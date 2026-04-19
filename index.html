@@ -1442,43 +1442,50 @@ body {
 <div id="screen-title" class="screen active">
   <div class="title-content">
     <div class="title-emblem">⚽</div>
-    <div class="title-main">日本代表<br>シミュレーター</div>
+    <div class="title-main" id="title-main-text">日本代表<br>シミュレーター</div>
     <div class="title-sub">Japan National Team Simulator β版</div>
+
+    <!-- 言語切り替えボタン -->
+    <div style="display:flex;gap:8px;justify-content:center;margin:10px 0 4px">
+      <button id="lang-btn-ja" onclick="setLang('ja')" style="padding:6px 18px;border-radius:20px;border:2px solid #fff;background:#fff;color:var(--japan-blue);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🇯🇵 日本語</button>
+      <button id="lang-btn-en" onclick="setLang('en')" style="padding:6px 18px;border-radius:20px;border:2px solid rgba(255,255,255,0.5);background:transparent;color:rgba(255,255,255,0.7);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🇬🇧 English</button>
+    </div>
+
     <div class="match-list">
       <div class="match-card" onclick="selectMatch('2026vsイングランド')">
-        <div class="match-date">2026年3月31日 ・ 親善試合</div>
+        <div class="match-date" id="match-date-eng">2026年3月31日 ・ 親善試合</div>
         <div class="match-flags">
           <span class="flag-emoji">🇯🇵</span>
           <span class="vs-text">VS</span>
           <span class="flag-emoji">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>
         </div>
-        <div class="match-title-text">日本 vs イングランド</div>
-        <div class="match-desc">主力をスタメン起用した日本がフォーデン・パーマー擁するイングランドに挑む！</div>
+        <div class="match-title-text" id="match-title-eng">日本 vs イングランド</div>
+        <div class="match-desc" id="match-desc-eng">主力をスタメン起用した日本がフォーデン・パーマー擁するイングランドに挑む！</div>
       </div>
       <div class="match-card" onclick="selectMatch('2026vsスコットランド')">
-        <div class="match-date">2026年3月28日 ・ 親善試合</div>
+        <div class="match-date" id="match-date-sco">2026年3月28日 ・ 親善試合</div>
         <div class="match-flags">
           <span class="flag-emoji">🇯🇵</span>
           <span class="vs-text">VS</span>
           <span class="flag-emoji">🏴󠁧󠁢󠁳󠁣󠁴󠁿</span>
         </div>
-        <div class="match-title-text">日本 vs スコットランド</div>
-        <div class="match-desc">W杯前最後の強化試合。若手中心の布陣でW杯出場国スコットランドに挑む！</div>
+        <div class="match-title-text" id="match-title-sco">日本 vs スコットランド</div>
+        <div class="match-desc" id="match-desc-sco">W杯前最後の強化試合。若手中心の布陣でW杯出場国スコットランドに挑む！</div>
       </div>
       <div class="match-card" onclick="selectMatch('2018vsベルギー')">
-        <div class="match-date">2018年7月2日 ・ ロシアW杯 決勝トーナメント</div>
+        <div class="match-date" id="match-date-bel">2018年7月2日 ・ ロシアW杯 決勝トーナメント</div>
         <div class="match-flags">
           <span class="flag-emoji">🇯🇵</span>
           <span class="vs-text">VS</span>
           <span class="flag-emoji">🇧🇪</span>
         </div>
-        <div class="match-title-text">日本 vs ベルギー</div>
-        <div class="match-desc">2点リードから逆転負けを喫した伝説の一戦。日本サッカー史上最高の舞台に挑む！</div>
+        <div class="match-title-text" id="match-title-bel">日本 vs ベルギー</div>
+        <div class="match-desc" id="match-desc-bel">2点リードから逆転負けを喫した伝説の一戦。日本サッカー史上最高の舞台に挑む！</div>
       </div>
 
     </div>
-    <button onclick="showScreen('players')" class="players-link-btn">📋 選手データリスト</button>
-    <div class="disclaimer-box">
+    <button onclick="showScreen('players')" class="players-link-btn" id="btn-players-list">📋 選手データリスト</button>
+    <div class="disclaimer-box" id="disclaimer-text">
       ⚠️ 本アプリは個人制作のファン向けシミュレーターです。日本サッカー協会・各チーム・選手等とは一切関係ありません。選手パラメータは独自設定です。商業目的のコンテンツではありません。
     </div>
   </div>
@@ -1488,7 +1495,7 @@ body {
 <div id="screen-formation" class="screen">
   <div class="screen-header">
     <button class="back-btn" onclick="closeFormationSelect()">← 戻る</button>
-    <div class="screen-title-text">システム選択</div>
+    <div class="screen-title-text" id="screen-formation-title">システム選択</div>
   </div>
   <div class="formation-select-content">
     <div class="formation-grid" id="formation-grid"></div>
@@ -1503,10 +1510,10 @@ body {
   </div>
   <div class="setting-content">
 
-    <button class="start-btn" style="margin-bottom:16px" onclick="startGame()">⚽ キックオフ！</button>
+    <button class="start-btn" id="btn-kickoff-top" style="margin-bottom:16px" onclick="startGame()">⚽ キックオフ！</button>
 
     <!-- スターティングメンバー -->
-    <div class="section-label" style="text-align:center;font-size:16px;margin-bottom:12px">スターティングメンバー</div>
+    <div class="section-label" id="label-starting" style="text-align:center;font-size:16px;margin-bottom:12px">スターティングメンバー</div>
     <div id="formation-view">
       <div class="formation-layout">
         <div class="field-panel">
@@ -1524,7 +1531,7 @@ body {
             </svg>
             <div class="formation-display" id="formation-display"></div>
           </div>
-          <div class="hint" style="text-align:right;margin-top:4px">ドラッグで選手入れ替え</div>
+          <div class="hint" id="label-drag" style="text-align:right;margin-top:4px">ドラッグで選手入れ替え</div>
         </div>
         <div class="bench-panel">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
@@ -1540,26 +1547,26 @@ body {
     <!-- 設定ボタングリッド -->
     <div class="setting-btn-grid">
       <button class="setting-nav-btn" onclick="openFormationSelect()">
-        <div class="setting-nav-btn-label">システム</div>
+        <div class="setting-nav-btn-label" id="setting-system-label">システム</div>
         <div class="setting-nav-btn-value" id="setting-system-value">-</div>
       </button>
       <button class="setting-nav-btn" onclick="openTacticsSelect()">
-        <div class="setting-nav-btn-label">戦術</div>
+        <div class="setting-nav-btn-label" id="setting-tactics-label">戦術</div>
         <div class="setting-nav-btn-value" id="setting-tactics-value">-</div>
       </button>
       <button class="setting-nav-btn" onclick="openKeyPlayerSelect()">
-        <div class="setting-nav-btn-label">キープレイヤー</div>
+        <div class="setting-nav-btn-label" id="setting-keyplayer-label">キープレイヤー</div>
         <div class="setting-nav-btn-value" id="setting-keyplayer-value">-</div>
       </button>
       <button class="setting-nav-btn" onclick="openMarkedPlayerSelect()">
-        <div class="setting-nav-btn-label">要注意プレイヤー</div>
+        <div class="setting-nav-btn-label" id="setting-marked-label">要注意プレイヤー</div>
         <div class="setting-nav-btn-value" id="setting-marked-value">-</div>
       </button>
     </div>
 
     <div style="display:flex;gap:10px;margin-top:0">
-      <button class="start-btn" style="flex:1" onclick="startGame()">⚽ キックオフ！</button>
-      <button class="start-btn" style="flex:1;background:linear-gradient(135deg,#8B0000,#c0392b)" onclick="runMultiGame()">📊 10試合</button>
+      <button class="start-btn" style="flex:1" id="btn-kickoff-bottom" onclick="startGame()">⚽ キックオフ！</button>
+      <button class="start-btn" style="flex:1;background:linear-gradient(135deg,#8B0000,#c0392b)" id="btn-multi" onclick="runMultiGame()">📊 10試合</button>
     </div>
   </div>
 </div>
@@ -1568,7 +1575,7 @@ body {
 <div id="screen-tactics" class="screen">
   <div class="screen-header">
     <button class="back-btn" onclick="closeSubSelect('tactics')">← 戻る</button>
-    <div class="screen-title-text">戦術選択</div>
+    <div class="screen-title-text" id="screen-tactics-title">戦術選択</div>
     <button class="formation-decide-btn" onclick="closeSubSelect('tactics')">決定</button>
   </div>
   <div class="setting-content" id="tactics-select-content"></div>
@@ -1578,7 +1585,7 @@ body {
 <div id="screen-keyplayer" class="screen">
   <div class="screen-header">
     <button class="back-btn" onclick="closeSubSelect('keyplayer')">← 戻る</button>
-    <div class="screen-title-text">キープレイヤー選択</div>
+    <div class="screen-title-text" id="screen-keyplayer-title">キープレイヤー選択</div>
     <button class="formation-decide-btn" onclick="closeSubSelect('keyplayer')">決定</button>
   </div>
   <div class="setting-content" id="keyplayer-select-content"></div>
@@ -1588,7 +1595,7 @@ body {
 <div id="screen-marked" class="screen">
   <div class="screen-header">
     <button class="back-btn" onclick="closeSubSelect('marked')">← 戻る</button>
-    <div class="screen-title-text">要注意プレイヤー選択</div>
+    <div class="screen-title-text" id="screen-marked-title">要注意プレイヤー選択</div>
     <button class="formation-decide-btn" onclick="closeSubSelect('marked')">決定</button>
   </div>
   <div class="setting-content" id="marked-select-content"></div>
@@ -1606,7 +1613,7 @@ body {
     </div>
     <div class="score-divider">
       <div class="score-colon">:</div>
-      <div class="game-time" id="game-time-display">前半0分</div>
+      <div class="game-time" id="game-time-display">-</div>
     </div>
     <div class="team-score">
       <div class="team-flag-name">
@@ -1618,9 +1625,9 @@ body {
   </div>
   <div class="game-content">
     <div class="chance-counter-display">
-      <span>チャンス: <span id="chance-count">0</span>/<span id="chance-total">10</span></span>
+      <span id="chance-label-text">チャンス: </span><span id="chance-count">0</span>/<span id="chance-total">10</span></span>
       <span id="chance-team-label">-</span>
-      <span>試合進行中</span>
+      <span id="game-in-progress-label">試合進行中</span>
     </div>
     <div class="log-area" id="log-area"></div>
     <div class="game-controls">
@@ -1633,7 +1640,7 @@ body {
 <!-- RESULT SCREEN -->
 <div id="screen-result" class="screen">
   <div class="screen-header">
-    <div class="screen-title-text">試合結果</div>
+    <div class="screen-title-text" id="screen-result-title">試合結果</div>
   </div>
   <div class="result-content">
     <div class="result-headline">FINAL SCORE</div>
@@ -1668,25 +1675,25 @@ body {
     <!-- Xシェアボタン -->
     <button class="share-btn share-btn-x" onclick="shareToX()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-      Xでシェア
+      <span id="share-x-label">Xでシェア</span>
     </button>
 
     <!-- エリア勝率 -->
     <div class="result-log-section">
-      <div class="result-log-header">【エリア別 日本の勝率】</div>
+      <div class="result-log-header" id="header-area-win">【エリア別 日本の勝率】</div>
       <div id="area-win-content" style="padding:8px 0"></div>
     </div>
 
     <!-- デュエル統計 -->
     <div class="result-log-section">
-      <div class="result-log-header">【デュエル勝率】</div>
+      <div class="result-log-header" id="header-duel">【デュエル勝率】</div>
       <div id="duel-stats-content"></div>
     </div>
 
     <!-- AI総括 -->
     <div class="result-log-section" id="summary-section">
       <div class="result-log-header" style="display:flex;align-items:center;justify-content:space-between">
-        <span>【AI試合総括】</span>
+        <span id="header-summary">【AI試合総括】</span>
         <button id="summary-btn" onclick="generateSummary()" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:white;cursor:pointer;font-family:inherit;font-weight:700">✨ 生成</button>
       </div>
       <div id="summary-content" style="padding:8px 0;font-size:13px;line-height:1.8;color:var(--text)">
@@ -1696,37 +1703,25 @@ body {
 
     <!-- ポゼッション -->
     <div class="result-log-section">
-      <div class="result-log-header">【ポゼッション】</div>
+      <div class="result-log-header" id="header-possession">【ポゼッション】</div>
       <div id="possession-content" style="padding:8px 0"></div>
     </div>
 
     <!-- 選手別出場ランキング（MVP） -->
     <div class="result-log-section">
-      <div class="result-log-header">【選手別関与シーン数】</div>
+      <div class="result-log-header" id="header-mvp">【選手別関与シーン数】</div>
       <div id="mvp-content" style="padding:8px 0"></div>
     </div>
 
     <!-- 攻撃パターン別ゴール -->
     <div class="result-log-section">
-      <div class="result-log-header">【攻撃パターン別ゴール】</div>
+      <div class="result-log-header" id="header-goal-pattern">【攻撃パターン別ゴール】</div>
       <div id="goal-pattern-content" style="padding:8px 0"></div>
-    </div>
-
-    <!-- 時間帯別得点 -->
-    <div class="result-log-section">
-      <div class="result-log-header">【時間帯別得点】</div>
-      <div id="time-goal-content" style="padding:8px 0"></div>
-    </div>
-
-    <!-- ハイライトシーン -->
-    <div class="result-log-section">
-      <div class="result-log-header">【ハイライトシーン】</div>
-      <div id="highlight-content" style="padding:8px 0"></div>
     </div>
 
     <!-- 試合詳細ログ -->
     <div class="result-log-section">
-      <div class="result-log-header">【試合詳細】</div>
+      <div class="result-log-header" id="header-detail">【試合詳細】</div>
       <div id="result-log-content"></div>
     </div>
   </div>
@@ -1737,7 +1732,7 @@ body {
 <div id="screen-multigame" class="screen">
   <div class="screen-header">
     <button class="back-btn" onclick="showScreen('title')">← 戻る</button>
-    <div class="screen-title-text">10試合シミュレーション</div>
+    <div class="screen-title-text" id="screen-multi-title">10試合シミュレーション</div>
   </div>
   <div style="flex:1;overflow-y:auto;padding:16px;background:#f5f7fa">
     <div id="multigame-content"></div>
@@ -1748,7 +1743,7 @@ body {
 <div id="screen-player-detail" class="screen">
   <div class="screen-header">
     <button class="back-btn" id="player-detail-back-btn" onclick="showScreen(_playerDetailOrigin)">← 戻る</button>
-    <div class="screen-title-text">選手データ</div>
+    <div class="screen-title-text" id="screen-player-detail-title">選手データ</div>
   </div>
   <div style="flex:1;overflow-y:auto;background:#f5f7fa;padding-bottom:24px" id="player-detail-body">
   </div>
@@ -1759,7 +1754,7 @@ body {
 
   <div class="screen-header">
     <button class="back-btn" onclick="showScreen('title')">← 戻る</button>
-    <div class="screen-title-text">選手データリスト</div>
+    <div class="screen-title-text" id="screen-players-title">選手データリスト</div>
   </div>
   <div class="players-screen" style="flex:1;overflow-y:auto;padding-bottom:20px">
     <div class="players-screen-header">
@@ -1815,6 +1810,204 @@ body {
 <div class="goal-animation" id="goal-anim">GOAL!!</div>
 
 <script>
+// ============================================================
+// i18n
+// ============================================================
+window.LANG = 'ja';
+
+const i18n = {
+  ja: {
+    titleMain: '日本代表<br>シミュレーター',
+    matchDateEng: '2026年3月31日 ・ 親善試合', matchDateSco: '2026年3月28日 ・ 親善試合', matchDateBel: '2018年7月2日 ・ ロシアW杯 決勝トーナメント',
+    matchTitleEng: '日本 vs イングランド', matchTitleSco: '日本 vs スコットランド', matchTitleBel: '日本 vs ベルギー',
+    matchDescEng: '主力をスタメン起用した日本がフォーデン・パーマー擁するイングランドに挑む！',
+    matchDescSco: 'W杯前最後の強化試合。若手中心の布陣でW杯出場国スコットランドに挑む！',
+    matchDescBel: '2点リードから逆転負けを喫した伝説の一戦。日本サッカー史上最高の舞台に挑む！',
+    btnPlayersList: '📋 選手データリスト',
+    disclaimer: '⚠️ 本アプリは個人制作のファン向けシミュレーターです。日本サッカー協会・各チーム・選手等とは一切関係ありません。選手パラメータは独自設定です。商業目的のコンテンツではありません。',
+    screenFormation: 'システム選択', screenSetting: '試合設定', screenTactics: '戦術選択',
+    screenKeyplayer: 'キープレイヤー選択', screenMarked: '要注意プレイヤー選択',
+    screenResult: '試合結果', screenMulti: '10試合シミュレーション',
+    screenPlayerDetail: '選手データ', screenPlayers: '選手データリスト',
+    btnBack: '← 戻る', btnDecide: '決定', btnKickoff: '⚽ キックオフ！', btnMulti: '📊 10試合',
+    labelStarting: 'スターティングメンバー', labelDrag: 'ドラッグで選手入れ替え',
+    labelBench: '控え', labelSystem: 'システム', labelTactics: '戦術',
+    labelKeyplayer: 'キープレイヤー', labelMarked: '要注意プレイヤー',
+    chanceLabel: 'チャンス:', gameInProgress: '試合進行中',
+    btnNextScene: '次のシーン ▶', btnAllEnd: '一気に試合終了',
+    btnNextArrow: '次へ →', btnSeeResult: '結果を見る', attackLabel: '攻撃:',
+    halfFirst: '前半', halfSecond: '後半', halftimeLoss: '前半ロスタイム', overtimeLoss: '後半ロスタイム', minUnit: '分',
+    draw: '引き分け', win: 'の勝利！',
+    btnRetry: '🔄 もう一度', btnHome: '🏠 トップへ', shareX: 'Xでシェア',
+    headerAreaWin: '【エリア別 日本の勝率】', headerDuel: '【デュエル勝率】',
+    headerSummary: '【AI試合総括】', btnGenerate: '✨ 生成',
+    summaryPlaceholder: '「✨ 生成」ボタンを押すと、AIが試合を総括します',
+    headerPossession: '【ポゼッション】', headerMvp: '【選手別関与シーン数】',
+    headerGoalPattern: '【攻撃パターン別ゴール】', headerTimeGoal: '【時間帯別得点】',
+    headerHighlight: '【ハイライトシーン】', headerDetail: '【試合詳細】',
+    playersTitle: '⚽ 選手データ一覧', playersSub: '日本代表シミュレーター 実装データ（全選手・29パラメータ）',
+    keypHint: '⭐ キープレイヤーは攻撃選択時に選ばれやすくなります',
+    markedHint: 'の要注意選手 — 選んだ選手の攻撃パラメータが15%ダウンします',
+    markedTap: '選手をタップして要注意選手を設定',
+    posSelect: ' を選択', unset: '未設定', gkDisabled: '（選択不可）',
+    multiAiHeader: '🤖 AI総括（10試合）', multiAiBtn: '✨ 生成', multiAiPlaceholder: '「✨ 生成」ボタンを押すと、AIが10試合を総括します',
+    winLabel: '勝', drawLabel: '分', loseLabel: '敗', avgScore: '平均スコア',
+    duelWinRate: 'デュエル勝率', duelWin: '勝', duelLose: '敗', duelTotal: '計',
+    duelAction: 'アクション', duelWinRateCol: '勝率', duelWinCount: '勝/計', duelPoints: '攻/守pt',
+    defLine: '守備', defLineLabel: 'ライン', fwLine: '前線', fwLineLabel: 'ライン',
+    ownHalf: '← 自陣　　　相手陣 →', overallLabel: '総合',
+    tacticsNames: ['ポゼッション','プレス','カウンター','カテナチオ','フリー'],
+    generatingLabel: '生成中...', regenerateLabel: '🔄 再生成',
+    imgAltWin: '勝利！', imgAltLose: '敗北...',
+    timeFirst: '前半 1-45分', timeSecond: '後半 46-90分', timeLoss: 'ロスタイム',
+  },
+  en: {
+    titleMain: 'Japan NT<br>Simulator',
+    matchDateEng: 'March 31, 2026 · Friendly', matchDateSco: 'March 28, 2026 · Friendly', matchDateBel: 'July 2, 2018 · Russia WC Round of 16',
+    matchTitleEng: 'Japan vs England', matchTitleSco: 'Japan vs Scotland', matchTitleBel: 'Japan vs Belgium',
+    matchDescEng: "Japan fields their best XI against Foden & Palmer's England!",
+    matchDescSco: "Japan's last tune-up before the World Cup against WC-bound Scotland!",
+    matchDescBel: 'The legendary match where Japan led 2-0 only to lose. Face the greatest stage in Japanese football history!',
+    btnPlayersList: '📋 Player Data List',
+    disclaimer: '⚠️ Fan-made simulator. Not affiliated with JFA, any club, or players. Parameters are custom-made. Not for commercial use.',
+    screenFormation: 'Select Formation', screenSetting: 'Match Setup', screenTactics: 'Select Tactics',
+    screenKeyplayer: 'Select Key Player', screenMarked: 'Select Marked Player',
+    screenResult: 'Match Result', screenMulti: '10-Match Simulation',
+    screenPlayerDetail: 'Player Data', screenPlayers: 'Player Data List',
+    btnBack: '← Back', btnDecide: 'Confirm', btnKickoff: '⚽ Kick Off!', btnMulti: '📊 10 Matches',
+    labelStarting: 'Starting XI', labelDrag: 'Drag to swap players',
+    labelBench: 'Bench', labelSystem: 'Formation', labelTactics: 'Tactics',
+    labelKeyplayer: 'Key Player', labelMarked: 'Marked Player',
+    chanceLabel: 'Chance:', gameInProgress: 'Match in progress',
+    btnNextScene: 'Next Scene ▶', btnAllEnd: 'Skip to Full Time',
+    btnNextArrow: 'Next →', btnSeeResult: 'See Result', attackLabel: 'Attack:',
+    halfFirst: '1st', halfSecond: '2nd', halftimeLoss: '1st Stoppage', overtimeLoss: '2nd Stoppage', minUnit: 'min',
+    draw: 'Draw', win: ' wins!',
+    btnRetry: '🔄 Play Again', btnHome: '🏠 Top', shareX: 'Share on X',
+    headerAreaWin: '[Japan Win Rate by Area]', headerDuel: '[Duel Win Rate]',
+    headerSummary: '[AI Match Summary]', btnGenerate: '✨ Generate',
+    summaryPlaceholder: 'Press "✨ Generate" to get an AI match summary.',
+    headerPossession: '[Possession]', headerMvp: '[Player Scene Involvement]',
+    headerGoalPattern: '[Goals by Attack Pattern]', headerTimeGoal: '[Goals by Time Period]',
+    headerHighlight: '[Highlight Scenes]', headerDetail: '[Match Details]',
+    playersTitle: '⚽ Player Data List', playersSub: 'Japan NT Simulator — All Players (29 Parameters)',
+    keypHint: '⭐ The key player is more likely to be selected during attacking moves',
+    markedHint: "'s marked player — selected player's attacking parameters drop 15%",
+    markedTap: 'Tap a player to set as marked player',
+    posSelect: ' select', unset: 'Not set', gkDisabled: '(N/A)',
+    multiAiHeader: '🤖 AI Summary (10 Matches)', multiAiBtn: '✨ Generate', multiAiPlaceholder: 'Press "✨ Generate" for an AI summary of 10 matches.',
+    winLabel: 'W', drawLabel: 'D', loseLabel: 'L', avgScore: 'Avg Score',
+    duelWinRate: 'Duel Win%', duelWin: 'W', duelLose: 'L', duelTotal: 'Total',
+    duelAction: 'Action', duelWinRateCol: 'Win%', duelWinCount: 'W/Total', duelPoints: 'Att/Def',
+    defLine: 'Defense', defLineLabel: 'Line', fwLine: 'Attack', fwLineLabel: 'Line',
+    ownHalf: '← Own Half     Opp Half →', overallLabel: 'Overall',
+    tacticsNames: ['Possession','Press','Counter','Catenaccio','Free'],
+    generatingLabel: 'Generating...', regenerateLabel: '🔄 Regenerate',
+    imgAltWin: 'Victory!', imgAltLose: 'Defeat...',
+    timeFirst: '1st Half (1-45min)', timeSecond: '2nd Half (46-90min)', timeLoss: 'Stoppage',
+  }
+};
+
+function t(key) { return (i18n[window.LANG]||i18n.ja)[key] || i18n.ja[key] || key; }
+
+function getPlayerName(player) {
+  if (!player) return '';
+  if (window.LANG === 'en' && player.en_name) return player.en_name;
+  return player.name;
+}
+
+function getTeamName(teamData) {
+  if (!teamData) return '';
+  if (window.LANG === 'en' && teamData.en_name) return teamData.en_name;
+  return teamData.name;
+}
+
+function getActionLabel(action) {
+  if (window.LANG !== 'en') return action;
+  var map = {
+    '中央からシュート':'Central Shot','サイドからシュート':'Cut Inside Shot',
+    'ヘディングシュート':'Header','ボレーシュート':'Volley',
+    'ミドルシュート':'Long Shot','フリーキック':'Free Kick',
+    'ドリブル突破':'Dribble','ショートパス':'Short Pass',
+    'ロングパス':'Long Pass','クロス':'Cross','セットプレー':'Set Piece',
+    'サイドクロス':'Wide Cross','飛び出し':'Run In Behind',
+    'ポストプレー':'Hold Up','カウンター':'Counter'
+  };
+  return map[action] || action;
+}
+
+function getPlayerDisplayName(player) {
+  if (!player) return '?';
+  if (window.LANG === 'en' && player.en_name) return player.en_name;
+  return player.long_name || player.name;
+}
+
+function setLang(lang) {
+  window.LANG = lang;
+  var bja = document.getElementById('lang-btn-ja');
+  var ben = document.getElementById('lang-btn-en');
+  bja.style.background = lang==='ja'?'#fff':'transparent';
+  bja.style.color = lang==='ja'?'var(--japan-blue)':'rgba(255,255,255,0.7)';
+  bja.style.borderColor = lang==='ja'?'#fff':'rgba(255,255,255,0.5)';
+  ben.style.background = lang==='en'?'#fff':'transparent';
+  ben.style.color = lang==='en'?'var(--japan-blue)':'rgba(255,255,255,0.7)';
+  ben.style.borderColor = lang==='en'?'#fff':'rgba(255,255,255,0.5)';
+  applyLang();
+}
+
+function _setText(id,text){var e=document.getElementById(id);if(e)e.textContent=text;}
+function _setHTML(id,html){var e=document.getElementById(id);if(e)e.innerHTML=html;}
+
+function applyLang() {
+  _setHTML('title-main-text', t('titleMain'));
+  _setText('match-date-eng', t('matchDateEng')); _setText('match-date-sco', t('matchDateSco')); _setText('match-date-bel', t('matchDateBel'));
+  _setText('match-title-eng', t('matchTitleEng')); _setText('match-title-sco', t('matchTitleSco')); _setText('match-title-bel', t('matchTitleBel'));
+  _setText('match-desc-eng', t('matchDescEng')); _setText('match-desc-sco', t('matchDescSco')); _setText('match-desc-bel', t('matchDescBel'));
+  _setText('btn-players-list', t('btnPlayersList'));
+  _setText('disclaimer-text', t('disclaimer'));
+  document.querySelectorAll('.back-btn').forEach(function(b){b.textContent=t('btnBack');});
+  document.querySelectorAll('.formation-decide-btn').forEach(function(b){b.textContent=t('btnDecide');});
+  var retryBtn=document.querySelector('.retry-btn'); if(retryBtn) retryBtn.textContent=t('btnRetry');
+  var homeBtn=document.querySelector('.home-btn'); if(homeBtn) homeBtn.textContent=t('btnHome');
+  var nextBtn=document.getElementById('next-btn'); if(nextBtn) nextBtn.textContent=t('btnNextScene');
+  var allBtn=document.getElementById('all-btn'); if(allBtn) allBtn.textContent=t('btnAllEnd');
+  var sumBtn=document.getElementById('summary-btn'); if(sumBtn && sumBtn.textContent.indexOf('✨')>=0) sumBtn.textContent=t('btnGenerate');
+  var sc=document.getElementById('summary-content');
+  if(sc && !sc.querySelector('div')) sc.innerHTML='<span style="color:var(--text-dim);font-size:12px">'+t('summaryPlaceholder')+'</span>';
+  document.querySelectorAll('.bench-panel-label').forEach(function(e){e.textContent=t('labelBench');});
+  _setText('chance-label-text', t('chanceLabel') + ' ');
+  _setText('game-in-progress-label', t('gameInProgress'));
+  _setText('share-x-label', t('shareX'));
+  // 設定画面ラベル
+  _setText('label-starting',          t('labelStarting'));
+  _setText('label-drag',              t('labelDrag'));
+  _setText('setting-system-label',    t('labelSystem'));
+  _setText('setting-tactics-label',   t('labelTactics'));
+  _setText('setting-keyplayer-label', t('labelKeyplayer'));
+  _setText('setting-marked-label',    t('labelMarked'));
+  _setText('btn-kickoff-top',         t('btnKickoff'));
+  _setText('btn-kickoff-bottom',      t('btnKickoff'));
+  _setText('btn-multi',               t('btnMulti'));
+  // スクリーンタイトル
+  _setText('screen-formation-title',    t('screenFormation'));
+  _setText('screen-tactics-title',      t('screenTactics'));
+  _setText('screen-keyplayer-title',    t('screenKeyplayer'));
+  _setText('screen-marked-title',       t('screenMarked'));
+  _setText('screen-result-title',       t('screenResult'));
+  _setText('screen-multi-title',        t('screenMulti'));
+  _setText('screen-player-detail-title',t('screenPlayerDetail'));
+  _setText('screen-players-title',      t('screenPlayers'));
+  _setText('setting-title-text',        t('screenSetting'));
+  // 結果画面ヘッダー
+  _setText('header-area-win',    t('headerAreaWin'));
+  _setText('header-duel',        t('headerDuel'));
+  _setText('header-summary',     t('headerSummary'));
+  _setText('header-possession',  t('headerPossession'));
+  _setText('header-mvp',         t('headerMvp'));
+  _setText('header-goal-pattern',t('headerGoalPattern'));
+  _setText('header-detail',      t('headerDetail'));
+}
+
 // ============================================================
 // DATA
 // ============================================================
@@ -1933,7 +2126,7 @@ const area_data = {
   "CR_R":{name:"クロス右サイド",offences:[["CF",40],["左CF",40],["右CF",40],["左WG",30],["右WG",30],["OMF",30],["左OMF",30],["右OMF",30],["左SMF",20],["右SMF",20],["CMF",20],["左CMF",20],["右CMF",20],["左SB",5],["右SB",5]],matchup:{"CF":[["CB"],["左CB","右CB"],["DMF"],["左DMF","右DMF"],["CMF"]],"左CF":[["右CB"],["CB"],["左CB","右CB"],["右DMF","左DMF"],["左DMF","右DMF"]],"右CF":[["左CB","右CB"],["CB"],["左CB","右CB"],["右DMF","左DMF"],["左DMF","右DMF"]],"左WG":[["右SB"],["右CB"],["CB"],["右DMF"],["DMF"]],"右WG":[["左SB"],["左CB"],["CB"],["左DMF"],["DMF"]],"OMF":[["DMF"],["左DMF","右DMF"],["CB"],["左CB","右CB"],["CMF"]],"左OMF":[["右DMF","左DMF"],["DMF"],["右CB"],["CB"],["右CMF","左CMF"]],"右OMF":[["左DMF","右DMF"],["DMF"],["左CB"],["CB"],["左CMF","右CMF"]],"左SMF":[["右SB"],["右CB"],["右DMF"],["右CMF"],["右SMF"]],"右SMF":[["左SB"],["左CB"],["左DMF"],["左CMF"],["左SMF"]],"CMF":[["CMF"],["左CMF","右CMF"],["DMF"],["左DMF","右DMF"],["CB"]],"左CMF":[["右CMF","左CMF"],["CMF"],["右DMF"],["DMF"],["左CB","右CB"]],"右CMF":[["左CMF","右CMF"],["CMF"],["左DMF"],["DMF"],["左CB","右CB"]],"左SB":[["右SB"],["右CB"],["右DMF"],["右CMF"],["右SMF"]],"右SB":[["左SB"],["左CB"],["左DMF"],["左CMF"],["左SMF"]]},actions:["ボレーシュート","ヘディングシュート"]}
 };
 
-const scenario_data = {
+const scenario_data_ja = {
   "ショートパス|成功|ショートパス|同":"【攻撃選手】が味方とのワンツーで【守備選手】をかわし【対象エリア】を突破！",
   "ショートパス|成功|ロングパス|同":"【対象エリア】でボールをキープした【攻撃選手】が味方とのワンツー！  【守備選手】はこれを止められない！",
   "ショートパス|成功|ドリブル突破|同":"【対象エリア】でボールを受けた【攻撃選手】がワンツーでマークしていた【守備選手】をかわす！",
@@ -2086,6 +2279,164 @@ const scenario_data = {
   "シュート|枠を外した！|フリーキック":"絶好の位置でのフリーキック。ボールをセットした【シュート選手】が放ったシュートは惜しくも枠を外れた。"
 };
 
+
+const scenario_data_en = {
+  "ショートパス|成功|ショートパス|同":"【攻撃選手】 plays a one-two with a teammate and slips past 【守備選手】, breaking through 【対象エリア】!",
+  "ショートパス|成功|ロングパス|同":"【攻撃選手】 holds the ball in 【対象エリア】 and plays a quick one-two!  【守備選手】 can't stop it!",
+  "ショートパス|成功|ドリブル突破|同":"【攻撃選手】 receives the ball in 【対象エリア】 and uses a one-two to shake off 【守備選手】!",
+  "ショートパス|成功|飛び出し|同":"【攻撃選手】 in 【対象エリア】 plays a short pass past 【守備選手】 and immediately runs in behind to collect the return!",
+  "ショートパス|成功|ポストプレー|同":"【攻撃選手】 breaks through 【対象エリア】 with a one-two!  【守備選手】 is powerless to stop it!",
+  "ショートパス|成功|ショートパス|別":"【攻撃選手】 in 【対象エリア】 sidesteps 【守備選手】 and plays the ball to 【次の攻撃選手】!",
+  "ショートパス|成功|ロングパス|別":"【攻撃選手】 holds possession in 【対象エリア】 and threads a short pass to 【次の攻撃選手】 — 【守備選手】 can't cut it out!",
+  "ショートパス|成功|ドリブル突破|別":"【攻撃選手】 in 【対象エリア】 plays it short to 【次の攻撃選手】 — 【守備選手】 can't intercept!",
+  "ショートパス|成功|飛び出し|別":"In 【対象エリア】, 【攻撃選手】 slides a through-ball past 【守備選手】 to 【次の攻撃選手】!",
+  "ショートパス|成功|ポストプレー|別":"【攻撃選手】 in 【対象エリア】 shakes off 【守備選手】 and plays a vertical pass forward!",
+  "ショートパス|成功|クロス":"【攻撃選手】 links up in passing combinations, shakes off 【守備選手】 and breaks through 【対象エリア】!",
+  "ショートパス|成功|シュート":"【攻撃選手】 links up in passing combinations, shakes off 【守備選手】 and breaks through 【対象エリア】!",
+  "サイドクロス|成功|サイドからシュート":"【攻撃選手】 whips in a cross! 【守備選手】 reacts but can't get there in time!",
+  "サイドクロス|成功|クロス":"In 【対象エリア】, 【攻撃選手】 bursts down the flank and drives a cross into the box!  【守備選手】 can't prevent it!",
+  "サイドクロス|成功|シュート":"In 【対象エリア】, 【攻撃選手】 breaks down the wing and cuts inside!  【守備選手】 can't keep up!",
+  "サイドクロス|成功|セットプレー":"In 【対象エリア】, 【攻撃選手】 charges down the flank and whips a cross into the center!  【守備選手】 can't stop it!",
+  "サイドクロス|失敗":[
+    "In 【対象エリア】, 【攻撃選手】 attempts a cross but 【守備選手】 clears it brilliantly!",
+    "In 【対象エリア】, 【攻撃選手】 tries to get a cross in but 【守備選手】 throws their body in the way and blocks it!",
+    "In 【対象エリア】, 【守備選手】 wins the header and clears 【攻撃選手】's cross!",
+    "In 【対象エリア】, 【攻撃選手】 attempts a cross but 【守備選手】 closes down quickly and wins the ball!"
+  ],
+  "サイドクロス|ファール":[
+    "In 【対象エリア】, 【守備選手】 brings down 【攻撃選手】 just as they shape to cross!  That's a foul!",
+    "In 【対象エリア】, 【守備選手】 clattered into 【攻撃選手】 as they prepared to cross!  Foul!",
+    "In 【対象エリア】, 【守備選手】 tries to block 【攻撃選手】's cross with their arm!  The referee's whistle blows!"
+  ],
+  "サイドクロス|カウンター":"In 【対象エリア】, 【攻撃選手】 attempts a cross but 【守備選手】 clears it brilliantly!  Counter-attack!",
+  "ロングパス|成功|クロス":"In 【対象エリア】, 【攻撃選手】 plays a long ball forward to the flank!  【守備選手】 can't get back!",
+  "ロングパス|成功|シュート":"In 【対象エリア】, 【攻撃選手】 launches a long pass into the attack!  【守備選手】 can't keep up!",
+  "ロングパス|成功|セットプレー":"In 【対象エリア】, 【攻撃選手】 sends a long ball forward!  【守備選手】 can't get back!",
+  "ロングパス|成功|ショートパス|同":"In 【対象エリア】, 【攻撃選手】 plays a long ball forward and holds possession, looking for a one-two combination!",
+  "ロングパス|成功|ショートパス|別":"In 【対象エリア】, 【攻撃選手】 plays a long ball forward — 【守備選手】 can't stop it. The ball finds 【次の攻撃選手】.",
+  "ロングパス|成功|ロングパス|同":"In 【対象エリア】, 【攻撃選手】 plays a long ball and continues the run to receive it further forward!",
+  "ロングパス|成功|ロングパス|別":"In 【対象エリア】, 【攻撃選手】 plays a long ball forward — 【守備選手】 can't stop it. The ball finds 【次の攻撃選手】.",
+  "ロングパス|成功|ドリブル突破|同":"In 【対象エリア】, 【攻撃選手】 plays a long ball and bursts forward to receive it!  【守備選手】 can't catch up!",
+  "ロングパス|成功|飛び出し|同":"In 【対象エリア】, 【攻撃選手】 plays a long ball forward and immediately makes a run in behind!  【守備選手】 can't deal with it!",
+  "ロングパス|成功|ポストプレー|同":"In 【対象エリア】, 【攻撃選手】 plays a long ball forward and holds possession!  【守備選手】 can't win it back!",
+  "ロングパス|成功|サイドクロス|同":"In 【対象エリア】, 【攻撃選手】 plays a long ball wide and immediately pushes forward!",
+  "ロングパス|成功|サイドクロス|別":"In 【対象エリア】, 【攻撃選手】 plays a long ball wide!  【守備選手】 can't get back.",
+  "ショートパス|成功|サイドクロス|同":"【攻撃選手】 plays one-touch passing to get past 【守備選手】 and breaks through 【対象エリア】!  Driving forward!",
+  "ショートパス|成功|サイドクロス|別":"【攻撃選手】 in 【対象エリア】 gets past 【守備選手】 and feeds 【次の攻撃選手】!",
+  "ドリブル突破|成功|サイドクロス|同":"In 【対象エリア】, 【攻撃選手】 bursts past 【守備選手】 with a dribble!!  Charging forward!",
+  "ドリブル突破|成功|サイドクロス|別":"In 【対象エリア】, 【攻撃選手】 dribbles past 【守備選手】 and links up with 【次の攻撃選手】.",
+  "飛び出し|成功|ロングパス|同":"In 【対象エリア】, 【攻撃選手】 reacts to the pass and runs in behind 【守備選手】!  Plays a long ball forward!",
+  "飛び出し|成功|飛び出し|同":"In 【対象エリア】, 【攻撃選手】 makes a run in behind 【守備選手】!  Continues to push further forward!",
+  "飛び出し|成功|ポストプレー|同":"In 【対象エリア】, 【攻撃選手】 times the run perfectly and gets away from 【守備選手】!  Holds the ball up.",
+  "飛び出し|成功|サイドクロス|同":"In 【対象エリア】, 【攻撃選手】 times the run and gets in behind 【守備選手】!  Driving forward!",
+  "飛び出し|成功|サイドクロス|別":"In 【対象エリア】, 【攻撃選手】 makes the run and escapes 【守備選手】!  【次の攻撃選手】 looks to deliver a cross!",
+  "ポストプレー|成功|サイドクロス|同":"In 【対象エリア】, 【攻撃選手】 uses clever link-up play to get past 【守備選手】!  Driving forward!",
+  "ポストプレー|成功|サイドクロス|別":"In 【対象エリア】, 【攻撃選手】 holds possession under pressure from 【守備選手】. 【次の攻撃選手】 moves to cross!",
+  "飛び出し|成功|ショートパス|同":"In 【対象エリア】, 【攻撃選手】 times the run to beat 【守備選手】 and plays a quick one-two!",
+  "飛び出し|成功|ショートパス|別":"In 【対象エリア】, 【攻撃選手】 makes the run and gets past 【守備選手】!  Plays it to 【次の攻撃選手】.",
+  "飛び出し|成功|ロングパス|別":"In 【対象エリア】, 【攻撃選手】 makes a perfectly-timed run!  Feeds 【次の攻撃選手】.",
+  "飛び出し|成功|ドリブル突破|同":"In 【対象エリア】, 【攻撃選手】 times the run and gets clear of 【守備選手】!",
+  "飛び出し|成功|ドリブル突破|別":"In 【対象エリア】, 【攻撃選手】 makes the run!  Links with 【次の攻撃選手】.",
+  "飛び出し|成功|飛び出し|別":"In 【対象エリア】, 【攻撃選手】 makes the run!  And 【次の攻撃選手】 also bursts in behind!",
+  "飛び出し|成功|ポストプレー|別":"In 【対象エリア】, 【攻撃選手】 beats 【守備選手】 with the run and plays it vertically!",
+  "ポストプレー|成功|クロス":"In 【対象エリア】, 【攻撃選手】 spins away from 【守備選手】 with intelligent link-up play!",
+  "ポストプレー|成功|シュート":"In 【対象エリア】, 【攻撃選手】 spins away from 【守備選手】 with intelligent link-up play!",
+  "ドリブル突破|成功|セットプレー":"In 【対象エリア】, 【攻撃選手】 leaves 【守備選手】 behind with a brilliant dribble!!",
+  "ショートパス|成功|セットプレー":"【攻撃選手】 plays quick combinations, shakes off 【守備選手】 and breaks through 【対象エリア】!",
+  "ポストプレー|成功|セットプレー":"In 【対象エリア】, 【攻撃選手】 spins away from 【守備選手】 with intelligent link-up play!",
+  "飛び出し|成功|セットプレー":"In 【対象エリア】, 【攻撃選手】 times the run brilliantly and escapes 【守備選手】!",
+  "ロングパス|成功|ドリブル突破|別":"【攻撃選手】 in 【対象エリア】 plays a long ball!  【守備選手】 can't stop it.",
+  "ロングパス|成功|飛び出し|別":"【攻撃選手】 in 【対象エリア】 gets away from the marker and plays a long ball into space!",
+  "ロングパス|成功|ポストプレー|別":"In 【対象エリア】, 【攻撃選手】 looks up and launches a long ball forward. 【守備選手】 reacts but can't reach it!",
+  "ドリブル突破|成功|ショートパス|同":"【攻撃選手】 dribbles past 【守備選手】 and breaks through 【対象エリア】!",
+  "ドリブル突破|成功|ロングパス|同":"【攻撃選手】 dribbles past 【守備選手】 and breaks through 【対象エリア】!",
+  "ドリブル突破|成功|ドリブル突破|同":"【攻撃選手】 dribbles past 【守備選手】 and breaks through 【対象エリア】!",
+  "ドリブル突破|成功|飛び出し|同":"【攻撃選手】 dribbles past 【守備選手】 and breaks through 【対象エリア】!  Passes to a teammate and immediately runs in behind the defense!",
+  "ドリブル突破|成功|ポストプレー|同":"【攻撃選手】 dribbles past 【守備選手】 and breaks through 【対象エリア】!  Holds the ball up to create space.",
+  "ドリブル突破|成功|ショートパス|別":"In 【対象エリア】, 【攻撃選手】 dribbles past 【守備選手】 and plays it to 【次の攻撃選手】.",
+  "ドリブル突破|成功|ロングパス|別":"In 【対象エリア】, 【攻撃選手】 dribbles past 【守備選手】 and plays it to 【次の攻撃選手】.",
+  "ドリブル突破|成功|ドリブル突破|別":"In 【対象エリア】, 【攻撃選手】 dribbles past 【守備選手】 and plays it to 【次の攻撃選手】.",
+  "ドリブル突破|成功|飛び出し|別":"In 【対象エリア】, 【攻撃選手】 dribbles past 【守備選手】 and threads a pass through to 【次の攻撃選手】!",
+  "ドリブル突破|成功|ポストプレー|別":"In 【対象エリア】, 【攻撃選手】 dribbles past 【守備選手】 and plays it in behind.",
+  "ドリブル突破|成功|クロス":"In 【対象エリア】, 【攻撃選手】 leaves 【守備選手】 for dead with a brilliant dribble!!",
+  "ドリブル突破|成功|シュート":"In 【対象エリア】, 【攻撃選手】 leaves 【守備選手】 for dead with a brilliant dribble!!",
+  "飛び出し|成功|クロス":"In 【対象エリア】, 【攻撃選手】 reads the pass perfectly and makes a brilliant run past 【守備選手】!",
+  "飛び出し|成功|シュート":"In 【対象エリア】, 【攻撃選手】 reads the pass perfectly and makes a brilliant run past 【守備選手】!",
+  "ポストプレー|成功|ショートパス|同":"【攻撃選手】 plays a sharp one-two from a layoff to break through 【対象エリア】!  【守備選手】 can't win the ball!",
+  "ポストプレー|成功|ロングパス|同":"【攻撃選手】 plays a sharp one-two from a layoff to break through 【対象エリア】!  【守備選手】 can't win the ball!",
+  "ポストプレー|成功|ドリブル突破|同":"【攻撃選手】 plays a sharp one-two from a layoff to break through 【対象エリア】!  【守備選手】 can't win the ball!",
+  "ポストプレー|成功|飛び出し|同":"In 【対象エリア】, 【攻撃選手】 uses a clever layoff and a one-two!  Gets in behind 【守備選手】 and continues the run!",
+  "ポストプレー|成功|ポストプレー|同":"【攻撃選手】 holds the ball under pressure from 【守備選手】 and plays quick combinations to break through 【対象エリア】!",
+  "ポストプレー|成功|ショートパス|別":"In 【対象エリア】, 【攻撃選手】 holds the ball under pressure from 【守備選手】 and feeds 【次の攻撃選手】.",
+  "ポストプレー|成功|ロングパス|別":"In 【対象エリア】, 【攻撃選手】 holds the ball under pressure from 【守備選手】 and feeds 【次の攻撃選手】.",
+  "ポストプレー|成功|ドリブル突破|別":"In 【対象エリア】, 【攻撃選手】 holds the ball under pressure from 【守備選手】 and feeds 【次の攻撃選手】.",
+  "ポストプレー|成功|飛び出し|別":"In 【対象エリア】, 【攻撃選手】 holds the ball under pressure and plays a forward pass past 【守備選手】!",
+  "ポストプレー|成功|ポストプレー|別":"In 【対象エリア】, 【攻撃選手】 holds the ball under pressure from 【守備選手】 and feeds 【次の攻撃選手】.",
+  "ポストプレー|成功|クロス":"In 【対象エリア】, 【攻撃選手】 spins away from the challenge of 【守備選手】!",
+  "ポストプレー|成功|シュート":"In 【対象エリア】, 【攻撃選手】 spins away from the challenge of 【守備選手】!",
+  "ショートパス|失敗":[
+    "【攻撃選手】 in 【対象エリア】 plays a short pass — but 【守備選手】 cuts it out brilliantly!",
+    "【攻撃選手】 in 【対象エリア】 tries to play it short — but 【守備選手】 reads it and intercepts!"
+  ],
+  "ロングパス|失敗":"【攻撃選手】 in 【対象エリア】 goes long — but 【守備選手】 cuts it out brilliantly!",
+  "ドリブル突破|失敗":[
+    "In 【対象エリア】, 【攻撃選手】 attempts to dribble through — but 【守備選手】 reads it and snuffs it out!",
+    "In 【対象エリア】, 【攻撃選手】 tries to drive forward but 【守備選手】 wins the ball with a tenacious tackle!"
+  ],
+  "飛び出し|失敗":[
+    "In 【対象エリア】, 【攻撃選手】 tries to run in behind — but 【守備選手】 reacts quickly and clears!",
+    "In 【対象エリア】, 【攻撃選手】 attempts to break clear but 【守備選手】's covering run gets there in time!"
+  ],
+  "ポストプレー|失敗":[
+    "In 【対象エリア】, 【守備選手】 puts in an aggressive challenge on 【攻撃選手】 and wins the ball!",
+    "In 【対象エリア】, 【攻撃選手】 tries to hold it up but is muscled off the ball by 【守備選手】!"
+  ],
+  "サイドクロス|失敗":"In 【対象エリア】, 【攻撃選手】 tries to cross — but 【守備選手】 clears it brilliantly!",
+  "ショートパス|ファール":"In 【対象エリア】, 【守備選手】 moves to block 【攻撃選手】's pass!  But that's a foul!",
+  "ロングパス|ファール":"In 【対象エリア】, 【守備選手】 goes in aggressively as 【攻撃選手】 shapes to play long — but the referee calls a foul.",
+  "ドリブル突破|ファール":"In 【対象エリア】, 【攻撃選手】 beats 【守備選手】 with a brilliant dribble!  【守備選手】 has no choice but to foul!",
+  "飛び出し|ファール":"In 【対象エリア】, 【守備選手】 tries to stop 【攻撃選手】's run with their body — the referee gives a foul!",
+  "ポストプレー|ファール":"In 【対象エリア】, 【守備選手】 charges in from behind on 【攻撃選手】 as they hold the ball — that's a foul!",
+  "サイドクロス|ファール":"In 【対象エリア】, 【守備選手】 brings down 【攻撃選手】 as they prepare to cross!  Foul!",
+  "ショートパス|カウンター":"【攻撃選手】 in 【対象エリア】 plays a short pass — but 【守備選手】 cuts it out!  Counter-attack!",
+  "ロングパス|カウンター":"【攻撃選手】 in 【対象エリア】 goes long — but 【守備選手】 reads it and clears!  Counter-attack!",
+  "ドリブル突破|カウンター":"In 【対象エリア】, 【攻撃選手】 attempts to dribble through — but 【守備選手】 snuffs it out!  They launch a counter-attack!",
+  "飛び出し|カウンター":"In 【対象エリア】, 【攻撃選手】 tries to run in behind — but 【守備選手】 reacts and clears!  The ball breaks for a counter!",
+  "ポストプレー|カウンター":"In 【対象エリア】, 【守備選手】 wins the ball from 【攻撃選手】 brilliantly!  Straight into a counter-attack!",
+  "サイドクロス|カウンター":"In 【対象エリア】, 【攻撃選手】 attempts a cross but 【守備選手】 clears it!  Counter-attack!",
+  "クロス|成功|ボレーシュート":"【クロス選手】 drives a cross into the box!  【シュート選手】 reacts and loses the marker 【守備選手】 — volley shot!",
+  "クロス|成功|ヘディングシュート":"【クロス選手】's cross finds 【シュート選手】!  Wins the aerial duel against 【守備選手】 and goes for the header!",
+  "クロス|失敗|ボレーシュート":"【クロス選手】 drives a cross into the box!  【シュート選手】 shapes to shoot but 【守備選手】 reacts quickly and clears!",
+  "クロス|失敗|ヘディングシュート":"【クロス選手】's cross finds 【シュート選手】!  But 【守備選手】 wins the header and clears the danger!",
+  "シュート|ゴール！！|中央からシュート":"【シュート選手】 breaks through the center and shoots!  【守備選手】 can't stop it!  <span style=\"color:#F00\"><b>GOOOOOOOAL!!</b></span>",
+  "シュート|GK防いだ！|中央からシュート":"【シュート選手】 breaks through the center and shoots!  But 【守備選手】 reacts quickly and saves!",
+  "シュート|枠を外した！|中央からシュート":"【シュート選手】 breaks through the center and shoots!  But the shot misses the target!",
+  "シュート|ゴール！！|サイドからシュート":"【シュート選手】 cuts inside from the flank and shoots!  【守備選手】 can't stop it!  <span style=\"color:#F00\"><b>GOOOOOOOAL!!</b></span>",
+  "シュート|GK防いだ！|サイドからシュート":"【シュート選手】 cuts inside from the flank and shoots!  But 【守備選手】 makes the save and keeps the goal out!",
+  "シュート|枠を外した！|サイドからシュート":"【シュート選手】 cuts inside from the flank and shoots!  But the effort flies wide.",
+  "ミドルシュート|ブロック|ミドルシュート":"【攻撃選手】 lets fly from distance!  But 【守備選手】 throws their body in the way and blocks!",
+  "ミドルシュート|ゴール！！|ミドルシュート":"【攻撃選手】 goes for it with a long-range effort!  It\'s beyond 【守備選手】\'s block.  【GK選手】 dives but can\'t keep it out — it\'s in the net!!  <span style=\"color:#F00\"><b>GOOOOOOOAL!!</b></span>",
+  "ミドルシュート|GK防いだ！|ミドルシュート":"【攻撃選手】 goes for it with a long-range effort!  It gets past 【守備選手】's block.  But 【GK選手】 pulls off a stunning save!",
+  "ミドルシュート|枠を外した！|ミドルシュート":"【攻撃選手】 goes for it with a long-range effort!  It gets past 【守備選手】's block.  But the powerful strike flies well wide.",
+  "シュート|ゴール！！|ボレーシュート":"【守備選手】 reacts to the volley but can't reach it!  <span style=\"color:#F00\"><b>GOOOOOOOAL!!</b></span>",
+  "シュート|GK防いだ！|ボレーシュート":"【守備選手】 reacts to the volley!  A sharp save keeps the goal out!",
+  "シュート|枠を外した！|ボレーシュート":"But the shot misses the target!",
+  "シュート|ゴール！！|ヘディングシュート":"【守備選手】 reacts to the header but can't get there!  <span style=\"color:#F00\"><b>GOOOOOOOAL!!</b></span>",
+  "シュート|GK防いだ！|ヘディングシュート":"【守備選手】 reacts to the header!  A sharp save keeps the goal out!",
+  "シュート|枠を外した！|ヘディングシュート":"But the header misses the target!",
+  "セットプレー|成功|ボレーシュート":"A set-piece opportunity — 【クロス選手】 delivers a dangerous ball into the box!  【シュート選手】 shakes off 【守備選手】 and volleys!",
+  "セットプレー|成功|ヘディングシュート":"【クロス選手】 places the ball and delivers into the box!  【シュート選手】 wins the header against 【守備選手】!",
+  "セットプレー|失敗|ボレーシュート":"A set-piece opportunity — 【クロス選手】 delivers a dangerous ball into the box!  But 【守備選手】 reacts quickly and clears!",
+  "セットプレー|失敗|ヘディングシュート":"【クロス選手】 delivers the set-piece into the box!  But 【守備選手】 wins the header against 【シュート選手】 and clears!",
+  "シュート|ゴール！！|フリーキック":"A free kick in a great position. 【シュート選手】 steps up and bends it perfectly into the goal!  <span style=\"color:#F00\"><b>GOOOOOOOAL!!</b></span>",
+  "シュート|GK防いだ！|フリーキック":"A free kick in a great position. 【シュート選手】 bends it toward goal — but 【守備選手】 pulls off a superb save!",
+  "シュート|枠を外した！|フリーキック":"A free kick in a great position. 【シュート選手】's curling effort just misses the target."
+};
+
+function getScenarioData() {
+  return window.LANG === 'en' ? scenario_data_en : scenario_data_ja;
+}
+
 // ============================================================
 // TEAM DATA (embedded from APK)
 // ============================================================
@@ -2098,148 +2449,148 @@ const scenario_data = {
 
   const TEAM_DATA = {
   japan2018: {
-    name:"日本",team_color:"#003087",flag:"🇯🇵",
+    name:"日本",en_name:"Japan",team_color:"#003087",flag:"🇯🇵",
     default_system:"4-2-3-1",default_tactics:1,default_keyplayer:10,
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],
     players:[
-      {name:"川島",long_name:"川島永嗣",positions:["GK"],params:[68,62,66,62,82,78,57,50,64,57,60,50,70,40,50,60,50,40,60,60,40,70,45,82,79,60,77,73,75]},
-      {name:"酒井(宏)",long_name:"酒井宏樹",positions:["SB", "SMF"],params:[77,82,78,76,75,75,72,72,76,72,75,63,74,53,60,77,72,72,73,71,68,67,69,50,50,73,76,78,75]},
-      {name:"吉田",long_name:"吉田麻也",positions:["CB", "DMF"],params:[80,78,76,76,75,86,70,62,74,74,75,64,72,67,70,68,70,62,79,82,79,77,67,50,50,82,78,77,75]},
-      {name:"昌子",long_name:"昌子源",positions:["CB", "SB"],params:[77,81,81,75,78,77,73,60,79,70,73,58,75,54,56,55,70,54,75,77,75,74,68,50,50,72,77,73,75]},
-      {name:"長友",long_name:"長友佑都",positions:["SB", "SMF"],params:[79,82,81,83,72,77,81,73,79,69,69,58,70,57,54,72,74,68,72,75,72,70,72,50,50,64,76,79,75]},
-      {name:"柴崎",long_name:"柴崎岳",positions:["CMF", "OMF", "DMF", "SMF"],params:[72,77,71,74,76,67,77,73,69,78,75,70,69,71,73,72,76,74,72,68,65,69,69,50,50,64,75,74,75]},
-      {name:"長谷部",long_name:"長谷部誠",positions:["DMF", "CMF", "SMF", "SB", "CB"],params:[76,79,74,71,78,74,73,73,72,77,76,66,72,60,67,70,76,64,77,78,70,80,71,50,50,67,83,85,75]},
-      {name:"原口",long_name:"原口元気",positions:["WG", "SMF", "SB"],params:[73,82,78,82,72,70,77,78,76,73,72,73,72,70,67,67,77,71,68,69,53,68,78,50,50,70,74,69,75]},
-      {name:"乾",long_name:"乾貴士",positions:["SMF", "OMF", "WG"],params:[67,78,79,85,76,64,87,86,77,77,70,71,75,81,71,70,84,80,42,35,30,60,70,50,50,62,76,78,75]},
-      {name:"香川",long_name:"香川真司",positions:["OMF", "SMF", "CMF"],params:[66,79,76,80,81,68,88,84,74,84,77,75,71,77,71,71,82,85,47,31,30,45,58,50,50,61,82,74,75]},
-      {name:"大迫",long_name:"大迫勇也",positions:["CF", "WG", "OMF"],params:[79,75,75,73,78,78,73,78,73,77,72,76,77,75,64,70,79,82,43,45,38,53,66,50,50,78,79,76,75]},
-      {name:"岡崎",long_name:"岡崎慎司",positions:["CF", "WG", "SMF", "OMF"],params:[73,83,74,78,84,87,83,77,72,75,66,78,78,78,58,62,78,82,48,52,40,63,75,50,50,78,83,78,75]},
-      {name:"本田",long_name:"本田圭佑",positions:["OMF", "CF", "SMF", "CMF", "WG"],params:[78,72,71,69,79,78,68,77,69,80,82,80,84,73,84,83,79,82,44,46,43,46,52,50,50,76,78,82,75]},
-      {name:"宇佐美",long_name:"宇佐美貴史",positions:["WG", "CF", "SMF"],params:[70,67,76,79,77,68,78,76,74,73,76,77,75,78,71,74,77,79,40,38,32,44,52,50,50,68,72,69,75]},
-      {name:"山口",long_name:"山口螢",positions:["DMF", "CMF", "SMF", "OMF"],params:[77,78,75,76,73,74,75,68,73,73,72,71,73,67,61,65,70,68,70,75,72,67,73,50,50,67,69,70,75]},
-      {name:"酒井(高)",long_name:"酒井高徳",positions:["SB", "SMF", "DMF"],params:[75,78,75,78,76,74,77,72,73,73,72,64,74,52,65,76,73,64,72,74,74,72,70,50,50,66,73,76,75]},
-      {name:"遠藤(航)",long_name:"遠藤航",positions:["DMF", "CB", "SB"],params:[73,76,77,76,74,78,77,67,75,68,72,52,70,50,57,64,71,63,72,72,72,72,70,50,50,73,72,73,75]},
-      {name:"東口",long_name:"東口順昭",positions:["GK"],params:[65,60,67,68,83,80,58,50,65,60,60,50,70,40,50,60,50,40,60,60,40,70,45,80,78,60,75,74,75]}
+      {name:"川島",en_name:"Kawashima",long_name:"川島永嗣",positions:["GK"],params:[68,62,66,62,82,78,57,50,64,57,60,50,70,40,50,60,50,40,60,60,40,70,45,82,79,60,77,73,75]},
+      {name:"酒井(宏)",en_name:"Sakai H.",long_name:"酒井宏樹",positions:["SB", "SMF"],params:[77,82,78,76,75,75,72,72,76,72,75,63,74,53,60,77,72,72,73,71,68,67,69,50,50,73,76,78,75]},
+      {name:"吉田",en_name:"Yoshida",long_name:"吉田麻也",positions:["CB", "DMF"],params:[80,78,76,76,75,86,70,62,74,74,75,64,72,67,70,68,70,62,79,82,79,77,67,50,50,82,78,77,75]},
+      {name:"昌子",en_name:"Shoji",long_name:"昌子源",positions:["CB", "SB"],params:[77,81,81,75,78,77,73,60,79,70,73,58,75,54,56,55,70,54,75,77,75,74,68,50,50,72,77,73,75]},
+      {name:"長友",en_name:"Nagatomo",long_name:"長友佑都",positions:["SB", "SMF"],params:[79,82,81,83,72,77,81,73,79,69,69,58,70,57,54,72,74,68,72,75,72,70,72,50,50,64,76,79,75]},
+      {name:"柴崎",en_name:"Shibasaki",long_name:"柴崎岳",positions:["CMF", "OMF", "DMF", "SMF"],params:[72,77,71,74,76,67,77,73,69,78,75,70,69,71,73,72,76,74,72,68,65,69,69,50,50,64,75,74,75]},
+      {name:"長谷部",en_name:"Hasebe",long_name:"長谷部誠",positions:["DMF", "CMF", "SMF", "SB", "CB"],params:[76,79,74,71,78,74,73,73,72,77,76,66,72,60,67,70,76,64,77,78,70,80,71,50,50,67,83,85,75]},
+      {name:"原口",en_name:"Haraguchi",long_name:"原口元気",positions:["WG", "SMF", "SB"],params:[73,82,78,82,72,70,77,78,76,73,72,73,72,70,67,67,77,71,68,69,53,68,78,50,50,70,74,69,75]},
+      {name:"乾",en_name:"Inui",long_name:"乾貴士",positions:["SMF", "OMF", "WG"],params:[67,78,79,85,76,64,87,86,77,77,70,71,75,81,71,70,84,80,42,35,30,60,70,50,50,62,76,78,75]},
+      {name:"香川",en_name:"Kagawa",long_name:"香川真司",positions:["OMF", "SMF", "CMF"],params:[66,79,76,80,81,68,88,84,74,84,77,75,71,77,71,71,82,85,47,31,30,45,58,50,50,61,82,74,75]},
+      {name:"大迫",en_name:"Osako",long_name:"大迫勇也",positions:["CF", "WG", "OMF"],params:[79,75,75,73,78,78,73,78,73,77,72,76,77,75,64,70,79,82,43,45,38,53,66,50,50,78,79,76,75]},
+      {name:"岡崎",en_name:"Okazaki",long_name:"岡崎慎司",positions:["CF", "WG", "SMF", "OMF"],params:[73,83,74,78,84,87,83,77,72,75,66,78,78,78,58,62,78,82,48,52,40,63,75,50,50,78,83,78,75]},
+      {name:"本田",en_name:"Honda",long_name:"本田圭佑",positions:["OMF", "CF", "SMF", "CMF", "WG"],params:[78,72,71,69,79,78,68,77,69,80,82,80,84,73,84,83,79,82,44,46,43,46,52,50,50,76,78,82,75]},
+      {name:"宇佐美",en_name:"Usami",long_name:"宇佐美貴史",positions:["WG", "CF", "SMF"],params:[70,67,76,79,77,68,78,76,74,73,76,77,75,78,71,74,77,79,40,38,32,44,52,50,50,68,72,69,75]},
+      {name:"山口",en_name:"Yamaguchi",long_name:"山口螢",positions:["DMF", "CMF", "SMF", "OMF"],params:[77,78,75,76,73,74,75,68,73,73,72,71,73,67,61,65,70,68,70,75,72,67,73,50,50,67,69,70,75]},
+      {name:"酒井(高)",en_name:"Sakai T.",long_name:"酒井高徳",positions:["SB", "SMF", "DMF"],params:[75,78,75,78,76,74,77,72,73,73,72,64,74,52,65,76,73,64,72,74,74,72,70,50,50,66,73,76,75]},
+      {name:"遠藤(航)",en_name:"Endo",long_name:"遠藤航",positions:["DMF", "CB", "SB"],params:[73,76,77,76,74,78,77,67,75,68,72,52,70,50,57,64,71,63,72,72,72,72,70,50,50,73,72,73,75]},
+      {name:"東口",en_name:"Higashiguchi",long_name:"東口順昭",positions:["GK"],params:[65,60,67,68,83,80,58,50,65,60,60,50,70,40,50,60,50,40,60,60,40,70,45,80,78,60,75,74,75]}
     ]
   },
   belgium2018: {
-    name:"ベルギー",team_color:"#CC0000",flag:"🇧🇪",
+    name:"ベルギー",en_name:"Belgium",team_color:"#CC0000",flag:"🇧🇪",
     default_system:"3-4-2-1",default_tactics:1,default_keyplayer:8,default_marked_player:8,
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
     players:[
-      {name:"クルトワ",long_name:"ティボー・クルトワ",positions:["GK"],params:[68,65,54,50,86,85,51,50,52,64,65,50,70,40,50,60,50,40,60,60,40,70,45,88,91,60,82,80,75]},
-      {name:"アルデルヴェイレルト",long_name:"トビー・アルデルヴェイレルト",positions:["CB", "SB", "DMF"],params:[82,76,69,67,85,83,64,66,67,77,80,50,84,40,69,65,71,53,84,85,87,77,70,50,50,84,76,80,75]},
-      {name:"コンパニ",long_name:"ヴァンサン・コンパニ",positions:["CB", "DMF"],params:[91,74,68,70,84,78,65,65,66,72,69,48,76,45,54,60,69,44,83,84,81,80,68,50,50,86,78,81,75]},
-      {name:"フェルトンゲン",long_name:"ヤン・フェルトンゲン",positions:["CB", "SB", "DMF"],params:[83,80,69,71,82,83,63,69,67,79,74,55,84,52,73,65,75,52,86,85,83,76,63,50,50,82,74,81,75]},
-      {name:"ヴィツェル",long_name:"アクセル・ヴィツェル",positions:["DMF", "CMF", "OMF", "SMF"],params:[80,84,74,70,80,73,73,83,72,82,77,70,78,64,70,68,83,69,76,71,67,72,78,50,50,77,75,84,75]},
-      {name:"デ・ブライネ",long_name:"ケヴィン・デ・ブライネ",positions:["OMF", "CMF", "SMF", "WG", "DMF"],params:[75,86,77,75,90,67,79,85,75,90,89,86,86,83,83,84,89,90,55,47,40,47,59,50,50,67,86,85,75]},
-      {name:"ムニエ",long_name:"トーマス・ムニエ",positions:["SMF", "WG", "SB"],params:[84,90,79,72,78,73,63,77,77,78,77,72,75,77,58,77,78,75,74,77,73,75,72,50,50,73,80,77,75]},
-      {name:"カラスコ",long_name:"ヤニック・カラスコ",positions:["SMF", "WG", "OMF"],params:[65,75,89,90,82,65,83,90,87,78,75,73,84,70,78,75,86,80,42,37,24,55,70,50,50,60,82,74,75]},
-      {name:"メルテンス",long_name:"ドリース・メルテンス",positions:["CF", "WG", "SMF", "OMF"],params:[62,78,86,92,88,63,93,90,84,83,75,86,81,72,80,83,88,89,35,33,27,37,49,50,50,60,86,81,75]},
-      {name:"E・アザール",long_name:"エデン・アザール",positions:["SMF", "OMF", "WG"],params:[70,80,88,93,86,58,92,95,86,84,81,81,80,80,76,81,92,90,39,29,23,43,50,50,50,60,86,87,75]},
-      {name:"ルカク",long_name:"ロメル・ルカク",positions:["CF"],params:[93,80,88,80,83,75,68,79,86,70,67,85,89,76,70,69,77,90,30,25,23,30,44,50,50,84,87,81,75]}
+      {name:"クルトワ",en_name:"Courtois",long_name:"ティボー・クルトワ",positions:["GK"],params:[68,65,54,50,86,85,51,50,52,64,65,50,70,40,50,60,50,40,60,60,40,70,45,88,91,60,82,80,75]},
+      {name:"アルデルヴェイレルト",en_name:"Alderweireld",long_name:"トビー・アルデルヴェイレルト",positions:["CB", "SB", "DMF"],params:[82,76,69,67,85,83,64,66,67,77,80,50,84,40,69,65,71,53,84,85,87,77,70,50,50,84,76,80,75]},
+      {name:"コンパニ",en_name:"Kompany",long_name:"ヴァンサン・コンパニ",positions:["CB", "DMF"],params:[91,74,68,70,84,78,65,65,66,72,69,48,76,45,54,60,69,44,83,84,81,80,68,50,50,86,78,81,75]},
+      {name:"フェルトンゲン",en_name:"Vertonghen",long_name:"ヤン・フェルトンゲン",positions:["CB", "SB", "DMF"],params:[83,80,69,71,82,83,63,69,67,79,74,55,84,52,73,65,75,52,86,85,83,76,63,50,50,82,74,81,75]},
+      {name:"ヴィツェル",en_name:"Witsel",long_name:"アクセル・ヴィツェル",positions:["DMF", "CMF", "OMF", "SMF"],params:[80,84,74,70,80,73,73,83,72,82,77,70,78,64,70,68,83,69,76,71,67,72,78,50,50,77,75,84,75]},
+      {name:"デ・ブライネ",en_name:"De Bruyne",long_name:"ケヴィン・デ・ブライネ",positions:["OMF", "CMF", "SMF", "WG", "DMF"],params:[75,86,77,75,90,67,79,85,75,90,89,86,86,83,83,84,89,90,55,47,40,47,59,50,50,67,86,85,75]},
+      {name:"ムニエ",en_name:"Meunier",long_name:"トーマス・ムニエ",positions:["SMF", "WG", "SB"],params:[84,90,79,72,78,73,63,77,77,78,77,72,75,77,58,77,78,75,74,77,73,75,72,50,50,73,80,77,75]},
+      {name:"カラスコ",en_name:"Carrasco",long_name:"ヤニック・カラスコ",positions:["SMF", "WG", "OMF"],params:[65,75,89,90,82,65,83,90,87,78,75,73,84,70,78,75,86,80,42,37,24,55,70,50,50,60,82,74,75]},
+      {name:"メルテンス",en_name:"Mertens",long_name:"ドリース・メルテンス",positions:["CF", "WG", "SMF", "OMF"],params:[62,78,86,92,88,63,93,90,84,83,75,86,81,72,80,83,88,89,35,33,27,37,49,50,50,60,86,81,75]},
+      {name:"E・アザール",en_name:"E.Hazard",long_name:"エデン・アザール",positions:["SMF", "OMF", "WG"],params:[70,80,88,93,86,58,92,95,86,84,81,81,80,80,76,81,92,90,39,29,23,43,50,50,50,60,86,87,75]},
+      {name:"ルカク",en_name:"Lukaku",long_name:"ロメル・ルカク",positions:["CF"],params:[93,80,88,80,83,75,68,79,86,70,67,85,89,76,70,69,77,90,30,25,23,30,44,50,50,84,87,81,75]}
     ]
   },
   japan2026vsEngland: {
-    name:"日本", team_color:"#003087", flag:"🇯🇵",
+    name:"日本",en_name:"Japan",team_color:"#003087",flag:"🇯🇵",
     default_system:"3-4-2-1", default_tactics:1, default_keyplayer:9, default_marked_player:6,
     default_lineup:[0,1,2,3,4,5,10,6,8,7,9,10],
     players:[
-      {name:"鈴木彩",long_name:"鈴木彩艶",positions:["GK"],params:[75,74,69,68,86,78,69,50,51,73,73,50,50,50,50,60,54,40,60,60,40,70,45,85,82,60,78,82,75]},
-      {name:"谷口",long_name:"谷口彰悟",positions:["CB","右CB"],params:[82,78,74,73,77,83,73,59,59,72,73,64,66,58,58,58,65,59,78,82,82,83,73,51,51,80,74,78,75]},
-      {name:"渡辺",long_name:"渡辺剛",positions:["CB"],params:[79,76,73,72,75,81,72,56,56,67,72,60,61,56,56,56,60,58,74,79,79,81,70,51,51,75,73,74,75]},
-      {name:"伊藤洋",long_name:"伊藤洋輝",positions:["左CB","CB","左SB"],params:[77,80,76,75,77,79,75,69,70,74,75,66,67,61,61,66,73,72,75,78,76,78,74,51,51,74,75,77,75]},
-      {name:"佐野海",long_name:"佐野海舟",positions:["DMF","CMF"],params:[78,82,74,73,82,74,74,71,70,79,76,70,70,68,64,63,72,72,82,79,77,76,79,50,50,70,78,78,75]},
-      {name:"鎌田",long_name:"鎌田大地",positions:["CMF","OMF","DMF"],params:[72,80,75,76,82,68,80,78,74,92,91,86,84,83,72,71,88,88,65,60,52,58,68,50,50,65,82,78,75]},
-      {name:"中村敬",long_name:"中村敬斗",positions:["左SMF","OMF","WG"],params:[68,77,88,88,78,65,86,86,87,72,68,80,79,68,62,62,74,83,60,56,44,56,68,50,50,60,78,74,75]},
-      {name:"三笘",long_name:"三笘薫",positions:["左OMF","OMF","左SMF","WG","左SB"],params:[66,74,80,90,82,62,92,93,98,74,70,87,85,72,66,66,94,92,45,38,30,52,62,50,50,58,80,78,75]},
-      {name:"伊東",long_name:"伊東純也",positions:["右OMF","OMF","右SMF","WG"],params:[68,80,90,90,82,65,88,84,96,72,68,83,82,68,62,62,88,86,58,52,40,54,68,50,50,60,78,74,75]},
-      {name:"上田",long_name:"上田綺世",positions:["CF"],params:[82,80,78,76,80,80,73,73,73,73,69,78,78,74,65,65,74,83,50,48,43,51,65,51,51,76,80,78,75]},
-      {name:"堂安",long_name:"堂安律",positions:["右SMF","OMF","WG"],params:[72,80,78,79,80,70,80,80,76,80,76,85,83,76,72,72,80,78,71,65,57,69,81,50,50,66,80,78,75]},
-      {name:"大迫敬",long_name:"大迫敬介",positions:["GK"],params:[73,72,67,66,82,76,67,50,51,59,65,50,50,50,50,60,53,40,60,60,40,70,45,82,78,60,74,76,75]},
-      {name:"早川",long_name:"早川友基",positions:["GK"],params:[72,69,65,64,80,74,65,50,51,58,61,50,50,50,50,60,51,40,60,60,40,70,45,80,76,60,73,74,75]},
-      {name:"菅原",long_name:"菅原由勢",positions:["右SB","CB","右SMF"],params:[76,82,80,79,77,72,78,72,73,67,66,68,69,65,60,62,72,72,74,76,70,76,74,50,50,70,78,69,75]},
-      {name:"瀬古",long_name:"瀬古歩夢",positions:["CB","右CB"],params:[78,77,74,72,76,80,72,57,57,68,72,61,64,57,57,57,61,58,74,80,80,82,72,51,51,76,74,75,75]},
-      {name:"橋岡",long_name:"橋岡大樹",positions:["右SB","CB","右SMF"],params:[74,82,78,77,76,73,76,69,72,72,70,65,67,60,57,58,69,69,74,75,70,74,73,51,51,68,76,74,75]},
-      {name:"鈴木淳",long_name:"鈴木淳之介",positions:["左CB","CB"],params:[78,76,72,70,75,80,70,69,56,81,85,75,76,56,55,55,73,71,73,79,79,81,69,50,79,75,72,74,75]},
-      {name:"藤田チ",long_name:"藤田譲瑠チマ",positions:["DMF","CMF"],params:[76,85,75,74,83,72,76,73,72,81,78,72,72,70,66,65,76,74,72,70,69,67,79,50,50,68,78,70,75]},
-      {name:"鈴木唯",long_name:"鈴木唯人",positions:["OMF","左SMF"],params:[72,80,76,77,79,69,77,77,74,78,73,74,74,73,69,69,77,76,69,61,53,56,69,51,51,67,78,76,75]},
-      {name:"田中碧",long_name:"田中碧",positions:["CMF","DMF"],params:[74,83,74,73,81,71,74,72,70,80,79,72,72,70,68,67,75,73,74,71,74,74,76,50,50,68,77,71,75]},
-      {name:"佐藤龍",long_name:"佐藤龍之介",positions:["OMF","右SMF"],params:[72,78,76,77,78,67,78,76,73,74,72,73,72,72,67,65,74,73,61,56,48,56,67,51,51,61,76,73,75]},
-      {name:"町野",long_name:"町野修斗",positions:["CF"],params:[76,80,76,76,78,76,73,67,67,67,65,73,73,69,58,56,65,76,54,53,44,53,61,51,51,72,76,74,75]},
-      {name:"前田大",long_name:"前田大然",positions:["CF","WG","左SMF"],params:[72,92,92,93,82,70,85,74,76,70,67,72,73,68,60,62,70,76,70,66,54,58,74,50,50,64,80,76,75]},
-      {name:"小川",long_name:"小川航基",positions:["CF"],params:[80,78,76,75,78,80,73,69,69,69,67,76,76,73,59,58,67,80,53,51,43,53,65,51,51,74,78,76,75]},
-      {name:"塩貝",long_name:"塩貝健人",positions:["CF","WG"],params:[74,82,82,83,78,72,80,74,74,72,68,73,73,69,59,59,72,74,58,54,44,54,67,51,51,69,78,74,75]},
-      {name:"後藤",long_name:"後藤啓介",positions:["CF"],params:[78,78,76,77,76,76,74,72,72,72,67,74,74,72,59,59,69,78,61,59,48,53,65,51,51,73,76,74,75]}
+      {name:"鈴木彩",en_name:"Suzuki A.",long_name:"鈴木彩艶",positions:["GK"],params:[75,74,69,68,86,78,69,50,51,73,73,50,50,50,50,60,54,40,60,60,40,70,45,85,82,60,78,82,75]},
+      {name:"谷口",en_name:"Taniguchi",long_name:"谷口彰悟",positions:["CB","右CB"],params:[82,78,74,73,77,83,73,59,59,72,73,64,66,58,58,58,65,59,78,82,82,83,73,51,51,80,74,78,75]},
+      {name:"渡辺",en_name:"Watanabe",long_name:"渡辺剛",positions:["CB"],params:[79,76,73,72,75,81,72,56,56,67,72,60,61,56,56,56,60,58,74,79,79,81,70,51,51,75,73,74,75]},
+      {name:"伊藤洋",en_name:"Ito Y.",long_name:"伊藤洋輝",positions:["左CB","CB","左SB"],params:[77,80,76,75,77,79,75,69,70,74,75,66,67,61,61,66,73,72,75,78,76,78,74,51,51,74,75,77,75]},
+      {name:"佐野海",en_name:"Sano K.",long_name:"佐野海舟",positions:["DMF","CMF"],params:[78,82,74,73,82,74,74,71,70,79,76,70,70,68,64,63,72,72,82,79,77,76,79,50,50,70,78,78,75]},
+      {name:"鎌田",en_name:"Kamada",long_name:"鎌田大地",positions:["CMF","OMF","DMF"],params:[72,80,75,76,82,68,80,78,74,92,91,86,84,83,72,71,88,88,65,60,52,58,68,50,50,65,82,78,75]},
+      {name:"中村敬",en_name:"Nakamura K.",long_name:"中村敬斗",positions:["左SMF","OMF","WG"],params:[68,77,88,88,78,65,86,86,87,72,68,80,79,68,62,62,74,83,60,56,44,56,68,50,50,60,78,74,75]},
+      {name:"三笘",en_name:"Mitoma",long_name:"三笘薫",positions:["左OMF","OMF","左SMF","WG","左SB"],params:[66,74,80,90,82,62,92,93,98,74,70,87,85,72,66,66,94,92,45,38,30,52,62,50,50,58,80,78,75]},
+      {name:"伊東",en_name:"Ito J.",long_name:"伊東純也",positions:["右OMF","OMF","右SMF","WG"],params:[68,80,90,90,82,65,88,84,96,72,68,83,82,68,62,62,88,86,58,52,40,54,68,50,50,60,78,74,75]},
+      {name:"上田",en_name:"Ueda",long_name:"上田綺世",positions:["CF"],params:[82,80,78,76,80,80,73,73,73,73,69,78,78,74,65,65,74,83,50,48,43,51,65,51,51,76,80,78,75]},
+      {name:"堂安",en_name:"Doan",long_name:"堂安律",positions:["右SMF","OMF","WG"],params:[72,80,78,79,80,70,80,80,76,80,76,85,83,76,72,72,80,78,71,65,57,69,81,50,50,66,80,78,75]},
+      {name:"大迫敬",en_name:"Osako K.",long_name:"大迫敬介",positions:["GK"],params:[73,72,67,66,82,76,67,50,51,59,65,50,50,50,50,60,53,40,60,60,40,70,45,82,78,60,74,76,75]},
+      {name:"早川",en_name:"Hayakawa",long_name:"早川友基",positions:["GK"],params:[72,69,65,64,80,74,65,50,51,58,61,50,50,50,50,60,51,40,60,60,40,70,45,80,76,60,73,74,75]},
+      {name:"菅原",en_name:"Sugawara",long_name:"菅原由勢",positions:["右SB","CB","右SMF"],params:[76,82,80,79,77,72,78,72,73,67,66,68,69,65,60,62,72,72,74,76,70,76,74,50,50,70,78,69,75]},
+      {name:"瀬古",en_name:"Seko",long_name:"瀬古歩夢",positions:["CB","右CB"],params:[78,77,74,72,76,80,72,57,57,68,72,61,64,57,57,57,61,58,74,80,80,82,72,51,51,76,74,75,75]},
+      {name:"橋岡",en_name:"Hashioka",long_name:"橋岡大樹",positions:["右SB","CB","右SMF"],params:[74,82,78,77,76,73,76,69,72,72,70,65,67,60,57,58,69,69,74,75,70,74,73,51,51,68,76,74,75]},
+      {name:"鈴木淳",en_name:"Suzuki J.",long_name:"鈴木淳之介",positions:["左CB","CB"],params:[78,76,72,70,75,80,70,69,56,81,85,75,76,56,55,55,73,71,73,79,79,81,69,50,79,75,72,74,75]},
+      {name:"藤田チ",en_name:"Fujita",long_name:"藤田譲瑠チマ",positions:["DMF","CMF"],params:[76,85,75,74,83,72,76,73,72,81,78,72,72,70,66,65,76,74,72,70,69,67,79,50,50,68,78,70,75]},
+      {name:"鈴木唯",en_name:"Suzuki Y.",long_name:"鈴木唯人",positions:["OMF","左SMF"],params:[72,80,76,77,79,69,77,77,74,78,73,74,74,73,69,69,77,76,69,61,53,56,69,51,51,67,78,76,75]},
+      {name:"田中碧",en_name:"Tanaka A.",long_name:"田中碧",positions:["CMF","DMF"],params:[74,83,74,73,81,71,74,72,70,80,79,72,72,70,68,67,75,73,74,71,74,74,76,50,50,68,77,71,75]},
+      {name:"佐藤龍",en_name:"Sato R.",long_name:"佐藤龍之介",positions:["OMF","右SMF"],params:[72,78,76,77,78,67,78,76,73,74,72,73,72,72,67,65,74,73,61,56,48,56,67,51,51,61,76,73,75]},
+      {name:"町野",en_name:"Machino",long_name:"町野修斗",positions:["CF"],params:[76,80,76,76,78,76,73,67,67,67,65,73,73,69,58,56,65,76,54,53,44,53,61,51,51,72,76,74,75]},
+      {name:"前田大",en_name:"Maeda",long_name:"前田大然",positions:["CF","WG","左SMF"],params:[72,92,92,93,82,70,85,74,76,70,67,72,73,68,60,62,70,76,70,66,54,58,74,50,50,64,80,76,75]},
+      {name:"小川",en_name:"Ogawa",long_name:"小川航基",positions:["CF"],params:[80,78,76,75,78,80,73,69,69,69,67,76,76,73,59,58,67,80,53,51,43,53,65,51,51,74,78,76,75]},
+      {name:"塩貝",en_name:"Shiokai",long_name:"塩貝健人",positions:["CF","WG"],params:[74,82,82,83,78,72,80,74,74,72,68,73,73,69,59,59,72,74,58,54,44,54,67,51,51,69,78,74,75]},
+      {name:"後藤",en_name:"Goto",long_name:"後藤啓介",positions:["CF"],params:[78,78,76,77,76,76,74,72,72,72,67,74,74,72,59,59,69,78,61,59,48,53,65,51,51,73,76,74,75]}
     ]
   },
   england2026: {
-    name:"イングランド", team_color:"#CC0000", flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    name:"イングランド",en_name:"England",team_color:"#CC0000", flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",
     default_system:"4-2-3-1", default_tactics:1, default_keyplayer:7, default_marked_player:7,
     default_lineup:[0,3,1,2,4,9,5,6,8,7,10,10],
     players:[
-      {name:"ピックフォード",long_name:"ジョーダン・ピックフォード",positions:["GK"],params:[70,70,64,63,82,75,63,50,51,66,69,50,50,50,50,60,55,40,60,60,40,70,45,87,80,60,82,90,75]},
-      {name:"コンサ",long_name:"エズリ・コンサ",positions:["CB","右CB"],params:[84,80,78,76,88,88,70,75,68,80,75,61,64,57,55,61,78,57,85,87,82,84,70,50,50,83,78,83,75]},
-      {name:"グエヒ",long_name:"マルク・グエヒ",positions:["左CB","CB"],params:[83,78,74,70,82,90,72,70,67,76,77,53,51,55,61,61,72,49,85,86,82,83,69,50,50,83,77,76,75]},
-      {name:"ホワイト",long_name:"ジャービス・ホワイト",positions:["右SB","CB","右SMF"],params:[75,80,75,73,85,82,70,76,71,80,81,65,69,70,64,77,79,74,83,80,80,73,66,50,50,78,82,77,75]},
-      {name:"オライリー",long_name:"ニコ・オライリー",positions:["左SB"],params:[78,74,85,77,79,87,75,77,73,79,76,65,67,64,57,78,77,76,77,78,73,80,67,50,50,78,76,74,75]},
-      {name:"メイヌー",long_name:"コビー・メイヌー",positions:["DMF","CMF"],params:[72,82,80,76,86,78,84,83,74,79,78,75,71,71,64,69,80,71,75,79,71,73,75,50,50,70,86,76,75]},
-      {name:"ロジャーズ",long_name:"モーガン・ロジャーズ",positions:["OMF","左SMF","右SMF","WG"],params:[80,85,80,77,89,80,79,86,79,83,78,79,75,76,72,72,85,86,68,74,58,68,68,50,50,67,89,77,75]},
-      {name:"パーマー",long_name:"コール・パーマー",positions:["OMF","CMF"],params:[67,79,78,80,89,73,83,89,77,90,88,83,80,84,82,88,89,88,67,65,57,66,70,50,50,65,90,79,75]},
-      {name:"ゴードン",long_name:"アンソニー・ゴードン",positions:["左SMF","WG","CF"],params:[72,89,92,88,85,71,88,85,80,79,80,78,75,76,67,75,81,83,68,65,56,61,73,50,50,69,85,76,75]},
-      {name:"アンダーソン",long_name:"エリオット・アンダーソン",positions:["CMF","右SMF","DMF"],params:[73,90,73,76,84,85,76,82,75,82,82,71,69,72,66,77,79,75,80,82,75,70,64,50,50,75,83,75,75]},
-      {name:"フォーデン",long_name:"フィル・フォーデン",positions:["OMF","左SMF","右SMF","WG"],params:[70,83,79,82,90,65,93,90,82,91,89,82,83,83,78,78,90,85,56,52,45,62,67,50,50,61,92,80,75]}
+      {name:"ピックフォード",en_name:"Pickford",long_name:"ジョーダン・ピックフォード",positions:["GK"],params:[70,70,64,63,82,75,63,50,51,66,69,50,50,50,50,60,55,40,60,60,40,70,45,87,80,60,82,90,75]},
+      {name:"コンサ",en_name:"Konsa",long_name:"エズリ・コンサ",positions:["CB","右CB"],params:[84,80,78,76,88,88,70,75,68,80,75,61,64,57,55,61,78,57,85,87,82,84,70,50,50,83,78,83,75]},
+      {name:"グエヒ",en_name:"Guéhi",long_name:"マルク・グエヒ",positions:["左CB","CB"],params:[83,78,74,70,82,90,72,70,67,76,77,53,51,55,61,61,72,49,85,86,82,83,69,50,50,83,77,76,75]},
+      {name:"ホワイト",en_name:"White",long_name:"ジャービス・ホワイト",positions:["右SB","CB","右SMF"],params:[75,80,75,73,85,82,70,76,71,80,81,65,69,70,64,77,79,74,83,80,80,73,66,50,50,78,82,77,75]},
+      {name:"オライリー",en_name:"O'Reilly",long_name:"ニコ・オライリー",positions:["左SB"],params:[78,74,85,77,79,87,75,77,73,79,76,65,67,64,57,78,77,76,77,78,73,80,67,50,50,78,76,74,75]},
+      {name:"メイヌー",en_name:"Mainoo",long_name:"コビー・メイヌー",positions:["DMF","CMF"],params:[72,82,80,76,86,78,84,83,74,79,78,75,71,71,64,69,80,71,75,79,71,73,75,50,50,70,86,76,75]},
+      {name:"ロジャーズ",en_name:"Rogers",long_name:"モーガン・ロジャーズ",positions:["OMF","左SMF","右SMF","WG"],params:[80,85,80,77,89,80,79,86,79,83,78,79,75,76,72,72,85,86,68,74,58,68,68,50,50,67,89,77,75]},
+      {name:"パーマー",en_name:"Palmer",long_name:"コール・パーマー",positions:["OMF","CMF"],params:[67,79,78,80,89,73,83,89,77,90,88,83,80,84,82,88,89,88,67,65,57,66,70,50,50,65,90,79,75]},
+      {name:"ゴードン",en_name:"Gordon",long_name:"アンソニー・ゴードン",positions:["左SMF","WG","CF"],params:[72,89,92,88,85,71,88,85,80,79,80,78,75,76,67,75,81,83,68,65,56,61,73,50,50,69,85,76,75]},
+      {name:"アンダーソン",en_name:"Anderson",long_name:"エリオット・アンダーソン",positions:["CMF","右SMF","DMF"],params:[73,90,73,76,84,85,76,82,75,82,82,71,69,72,66,77,79,75,80,82,75,70,64,50,50,75,83,75,75]},
+      {name:"フォーデン",en_name:"Foden",long_name:"フィル・フォーデン",positions:["OMF","左SMF","右SMF","WG"],params:[70,83,79,82,90,65,93,90,82,91,89,82,83,83,78,78,90,85,56,52,45,62,67,50,50,61,92,80,75]}
     ]
   },
   japan2026: {
-    name:"日本", team_color:"#003087", flag:"🇯🇵",
+    name:"日本",en_name:"Japan",team_color:"#003087",flag:"🇯🇵",
     default_system:"3-4-2-1", default_tactics:1, default_keyplayer:9, default_marked_player:8,
     default_lineup:[0,3,2,4,6,5,1,7,8,9,10,10],
     players:[
-      {name:"鈴木彩",long_name:"鈴木彩艶",positions:["GK"],params:[75,74,69,68,86,78,69,50,51,73,73,50,50,50,50,60,54,40,60,60,40,70,45,85,82,60,78,82,75]},
-      {name:"菅原",long_name:"菅原由勢",positions:["右SB","CB","右SMF"],params:[75,81,79,78,76,72,77,72,73,68,68,68,69,65,58,60,72,72,73,75,71,75,73,50,50,71,77,71,74]},
-      {name:"瀬古",long_name:"瀬古歩夢",positions:["CB","右CB"],params:[78,77,74,72,76,80,72,57,57,68,72,61,64,57,57,57,61,58,74,80,80,82,72,51,51,76,74,75,75]},
-      {name:"渡辺",long_name:"渡辺剛",positions:["CB"],params:[79,76,73,72,75,81,72,56,56,67,72,60,61,56,56,56,60,58,74,79,79,81,70,51,51,75,73,74,75]},
-      {name:"伊藤洋",long_name:"伊藤洋輝",positions:["左CB","CB","左SB"],params:[77,80,76,75,77,79,75,69,70,74,75,66,67,61,61,66,73,72,75,78,76,78,74,51,51,74,75,77,75]},
-      {name:"藤田チ",long_name:"藤田譲瑠チマ",positions:["DMF","CMF"],params:[75,83,74,73,82,72,75,73,72,82,77,72,72,71,66,65,75,73,71,69,68,73,78,50,50,68,77,68,74]},
-      {name:"田中碧",long_name:"田中碧",positions:["CMF","DMF"],params:[73,82,73,73,80,71,73,72,71,79,78,72,72,71,68,67,74,73,79,69,66,73,75,50,50,68,76,69,74]},
-      {name:"前田大",long_name:"前田大然",positions:["CF","WG","左SMF"],params:[72,92,92,93,82,70,85,74,76,70,67,72,73,68,60,62,70,76,70,66,54,58,74,50,50,64,80,76,75]},
-      {name:"佐野航",long_name:"佐野航大",positions:["DMF","CMF","OMF","左SMF"],params:[74,81,72,71,77,69,72,73,69,75,71,70,72,70,64,63,72,75,68,64,60,59,75,47,47,64,74,74,72]},
-      {name:"鈴木唯",long_name:"鈴木唯人",positions:["OMF","左SMF"],params:[72,80,76,77,79,69,77,77,74,78,73,74,74,73,69,69,77,76,69,61,53,56,69,51,51,67,78,76,75]},
-      {name:"後藤",long_name:"後藤啓介",positions:["CF"],params:[78,78,76,77,76,76,74,69,69,69,66,74,74,69,60,60,67,78,63,60,46,53,65,50,50,73,76,74,75]},
-      {name:"大迫敬",long_name:"大迫敬介",positions:["GK"],params:[73,72,67,66,82,76,67,50,51,59,65,50,50,50,50,60,53,40,60,60,40,70,45,82,78,60,74,76,75]},
-      {name:"早川",long_name:"早川友基",positions:["GK"],params:[72,69,65,64,80,74,65,50,51,58,61,50,50,50,50,60,51,40,60,60,40,70,45,80,76,60,73,74,75]},
-      {name:"谷口",long_name:"谷口彰悟",positions:["CB","右CB"],params:[82,78,74,73,77,83,73,59,59,72,73,64,66,58,58,58,65,59,78,82,82,83,73,51,51,80,74,78,75]},
-      {name:"橋岡",long_name:"橋岡大樹",positions:["右SB","CB","右SMF"],params:[74,82,78,77,76,73,76,69,72,72,70,65,67,60,57,58,69,69,74,75,70,74,73,51,51,68,76,74,75]},
-      {name:"鈴木淳",long_name:"鈴木淳之介",positions:["左CB","CB"],params:[78,76,73,72,75,80,72,68,56,83,86,72,74,57,55,55,76,70,74,79,79,81,70,51,51,75,73,74,75]},
-      {name:"三笘",long_name:"三笘薫",positions:["左OMF","OMF","左SMF","WG"],params:[67,74,80,90,83,63,88,93,88,79,76,77,73,73,67,67,86,88,59,53,45,61,66,50,50,59,81,78,76]},
-      {name:"堂安",long_name:"堂安律",positions:["右SMF","OMF","WG"],params:[73,80,78,79,80,72,80,80,76,80,76,76,75,76,73,73,80,78,74,68,58,72,83,51,51,67,80,78,75]},
-      {name:"中村敬",long_name:"中村敬斗",positions:["左SMF","OMF","WG"],params:[70,77,88,88,79,67,86,86,86,74,70,84,84,70,62,62,75,84,60,57,47,57,70,52,52,60,79,75,76]},
-      {name:"伊東",long_name:"伊東純也",positions:["右OMF","OMF","右SMF","WG"],params:[69,80,90,90,82,66,87,84,96,73,69,86,85,74,80,61,76,91,58,53,43,54,69,51,51,59,78,74,75]},
-      {name:"鎌田",long_name:"鎌田大地",positions:["CMF","OMF","DMF"],params:[73,80,75,76,82,69,80,78,74,83,83,72,73,85,81,81,92,80,66,59,53,58,69,51,51,66,82,78,75]},
-      {name:"佐野海",long_name:"佐野海舟",positions:["DMF","CMF"],params:[78,82,74,74,82,74,74,72,72,79,76,72,72,69,65,64,73,73,83,80,76,76,78,51,51,72,78,78,75]},
-      {name:"小川",long_name:"小川航基",positions:["CF"],params:[80,78,76,75,78,80,73,69,69,69,67,76,76,73,59,58,67,80,53,51,43,53,65,51,51,74,78,76,75]},
-      {name:"町野",long_name:"町野修斗",positions:["CF"],params:[76,80,76,76,78,76,73,67,67,67,65,73,73,69,58,56,65,76,54,53,44,53,61,51,51,72,76,74,75]},
-      {name:"上田",long_name:"上田綺世",positions:["CF"],params:[82,80,78,76,80,80,73,73,73,73,69,78,78,74,65,65,74,83,50,48,43,51,65,51,51,76,80,78,75]},
-      {name:"塩貝",long_name:"塩貝健人",positions:["CF","WG"],params:[74,82,82,83,78,72,80,74,74,72,68,73,73,69,59,59,72,74,58,54,44,54,67,51,51,69,78,74,75]}
+      {name:"鈴木彩",en_name:"Suzuki A.",long_name:"鈴木彩艶",positions:["GK"],params:[75,74,69,68,86,78,69,50,51,73,73,50,50,50,50,60,54,40,60,60,40,70,45,85,82,60,78,82,75]},
+      {name:"菅原",en_name:"Sugawara",long_name:"菅原由勢",positions:["右SB","CB","右SMF"],params:[75,81,79,78,76,72,77,72,73,68,68,68,69,65,58,60,72,72,73,75,71,75,73,50,50,71,77,71,74]},
+      {name:"瀬古",en_name:"Seko",long_name:"瀬古歩夢",positions:["CB","右CB"],params:[78,77,74,72,76,80,72,57,57,68,72,61,64,57,57,57,61,58,74,80,80,82,72,51,51,76,74,75,75]},
+      {name:"渡辺",en_name:"Watanabe",long_name:"渡辺剛",positions:["CB"],params:[79,76,73,72,75,81,72,56,56,67,72,60,61,56,56,56,60,58,74,79,79,81,70,51,51,75,73,74,75]},
+      {name:"伊藤洋",en_name:"Ito Y.",long_name:"伊藤洋輝",positions:["左CB","CB","左SB"],params:[77,80,76,75,77,79,75,69,70,74,75,66,67,61,61,66,73,72,75,78,76,78,74,51,51,74,75,77,75]},
+      {name:"藤田チ",en_name:"Fujita",long_name:"藤田譲瑠チマ",positions:["DMF","CMF"],params:[75,83,74,73,82,72,75,73,72,82,77,72,72,71,66,65,75,73,71,69,68,73,78,50,50,68,77,68,74]},
+      {name:"田中碧",en_name:"Tanaka A.",long_name:"田中碧",positions:["CMF","DMF"],params:[73,82,73,73,80,71,73,72,71,79,78,72,72,71,68,67,74,73,79,69,66,73,75,50,50,68,76,69,74]},
+      {name:"前田大",en_name:"Maeda",long_name:"前田大然",positions:["CF","WG","左SMF"],params:[72,92,92,93,82,70,85,74,76,70,67,72,73,68,60,62,70,76,70,66,54,58,74,50,50,64,80,76,75]},
+      {name:"佐野航",en_name:"Sano K2.",long_name:"佐野航大",positions:["DMF","CMF","OMF","左SMF"],params:[74,81,72,71,77,69,72,73,69,75,71,70,72,70,64,63,72,75,68,64,60,59,75,47,47,64,74,74,72]},
+      {name:"鈴木唯",en_name:"Suzuki Y.",long_name:"鈴木唯人",positions:["OMF","左SMF"],params:[72,80,76,77,79,69,77,77,74,78,73,74,74,73,69,69,77,76,69,61,53,56,69,51,51,67,78,76,75]},
+      {name:"後藤",en_name:"Goto",long_name:"後藤啓介",positions:["CF"],params:[78,78,76,77,76,76,74,69,69,69,66,74,74,69,60,60,67,78,63,60,46,53,65,50,50,73,76,74,75]},
+      {name:"大迫敬",en_name:"Osako K.",long_name:"大迫敬介",positions:["GK"],params:[73,72,67,66,82,76,67,50,51,59,65,50,50,50,50,60,53,40,60,60,40,70,45,82,78,60,74,76,75]},
+      {name:"早川",en_name:"Hayakawa",long_name:"早川友基",positions:["GK"],params:[72,69,65,64,80,74,65,50,51,58,61,50,50,50,50,60,51,40,60,60,40,70,45,80,76,60,73,74,75]},
+      {name:"谷口",en_name:"Taniguchi",long_name:"谷口彰悟",positions:["CB","右CB"],params:[82,78,74,73,77,83,73,59,59,72,73,64,66,58,58,58,65,59,78,82,82,83,73,51,51,80,74,78,75]},
+      {name:"橋岡",en_name:"Hashioka",long_name:"橋岡大樹",positions:["右SB","CB","右SMF"],params:[74,82,78,77,76,73,76,69,72,72,70,65,67,60,57,58,69,69,74,75,70,74,73,51,51,68,76,74,75]},
+      {name:"鈴木淳",en_name:"Suzuki J.",long_name:"鈴木淳之介",positions:["左CB","CB"],params:[78,76,73,72,75,80,72,68,56,83,86,72,74,57,55,55,76,70,74,79,79,81,70,51,51,75,73,74,75]},
+      {name:"三笘",en_name:"Mitoma",long_name:"三笘薫",positions:["左OMF","OMF","左SMF","WG"],params:[67,74,80,90,83,63,88,93,88,79,76,77,73,73,67,67,86,88,59,53,45,61,66,50,50,59,81,78,76]},
+      {name:"堂安",en_name:"Doan",long_name:"堂安律",positions:["右SMF","OMF","WG"],params:[73,80,78,79,80,72,80,80,76,80,76,76,75,76,73,73,80,78,74,68,58,72,83,51,51,67,80,78,75]},
+      {name:"中村敬",en_name:"Nakamura K.",long_name:"中村敬斗",positions:["左SMF","OMF","WG"],params:[70,77,88,88,79,67,86,86,86,74,70,84,84,70,62,62,75,84,60,57,47,57,70,52,52,60,79,75,76]},
+      {name:"伊東",en_name:"Ito J.",long_name:"伊東純也",positions:["右OMF","OMF","右SMF","WG"],params:[69,80,90,90,82,66,87,84,96,73,69,86,85,74,80,61,76,91,58,53,43,54,69,51,51,59,78,74,75]},
+      {name:"鎌田",en_name:"Kamada",long_name:"鎌田大地",positions:["CMF","OMF","DMF"],params:[73,80,75,76,82,69,80,78,74,83,83,72,73,85,81,81,92,80,66,59,53,58,69,51,51,66,82,78,75]},
+      {name:"佐野海",en_name:"Sano K.",long_name:"佐野海舟",positions:["DMF","CMF"],params:[78,82,74,74,82,74,74,72,72,79,76,72,72,69,65,64,73,73,83,80,76,76,78,51,51,72,78,78,75]},
+      {name:"小川",en_name:"Ogawa",long_name:"小川航基",positions:["CF"],params:[80,78,76,75,78,80,73,69,69,69,67,76,76,73,59,58,67,80,53,51,43,53,65,51,51,74,78,76,75]},
+      {name:"町野",en_name:"Machino",long_name:"町野修斗",positions:["CF"],params:[76,80,76,76,78,76,73,67,67,67,65,73,73,69,58,56,65,76,54,53,44,53,61,51,51,72,76,74,75]},
+      {name:"上田",en_name:"Ueda",long_name:"上田綺世",positions:["CF"],params:[82,80,78,76,80,80,73,73,73,73,69,78,78,74,65,65,74,83,50,48,43,51,65,51,51,76,80,78,75]},
+      {name:"塩貝",en_name:"Shiokai",long_name:"塩貝健人",positions:["CF","WG"],params:[74,82,82,83,78,72,80,74,74,72,68,73,73,69,59,59,72,74,58,54,44,54,67,51,51,69,78,74,75]}
     ]
   },
   scotland2026: {
-    name:"スコットランド", team_color:"#003f8a", flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    name:"スコットランド",en_name:"Scotland",team_color:"#003f8a", flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",
     default_system:"4-2-3-1", default_tactics:2, default_keyplayer:8, default_marked_player:7,
     default_lineup:[0,1,2,3,4,8,5,10,6,7,9,10],
     players:[
-      {name:"ガン",long_name:"アンガス・ガン",positions:["GK"],params:[72,72,68,67,83,78,67,50,50,60,65,50,60,40,50,50,52,55,55,58,40,65,42,83,80,60,75,78,75]},
-      {name:"パターソン",long_name:"ネイサン・パターソン",positions:["右SB"],params:[74,80,77,76,75,72,75,68,70,71,70,65,67,63,58,60,70,70,72,74,68,74,72,50,50,68,76,74,75]},
-      {name:"ヘンドリー",long_name:"ジャック・ヘンドリー",positions:["CB"],params:[81,76,72,70,76,83,70,55,55,65,70,60,62,55,55,55,60,58,74,80,80,82,70,50,50,78,72,76,75]},
-      {name:"マッケンナ",long_name:"スコット・マッケンナ",positions:["CB","左CB"],params:[80,77,73,71,77,82,71,56,56,66,71,61,63,56,56,56,61,59,75,81,81,83,71,50,50,77,73,77,75]},
-      {name:"ロバートソン",long_name:"アンドリュー・ロバートソン",positions:["左SB","左SMF"],params:[76,80,76,78,79,73,79,74,76,76,74,67,70,65,62,63,74,73,76,77,72,76,76,50,50,70,79,82,75]},
-      {name:"ファーガソン",long_name:"ルイス・ファーガソン",positions:["CMF","DMF"],params:[77,82,74,73,80,72,74,72,70,78,76,72,72,70,65,65,75,74,79,78,76,76,75,50,50,70,78,78,75]},
-      {name:"マクリーン",long_name:"ケニー・マクリーン",positions:["CMF","DMF"],params:[75,80,72,71,78,71,73,70,69,77,78,73,72,70,70,68,73,72,77,76,74,74,73,50,50,68,76,76,75]},
-      {name:"マッギン",long_name:"ジョン・マッギン",positions:["CMF","OMF"],params:[78,84,74,74,82,74,76,76,73,81,79,76,76,73,72,70,78,78,78,76,72,72,76,50,50,72,80,82,75]},
-      {name:"マクトミネイ",long_name:"スコット・マクトミネイ",positions:["CMF","OMF","DMF"],params:[82,83,75,74,82,75,76,74,72,68,79,78,78,75,70,68,76,80,78,77,72,72,76,50,50,73,80,83,75]},
-      {name:"ダイクス",long_name:"リンドン・ダイクス",positions:["CF"],params:[83,80,74,73,78,80,72,68,67,68,66,76,76,70,60,58,66,80,65,65,48,55,66,50,50,77,76,76,75]},
-      {name:"コンウェイ",long_name:"トミー・コンウェイ",positions:["CF","WG"],params:[74,80,78,79,78,71,78,73,74,70,67,73,73,70,62,62,71,76,65,62,50,55,68,50,50,65,76,75,75]}
+      {name:"ガン",en_name:"Gunn",long_name:"アンガス・ガン",positions:["GK"],params:[72,72,68,67,83,78,67,50,50,60,65,50,60,40,50,50,52,55,55,58,40,65,42,83,80,60,75,78,75]},
+      {name:"パターソン",en_name:"Patterson",long_name:"ネイサン・パターソン",positions:["右SB"],params:[74,80,77,76,75,72,75,68,70,71,70,65,67,63,58,60,70,70,72,74,68,74,72,50,50,68,76,74,75]},
+      {name:"ヘンドリー",en_name:"Hendry",long_name:"ジャック・ヘンドリー",positions:["CB"],params:[81,76,72,70,76,83,70,55,55,65,70,60,62,55,55,55,60,58,74,80,80,82,70,50,50,78,72,76,75]},
+      {name:"マッケンナ",en_name:"McKenna",long_name:"スコット・マッケンナ",positions:["CB","左CB"],params:[80,77,73,71,77,82,71,56,56,66,71,61,63,56,56,56,61,59,75,81,81,83,71,50,50,77,73,77,75]},
+      {name:"ロバートソン",en_name:"Robertson",long_name:"アンドリュー・ロバートソン",positions:["左SB","左SMF"],params:[76,80,76,78,79,73,79,74,76,76,74,67,70,65,62,63,74,73,76,77,72,76,76,50,50,70,79,82,75]},
+      {name:"ファーガソン",en_name:"Ferguson",long_name:"ルイス・ファーガソン",positions:["CMF","DMF"],params:[77,82,74,73,80,72,74,72,70,78,76,72,72,70,65,65,75,74,79,78,76,76,75,50,50,70,78,78,75]},
+      {name:"マクリーン",en_name:"McLean",long_name:"ケニー・マクリーン",positions:["CMF","DMF"],params:[75,80,72,71,78,71,73,70,69,77,78,73,72,70,70,68,73,72,77,76,74,74,73,50,50,68,76,76,75]},
+      {name:"マッギン",en_name:"McGinn",long_name:"ジョン・マッギン",positions:["CMF","OMF"],params:[78,84,74,74,82,74,76,76,73,81,79,76,76,73,72,70,78,78,78,76,72,72,76,50,50,72,80,82,75]},
+      {name:"マクトミネイ",en_name:"McTominay",long_name:"スコット・マクトミネイ",positions:["CMF","OMF","DMF"],params:[82,83,75,74,82,75,76,74,72,68,79,78,78,75,70,68,76,80,78,77,72,72,76,50,50,73,80,83,75]},
+      {name:"ダイクス",en_name:"Dykes",long_name:"リンドン・ダイクス",positions:["CF"],params:[83,80,74,73,78,80,72,68,67,68,66,76,76,70,60,58,66,80,65,65,48,55,66,50,50,77,76,76,75]},
+      {name:"コンウェイ",en_name:"Conway",long_name:"トミー・コンウェイ",positions:["CF","WG"],params:[74,80,78,79,78,71,78,73,74,70,67,73,73,70,62,62,71,76,65,62,50,55,68,50,50,65,76,75,75]}
     ]
   },
 };
@@ -2474,6 +2825,7 @@ function buildPlayersTable(containerId, teams) {
 }
 
 function showScreen(name) {
+  if (name === 'title' || name === 'setting') _resetSummary();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
   // 選手データ画面は初回表示時にJSで動的生成
@@ -2512,7 +2864,7 @@ function selectMatch(key) {
 function initSettingScreen() {
   // Title
   document.getElementById('setting-title-text').textContent =
-    `${team1Data.name} vs ${team2Data.name}`;
+    `${getTeamName(team1Data)} vs ${getTeamName(team2Data)}`;
 
   // Init state
   team1State = {
@@ -2529,19 +2881,21 @@ function initSettingScreen() {
   renderBench();
   // ボタン値更新
   updateSettingBtnValues();
+  // 言語ラベル更新
+  applyLang();
 }
 
 function updateSettingBtnValues() {
   document.getElementById('setting-system-value').textContent =
     system_data[team1State.systemIdx].name;
   document.getElementById('setting-tactics-value').textContent =
-    TACTICS_NAMES[team1State.tactics];
+    t('tacticsNames')[team1State.tactics] || TACTICS_NAMES[team1State.tactics];
   const kp = team1Data.players[team1State.lineup[team1State.keyplayer]];
   document.getElementById('setting-keyplayer-value').textContent =
-    kp ? kp.name : '-';
-  const mp = team1State.marked_player >= 0
-    ? (team2Data.players[team1State.marked_player] ? team2Data.players[team1State.marked_player].name : '-')
-    : '未設定';
+    kp ? getPlayerName(kp) : '-';
+  const mpPlayer = team1State.marked_player >= 0
+    ? team2Data.players[team1State.marked_player] : null;
+  const mp = mpPlayer ? getPlayerName(mpPlayer) : t('unset');
   document.getElementById('setting-marked-value').textContent = mp;
 }
 
@@ -2571,13 +2925,23 @@ function closeFormationSelect() {
 }
 
 // 戦術選択
-const TACTICS_DESC = [
+const TACTICS_DESC_JA = [
   'パスをつなぎ支配率を高める',
   '高い位置からプレスをかける',
   '守備から素早く攻撃に転じる',
   '守備を固め堅実に戦う',
   '自由な戦術で戦う',
 ];
+const TACTICS_DESC_EN = [
+  'Build possession with short passing',
+  'Press high up the pitch',
+  'Defend and hit on the counter',
+  'Defend deep and stay compact',
+  'Play with no fixed style',
+];
+function getTacticsDesc(i) {
+  return window.LANG === 'en' ? TACTICS_DESC_EN[i] : TACTICS_DESC_JA[i];
+}
 const TACTICS_ICON = ['🔄','⚡','↩️','🛡️','🆓'];
 
 function openTacticsSelect() {
@@ -2589,8 +2953,8 @@ function openTacticsSelect() {
     opt.innerHTML = `
       <div class="tactics-option-icon">${TACTICS_ICON[i]}</div>
       <div class="tactics-option-text">
-        <div class="tactics-option-name">${name}</div>
-        <div class="tactics-option-desc">${TACTICS_DESC[i]}</div>
+        <div class="tactics-option-name">${t('tacticsNames')[i]||name}</div>
+        <div class="tactics-option-desc">${getTacticsDesc(i)}</div>
       </div>
       ${i === team1State.tactics ? '<span style="color:var(--japan-blue);font-size:20px">✓</span>' : ''}
     `;
@@ -2610,7 +2974,7 @@ function openKeyPlayerSelect() {
   const sys = system_data[team1State.systemIdx];
   const desc = document.createElement('div');
   desc.style.cssText = 'font-size:12px;color:var(--text-dim);margin-bottom:14px;padding:10px;background:rgba(0,48,135,0.05);border-radius:8px';
-  desc.textContent = '⭐ キープレイヤーは攻撃選択時に選ばれやすくなります';
+  desc.textContent = '⭐ ' + t('keypHint').replace('⭐ ','');
   content.appendChild(desc);
   for (let pos = 0; pos < 11; pos++) {
     const playerIdx = team1State.lineup[pos];
@@ -2619,7 +2983,7 @@ function openKeyPlayerSelect() {
     item.className = 'player-select-item' + (pos === team1State.keyplayer ? ' current' : '');
     item.innerHTML = `
       <div style="background:${team1Data.team_color};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${sys.positions[pos].replace(/[左右]/g,'').substring(0,2)}</div>
-      <div class="psi-name">${p.name}<span style="font-size:11px;color:var(--text-dim);margin-left:6px">${sys.positions[pos]}</span></div>
+      <div class="psi-name">${getPlayerName(p)}<span style="font-size:11px;color:var(--text-dim);margin-left:6px">${sys.positions[pos]}</span></div>
       ${pos === team1State.keyplayer ? '<span style="color:var(--japan-blue);font-size:18px;margin-left:auto">⭐</span>' : ''}
     `;
     item.onclick = () => {
@@ -2643,7 +3007,7 @@ function openMarkedPlayerSelect() {
   // 説明文
   const desc = document.createElement('div');
   desc.style.cssText = 'font-size:12px;color:var(--text-dim);margin-bottom:12px;padding:10px;background:rgba(188,0,45,0.05);border-radius:8px';
-  desc.textContent = `🎯 ${team2Data.name}の要注意選手 — 選んだ選手の攻撃パラメータが15%ダウンします`;
+  desc.textContent = `🎯 ${getTeamName(team2Data)}${t('markedHint')}`;
   content.appendChild(desc);
 
   // フォーメーション表示
@@ -2680,7 +3044,7 @@ function openMarkedPlayerSelect() {
     const isMarked = team1State.marked_player === playerIdx;
     dot.innerHTML = `
       <div style="width:36px;height:36px;border-radius:50%;background:${isGK ? '#555' : team2Data.team_color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;border:2px solid ${isMarked ? '#ff0' : 'rgba(255,255,255,0.6)'};box-shadow:0 2px 8px rgba(0,0,0,0.5)">${sys2.positions[pos].replace(/[左右]/g,'').substring(0,2)}</div>
-      <div style="font-size:8px;font-weight:700;color:white;text-shadow:0 1px 3px rgba(0,0,0,0.9);margin-top:2px;white-space:nowrap;-webkit-text-size-adjust:none">${p.name}</div>
+      <div style="font-size:8px;font-weight:700;color:white;text-shadow:0 1px 3px rgba(0,0,0,0.9);margin-top:2px;white-space:nowrap;-webkit-text-size-adjust:none">${getPlayerName(p)}</div>
     `;
     dot.onclick = () => {
       if (isGK) return;
@@ -2693,13 +3057,13 @@ function openMarkedPlayerSelect() {
   // 区切り
   const divider = document.createElement('div');
   divider.style.cssText = 'font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:8px';
-  divider.textContent = '選手をタップして要注意選手を設定';
+  divider.textContent = t('markedTap');
   content.appendChild(divider);
 
   // 未設定オプション
   const none = document.createElement('div');
   none.className = 'player-select-item' + (team1State.marked_player < 0 ? ' current' : '');
-  none.innerHTML = `<div class="psi-name" style="color:var(--text-dim)">未設定</div>${team1State.marked_player < 0 ? '<span style="color:var(--japan-red);font-size:18px;margin-left:auto">🎯</span>' : ''}`;
+  none.innerHTML = `<div class="psi-name" style="color:var(--text-dim)">${t('unset')}</div>${team1State.marked_player < 0 ? '<span style="color:var(--japan-red);font-size:18px;margin-left:auto">🎯</span>' : ''}`;
   none.onclick = () => {
     team1State.marked_player = -1;
     closeSubSelect('marked');
@@ -2714,7 +3078,7 @@ function openMarkedPlayerSelect() {
     item.style.cssText = isGKitem ? 'opacity:0.4;pointer-events:none' : '';
     item.innerHTML = `
       <div style="background:${isGKitem ? '#555' : team2Data.team_color};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${sys2.positions[pos].replace(/[左右]/g,'').substring(0,2)}</div>
-      <div class="psi-name">${p.name}<span style="font-size:11px;color:var(--text-dim);margin-left:6px">${p.long_name}</span>${isGKitem ? '<span style="font-size:10px;color:#888;margin-left:6px">（選択不可）</span>' : ''}</div>
+      <div class="psi-name">${getPlayerName(p)}<span style="font-size:11px;color:var(--text-dim);margin-left:6px">${p.long_name}</span>${isGKitem ? `<span style="font-size:10px;color:#888;margin-left:6px">${t('gkDisabled')}</span>` : ''}</div>
       ${team1State.marked_player === playerIdx ? '<span style="color:var(--japan-red);font-size:18px;margin-left:auto">🎯</span>' : ''}
     `;
     item.onclick = () => {
@@ -2803,7 +3167,7 @@ function renderOpponentLineup() {
       <div class="lineup-num" style="color:${team2Data.team_color};font-weight:700;width:28px;text-align:right;font-size:12px">${pos + 1}</div>
       <div style="width:36px;height:36px;border-radius:50%;background:${team2Data.team_color};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;flex-shrink:0">${sys.positions[pos].replace(/[左右]/g,'').substring(0,2)}</div>
       <div style="flex:1">
-        <div style="font-size:13px;font-weight:700;color:var(--text)">${p.name}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)">${getPlayerName(p)}</div>
         <div style="font-size:11px;color:var(--text-dim)">${p.long_name}</div>
       </div>
       <div style="font-size:11px;color:var(--text-dim)">${sys.positions[pos]}</div>
@@ -2837,7 +3201,7 @@ function openKeyPlayerModal() {
     const p = team1Data.players[playerIdx];
     const item = document.createElement('div');
     item.className = 'player-select-item' + (pos === team1State.keyplayer ? ' current' : '');
-    item.innerHTML = `<div class="psi-num">${pos}</div><div class="psi-name">${p.name}</div><div class="psi-pos">${sys.positions[pos]}</div>`;
+    item.innerHTML = `<div class="psi-num">${pos}</div><div class="psi-name">${getPlayerName(p)}</div><div class="psi-pos">${sys.positions[pos]}</div>`;
     item.onclick = () => { team1State.keyplayer = pos; renderKeyplayer(); closeModal('modal-keyplayer'); };
     list.appendChild(item);
   }
@@ -2895,7 +3259,7 @@ function renderFormation() {
       dragState.dragging = true;
       const t = e.touches[0];
       if (!dragState.ghostShown) {
-        showGhost(player ? player.name : '?', t.clientX, t.clientY);
+        showGhost(player ? getPlayerName(player) : '?', t.clientX, t.clientY);
         dragState.ghostShown = true;
       }
       moveGhost(t.clientX, t.clientY);
@@ -2927,7 +3291,7 @@ function renderFormation() {
 
     const nameTag = document.createElement('div');
     nameTag.className = 'player-name-tag';
-    nameTag.textContent = player ? player.name : '?';
+    nameTag.textContent = player ? getPlayerName(player) : '?';
     nameTag.style.cssText = '-webkit-text-size-adjust:none;text-size-adjust:none;font-size:9px;font-weight:700;';
 
     dot.appendChild(circle);
@@ -2960,15 +3324,15 @@ function renderBench() {
     const circle = document.createElement('div');
     circle.className = 'bench-item-circle';
     circle.style.background = '#888';
-    circle.textContent = p.positions[0].substring(0, 2);
+    circle.textContent = POS_ABBR[p.positions[0]] || p.positions[0].replace(/[左右]/g,'').substring(0,2);
 
     const name = document.createElement('div');
     name.className = 'bench-item-name';
-    name.textContent = p.name;
+    name.textContent = getPlayerName(p);
 
     const posLabel = document.createElement('div');
     posLabel.className = 'bench-item-pos';
-    posLabel.textContent = p.positions[0];
+    posLabel.textContent = POS_ABBR[p.positions[0]] || p.positions[0].replace(/[左右]/g,'').substring(0,2);
 
     item.appendChild(circle);
     item.appendChild(name);
@@ -3023,7 +3387,7 @@ function renderBench() {
 }
 function openPlayerParams(playerIdx) {
   const p = team1Data.players[playerIdx];
-  document.getElementById('params-name').textContent = p.name;
+  document.getElementById('params-name').textContent = getPlayerName(p);
   document.getElementById('params-long-name').textContent = p.long_name;
   document.getElementById('params-pos').textContent = p.positions.join(' / ');
 
@@ -3145,7 +3509,7 @@ function clearHighlight() {
 function openPlayerSelect(pos) {
   editingPosition = pos;
   const sys = system_data[team1State.systemIdx];
-  document.getElementById('modal-pos-name').textContent = sys.positions[pos] + ' を選択';
+  document.getElementById('modal-pos-name').textContent = sys.positions[pos] + t('posSelect');
 
   const list = document.getElementById('player-select-list');
   list.innerHTML = '';
@@ -3229,8 +3593,8 @@ function startGame() {
   // Update UI
   document.getElementById('score-flag1').textContent = team1Data.flag;
   document.getElementById('score-flag2').textContent = team2Data.flag;
-  document.getElementById('score-name1').textContent = team1Data.name;
-  document.getElementById('score-name2').textContent = team2Data.name;
+  document.getElementById('score-name1').textContent = getTeamName(team1Data);
+  document.getElementById('score-name2').textContent = getTeamName(team2Data);
   document.getElementById('score1').textContent = '0';
   document.getElementById('score2').textContent = '0';
   document.getElementById('log-area').innerHTML = '';
@@ -3494,15 +3858,13 @@ function selectFKKicker(team) {
 
 function calcTime(chanceNo) {
   const r = Math.random();
-  // 前半: 0〜8 → 1〜45分を9分割
-  if (chanceNo <= 7) return `前半${Math.floor(r*5) + chanceNo*5 + 1}分`;
-  if (chanceNo === 8) return `前半${Math.floor(r*4)+42}分`;
-  if (chanceNo === 9) return '前半ロスタイム';
-  // 後半: 10〜18 → 46〜90分を9分割
-  if (chanceNo <= 17) return `後半${Math.floor(r*5) + (chanceNo-10)*5 + 46}分`;
-  if (chanceNo === 18) return `後半${Math.floor(r*4)+87}分`;
-  if (chanceNo === 19) return '後半ロスタイム';
-  return '後半ロスタイム';
+  if (chanceNo <= 7) return `${t('halfFirst')} ${Math.floor(r*5) + chanceNo*5 + 1}${t('minUnit')}`;
+  if (chanceNo === 8) return `${t('halfFirst')} ${Math.floor(r*4)+42}${t('minUnit')}`;
+  if (chanceNo === 9) return t('halftimeLoss');
+  if (chanceNo <= 17) return `${t('halfSecond')} ${Math.floor(r*5) + (chanceNo-10)*5 + 46}${t('minUnit')}`;
+  if (chanceNo === 18) return `${t('halfSecond')} ${Math.floor(r*4)+87}${t('minUnit')}`;
+  if (chanceNo === 19) return t('overtimeLoss');
+  return t('overtimeLoss');
 }
 
 function simulateChance(gs, chanceNo) {
@@ -3902,7 +4264,7 @@ function sceneToText(scenes, sceneNo, team1, team2) {
     key += '|ミドルシュート';
   }
 
-  let s = scenario_data[key];
+  let s = getScenarioData()[key];
   if (Array.isArray(s)) s = s[Math.floor(Math.random() * s.length)];
 
   // フォールバック: キーが見つからない場合
@@ -3917,7 +4279,7 @@ function sceneToText(scenes, sceneNo, team1, team2) {
       if (['クロス','シュート','セットプレー'].includes(nextScenario)) {
         // ショートパスの同等キーで代替
         const altKey = 'ショートパス|成功|' + nextScenario;
-        s = scenario_data[altKey];
+        s = getScenarioData()[altKey];
       }
       // まだない場合はシナリオ別の汎用文
       if (!s) {
@@ -3930,7 +4292,7 @@ function sceneToText(scenes, sceneNo, team1, team2) {
     // カウンター系のフォールバック
     if (!s && res === 'カウンター') {
       const counterKey = scenario + '|カウンター';
-      s = scenario_data[counterKey];
+      s = getScenarioData()[counterKey];
       if (!s) s = '【対象エリア】、【守備選手】がボールを奪いカウンター発動！';
     }
 
@@ -3938,7 +4300,15 @@ function sceneToText(scenes, sceneNo, team1, team2) {
     if (!s) s = '【攻撃選手】が【守備選手】との攻防を繰り広げた。（' + key + '）';
   }
 
-  s = s.replace(/【対象エリア】/g, area_data[scene.area] ? area_data[scene.area].name : scene.area);
+  const _areaNameForText = window.LANG === 'en'
+    ? ({
+        'DF_L':'DF Left','DF_M':'DF Center','DF_R':'DF Right',
+        'MF_L':'MF Left','MF_M':'MF Center','MF_R':'MF Right',
+        'FW_L':'FW Left','FW_M':'FW Center','FW_R':'FW Right',
+        'CR_L':'Cross Left','CR_R':'Cross Right','SHOOT_M':'Shooting Area'
+      }[scene.area] || scene.area)
+    : (area_data[scene.area] ? area_data[scene.area].name : scene.area);
+  s = s.replace(/【対象エリア】/g, _areaNameForText);
   s = s.replace(/【攻撃選手】/g, coloredName(scene.offence, scene.ofsPos));
   s = s.replace(/【守備選手】/g, coloredName(scene.defence, scene.dfsPos));
   s = s.replace(/【シュート選手】/g, coloredName(scene.offence, scene.ofsPos));
@@ -3954,7 +4324,7 @@ function sceneToText(scenes, sceneNo, team1, team2) {
 
 function coloredName(team, pos) {
   const p = team.players[team.lineup[pos]];
-  return `<span style="color:${team.team_color};font-weight:bold">${p ? p.name : '?'}</span>`;
+  return `<span style="color:${team.team_color};font-weight:bold">${p ? getPlayerName(p) : '?'}</span>`;
 }
 
 // ============================================================
@@ -3990,8 +4360,10 @@ function renderSceneField(sc, prevSc) {
   const isTeam1Offence = sc.offence === gameState.team1;
   const ofColor = sc.offence.team_color || '#003087';
   const dfColor = sc.defence.team_color || '#CC6600';
-  const ofName = (sc.offence.players[sc.offence.lineup[sc.ofsPos]] ? sc.offence.players[sc.offence.lineup[sc.ofsPos]].name : '?');
-  const dfName = (sc.defence.players[sc.defence.lineup[sc.dfsPos]] ? sc.defence.players[sc.defence.lineup[sc.dfsPos]].name : '?');
+  const ofP = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  const dfP = sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+  const ofName = ofP ? getPlayerName(ofP) : '?';
+  const dfName = dfP ? getPlayerName(dfP) : '?';
 
   const flip = !isTeam1Offence;
   const toX = (px) => ((flip ? (100 - px) : px) / 100) * W;
@@ -4076,9 +4448,16 @@ function renderSceneField(sc, prevSc) {
   // 結果バッジ
   const resultColor = sc.result === 'ゴール！！' ? '#FFD700' : sc.result === '成功' ? '#44DD66' :
     sc.result === 'カウンター' ? '#FF8C00' : sc.result === 'ファール' ? '#FFD700' : '#FF4444';
-  const resultText = sc.result === 'ゴール！！' ? '⚽ GOAL!!' : sc.result === '成功' ? '✅ 成功' :
-    sc.result === 'カウンター' ? '↩️ カウンター' : sc.result === 'ファール' ? '🟨 ファール' :
-    sc.result === 'GK防いだ！' ? '🧤 セーブ' : sc.result === '枠を外した！' ? '💨 枠外' : '❌ 失敗';
+
+  const _isEn = window.LANG === 'en';
+  const resultText = sc.result === 'ゴール！！' ? '⚽ GOAL!!' :
+    sc.result === '成功'      ? (_isEn ? '✅ Success'   : '✅ 成功') :
+    sc.result === 'カウンター'? (_isEn ? '↩️ Counter'   : '↩️ カウンター') :
+    sc.result === 'ファール'  ? (_isEn ? '🟨 Foul'      : '🟨 ファール') :
+    sc.result === 'GK防いだ！'? (_isEn ? '🧤 Saved'     : '🧤 セーブ') :
+    sc.result === '枠を外した！'?(_isEn ? '💨 Off Target': '💨 枠外') :
+    sc.result === 'ブロック'  ? (_isEn ? '🛡️ Blocked'   : '🛡️ ブロック') :
+                                (_isEn ? '❌ Failed'    : '❌ 失敗');
 
   const rbg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   rbg.setAttribute('x', '8'); rbg.setAttribute('y', H - 20);
@@ -4098,7 +4477,16 @@ function renderSceneField(sc, prevSc) {
   albl.setAttribute('x', W - 8); albl.setAttribute('y', H - 9);
   albl.setAttribute('text-anchor', 'end'); albl.setAttribute('font-size', '8');
   albl.setAttribute('fill', 'rgba(255,255,255,0.45)'); albl.setAttribute('font-family', 'sans-serif');
-  albl.textContent = (area_data[sc.area] ? area_data[sc.area].name : sc.area);
+  const AREA_NAME_EN = {
+    'DF_L':'DF Left','DF_M':'DF Center','DF_R':'DF Right',
+    'MF_L':'MF Left','MF_M':'MF Center','MF_R':'MF Right',
+    'FW_L':'FW Left','FW_M':'FW Center','FW_R':'FW Right',
+    'CR_L':'Cross Left','CR_R':'Cross Right','SHOOT_M':'Shot'
+  };
+  const _areaName = window.LANG === 'en'
+    ? (AREA_NAME_EN[sc.area] || sc.area)
+    : (area_data[sc.area] ? area_data[sc.area].name : sc.area);
+  albl.textContent = _areaName;
   svg.appendChild(albl);
 
   if (sc.result === 'ゴール！！') {
@@ -4143,7 +4531,7 @@ function nextChance() {
     document.getElementById('score2').textContent = res.t2score;
     document.getElementById('game-time-display').textContent = res.time;
     const offTeam = res.scenes[0] ? res.scenes[0].offence : null;
-    document.getElementById('chance-team-label').textContent = offTeam ? `攻撃: ${offTeam.name}` : '';
+    document.getElementById('chance-team-label').textContent = offTeam ? `${t('attackLabel')} ${getTeamName(offTeam)}` : '';
   }
 
   // 1シーン1フィールド：テキストの前にフィールドを追加
@@ -4174,8 +4562,8 @@ function nextChance() {
     currentEventDiv = null;
     document.getElementById('chance-count').textContent = currentChanceIdx;
     if (currentChanceIdx >= chanceResults.length) {
-      document.getElementById('next-btn').textContent = '次へ →';
-      document.getElementById('all-btn').textContent = '結果を見る';
+      document.getElementById('next-btn').textContent = t('btnNextArrow');
+      document.getElementById('all-btn').textContent = t('btnSeeResult');
     }
   }
 }
@@ -4667,6 +5055,7 @@ function runMultiGame() {
   const areaWin = {};  // 日本攻撃時の勝率
   const areaDef = {};  // ベルギー攻撃時の日本守備勝率
   const playerDuel = {};
+  const allGoalPatterns = {};
   const gkSave = {};   // GKセーブ率
   const scenesAllMulti = [];
 
@@ -4736,21 +5125,29 @@ function runMultiGame() {
         // デュエル勝率（GKはGKセーブ率として別集計、通常デュエルから除外）
         if (isNormal) {
           scenesAllMulti.push(sc);
-          const ofsName = (sc.offence.players[sc.offence.lineup[sc.ofsPos]] ? sc.offence.players[sc.offence.lineup[sc.ofsPos]].name : undefined);
+          const ofsP = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+          const ofsName = ofsP ? ofsP.name : undefined;
           const ofsKey = sc.offence.name + '_' + ofsName;
-          if (!playerDuel[ofsKey]) playerDuel[ofsKey] = { name: ofsName, team: sc.offence.name, color: sc.offence.team_color, win: 0, lose: 0 };
+          if (!playerDuel[ofsKey]) playerDuel[ofsKey] = { name: ofsName, en_name: ofsP ? ofsP.en_name : undefined, team: sc.offence.name, color: sc.offence.team_color, win: 0, lose: 0 };
           win ? playerDuel[ofsKey].win++ : playerDuel[ofsKey].lose++;
-          const dfsName = (sc.defence.players[sc.defence.lineup[sc.dfsPos]] ? sc.defence.players[sc.defence.lineup[sc.dfsPos]].name : undefined);
+          const dfsP = sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+          const dfsName = dfsP ? dfsP.name : undefined;
           const dfsKey = sc.defence.name + '_' + dfsName;
-          if (!playerDuel[dfsKey]) playerDuel[dfsKey] = { name: dfsName, team: sc.defence.name, color: sc.defence.team_color, win: 0, lose: 0 };
+          if (!playerDuel[dfsKey]) playerDuel[dfsKey] = { name: dfsName, en_name: dfsP ? dfsP.en_name : undefined, team: sc.defence.name, color: sc.defence.team_color, win: 0, lose: 0 };
           win ? playerDuel[dfsKey].lose++ : playerDuel[dfsKey].win++;
         }
         if (isShoot) {
-          // GKセーブ率集計（dfsPos=0=GK）
-          const gkName = (sc.defence.players[sc.defence.lineup[0]] ? sc.defence.players[sc.defence.lineup[0]].name : undefined);
+          const gkP = sc.defence.players[sc.defence.lineup[0]];
+          const gkName = gkP ? gkP.name : undefined;
           const gkKey = sc.defence.name + '_GK';
-          if (!gkSave[gkKey]) gkSave[gkKey] = { name: gkName, team: sc.defence.name, color: sc.defence.team_color, save: 0, goal: 0 };
+          if (!gkSave[gkKey]) gkSave[gkKey] = { name: gkName, en_name: gkP ? gkP.en_name : undefined, team: sc.defence.name, color: sc.defence.team_color, save: 0, goal: 0 };
           sc.result === 'GK防いだ！' ? gkSave[gkKey].save++ : gkSave[gkKey].goal++;
+          // ゴールパターン集計
+          if (sc.result === 'ゴール！！') {
+            const gk = sc.offence.name + ' / ' + sc.action;
+            if (!allGoalPatterns[gk]) allGoalPatterns[gk] = 0;
+            allGoalPatterns[gk]++;
+          }
         }
       });
     });
@@ -4762,11 +5159,11 @@ function runMultiGame() {
 
   let html = `<div style="background:white;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
     <div style="display:flex;justify-content:space-around;text-align:center;margin-bottom:12px">
-      <div><div style="font-size:32px;font-weight:700;color:${team1Data.team_color}">${t1wins}</div><div style="font-size:11px;color:#888">${team1Data.flag} 勝</div></div>
-      <div><div style="font-size:32px;font-weight:700;color:#aaa">${draws}</div><div style="font-size:11px;color:#888">分</div></div>
-      <div><div style="font-size:32px;font-weight:700;color:${team2Data.team_color}">${t2wins}</div><div style="font-size:11px;color:#888">${team2Data.flag} 勝</div></div>
+      <div><div style="font-size:32px;font-weight:700;color:${team1Data.team_color}">${t1wins}</div><div style="font-size:11px;color:#888">${team1Data.flag} ${t('winLabel')}</div></div>
+      <div><div style="font-size:32px;font-weight:700;color:#aaa">${draws}</div><div style="font-size:11px;color:#888">${t('drawLabel')}</div></div>
+      <div><div style="font-size:32px;font-weight:700;color:${team2Data.team_color}">${t2wins}</div><div style="font-size:11px;color:#888">${team2Data.flag} ${t('winLabel')}</div></div>
     </div>
-    <div style="text-align:center;font-size:14px;color:#555;margin-bottom:10px">平均スコア  <b style="color:${team1Data.team_color}">${avgT1}</b> 対 <b style="color:${team2Data.team_color}">${avgT2}</b></div>
+    <div style="text-align:center;font-size:14px;color:#555;margin-bottom:10px">${t('avgScore')}  <b style="color:${team1Data.team_color}">${avgT1}</b> vs <b style="color:${team2Data.team_color}">${avgT2}</b></div>
     <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center">
       ${scores.map(s => { const col = s.t1>s.t2 ? team1Data.team_color : s.t2>s.t1 ? team2Data.team_color : '#999'; return '<span style="font-size:12px;padding:2px 8px;border-radius:12px;background:'+col+';color:white;font-weight:700">'+s.t1+'-'+s.t2+'</span>'; }).join('')}
     </div>
@@ -4803,10 +5200,10 @@ function runMultiGame() {
     svg += '<line x1="' + (cx-10).toFixed(1) + '" y1="' + cy.toFixed(1) + '" x2="' + (cx+10).toFixed(1) + '" y2="' + cy.toFixed(1) + '" stroke="rgba(255,255,255,0.4)" stroke-width="0.7"/>';
     svg += '<text x="' + cx.toFixed(1) + '" y="' + (cy+8).toFixed(1) + '" text-anchor="middle" font-size="9" fill="rgba(255,220,220,0.95)">' + defStr + '</text>';
   });
-  svg+=`<text x="${W2/2}" y="${H2-6}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">← 自陣          相手陣 →</text></svg>`;
+  svg+=`<text x="${W2/2}" y="${H2-6}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">${window.LANG==='en'?'← Own Half     Opp Half →':'← 自陣          相手陣 →'}</text></svg>`;
 
   html+=`<div style="background:white;border-radius:12px;padding:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
-    <div style="font-size:12px;font-weight:700;color:#1a3a6b;margin-bottom:8px">📊 エリア別 日本の勝率（${GAMES}試合合計）</div>
+    <div style="font-size:12px;font-weight:700;color:#1a3a6b;margin-bottom:8px">📊 ${window.LANG==='en'?'Japan Win Rate by Area ('+GAMES+' matches)':'エリア別 日本の勝率（'+GAMES+'試合合計）'}</div>
     <div id="multi-field-tabs"></div>
   </div>`;
 
@@ -4819,13 +5216,13 @@ function runMultiGame() {
       return '<div style="display:flex;align-items:center;padding:5px 10px;border-bottom:1px solid #f0f0f0;gap:8px">'
         +'<div style="width:5em;font-size:12px;font-weight:700;overflow:hidden;white-space:nowrap;cursor:pointer;text-decoration:underline;color:#1a3a6b" onclick="showDuelDetail(this)"'
         +' data-name="'+d.name+'" data-team="'+teamName+'" data-win="'+d.win+'" data-lose="'+d.lose+'">'
-        +d.name+'</div>'
+        +(window.LANG==='en'&&d.en_name?d.en_name:d.name)+'</div>'
         +'<div style="flex:1;background:#eee;border-radius:4px;height:7px;overflow:hidden"><div style="width:'+rate+'%;background:'+bc+';height:100%;border-radius:4px"></div></div>'
         +'<div style="width:3em;text-align:right;font-size:12px;font-weight:700;color:'+bc+'">'+rate+'%</div>'
-        +'<div style="width:5em;text-align:right;font-size:10px;color:#aaa">'+d.win+'勝'+d.lose+'敗</div>'
+        +'<div style="width:5em;text-align:right;font-size:10px;color:#aaa">'+d.win+(window.LANG==='en'?'W ':' 勝')+d.lose+(window.LANG==='en'?'L':' 敗')+'</div>'
         +'</div>';
     }).join('');
-    return '<div style="margin-bottom:8px"><div style="background:'+teamData.team_color+';color:white;font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px 8px 0 0">'+teamData.flag+' '+teamData.name+'</div>'+rows+'</div>';
+    return '<div style="margin-bottom:8px"><div style="background:'+teamData.team_color+';color:white;font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px 8px 0 0">'+teamData.flag+' '+getTeamName(teamData)+'</div>'+rows+'</div>';
   };
 
   // GKセーブ率HTML
@@ -4834,7 +5231,7 @@ function runMultiGame() {
     const rate = total > 0 ? Math.round(gk.save / total * 100) : 0;
     const bc = rate >= 70 ? '#1a6bb5' : rate >= 50 ? '#2d7a3a' : '#c0392b';
     return '<div style="display:flex;align-items:center;padding:6px 12px;border-bottom:1px solid #f0f0f0;gap:8px">'
-      + '<div style="width:5em;font-size:12px;font-weight:700">' + gk.name + '</div>'
+      + '<div style="width:5em;font-size:12px;font-weight:700">' + (window.LANG==='en'&&gk.en_name?gk.en_name:gk.name) + '</div>'
       + '<div style="flex:1;background:#eee;border-radius:4px;height:7px;overflow:hidden"><div style="width:' + rate + '%;background:' + bc + ';height:100%;border-radius:4px"></div></div>'
       + '<div style="width:3em;text-align:right;font-size:12px;font-weight:700;color:' + bc + '">' + rate + '%</div>'
       + '<div style="width:6em;text-align:right;font-size:10px;color:#aaa">' + gk.save + 'S/' + total + 'SH</div>'
@@ -4842,13 +5239,13 @@ function runMultiGame() {
   }).join('');
 
   html+=`<div style="background:white;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
-    <div style="font-size:12px;font-weight:700;color:#1a3a6b;margin-bottom:8px">⚔️ デュエル勝率（${GAMES}試合合計）</div>
+    <div style="font-size:12px;font-weight:700;color:#1a3a6b;margin-bottom:8px">⚔️ ${window.LANG==='en'?'Duel Win Rate ('+GAMES+' matches)':'デュエル勝率（'+GAMES+'試合合計）'}</div>
     ${makeTeamDuel(team1Data.name,team1Data)}
     ${makeTeamDuel(team2Data.name,team2Data)}
   </div>`;
 
   html+=`<div style="background:white;border-radius:12px;padding:12px;margin-top:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
-    <div style="font-size:12px;font-weight:700;color:#1a3a6b;margin-bottom:8px">🧤 GKセーブ率（${GAMES}試合合計）</div>
+    <div style="font-size:12px;font-weight:700;color:#1a3a6b;margin-bottom:8px">🧤 ${window.LANG==='en'?'GK Save Rate ('+GAMES+' matches)':'GKセーブ率（'+GAMES+'試合合計）'}</div>
     ${gkHtml}
   </div>`;
 
@@ -4870,36 +5267,16 @@ function runMultiGame() {
     if (!p) return;
     var tname = s.offence.name;
     var k = tname + '_' + p.name;
-    if (!_mvpCounter[k]) _mvpCounter[k] = { name: p.long_name||p.name, team: tname, color: s.offence.team_color, count: 0 };
+    if (!_mvpCounter[k]) _mvpCounter[k] = { name: p.long_name||p.name, en_name: p.en_name, team: tname, color: s.offence.team_color, count: 0, dispName: window.LANG==='en'&&p.en_name?p.en_name:(p.long_name||p.name) };
     _mvpCounter[k].count++;
   });
   var _t1mvps = Object.values(_mvpCounter).filter(function(v){return v.team===team1Data.name;}).sort(function(a,b){return b.count-a.count;}).slice(0,5);
   var _t2mvps = Object.values(_mvpCounter).filter(function(v){return v.team===team2Data.name;}).sort(function(a,b){return b.count-a.count;}).slice(0,5);
 
   // ③ 攻撃パターン別ゴール（全試合合算）
-  var _patterns = {};
-  scenesAllMulti.forEach(function(s){
-    if (s.result === 'ゴール！！') {
-      var k = s.offence.name + ' / ' + s.action;
-      _patterns[k] = (_patterns[k]||0) + 1;
-    }
-  });
+  var _patterns = allGoalPatterns;
 
-  // ④ 時間帯別得点（全試合合算）
-  var _tb = {'前半':{t1:0,t2:0},'後半':{t1:0,t2:0},'ロスタイム':{t1:0,t2:0}};
-  // scenesAllMultiには時間情報がないのでchanceResultsの代わりにscoreから推定は難しい
-  // → シーンにtimeがないためスキップ（10試合モードは時間データ未保持）
-
-  // ⑤ ハイライト（全試合で最も差が大きかったシーン上位3）
-  var _hl = [];
-  scenesAllMulti.forEach(function(s){
-    var diff = (s.ofsPoint||0) - (s.dfsPoint||0);
-    if (diff > 8) {
-      var p = s.offence.players[s.offence.lineup[s.ofsPos]];
-      _hl.push({ diff:diff, name:p?p.long_name||p.name:'?', team:s.offence.name, color:s.offence.team_color, action:s.action, result:s.result });
-    }
-  });
-  _hl.sort(function(a,b){return b.diff-a.diff;});
+  var _hl = []; // ハイライト削除
 
   // シュート数合計
   var _t1shootTotal = scores.reduce(function(s,r){return s+r.t1shoot;},0);
@@ -4908,11 +5285,17 @@ function runMultiGame() {
   var _t2saveTotal  = scores.reduce(function(s,r){return s+r.t2save;},0);
 
   // ===== HTML追加 =====
-  var mgColor = function(team) { return team === team1Data.name ? team1Data.team_color : team2Data.team_color; };
+  var mgColor = function(teamName) { return teamName === team1Data.name ? team1Data.team_color : team2Data.team_color; };
+  var mgTeamDisplay = function(teamName) {
+    if (window.LANG === 'en') {
+      return teamName === team1Data.name ? (team1Data.en_name||team1Data.name) : (team2Data.en_name||team2Data.name);
+    }
+    return teamName;
+  };
 
   // ポゼッション
   html += '<div style="background:white;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">'
-    + '<div style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8eef5">📊 ポゼッション（10試合平均）</div>'
+    + '<div style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8eef5">📊 ' + (window.LANG==='en'?'Possession (10-Match Avg)':'ポゼッション（10試合平均）') + '</div>'
     + '<div style="display:flex;align-items:center;gap:8px;padding:4px 0">'
     + '<div style="font-size:13px;font-weight:700;color:' + team1Data.team_color + ';width:36px;text-align:right">' + _t1poss + '%</div>'
     + '<div style="flex:1;height:14px;border-radius:7px;overflow:hidden;background:#eee;display:flex">'
@@ -4922,9 +5305,9 @@ function runMultiGame() {
     + '<div style="font-size:13px;font-weight:700;color:' + team2Data.team_color + ';width:36px">' + _t2poss + '%</div>'
     + '</div>'
     + '<div style="display:flex;justify-content:space-between;font-size:10px;color:#888;margin-top:4px">'
-    + '<span>' + team1Data.flag + ' ' + team1Data.name + '</span>'
-    + '<span>シュート ' + _t1shootTotal + '本 / ' + _t2shootTotal + '本</span>'
-    + '<span>' + team2Data.flag + ' ' + team2Data.name + '</span>'
+    + '<span>' + team1Data.flag + ' ' + getTeamName(team1Data) + '</span>'
+    + '<span>' + (window.LANG==='en' ? 'Shots: '+_t1shootTotal+' / '+_t2shootTotal : 'シュート '+_t1shootTotal+'本 / '+_t2shootTotal+'本') + '</span>'
+    + '<span>' + team2Data.flag + ' ' + getTeamName(team2Data) + '</span>'
     + '</div>'
     + '</div>';
 
@@ -4932,9 +5315,9 @@ function runMultiGame() {
   var _t1chanceTotal = scores.reduce(function(s,r){return s+(r.t1chance||0);},0);
   var _t2chanceTotal = scores.reduce(function(s,r){return s+(r.t2chance||0);},0);
   var _statsRows = [
-    { label: 'チャンス数', t1: (_t1chanceTotal/GAMES).toFixed(1), t2: (_t2chanceTotal/GAMES).toFixed(1) },
-    { label: 'シュート',   t1: (_t1shootTotal/GAMES).toFixed(1),  t2: (_t2shootTotal/GAMES).toFixed(1) },
-    { label: 'GKセーブ',  t1: (_t1saveTotal/GAMES).toFixed(1),   t2: (_t2saveTotal/GAMES).toFixed(1) },
+    { label: window.LANG==='en'?'Chances':'チャンス数', t1: (_t1chanceTotal/GAMES).toFixed(1), t2: (_t2chanceTotal/GAMES).toFixed(1) },
+    { label: window.LANG==='en'?'Shots':'シュート',   t1: (_t1shootTotal/GAMES).toFixed(1),  t2: (_t2shootTotal/GAMES).toFixed(1) },
+    { label: window.LANG==='en'?'GK Saves':'GKセーブ',  t1: (_t1saveTotal/GAMES).toFixed(1),   t2: (_t2saveTotal/GAMES).toFixed(1) },
   ];
   var _statsGridHtml = '<div class="stats-grid">';
   _statsRows.forEach(function(row) {
@@ -4944,10 +5327,10 @@ function runMultiGame() {
   });
   _statsGridHtml += '</div>';
   html += '<div style="background:white;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">'
-    + '<div style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8eef5">📈 チャンス・シュート・セーブ（1試合平均）</div>'
+    + '<div style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8eef5">📈 ' + (window.LANG==='en'?'Chances / Shots / Saves (Per Match)':'チャンス・シュート・セーブ（1試合平均）') + '</div>'
     + '<div style="display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:6px">'
-    + '<span>' + team1Data.flag + ' ' + team1Data.name + '</span>'
-    + '<span>' + team2Data.flag + ' ' + team2Data.name + '</span>'
+    + '<span>' + team1Data.flag + ' ' + getTeamName(team1Data) + '</span>'
+    + '<span>' + team2Data.flag + ' ' + getTeamName(team2Data) + '</span>'
     + '</div>'
     + _statsGridHtml
     + '</div>';
@@ -4963,8 +5346,8 @@ function runMultiGame() {
       var medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'　';
       _mvpHtml += '<div style="margin-bottom:6px">'
         + '<div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:2px">'
-        + '<span>' + medal + ' <span style="color:' + tdata.team_color + '">' + v.name + '</span></span>'
-        + '<span style="color:#888">' + v.count + '回</span></div>'
+        + '<span>' + medal + ' <span style="color:' + tdata.team_color + '">' + (window.LANG==='en'&&v.en_name?v.en_name:(v.dispName||v.name)) + '</span></span>'
+        + '<span style="color:#888">' + v.count + (window.LANG==='en'?'x':'回') + '</span></div>'
         + '<div style="height:6px;background:#eee;border-radius:3px;overflow:hidden">'
         + '<div style="width:' + pct + '%;height:100%;background:' + tdata.team_color + ';border-radius:3px"></div>'
         + '</div></div>';
@@ -4973,50 +5356,40 @@ function runMultiGame() {
   });
   _mvpHtml += '</div>';
   html += '<div style="background:white;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">'
-    + '<div style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8eef5">🏃 選手別関与シーン数（10試合合算）</div>'
+    + '<div style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8eef5">🏃 ' + (window.LANG==='en'?'Player Scene Involvement (10 Matches)':'選手別関与シーン数（10試合合算）') + '</div>'
     + _mvpHtml + '</div>';
 
   // 攻撃パターン別ゴール
   var _patList = Object.entries(_patterns).sort(function(a,b){return b[1]-a[1];});
   var _patHtml = _patList.length ? _patList.map(function(e){
+    var rawTeamName = e[0].split(' / ')[0];
+    var dispTeamName = mgTeamDisplay(rawTeamName);
     return '<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12px">'
-      + '<span style="color:' + mgColor(e[0].split(' / ')[0]) + ';font-weight:700;min-width:50px">' + e[0].split(' / ')[0] + '</span>'
-      + '<span style="flex:1">' + e[0].split(' / ')[1] + '</span>'
+      + '<span style="color:' + mgColor(rawTeamName) + ';font-weight:700;min-width:50px">' + dispTeamName + '</span>'
+      + '<span style="flex:1">' + getActionLabel(e[0].split(' / ')[1]) + '</span>'
       + '<span style="font-weight:700">⚽×' + e[1] + '</span></div>';
-  }).join('') : '<span style="font-size:11px;color:#888">得点なし</span>';
+  }).join('') : '<span style="font-size:11px;color:#888">' + (window.LANG==='en'?'No goals':'得点なし') + '</span>';
   html += '<div style="background:white;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">'
-    + '<div style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8eef5">⚽ 攻撃パターン別ゴール（10試合合算）</div>'
+    + '<div style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8eef5">⚽ ' + (window.LANG==='en'?'Goals by Attack Pattern (10 Matches)':'攻撃パターン別ゴール（10試合合算）') + '</div>'
     + _patHtml + '</div>';
 
-  // ハイライト
-  var _hlHtml = _hl.slice(0,3).length ? _hl.slice(0,3).map(function(h,i){
-    return '<div style="padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:12px">'
-      + '<div style="display:flex;align-items:center;gap:6px">'
-      + '<span style="font-size:14px">' + (h.result==='ゴール！！'?'⚽':['🔥','✨','💫'][i]) + '</span>'
-      + '<span style="font-weight:700;color:' + h.color + '">' + h.name + '</span>'
-      + '<span style="color:#888">' + h.action + '</span></div>'
-      + '<div style="font-size:10px;color:#aaa;margin-top:2px;padding-left:20px">攻撃値 ' + h.diff + ' 超え → ' + h.result + '</div>'
-      + '</div>';
-  }).join('') : '<span style="font-size:11px;color:#888">データなし</span>';
-  html += '<div style="background:white;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">'
-    + '<div style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8eef5">🔥 ハイライトシーン（全試合ベスト3）</div>'
-    + _hlHtml + '</div>';
+
+
 
   // AI総括ボタン
   html += '<div style="background:white;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">'
     + '<div style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8eef5;display:flex;align-items:center;justify-content:space-between">'
-    + '<span>🤖 AI総括（10試合）</span>'
+    + '<span>' + t('multiAiHeader') + '</span>'
     + '<button id="multi-summary-btn" onclick="generateMultiSummary(' + t1wins + ',' + t2wins + ',' + draws + ',' + _t1poss + ',' + _t1shootTotal + ',' + _t2shootTotal + ')" '
-    + 'style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid #ccc;background:#f5f5f5;color:#333;cursor:pointer;font-family:inherit;font-weight:700">✨ 生成</button>'
+    + 'style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid #ccc;background:#f5f5f5;color:#333;cursor:pointer;font-family:inherit;font-weight:700">' + t('multiAiBtn') + '</button>'
     + '</div>'
     + '<div id="multi-summary-content" style="font-size:13px;line-height:1.8;color:#555">'
-    + '<span style="font-size:12px;color:#aaa">「✨ 生成」ボタンを押すと、AIが10試合を総括します</span>'
+    + '<span style="font-size:12px;color:#aaa">' + t('multiAiPlaceholder') + '</span>'
     + '</div></div>';
 
   // MVP情報をグローバルに保存（AI総括用）
   window._multiMvps = _t1mvps.concat(_t2mvps);
   window._multiPatterns = _patList;
-  window._multiHL = _hl.slice(0,3);
   window._t1saveTotal = _t1saveTotal;
   window._t2saveTotal = _t2saveTotal;
 
@@ -5031,8 +5404,8 @@ function showResult() {
   const t1score = lastRes.t1score;
   const t2score = lastRes.t2score;
 
-  document.getElementById('result-name1').textContent = team1Data.name;
-  document.getElementById('result-name2').textContent = team2Data.name;
+  document.getElementById('result-name1').textContent = getTeamName(team1Data);
+  document.getElementById('result-name2').textContent = getTeamName(team2Data);
   document.getElementById('result-score1').textContent = t1score;
   document.getElementById('result-score1').style.color = team1Data.team_color;
   document.getElementById('result-score2').textContent = t2score;
@@ -5040,13 +5413,13 @@ function showResult() {
 
   const winner = document.getElementById('result-winner');
   if (t1score > t2score) {
-    winner.textContent = `${team1Data.flag} ${team1Data.name} の勝利！`;
+    winner.textContent = `${team1Data.flag} ${getTeamName(team1Data)}${t('win')}`;
     winner.style.color = team1Data.team_color;
   } else if (t2score > t1score) {
-    winner.textContent = `${team2Data.flag} ${team2Data.name} の勝利！`;
+    winner.textContent = `${team2Data.flag} ${getTeamName(team2Data)}${t('win')}`;
     winner.style.color = team2Data.team_color;
   } else {
-    winner.textContent = '引き分け';
+    winner.textContent = t('draw');
     winner.style.color = '#aaa';
   }
 
@@ -5055,9 +5428,9 @@ function showResult() {
   const t1 = gs.team1, t2 = gs.team2;
   const statsGrid = document.getElementById('stats-grid');
   const stats = [
-    [t1.chanceCounter, 'チャンス', t2.chanceCounter],
-    [t1.shootCounter, 'シュート', t2.shootCounter],
-    [t1.gkSaveCounter, 'GKセーブ', t2.gkSaveCounter],
+    [t1.chanceCounter, window.LANG==='en'?'Chances':'チャンス', t2.chanceCounter],
+    [t1.shootCounter, window.LANG==='en'?'Shots':'シュート', t2.shootCounter],
+    [t1.gkSaveCounter, window.LANG==='en'?'GK Saves':'GKセーブ', t2.gkSaveCounter],
   ];
 
   statsGrid.innerHTML = '';
@@ -5081,7 +5454,8 @@ function showResult() {
   } else {
     const byTeam = { [team1Data.name]: [], [team2Data.name]: [] };
     goals.forEach(({ time, team, pos }) => {
-      const name = (team.players[team.lineup[pos]] ? team.players[team.lineup[pos]].name : '?');
+      const p = team.players[team.lineup[pos]];
+      const name = p ? getPlayerName(p) : '?';
       const tname = team.name;
       if (byTeam[tname]) byTeam[tname].push(`${time}  ${name}`);
     });
@@ -5156,7 +5530,7 @@ function showResult() {
       const p = team.players[team.lineup[pos]];
       if (!p) return;
       const key = team.name + '_' + p.name;
-      if (!duelMap[key]) duelMap[key] = { name: p.name, teamName: team.name, color: team.team_color, win: 0, lose: 0 };
+      if (!duelMap[key]) duelMap[key] = { name: p.name, enName: p.en_name, teamName: team.name, color: team.team_color, win: 0, lose: 0 };
     }
   });
 
@@ -5168,19 +5542,22 @@ function showResult() {
       if (isNormal) {
         scenesAll1.push(sc);
         const win = (sc.result === '成功' || sc.result === 'ファール');
-        const ofsName = (sc.offence.players[sc.offence.lineup[sc.ofsPos]] ? sc.offence.players[sc.offence.lineup[sc.ofsPos]].name : undefined);
+        const ofsP = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+        const ofsName = ofsP ? ofsP.name : undefined;
         const ofsKey = sc.offence.name + '_' + ofsName;
-        if (!duelMap[ofsKey]) duelMap[ofsKey] = { name: ofsName, teamName: sc.offence.name, color: sc.offence.team_color, win: 0, lose: 0 };
+        if (!duelMap[ofsKey]) duelMap[ofsKey] = { name: ofsName, enName: ofsP ? ofsP.en_name : undefined, teamName: sc.offence.name, color: sc.offence.team_color, win: 0, lose: 0 };
         win ? duelMap[ofsKey].win++ : duelMap[ofsKey].lose++;
-        const dfsName = (sc.defence.players[sc.defence.lineup[sc.dfsPos]] ? sc.defence.players[sc.defence.lineup[sc.dfsPos]].name : undefined);
+        const dfsP = sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+        const dfsName = dfsP ? dfsP.name : undefined;
         const dfsKey = sc.defence.name + '_' + dfsName;
-        if (!duelMap[dfsKey]) duelMap[dfsKey] = { name: dfsName, teamName: sc.defence.name, color: sc.defence.team_color, win: 0, lose: 0 };
+        if (!duelMap[dfsKey]) duelMap[dfsKey] = { name: dfsName, enName: dfsP ? dfsP.en_name : undefined, teamName: sc.defence.name, color: sc.defence.team_color, win: 0, lose: 0 };
         win ? duelMap[dfsKey].lose++ : duelMap[dfsKey].win++;
       }
       if (isShoot) {
-        const gkName = (sc.defence.players[sc.defence.lineup[0]] ? sc.defence.players[sc.defence.lineup[0]].name : undefined);
+        const gkP = sc.defence.players[sc.defence.lineup[0]];
+        const gkName = gkP ? gkP.name : undefined;
         const gkKey = sc.defence.name + '_GK';
-        if (!gkSave1[gkKey]) gkSave1[gkKey] = { name: gkName, team: sc.defence.name, color: sc.defence.team_color, save: 0, goal: 0 };
+        if (!gkSave1[gkKey]) gkSave1[gkKey] = { name: gkName, enName: gkP ? gkP.en_name : undefined, team: sc.defence.name, color: sc.defence.team_color, save: 0, goal: 0 };
         sc.result === 'GK防いだ！' ? gkSave1[gkKey].save++ : gkSave1[gkKey].goal++;
       }
     });
@@ -5196,16 +5573,17 @@ function showResult() {
       const total = d.win + d.lose;
       const rate = total > 0 ? Math.round(d.win / total * 100) : 0;
       const barColor = rate >= 60 ? '#003087' : rate >= 40 ? '#2d7a3a' : '#B8001F';
+      const dispName = (window.LANG === 'en' && d.enName) ? d.enName : d.name;
       return '<div style="display:flex;align-items:center;padding:6px 12px;border-bottom:1px solid #f0f0f0;gap:8px">'
         + '<div style="width:5em;font-size:12px;font-weight:700;overflow:hidden;white-space:nowrap;cursor:pointer;text-decoration:underline;color:#1a3a6b" onclick="showDuelDetail(this)"'
-        + ' data-name="' + d.name + '" data-team="' + d.teamName + '" data-win="' + d.win + '" data-lose="' + d.lose + '">' + d.name + '</div>'
+        + ' data-name="' + d.name + '" data-team="' + d.teamName + '" data-win="' + d.win + '" data-lose="' + d.lose + '">' + dispName + '</div>'
         + '<div style="flex:1;background:#eee;border-radius:4px;height:8px;overflow:hidden"><div style="width:' + rate + '%;background:' + barColor + ';height:100%;border-radius:4px;transition:width 0.3s"></div></div>'
         + '<div style="width:3em;text-align:right;font-size:12px;font-weight:700;color:' + barColor + '">' + rate + '%</div>'
-        + '<div style="width:4em;text-align:right;font-size:10px;color:#aaa">' + d.win + '勝' + d.lose + '敗</div>'
+        + '<div style="width:4em;text-align:right;font-size:10px;color:#aaa">' + d.win + t('duelWin') + d.lose + t('duelLose') + '</div>'
         + '</div>';
     }).join('');
     return `<div style="margin-bottom:16px">
-      <div style="background:${teamData.team_color};color:white;font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px 8px 0 0">${teamData.flag} ${teamData.name}</div>
+      <div style="background:${teamData.team_color};color:white;font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px 8px 0 0">${teamData.flag} ${getTeamName(teamData)}</div>
       ${rows}
     </div>`;
   }
@@ -5214,8 +5592,9 @@ function showResult() {
     const total = gk.save + gk.goal;
     const rate = total > 0 ? Math.round(gk.save / total * 100) : 0;
     const bc = rate >= 70 ? '#1a6bb5' : rate >= 50 ? '#2d7a3a' : '#c0392b';
+    const dispName = (window.LANG === 'en' && gk.enName) ? gk.enName : gk.name;
     return '<div style="display:flex;align-items:center;padding:5px 10px;border-bottom:1px solid #f0f0f0;gap:8px">'
-      + '<div style="width:5em;font-size:12px;font-weight:700">' + gk.name + '</div>'
+      + '<div style="width:5em;font-size:12px;font-weight:700">' + dispName + '</div>'
       + '<div style="flex:1;background:#eee;border-radius:4px;height:7px;overflow:hidden"><div style="width:' + rate + '%;background:' + bc + ';height:100%;border-radius:4px"></div></div>'
       + '<div style="width:3em;text-align:right;font-size:12px;font-weight:700;color:' + bc + '">' + rate + '%</div>'
       + '<div style="width:6em;text-align:right;font-size:10px;color:#aaa">' + gk.save + 'S/' + total + 'SH</div>'
@@ -5225,7 +5604,7 @@ function showResult() {
   _duelScenesCache = scenesAll1;
   const duelEl = document.getElementById('duel-stats-content');
   duelEl.innerHTML = renderDuelTable(t1Duels, team1Data) + renderDuelTable(t2Duels, team2Data)
-    + '<div style="margin-top:12px"><div style="background:#555;color:white;font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px 8px 0 0">🧤 GKセーブ率</div>' + gkHtml1 + '</div>';
+    + '<div style="margin-top:12px"><div style="background:#555;color:white;font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px 8px 0 0">🧤 ' + (window.LANG==='en'?'GK Save Rate':'GKセーブ率') + '</div>' + gkHtml1 + '</div>';
 
   // 試合詳細ログ
   const logContent = document.getElementById('result-log-content');
@@ -5272,8 +5651,8 @@ function showResult() {
         <div style="font-size:13px;font-weight:700;color:${team2Data.team_color};width:36px">${t2pct}%</div>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-dim);margin-top:2px">
-        <span>${team1Data.flag} ${team1Data.name}</span>
-        <span>${team2Data.flag} ${team2Data.name}</span>
+        <span>${team1Data.flag} ${getTeamName(team1Data)}</span>
+        <span>${team2Data.flag} ${getTeamName(team2Data)}</span>
       </div>`;
   })();
 
@@ -5286,7 +5665,7 @@ function showResult() {
         const p = s.offence.players[s.offence.lineup[s.ofsPos]];
         if (p) {
           const key = teamKey + '_' + p.name;
-          counter[key] = (counter[key] || { name: p.name, team: s.offence, count: 0 });
+          if (!counter[key]) counter[key] = { name: p.name, enName: p.en_name, team: s.offence, count: 0 };
           counter[key].count++;
         }
       });
@@ -5301,10 +5680,11 @@ function showResult() {
       list.forEach((v, i) => {
         const pct = Math.round(v.count / maxCount * 100);
         const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '　';
+        const dispName = (window.LANG === 'en' && v.enName) ? v.enName : v.name;
         html += `<div style="margin-bottom:6px">
           <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:2px">
-            <span>${medal} <span style="color:${tdata.team_color}">${v.name}</span></span>
-            <span style="color:var(--text-dim)">${v.count}回</span>
+            <span>${medal} <span style="color:${tdata.team_color}">${dispName}</span></span>
+            <span style="color:var(--text-dim)">${v.count}${window.LANG==='en'?'x':'回'}</span>
           </div>
           <div style="height:6px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden">
             <div style="width:${pct}%;height:100%;background:${tdata.team_color};border-radius:3px"></div>
@@ -5323,9 +5703,9 @@ function showResult() {
     chanceResults.forEach(res => {
       res.scenes.forEach(s => {
         if (s.result === 'ゴール！！') {
-          const teamName = s.offence === gameState.team1 ? team1Data.name : team2Data.name;
+          const teamName = s.offence === gameState.team1 ? getTeamName(team1Data) : getTeamName(team2Data);
           const tcolor = s.offence === gameState.team1 ? team1Data.team_color : team2Data.team_color;
-          const pat = s.action || s.scenario || '不明';
+          const pat = s.action || s.scenario || (window.LANG==='en'?'Unknown':'不明');
           const k = teamName + '|' + pat;
           if (!patterns[k]) patterns[k] = { label: pat, teamName, tcolor, count: 0 };
           patterns[k].count++;
@@ -5335,7 +5715,7 @@ function showResult() {
     const list = Object.values(patterns).sort((a,b) => b.count - a.count);
     const el = document.getElementById('goal-pattern-content');
     if (list.length === 0) {
-      el.innerHTML = '<div style="font-size:11px;color:var(--text-dim);padding:4px 0">得点なし</div>';
+      el.innerHTML = `<div style="font-size:11px;color:var(--text-dim);padding:4px 0">${window.LANG==='en'?'No goals':'得点なし'}</div>`;
       return;
     }
     el.innerHTML = list.map(v =>
@@ -5347,78 +5727,6 @@ function showResult() {
     ).join('');
   })();
 
-  // ④ 時間帯別得点
-  (function() {
-    const bands = [
-      { label: '前半 1-45分', min: 0,  max: 45, t1: 0, t2: 0 },
-      { label: '後半 46-90分', min: 46, max: 89, t1: 0, t2: 0 },
-      { label: 'ロスタイム',   min: 90, max: 999, t1: 0, t2: 0 },
-    ];
-    chanceResults.forEach(res => {
-      const min = parseInt(res.time) || 0;
-      res.scenes.forEach(s => {
-        if (s.result === 'ゴール！！') {
-          const band = bands.find(b => min >= b.min && min <= b.max);
-          if (band) {
-            if (s.offence === gameState.team1) band.t1++;
-            else band.t2++;
-          }
-        }
-      });
-    });
-    const el = document.getElementById('time-goal-content');
-    el.innerHTML = '<div style="display:grid;grid-template-columns:auto 1fr auto auto;gap:4px 10px;align-items:center">' +
-      bands.map(b => `
-        <div style="font-size:10px;color:var(--text-dim)">${b.label}</div>
-        <div style="height:8px;background:rgba(0,0,0,0.06);border-radius:4px;overflow:hidden;display:flex">
-          ${b.t1 > 0 ? `<div style="width:${b.t1*20}px;max-width:60px;background:${team1Data.team_color};border-radius:4px"></div>` : ''}
-          ${b.t2 > 0 ? `<div style="width:${b.t2*20}px;max-width:60px;background:${team2Data.team_color};border-radius:4px;margin-left:2px"></div>` : ''}
-        </div>
-        <div style="font-size:12px;font-weight:700;color:${team1Data.team_color};text-align:right">${b.t1}</div>
-        <div style="font-size:12px;font-weight:700;color:${team2Data.team_color}">${b.t2}</div>
-      `).join('') + '</div>';
-  })();
-
-  // ⑤ ハイライトシーン（最大ofsPoint-dfsPoint差のシーン上位3）
-  (function() {
-    const highlights = [];
-    chanceResults.forEach(res => {
-      res.scenes.forEach(s => {
-        const diff = (s.ofsPoint || 0) - (s.dfsPoint || 0);
-        if (diff > 0 && s.result !== 'ゴール！！') {
-          const p = s.offence.players[s.offence.lineup[s.ofsPos]];
-          const tcolor = s.offence === gameState.team1 ? team1Data.team_color : team2Data.team_color;
-          highlights.push({ diff, name: p ? p.name : '?', action: s.action, result: s.result, time: res.time, tcolor, ofsPoint: s.ofsPoint, dfsPoint: s.dfsPoint });
-        }
-        // ゴールシーンも
-        if (s.result === 'ゴール！！') {
-          const p = s.offence.players[s.offence.lineup[s.ofsPos]];
-          const tcolor = s.offence === gameState.team1 ? team1Data.team_color : team2Data.team_color;
-          highlights.push({ diff: (s.ofsPoint||0)-(s.dfsPoint||0), name: p ? p.name : '?', action: s.action, result: s.result, time: res.time, tcolor, ofsPoint: s.ofsPoint, dfsPoint: s.dfsPoint, isGoal: true });
-        }
-      });
-    });
-    highlights.sort((a,b) => b.diff - a.diff);
-    const top = highlights.slice(0, 3);
-    const el = document.getElementById('highlight-content');
-    if (top.length === 0) {
-      el.innerHTML = '<div style="font-size:11px;color:var(--text-dim)">データなし</div>';
-      return;
-    }
-    el.innerHTML = top.map((h, i) => `
-      <div style="padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05);font-size:12px">
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:14px">${h.isGoal ? '⚽' : ['🔥','✨','💫'][i]}</span>
-          <span style="font-weight:700;color:${h.tcolor}">${h.name}</span>
-          <span style="color:var(--text-dim)">${h.action}</span>
-          <span style="margin-left:auto;font-size:10px;color:var(--text-dim)">${h.time}</span>
-        </div>
-        <div style="font-size:10px;color:var(--text-dim);margin-top:2px;padding-left:20px">
-          攻撃値 ${h.ofsPoint} vs 守備値 ${h.dfsPoint}（差+${h.diff}）→ ${h.result}
-        </div>
-      </div>`).join('');
-  })();
-
   showScreen('result');
 
   // 結果画像をセット
@@ -5427,7 +5735,15 @@ function showResult() {
 }
 
 function retryGame() {
+  _resetSummary();
   showScreen('setting');
+}
+
+function _resetSummary() {
+  var el = document.getElementById('summary-content');
+  var btn = document.getElementById('summary-btn');
+  if (el) el.innerHTML = '<span style="color:var(--text-dim);font-size:12px">' + t('summaryPlaceholder') + '</span>';
+  if (btn) { btn.disabled = false; btn.textContent = t('btnGenerate'); }
 }
 
 // Close modals on overlay click
@@ -5557,14 +5873,14 @@ function setResultImage(team1Score, team2Score) {
   if (!img) return;
   if (team1Score > team2Score) {
     img.src = IMG_WIN;
-    img.alt = '勝利！';
+    img.alt = t('imgAltWin');
     if (wrap) wrap.style.display = '';
   } else if (team1Score < team2Score) {
     img.src = IMG_LOSE;
-    img.alt = '敗北...';
+    img.alt = t('imgAltLose');
     if (wrap) wrap.style.display = '';
   } else {
-    img.src = '';  // 引き分けは画像なし
+    img.src = '';
     if (wrap) wrap.style.display = 'none';
   }
 }
@@ -5577,14 +5893,16 @@ function shareToX() {
   const winner = document.getElementById('result-winner').textContent;
 
   let emoji = '⚽';
-  if (winner.includes('勝利') || winner.includes('WIN')) emoji = '🎉';
-  else if (winner.includes('敗') || winner.includes('LOSE')) emoji = '😭';
+  if (winner.includes('勝利') || winner.includes('wins')) emoji = '🎉';
+  else if (winner.includes('敗') || winner.includes('Defeat')) emoji = '😭';
 
-  // スコアラーを取得
   const scorers = document.getElementById('result-scorers').textContent.trim();
   const scorerText = scorers ? `\n${scorers}` : '';
+  const tags = window.LANG === 'en'
+    ? '#JapanNT #FootballSim #Soccer'
+    : '#日本代表 #FootballSim #サッカー';
 
-  const text = `${emoji} ${name1} ${score1}-${score2} ${name2}${scorerText}\n\n#日本代表 #FootballSim #サッカー`;
+  const text = `${emoji} ${name1} ${score1}-${score2} ${name2}${scorerText}\n\n${tags}`;
   const url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text);
   window.open(url, '_blank');
 }
@@ -5594,7 +5912,7 @@ function generateSummary() {
   var btn = document.getElementById('summary-btn');
   var el  = document.getElementById('summary-content');
   btn.disabled = true;
-  btn.textContent = '生成中...';
+  btn.textContent = t('generatingLabel');
 
   var t1 = gameState.team1, t2 = gameState.team2;
   var lastRes = chanceResults[chanceResults.length - 1];
@@ -5612,7 +5930,7 @@ function generateSummary() {
     res.scenes.forEach(function(s){
       if(s.result==='ゴール！！'){
         var p = s.offence.players[s.offence.lineup[s.ofsPos]];
-        goals.push({ team: s.offence===t1?team1Data:team2Data, name: p?p.long_name||p.name:'?', action: s.action, time: res.time });
+        goals.push({ team: s.offence===t1?team1Data:team2Data, name: p?p.long_name||p.name:'?', en_name: p?p.en_name:'?', dispName: p?(window.LANG==='en'&&p.en_name?p.en_name:p.long_name||p.name):'?', action: s.action, time: res.time });
       }
     });
   });
@@ -5622,7 +5940,7 @@ function generateSummary() {
   chanceResults.forEach(function(res){ res.scenes.forEach(function(s){
     var p = s.offence.players[s.offence.lineup[s.ofsPos]]; if(!p) return;
     var k = (s.offence===t1?'t1':'t2')+'_'+p.name;
-    if(!counter[k]) counter[k]={name:p.long_name||p.name, team:s.offence===t1?team1Data:team2Data, count:0};
+    if(!counter[k]) counter[k]={name:p.long_name||p.name, en_name:p.en_name, team:s.offence===t1?team1Data:team2Data, count:0, dispName:window.LANG==='en'&&p.en_name?p.en_name:(p.long_name||p.name)};
     counter[k].count++;
   });});
   var allMvp = Object.values(counter).sort(function(a,b){return b.count-a.count;});
@@ -5641,45 +5959,72 @@ function generateSummary() {
 
   // ===== 文章生成 =====
   var lines = [];
+  var isEn = window.LANG === 'en';
+  var t1n = getTeamName(team1Data), t2n = getTeamName(team2Data);
 
-  // ① 試合結果の書き出し
+  // ① 試合結果
   var resultLabel;
-  if      (t1score > t2score) resultLabel = team1Data.name + 'が' + t1score + 'ー' + t2score + 'で勝利した。';
-  else if (t2score > t1score) resultLabel = team2Data.name + 'が' + t2score + 'ー' + t1score + 'で勝利した。';
-  else                        resultLabel = t1score + 'ー' + t2score + 'のスコアレスドローに終わった。';
+  if (isEn) {
+    if      (t1score > t2score) resultLabel = t1n + ' won ' + t1score + '-' + t2score + '.';
+    else if (t2score > t1score) resultLabel = t2n + ' won ' + t2score + '-' + t1score + '.';
+    else                        resultLabel = 'The match ended ' + t1score + '-' + t2score + ' in a draw.';
+  } else {
+    if      (t1score > t2score) resultLabel = team1Data.name + 'が' + t1score + 'ー' + t2score + 'で勝利した。';
+    else if (t2score > t1score) resultLabel = team2Data.name + 'が' + t2score + 'ー' + t1score + 'で勝利した。';
+    else                        resultLabel = t1score + 'ー' + t2score + 'のスコアレスドローに終わった。';
+  }
 
-  // ② ポゼッション文
+  // ② ポゼッション
   var possText;
-  if      (t1poss >= 55) possText = team1Data.name + 'がポゼッション' + t1poss + '%と試合を支配した。';
-  else if (t2poss >= 55) possText = team2Data.name + 'がポゼッション' + (100-t1poss) + '%とゲームをコントロールした。';
-  else                   possText = '両チームはポゼッション' + t1poss + '%対' + (100-t1poss) + '%と拮抗したゲームを展開した。';
+  if (isEn) {
+    if      (t1poss >= 55) possText = t1n + ' dominated possession with ' + t1poss + '%.';
+    else if (t2poss >= 55) possText = t2n + ' controlled the game with ' + (100-t1poss) + '% possession.';
+    else                   possText = 'Possession was balanced: ' + t1poss + '% vs ' + (100-t1poss) + '%.';
+  } else {
+    if      (t1poss >= 55) possText = team1Data.name + 'がポゼッション' + t1poss + '%と試合を支配した。';
+    else if (t2poss >= 55) possText = team2Data.name + 'がポゼッション' + (100-t1poss) + '%とゲームをコントロールした。';
+    else                   possText = '両チームはポゼッション' + t1poss + '%対' + (100-t1poss) + '%と拮抗したゲームを展開した。';
+  }
 
-  // ③ シュート・迫力文
+  // ③ シュート
   var shootText;
   var totalShoot = t1shoot + t2shoot;
-  if      (totalShoot >= 20) shootText = '合計' + totalShoot + '本のシュートが飛び交う激しい展開となった。';
-  else if (totalShoot >= 12) shootText = '両チーム合わせて' + totalShoot + '本のシュートが記録された。';
-  else                       shootText = 'シュート数は' + team1Data.name + '' + t1shoot + '本、' + team2Data.name + '' + t2shoot + '本と、慎重な試合展開だった。';
+  if (isEn) {
+    if      (totalShoot >= 20) shootText = 'An intense match with ' + totalShoot + ' total shots.';
+    else if (totalShoot >= 12) shootText = 'Both teams combined for ' + totalShoot + ' shots.';
+    else                       shootText = 'Shots: ' + t1n + ' ' + t1shoot + ', ' + t2n + ' ' + t2shoot + '. A cautious affair.';
+  } else {
+    if      (totalShoot >= 20) shootText = '合計' + totalShoot + '本のシュートが飛び交う激しい展開となった。';
+    else if (totalShoot >= 12) shootText = '両チーム合わせて' + totalShoot + '本のシュートが記録された。';
+    else                       shootText = 'シュート数は' + team1Data.name + 'が' + t1shoot + '本、' + team2Data.name + 'が' + t2shoot + '本と、慎重な試合展開だった。';
+  }
 
   // ④ 得点シーン
   var goalText = '';
   if (goals.length === 0) {
-    goalText = 'スコアは動かず、ゴールレスに終わった。';
+    goalText = isEn ? 'The match ended goalless.' : 'スコアは動かず、ゴールレスに終わった。';
   } else {
     var goalDescs = goals.map(function(g){
-      var actionLabel = g.action.replace('中央からシュート','中央突破').replace('サイドからシュート','サイド切り込み').replace('ヘディングシュート','ヘディング').replace('ミドルシュート','ミドルシュート');
-      return g.time + 'に' + g.team.name + '・' + g.name + 'が' + actionLabel + 'で得点';
+      var gname = isEn ? (g.dispName || g.en_name || g.name) : (g.dispName || g.name);
+      var gteam = isEn ? (g.team.en_name || g.team.name) : g.team.name;
+      if (isEn) {
+        return g.time + ': ' + gteam + ' - ' + gname + ' (' + getActionLabel(g.action) + ')';
+      } else {
+        var actionLabel = g.action.replace('中央からシュート','中央突破').replace('サイドからシュート','サイド切り込み').replace('ヘディングシュート','ヘディング');
+        return g.time + 'に' + g.team.name + '・' + gname + 'が' + actionLabel + 'で得点';
+      }
     });
-    goalText = goalDescs.join('、') + 'した。';
+    goalText = isEn ? goalDescs.join(', ') + '.' : goalDescs.join('、') + 'した。';
   }
 
-  // ⑤ MVP文
+  // ⑤ MVP
   var mvpText = '';
-  if (t1mvp.length) {
-    mvpText += team1Data.name + 'では' + t1mvp.map(function(v){return v.name+'（'+v.count+'回関与）';}).join('、') + 'が目立った。';
-  }
-  if (t2mvp.length) {
-    mvpText += team2Data.name + 'では' + t2mvp.map(function(v){return v.name+'（'+v.count+'回関与）';}).join('、') + 'が存在感を示した。';
+  if (isEn) {
+    if (t1mvp.length) mvpText += t1n + ': ' + t1mvp.map(function(v){return (v.dispName||v.en_name||v.name)+'('+v.count+'x)';}).join(', ') + ' stood out. ';
+    if (t2mvp.length) mvpText += t2n + ': ' + t2mvp.map(function(v){return (v.dispName||v.en_name||v.name)+'('+v.count+'x)';}).join(', ') + ' were influential.';
+  } else {
+    if (t1mvp.length) mvpText += team1Data.name + 'では' + t1mvp.map(function(v){return v.name+'（'+v.count+'回関与）';}).join('、') + 'が目立った。';
+    if (t2mvp.length) mvpText += team2Data.name + 'では' + t2mvp.map(function(v){return v.name+'（'+v.count+'回関与）';}).join('、') + 'が存在感を示した。';
   }
 
   // ⑥ パターン分析
@@ -5688,27 +6033,42 @@ function generateSummary() {
   if (patKeys.length) {
     var topPat = patKeys.sort(function(a,b){ return (patterns[b].t1+patterns[b].t2)-(patterns[a].t1+patterns[a].t2); })[0];
     var topCount = patterns[topPat].t1 + patterns[topPat].t2;
-    patText = '得点の多くは' + topPat + '（' + topCount + '点）から生まれた。';
+    patText = isEn
+      ? 'Most goals came from ' + getActionLabel(topPat) + ' (' + topCount + ').'
+      : '得点の多くは' + topPat + '（' + topCount + '点）から生まれた。';
   }
 
-  // ⑦ GKセーブ文
+  // ⑦ GKセーブ
   var saveText = '';
-  if (t1save >= 4) saveText = team1Data.name + 'GKが' + t1save + 'セーブの奮闘を見せた。';
-  else if (t2save >= 4) saveText = team2Data.name + 'GKが' + t2save + 'セーブの好守を見せた。';
+  if (isEn) {
+    if (t1save >= 4) saveText = t1n + "'s GK made " + t1save + ' saves.';
+    else if (t2save >= 4) saveText = t2n + "'s GK made " + t2save + ' saves.';
+  } else {
+    if (t1save >= 4) saveText = team1Data.name + 'GKが' + t1save + 'セーブの奮闘を見せた。';
+    else if (t2save >= 4) saveText = team2Data.name + 'GKが' + t2save + 'セーブの好守を見せた。';
+  }
 
   // 総合コメント
   var overallText = '';
-  if      (t1score > t2score && t1poss >= 55) overallText = team1Data.name + 'が主導権を握り続けた完勝だった。';
-  else if (t1score > t2score && t1poss < 50)  overallText = team1Data.name + 'は劣勢ながらも効率的な攻撃で勝利をもぎ取った。';
-  else if (t2score > t1score && t2save >= 3)  overallText = team2Data.name + 'GKの活躍も光る試合だった。';
-  else if (t1score === t2score)               overallText = '両チームが互いに一歩も引かない好ゲームだった。';
-  else                                        overallText = team2Data.name + 'の底力が光る試合だった。';
+  if (isEn) {
+    if      (t1score > t2score && t1poss >= 55) overallText = t1n + ' dominated throughout for a convincing win.';
+    else if (t1score > t2score && t1poss < 50)  overallText = t1n + ' were efficient despite being under pressure.';
+    else if (t2score > t1score && t2save >= 3)  overallText = t2n + "'s GK was key to the result.";
+    else if (t1score === t2score)               overallText = 'An evenly-matched contest neither side deserved to lose.';
+    else                                        overallText = t2n + ' showed their class when it mattered.';
+  } else {
+    if      (t1score > t2score && t1poss >= 55) overallText = team1Data.name + 'が主導権を握り続けた完勝だった。';
+    else if (t1score > t2score && t1poss < 50)  overallText = team1Data.name + 'は劣勢ながらも効率的な攻撃で勝利をもぎ取った。';
+    else if (t2score > t1score && t2save >= 3)  overallText = team2Data.name + 'GKの活躍も光る試合だった。';
+    else if (t1score === t2score)               overallText = '両チームが互いに一歩も引かない好ゲームだった。';
+    else                                        overallText = team2Data.name + 'の底力が光る試合だった。';
+  }
 
   var summary = [resultLabel, possText, shootText, goalText, mvpText, patText, saveText, overallText]
     .filter(function(s){return s.length > 0;}).join(' ');
 
   el.innerHTML = '<div style="line-height:1.9;font-size:13px">' + summary + '</div>';
-  btn.textContent = '🔄 再生成';
+  btn.textContent = t('regenerateLabel');
   btn.disabled = false;
 }
 
@@ -5717,7 +6077,7 @@ function generateMultiSummary(t1wins, t2wins, draws, t1poss, t1shoot, t2shoot) {
   var btn = document.getElementById('multi-summary-btn');
   var el  = document.getElementById('multi-summary-content');
   btn.disabled = true;
-  btn.textContent = '生成中...';
+  btn.textContent = t('generatingLabel');
 
   var mvps     = window._multiMvps    || [];
   var patterns = window._multiPatterns|| [];
@@ -5726,68 +6086,111 @@ function generateMultiSummary(t1wins, t2wins, draws, t1poss, t1shoot, t2shoot) {
   var t2save   = window._t2saveTotal  || 0;
   var t2poss   = 100 - t1poss;
   var GAMES    = 10;
-
-  var lines = [];
+  var isEn     = window.LANG === 'en';
+  var t1n      = getTeamName(team1Data);
+  var t2n      = getTeamName(team2Data);
 
   // ① 勝敗総評
   var resultText;
-  var winRate = Math.round(t1wins / GAMES * 100);
-  if      (t1wins >= 7) resultText = team1Data.name + 'が' + t1wins + '勝' + draws + '分' + t2wins + '敗と圧倒的な強さを見せた。';
-  else if (t1wins >= 5) resultText = team1Data.name + 'が' + t1wins + '勝と優位に立った10試合だった。';
-  else if (t1wins === t2wins) resultText = '両チームが' + t1wins + '勝' + draws + '分' + t2wins + '敗と互角の戦いを繰り広げた。';
-  else if (t2wins >= 7) resultText = team2Data.name + 'が' + t2wins + '勝と10試合を制した。';
-  else    resultText = team2Data.name + 'が' + t2wins + '勝' + draws + '分' + t1wins + '敗と上回った。';
+  if (isEn) {
+    if      (t1wins >= 7) resultText = t1n + ' dominated with ' + t1wins + 'W-' + draws + 'D-' + t2wins + 'L over 10 matches.';
+    else if (t1wins >= 5) resultText = t1n + ' had the edge with ' + t1wins + ' wins across 10 matches.';
+    else if (t1wins === t2wins) resultText = 'An even series — ' + t1wins + 'W-' + draws + 'D-' + t2wins + 'L for both sides.';
+    else if (t2wins >= 7) resultText = t2n + ' dominated the 10-match series with ' + t2wins + ' wins.';
+    else    resultText = t2n + ' edged the series ' + t2wins + 'W-' + draws + 'D-' + t1wins + 'L.';
+  } else {
+    if      (t1wins >= 7) resultText = team1Data.name + 'が' + t1wins + '勝' + draws + '分' + t2wins + '敗と圧倒的な強さを見せた。';
+    else if (t1wins >= 5) resultText = team1Data.name + 'が' + t1wins + '勝と優位に立った10試合だった。';
+    else if (t1wins === t2wins) resultText = '両チームが' + t1wins + '勝' + draws + '分' + t2wins + '敗と互角の戦いを繰り広げた。';
+    else if (t2wins >= 7) resultText = team2Data.name + 'が' + t2wins + '勝と10試合を制した。';
+    else    resultText = team2Data.name + 'が' + t2wins + '勝' + draws + '分' + t1wins + '敗と上回った。';
+  }
 
   // ② ポゼッション傾向
   var possText;
-  if      (t1poss >= 55) possText = team1Data.name + 'はポゼッション平均' + t1poss + '%とゲームを支配する展開が続いた。';
-  else if (t2poss >= 55) possText = team2Data.name + 'がポゼッション平均' + t2poss + '%とボールを握り続けた。';
-  else    possText = 'ポゼッションは' + t1poss + '対' + t2poss + 'とほぼ拮抗し、どちらが主導権を握るか分からない試合が続いた。';
+  if (isEn) {
+    if      (t1poss >= 55) possText = t1n + ' averaged ' + t1poss + '% possession and controlled the tempo throughout.';
+    else if (t2poss >= 55) possText = t2n + ' averaged ' + t2poss + '% possession and dictated play.';
+    else    possText = 'Possession was closely contested at ' + t1poss + '% vs ' + t2poss + '% on average.';
+  } else {
+    if      (t1poss >= 55) possText = team1Data.name + 'はポゼッション平均' + t1poss + '%とゲームを支配する展開が続いた。';
+    else if (t2poss >= 55) possText = team2Data.name + 'がポゼッション平均' + t2poss + '%とボールを握り続けた。';
+    else    possText = 'ポゼッションは' + t1poss + '対' + t2poss + 'とほぼ拮抗し、どちらが主導権を握るか分からない試合が続いた。';
+  }
 
   // ③ シュート傾向
   var avgT1shoot = (t1shoot / GAMES).toFixed(1);
   var avgT2shoot = (t2shoot / GAMES).toFixed(1);
   var shootText;
-  if      (parseFloat(avgT1shoot) >= parseFloat(avgT2shoot) * 1.3) shootText = team1Data.name + 'は1試合平均' + avgT1shoot + 'シュートと攻撃的な姿勢を見せた一方、' + team2Data.name + 'は' + avgT2shoot + '本にとどまった。';
-  else if (parseFloat(avgT2shoot) >= parseFloat(avgT1shoot) * 1.3) shootText = team2Data.name + 'が1試合平均' + avgT2shoot + 'シュートと攻撃の圧力をかけ続けた。' + team1Data.name + 'は平均' + avgT1shoot + '本だった。';
-  else    shootText = '1試合平均シュート数は' + team1Data.name + '' + avgT1shoot + '本、' + team2Data.name + '' + avgT2shoot + '本と近い数字だった。';
+  if (isEn) {
+    if      (parseFloat(avgT1shoot) >= parseFloat(avgT2shoot) * 1.3) shootText = t1n + ' averaged ' + avgT1shoot + ' shots per game, showing attacking intent. ' + t2n + ' managed just ' + avgT2shoot + '.';
+    else if (parseFloat(avgT2shoot) >= parseFloat(avgT1shoot) * 1.3) shootText = t2n + ' kept up the attacking pressure at ' + avgT2shoot + ' shots per game. ' + t1n + ' averaged ' + avgT1shoot + '.';
+    else    shootText = 'Shots per game were close — ' + t1n + ' ' + avgT1shoot + ', ' + t2n + ' ' + avgT2shoot + '.';
+  } else {
+    if      (parseFloat(avgT1shoot) >= parseFloat(avgT2shoot) * 1.3) shootText = team1Data.name + 'は1試合平均' + avgT1shoot + 'シュートと攻撃的な姿勢を見せた一方、' + team2Data.name + 'は' + avgT2shoot + '本にとどまった。';
+    else if (parseFloat(avgT2shoot) >= parseFloat(avgT1shoot) * 1.3) shootText = team2Data.name + 'が1試合平均' + avgT2shoot + 'シュートと攻撃の圧力をかけ続けた。' + team1Data.name + 'は平均' + avgT1shoot + '本だった。';
+    else    shootText = '1試合平均シュート数は' + team1Data.name + 'が' + avgT1shoot + '本、' + team2Data.name + 'が' + avgT2shoot + '本と近い数字だった。';
+  }
 
   // ④ 最多関与選手
   var mvpText = '';
   var t1top = mvps.filter(function(v){return v.team===team1Data.name;}).slice(0,2);
   var t2top = mvps.filter(function(v){return v.team===team2Data.name;}).slice(0,2);
-  if (t1top.length) mvpText += team1Data.name + 'では' + t1top.map(function(v){return v.name;}).join('・') + 'が攻撃の中心となった。';
-  if (t2top.length) mvpText += team2Data.name + 'では' + t2top.map(function(v){return v.name;}).join('・') + 'の関与が目立った。';
+  if (isEn) {
+    if (t1top.length) mvpText += t1n + ': ' + t1top.map(function(v){return v.en_name||v.name;}).join(' & ') + ' drove the attack. ';
+    if (t2top.length) mvpText += t2n + ': ' + t2top.map(function(v){return v.en_name||v.name;}).join(' & ') + ' were heavily involved.';
+  } else {
+    if (t1top.length) mvpText += team1Data.name + 'では' + t1top.map(function(v){return v.name;}).join('・') + 'が攻撃の中心となった。';
+    if (t2top.length) mvpText += team2Data.name + 'では' + t2top.map(function(v){return v.name;}).join('・') + 'の関与が目立った。';
+  }
 
   // ⑤ 攻撃パターン
   var patText = '';
   if (patterns.length) {
     var top = patterns[0];
-    var topName = top[0].split(' / ')[1] || top[0];
-    var topTeam = top[0].split(' / ')[0] || '';
-    patText = topTeam + 'の得点源は' + topName + 'が最多（' + top[1] + '点）で、効果的なパターンとして機能した。';
+    var topAction = top[0].split(' / ')[1] || top[0];
+    var topTeamRaw = top[0].split(' / ')[0] || '';
+    var topTeamDisp = isEn ? (topTeamRaw === team1Data.name ? t1n : t2n) : topTeamRaw;
+    if (isEn) {
+      patText = topTeamDisp + "'s top scoring method was " + getActionLabel(topAction) + ' (' + top[1] + ' goals).';
+    } else {
+      patText = topTeamDisp + 'の得点源は' + topAction + 'が最多（' + top[1] + '点）で、効果的なパターンとして機能した。';
+    }
   }
 
   // ⑥ GKセーブ
   var saveText = '';
   var avgT1save = (t1save / GAMES).toFixed(1);
   var avgT2save = (t2save / GAMES).toFixed(1);
-  if      (t1save >= t2save * 1.5 && t1save >= 15) saveText = team1Data.name + 'GKは平均' + avgT1save + 'セーブと守護神ぶりを発揮した。';
-  else if (t2save >= t1save * 1.5 && t2save >= 15) saveText = team2Data.name + 'GKが平均' + avgT2save + 'セーブと守備を支えた。';
+  if (isEn) {
+    if      (t1save >= t2save * 1.5 && t1save >= 15) saveText = t1n + "'s goalkeeper averaged " + avgT1save + ' saves per game — a key factor.';
+    else if (t2save >= t1save * 1.5 && t2save >= 15) saveText = t2n + "'s goalkeeper averaged " + avgT2save + ' saves per game — a standout performer.';
+  } else {
+    if      (t1save >= t2save * 1.5 && t1save >= 15) saveText = team1Data.name + 'GKは平均' + avgT1save + 'セーブと守護神ぶりを発揮した。';
+    else if (t2save >= t1save * 1.5 && t2save >= 15) saveText = team2Data.name + 'GKが平均' + avgT2save + 'セーブと守備を支えた。';
+  }
 
   // ⑦ 総合評価
   var overallText;
-  if      (t1wins >= 6 && t1poss >= 52) overallText = '総じて' + team1Data.name + 'が戦術・個人能力ともに上回った10試合だった。';
-  else if (t2wins >= 6 && t2poss >= 52) overallText = '総じて' + team2Data.name + 'の総合力が際立つシリーズとなった。';
-  else if (t1wins >= 6 && t1poss < 50)  overallText = team1Data.name + 'は守備を堅め、カウンターを活かした戦略が奏功した。';
-  else if (Math.abs(t1wins-t2wins) <= 1) overallText = '実力が拮抗しており、どちらが勝ってもおかしくないシリーズだった。';
-  else    overallText = '10試合を通じて多くの見どころがあった。';
+  if (isEn) {
+    if      (t1wins >= 6 && t1poss >= 52) overallText = 'Overall, ' + t1n + ' were superior in both tactics and individual quality across the 10 matches.';
+    else if (t2wins >= 6 && t2poss >= 52) overallText = 'Overall, ' + t2n + ' showed their class throughout the series.';
+    else if (t1wins >= 6 && t1poss < 50)  overallText = t1n + ' defended well and made their counter-attacks count.';
+    else if (Math.abs(t1wins-t2wins) <= 1) overallText = 'A closely matched series — either team could have come out on top.';
+    else    overallText = 'An entertaining 10-match series with plenty of highlights.';
+  } else {
+    if      (t1wins >= 6 && t1poss >= 52) overallText = '総じて' + team1Data.name + 'が戦術・個人能力ともに上回った10試合だった。';
+    else if (t2wins >= 6 && t2poss >= 52) overallText = '総じて' + team2Data.name + 'の総合力が際立つシリーズとなった。';
+    else if (t1wins >= 6 && t1poss < 50)  overallText = team1Data.name + 'は守備を堅め、カウンターを活かした戦略が奏功した。';
+    else if (Math.abs(t1wins-t2wins) <= 1) overallText = '実力が拮抗しており、どちらが勝ってもおかしくないシリーズだった。';
+    else    overallText = '10試合を通じて多くの見どころがあった。';
+  }
 
   var summary = [resultText, possText, shootText, mvpText, patText, saveText, overallText]
     .filter(function(s){return s && s.length > 0;}).join(' ');
 
   el.innerHTML = '<div style="line-height:1.9;font-size:13px">' + summary + '</div>';
-  btn.textContent = '🔄 再生成';
+  btn.textContent = t('regenerateLabel');
   btn.disabled = false;
 }
 
