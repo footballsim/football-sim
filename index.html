@@ -106,11 +106,12 @@ body {
 }
 
 .title-sub {
-  font-size: 14px;
+  font-size: clamp(18px, 4.5vw, 28px);
   color: var(--gold);
-  letter-spacing: 6px;
-  margin-top: 8px;
+  letter-spacing: 5px;
+  margin-top: 4px;
   text-transform: uppercase;
+  font-weight: 700;
 }
 
 .match-list {
@@ -1442,7 +1443,7 @@ body {
 <div id="screen-title" class="screen active">
   <div class="title-content">
     <div class="title-emblem">⚽</div>
-    <div class="title-main" id="title-main-text">日本代表<br>シミュレーター</div>
+    <div class="title-main" id="title-main-text" style="display:none"></div>
     <div class="title-sub">Japan National Team Simulator β版</div>
 
     <!-- 言語切り替えボタン -->
@@ -1818,7 +1819,7 @@ window.LANG = 'ja';
 
 const i18n = {
   ja: {
-    titleMain: '日本代表<br>シミュレーター',
+    titleMain: '',
     matchDateEng: '2026年3月31日 ・ 親善試合', matchDateSco: '2026年3月28日 ・ 親善試合', matchDateBel: '2018年7月2日 ・ ロシアW杯 決勝トーナメント',
     matchTitleEng: '日本 vs イングランド', matchTitleSco: '日本 vs スコットランド', matchTitleBel: '日本 vs ベルギー',
     matchDescEng: '主力をスタメン起用した日本がフォーデン・パーマー擁するイングランドに挑む！',
@@ -1863,7 +1864,7 @@ const i18n = {
     timeFirst: '前半 1-45分', timeSecond: '後半 46-90分', timeLoss: 'ロスタイム',
   },
   en: {
-    titleMain: 'Japan NT<br>Simulator',
+    titleMain: '',
     matchDateEng: 'March 31, 2026 · Friendly', matchDateSco: 'March 28, 2026 · Friendly', matchDateBel: 'July 2, 2018 · Russia WC Round of 16',
     matchTitleEng: 'Japan vs England', matchTitleSco: 'Japan vs Scotland', matchTitleBel: 'Japan vs Belgium',
     matchDescEng: "Japan fields their best XI against Foden & Palmer's England!",
@@ -5983,163 +5984,121 @@ function generateSummary() {
   var el  = document.getElementById('summary-content');
   btn.disabled = true;
   btn.textContent = t('generatingLabel');
+  el.innerHTML = '<span style="color:var(--text-dim);font-size:12px">✨ ' + (window.LANG==='en' ? 'Generating...' : '生成中...') + '</span>';
 
+  // ===== 試合データを集計してWorkerに送る =====
   var t1 = gameState.team1, t2 = gameState.team2;
   var lastRes = chanceResults[chanceResults.length - 1];
   var t1score = lastRes.t1score, t2score = lastRes.t2score;
 
-  // ポゼッション
   var t1atk = 0, t2atk = 0;
   chanceResults.forEach(function(res){ res.scenes.forEach(function(s){ if(s.offence===t1) t1atk++; else t2atk++; }); });
   var t1poss = Math.round(t1atk/(t1atk+t2atk||1)*100);
-  var t2poss = 100 - t1poss;
 
-  // 得点者
   var goals = [];
   chanceResults.forEach(function(res){
     res.scenes.forEach(function(s){
       if(s.result==='ゴール！！'){
         var p = s.offence.players[s.offence.lineup[s.ofsPos]];
-        goals.push({ team: s.offence===t1?team1Data:team2Data, name: p?p.long_name||p.name:'?', en_name: p?p.en_name:'?', dispName: p?(window.LANG==='en'&&p.en_name?p.en_name:p.long_name||p.name):'?', action: s.action, time: res.time });
+        var pname = p ? (window.LANG==='en' && p.en_name ? p.en_name : p.long_name||p.name) : '?';
+        var tname = window.LANG==='en' ? (s.offence===t1?getTeamName(team1Data):getTeamName(team2Data)) : (s.offence===t1?team1Data.name:team2Data.name);
+        goals.push(res.time + ': ' + tname + ' - ' + pname);
       }
     });
   });
 
-  // 選手別MVP
   var counter = {};
   chanceResults.forEach(function(res){ res.scenes.forEach(function(s){
     var p = s.offence.players[s.offence.lineup[s.ofsPos]]; if(!p) return;
     var k = (s.offence===t1?'t1':'t2')+'_'+p.name;
-    if(!counter[k]) counter[k]={name:p.long_name||p.name, en_name:p.en_name, team:s.offence===t1?team1Data:team2Data, count:0, dispName:window.LANG==='en'&&p.en_name?p.en_name:(p.long_name||p.name)};
+    if(!counter[k]) counter[k]={name: window.LANG==='en'&&p.en_name?p.en_name:(p.long_name||p.name), team:s.offence===t1?'t1':'t2', count:0};
     counter[k].count++;
   });});
   var allMvp = Object.values(counter).sort(function(a,b){return b.count-a.count;});
-  var t1mvp = allMvp.filter(function(v){return v.team===team1Data;}).slice(0,3);
-  var t2mvp = allMvp.filter(function(v){return v.team===team2Data;}).slice(0,3);
+  var t1mvp = allMvp.filter(function(v){return v.team==='t1';}).slice(0,2).map(function(v){return v.name+'('+v.count+')';}).join(', ');
+  var t2mvp = allMvp.filter(function(v){return v.team==='t2';}).slice(0,2).map(function(v){return v.name+'('+v.count+')';}).join(', ');
 
-  // シュート・セーブ
-  var t1shoot = t1.shootCounter, t2shoot = t2.shootCounter;
-  var t1save  = t1.gkSaveCounter, t2save  = t2.gkSaveCounter;
-
-  // パターン別ゴール
   var patterns = {};
   chanceResults.forEach(function(res){ res.scenes.forEach(function(s){
-    if(s.result==='ゴール！！'){ var k = s.action; patterns[k]=(patterns[k]||{t1:0,t2:0}); if(s.offence===t1) patterns[k].t1++; else patterns[k].t2++; }
+    if(s.result==='ゴール！！'){ patterns[s.action]=(patterns[s.action]||0)+1; }
   });});
+  var topPat = Object.keys(patterns).sort(function(a,b){return patterns[b]-patterns[a];})[0];
+  var topPatLabel = topPat ? (getActionLabel(topPat) + '(' + patterns[topPat] + ')') : '';
 
-  // ===== 文章生成 =====
-  var lines = [];
-  var isEn = window.LANG === 'en';
-  var t1n = getTeamName(team1Data), t2n = getTeamName(team2Data);
+  var matchData = {
+    team1:  getTeamName(team1Data),
+    team2:  getTeamName(team2Data),
+    score1: t1score,
+    score2: t2score,
+    poss1:  t1poss,
+    poss2:  100 - t1poss,
+    shots1: t1.shootCounter,
+    shots2: t2.shootCounter,
+    saves1: t1.gkSaveCounter,
+    saves2: t2.gkSaveCounter,
+    goals:  goals.join(' / ') || (window.LANG==='en' ? 'None' : 'なし'),
+    mvp1:   t1mvp,
+    mvp2:   t2mvp,
+    topPattern: topPatLabel,
+  };
 
-  // ① 試合結果
-  var resultLabel;
-  if (isEn) {
-    if      (t1score > t2score) resultLabel = t1n + ' won ' + t1score + '-' + t2score + '.';
-    else if (t2score > t1score) resultLabel = t2n + ' won ' + t2score + '-' + t1score + '.';
-    else                        resultLabel = 'The match ended ' + t1score + '-' + t2score + ' in a draw.';
-  } else {
-    if      (t1score > t2score) resultLabel = team1Data.name + 'が' + t1score + 'ー' + t2score + 'で勝利した。';
-    else if (t2score > t1score) resultLabel = team2Data.name + 'が' + t2score + 'ー' + t1score + 'で勝利した。';
-    else                        resultLabel = t1score + 'ー' + t2score + 'のスコアレスドローに終わった。';
-  }
+  // ===== Worker にストリーミングリクエスト =====
+  var WORKER_URL = 'https://footballsimulator.m-iwasaki18.workers.dev';
 
-  // ② ポゼッション
-  var possText;
-  if (isEn) {
-    if      (t1poss >= 55) possText = t1n + ' dominated possession with ' + t1poss + '%.';
-    else if (t2poss >= 55) possText = t2n + ' controlled the game with ' + (100-t1poss) + '% possession.';
-    else                   possText = 'Possession was balanced: ' + t1poss + '% vs ' + (100-t1poss) + '%.';
-  } else {
-    if      (t1poss >= 55) possText = team1Data.name + 'がポゼッション' + t1poss + '%と試合を支配した。';
-    else if (t2poss >= 55) possText = team2Data.name + 'がポゼッション' + (100-t1poss) + '%とゲームをコントロールした。';
-    else                   possText = '両チームはポゼッション' + t1poss + '%対' + (100-t1poss) + '%と拮抗したゲームを展開した。';
-  }
+  fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ matchData: matchData, lang: window.LANG || 'ja' }),
+  }).then(function(res) {
+    if (!res.ok) {
+      return res.text().then(function(body) {
+        throw new Error('HTTP ' + res.status + ': ' + body);
+      });
+    }
 
-  // ③ シュート
-  var shootText;
-  var totalShoot = t1shoot + t2shoot;
-  if (isEn) {
-    if      (totalShoot >= 20) shootText = 'An intense match with ' + totalShoot + ' total shots.';
-    else if (totalShoot >= 12) shootText = 'Both teams combined for ' + totalShoot + ' shots.';
-    else                       shootText = 'Shots: ' + t1n + ' ' + t1shoot + ', ' + t2n + ' ' + t2shoot + '. A cautious affair.';
-  } else {
-    if      (totalShoot >= 20) shootText = '合計' + totalShoot + '本のシュートが飛び交う激しい展開となった。';
-    else if (totalShoot >= 12) shootText = '両チーム合わせて' + totalShoot + '本のシュートが記録された。';
-    else                       shootText = 'シュート数は' + team1Data.name + 'が' + t1shoot + '本、' + team2Data.name + 'が' + t2shoot + '本と、慎重な試合展開だった。';
-  }
+    var reader = res.body.getReader();
+    var decoder = new TextDecoder();
+    var buffer = '';
+    var fullText = '';
+    el.innerHTML = '<div style="line-height:1.9;font-size:13px"></div>';
+    var textEl = el.querySelector('div');
 
-  // ④ 得点シーン
-  var goalText = '';
-  if (goals.length === 0) {
-    goalText = isEn ? 'The match ended goalless.' : 'スコアは動かず、ゴールレスに終わった。';
-  } else {
-    var goalDescs = goals.map(function(g){
-      var gname = isEn ? (g.dispName || g.en_name || g.name) : (g.dispName || g.name);
-      var gteam = isEn ? (g.team.en_name || g.team.name) : g.team.name;
-      if (isEn) {
-        return g.time + ': ' + gteam + ' - ' + gname + ' (' + getActionLabel(g.action) + ')';
-      } else {
-        var actionLabel = g.action.replace('中央からシュート','中央突破').replace('サイドからシュート','サイド切り込み').replace('ヘディングシュート','ヘディング');
-        return g.time + 'に' + g.team.name + '・' + gname + 'が' + actionLabel + 'で得点';
-      }
-    });
-    goalText = isEn ? goalDescs.join(', ') + '.' : goalDescs.join('、') + 'した。';
-  }
+    function read() {
+      reader.read().then(function(chunk) {
+        if (chunk.done) {
+          btn.textContent = t('regenerateLabel');
+          btn.disabled = false;
+          return;
+        }
+        buffer += decoder.decode(chunk.value, { stream: true });
+        var lines = buffer.split('\n');
+        buffer = lines.pop();
+        lines.forEach(function(line) {
+          if (!line.startsWith('data: ')) return;
+          var data = line.slice(6).trim();
+          if (data === '[DONE]') return;
+          try {
+            var json = JSON.parse(data);
+            if (json.type === 'content_block_delta' && json.delta && json.delta.text) {
+              fullText += json.delta.text;
+              textEl.textContent = fullText;
+            }
+          } catch(e) {}
+        });
+        read();
+      }).catch(function(err) {
+        el.innerHTML = '<span style="color:red;font-size:11px">Stream error: ' + err.message + '</span>';
+        btn.textContent = t('regenerateLabel');
+        btn.disabled = false;
+      });
+    }
+    read();
 
-  // ⑤ MVP
-  var mvpText = '';
-  if (isEn) {
-    if (t1mvp.length) mvpText += t1n + ': ' + t1mvp.map(function(v){return (v.dispName||v.en_name||v.name)+'('+v.count+'x)';}).join(', ') + ' stood out. ';
-    if (t2mvp.length) mvpText += t2n + ': ' + t2mvp.map(function(v){return (v.dispName||v.en_name||v.name)+'('+v.count+'x)';}).join(', ') + ' were influential.';
-  } else {
-    if (t1mvp.length) mvpText += team1Data.name + 'では' + t1mvp.map(function(v){return v.name+'（'+v.count+'回関与）';}).join('、') + 'が目立った。';
-    if (t2mvp.length) mvpText += team2Data.name + 'では' + t2mvp.map(function(v){return v.name+'（'+v.count+'回関与）';}).join('、') + 'が存在感を示した。';
-  }
-
-  // ⑥ パターン分析
-  var patKeys = Object.keys(patterns);
-  var patText = '';
-  if (patKeys.length) {
-    var topPat = patKeys.sort(function(a,b){ return (patterns[b].t1+patterns[b].t2)-(patterns[a].t1+patterns[a].t2); })[0];
-    var topCount = patterns[topPat].t1 + patterns[topPat].t2;
-    patText = isEn
-      ? 'Most goals came from ' + getActionLabel(topPat) + ' (' + topCount + ').'
-      : '得点の多くは' + topPat + '（' + topCount + '点）から生まれた。';
-  }
-
-  // ⑦ GKセーブ
-  var saveText = '';
-  if (isEn) {
-    if (t1save >= 4) saveText = t1n + "'s GK made " + t1save + ' saves.';
-    else if (t2save >= 4) saveText = t2n + "'s GK made " + t2save + ' saves.';
-  } else {
-    if (t1save >= 4) saveText = team1Data.name + 'GKが' + t1save + 'セーブの奮闘を見せた。';
-    else if (t2save >= 4) saveText = team2Data.name + 'GKが' + t2save + 'セーブの好守を見せた。';
-  }
-
-  // 総合コメント
-  var overallText = '';
-  if (isEn) {
-    if      (t1score > t2score && t1poss >= 55) overallText = t1n + ' dominated throughout for a convincing win.';
-    else if (t1score > t2score && t1poss < 50)  overallText = t1n + ' were efficient despite being under pressure.';
-    else if (t2score > t1score && t2save >= 3)  overallText = t2n + "'s GK was key to the result.";
-    else if (t1score === t2score)               overallText = 'An evenly-matched contest neither side deserved to lose.';
-    else                                        overallText = t2n + ' showed their class when it mattered.';
-  } else {
-    if      (t1score > t2score && t1poss >= 55) overallText = team1Data.name + 'が主導権を握り続けた完勝だった。';
-    else if (t1score > t2score && t1poss < 50)  overallText = team1Data.name + 'は劣勢ながらも効率的な攻撃で勝利をもぎ取った。';
-    else if (t2score > t1score && t2save >= 3)  overallText = team2Data.name + 'GKの活躍も光る試合だった。';
-    else if (t1score === t2score)               overallText = '両チームが互いに一歩も引かない好ゲームだった。';
-    else                                        overallText = team2Data.name + 'の底力が光る試合だった。';
-  }
-
-  var summary = [resultLabel, possText, shootText, goalText, mvpText, patText, saveText, overallText]
-    .filter(function(s){return s.length > 0;}).join(' ');
-
-  el.innerHTML = '<div style="line-height:1.9;font-size:13px">' + summary + '</div>';
-  btn.textContent = t('regenerateLabel');
-  btn.disabled = false;
+  }).catch(function(err) {
+    el.innerHTML = '<span style="color:red;font-size:11px">接続エラー: ' + err.message + '</span>';
+    btn.textContent = t('regenerateLabel');
+    btn.disabled = false;
+  });
 }
 
 // ===== AI総括（10試合モード・ルールベース）=====
@@ -6148,126 +6107,103 @@ function generateMultiSummary(t1wins, t2wins, draws, t1poss, t1shoot, t2shoot, G
   var el  = document.getElementById('multi-summary-content');
   btn.disabled = true;
   btn.textContent = t('generatingLabel');
+  el.innerHTML = '<span style="color:var(--text-dim);font-size:12px">✨ ' + (window.LANG==='en' ? 'Generating...' : '生成中...') + '</span>';
 
-  var mvps     = window._multiMvps    || [];
-  var patterns = window._multiPatterns|| [];
-  var hl       = window._multiHL      || [];
-  var t1save   = window._t1saveTotal  || 0;
-  var t2save   = window._t2saveTotal  || 0;
-  var t2poss   = 100 - t1poss;
   GAMES = GAMES || 10;
-  var isEn     = window.LANG === 'en';
-  var t1n      = getTeamName(team1Data);
-  var t2n      = getTeamName(team2Data);
-
-  // ① 勝敗総評
-  var resultText;
-  var domThresh  = Math.round(GAMES * 0.70); // 70%以上 → 圧倒
-  var edgeThresh = Math.round(GAMES * 0.50); // 50%超  → 優位
-  if (isEn) {
-    if      (t1wins >= domThresh) resultText = t1n + ' dominated with ' + t1wins + 'W-' + draws + 'D-' + t2wins + 'L over ' + GAMES + ' matches.';
-    else if (t1wins > edgeThresh) resultText = t1n + ' had the edge with ' + t1wins + ' wins across ' + GAMES + ' matches.';
-    else if (t1wins === t2wins)   resultText = 'An even series — ' + t1wins + 'W-' + draws + 'D-' + t2wins + 'L for both sides (' + GAMES + ' matches).';
-    else if (t2wins >= domThresh) resultText = t2n + ' dominated the ' + GAMES + '-match series with ' + t2wins + ' wins.';
-    else if (t2wins > edgeThresh) resultText = t2n + ' had the edge with ' + t2wins + ' wins across ' + GAMES + ' matches.';
-    else                          resultText = t2n + ' edged the series ' + t2wins + 'W-' + draws + 'D-' + t1wins + 'L (' + GAMES + ' matches).';
-  } else {
-    if      (t1wins >= domThresh) resultText = team1Data.name + 'が' + t1wins + '勝' + draws + '分' + t2wins + '敗と圧倒的な強さを見せた（' + GAMES + '試合）。';
-    else if (t1wins > edgeThresh) resultText = team1Data.name + 'が' + t1wins + '勝と優位に立った' + GAMES + '試合だった。';
-    else if (t1wins === t2wins)   resultText = '両チームが' + t1wins + '勝' + draws + '分' + t2wins + '敗と互角の戦いを繰り広げた（' + GAMES + '試合）。';
-    else if (t2wins >= domThresh) resultText = team2Data.name + 'が' + t2wins + '勝と' + GAMES + '試合を制した。';
-    else if (t2wins > edgeThresh) resultText = team2Data.name + 'が' + t2wins + '勝と優位に立った' + GAMES + '試合だった。';
-    else                          resultText = team2Data.name + 'が' + t2wins + '勝' + draws + '分' + t1wins + '敗と上回った（' + GAMES + '試合）。';
-  }
-
-  // ② ポゼッション傾向
-  var possText;
-  if (isEn) {
-    if      (t1poss >= 55) possText = t1n + ' averaged ' + t1poss + '% possession and controlled the tempo throughout.';
-    else if (t2poss >= 55) possText = t2n + ' averaged ' + t2poss + '% possession and dictated play.';
-    else    possText = 'Possession was closely contested at ' + t1poss + '% vs ' + t2poss + '% on average.';
-  } else {
-    if      (t1poss >= 55) possText = team1Data.name + 'はポゼッション平均' + t1poss + '%とゲームを支配する展開が続いた。';
-    else if (t2poss >= 55) possText = team2Data.name + 'がポゼッション平均' + t2poss + '%とボールを握り続けた。';
-    else    possText = 'ポゼッションは' + t1poss + '対' + t2poss + 'とほぼ拮抗し、どちらが主導権を握るか分からない試合が続いた。';
-  }
-
-  // ③ シュート傾向
+  var isEn = window.LANG === 'en';
+  var t1n  = getTeamName(team1Data);
+  var t2n  = getTeamName(team2Data);
+  var t2poss = 100 - t1poss;
   var avgT1shoot = (t1shoot / GAMES).toFixed(1);
   var avgT2shoot = (t2shoot / GAMES).toFixed(1);
-  var shootText;
-  if (isEn) {
-    if      (parseFloat(avgT1shoot) >= parseFloat(avgT2shoot) * 1.3) shootText = t1n + ' averaged ' + avgT1shoot + ' shots per game, showing attacking intent. ' + t2n + ' managed just ' + avgT2shoot + '.';
-    else if (parseFloat(avgT2shoot) >= parseFloat(avgT1shoot) * 1.3) shootText = t2n + ' kept up the attacking pressure at ' + avgT2shoot + ' shots per game. ' + t1n + ' averaged ' + avgT1shoot + '.';
-    else    shootText = 'Shots per game were close — ' + t1n + ' ' + avgT1shoot + ', ' + t2n + ' ' + avgT2shoot + '.';
-  } else {
-    if      (parseFloat(avgT1shoot) >= parseFloat(avgT2shoot) * 1.3) shootText = team1Data.name + 'は1試合平均' + avgT1shoot + 'シュートと攻撃的な姿勢を見せた一方、' + team2Data.name + 'は' + avgT2shoot + '本にとどまった。';
-    else if (parseFloat(avgT2shoot) >= parseFloat(avgT1shoot) * 1.3) shootText = team2Data.name + 'が1試合平均' + avgT2shoot + 'シュートと攻撃の圧力をかけ続けた。' + team1Data.name + 'は平均' + avgT1shoot + '本だった。';
-    else    shootText = '1試合平均シュート数は' + team1Data.name + 'が' + avgT1shoot + '本、' + team2Data.name + 'が' + avgT2shoot + '本と近い数字だった。';
-  }
 
-  // ④ 最多関与選手
-  var mvpText = '';
-  var t1top = mvps.filter(function(v){return v.team===team1Data.name;}).slice(0,2);
-  var t2top = mvps.filter(function(v){return v.team===team2Data.name;}).slice(0,2);
-  if (isEn) {
-    if (t1top.length) mvpText += t1n + ': ' + t1top.map(function(v){return v.en_name||v.name;}).join(' & ') + ' drove the attack. ';
-    if (t2top.length) mvpText += t2n + ': ' + t2top.map(function(v){return v.en_name||v.name;}).join(' & ') + ' were heavily involved.';
-  } else {
-    if (t1top.length) mvpText += team1Data.name + 'では' + t1top.map(function(v){return v.name;}).join('・') + 'が攻撃の中心となった。';
-    if (t2top.length) mvpText += team2Data.name + 'では' + t2top.map(function(v){return v.name;}).join('・') + 'の関与が目立った。';
-  }
+  // MVP上位2名
+  var mvps = window._multiMvps || [];
+  var t1top = mvps.filter(function(v){return v.team===team1Data.name;}).slice(0,2)
+              .map(function(v){return (isEn&&v.en_name?v.en_name:v.name)+'('+v.count+')';}).join(', ');
+  var t2top = mvps.filter(function(v){return v.team===team2Data.name;}).slice(0,2)
+              .map(function(v){return (isEn&&v.en_name?v.en_name:v.name)+'('+v.count+')';}).join(', ');
 
-  // ⑤ 攻撃パターン
-  var patText = '';
-  if (patterns.length) {
-    var top = patterns[0];
-    var topAction = top[0].split(' / ')[1] || top[0];
-    var topTeamRaw = top[0].split(' / ')[0] || '';
-    var topTeamDisp = isEn ? (topTeamRaw === team1Data.name ? t1n : t2n) : topTeamRaw;
-    if (isEn) {
-      patText = topTeamDisp + "'s top scoring method was " + getActionLabel(topAction) + ' (' + top[1] + ' goals).';
-    } else {
-      patText = topTeamDisp + 'の得点源は' + topAction + 'が最多（' + top[1] + '点）で、効果的なパターンとして機能した。';
+  // 攻撃パターン
+  var patterns = window._multiPatterns || [];
+  var topPat = patterns.length ? getActionLabel(patterns[0][0].split(' / ')[1]||patterns[0][0]) + '(' + patterns[0][1] + ')' : '';
+
+  var matchData = {
+    team1:      t1n,
+    team2:      t2n,
+    score1:     t1wins,
+    score2:     t2wins,
+    draws:      draws,
+    games:      GAMES,
+    poss1:      t1poss,
+    poss2:      t2poss,
+    shots1:     parseFloat(avgT1shoot),
+    shots2:     parseFloat(avgT2shoot),
+    saves1:     ((window._t1saveTotal||0)/GAMES).toFixed(1),
+    saves2:     ((window._t2saveTotal||0)/GAMES).toFixed(1),
+    goals:      t1wins + 'W-' + draws + 'D-' + t2wins + 'L',
+    mvp1:       t1top,
+    mvp2:       t2top,
+    topPattern: topPat,
+    isMulti:    true,
+  };
+
+  var WORKER_URL = 'https://footballsimulator.m-iwasaki18.workers.dev';
+
+  fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ matchData: matchData, lang: window.LANG || 'ja' }),
+  }).then(function(res) {
+    if (!res.ok) {
+      return res.text().then(function(body) {
+        throw new Error('HTTP ' + res.status + ': ' + body);
+      });
     }
-  }
 
-  // ⑥ GKセーブ
-  var saveText = '';
-  var avgT1save = (t1save / GAMES).toFixed(1);
-  var avgT2save = (t2save / GAMES).toFixed(1);
-  if (isEn) {
-    if      (t1save >= t2save * 1.5 && t1save >= 15) saveText = t1n + "'s goalkeeper averaged " + avgT1save + ' saves per game — a key factor.';
-    else if (t2save >= t1save * 1.5 && t2save >= 15) saveText = t2n + "'s goalkeeper averaged " + avgT2save + ' saves per game — a standout performer.';
-  } else {
-    if      (t1save >= t2save * 1.5 && t1save >= 15) saveText = team1Data.name + 'GKは平均' + avgT1save + 'セーブと守護神ぶりを発揮した。';
-    else if (t2save >= t1save * 1.5 && t2save >= 15) saveText = team2Data.name + 'GKが平均' + avgT2save + 'セーブと守備を支えた。';
-  }
+    var reader = res.body.getReader();
+    var decoder = new TextDecoder();
+    var buffer = '';
+    var fullText = '';
+    el.innerHTML = '<div style="line-height:1.9;font-size:13px"></div>';
+    var textEl = el.querySelector('div');
 
-  // ⑦ 総合評価
-  var overallText;
-  var overThresh = Math.round(GAMES * 0.60); // 60%以上 → 上回った
-  var closeThresh = Math.round(GAMES * 0.10); // 10%以内 → 拮抗
-  if (isEn) {
-    if      (t1wins >= overThresh && t1poss >= 52) overallText = 'Overall, ' + t1n + ' were superior in both tactics and individual quality across ' + GAMES + ' matches.';
-    else if (t2wins >= overThresh && t2poss >= 52) overallText = 'Overall, ' + t2n + ' showed their class throughout the ' + GAMES + '-match series.';
-    else if (t1wins >= overThresh && t1poss < 50)  overallText = t1n + ' defended well and made their counter-attacks count.';
-    else if (Math.abs(t1wins-t2wins) <= closeThresh) overallText = 'A closely matched series — either team could have come out on top.';
-    else    overallText = 'An entertaining ' + GAMES + '-match series with plenty of highlights.';
-  } else {
-    if      (t1wins >= overThresh && t1poss >= 52) overallText = '総じて' + team1Data.name + 'が戦術・個人能力ともに上回った' + GAMES + '試合だった。';
-    else if (t2wins >= overThresh && t2poss >= 52) overallText = '総じて' + team2Data.name + 'の総合力が際立つシリーズとなった。';
-    else if (t1wins >= overThresh && t1poss < 50)  overallText = team1Data.name + 'は守備を堅め、カウンターを活かした戦略が奏功した。';
-    else if (Math.abs(t1wins-t2wins) <= closeThresh) overallText = '実力が拮抗しており、どちらが勝ってもおかしくないシリーズだった。';
-    else    overallText = GAMES + '試合を通じて多くの見どころがあった。';
-  }
+    function read() {
+      reader.read().then(function(chunk) {
+        if (chunk.done) {
+          btn.textContent = t('regenerateLabel');
+          btn.disabled = false;
+          return;
+        }
+        buffer += decoder.decode(chunk.value, { stream: true });
+        var lines = buffer.split('\n');
+        buffer = lines.pop();
+        lines.forEach(function(line) {
+          if (!line.startsWith('data: ')) return;
+          var data = line.slice(6).trim();
+          if (data === '[DONE]') return;
+          try {
+            var json = JSON.parse(data);
+            if (json.type === 'content_block_delta' && json.delta && json.delta.text) {
+              fullText += json.delta.text;
+              textEl.textContent = fullText;
+            }
+          } catch(e) {}
+        });
+        read();
+      }).catch(function(err) {
+        el.innerHTML = '<span style="color:red;font-size:11px">Stream error: ' + err.message + '</span>';
+        btn.textContent = t('regenerateLabel');
+        btn.disabled = false;
+      });
+    }
+    read();
 
-  var summary = [resultText, possText, shootText, mvpText, patText, saveText, overallText]
-    .filter(function(s){return s && s.length > 0;}).join(' ');
-
-  el.innerHTML = '<div style="line-height:1.9;font-size:13px">' + summary + '</div>';
-  btn.textContent = t('regenerateLabel');
-  btn.disabled = false;
+  }).catch(function(err) {
+    el.innerHTML = '<span style="color:red;font-size:11px">接続エラー: ' + err.message + '</span>';
+    btn.textContent = t('regenerateLabel');
+    btn.disabled = false;
+  });
 }
 
 
