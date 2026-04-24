@@ -3,18 +3,18 @@
 <head>
 <!-- OGP / SNSシェア用メタタグ -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Football Simulator AI">
+  <meta property="og:title" content="Football Simulation Lab">
   <meta property="og:description" content="Simulate football matches with real player stats, tactics and formations. Japan NT vs England, Scotland &amp; more.">
   <meta property="og:image" content="https://YOUR_SITE_URL/top.png">
   <meta property="og:url" content="https://YOUR_SITE_URL">
-  <meta property="og:site_name" content="Football Sim">
+  <meta property="og:site_name" content="Football Simulation Lab">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Football Simulator AI">
+  <meta name="twitter:title" content="Football Simulation Lab">
   <meta name="twitter:description" content="Simulate football matches with real player stats, tactics and formations.">
   <meta name="twitter:image" content="https://YOUR_SITE_URL/top.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Football Simulator AI</title>
+<title>Football Simulation Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -108,9 +108,8 @@ body {
 .title-sub {
   font-size: clamp(18px, 4.5vw, 28px);
   color: var(--gold);
-  letter-spacing: 5px;
+  letter-spacing: 3px;
   margin-top: 4px;
-  text-transform: uppercase;
   font-weight: 700;
 }
 
@@ -1444,7 +1443,7 @@ body {
   <div class="title-content">
     <div class="title-emblem">⚽</div>
     <div class="title-main" id="title-main-text" style="display:none"></div>
-    <div class="title-sub">Football Simulator AI</div>
+    <div class="title-sub">Football Simulation Lab</div>
 
     <!-- 言語切り替えボタン -->
     <div style="display:flex;gap:8px;justify-content:center;margin:10px 0 4px">
@@ -1489,7 +1488,7 @@ body {
     <div class="disclaimer-box" id="disclaimer-text">
       ⚠️ 本アプリは個人制作のファン向けシミュレーターです。日本サッカー協会・各チーム・選手等とは一切関係ありません。選手パラメータは独自設定です。商業目的のコンテンツではありません。
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.0.3</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.0.5</div>
   </div>
 </div>
 
@@ -6009,7 +6008,7 @@ function setResultImage(team1Score, team2Score) {
 function shareToX(mode) {
   var isEn = window.LANG === 'en';
   var siteUrl = 'https://footballsim.github.io/football-sim/';
-  var tags = isEn ? '#FootballSimulatorAI #Soccer #FootballSim' : '#FootballSimulatorAI #サッカー #日本代表';
+  var tags = isEn ? '#FootballSimulationLab #Soccer #FootballSim' : '#FootballSimulationLab #サッカー #日本代表';
   var text;
 
   if (!mode || mode === 'single') {
@@ -6565,7 +6564,7 @@ function drawShareCanvas(ctx, d, isEn, S) {
   }
 
   // watermark
-  textCenter(ctx, 'Football Simulator AI', S-200, S-24, '400 22px Arial', DIMWHITE);
+  textCenter(ctx, 'Football Simulation Lab', S-200, S-24, '400 22px Arial', DIMWHITE);
 }
 
 
