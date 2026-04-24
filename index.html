@@ -1681,6 +1681,10 @@ body {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         <span id="share-x-label">Xでシェア</span>
       </button>
+      <button class="share-btn" style="flex:1;background:#ff4500;color:white" onclick="shareToReddit('single')">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="white"><circle cx="10" cy="10" r="10" fill="#ff4500"/><path d="M16.67 10a1.46 1.46 0 0 0-2.47-1 7.12 7.12 0 0 0-3.85-1.23l.65-3.07 2.13.45a1 1 0 1 0 .14-.55l-2.38-.5a.26.26 0 0 0-.31.2l-.73 3.44a7.14 7.14 0 0 0-3.89 1.23 1.46 1.46 0 1 0-1.61 2.39 2.87 2.87 0 0 0 0 .44c0 2.24 2.61 4.06 5.83 4.06s5.83-1.82 5.83-4.06a2.87 2.87 0 0 0 0-.44 1.46 1.46 0 0 0 .57-1.36zM7.27 11a1 1 0 1 1 1 1 1 1 0 0 1-1-1zm5.58 2.64a3.56 3.56 0 0 1-2.85.5 3.56 3.56 0 0 1-2.85-.5.26.26 0 0 1 .37-.37 3.13 3.13 0 0 0 2.48.38 3.13 3.13 0 0 0 2.48-.38.26.26 0 0 1 .37.37zm-.17-1.64a1 1 0 1 1 1-1 1 1 0 0 1-1 1z" fill="white"/></svg>
+        <span id="share-reddit-label">Reddit</span>
+      </button>
       <button class="share-btn" style="flex:1;background:linear-gradient(135deg,#1a3a6b,#0050cc);color:white" onclick="generateShareImage('single')">
         📸 <span id="share-img-label">画像を保存</span>
       </button>
@@ -1836,7 +1840,7 @@ const i18n = {
     screenKeyplayer: 'キープレイヤー選択', screenMarked: '要注意プレイヤー選択',
     screenResult: '試合結果', screenMulti: '10試合シミュレーション',
     screenPlayerDetail: '選手データ', screenPlayers: '選手データリスト',
-    shareImg: '📸 画像を保存', shareImgSaved: '✅ 保存しました',
+    shareImg: '📸 画像', shareImgSaved: '✅ 保存しました', shareX: 'Xでシェア', shareReddit: 'Reddit',
     btnBack: '← 戻る', btnDecide: '決定', btnKickoff: '⚽ キックオフ！', btnMulti: '📊 10試合', btnMulti100: '📊 100試合',
     labelStarting: 'スターティングメンバー', labelDrag: 'ドラッグで選手入れ替え',
     labelBench: '控え', labelSystem: 'システム', labelTactics: '戦術',
@@ -1882,7 +1886,7 @@ const i18n = {
     screenKeyplayer: 'Select Key Player', screenMarked: 'Select Marked Player',
     screenResult: 'Match Result', screenMulti: '10-Match Simulation',
     screenPlayerDetail: 'Player Data', screenPlayers: 'Player Data List',
-    shareImg: '📸 Save Image', shareImgSaved: '✅ Saved!',
+    shareImg: '📸 Image', shareImgSaved: '✅ Saved!', shareX: 'Share on X', shareReddit: 'Reddit',
     btnBack: '← Back', btnDecide: 'Confirm', btnKickoff: '⚽ Kick Off!', btnMulti: '📊 10', btnMulti100: '📊 100',
     labelStarting: 'Starting XI', labelDrag: 'Drag to swap players',
     labelBench: 'Bench', labelSystem: 'Formation', labelTactics: 'Tactics',
@@ -5494,7 +5498,11 @@ function runMultiGame(GAMES) {
   window._multiGoalScorers = goalScorers;
 
   // 📸 シェアボタンを追加
-  html += '<button onclick="generateShareImage(\'multi\')" style="width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#1a3a6b,#0050cc);color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:12px">' + t('shareImg') + '</button>';
+  html += '<div style="display:flex;gap:8px;margin-bottom:12px">'
+    + '<button onclick="shareToX(\'multi\')" style="flex:1;padding:10px;border:none;border-radius:10px;background:#000;color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">𝕏 ' + t('shareX') + '</button>'
+    + '<button onclick="shareToReddit(\'multi\')" style="flex:1;padding:10px;border:none;border-radius:10px;background:#ff4500;color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Reddit</button>'
+    + '<button onclick="generateShareImage(\'multi\')" style="flex:1;padding:10px;border:none;border-radius:10px;background:linear-gradient(135deg,#1a3a6b,#0050cc);color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">' + t('shareImg') + '</button>'
+    + '</div>';
 
   _duelScenesCache = scenesAllMulti;
   el.innerHTML = html;
@@ -5997,26 +6005,57 @@ function setResultImage(team1Score, team2Score) {
   }
 }
 
-function shareToX() {
-  const score1 = document.getElementById('result-score1').textContent;
-  const score2 = document.getElementById('result-score2').textContent;
-  const name1  = document.getElementById('result-name1').textContent;
-  const name2  = document.getElementById('result-name2').textContent;
-  const winner = document.getElementById('result-winner').textContent;
+function shareToX(mode) {
+  var isEn = window.LANG === 'en';
+  var siteUrl = 'https://mitsuru18.github.io/football-sim/';
+  var tags = isEn ? '#FootballSimulatorAI #Soccer #FootballSim' : '#FootballSimulatorAI #サッカー #日本代表';
+  var text;
 
-  let emoji = '⚽';
-  if (winner.includes('勝利') || winner.includes('wins')) emoji = '🎉';
-  else if (winner.includes('敗') || winner.includes('Defeat')) emoji = '😭';
+  if (!mode || mode === 'single') {
+    var score1 = document.getElementById('result-score1').textContent;
+    var score2 = document.getElementById('result-score2').textContent;
+    var name1  = document.getElementById('result-name1').textContent;
+    var name2  = document.getElementById('result-name2').textContent;
+    var winner = document.getElementById('result-winner').textContent;
+    var emoji  = winner.includes('勝利')||winner.includes('Win') ? '🎉' : winner.includes('敗')||winner.includes('Defeat') ? '😭' : '🤝';
+    text = emoji + ' ' + name1 + ' ' + score1 + '-' + score2 + ' ' + name2 + '\n' + winner + '\n\n' + siteUrl + '\n' + tags;
+  } else {
+    var GAMES = window._multiGAMES || 10;
+    var t1wins = window._multiT1wins || 0;
+    var t2wins = window._multiT2wins || 0;
+    var draws  = GAMES - t1wins - t2wins;
+    var n1 = getTeamName(team1Data), n2 = getTeamName(team2Data);
+    text = '⚽ ' + n1 + ' vs ' + n2 + ' (' + GAMES + (isEn?' matches':'試合') + ')\n'
+      + n1 + ' ' + t1wins + (isEn?'W':'勝') + ' / ' + draws + (isEn?'D':'分') + ' / ' + n2 + ' ' + t2wins + (isEn?'W':'勝') + '\n\n'
+      + siteUrl + '\n' + tags;
+  }
 
-  const scorers = document.getElementById('result-scorers').textContent.trim();
-  const scorerText = scorers ? `\n${scorers}` : '';
-  const tags = window.LANG === 'en'
-    ? '#JapanNT #FootballSim #Soccer'
-    : '#日本代表 #FootballSim #サッカー';
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text), '_blank');
+}
 
-  const text = `${emoji} ${name1} ${score1}-${score2} ${name2}${scorerText}\n\n${tags}`;
-  const url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text);
-  window.open(url, '_blank');
+function shareToReddit(mode) {
+  var isEn = window.LANG === 'en';
+  var siteUrl = 'https://mitsuru18.github.io/football-sim/';
+  var title, text;
+
+  if (!mode || mode === 'single') {
+    var score1 = document.getElementById('result-score1').textContent;
+    var score2 = document.getElementById('result-score2').textContent;
+    var name1  = document.getElementById('result-name1').textContent;
+    var name2  = document.getElementById('result-name2').textContent;
+    title = name1 + ' ' + score1 + '-' + score2 + ' ' + name2 + (isEn ? ' — Match Simulation Result' : ' シミュレーション結果');
+  } else {
+    var GAMES = window._multiGAMES || 10;
+    var t1wins = window._multiT1wins || 0;
+    var t2wins = window._multiT2wins || 0;
+    var draws  = GAMES - t1wins - t2wins;
+    var n1 = getTeamName(team1Data), n2 = getTeamName(team2Data);
+    title = n1 + ' vs ' + n2 + ' ' + GAMES + (isEn ? '-Match Simulation: ' : '試合結果: ')
+      + t1wins + (isEn?'W':' 勝') + '-' + draws + (isEn?'D':' 分') + '-' + t2wins + (isEn?'W':' 勝');
+  }
+
+  var redditUrl = 'https://www.reddit.com/submit?url=' + encodeURIComponent(siteUrl) + '&title=' + encodeURIComponent(title);
+  window.open(redditUrl, '_blank');
 }
 
 // ===== AI試合総括（ルールベース）=====
@@ -6404,7 +6443,7 @@ function buildShareCardHtml(d, isEn) {
     var scorer1Html = d.scorers1.map(function(v, i) {
       var medal = i===0?'🥇':i===1?'🥈':'🥉';
       var nm = (isEn && v.en_name) ? v.en_name : v.name;
-      return '<div style="font-size:12px;color:white;padding:3px 0">' + medal + ' ' + nm + ' <span style="color:' + d.color1 + ';font-weight:700">' + v.goals + 'G</span></div>';
+      return '<div style="font-size:12px;color:white;padding:3px 0">' + medal + ' ' + nm + ' <span style="color:#7ec8f0;font-weight:700">' + v.goals + 'G</span></div>';
     }).join('');
     var scorer2Html = d.scorers2.map(function(v, i) {
       var medal = i===0?'🥇':i===1?'🥈':'🥉';
@@ -6443,7 +6482,7 @@ function buildShareCardHtml(d, isEn) {
       // Top Scorers
       + '<div style="display:flex;gap:16px;width:100%;max-width:460px">'
         + '<div style="flex:1;background:rgba(255,255,255,0.06);border-radius:10px;padding:12px">'
-          + '<div style="font-size:11px;color:' + d.color1 + ';font-weight:700;margin-bottom:8px;text-transform:uppercase">' + topScorersLabel + '</div>'
+          + '<div style="font-size:11px;color:#7ec8f0;font-weight:700;margin-bottom:8px;text-transform:uppercase">' + topScorersLabel + '</div>'
           + scorer1Html
         + '</div>'
         + '<div style="flex:1;background:rgba(255,255,255,0.06);border-radius:10px;padding:12px">'
