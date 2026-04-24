@@ -1496,7 +1496,7 @@ body {
     <div class="disclaimer-box" id="disclaimer-text">
       ⚠️ 本アプリは個人制作のファン向けシミュレーターです。日本サッカー協会・各チーム・選手等とは一切関係ありません。選手パラメータは独自設定です。商業目的のコンテンツではありません。
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.0.9</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.1.0</div>
   </div>
 </div>
 
@@ -6378,8 +6378,11 @@ function generateShareImage(mode) {
   canvas.toBlob(function(blob) {
     var file = new File([blob], 'football-sim-result.png', { type: 'image/png' });
 
-    // Web Share API（iPhone Safari等で画像付き共有シートを開く）
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    // スマホ判定（タッチデバイス）
+    var isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+
+    // Web Share API（スマホのみ）
+    if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
       navigator.share({
         files: [file],
         title: 'Football Simulation Lab',
