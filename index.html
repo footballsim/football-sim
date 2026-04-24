@@ -1433,6 +1433,7 @@ body {
   text-align: left;
 }
 </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -1674,11 +1675,16 @@ body {
       <button class="home-btn" onclick="showScreen('title')">🏠 トップへ</button>
     </div>
 
-    <!-- Xシェアボタン -->
-    <button class="share-btn share-btn-x" onclick="shareToX()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-      <span id="share-x-label">Xでシェア</span>
-    </button>
+    <!-- シェアボタン群 -->
+    <div style="display:flex;gap:8px;margin-bottom:4px">
+      <button class="share-btn share-btn-x" onclick="shareToX()" style="flex:1">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <span id="share-x-label">Xでシェア</span>
+      </button>
+      <button class="share-btn" style="flex:1;background:linear-gradient(135deg,#1a3a6b,#0050cc);color:white" onclick="generateShareImage('single')">
+        📸 <span id="share-img-label">画像を保存</span>
+      </button>
+    </div>
 
     <!-- エリア勝率 -->
     <div class="result-log-section">
@@ -1830,6 +1836,7 @@ const i18n = {
     screenKeyplayer: 'キープレイヤー選択', screenMarked: '要注意プレイヤー選択',
     screenResult: '試合結果', screenMulti: '10試合シミュレーション',
     screenPlayerDetail: '選手データ', screenPlayers: '選手データリスト',
+    shareImg: '📸 画像を保存', shareImgSaved: '✅ 保存しました',
     btnBack: '← 戻る', btnDecide: '決定', btnKickoff: '⚽ キックオフ！', btnMulti: '📊 10試合', btnMulti100: '📊 100試合',
     labelStarting: 'スターティングメンバー', labelDrag: 'ドラッグで選手入れ替え',
     labelBench: '控え', labelSystem: 'システム', labelTactics: '戦術',
@@ -1875,6 +1882,7 @@ const i18n = {
     screenKeyplayer: 'Select Key Player', screenMarked: 'Select Marked Player',
     screenResult: 'Match Result', screenMulti: '10-Match Simulation',
     screenPlayerDetail: 'Player Data', screenPlayers: 'Player Data List',
+    shareImg: '📸 Save Image', shareImgSaved: '✅ Saved!',
     btnBack: '← Back', btnDecide: 'Confirm', btnKickoff: '⚽ Kick Off!', btnMulti: '📊 10', btnMulti100: '📊 100',
     labelStarting: 'Starting XI', labelDrag: 'Drag to swap players',
     labelBench: 'Bench', labelSystem: 'Formation', labelTactics: 'Tactics',
@@ -1940,7 +1948,7 @@ function getActionLabel(action) {
 function getPlayerDisplayName(player) {
   if (!player) return '?';
   if (window.LANG === 'en' && player.en_name) return player.en_name;
-  return player.long_name || player.name;
+  return (window.LANG === 'en' && player.en_name) ? player.en_name : (player.long_name || player.name);
 }
 
 function setLang(lang) {
@@ -1979,6 +1987,7 @@ function applyLang() {
   _setText('chance-label-text', t('chanceLabel') + ' ');
   _setText('game-in-progress-label', t('gameInProgress'));
   _setText('share-x-label', t('shareX'));
+  _setText('share-img-label', t('shareImg'));
   // 設定画面ラベル
   _setText('label-starting',          t('labelStarting'));
   _setText('label-drag',              t('labelDrag'));
@@ -3102,7 +3111,7 @@ function openMarkedPlayerSelect() {
     item.style.cssText = isGKitem ? 'opacity:0.4;pointer-events:none' : '';
     item.innerHTML = `
       <div style="background:${isGKitem ? '#555' : team2Data.team_color};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${sys2.positions[pos].replace(/[左右]/g,'').substring(0,2)}</div>
-      <div class="psi-name">${getPlayerName(p)}<span style="font-size:11px;color:var(--text-dim);margin-left:6px">${p.long_name}</span>${isGKitem ? `<span style="font-size:10px;color:#888;margin-left:6px">${t('gkDisabled')}</span>` : ''}</div>
+      <div class="psi-name">${getPlayerName(p)}${isGKitem ? `<span style="font-size:10px;color:#888;margin-left:6px">${t('gkDisabled')}</span>` : ''}</div>
       ${team1State.marked_player === playerIdx ? '<span style="color:var(--japan-red);font-size:18px;margin-left:auto">🎯</span>' : ''}
     `;
     item.onclick = () => {
@@ -3192,7 +3201,7 @@ function renderOpponentLineup() {
       <div style="width:36px;height:36px;border-radius:50%;background:${team2Data.team_color};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;flex-shrink:0">${sys.positions[pos].replace(/[左右]/g,'').substring(0,2)}</div>
       <div style="flex:1">
         <div style="font-size:13px;font-weight:700;color:var(--text)">${getPlayerName(p)}</div>
-        <div style="font-size:11px;color:var(--text-dim)">${p.long_name}</div>
+
       </div>
       <div style="font-size:11px;color:var(--text-dim)">${sys.positions[pos]}</div>
     `;
@@ -3412,7 +3421,8 @@ function renderBench() {
 function openPlayerParams(playerIdx) {
   const p = team1Data.players[playerIdx];
   document.getElementById('params-name').textContent = getPlayerName(p);
-  document.getElementById('params-long-name').textContent = p.long_name;
+  const lnEl = document.getElementById('params-long-name');
+  if (lnEl) lnEl.style.display = 'none';
   document.getElementById('params-pos').textContent = p.positions.join(' / ');
 
   const grid = document.getElementById('params-grid');
@@ -3543,7 +3553,7 @@ function openPlayerSelect(pos) {
     const item = document.createElement('div');
     item.className = 'player-select-item' + (team1State.lineup[pos] === i ? ' current' : '');
     item.style.opacity = inUse ? '0.4' : '1';
-    item.innerHTML = `<div class="psi-num">${i}</div><div class="psi-name">${p.name}<span style="font-size:11px;color:var(--text-dim);margin-left:6px">${p.long_name}</span></div><div class="psi-pos">${p.positions.join('/')}</div>`;
+    item.innerHTML = `<div class="psi-num">${i}</div><div class="psi-name">${getPlayerName(p)}</div><div class="psi-pos">${p.positions.join('/')}</div>`;
     if (!inUse) {
       item.onclick = () => {
         team1State.lineup[pos] = i;
@@ -5477,6 +5487,13 @@ function runMultiGame(GAMES) {
   window._multiPatterns = _patList;
   window._t1saveTotal = _t1saveTotal;
   window._t2saveTotal = _t2saveTotal;
+  window._multiGAMES = GAMES;
+  window._multiT1wins = t1wins;
+  window._multiT2wins = t2wins;
+  window._multiPoss1  = _t1poss;
+
+  // 📸 シェアボタンを追加
+  html += '<button onclick="generateShareImage(\'multi\')" style="width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#1a3a6b,#0050cc);color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:12px">' + t('shareImg') + '</button>';
 
   _duelScenesCache = scenesAllMulti;
   el.innerHTML = html;
@@ -6250,6 +6267,188 @@ function generateMultiSummary(t1wins, t2wins, draws, t1poss, t1shoot, t2shoot, G
 document.addEventListener('DOMContentLoaded', function() {
   applyLang();
 });
+
+// ===== 画像シェア機能 =====
+function generateShareImage(mode) {
+  var isEn = window.LANG === 'en';
+
+  // シェアカード用データを収集
+  var cardData = {};
+
+  if (mode === 'single') {
+    var score1 = document.getElementById('result-score1').textContent;
+    var score2 = document.getElementById('result-score2').textContent;
+    var name1  = getTeamName(team1Data);
+    var name2  = getTeamName(team2Data);
+    var winner = document.getElementById('result-winner').textContent;
+    // ポゼッション
+    var possEl = document.getElementById('poss-bar-t1');
+    var poss1  = possEl ? possEl.style.width.replace('%','') : '50';
+    var poss2  = (100 - parseFloat(poss1)).toFixed(0);
+
+    cardData = {
+      mode: 'single',
+      name1: name1, name2: name2,
+      color1: team1Data.team_color, color2: team2Data.team_color,
+      flag1: team1Data.flag, flag2: team2Data.flag,
+      score1: score1, score2: score2,
+      winner: winner,
+      poss1: poss1, poss2: poss2,
+    };
+  } else {
+    // multi: 10試合 or 100試合
+    var GAMES = window._multiGAMES || 10;
+    var t1wins = window._multiT1wins || 0;
+    var t2wins = window._multiT2wins || 0;
+    var draws  = GAMES - t1wins - t2wins;
+    var poss1m = window._multiPoss1 || 50;
+    var scorers1 = (window._multiMvps || []).filter(function(v){return v.team===team1Data.name;}).slice(0,3);
+    var scorers2 = (window._multiMvps || []).filter(function(v){return v.team===team2Data.name;}).slice(0,3);
+
+    cardData = {
+      mode: 'multi',
+      games: GAMES,
+      name1: getTeamName(team1Data), name2: getTeamName(team2Data),
+      color1: team1Data.team_color, color2: team2Data.team_color,
+      flag1: team1Data.flag, flag2: team2Data.flag,
+      t1wins: t1wins, t2wins: t2wins, draws: draws,
+      poss1: poss1m, poss2: 100 - poss1m,
+      scorers1: scorers1, scorers2: scorers2,
+    };
+  }
+
+  // カード用HTMLを生成
+  var cardHtml = buildShareCardHtml(cardData, isEn);
+
+  // 一時コンテナに挿入
+  var container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:540px;height:540px;z-index:9999';
+  container.innerHTML = cardHtml;
+  document.body.appendChild(container);
+
+  // html2canvasで描画
+  html2canvas(container.firstChild, {
+    width: 540, height: 540, scale: 2,
+    useCORS: true, backgroundColor: null,
+    logging: false,
+  }).then(function(canvas) {
+    document.body.removeChild(container);
+    var link = document.createElement('a');
+    link.download = 'football-sim-result.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }).catch(function(err) {
+    document.body.removeChild(container);
+    alert('Image generation failed: ' + err.message);
+  });
+}
+
+function buildShareCardHtml(d, isEn) {
+  var bg = '#0d1b3e';
+  var gold = '#f0c040';
+  var winLabel = isEn ? 'W' : '勝';
+  var drawLabel = isEn ? 'D' : '分';
+  var lossLabel = isEn ? 'L' : '敗';
+  var possLabel = isEn ? 'Possession' : 'ポゼッション';
+  var topScorersLabel = isEn ? 'Top Scorers' : '得点者';
+  var watermark = 'Football Simulator AI';
+
+  if (d.mode === 'single') {
+    var winnerColor = d.color1;
+    if (d.winner.includes(d.name2)) winnerColor = d.color2;
+    return '<div style="width:540px;height:540px;background:' + bg + ';font-family:Arial,sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;padding:40px 32px">'
+      // 背景装飾
+      + '<div style="position:absolute;top:-60px;left:-60px;width:280px;height:280px;border-radius:50%;background:' + d.color1 + ';opacity:0.12"></div>'
+      + '<div style="position:absolute;bottom:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:' + d.color2 + ';opacity:0.12"></div>'
+      // ゲームタグ
+      + '<div style="background:rgba(255,255,255,0.1);color:#aac;font-size:12px;padding:4px 14px;border-radius:20px;letter-spacing:2px;margin-bottom:28px;text-transform:uppercase">Match Simulation</div>'
+      // チーム名＆スコア
+      + '<div style="display:flex;align-items:center;justify-content:center;gap:20px;width:100%;margin-bottom:24px">'
+        + '<div style="flex:1;text-align:right">'
+          + '<div style="font-size:22px;font-weight:700;color:' + d.color1 + '">' + d.flag1 + ' ' + d.name1 + '</div>'
+        + '</div>'
+        + '<div style="text-align:center">'
+          + '<div style="font-size:72px;font-weight:900;color:white;letter-spacing:4px;line-height:1">' + d.score1 + '<span style="color:#555;margin:0 6px">-</span>' + d.score2 + '</div>'
+        + '</div>'
+        + '<div style="flex:1;text-align:left">'
+          + '<div style="font-size:22px;font-weight:700;color:' + d.color2 + '">' + d.flag2 + ' ' + d.name2 + '</div>'
+        + '</div>'
+      + '</div>'
+      // 結果バッジ
+      + '<div style="background:' + winnerColor + ';color:white;font-size:15px;font-weight:700;padding:6px 24px;border-radius:20px;margin-bottom:28px">' + d.winner + '</div>'
+      // ポゼッション
+      + '<div style="width:100%;max-width:380px">'
+        + '<div style="display:flex;justify-content:space-between;font-size:13px;color:#aaa;margin-bottom:6px">'
+          + '<span style="color:' + d.color1 + ';font-weight:700">' + d.poss1 + '%</span>'
+          + '<span style="font-size:11px;color:#888">' + possLabel + '</span>'
+          + '<span style="color:' + d.color2 + ';font-weight:700">' + d.poss2 + '%</span>'
+        + '</div>'
+        + '<div style="height:8px;border-radius:4px;overflow:hidden;background:' + d.color2 + '">'
+          + '<div style="height:100%;width:' + d.poss1 + '%;background:' + d.color1 + ';border-radius:4px 0 0 4px"></div>'
+        + '</div>'
+      + '</div>'
+      // ウォーターマーク
+      + '<div style="position:absolute;bottom:16px;right:20px;font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px">' + watermark + '</div>'
+    + '</div>';
+  } else {
+    // multi mode
+    var t1rate = Math.round(d.t1wins / d.games * 100);
+    var t2rate = Math.round(d.t2wins / d.games * 100);
+    var scorer1Html = d.scorers1.map(function(v, i) {
+      var medal = i===0?'🥇':i===1?'🥈':'🥉';
+      var nm = (isEn && v.en_name) ? v.en_name : v.name;
+      return '<div style="font-size:12px;color:white;padding:3px 0">' + medal + ' ' + nm + ' <span style="color:' + d.color1 + ';font-weight:700">' + v.count + '</span></div>';
+    }).join('');
+    var scorer2Html = d.scorers2.map(function(v, i) {
+      var medal = i===0?'🥇':i===1?'🥈':'🥉';
+      var nm = (isEn && v.en_name) ? v.en_name : v.name;
+      return '<div style="font-size:12px;color:white;padding:3px 0">' + medal + ' ' + nm + ' <span style="color:' + d.color2 + ';font-weight:700">' + v.count + '</span></div>';
+    }).join('');
+
+    return '<div style="width:540px;height:540px;background:' + bg + ';font-family:Arial,sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;padding:32px">'
+      + '<div style="position:absolute;top:-80px;left:-80px;width:300px;height:300px;border-radius:50%;background:' + d.color1 + ';opacity:0.1"></div>'
+      + '<div style="position:absolute;bottom:-80px;right:-80px;width:300px;height:300px;border-radius:50%;background:' + d.color2 + ';opacity:0.1"></div>'
+      // タグ
+      + '<div style="background:rgba(255,255,255,0.1);color:#aac;font-size:11px;padding:4px 14px;border-radius:20px;letter-spacing:2px;margin-bottom:20px;text-transform:uppercase">' + d.games + '-Match Simulation</div>'
+      // チーム名
+      + '<div style="display:flex;justify-content:center;gap:24px;margin-bottom:20px;width:100%">'
+        + '<div style="text-align:center;font-size:18px;font-weight:700;color:' + d.color1 + '">' + d.flag1 + ' ' + d.name1 + '</div>'
+        + '<div style="font-size:18px;color:#555;font-weight:700">vs</div>'
+        + '<div style="text-align:center;font-size:18px;font-weight:700;color:' + d.color2 + '">' + d.flag2 + ' ' + d.name2 + '</div>'
+      + '</div>'
+      // 勝敗数
+      + '<div style="display:flex;justify-content:center;gap:32px;margin-bottom:20px">'
+        + '<div style="text-align:center"><div style="font-size:52px;font-weight:900;color:' + d.color1 + ';line-height:1">' + d.t1wins + '</div><div style="font-size:12px;color:#888;margin-top:4px">' + winLabel + ' (' + t1rate + '%)</div></div>'
+        + '<div style="text-align:center"><div style="font-size:52px;font-weight:900;color:#777;line-height:1">' + d.draws + '</div><div style="font-size:12px;color:#888;margin-top:4px">' + drawLabel + '</div></div>'
+        + '<div style="text-align:center"><div style="font-size:52px;font-weight:900;color:' + d.color2 + ';line-height:1">' + d.t2wins + '</div><div style="font-size:12px;color:#888;margin-top:4px">' + winLabel + ' (' + t2rate + '%)</div></div>'
+      + '</div>'
+      // ポゼッション
+      + '<div style="width:100%;max-width:400px;margin-bottom:20px">'
+        + '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">'
+          + '<span style="color:' + d.color1 + ';font-weight:700">' + d.poss1 + '%</span>'
+          + '<span style="font-size:10px;color:#888">' + possLabel + '</span>'
+          + '<span style="color:' + d.color2 + ';font-weight:700">' + d.poss2 + '%</span>'
+        + '</div>'
+        + '<div style="height:7px;border-radius:4px;overflow:hidden;background:' + d.color2 + '">'
+          + '<div style="height:100%;width:' + d.poss1 + '%;background:' + d.color1 + '"></div>'
+        + '</div>'
+      + '</div>'
+      // Top Scorers
+      + '<div style="display:flex;gap:16px;width:100%;max-width:460px">'
+        + '<div style="flex:1;background:rgba(255,255,255,0.06);border-radius:10px;padding:12px">'
+          + '<div style="font-size:11px;color:' + d.color1 + ';font-weight:700;margin-bottom:8px;text-transform:uppercase">' + topScorersLabel + '</div>'
+          + scorer1Html
+        + '</div>'
+        + '<div style="flex:1;background:rgba(255,255,255,0.06);border-radius:10px;padding:12px">'
+          + '<div style="font-size:11px;color:' + d.color2 + ';font-weight:700;margin-bottom:8px;text-transform:uppercase">' + topScorersLabel + '</div>'
+          + scorer2Html
+        + '</div>'
+      + '</div>'
+      // ウォーターマーク
+      + '<div style="position:absolute;bottom:14px;right:18px;font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px">' + watermark + '</div>'
+    + '</div>';
+  }
+}
 
 </script>
 </body>
