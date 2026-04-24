@@ -6366,6 +6366,12 @@ function generateShareImage(mode) {
   container.innerHTML = cardHtml;
   document.body.appendChild(container);
 
+  if (!container.firstChild) {
+    document.body.removeChild(container);
+    alert('Card generation failed. cardHtml length: ' + cardHtml.length);
+    return;
+  }
+
   // html2canvasで描画
   html2canvas(container.firstChild, {
     width: 540, height: 540, scale: 2,
@@ -6379,7 +6385,7 @@ function generateShareImage(mode) {
     link.click();
   }).catch(function(err) {
     document.body.removeChild(container);
-    alert('Image generation failed: ' + err.message);
+    alert('html2canvas error: ' + (err && err.message ? err.message : JSON.stringify(err)));
   });
 }
 
@@ -6396,129 +6402,127 @@ function buildShareCardHtml(d, isEn) {
 
     if (d.mode === 'single') {
       var s1 = parseInt(d.score1), s2 = parseInt(d.score2);
-      var realWinner  = s1 > s2 ? n1 : s2 > s1 ? n2 : null;
-      var realLoser   = s1 > s2 ? n2 : s2 > s1 ? n1 : null;
-      var possLeader  = p1 > p2 ? n1 : n2;
-      var possTrailer = p1 > p2 ? n2 : n1;
+      var realWinner = s1 > s2 ? n1 : s2 > s1 ? n2 : null;
+      var realLoser  = s1 > s2 ? n2 : s2 > s1 ? n1 : null;
+      var possLeader  = p1 >= p2 ? n1 : n2;
+      var possTrailer = p1 >= p2 ? n2 : n1;
 
-      // マルチデータがあれば組み合わせる
-      var hasMulti = false; // 1試合のINSIGHTはsingle単体データのみ使用
-      var simFav = null, simRate = 0;
-      if (hasMulti) {
-        var mg = window._multiGAMES || 10;
-        var mt1 = window._multiT1wins || 0;
-        var mt2 = window._multiT2wins || 0;
-        simFav  = mt1 > mt2 ? n1 : mt2 > mt1 ? n2 : null;
-        simRate = simFav === n1 ? Math.round(mt1/mg*100) : Math.round(mt2/mg*100);
-        var simRateDiff = Math.abs(mt1 - mt2) / mg * 100;
-
-        // Line 1: Real result
-        if (!realWinner) {
-          lines.push(n1 + ' and ' + n2 + ' drew ' + s1 + '-' + s2 + '.');
-        } else {
-          lines.push(realWinner + ' won ' + s1 + '-' + s2 + '.');
-        }
-        // Line 2: Simulation result
-        if (!simFav) {
-          lines.push('Simulation: an even ' + mt1 + 'W-' + (mg-mt1-mt2) + 'D-' + mt2 + 'W split.');
-        } else {
-          lines.push('Over ' + mg + ' sims, ' + simFav + ' wins ' + simRate + '% of the time.');
-        }
-
-        // 4 classifications
-        if (!realWinner && simFav) {
-          // CONTRADICTION: draw but sim has a favorite
-          lines.push('The draw hides a bigger story.');
-          lines.push('Can ' + simFav + ' turn dominance into wins?');
-        } else if (realWinner && simFav && realWinner !== simFav) {
-          // CONTRADICTION: real winner ≠ sim favorite
-          lines.push('The result defied the simulation.');
-          lines.push('Was this an upset — or just luck?');
-        } else if (realWinner && simFav && realWinner === simFav) {
-          // ALIGNMENT
-          if (simRate >= 60) {
-            lines.push(realWinner + ' is the clear favorite. No surprise here.');
-            lines.push('Can anyone stop ' + realWinner + '?');
-          } else {
-            lines.push('Result and simulation point the same way.');
-            lines.push('How far can ' + realWinner + ' carry this form?');
-          }
-        } else if (!realWinner && !simFav) {
-          // CLOSE MATCH
-          lines.push('Everything says this is a 50/50 game.');
-          lines.push('Who breaks the deadlock next time?');
-        } else if (simRateDiff < 10) {
-          // CLOSE MATCH
-          lines.push('The simulation calls this a coin flip.');
-          lines.push('What will decide the real winner?');
-        } else if (possLeader !== realWinner && realWinner) {
-          // POSSESSION CONTRADICTION
-          lines.push(possTrailer + ' had less ball but still won.');
-          lines.push('Is efficiency beating possession here?');
-        } else {
-          lines.push('Possession and results tell the same story.');
-          lines.push('Will this trend hold over time?');
-        }
-
-      } else {
-        // マルチデータなし：単体1試合のみ
-        if (!realWinner) {
+      if (!realWinner) {
+        // 引き分け
+        if (isEn) {
           lines.push(n1 + ' ' + s1 + '-' + s2 + ' ' + n2 + '. A draw.');
-          lines.push('Possession: ' + n1 + ' ' + p1 + '% vs ' + n2 + ' ' + p2 + '%.');
+          lines.push('Possession: ' + n1 + ' ' + p1 + '% — ' + n2 + ' ' + p2 + '%.');
           if (Math.abs(p1-p2) <= 5) {
-            lines.push('Balanced in every way.');
-            lines.push('Could either team have won?');
+            lines.push('Balanced from start to finish.');
+            lines.push('Could either team have taken it?');
           } else {
-            lines.push(possLeader + ' dominated the ball but no winner.');
-            lines.push('Does possession really matter?');
+            lines.push(possLeader + ' had the ball. Neither had the edge.');
+            lines.push('Does possession really matter here?');
           }
         } else {
-          lines.push(realWinner + ' won ' + s1 + '-' + s2 + '.');
-          lines.push('Possession: ' + possLeader + ' led with ' + Math.max(p1,p2) + '%.');
-          if (possLeader !== realWinner) {
-            lines.push(realLoser + ' had the ball. ' + realWinner + ' had the goals.');
-            lines.push('Is this a blueprint for beating ' + possLeader + '?');
+          lines.push(n1 + ' ' + s1 + '-' + s2 + ' ' + n2 + '。引き分けに終わった。');
+          lines.push('ポゼッション：' + n1 + ' ' + p1 + '% — ' + n2 + ' ' + p2 + '%。');
+          if (Math.abs(p1-p2) <= 5) {
+            lines.push('終始均衡した展開となった。');
+            lines.push('どちらが勝ってもおかしくなかった。');
           } else {
-            lines.push(realWinner + ' controlled both the ball and the result.');
-            lines.push('Can ' + realLoser + ' find a different approach?');
+            lines.push(possLeader + 'がボールを握ったが、決着はつかなかった。');
+            lines.push('このレベルでポゼッションは意味を持つのか？');
           }
+        }
+      } else if (possLeader !== realWinner) {
+        // POSSESSION CONTRADICTION
+        if (isEn) {
+          lines.push(realWinner + ' won ' + s1 + '-' + s2 + '.');
+          lines.push(possLeader + ' had ' + Math.max(p1,p2) + '% possession.');
+          lines.push(realLoser + ' had the ball. ' + realWinner + ' had the goals.');
+          lines.push('Is this a blueprint for beating ' + possLeader + '?');
+        } else {
+          lines.push(realWinner + 'が' + s1 + '-' + s2 + 'で勝利。');
+          lines.push(possLeader + 'がポゼッション' + Math.max(p1,p2) + '%を記録。');
+          lines.push(realLoser + 'がボールを保持し、' + realWinner + 'がゴールを奪った。');
+          lines.push(possLeader + '攻略のヒントがここにある？');
+        }
+      } else {
+        // ALIGNMENT
+        if (isEn) {
+          lines.push(realWinner + ' won ' + s1 + '-' + s2 + '.');
+          lines.push(realWinner + ' controlled both ball and result.');
+          lines.push('Possession ' + Math.max(p1,p2) + '% — and it showed.');
+          lines.push('Can ' + realLoser + ' find a different approach?');
+        } else {
+          lines.push(realWinner + 'が' + s1 + '-' + s2 + 'で勝利。');
+          lines.push(realWinner + 'がボールも結果も制した。');
+          lines.push('ポゼッション' + Math.max(p1,p2) + '%——それが結果に直結した。');
+          lines.push(realLoser + 'は別のアプローチを見つけられるか？');
         }
       }
 
     } else {
       // MULTI mode
       var t1w = d.t1wins, t2w = d.t2wins, dr = d.draws, gm = d.games;
-      var simFavM  = t1w > t2w ? n1 : t2w > t1w ? n2 : null;
-      var simRate1 = Math.round(t1w/gm*100);
-      var simRate2 = Math.round(t2w/gm*100);
-      var rateDiff = Math.abs(simRate1 - simRate2);
+      var simFav   = t1w > t2w ? n1 : t2w > t1w ? n2 : null;
+      var simLoser = t1w > t2w ? n2 : t2w > t1w ? n1 : null;
+      var favWins  = Math.max(t1w, t2w);
+      var favRate  = Math.round(favWins / gm * 100);
+      var rateDiff = Math.abs(Math.round(t1w/gm*100) - Math.round(t2w/gm*100));
       var possLeaderM  = p1 >= p2 ? n1 : n2;
       var possTrailerM = p1 >= p2 ? n2 : n1;
+      var domThresh = gm * 0.6;
 
-      // Line 1: Series summary
-      lines.push(n1 + ' ' + t1w + 'W vs ' + n2 + ' ' + t2w + 'W over ' + gm + ' matches.');
-      // Line 2: Possession
-      lines.push('Possession: ' + n1 + ' ' + p1 + '% vs ' + n2 + ' ' + p2 + '%.');
+      if (isEn) {
+        // Line 1: Series summary
+        lines.push(n1 + ' ' + t1w + 'W — Draw ' + dr + ' — ' + n2 + ' ' + t2w + 'W.');
+        // Line 2: Possession
+        lines.push('Avg possession: ' + n1 + ' ' + p1 + '% vs ' + n2 + ' ' + p2 + '%.');
 
-      if (rateDiff < 10) {
-        // CLOSE MATCH
-        lines.push('Too close to call. Anyone can win.');
-        lines.push('What\'s the deciding factor here?');
-      } else if (simFavM && possLeaderM !== simFavM) {
-        // POSSESSION CONTRADICTION
-        lines.push(possTrailerM + ' wins more with less of the ball.');
-        lines.push('Is ' + simFavM + ' the most efficient team here?');
-      } else if (simFavM && (t1w >= gm*0.6 || t2w >= gm*0.6)) {
-        // ALIGNMENT (dominant)
-        lines.push(simFavM + ' wins ' + Math.round(Math.max(t1w,t2w)/gm*100) + '% of the time. Dominant.');
-        lines.push('Can ' + (simFavM === n1 ? n2 : n1) + ' ever close this gap?');
-      } else if (simFavM) {
-        // ALIGNMENT (edge)
-        lines.push(simFavM + ' has the edge, but it\'s not settled.');
-        lines.push('What gives ' + simFavM + ' the advantage?');
+        if (rateDiff < 10) {
+          // CLOSE MATCH
+          lines.push('Impossible to call. Either team can win.');
+          lines.push('Who takes the edge in the next series?');
+        } else if (simFav && possLeaderM !== simFav) {
+          // POSSESSION CONTRADICTION
+          lines.push(possTrailerM + ' wins more with less of the ball.');
+          lines.push('Is efficiency ' + simFav + '\'s secret weapon?');
+        } else if (simFav && favWins >= domThresh) {
+          // ALIGNMENT dominant
+          lines.push(simFav + ' wins ' + favRate + '% of the time. Dominant.');
+          lines.push('Can ' + simLoser + ' ever close this gap?');
+        } else if (simFav) {
+          // ALIGNMENT edge
+          lines.push(simFav + ' has the edge — but it\'s not settled.');
+          lines.push('What gives ' + simFav + ' the advantage?');
+        } else {
+          // PERFECT TIE
+          lines.push('Perfectly balanced over ' + gm + ' simulations.');
+          lines.push('Which team has the higher ceiling?');
+        }
       } else {
-        lines.push('Perfectly balanced over ' + gm + ' simulations.');
-        lines.push('Which team has the higher ceiling?');
+        // 日本語版
+        lines.push(n1 + ' ' + t1w + '勝 — 引き分け ' + dr + ' — ' + n2 + ' ' + t2w + '勝。');
+        lines.push('平均ポゼッション：' + n1 + ' ' + p1 + '% vs ' + n2 + ' ' + p2 + '%。');
+
+        if (rateDiff < 10) {
+          // CLOSE MATCH
+          lines.push('勝敗を予測するのは不可能に近い。');
+          lines.push('次のシリーズで優位に立つのはどちらか？');
+        } else if (simFav && possLeaderM !== simFav) {
+          // POSSESSION CONTRADICTION
+          lines.push(possTrailerM + 'はボールを持たずして勝ちを積み重ねた。');
+          lines.push(simFav + 'の効率的なサッカーが武器となっているのか？');
+        } else if (simFav && favWins >= domThresh) {
+          // ALIGNMENT dominant
+          lines.push(simFav + 'が' + favRate + '%の確率で勝利。圧倒的だ。');
+          lines.push(simLoser + 'はこの差を埋められるのか？');
+        } else if (simFav) {
+          // ALIGNMENT edge
+          lines.push(simFav + 'が優位に立つが、まだ決着はついていない。');
+          lines.push(simFav + 'のアドバンテージの源泉はどこにある？');
+        } else {
+          // PERFECT TIE
+          lines.push(gm + '試合を通じて完璧な均衡が保たれた。');
+          lines.push('より高いポテンシャルを持つのはどちらか？');
+        }
       }
     }
 
