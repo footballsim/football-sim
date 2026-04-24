@@ -1488,7 +1488,7 @@ body {
     <div class="disclaimer-box" id="disclaimer-text">
       ⚠️ 本アプリは個人制作のファン向けシミュレーターです。日本サッカー協会・各チーム・選手等とは一切関係ありません。選手パラメータは独自設定です。商業目的のコンテンツではありません。
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.0.6</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.0.8</div>
   </div>
 </div>
 
@@ -1682,7 +1682,7 @@ body {
       </button>
       <button class="share-btn" style="flex:1;background:#ff4500;color:white" onclick="shareToReddit('single')">
         <svg width="18" height="18" viewBox="0 0 20 20" fill="white"><circle cx="10" cy="10" r="10" fill="#ff4500"/><path d="M16.67 10a1.46 1.46 0 0 0-2.47-1 7.12 7.12 0 0 0-3.85-1.23l.65-3.07 2.13.45a1 1 0 1 0 .14-.55l-2.38-.5a.26.26 0 0 0-.31.2l-.73 3.44a7.14 7.14 0 0 0-3.89 1.23 1.46 1.46 0 1 0-1.61 2.39 2.87 2.87 0 0 0 0 .44c0 2.24 2.61 4.06 5.83 4.06s5.83-1.82 5.83-4.06a2.87 2.87 0 0 0 0-.44 1.46 1.46 0 0 0 .57-1.36zM7.27 11a1 1 0 1 1 1 1 1 1 0 0 1-1-1zm5.58 2.64a3.56 3.56 0 0 1-2.85.5 3.56 3.56 0 0 1-2.85-.5.26.26 0 0 1 .37-.37 3.13 3.13 0 0 0 2.48.38 3.13 3.13 0 0 0 2.48-.38.26.26 0 0 1 .37.37zm-.17-1.64a1 1 0 1 1 1-1 1 1 0 0 1-1 1z" fill="white"/></svg>
-        <span id="share-reddit-label">Reddit</span>
+        <span id="share-reddit-label">Reddit (Link)</span>
       </button>
       <button class="share-btn" style="flex:1;background:linear-gradient(135deg,#1a3a6b,#0050cc);color:white" onclick="generateShareImage('single')">
         <span id="share-img-label">📷 Save</span>
@@ -1839,7 +1839,7 @@ const i18n = {
     screenKeyplayer: 'キープレイヤー選択', screenMarked: '要注意プレイヤー選択',
     screenResult: '試合結果', screenMulti: '10試合シミュレーション',
     screenPlayerDetail: '選手データ', screenPlayers: '選手データリスト',
-    shareImg: '📷 Save', shareImgSaved: '✅ 保存しました', shareX: 'Share', shareReddit: 'Reddit',
+    shareImg: '📷 Save', shareImgSaved: '✅ 保存しました', shareX: 'Share', shareReddit: 'Reddit (Link)',
     btnBack: '← 戻る', btnDecide: '決定', btnKickoff: '⚽ キックオフ！', btnMulti: '📊 10試合', btnMulti100: '📊 100試合',
     labelStarting: 'スターティングメンバー', labelDrag: 'ドラッグで選手入れ替え',
     labelBench: '控え', labelSystem: 'システム', labelTactics: '戦術',
@@ -1885,7 +1885,7 @@ const i18n = {
     screenKeyplayer: 'Select Key Player', screenMarked: 'Select Marked Player',
     screenResult: 'Match Result', screenMulti: '10-Match Simulation',
     screenPlayerDetail: 'Player Data', screenPlayers: 'Player Data List',
-    shareImg: '📷 Save', shareImgSaved: '✅ Saved!', shareX: 'Share', shareReddit: 'Reddit',
+    shareImg: '📷 Save', shareImgSaved: '✅ Saved!', shareX: 'Share', shareReddit: 'Reddit (Link)',
     btnBack: '← Back', btnDecide: 'Confirm', btnKickoff: '⚽ Kick Off!', btnMulti: '📊 10', btnMulti100: '📊 100',
     labelStarting: 'Starting XI', labelDrag: 'Drag to swap players',
     labelBench: 'Bench', labelSystem: 'Formation', labelTactics: 'Tactics',
@@ -6043,15 +6043,27 @@ function shareToReddit(mode) {
     var score2 = document.getElementById('result-score2').textContent;
     var name1  = document.getElementById('result-name1').textContent;
     var name2  = document.getElementById('result-name2').textContent;
-    title = name1 + ' ' + score1 + '-' + score2 + ' ' + name2 + (isEn ? ' — Match Simulation Result' : ' シミュレーション結果');
+    var poss1el = null;
+    try {
+      var t1a=0,t2a=0;
+      if(chanceResults){chanceResults.forEach(function(r){r.scenes.forEach(function(s){if(s.offence===gameState.team1)t1a++;else t2a++;});});}
+      var p1=Math.round(t1a/(t1a+t2a||1)*100);
+      title = (isEn
+        ? name1+' '+score1+'-'+score2+' '+name2+' | Possession: '+p1+'% vs '+(100-p1)+'% | Football Simulation Lab'
+        : name1+' '+score1+'-'+score2+' '+name2+' | ポゼッション: '+p1+'% vs '+(100-p1)+'% | Football Simulation Lab');
+    } catch(e) {
+      title = name1 + ' ' + score1 + '-' + score2 + ' ' + name2 + (isEn ? ' — Match Simulation Result' : ' シミュレーション結果');
+    }
   } else {
     var GAMES = window._multiGAMES || 10;
     var t1wins = window._multiT1wins || 0;
     var t2wins = window._multiT2wins || 0;
     var draws  = GAMES - t1wins - t2wins;
     var n1 = getTeamName(team1Data), n2 = getTeamName(team2Data);
-    title = n1 + ' vs ' + n2 + ' ' + GAMES + (isEn ? '-Match Simulation: ' : '試合結果: ')
-      + t1wins + (isEn?'W':' 勝') + '-' + draws + (isEn?'D':' 分') + '-' + t2wins + (isEn?'W':' 勝');
+    var mp1 = window._multiPoss1 || 50;
+    title = (isEn
+      ? n1+' '+t1wins+'W-'+draws+'D-'+t2wins+'W over '+GAMES+' matches | Possession: '+mp1+'% vs '+(100-mp1)+'% | Football Simulation Lab'
+      : n1+' '+t1wins+'勝-'+draws+'分-'+t2wins+'勝（'+GAMES+'試合）| ポゼッション: '+mp1+'% vs '+(100-mp1)+'% | Football Simulation Lab');
   }
 
   var redditUrl = 'https://www.reddit.com/submit?url=' + encodeURIComponent(siteUrl) + '&title=' + encodeURIComponent(title);
@@ -6350,6 +6362,34 @@ function generateShareImage(mode) {
 
   drawShareCanvas(ctx, d, isEn, S);
 
+  var shareText = (d.mode === 'single')
+    ? (isEn ? d.name1+' '+d.score1+'-'+d.score2+' '+d.name2 : d.name1+' '+d.score1+'-'+d.score2+' '+d.name2)
+    : (isEn ? d.name1+' '+d.t1wins+'W vs '+d.name2+' '+d.t2wins+'W ('+d.games+' matches)' : d.name1+' '+d.t1wins+'勝 vs '+d.name2+' '+d.t2wins+'勝（'+d.games+'試合）');
+  var shareUrl = 'https://footballsim.github.io/football-sim/';
+
+  canvas.toBlob(function(blob) {
+    var file = new File([blob], 'football-sim-result.png', { type: 'image/png' });
+
+    // Web Share API（iPhone Safari等で画像付き共有シートを開く）
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({
+        files: [file],
+        title: 'Football Simulation Lab',
+        text: shareText + '\n' + shareUrl,
+      }).catch(function(err) {
+        if (err.name !== 'AbortError') {
+          // 共有キャンセル以外のエラーはダウンロードにフォールバック
+          _downloadCanvas(canvas);
+        }
+      });
+    } else {
+      // Web Share API非対応（PC等）→ ダウンロード
+      _downloadCanvas(canvas);
+    }
+  }, 'image/png');
+}
+
+function _downloadCanvas(canvas) {
   var link = document.createElement('a');
   link.download = 'football-sim-result.png';
   link.href = canvas.toDataURL('image/png');
