@@ -1496,7 +1496,7 @@ body {
     <div class="disclaimer-box" id="disclaimer-text">
       ⚠️ 本アプリは個人制作のファン向けシミュレーターです。日本サッカー協会・各チーム・選手等とは一切関係ありません。選手パラメータは独自設定です。商業目的のコンテンツではありません。
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.1.2</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.1.9</div>
   </div>
 </div>
 
@@ -1743,6 +1743,8 @@ body {
       <div class="result-log-header" id="header-detail">【試合詳細】</div>
       <div id="result-log-content"></div>
     </div>
+    <!-- Patreonバナー -->
+    <div id="patreon-banner-single"></div>
   </div>
 </div>
 
@@ -2021,6 +2023,8 @@ function applyLang() {
   _setText('screen-players-title',      t('screenPlayers'));
   _setText('setting-title-text',        t('screenSetting'));
   _setText('players-h1', t('playersTitle'));
+  var pb = document.getElementById('patreon-banner-single');
+  if (pb) pb.innerHTML = getPatreonBannerHtml(window.LANG === 'en');
   _setText('players-sub', t('playersSub'));
   // 言語切り替え時に選手テーブルを再ビルド
   var playersBody = document.getElementById('players2018-body');
@@ -3270,8 +3274,8 @@ function renderFormation() {
     dot.dataset.pos = pos;
     dot.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
-    // タップで選手選択
-    dot.onclick = () => { if (!dragState.dragging) openPlayerSelect(pos); };
+    // タップで選手詳細ページへ
+    dot.onclick = () => { if (!dragState.dragging) showPlayerDetail(getTeam1DataKey(), playerIdx); };
 
     const circle = document.createElement('div');
     circle.className = 'player-circle';
@@ -3293,7 +3297,7 @@ function renderFormation() {
       dragState.activeDot = dot;
       dot.classList.add('dragging');
       dragState.longPressTimer = setTimeout(() => {
-        if (!dragState.dragging) openPlayerParams(playerIdx);
+        if (!dragState.dragging) showPlayerDetail(getTeam1DataKey(), playerIdx);
       }, 500);
     }, { passive: false });
 
@@ -3344,6 +3348,13 @@ function renderFormation() {
   }
 }
 
+// team1DataのTEAM_DATAキーを返す
+function getTeam1DataKey() {
+  if (currentMatchKey === '2026vsイングランド') return 'japan2026vsEngland';
+  if (currentMatchKey === '2026vsスコットランド') return 'japan2026';
+  return 'japan2018';
+}
+
 // D&D 状態管理
 const dragState = { dragging: false, sourceType: null, sourcePos: null, sourcePlayerIdx: null };
 
@@ -3382,6 +3393,9 @@ function renderBench() {
     item.appendChild(name);
     item.appendChild(posLabel);
 
+    // タップ・長押しで選手詳細ページへ
+    item.onclick = () => { if (!dragState.dragging) showPlayerDetail(getTeam1DataKey(), idx); };
+
     item.addEventListener('touchstart', e => {
       e.preventDefault();
       dragState.dragging = false;
@@ -3391,10 +3405,14 @@ function renderBench() {
       dragState.ghostShown = false;
       dragState.activeDot = item;
       item.classList.add('dragging');
+      dragState.longPressTimer = setTimeout(() => {
+        if (!dragState.dragging) showPlayerDetail(getTeam1DataKey(), idx);
+      }, 500);
     }, { passive: false });
 
     item.addEventListener('touchmove', e => {
       e.preventDefault();
+      clearTimeout(dragState.longPressTimer);
       dragState.dragging = true;
       const t = e.touches[0];
       if (!dragState.ghostShown) {
@@ -3407,6 +3425,7 @@ function renderBench() {
 
     item.addEventListener('touchend', e => {
       e.preventDefault();
+      clearTimeout(dragState.longPressTimer);
       const t = e.changedTouches[0];
       applyDrop(t.clientX, t.clientY);
       item.classList.remove('dragging');
@@ -5509,6 +5528,9 @@ function runMultiGame(GAMES) {
   window._multiPoss1  = _t1poss;
   window._multiGoalScorers = goalScorers;
 
+  // Patreonバナーを最下部に追加
+  html += getPatreonBannerHtml(window.LANG === 'en');
+
   // 📸 シェアボタンを追加
 
 
@@ -6625,6 +6647,26 @@ function drawShareCanvas(ctx, d, isEn, S) {
   textCenter(ctx, 'Football Simulation Lab', S-180, S-28, '400 22px Arial', DIMWHITE);
 }
 
+
+function getPatreonBannerHtml(isEn) {
+  var ja = '<div style="margin:16px 0;padding:16px;background:#fff8f0;border:1px solid #f96854;border-radius:12px;text-align:center">'
+    + '<div style="font-size:13px;color:#555;line-height:1.8;margin-bottom:10px">'
+    + 'このシミュレーションを楽しんでいただけましたか？<br>'
+    + 'AI試合総括は実際の計算コストが発生します。<br>'
+    + 'この機能を継続するため、サポートをご検討ください。'
+    + '</div>'
+    + '<a href="https://www.patreon.com/cw/FootballSimulationLab" target="_blank" rel="noopener" style="display:inline-block;background:#f96854;color:white;font-weight:700;font-size:14px;padding:10px 28px;border-radius:24px;text-decoration:none">→ Support on Patreon</a>'
+    + '</div>';
+  var en = '<div style="margin:16px 0;padding:16px;background:#fff8f0;border:1px solid #f96854;border-radius:12px;text-align:center">'
+    + '<div style="font-size:13px;color:#555;line-height:1.8;margin-bottom:10px">'
+    + 'Enjoyed this simulation?<br>'
+    + 'AI match summaries cost real compute to generate.<br>'
+    + 'If you want to keep this feature running, consider supporting:'
+    + '</div>'
+    + '<a href="https://www.patreon.com/cw/FootballSimulationLab" target="_blank" rel="noopener" style="display:inline-block;background:#f96854;color:white;font-weight:700;font-size:14px;padding:10px 28px;border-radius:24px;text-decoration:none">→ Support on Patreon</a>'
+    + '</div>';
+  return isEn ? en : ja;
+}
 
 </script>
 </body>
