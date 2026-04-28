@@ -1506,7 +1506,7 @@ body {
     <div class="disclaimer-box" id="disclaimer-text">
       ⚠️ このシミュレーターは個人制作のファン向けコンテンツです。FIFA・JFA・各国サッカー協会・クラブチーム・選手本人とは一切関係ありません。選手名は識別目的のみで使用しており、実在の選手を代表・推薦・関連付けるものではありません。選手パラメータはすべて独自の創作設定であり、実際の能力・評価とは無関係です。Patreonによる支援はサーバー維持費（AI総括機能）への任意の寄付であり、コンテンツの販売ではありません。本コンテンツは非商業的ファン活動として制作されています。
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.3.7</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.3.8</div>
   </div>
 </div>
 
@@ -1847,6 +1847,10 @@ body {
 // ・戦術「プレス」が優位過ぎるので「体力消費」の概念を実装
 //   → プレス時は体力の消費が早くなるようにする
 //   → ただし10試合・100試合への影響を要検討
+//
+// ・スコアのばらつき改善案（現在は最大12シーンに制限済み）
+//   ② モメンタム補正：リード時に守備力+5、ビハインド時に攻撃力+5
+//   ⑤ スコア差補正：3点差以上で劣勢チームのカウンター成功率UP
 // ============================================================
 // i18n
 // ============================================================
@@ -3747,16 +3751,16 @@ function startGame() {
     });
   });
 
-  // Pre-simulate 20 chances（前半10 + 後半10）
-  // 前半ロスタイム(chanceNo=9)は50%、後半ロスタイム(chanceNo=19)は必ず発生
-  for (let i = 0; i < 19; i++) {
-    if (i === 9 && Math.random() < 0.5) continue; // 前半ロスタイムは50%
+  // Pre-simulate 12 chances（前半5 + 後半5 + ロスタイム最大2）
+  // 前半ロスタイム(chanceNo=5)は50%、後半ロスタイム(chanceNo=11)は必ず発生
+  for (let i = 0; i < 11; i++) {
+    if (i === 5 && Math.random() < 0.5) continue; // 前半ロスタイムは50%
     const result = simulateChance(gameState, i);
     chanceResults.push(result);
   }
   // 後半ロスタイムは必ず
   {
-    const result = simulateChance(gameState, 19);
+    const result = simulateChance(gameState, 11);
     chanceResults.push(result);
   }
 
@@ -4031,12 +4035,12 @@ function selectFKKicker(team) {
 
 function calcTime(chanceNo) {
   const r = Math.random();
-  if (chanceNo <= 7) return `${t('halfFirst')} ${Math.floor(r*5) + chanceNo*5 + 1}${t('minUnit')}`;
-  if (chanceNo === 8) return `${t('halfFirst')} ${Math.floor(r*4)+42}${t('minUnit')}`;
-  if (chanceNo === 9) return t('halftimeLoss');
-  if (chanceNo <= 17) return `${t('halfSecond')} ${Math.floor(r*5) + (chanceNo-10)*5 + 46}${t('minUnit')}`;
-  if (chanceNo === 18) return `${t('halfSecond')} ${Math.floor(r*4)+87}${t('minUnit')}`;
-  if (chanceNo === 19) return t('overtimeLoss');
+  if (chanceNo <= 3) return `${t('halfFirst')} ${Math.floor(r*8) + chanceNo*8 + 1}${t('minUnit')}`;
+  if (chanceNo === 4) return `${t('halfFirst')} ${Math.floor(r*4)+38}${t('minUnit')}`;
+  if (chanceNo === 5) return t('halftimeLoss');
+  if (chanceNo <= 9) return `${t('halfSecond')} ${Math.floor(r*8) + (chanceNo-6)*8 + 46}${t('minUnit')}`;
+  if (chanceNo === 10) return `${t('halfSecond')} ${Math.floor(r*4)+87}${t('minUnit')}`;
+  if (chanceNo === 11) return t('overtimeLoss');
   return t('overtimeLoss');
 }
 
@@ -5247,11 +5251,11 @@ function runMultiGame(GAMES) {
     });
     const gs = { team1: t1, team2: t2 };
     const results = [];
-    for (let i = 0; i < 19; i++) {
-      if (i === 9 && Math.random() < 0.5) continue;
+    for (let i = 0; i < 11; i++) {
+      if (i === 5 && Math.random() < 0.5) continue;
       results.push(simulateChance(gs, i));
     }
-    results.push(simulateChance(gs, 19));
+    results.push(simulateChance(gs, 11));
 
     const t1s = t1.score, t2s = t2.score;
     // ポゼッション集計用
