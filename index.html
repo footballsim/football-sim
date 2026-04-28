@@ -1506,7 +1506,7 @@ body {
     <div class="disclaimer-box" id="disclaimer-text">
       ⚠️ このシミュレーターは個人制作のファン向けコンテンツです。FIFA・JFA・各国サッカー協会・クラブチーム・選手本人とは一切関係ありません。選手名は識別目的のみで使用しており、実在の選手を代表・推薦・関連付けるものではありません。選手パラメータはすべて独自の創作設定であり、実際の能力・評価とは無関係です。Patreonによる支援はサーバー維持費（AI総括機能）への任意の寄付であり、コンテンツの販売ではありません。本コンテンツは非商業的ファン活動として制作されています。
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.3.6</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.3.7</div>
   </div>
 </div>
 
@@ -6007,7 +6007,7 @@ function _resetSummary() {
   var el = document.getElementById('summary-content');
   var btn = document.getElementById('summary-btn');
   if (el) el.innerHTML = '<span style="color:var(--text-dim);font-size:12px">' + t('summaryPlaceholder') + '</span>';
-  if (btn) { btn.disabled = false; btn.textContent = t('btnGenerate'); }
+  if (btn) { btn.disabled = false; btn.textContent = t('btnGenerate'); btn.style.opacity = '1'; }
 }
 
 // Close modals on overlay click
@@ -6310,8 +6310,9 @@ function generateSummary() {
     function read() {
       reader.read().then(function(chunk) {
         if (chunk.done) {
-          btn.textContent = t('regenerateLabel');
-          btn.disabled = false;
+          btn.textContent = window.LANG === 'en' ? '✅ Generated' : '✅ 生成済み';
+          btn.disabled = true;
+          btn.style.opacity = '0.6';
           return;
         }
         buffer += decoder.decode(chunk.value, { stream: true });
@@ -6332,16 +6333,18 @@ function generateSummary() {
         read();
       }).catch(function(err) {
         el.innerHTML = '<span style="color:red;font-size:11px">Stream error: ' + err.message + '</span>';
-        btn.textContent = t('regenerateLabel');
+        btn.textContent = window.LANG === 'en' ? '🔄 Retry' : '🔄 再試行';
         btn.disabled = false;
+        btn.style.opacity = '1';
       });
     }
     read();
 
   }).catch(function(err) {
     el.innerHTML = '<span style="color:red;font-size:11px">接続エラー: ' + err.message + '</span>';
-    btn.textContent = t('regenerateLabel');
+    btn.textContent = window.LANG === 'en' ? '🔄 Retry' : '🔄 再試行';
     btn.disabled = false;
+    btn.style.opacity = '1';
   });
 }
 
@@ -6423,8 +6426,9 @@ function generateMultiSummary(t1wins, t2wins, draws, t1poss, t1shoot, t2shoot, G
     function read() {
       reader.read().then(function(chunk) {
         if (chunk.done) {
-          btn.textContent = t('regenerateLabel');
-          btn.disabled = false;
+          btn.textContent = window.LANG === 'en' ? '✅ Generated' : '✅ 生成済み';
+          btn.disabled = true;
+          btn.style.opacity = '0.6';
           return;
         }
         buffer += decoder.decode(chunk.value, { stream: true });
@@ -6445,16 +6449,18 @@ function generateMultiSummary(t1wins, t2wins, draws, t1poss, t1shoot, t2shoot, G
         read();
       }).catch(function(err) {
         el.innerHTML = '<span style="color:red;font-size:11px">Stream error: ' + err.message + '</span>';
-        btn.textContent = t('regenerateLabel');
+        btn.textContent = window.LANG === 'en' ? '🔄 Retry' : '🔄 再試行';
         btn.disabled = false;
+        btn.style.opacity = '1';
       });
     }
     read();
 
   }).catch(function(err) {
     el.innerHTML = '<span style="color:red;font-size:11px">接続エラー: ' + err.message + '</span>';
-    btn.textContent = t('regenerateLabel');
+    btn.textContent = window.LANG === 'en' ? '🔄 Retry' : '🔄 再試行';
     btn.disabled = false;
+    btn.style.opacity = '1';
   });
 }
 
