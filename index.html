@@ -1507,7 +1507,7 @@ body {
     <div class="disclaimer-box" id="disclaimer-text">
       ⚠️ このシミュレーターは個人制作のファン向けコンテンツです。FIFA・JFA・各国サッカー協会・クラブチーム・選手本人とは一切関係ありません。選手名は識別目的のみで使用しており、実在の選手を代表・推薦・関連付けるものではありません。選手パラメータはすべて独自の創作設定であり、実際の能力・評価とは無関係です。Patreonによる支援はサーバー維持費（AI総括機能）への任意の寄付であり、コンテンツの販売ではありません。本コンテンツは非商業的ファン活動として制作されています。
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.3.9</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.4.0</div>
   </div>
 </div>
 
@@ -6357,10 +6357,18 @@ function generateSummary() {
     read();
 
   }).catch(function(err) {
-    el.innerHTML = '<span style="color:red;font-size:11px">接続エラー: ' + err.message + '</span>';
-    btn.textContent = window.LANG === 'en' ? '🔄 Retry' : '🔄 再試行';
-    btn.disabled = false;
-    btn.style.opacity = '1';
+    if (err.message && err.message.indexOf('429') !== -1) {
+      var msg = window.LANG === 'en' ? '⏳ You have reached the AI summary limit (3/hour). We limit usage to keep AI running. Try again in 1 hour, or support us on Patreon!' : '⏳ AI総括の生成上限（1時間あたり3回）に達しました。生成AIコスト維持のため制限を設けています。1時間後にお試しいただくか、Patreonでのサポートをご検討ください！';
+      el.innerHTML = '<span style="color:#e67e00;font-size:12px;line-height:1.7">' + msg + '</span>';
+      btn.textContent = window.LANG === 'en' ? '⏳ Limit reached' : '⏳ 上限に達しました';
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+    } else {
+      el.innerHTML = '<span style="color:red;font-size:11px">接続エラー: ' + err.message + '</span>';
+      btn.textContent = window.LANG === 'en' ? '🔄 Retry' : '🔄 再試行';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
   });
 }
 
@@ -6481,10 +6489,18 @@ function generateMultiSummary(t1wins, t2wins, draws, t1poss, t1shoot, t2shoot, G
     read();
 
   }).catch(function(err) {
-    el.innerHTML = '<span style="color:red;font-size:11px">接続エラー: ' + err.message + '</span>';
-    btn.textContent = window.LANG === 'en' ? '🔄 Retry' : '🔄 再試行';
-    btn.disabled = false;
-    btn.style.opacity = '1';
+    if (err.message && err.message.indexOf('429') !== -1) {
+      var msg = window.LANG === 'en' ? '⏳ You have reached the AI summary limit (3/hour). We limit usage to keep AI running. Try again in 1 hour, or support us on Patreon!' : '⏳ AI総括の生成上限（1時間あたり3回）に達しました。生成AIコスト維持のため制限を設けています。1時間後にお試しいただくか、Patreonでのサポートをご検討ください！';
+      el.innerHTML = '<span style="color:#e67e00;font-size:12px;line-height:1.7">' + msg + '</span>';
+      btn.textContent = window.LANG === 'en' ? '⏳ Limit reached' : '⏳ 上限に達しました';
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+    } else {
+      el.innerHTML = '<span style="color:red;font-size:11px">接続エラー: ' + err.message + '</span>';
+      btn.textContent = window.LANG === 'en' ? '🔄 Retry' : '🔄 再試行';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
   });
 }
 
