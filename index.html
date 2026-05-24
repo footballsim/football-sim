@@ -7078,6 +7078,19 @@ function showResult() {
     winner.style.color = '#aaa';
   }
 
+  // GA4 カスタムイベント: 試合結果
+  if (typeof gtag === 'function') {
+    var _matchType = isWCFMode ? 'wc_final' : isWCSFMode ? 'wc_sf' : isWCQFMode ? 'wc_qf' : isWCR16Mode ? 'wc_r16' : isWCR32Mode ? 'wc_r32' : 'normal';
+    var _result = t1score > t2score ? 'team1_win' : t2score > t1score ? 'team2_win' : 'draw';
+    gtag('event', 'match_complete', {
+      team1: team1Data.en_name || team1Data.name,
+      team2: team2Data.en_name || team2Data.name,
+      score: t1score + '-' + t2score,
+      result: _result,
+      match_type: _matchType
+    });
+  }
+
   // Stats
   const gs = gameState;
   const t1 = gs.team1, t2 = gs.team2;
