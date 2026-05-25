@@ -2469,6 +2469,11 @@ const i18n = {
     wcPKLose: 'PK敗退',
     wcPKNextRound: 'ラウンド16へ',
     wcPKEliminated: '敗退へ',
+    wcEliminatedMsgR32: 'W杯1回戦で敗退しました',
+    wcEliminatedMsgR16: 'W杯2回戦で敗退しました',
+    wcEliminatedMsgQF: 'W杯準々決勝で敗退しました',
+    wcEliminatedMsgSF: 'W杯準決勝で敗退しました',
+    wcEliminatedMsgFin: 'W杯決勝で敗退しました',
     wcStatsBtnWC: '📊 W杯シミュレーション統計',
     wcStatsTitle: '📊 W杯シミュレーション統計',
     wcStatsTabMC: '🎲 シミュレーション確率',
@@ -2608,6 +2613,11 @@ const i18n = {
     wcPKLose: 'PK Defeat',
     wcPKNextRound: 'Next Round',
     wcPKEliminated: 'Eliminated',
+    wcEliminatedMsgR32: 'Eliminated at Round of 32',
+    wcEliminatedMsgR16: 'Eliminated at Round of 16',
+    wcEliminatedMsgQF: 'Eliminated at Quarter Final',
+    wcEliminatedMsgSF: 'Eliminated at Semi Final',
+    wcEliminatedMsgFin: 'Eliminated at the Final',
     wcStatsBtnWC: '📊 WC Simulation Stats',
     wcStatsTitle: '📊 WC Simulation Stats',
     wcStatsTabMC: '🎲 Simulation Odds',
@@ -4247,10 +4257,23 @@ function _applyTournamentI18n() {
     'wc-sf-win-title': t('wcAdvancedF'), 'wc-sf-win-congrats': t('wcCongrats'), 'wc-sf-win-again-btn': t('wcPlayAgain'), 'wc-sf-win-title-btn': t('wcToTitle'),
     'wc-f-start-btn': t('wcKickoff'), 'wc-f-again-btn': t('wcPlayAgain'), 'wc-f-title-btn': t('wcToTitle'),
     'wc-champion-title': t('wcChampion'), 'wc-champion-sub': t('wcChampionSub'), 'wc-champion-again-btn': t('wcPlayAgain'), 'wc-champion-title-btn': t('wcToTitle'),
-    'wc-eliminated-title': t('wcEliminated2'), 'wc-eliminated-msg': t('wcEliminatedMsg'), 'wc-eliminated-again-btn': t('wcPlayAgain'), 'wc-eliminated-title-btn': t('wcToTitle'),
+    'wc-eliminated-title': t('wcEliminated2'), 'wc-eliminated-again-btn': t('wcPlayAgain'), 'wc-eliminated-title-btn': t('wcToTitle'),
   };
   Object.entries(ids).forEach(([id, text]) => { const el = document.getElementById(id); if (el) el.textContent = text; });
 }
+let _wcEliminatedStage = null;
+function showWCEliminated(stageKey) {
+  _wcEliminatedStage = stageKey;
+  const _msgMap = {
+    wc_r32: t('wcEliminatedMsgR32'), wc_r16: t('wcEliminatedMsgR16'),
+    wc_qf:  t('wcEliminatedMsgQF'),  wc_sf:  t('wcEliminatedMsgSF'),
+    wc_final: t('wcEliminatedMsgFin')
+  };
+  const el = document.getElementById('wc-eliminated-msg');
+  if (el) el.textContent = _msgMap[stageKey] || t('wcEliminatedMsg');
+  showScreen('worldcup-eliminated');
+}
+
 function showScreen(name) {
   if (name === 'title') isWorldCupMode = false;
   if (name === 'title' || name === 'setting') _resetSummary();
@@ -8492,7 +8515,7 @@ function updateWCR16AfterResult() {
         btn.textContent = t('wcDefeated');
         btn.style.background = 'rgba(180,0,0,0.5)';
         btn.style.color = '#fff';
-        btn.onclick = () => showScreen('worldcup-eliminated');
+        btn.onclick = () => showWCEliminated('wc_r16');
       }
     }
     isWCR16Mode = false;
@@ -8572,7 +8595,7 @@ function updateWCQFAfterResult() {
         btn.textContent = t('wcDefeated');
         btn.style.background = 'rgba(180,0,0,0.5)';
         btn.style.color = '#fff';
-        btn.onclick = () => showScreen('worldcup-eliminated');
+        btn.onclick = () => showWCEliminated('wc_qf');
       }
     }
     isWCQFMode = false;
@@ -8653,7 +8676,7 @@ function updateWCSFAfterResult() {
         btn.textContent = t('wcDefeated');
         btn.style.background = 'rgba(180,0,0,0.5)';
         btn.style.color = '#fff';
-        btn.onclick = () => showScreen('worldcup-eliminated');
+        btn.onclick = () => showWCEliminated('wc_sf');
       }
     }
     isWCSFMode = false;
@@ -8730,7 +8753,7 @@ function updateWCFAfterResult() {
         btn.textContent = t('wcDefeated');
         btn.style.background = 'rgba(180,0,0,0.5)';
         btn.style.color = '#fff';
-        btn.onclick = () => showScreen('worldcup-eliminated');
+        btn.onclick = () => showWCEliminated('wc_final');
       }
     }
     isWCFMode = false;
@@ -9009,30 +9032,30 @@ function _finishPK() {
           wcQFOpponent = wcR16Opponent === TEAM_DATA.mexico2026 ? TEAM_DATA.spain2026 : TEAM_DATA.france2026;
           showWCQF();
         } else {
-          showScreen('worldcup-eliminated');
+          showWCEliminated('wc_r16');
         }
       } else if (isWCQFMode) {
         isWCQFMode = false;
         if (japanWon) {
           wcSFOpponent = wcQFOpponent === TEAM_DATA.france2026 ? TEAM_DATA.spain2026 : TEAM_DATA.argentina2026;
           showWCSF();
-        } else { showScreen('worldcup-eliminated'); }
+        } else { showWCEliminated('wc_qf'); }
       } else if (isWCSFMode) {
         isWCSFMode = false;
         if (japanWon) {
           wcFOpponent = wcSFOpponent === TEAM_DATA.spain2026 ? TEAM_DATA.argentina2026 : TEAM_DATA.spain2026;
           showWCF();
-        } else { showScreen('worldcup-eliminated'); }
+        } else { showWCEliminated('wc_sf'); }
       } else if (isWCFMode) {
         isWCFMode = false;
-        showScreen(japanWon ? 'worldcup-champion' : 'worldcup-eliminated');
+        japanWon ? showScreen('worldcup-champion') : showWCEliminated('wc_final');
       } else {
         isWCR32Mode = false;
         if (japanWon) {
           wcR16Opponent = wcR32Opponent === TEAM_DATA.morocco2026 ? TEAM_DATA.mexico2026 : TEAM_DATA.norway2026;
           showWCR16();
         } else {
-          showScreen('worldcup-eliminated');
+          showWCEliminated('wc_r32');
         }
       }
     };
@@ -9129,12 +9152,13 @@ function updateWCETAfterResult() {
         };
       }
     } else if (wcETScore.t2 > wcETScore.t1) {
+      const _etElimStage = isWCFMode ? 'wc_final' : isWCSFMode ? 'wc_sf' : isWCQFMode ? 'wc_qf' : isWCR16Mode ? 'wc_r16' : 'wc_r32';
       if (btn) {
         btn.style.display = '';
         btn.textContent = t('wcDefeated');
         btn.style.background = 'rgba(180,0,0,0.5)';
         btn.style.color = '#fff';
-        btn.onclick = () => showScreen('worldcup-eliminated');
+        btn.onclick = () => showWCEliminated(_etElimStage);
       }
       isWCR32Mode = false; isWCR16Mode = false; isWCQFMode = false; isWCSFMode = false; isWCFMode = false; wcPhase = '';
     } else {
@@ -9193,7 +9217,7 @@ function updateWCR32AfterResult() {
         btn.textContent = t('wcDefeated');
         btn.style.background = 'rgba(180,0,0,0.5)';
         btn.style.color = '#fff';
-        btn.onclick = () => showScreen('worldcup-eliminated');
+        btn.onclick = () => showWCEliminated('wc_r32');
       }
     }
     isWCR32Mode = false;
