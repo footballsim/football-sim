@@ -10342,7 +10342,7 @@ async function loadRealStats() {
         <div style="height:7px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden">
           <div style="height:100%;width:${wr}%;background:linear-gradient(90deg,#1a6bb5,#27ae60);border-radius:4px"></div>
         </div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px">${a.w}勝 ${a.d}分 ${a.l}敗${a.matchType!=='wc_group'?` <span style="color:rgba(255,255,255,0.2)">(${a.w_r?`90分${a.w_r}勝`:''}${a.w_et?` 延${a.w_et}勝`:''}${a.w_pk?` PK${a.w_pk}勝`:''}${a.l_r?` 90分${a.l_r}敗`:''}${a.l_et?` 延${a.l_et}敗`:''}${a.l_pk?` PK${a.l_pk}敗`:''})</span>`:''}` }</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px">${(()=>{let s=a.w+'勝 '+a.d+'分 '+a.l+'敗';if(a.matchType!=='wc_group'){let d='';if(a.w_r)d+='90分'+a.w_r+'勝';if(a.w_et)d+=(d?' ':'')+'延'+a.w_et+'勝';if(a.w_pk)d+=(d?' ':'')+'PK'+a.w_pk+'勝';if(a.l_r)d+=(d?' ':'')+'90分'+a.l_r+'敗';if(a.l_et)d+=(d?' ':'')+'延'+a.l_et+'敗';if(a.l_pk)d+=(d?' ':'')+'PK'+a.l_pk+'敗';if(d)s+=' <span style="color:rgba(255,255,255,0.2)">('+d+')</span>';}return s;})()}</div>
       </div>
       <div style="width:42px;text-align:right;font-size:16px;font-weight:700;color:${wr>=50?'#4ade80':'#f87171'}">${wr}%</div>
     </div>`;
