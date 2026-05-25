@@ -1358,6 +1358,74 @@ body {
   font-family: 'Noto Sans JP', sans-serif;
 }
 
+/* ===== TOP MENU CARDS ===== */
+.top-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 16px 4px;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.top-menu-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.top-menu-card:hover, .top-menu-card:active {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+}
+
+.top-menu-wc {
+  background: linear-gradient(135deg, rgba(184,134,11,0.42) 0%, rgba(255,215,0,0.12) 100%);
+  border-color: rgba(255,215,0,0.45);
+}
+
+.top-menu-single {
+  background: linear-gradient(135deg, rgba(30,100,50,0.5) 0%, rgba(58,158,74,0.18) 100%);
+  border-color: rgba(80,200,100,0.35);
+}
+
+.top-menu-players {
+  background: linear-gradient(135deg, rgba(0,60,160,0.5) 0%, rgba(30,100,220,0.18) 100%);
+  border-color: rgba(80,140,255,0.3);
+}
+
+.top-menu-icon {
+  font-size: 38px;
+  flex-shrink: 0;
+  width: 50px;
+  text-align: center;
+}
+
+.top-menu-label {
+  font-size: 18px;
+  font-weight: 900;
+  color: white;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.top-menu-desc {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+#screen-single {
+  background: linear-gradient(160deg, #003087 0%, #0050cc 50%, #1a7a3a 100%);
+}
+
 .goal-animation {
   position: fixed;
   top: 50%;
@@ -1498,18 +1566,14 @@ body {
   <div class="title-content">
     <!-- ヒーローセクション -->
     <div class="title-hero">
-      <div class="title-emblem" style="display:none">⚽</div>
-      <div class="title-main" id="title-main-text" style="display:none"></div>
-
-      <!-- 言語切り替えボタン（上部・小さく） -->
+      <!-- 言語切り替えボタン -->
       <div style="display:flex;gap:8px;justify-content:center;margin-bottom:28px;position:relative">
         <button id="lang-btn-ja" onclick="setLang('ja')" style="padding:5px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.4);background:transparent;color:rgba(255,255,255,0.65);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🇯🇵 日本語</button>
         <button id="lang-btn-en" onclick="setLang('en')" style="padding:5px 14px;border-radius:20px;border:1px solid #fff;background:#fff;color:var(--japan-blue);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🇬🇧 English</button>
       </div>
 
       <div class="title-sub">Football Simulation Lab</div>
-
-      <button id="btn-wc-mode" onclick="showScreen('worldcup')" class="start-btn" style="width:100%;max-width:380px;margin:0 auto;display:block;background:linear-gradient(135deg,#b8860b,#ffd700);color:#1a1a1a;font-size:1.6rem;padding:22px 24px;letter-spacing:0.1em;border-radius:14px;font-family:'Bebas Neue',sans-serif">🏆 W杯モードを始める</button>
+      <div class="title-wc-copy" id="top-tagline">JAPAN 2026 WORLD CUP SIMULATOR</div>
 
       <!-- デバッグパネル（?debug=1 時のみ表示） -->
       <div id="debug-panel" style="display:none;width:100%;max-width:380px;margin:12px auto 0;background:rgba(0,0,0,0.06);border:1px dashed #bbb;border-radius:8px;padding:10px 12px;box-sizing:border-box">
@@ -1530,9 +1594,47 @@ body {
       </div>
     </div>
 
-    <!-- 単発試合セクション -->
+    <!-- トップメニュー -->
+    <div class="top-menu">
+      <div class="top-menu-card top-menu-wc" onclick="showScreen('worldcup')">
+        <div class="top-menu-icon">🏆</div>
+        <div>
+          <div class="top-menu-label" id="top-lbl-wc">W杯モード</div>
+          <div class="top-menu-desc" id="top-desc-wc">グループステージから頂点を目指す</div>
+        </div>
+      </div>
+      <div class="top-menu-card top-menu-single" onclick="showScreen('single')">
+        <div class="top-menu-icon">⚽</div>
+        <div>
+          <div class="top-menu-label" id="top-lbl-single">シングルマッチ</div>
+          <div class="top-menu-desc" id="top-desc-single">好きな対戦カードをシミュレート</div>
+        </div>
+      </div>
+      <div class="top-menu-card top-menu-players" onclick="showScreen('players')">
+        <div class="top-menu-icon">📋</div>
+        <div>
+          <div class="top-menu-label" id="top-lbl-players">選手データ</div>
+          <div class="top-menu-desc" id="top-desc-players">全選手のパラメータを確認</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="title-patreon-banner"></div>
+    <div class="disclaimer-box" id="disclaimer-text">
+      ⚠️ このシミュレーターは個人制作のファン向けコンテンツです。FIFA・JFA・各国サッカー協会・クラブチーム・選手本人とは一切関係ありません。選手名は識別目的のみで使用しており、実在の選手を代表・推薦・関連付けるものではありません。選手パラメータはすべて独自の創作設定であり、実際の能力・評価とは無関係です。本コンテンツは非商業的ファン活動として制作されています。
+    </div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.6.4</div>
+  </div>
+</div>
+
+<!-- SINGLE MATCH SCREEN -->
+<div id="screen-single" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('title')">← 戻る</button>
+    <div class="screen-title-text">⚽ シングルマッチ</div>
+  </div>
+  <div class="title-content" style="padding-top:12px">
     <div class="other-matches-section">
-      <div id="other-matches-heading" class="other-matches-heading">⚽ その他の試合</div>
       <div class="match-list">
       <div class="match-card" onclick="selectMatch('2026vsオランダ')">
         <div class="match-date" id="match-date-ned">2026年6月14日 ・ W杯グループステージ</div>
@@ -1595,13 +1697,7 @@ body {
         <div class="match-desc" id="match-desc-bel">2点リードから逆転負けを喫した伝説の一戦。日本サッカー史上最高の舞台に挑む！</div>
       </div>
       </div><!-- /match-list -->
-    </div><!-- /other-matches-section -->
-    <button onclick="showScreen('players')" class="players-link-btn" id="btn-players-list">📋 選手データリスト</button>
-    <div id="title-patreon-banner"></div>
-    <div class="disclaimer-box" id="disclaimer-text">
-      ⚠️ このシミュレーターは個人制作のファン向けコンテンツです。FIFA・JFA・各国サッカー協会・クラブチーム・選手本人とは一切関係ありません。選手名は識別目的のみで使用しており、実在の選手を代表・推薦・関連付けるものではありません。選手パラメータはすべて独自の創作設定であり、実際の能力・評価とは無関係です。本コンテンツは非商業的ファン活動として制作されています。
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.6.3</div>
   </div>
 </div>
 
@@ -1806,7 +1902,7 @@ body {
 <!-- SETTING SCREEN -->
 <div id="screen-setting" class="screen">
   <div class="screen-header">
-    <button class="back-btn" onclick="showScreen('title')">← 戻る</button>
+    <button class="back-btn" onclick="showScreen(_settingBackScreen)">← 戻る</button>
     <div class="screen-title-text" id="setting-title-text">試合設定</div>
   </div>
   <div class="setting-content">
@@ -3688,6 +3784,7 @@ let _duelPlayerCache = {};
 let currentChanceIdx = 0;
 let editingPosition = null;
 let _playerDetailOrigin = 'title';
+let _settingBackScreen = 'title';
 let halfTimeShown = false;
 let halfTimeScore = { t1: 0, t2: 0 };
 // W杯交代管理：5人・3回（ハーフタイムは回数消費なし）
@@ -3977,6 +4074,7 @@ function showScreen(name) {
 
 function selectMatch(key) {
   currentMatchKey = key;
+  _settingBackScreen = 'single';
 
   if (key === '2026vsチュニジア') {
     team1Data = TEAM_DATA.japan2026vsTunisia;
@@ -7429,6 +7527,7 @@ function startWCMatch(idx) {
   isWorldCupMode = true;
   const keys = ['2026vsオランダ', '2026vsチュニジア', '2026vsスウェーデン'];
   selectMatch(keys[idx]);
+  _settingBackScreen = 'worldcup';
 }
 
 // サイレントシミュレーション（UIなしで1試合演算）
@@ -8103,6 +8202,7 @@ function startWCR32Match() {
   wcPhase = 'r32';
   const key = wcR32Opponent === TEAM_DATA.morocco2026 ? '2026r32vsモロッコ' : '2026r32vsブラジル';
   selectMatch(key);
+  _settingBackScreen = 'worldcup-r32';
 }
 
 function showWCR16() {
@@ -8141,6 +8241,7 @@ function startWCR16Match() {
   wcPhase = 'r16';
   const key = wcR16Opponent === TEAM_DATA.mexico2026 ? '2026r16vsメキシコ' : '2026r16vsノルウェー';
   selectMatch(key);
+  _settingBackScreen = 'worldcup-r16';
 }
 
 function updateWCR16AfterResult() {
@@ -8220,6 +8321,7 @@ function startWCQFMatch() {
   wcPhase = 'qf';
   const key = wcQFOpponent === TEAM_DATA.spain2026 ? '2026qfvsスペイン' : '2026qfvsフランス';
   selectMatch(key);
+  _settingBackScreen = 'worldcup-qf';
 }
 
 function updateWCQFAfterResult() {
@@ -8299,6 +8401,7 @@ function startWCSFMatch() {
   wcPhase = 'sf';
   const key = wcSFOpponent === TEAM_DATA.argentina2026 ? '2026sfvsアルゼンチン' : '2026sfvsイングランド';
   selectMatch(key);
+  _settingBackScreen = 'worldcup-sf';
 }
 
 function updateWCSFAfterResult() {
@@ -8379,6 +8482,7 @@ function startWCFMatch() {
   wcPhase = 'f';
   const key = wcFOpponent === TEAM_DATA.argentina2026 ? '2026fvsアルゼンチン' : '2026fvsスペイン';
   selectMatch(key);
+  _settingBackScreen = 'worldcup-f';
 }
 
 function updateWCFAfterResult() {
