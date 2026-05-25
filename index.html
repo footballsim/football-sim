@@ -10032,12 +10032,12 @@ function getPatreonBannerHtml(isEn) {
 // --- Firebase設定 ---
 // Firebase Consoleでプロジェクト作成後、configをここに貼り付けてください
 const WC_FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyBT4WBOZtwc_35lcxl4LTeX73EkQNtg5x4",
+  authDomain: "football-simulator-4710f.firebaseapp.com",
+  projectId: "football-simulator-4710f",
+  storageBucket: "football-simulator-4710f.firebasestorage.app",
+  messagingSenderId: "51109416821",
+  appId: "1:51109416821:web:360842a4ee5081d2b38d3c"
 };
 
 let _wcFbDb = null;
@@ -10071,50 +10071,68 @@ async function loadWCMatchResults() {
   } catch(e) { console.warn('Firebase read error:', e); return null; }
 }
 
-// --- Monte Carlo ---
-function _mcTeamStrength(teamData) {
-  if (!teamData || !teamData.players) return 1000;
-  return teamData.default_lineup.slice(0, 11).reduce((sum, idx) => {
-    const p = teamData.players[idx];
-    return sum + (p ? p.params.reduce((a, b) => a + b, 0) : 0);
-  }, 0);
+// --- Monte Carlo（simulateSilentによるキャリブレーション方式） ---
+// パラメータ合計は全チーム近似値のため強度比が横並びになる問題を解消
+// → 実際のゲームエンジン(simulateSilent)で50試合ずつ先行計算し、
+//   その勝率をMC確率として使用する
+
+let _wcCalibCache = null; // キャッシュ（再シミュ時は再計算）
+
+function _calibrateWCRates() {
+  const CAL = 50; // キャリブレーション試合数/対戦
+  const td = TEAM_DATA;
+  const JP = td.japan2026vsNetherlands; // ノックアウト時の日本チームデータ
+
+  const run = (t1, t2) => {
+    if (!t1 || !t2) return {w:0.4, d:0.2, l:0.4};
+    let w=0, d=0, l=0;
+    for (let i = 0; i < CAL; i++) {
+      const r = simulateSilent(t1, t2);
+      if (r.t1score > r.t2score) w++;
+      else if (r.t1score === r.t2score) d++;
+      else l++;
+    }
+    return {w:w/CAL, d:d/CAL, l:l/CAL};
+  };
+
+  return {
+    // グループ 日本戦
+    jp_nl: run(td.japan2026vsNetherlands, td.netherlands2026),
+    jp_tn: run(td.japan2026vsTunisia,     td.tunisia2026),
+    jp_sw: run(td.japan2026vsSweden,      td.sweden2026),
+    // グループ 非日本戦
+    nl_tn: run(td.netherlands2026, td.tunisia2026),
+    nl_sw: run(td.netherlands2026, td.sweden2026),
+    tn_sw: run(td.tunisia2026,     td.sweden2026),
+    // ノックアウト
+    jp_mo: run(JP, td.morocco2026),
+    jp_br: run(JP, td.brazil2026),
+    jp_no: run(JP, td.norway2026),
+    jp_mx: run(JP, td.mexico2026),   // メキシコHA未反映（簡易近似）
+    jp_sp: run(JP, td.spain2026),
+    jp_fr: run(JP, td.france2026),
+    jp_ar: run(JP, td.argentina2026),
+  };
 }
 
-function _mcGroupMatch(s1, s2) {
-  const ratio = s1 / (s1 + s2);
-  const pWin = 0.15 + ratio * 0.7;
-  const pDraw = 0.22;
+function _mcSim(rates) {
   const r = Math.random();
-  if (r < pWin - pDraw / 2) return 1;
-  if (r < pWin + pDraw / 2) return 0;
+  if (r < rates.w) return 1;
+  if (r < rates.w + rates.d) return 0;
   return -1;
 }
 
-function _mcKOMatch(s1, s2) {
-  const ratio = s1 / (s1 + s2);
-  const pWin = 0.15 + ratio * 0.7;
-  const pDraw = 0.18;
-  const r = Math.random();
-  if (r < pWin - pDraw / 2) return 1;
-  if (r < pWin + pDraw / 2) return Math.random() < 0.5 ? 1 : -1;
-  return -1;
+function _mcSimKO(rates) {
+  const result = _mcSim(rates);
+  if (result === 0) return Math.random() < 0.5 ? 1 : -1; // draw → PK
+  return result;
 }
 
 function runWCMonteCarlo(N) {
-  const td = TEAM_DATA;
-  const str = {
-    japan:       _mcTeamStrength(td.japan2026),
-    netherlands: _mcTeamStrength(td.netherlands2026),
-    tunisia:     _mcTeamStrength(td.tunisia2026),
-    sweden:      _mcTeamStrength(td.sweden2026),
-    morocco:     _mcTeamStrength(td.morocco2026),
-    brazil:      _mcTeamStrength(td.brazil2026),
-    norway:      _mcTeamStrength(td.norway2026),
-    mexico:      _mcTeamStrength(td.mexico2026) * 1.08,
-    spain:       _mcTeamStrength(td.spain2026),
-    france:      _mcTeamStrength(td.france2026),
-    argentina:   _mcTeamStrength(td.argentina2026)
-  };
+  // キャリブレーション（毎回リセット）
+  _wcCalibCache = _calibrateWCRates();
+  const rt = _wcCalibCache;
+
   const R = {
     vsNL:{w:0,d:0,l:0}, vsTN:{w:0,d:0,l:0}, vsSW:{w:0,d:0,l:0},
     q1st:0, q2nd:0, qFail:0,
@@ -10125,40 +10143,50 @@ function runWCMonteCarlo(N) {
     finw:0, finSpain:{w:0,l:0},  finArgentina:{w:0,l:0},
     N
   };
+
   for (let i = 0; i < N; i++) {
     const pts = [0,0,0,0];
-    const rec = (a, b, r) => { if(r>0)pts[a]+=3; else if(r===0){pts[a]+=1;pts[b]+=1;} else pts[b]+=3; return r; };
-    const rNL = rec(0,1, _mcGroupMatch(str.japan, str.netherlands));
-    const rTN = rec(0,2, _mcGroupMatch(str.japan, str.tunisia));
-    const rSW = rec(0,3, _mcGroupMatch(str.japan, str.sweden));
-    rec(1,2, _mcGroupMatch(str.netherlands, str.tunisia));
-    rec(1,3, _mcGroupMatch(str.netherlands, str.sweden));
-    rec(2,3, _mcGroupMatch(str.tunisia, str.sweden));
-    const addG = (t, r) => { if(r>0)t.w++;else if(r===0)t.d++;else t.l++; };
+    const rec = (a, b, res) => {
+      if(res>0)pts[a]+=3; else if(res===0){pts[a]+=1;pts[b]+=1;} else pts[b]+=3; return res;
+    };
+    const rNL = rec(0,1, _mcSim(rt.jp_nl));
+    const rTN = rec(0,2, _mcSim(rt.jp_tn));
+    const rSW = rec(0,3, _mcSim(rt.jp_sw));
+    rec(1,2, _mcSim(rt.nl_tn));
+    rec(1,3, _mcSim(rt.nl_sw));
+    rec(2,3, _mcSim(rt.tn_sw));
+
+    const addG = (t, res) => { if(res>0)t.w++;else if(res===0)t.d++;else t.l++; };
     addG(R.vsNL,rNL); addG(R.vsTN,rTN); addG(R.vsSW,rSW);
+
     let rank=1; for(let j=1;j<4;j++) if(pts[j]>pts[0]) rank++;
     if(rank>2){R.qFail++;continue;}
     if(rank===1)R.q1st++;else R.q2nd++;
-    const r32K = rank===1?'morocco':'brazil';
-    const r32 = _mcKOMatch(str.japan, str[r32K]);
-    if(r32>0){R.r32w++;R['r32'+(rank===1?'Morocco':'Brazil')].w++;}
-    else{R['r32'+(rank===1?'Morocco':'Brazil')].l++;continue;}
-    const r16K = r32K==='morocco'?'mexico':'norway';
-    const r16 = _mcKOMatch(str.japan, str[r16K]);
-    if(r16>0){R.r16w++;R['r16'+(r16K==='mexico'?'Mexico':'Norway')].w++;}
-    else{R['r16'+(r16K==='mexico'?'Mexico':'Norway')].l++;continue;}
-    const qfK = r16K==='mexico'?'spain':'france';
-    const qf = _mcKOMatch(str.japan, str[qfK]);
-    if(qf>0){R.qfw++;R['qf'+(qfK==='spain'?'Spain':'France')].w++;}
-    else{R['qf'+(qfK==='spain'?'Spain':'France')].l++;continue;}
-    const sfK = qfK==='france'?'spain':'argentina';
-    const sf = _mcKOMatch(str.japan, str[sfK]);
-    if(sf>0){R.sfw++;R['sf'+(sfK==='argentina'?'Argentina':'Spain')].w++;}
-    else{R['sf'+(sfK==='argentina'?'Argentina':'Spain')].l++;continue;}
-    const finK = sfK==='spain'?'argentina':'spain';
-    const fin = _mcKOMatch(str.japan, str[finK]);
-    if(fin>0){R.finw++;R['fin'+(finK==='argentina'?'Argentina':'Spain')].w++;}
-    else{R['fin'+(finK==='argentina'?'Argentina':'Spain')].l++;}
+
+    const isMorocco = rank===1;
+    const r32 = _mcSimKO(isMorocco ? rt.jp_mo : rt.jp_br);
+    if(r32>0){R.r32w++;R[isMorocco?'r32Morocco':'r32Brazil'].w++;}
+    else{R[isMorocco?'r32Morocco':'r32Brazil'].l++;continue;}
+
+    const isMexico = isMorocco;
+    const r16 = _mcSimKO(isMexico ? rt.jp_mx : rt.jp_no);
+    if(r16>0){R.r16w++;R[isMexico?'r16Mexico':'r16Norway'].w++;}
+    else{R[isMexico?'r16Mexico':'r16Norway'].l++;continue;}
+
+    const isSpainQF = isMexico;
+    const qf = _mcSimKO(isSpainQF ? rt.jp_sp : rt.jp_fr);
+    if(qf>0){R.qfw++;R[isSpainQF?'qfSpain':'qfFrance'].w++;}
+    else{R[isSpainQF?'qfSpain':'qfFrance'].l++;continue;}
+
+    const isArgentinaSF = isSpainQF;
+    const sf = _mcSimKO(isArgentinaSF ? rt.jp_ar : rt.jp_sp);
+    if(sf>0){R.sfw++;R[isArgentinaSF?'sfArgentina':'sfSpain'].w++;}
+    else{R[isArgentinaSF?'sfArgentina':'sfSpain'].l++;continue;}
+
+    const isSpainFin = isArgentinaSF;
+    const fin = _mcSimKO(isSpainFin ? rt.jp_sp : rt.jp_ar);
+    if(fin>0){R.finw++;R[isSpainFin?'finSpain':'finArgentina'].w++;}
+    else{R[isSpainFin?'finSpain':'finArgentina'].l++;}
   }
   return R;
 }
