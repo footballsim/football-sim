@@ -1625,7 +1625,7 @@ body {
     <div class="disclaimer-box" id="disclaimer-text">
       ⚠️ このシミュレーターは個人制作のファン向けコンテンツです。FIFA・JFA・各国サッカー協会・クラブチーム・選手本人とは一切関係ありません。選手名は識別目的のみで使用しており、実在の選手を代表・推薦・関連付けるものではありません。選手パラメータはすべて独自の創作設定であり、実際の能力・評価とは無関係です。本コンテンツは非商業的ファン活動として制作されています。
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.6.5</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.6.6</div>
   </div>
 </div>
 
@@ -8762,6 +8762,13 @@ function startWCPK() {
   document.getElementById('pk-title-label').textContent = t('wcPK');
   document.getElementById('pk-kick-btn').textContent = t('wcPKKickBtn');
   document.getElementById('pk-next-btn').textContent = t('wcPKNext');
+  // 前のPK戦で上書きされたonclickをリセット
+  document.getElementById('pk-next-btn').onclick = stepWCPK_next;
+  // 前のPK戦の結果画像をリセット
+  const _pkImgWrap = document.getElementById('pk-result-img-wrap');
+  if (_pkImgWrap) _pkImgWrap.style.display = 'none';
+  const _pkImg = document.getElementById('pk-result-img');
+  if (_pkImg) _pkImg.src = '';
   showScreen('worldcup-pk');
   _renderPKState();
 }
