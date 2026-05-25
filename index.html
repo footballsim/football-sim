@@ -7330,14 +7330,22 @@ function showResult() {
     });
   }
   // Firebase: WC試合結果書き込み
+  // KOモード：引き分けはET/PKに続くため書き込まない（重複防止）
+  // PK決着は _finishPK() 内で書き込む
   {
     const _isWCKO = isWCR32Mode || isWCR16Mode || isWCQFMode || isWCSFMode || isWCFMode;
     const _isWCGrp = isWorldCupMode && !_isWCKO;
-    if (_isWCKO || _isWCGrp) {
-      const _wcMT = isWCFMode ? 'wc_final' : isWCSFMode ? 'wc_sf' : isWCQFMode ? 'wc_qf' : isWCR16Mode ? 'wc_r16' : isWCR32Mode ? 'wc_r32' : 'wc_group';
+    if (_isWCGrp) {
       const _wcRes = t1score > t2score ? 'win' : t2score > t1score ? 'loss' : 'draw';
-      writeWCMatchResult(_wcMT, _wcRes, team2Data.en_name || team2Data.name);
+      writeWCMatchResult('wc_group', _wcRes, team2Data.en_name || team2Data.name, 'regular');
+    } else if (_isWCKO && t1score !== t2score) {
+      // 引き分えでない場合のみ書き込む（90分決着 or 延長決着）
+      const _wcMT = isWCFMode ? 'wc_final' : isWCSFMode ? 'wc_sf' : isWCQFMode ? 'wc_qf' : isWCR16Mode ? 'wc_r16' : isWCR32Mode ? 'wc_r32' : 'wc_group';
+      const _wcRes = t1score > t2score ? 'win' : 'loss';
+      const _rType = wcPhase === 'et_second' ? 'et' : 'regular';
+      writeWCMatchResult(_wcMT, _wcRes, team2Data.en_name || team2Data.name, _rType);
     }
+    // 引き分え（ET/PKへ）は ET後半 or _finishPK() で書き込む
   }
 
   // Stats
@@ -8907,6 +8915,13 @@ function _finishPK() {
   st.done = true;
   const japanWon = st.t1Goals > st.t2Goals;
 
+  // Firebase: PK決着の試合結果を書き込む
+  {
+    const _wcMT = isWCFMode ? 'wc_final' : isWCSFMode ? 'wc_sf' : isWCQFMode ? 'wc_qf' : isWCR16Mode ? 'wc_r16' : 'wc_r32';
+    const _wcRes = japanWon ? 'win' : 'loss';
+    writeWCMatchResult(_wcMT, _wcRes, team2Data.en_name || team2Data.name, 'pk');
+  }
+
   document.getElementById('pk-kicker-box').style.display = 'none';
   document.getElementById('pk-kick-btn').style.display = 'none';
 
@@ -10053,11 +10068,12 @@ function _getWCFbDb() {
   } catch(e) { console.warn('Firebase init error:', e); return null; }
 }
 
-function writeWCMatchResult(matchType, result, opponentName) {
+function writeWCMatchResult(matchType, result, opponentName, resultType) {
   const db = _getWCFbDb();
   if (!db) return;
   db.collection('wc_match_results').add({
     matchType, result, opponent: opponentName,
+    resultType: resultType || 'regular', // 'regular' | 'et' | 'pk'
     ts: firebase.firestore.FieldValue.serverTimestamp()
   }).catch(e => console.warn('Firebase write error:', e));
 }
@@ -10301,10 +10317,14 @@ async function loadRealStats() {
   const agg = {};
   data.forEach(d => {
     const key = (d.matchType||'?') + '|' + (d.opponent||'?');
-    if (!agg[key]) agg[key] = {w:0,l:0,d:0,total:0,matchType:d.matchType,opponent:d.opponent};
+    if (!agg[key]) agg[key] = {w:0,l:0,d:0,total:0,matchType:d.matchType,opponent:d.opponent,
+      w_r:0,w_et:0,w_pk:0,l_r:0,l_et:0,l_pk:0};
     const a = agg[key];
     a.total++;
-    if(d.result==='win')a.w++;else if(d.result==='loss')a.l++;else a.d++;
+    const rt = d.resultType || 'regular';
+    if(d.result==='win'){a.w++;if(rt==='et')a.w_et++;else if(rt==='pk')a.w_pk++;else a.w_r++;}
+    else if(d.result==='loss'){a.l++;if(rt==='et')a.l_et++;else if(rt==='pk')a.l_pk++;else a.l_r++;}
+    else a.d++;
   });
   const order = ['wc_group','wc_r32','wc_r16','wc_qf','wc_sf','wc_final'];
   const typeLabel = {wc_group:'GL',wc_r32:'1回戦',wc_r16:'2回戦',wc_qf:'準々決勝',wc_sf:'準決勝',wc_final:'決勝'};
@@ -10322,7 +10342,7 @@ async function loadRealStats() {
         <div style="height:7px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden">
           <div style="height:100%;width:${wr}%;background:linear-gradient(90deg,#1a6bb5,#27ae60);border-radius:4px"></div>
         </div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px">${a.w}勝 ${a.d}分 ${a.l}敗</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px">${a.w}勝 ${a.d}分 ${a.l}敗${a.matchType!=='wc_group'?` <span style="color:rgba(255,255,255,0.2)">(${a.w_r?`90分${a.w_r}勝`:''}${a.w_et?` 延${a.w_et}勝`:''}${a.w_pk?` PK${a.w_pk}勝`:''}${a.l_r?` 90分${a.l_r}敗`:''}${a.l_et?` 延${a.l_et}敗`:''}${a.l_pk?` PK${a.l_pk}敗`:''})</span>`:''}` }</div>
       </div>
       <div style="width:42px;text-align:right;font-size:16px;font-weight:700;color:${wr>=50?'#4ade80':'#f87171'}">${wr}%</div>
     </div>`;
