@@ -10200,12 +10200,12 @@ function refreshMCStats() {
     const tri = r => `<span style="font-size:12px;font-weight:700;color:#4ade80">${pct(r.w)}%勝</span>&nbsp;<span style="font-size:12px;color:#888">${pct(r.d)}%分</span>&nbsp;<span style="font-size:12px;color:#f87171">${pct(r.l)}%負</span>`;
     const qualified = R.q1st + R.q2nd;
     const stages = [
-      {lbl:'R32', v:qualified,  color:'linear-gradient(90deg,#374151,#6b7280)'},
-      {lbl:'R16', v:R.r32w,     color:'linear-gradient(90deg,#1e3a5f,#2563eb)'},
-      {lbl:'QF',  v:R.r16w,     color:'linear-gradient(90deg,#1a3a6b,#1a6bb5)'},
-      {lbl:'SF',  v:R.qfw,      color:'linear-gradient(90deg,#0d4a8a,#0ea5e9)'},
-      {lbl:'決勝', v:R.sfw,      color:'linear-gradient(90deg,#7c2d12,#ea580c)'},
-      {lbl:'🏆優勝', v:R.finw,   color:'linear-gradient(90deg,#78350f,#f59e0b)'}
+      {lbl:'1回戦', v:qualified,  color:'linear-gradient(90deg,#374151,#6b7280)'},
+      {lbl:'2回戦', v:R.r32w,     color:'linear-gradient(90deg,#1e3a5f,#2563eb)'},
+      {lbl:'準々決勝', v:R.r16w,   color:'linear-gradient(90deg,#1a3a6b,#1a6bb5)'},
+      {lbl:'準決勝',  v:R.qfw,     color:'linear-gradient(90deg,#0d4a8a,#0ea5e9)'},
+      {lbl:'決勝',   v:R.sfw,      color:'linear-gradient(90deg,#7c2d12,#ea580c)'},
+      {lbl:'🏆優勝', v:R.finw,    color:'linear-gradient(90deg,#78350f,#f59e0b)'}
     ];
     let html = `
     <div style="margin-bottom:20px">
@@ -10279,7 +10279,7 @@ async function loadRealStats() {
     if(d.result==='win')a.w++;else if(d.result==='loss')a.l++;else a.d++;
   });
   const order = ['wc_group','wc_r32','wc_r16','wc_qf','wc_sf','wc_final'];
-  const typeLabel = {wc_group:'GL',wc_r32:'R32',wc_r16:'R16',wc_qf:'QF',wc_sf:'SF',wc_final:'決勝'};
+  const typeLabel = {wc_group:'GL',wc_r32:'1回戦',wc_r16:'2回戦',wc_qf:'準々決勝',wc_sf:'準決勝',wc_final:'決勝'};
   const sorted = Object.values(agg).sort((a,b)=>order.indexOf(a.matchType)-order.indexOf(b.matchType));
   let html = `<div style="font-size:11px;color:rgba(255,255,255,0.35);text-align:right;margin-bottom:14px">全${data.length}試合のデータ</div>`;
   sorted.forEach(a => {
