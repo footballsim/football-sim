@@ -10329,25 +10329,25 @@ async function loadRealStats() {
   const order = ['wc_group','wc_r32','wc_r16','wc_qf','wc_sf','wc_final'];
   const typeLabel = {wc_group:'GL',wc_r32:'1回戦',wc_r16:'2回戦',wc_qf:'準々決勝',wc_sf:'準決勝',wc_final:'決勝'};
   const sorted = Object.values(agg).sort((a,b)=>order.indexOf(a.matchType)-order.indexOf(b.matchType));
-  let html = `<div style="font-size:11px;color:rgba(255,255,255,0.35);text-align:right;margin-bottom:14px">全${data.length}試合のデータ</div>`;
+  let html = `<div style="font-size:11px;color:rgba(255,255,255,0.7);text-align:right;margin-bottom:14px">全${data.length}試合のデータ</div>`;
   sorted.forEach(a => {
     const wr = Math.round(a.w/a.total*100);
     html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-      <div style="width:36px;font-size:10px;color:rgba(255,255,255,0.4);font-weight:700;text-align:right;flex-shrink:0">${typeLabel[a.matchType]||''}</div>
+      <div style="width:36px;font-size:10px;color:#fff;font-weight:700;text-align:right;flex-shrink:0">${typeLabel[a.matchType]||''}</div>
       <div style="flex:1">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
           <span style="font-size:13px;color:#fff">vs ${a.opponent}</span>
-          <span style="font-size:11px;color:rgba(255,255,255,0.4)">${a.total}試合</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.7)">${a.total}試合</span>
         </div>
-        <div style="height:7px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden">
+        <div style="height:7px;background:rgba(255,255,255,0.15);border-radius:4px;overflow:hidden">
           <div style="height:100%;width:${wr}%;background:linear-gradient(90deg,#1a6bb5,#27ae60);border-radius:4px"></div>
         </div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px">${(()=>{let s=a.w+'勝 '+a.d+'分 '+a.l+'敗';if(a.matchType!=='wc_group'){let d='';if(a.w_r)d+='90分'+a.w_r+'勝';if(a.w_et)d+=(d?' ':'')+'延'+a.w_et+'勝';if(a.w_pk)d+=(d?' ':'')+'PK'+a.w_pk+'勝';if(a.l_r)d+=(d?' ':'')+'90分'+a.l_r+'敗';if(a.l_et)d+=(d?' ':'')+'延'+a.l_et+'敗';if(a.l_pk)d+=(d?' ':'')+'PK'+a.l_pk+'敗';if(d)s+=' <span style="color:rgba(255,255,255,0.2)">('+d+')</span>';}return s;})()}</div>
+        <div style="font-size:10px;color:#fff;margin-top:2px">${(()=>{let s=a.w+'勝 '+a.d+'分 '+a.l+'敗';if(a.matchType!=='wc_group'){let d='';if(a.w_r)d+='90分'+a.w_r+'勝';if(a.w_et)d+=(d?' ':'')+'延'+a.w_et+'勝';if(a.w_pk)d+=(d?' ':'')+'PK'+a.w_pk+'勝';if(a.l_r)d+=(d?' ':'')+'90分'+a.l_r+'敗';if(a.l_et)d+=(d?' ':'')+'延'+a.l_et+'敗';if(a.l_pk)d+=(d?' ':'')+'PK'+a.l_pk+'敗';if(d)s+=' <span style="color:rgba(255,255,255,0.6)">('+d+')</span>';}return s;})()}</div>
       </div>
       <div style="width:42px;text-align:right;font-size:16px;font-weight:700;color:${wr>=50?'#4ade80':'#f87171'}">${wr}%</div>
     </div>`;
   });
-  html += `<div style="margin-top:8px;font-size:10px;color:rgba(255,255,255,0.2);text-align:center">全プレイヤーの実プレイ戦績</div>`;
+  html += `<div style="margin-top:8px;font-size:10px;color:rgba(255,255,255,0.5);text-align:center">全プレイヤーの実プレイ戦績</div>`;
   resultEl.innerHTML = html;
 }
 
