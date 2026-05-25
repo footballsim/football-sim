@@ -7990,6 +7990,9 @@ function updateWCAfterResult() {
 
   wcMatchIndex++;
   renderWCTable();
+  // グループ戦では延長/PKボタンを必ず非表示
+  const _wcGrpEtBtn = document.getElementById('wc-et-btn');
+  if (_wcGrpEtBtn) _wcGrpEtBtn.style.display = 'none';
   const _backBtn = document.getElementById('wc-result-back-btn');
   if (_backBtn) {
     _backBtn.textContent = window.LANG === 'en' ? '🏆 Back to Group' : '🏆 グループへ';
@@ -9267,6 +9270,11 @@ function resetWCMode() {
   if (autoEl) { autoEl.innerHTML=''; autoEl.style.display='none'; }
   const etPkEl = document.getElementById('wc-et-pk-result');
   if (etPkEl) { etPkEl.innerHTML=''; etPkEl.style.display='none'; }
+  // ET/PKボタンをリセット（前のトーナメント試合の状態が残らないよう）
+  const _etBtn = document.getElementById('wc-et-btn');
+  if (_etBtn) { _etBtn.style.display = 'none'; _etBtn.textContent = t('wcETBtn'); }
+  // PKステートをリセット
+  pkState = null;
   renderWCTable();
   updateWCNextBtn();
   showScreen('worldcup');
