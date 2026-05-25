@@ -25,6 +25,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<!-- Firebase SDK（みんなの戦績 機能用） -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 <title>Football Simulation Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1625,7 +1628,7 @@ body {
     <div class="disclaimer-box" id="disclaimer-text">
       ⚠️ このシミュレーターは個人制作のファン向けコンテンツです。FIFA・JFA・各国サッカー協会・クラブチーム・選手本人とは一切関係ありません。選手名は識別目的のみで使用しており、実在の選手を代表・推薦・関連付けるものではありません。選手パラメータはすべて独自の創作設定であり、実際の能力・評価とは無関係です。本コンテンツは非商業的ファン活動として制作されています。
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.6.7</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.6.8</div>
   </div>
 </div>
 
@@ -1738,6 +1741,9 @@ body {
     <div id="wc-auto-results" style="max-width:400px;margin:0 auto 12px;display:none;padding:6px 12px;background:rgba(0,0,0,0.35);border-radius:8px;font-size:11px;color:rgba(255,255,255,0.7);text-align:center;line-height:1.8"></div>
     <div style="max-width:360px;margin:0 auto">
       <button id="wc-btn-next" class="start-btn" onclick="onWCNextBtn()" style="color:#ffffff">⚽ 次へ：日本 vs オランダ</button>
+    </div>
+    <div style="max-width:360px;margin:8px auto 0">
+      <button onclick="showWCStats()" style="width:100%;padding:10px;font-size:13px;font-weight:700;border:none;border-radius:10px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.65);cursor:pointer;font-family:inherit;letter-spacing:0.5px">📊 W杯シミュレーション統計</button>
     </div>
   </div>
 </div>
@@ -1887,6 +1893,30 @@ body {
     </div>
     <button id="pk-kick-btn" onclick="stepWCPK_kick()" style="width:100%;padding:18px;font-size:18px;font-weight:700;border:none;border-radius:14px;background:linear-gradient(135deg,#c8102e,#e63950);color:#fff;cursor:pointer;font-family:inherit;margin-bottom:10px;box-sizing:border-box"></button>
     <button id="pk-next-btn" onclick="stepWCPK_next()" style="display:none;width:100%;padding:16px;font-size:16px;font-weight:700;border:none;border-radius:14px;background:linear-gradient(135deg,#1a7a3a,#27ae60);color:#fff;cursor:pointer;font-family:inherit;box-sizing:border-box"></button>
+  </div>
+</div>
+
+<!-- WC STATS SCREEN -->
+<div id="screen-worldcup-stats" class="screen" style="background:linear-gradient(160deg,#0d1117 0%,#0f1923 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div class="screen-header" style="background:rgba(0,0,0,0.4);width:100%">
+    <button class="back-btn" style="color:#fff" onclick="showScreen('worldcup')">← 戻る</button>
+    <div class="screen-title-text" style="color:#fff">📊 W杯シミュレーション統計</div>
+  </div>
+  <div style="width:100%;max-width:500px;padding:16px;box-sizing:border-box">
+    <div style="display:flex;background:rgba(255,255,255,0.07);border-radius:10px;padding:3px;margin-bottom:20px;gap:3px">
+      <button id="stats-tab-mc" onclick="switchStatsTab('mc')" style="flex:1;padding:9px 4px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#1a6bb5,#0d4a8a);color:#fff">🎲 シミュレーション確率</button>
+      <button id="stats-tab-real" onclick="switchStatsTab('real')" style="flex:1;padding:9px 4px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:transparent;color:rgba(255,255,255,0.45)">👥 みんなの戦績</button>
+    </div>
+    <div id="stats-content-mc">
+      <div id="stats-mc-status" style="text-align:center;color:rgba(255,255,255,0.45);font-size:13px;margin:24px 0">シミュレーション実行中...</div>
+      <div id="stats-mc-result" style="display:none"></div>
+      <button onclick="refreshMCStats()" style="width:100%;margin-top:16px;padding:12px;font-size:13px;font-weight:700;border:none;border-radius:10px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);cursor:pointer;font-family:inherit">🔄 再シミュレーション（1000回）</button>
+    </div>
+    <div id="stats-content-real" style="display:none">
+      <div id="stats-real-status" style="text-align:center;color:rgba(255,255,255,0.45);font-size:13px;margin:24px 0">データ読み込み中...</div>
+      <div id="stats-real-result"></div>
+      <button onclick="loadRealStats()" style="width:100%;margin-top:16px;padding:12px;font-size:13px;font-weight:700;border:none;border-radius:10px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);cursor:pointer;font-family:inherit">🔄 データを更新</button>
+    </div>
   </div>
 </div>
 
@@ -7299,6 +7329,16 @@ function showResult() {
       match_type: _matchType
     });
   }
+  // Firebase: WC試合結果書き込み
+  {
+    const _isWCKO = isWCR32Mode || isWCR16Mode || isWCQFMode || isWCSFMode || isWCFMode;
+    const _isWCGrp = isWorldCupMode && !_isWCKO;
+    if (_isWCKO || _isWCGrp) {
+      const _wcMT = isWCFMode ? 'wc_final' : isWCSFMode ? 'wc_sf' : isWCQFMode ? 'wc_qf' : isWCR16Mode ? 'wc_r16' : isWCR32Mode ? 'wc_r32' : 'wc_group';
+      const _wcRes = t1score > t2score ? 'win' : t2score > t1score ? 'loss' : 'draw';
+      writeWCMatchResult(_wcMT, _wcRes, team2Data.en_name || team2Data.name);
+    }
+  }
 
   // Stats
   const gs = gameState;
@@ -9983,6 +10023,284 @@ function getPatreonBannerHtml(isEn) {
     + '<a href="https://www.patreon.com/cw/FootballSimulationLab" target="_blank" rel="noopener" style="display:inline-block;background:#f96854;color:white;font-weight:700;font-size:14px;padding:10px 28px;border-radius:24px;text-decoration:none">→ Support on Patreon</a>'
     + '</div>';
   return isEn ? en : ja;
+}
+
+// =============================================
+// W杯統計システム（Monte Carlo + Firebase）
+// =============================================
+
+// --- Firebase設定 ---
+// Firebase Consoleでプロジェクト作成後、configをここに貼り付けてください
+const WC_FIREBASE_CONFIG = {
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
+};
+
+let _wcFbDb = null;
+function _getWCFbDb() {
+  if (_wcFbDb) return _wcFbDb;
+  if (!WC_FIREBASE_CONFIG.apiKey) return null;
+  try {
+    let app;
+    try { app = firebase.app('wc-stats'); }
+    catch(e) { app = firebase.initializeApp(WC_FIREBASE_CONFIG, 'wc-stats'); }
+    _wcFbDb = firebase.firestore(app);
+    return _wcFbDb;
+  } catch(e) { console.warn('Firebase init error:', e); return null; }
+}
+
+function writeWCMatchResult(matchType, result, opponentName) {
+  const db = _getWCFbDb();
+  if (!db) return;
+  db.collection('wc_match_results').add({
+    matchType, result, opponent: opponentName,
+    ts: firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(e => console.warn('Firebase write error:', e));
+}
+
+async function loadWCMatchResults() {
+  const db = _getWCFbDb();
+  if (!db) return null;
+  try {
+    const snap = await db.collection('wc_match_results').get();
+    return snap.docs.map(d => d.data());
+  } catch(e) { console.warn('Firebase read error:', e); return null; }
+}
+
+// --- Monte Carlo ---
+function _mcTeamStrength(teamData) {
+  if (!teamData || !teamData.players) return 1000;
+  return teamData.default_lineup.slice(0, 11).reduce((sum, idx) => {
+    const p = teamData.players[idx];
+    return sum + (p ? p.params.reduce((a, b) => a + b, 0) : 0);
+  }, 0);
+}
+
+function _mcGroupMatch(s1, s2) {
+  const ratio = s1 / (s1 + s2);
+  const pWin = 0.15 + ratio * 0.7;
+  const pDraw = 0.22;
+  const r = Math.random();
+  if (r < pWin - pDraw / 2) return 1;
+  if (r < pWin + pDraw / 2) return 0;
+  return -1;
+}
+
+function _mcKOMatch(s1, s2) {
+  const ratio = s1 / (s1 + s2);
+  const pWin = 0.15 + ratio * 0.7;
+  const pDraw = 0.18;
+  const r = Math.random();
+  if (r < pWin - pDraw / 2) return 1;
+  if (r < pWin + pDraw / 2) return Math.random() < 0.5 ? 1 : -1;
+  return -1;
+}
+
+function runWCMonteCarlo(N) {
+  const td = TEAM_DATA;
+  const str = {
+    japan:       _mcTeamStrength(td.japan2026),
+    netherlands: _mcTeamStrength(td.netherlands2026),
+    tunisia:     _mcTeamStrength(td.tunisia2026),
+    sweden:      _mcTeamStrength(td.sweden2026),
+    morocco:     _mcTeamStrength(td.morocco2026),
+    brazil:      _mcTeamStrength(td.brazil2026),
+    norway:      _mcTeamStrength(td.norway2026),
+    mexico:      _mcTeamStrength(td.mexico2026) * 1.08,
+    spain:       _mcTeamStrength(td.spain2026),
+    france:      _mcTeamStrength(td.france2026),
+    argentina:   _mcTeamStrength(td.argentina2026)
+  };
+  const R = {
+    vsNL:{w:0,d:0,l:0}, vsTN:{w:0,d:0,l:0}, vsSW:{w:0,d:0,l:0},
+    q1st:0, q2nd:0, qFail:0,
+    r32w:0, r32Morocco:{w:0,l:0}, r32Brazil:{w:0,l:0},
+    r16w:0, r16Mexico:{w:0,l:0}, r16Norway:{w:0,l:0},
+    qfw:0,  qfSpain:{w:0,l:0},   qfFrance:{w:0,l:0},
+    sfw:0,  sfArgentina:{w:0,l:0}, sfSpain:{w:0,l:0},
+    finw:0, finSpain:{w:0,l:0},  finArgentina:{w:0,l:0},
+    N
+  };
+  for (let i = 0; i < N; i++) {
+    const pts = [0,0,0,0];
+    const rec = (a, b, r) => { if(r>0)pts[a]+=3; else if(r===0){pts[a]+=1;pts[b]+=1;} else pts[b]+=3; return r; };
+    const rNL = rec(0,1, _mcGroupMatch(str.japan, str.netherlands));
+    const rTN = rec(0,2, _mcGroupMatch(str.japan, str.tunisia));
+    const rSW = rec(0,3, _mcGroupMatch(str.japan, str.sweden));
+    rec(1,2, _mcGroupMatch(str.netherlands, str.tunisia));
+    rec(1,3, _mcGroupMatch(str.netherlands, str.sweden));
+    rec(2,3, _mcGroupMatch(str.tunisia, str.sweden));
+    const addG = (t, r) => { if(r>0)t.w++;else if(r===0)t.d++;else t.l++; };
+    addG(R.vsNL,rNL); addG(R.vsTN,rTN); addG(R.vsSW,rSW);
+    let rank=1; for(let j=1;j<4;j++) if(pts[j]>pts[0]) rank++;
+    if(rank>2){R.qFail++;continue;}
+    if(rank===1)R.q1st++;else R.q2nd++;
+    const r32K = rank===1?'morocco':'brazil';
+    const r32 = _mcKOMatch(str.japan, str[r32K]);
+    if(r32>0){R.r32w++;R['r32'+(rank===1?'Morocco':'Brazil')].w++;}
+    else{R['r32'+(rank===1?'Morocco':'Brazil')].l++;continue;}
+    const r16K = r32K==='morocco'?'mexico':'norway';
+    const r16 = _mcKOMatch(str.japan, str[r16K]);
+    if(r16>0){R.r16w++;R['r16'+(r16K==='mexico'?'Mexico':'Norway')].w++;}
+    else{R['r16'+(r16K==='mexico'?'Mexico':'Norway')].l++;continue;}
+    const qfK = r16K==='mexico'?'spain':'france';
+    const qf = _mcKOMatch(str.japan, str[qfK]);
+    if(qf>0){R.qfw++;R['qf'+(qfK==='spain'?'Spain':'France')].w++;}
+    else{R['qf'+(qfK==='spain'?'Spain':'France')].l++;continue;}
+    const sfK = qfK==='france'?'spain':'argentina';
+    const sf = _mcKOMatch(str.japan, str[sfK]);
+    if(sf>0){R.sfw++;R['sf'+(sfK==='argentina'?'Argentina':'Spain')].w++;}
+    else{R['sf'+(sfK==='argentina'?'Argentina':'Spain')].l++;continue;}
+    const finK = sfK==='spain'?'argentina':'spain';
+    const fin = _mcKOMatch(str.japan, str[finK]);
+    if(fin>0){R.finw++;R['fin'+(finK==='argentina'?'Argentina':'Spain')].w++;}
+    else{R['fin'+(finK==='argentina'?'Argentina':'Spain')].l++;}
+  }
+  return R;
+}
+
+// --- 統計画面 ---
+function showWCStats() {
+  showScreen('worldcup-stats');
+  switchStatsTab('mc');
+  refreshMCStats();
+}
+
+function switchStatsTab(tab) {
+  const isMC = tab === 'mc';
+  const btnMC = document.getElementById('stats-tab-mc');
+  const btnRe = document.getElementById('stats-tab-real');
+  btnMC.style.background = isMC ? 'linear-gradient(135deg,#1a6bb5,#0d4a8a)' : 'transparent';
+  btnMC.style.color = isMC ? '#fff' : 'rgba(255,255,255,0.45)';
+  btnRe.style.background = !isMC ? 'linear-gradient(135deg,#1a7a3a,#0d5a2a)' : 'transparent';
+  btnRe.style.color = !isMC ? '#fff' : 'rgba(255,255,255,0.45)';
+  document.getElementById('stats-content-mc').style.display = isMC ? '' : 'none';
+  document.getElementById('stats-content-real').style.display = !isMC ? '' : 'none';
+  if (!isMC) loadRealStats();
+}
+
+function refreshMCStats() {
+  const statusEl = document.getElementById('stats-mc-status');
+  const resultEl = document.getElementById('stats-mc-result');
+  statusEl.style.display = '';
+  statusEl.textContent = '1000回シミュレーション実行中...';
+  resultEl.style.display = 'none';
+  setTimeout(() => {
+    const R = runWCMonteCarlo(1000);
+    const N = R.N;
+    const pct = v => Math.round(v / N * 100);
+    const bar = (v, color) => {
+      const w = Math.max(0, Math.min(100, Math.round(v / N * 100)));
+      return `<div style="height:5px;background:rgba(255,255,255,0.08);border-radius:3px;margin:3px 0 10px"><div style="height:100%;width:${w}%;background:${color||'linear-gradient(90deg,#1a6bb5,#27ae60)'};border-radius:3px;min-width:${v>0?2:0}px"></div></div>`;
+    };
+    const tri = r => `<span style="font-size:12px;font-weight:700;color:#4ade80">${pct(r.w)}%勝</span>&nbsp;<span style="font-size:12px;color:#888">${pct(r.d)}%分</span>&nbsp;<span style="font-size:12px;color:#f87171">${pct(r.l)}%負</span>`;
+    const qualified = R.q1st + R.q2nd;
+    const stages = [
+      {lbl:'R32', v:qualified,  color:'linear-gradient(90deg,#374151,#6b7280)'},
+      {lbl:'R16', v:R.r32w,     color:'linear-gradient(90deg,#1e3a5f,#2563eb)'},
+      {lbl:'QF',  v:R.r16w,     color:'linear-gradient(90deg,#1a3a6b,#1a6bb5)'},
+      {lbl:'SF',  v:R.qfw,      color:'linear-gradient(90deg,#0d4a8a,#0ea5e9)'},
+      {lbl:'決勝', v:R.sfw,      color:'linear-gradient(90deg,#7c2d12,#ea580c)'},
+      {lbl:'🏆優勝', v:R.finw,   color:'linear-gradient(90deg,#78350f,#f59e0b)'}
+    ];
+    let html = `
+    <div style="margin-bottom:20px">
+      <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:10px;letter-spacing:1.5px;text-transform:uppercase">グループリーグ</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#fff;margin-bottom:2px"><span>🇳🇱 オランダ</span>${tri(R.vsNL)}</div>${bar(R.vsNL.w)}
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#fff;margin-bottom:2px"><span>🇹🇳 チュニジア</span>${tri(R.vsTN)}</div>${bar(R.vsTN.w)}
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#fff;margin-bottom:2px"><span>🇸🇪 スウェーデン</span>${tri(R.vsSW)}</div>${bar(R.vsSW.w)}
+    </div>
+    <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px;margin-bottom:20px">
+      <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:12px;letter-spacing:1.5px;text-transform:uppercase">グループ突破</div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1;text-align:center;background:rgba(255,215,0,0.12);border-radius:8px;padding:10px 4px">
+          <div style="font-size:24px;font-weight:900;color:#ffd700">${pct(R.q1st)}%</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:2px">1位通過</div>
+        </div>
+        <div style="flex:1;text-align:center;background:rgba(255,255,255,0.07);border-radius:8px;padding:10px 4px">
+          <div style="font-size:24px;font-weight:900;color:#c0c0c0">${pct(R.q2nd)}%</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:2px">2位通過</div>
+        </div>
+        <div style="flex:1;text-align:center;background:rgba(37,99,235,0.2);border-radius:8px;padding:10px 4px">
+          <div style="font-size:24px;font-weight:900;color:#60a5fa">${pct(qualified)}%</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:2px">突破率</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:10px;letter-spacing:1.5px;text-transform:uppercase">トーナメント進出率</div>
+      ${stages.map(s => `<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <div style="width:40px;font-size:11px;color:rgba(255,255,255,0.5);font-weight:700;flex-shrink:0;text-align:right">${s.lbl}</div>
+        <div style="flex:1;height:10px;background:rgba(255,255,255,0.07);border-radius:5px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(s.v/N*100)}%;background:${s.color};border-radius:5px;min-width:${s.v>0?2:0}px"></div>
+        </div>
+        <div style="width:38px;text-align:right;font-size:14px;font-weight:700;color:${s.lbl.includes('優勝')?'#ffd700':'#fff'}">${Math.round(s.v/N*100)}%</div>
+      </div>`).join('')}
+    </div>
+    <div style="margin-top:14px;font-size:10px;color:rgba(255,255,255,0.2);text-align:center">1000回シミュレーション ／ 毎回結果は変わります</div>`;
+    resultEl.innerHTML = html;
+    resultEl.style.display = '';
+    statusEl.style.display = 'none';
+  }, 60);
+}
+
+async function loadRealStats() {
+  const statusEl = document.getElementById('stats-real-status');
+  const resultEl = document.getElementById('stats-real-result');
+  if (!WC_FIREBASE_CONFIG.apiKey) {
+    statusEl.style.display = 'none';
+    resultEl.innerHTML = `<div style="text-align:center;padding:28px 16px;background:rgba(255,255,255,0.04);border-radius:12px">
+      <div style="font-size:32px;margin-bottom:12px">🔧</div>
+      <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:10px">Firebase設定が必要です</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.45);line-height:1.8">console.firebase.google.com でプロジェクトを作成し<br>Firestoreを有効化 → firebaseConfigを<br>コードのWC_FIREBASE_CONFIGに貼り付けてください</div>
+    </div>`;
+    return;
+  }
+  statusEl.style.display = '';
+  statusEl.textContent = 'データ読み込み中...';
+  resultEl.innerHTML = '';
+  const data = await loadWCMatchResults();
+  if (!data) { statusEl.textContent = 'データの取得に失敗しました'; return; }
+  statusEl.style.display = 'none';
+  if (data.length === 0) {
+    resultEl.innerHTML = '<div style="text-align:center;padding:32px 16px;color:rgba(255,255,255,0.35);font-size:13px">まだデータがありません<br>W杯モードで試合をプレイしてください！</div>';
+    return;
+  }
+  const agg = {};
+  data.forEach(d => {
+    const key = (d.matchType||'?') + '|' + (d.opponent||'?');
+    if (!agg[key]) agg[key] = {w:0,l:0,d:0,total:0,matchType:d.matchType,opponent:d.opponent};
+    const a = agg[key];
+    a.total++;
+    if(d.result==='win')a.w++;else if(d.result==='loss')a.l++;else a.d++;
+  });
+  const order = ['wc_group','wc_r32','wc_r16','wc_qf','wc_sf','wc_final'];
+  const typeLabel = {wc_group:'GL',wc_r32:'R32',wc_r16:'R16',wc_qf:'QF',wc_sf:'SF',wc_final:'決勝'};
+  const sorted = Object.values(agg).sort((a,b)=>order.indexOf(a.matchType)-order.indexOf(b.matchType));
+  let html = `<div style="font-size:11px;color:rgba(255,255,255,0.35);text-align:right;margin-bottom:14px">全${data.length}試合のデータ</div>`;
+  sorted.forEach(a => {
+    const wr = Math.round(a.w/a.total*100);
+    html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <div style="width:36px;font-size:10px;color:rgba(255,255,255,0.4);font-weight:700;text-align:right;flex-shrink:0">${typeLabel[a.matchType]||''}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:13px;color:#fff">vs ${a.opponent}</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">${a.total}試合</span>
+        </div>
+        <div style="height:7px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${wr}%;background:linear-gradient(90deg,#1a6bb5,#27ae60);border-radius:4px"></div>
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px">${a.w}勝 ${a.d}分 ${a.l}敗</div>
+      </div>
+      <div style="width:42px;text-align:right;font-size:16px;font-weight:700;color:${wr>=50?'#4ade80':'#f87171'}">${wr}%</div>
+    </div>`;
+  });
+  html += `<div style="margin-top:8px;font-size:10px;color:rgba(255,255,255,0.2);text-align:center">全プレイヤーの実プレイ戦績</div>`;
+  resultEl.innerHTML = html;
 }
 
 </script>
