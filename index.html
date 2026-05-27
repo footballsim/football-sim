@@ -1628,7 +1628,7 @@ body {
     <div class="disclaimer-box" id="disclaimer-text">
       ⚠️ このシミュレーターは個人制作のファン向けコンテンツです。FIFA・JFA・各国サッカー協会・クラブチーム・選手本人とは一切関係ありません。選手名は識別目的のみで使用しており、実在の選手を代表・推薦・関連付けるものではありません。選手パラメータはすべて独自の創作設定であり、実際の能力・評価とは無関係です。本コンテンツは非商業的ファン活動として制作されています。
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.10.0</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.11.0</div>
   </div>
 </div>
 
@@ -1912,7 +1912,7 @@ body {
     <div id="stats-content-mc">
       <div id="stats-mc-status" style="text-align:center;color:rgba(255,255,255,0.45);font-size:13px;margin:24px 0">シミュレーション実行中...</div>
       <div id="stats-mc-result" style="display:none"></div>
-      <button id="stats-mc-refresh-btn" onclick="refreshMCStats()" style="width:100%;margin-top:16px;padding:12px;font-size:13px;font-weight:700;border:none;border-radius:10px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);cursor:pointer;font-family:inherit">🔄 再シミュレーション（1000回）</button>
+      <button id="stats-mc-refresh-btn" onclick="refreshMCStats()" style="width:100%;margin-top:16px;padding:12px;font-size:13px;font-weight:700;border:none;border-radius:10px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);cursor:pointer;font-family:inherit">🔄 再シミュレーション（10000回）</button>
     </div>
     <div id="stats-content-real" style="display:none">
       <div id="stats-real-status" style="text-align:center;color:rgba(255,255,255,0.45);font-size:13px;margin:24px 0">データ読み込み中...</div>
@@ -2485,8 +2485,8 @@ const i18n = {
     wcStatsTabMC: '🎲 シミュレーション確率',
     wcStatsTabReal: '👥 みんなの戦績',
     wcStatsMCRunning: 'シミュレーション実行中...',
-    wcStatsMCRunning1000: '1000回シミュレーション実行中...',
-    wcStatsMCRefresh: '🔄 再シミュレーション（1000回）',
+    wcStatsMCRunning1000: '10000回シミュレーション実行中...',
+    wcStatsMCRefresh: '🔄 再シミュレーション（10000回）',
     wcStatsRealLoading: 'データ読み込み中...',
     wcStatsRealRefresh: '🔄 データを更新',
     wcStatsRealFail: 'データの取得に失敗しました',
@@ -2495,7 +2495,7 @@ const i18n = {
     wcStatsGLLabel: 'グループリーグ', wcStatsQualLabel: 'グループ突破',
     wcStatsQ1st: '1位通過', wcStatsQ2nd: '2位通過', wcStatsQRate: '突破率',
     wcStatsKnockout: 'トーナメント進出率',
-    wcStatsMCFooter: '1000回シミュレーション ／ 毎回結果は変わります',
+    wcStatsMCFooter: '10000回シミュレーション ／ 毎回結果は変わります',
     wcStatsW: '勝', wcStatsD: '分', wcStatsL: '負', wcStatsMatches: '試合',
     wcStats90: '90分', wcStatsET: '延', wcStatsPK: 'PK',
     wcStatsFirebaseTitle: 'Firebase設定が必要です',
@@ -2633,8 +2633,8 @@ const i18n = {
     wcStatsTabMC: '🎲 Simulation Odds',
     wcStatsTabReal: '👥 Community Results',
     wcStatsMCRunning: 'Running simulation...',
-    wcStatsMCRunning1000: 'Running 1,000 simulations...',
-    wcStatsMCRefresh: '🔄 Re-run (1,000 simulations)',
+    wcStatsMCRunning1000: 'Running 10,000 simulations...',
+    wcStatsMCRefresh: '🔄 Re-run (10,000 simulations)',
     wcStatsRealLoading: 'Loading data...',
     wcStatsRealRefresh: '🔄 Refresh Data',
     wcStatsRealFail: 'Failed to load data',
@@ -2643,7 +2643,7 @@ const i18n = {
     wcStatsGLLabel: 'Group Stage', wcStatsQualLabel: 'Group Qualification',
     wcStatsQ1st: '1st Place', wcStatsQ2nd: '2nd Place', wcStatsQRate: 'Advance Rate',
     wcStatsKnockout: 'Knockout Stage Odds',
-    wcStatsMCFooter: '1,000 simulations / results vary each run',
+    wcStatsMCFooter: '10,000 simulations / results vary each run',
     wcStatsW: 'W', wcStatsD: 'D', wcStatsL: 'L', wcStatsMatches: 'matches',
     wcStats90: '90m', wcStatsET: 'ET', wcStatsPK: 'PK',
     wcStatsFirebaseTitle: 'Firebase setup required',
@@ -10237,48 +10237,32 @@ async function loadWCMatchResults() {
   } catch(e) { console.warn('Firebase read error:', e); return null; }
 }
 
-// --- Monte Carlo（simulateSilentによるキャリブレーション方式） ---
-// パラメータ合計は全チーム近似値のため強度比が横並びになる問題を解消
-// → 実際のゲームエンジン(simulateSilent)で50試合ずつ先行計算し、
-//   その勝率をMC確率として使用する
+// --- Monte Carlo（固定勝率方式） ---
+// simulateSilent 6000試合/対戦の平均値をハードコード。
+// 毎回ランダム計測(CAL=50)だと分散が大きく1位/2位が逆転するため固定化。
+// チームパラメータ変更時は calibrate_large.js で再計測してここを更新すること。
 
-let _wcCalibCache = null; // キャッシュ（再シミュ時は再計算）
+let _wcCalibCache = null; // 後方互換のため保持
 
 function _calibrateWCRates() {
-  const CAL = 50; // キャリブレーション試合数/対戦
-  const td = TEAM_DATA;
-  const JP = td.japan2026vsNetherlands; // ノックアウト時の日本チームデータ
-
-  const run = (t1, t2) => {
-    if (!t1 || !t2) return {w:0.4, d:0.2, l:0.4};
-    let w=0, d=0, l=0;
-    for (let i = 0; i < CAL; i++) {
-      const r = simulateSilent(t1, t2);
-      if (r.t1score > r.t2score) w++;
-      else if (r.t1score === r.t2score) d++;
-      else l++;
-    }
-    return {w:w/CAL, d:d/CAL, l:l/CAL};
-  };
-
   return {
     // グループ 日本戦
-    jp_nl: run(td.japan2026vsNetherlands, td.netherlands2026),
-    jp_tn: run(td.japan2026vsTunisia,     td.tunisia2026),
-    jp_sw: run(td.japan2026vsSweden,      td.sweden2026),
+    jp_nl: {w:0.246, d:0.428, l:0.326},
+    jp_tn: {w:0.362, d:0.430, l:0.208},
+    jp_sw: {w:0.419, d:0.406, l:0.175},
     // グループ 非日本戦
-    nl_tn: run(td.netherlands2026, td.tunisia2026),
-    nl_sw: run(td.netherlands2026, td.sweden2026),
-    tn_sw: run(td.tunisia2026,     td.sweden2026),
-    // ノックアウト
-    jp_mo: run(JP, td.morocco2026),
-    jp_br: run(JP, td.brazil2026),
-    jp_no: run(JP, td.norway2026),
-    jp_mx: run(JP, td.mexico2026),   // メキシコHA未反映（簡易近似）
-    jp_sp: run(JP, td.spain2026),
-    jp_fr: run(JP, td.france2026),
-    jp_ar: run(JP, td.argentina2026),
-    jp_en: run(JP, td.england2026),
+    nl_tn: {w:0.460, d:0.388, l:0.152},
+    nl_sw: {w:0.532, d:0.344, l:0.124},
+    tn_sw: {w:0.343, d:0.420, l:0.237},
+    // ノックアウト（日本はjapan2026vsNetherlandsデータ使用）
+    jp_mo: {w:0.393, d:0.401, l:0.206},
+    jp_br: {w:0.290, d:0.404, l:0.306},
+    jp_no: {w:0.401, d:0.400, l:0.199},
+    jp_mx: {w:0.413, d:0.417, l:0.170},
+    jp_sp: {w:0.231, d:0.417, l:0.352},
+    jp_fr: {w:0.222, d:0.444, l:0.334},
+    jp_ar: {w:0.270, d:0.432, l:0.298},
+    jp_en: {w:0.229, d:0.433, l:0.338},
   };
 }
 
@@ -10388,7 +10372,7 @@ function refreshMCStats() {
   statusEl.textContent = t('wcStatsMCRunning1000');
   resultEl.style.display = 'none';
   setTimeout(() => {
-    const R = runWCMonteCarlo(1000);
+    const R = runWCMonteCarlo(10000);
     const N = R.N;
     const pct = v => Math.round(v / N * 100);
     const bar = (v, color) => {
