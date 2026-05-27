@@ -1628,7 +1628,7 @@ body {
     <div class="disclaimer-box" id="disclaimer-text">
       ⚠️ このシミュレーターは個人制作のファン向けコンテンツです。FIFA・JFA・各国サッカー協会・クラブチーム・選手本人とは一切関係ありません。選手名は識別目的のみで使用しており、実在の選手を代表・推薦・関連付けるものではありません。選手パラメータはすべて独自の創作設定であり、実際の能力・評価とは無関係です。本コンテンツは非商業的ファン活動として制作されています。
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.11.0</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.12.0</div>
   </div>
 </div>
 
@@ -5532,6 +5532,7 @@ function simulateChance(gs, chanceNo) {
   let dfsPoint = getActionParam(defence, dfsPos, '対'+action);
 
   if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
+  if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
 
   let result = (function(o,d){var p=o*o/(o*o+d*d);return Math.random()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
   let scene = { offence, defence, area, rawArea, ofsPos, dfsPos, action, scenario: action, result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
@@ -5637,6 +5638,7 @@ function simulateChance(gs, chanceNo) {
     ofsPoint = getActionParam(offence, ofsPos, action);
     dfsPoint = getActionParam(defence, dfsPos, '対'+action);
     if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
+    if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
     result = (function(o,d){var p=o*o/(o*o+d*d);return Math.random()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
 
     // scenario はアクション名をそのまま使うが、'クロス'は CRエリアのクロスシーン専用識別子と
@@ -5736,6 +5738,7 @@ function simulateChance(gs, chanceNo) {
     dfsPos = 0; // GK
     dfsPoint = getActionParam(defence, 0, '対中央からシュート');
     if (defence === team1 && team2.marked_player >= 0 && shootOfsPos === team2.marked_player) ofsPoint *= 0.85;
+    if (defence === team1 && team1.marked_player >= 0 && offence.lineup[shootOfsPos] === team1.marked_player) ofsPoint *= 0.85;
 
     let shootResult;
     if (Math.random() * 100 > ofsPoint) {
@@ -5785,6 +5788,7 @@ function simulateChance(gs, chanceNo) {
         ofsPoint = getActionParam(offence, ofsPos, action);
         dfsPoint = getActionParam(defence, dfsPos, '対'+action);
         if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
+        if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
         result = (function(o,d){var p=o*o/(o*o+d*d);return Math.random()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
         scene = { offence, defence, area, crossPos, ofsPos, dfsPos, action, scenario: 'セットプレー', result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
         scenes.push(scene);
@@ -5827,6 +5831,7 @@ function simulateChance(gs, chanceNo) {
             dfsPlayer = defence.players[defence.lineup[dfsPos]];
             dfsPoint = getActionParam(defence, dfsPos, '対'+action);
             if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
+            if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
             result = (function(o,d){var p=o*o/(o*o+d*d);return Math.random()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
             scene = { offence, defence, area, crossPos, ofsPos, dfsPos, action, scenario: 'クロス', result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
             scenes.push(scene);
@@ -5845,6 +5850,7 @@ function simulateChance(gs, chanceNo) {
       ofsPoint = getActionParam(offence, ofsPos, shootAction);
       dfsPoint = getActionParam(defence, 0, '対'+shootAction);
       if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
+      if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
 
       let shootResult;
       if (Math.random() * 100 > ofsPoint) {
