@@ -1628,7 +1628,7 @@ body {
     <div class="disclaimer-box" id="disclaimer-text">
       ⚠️ このシミュレーターは個人制作のファン向けコンテンツです。FIFA・JFA・各国サッカー協会・クラブチーム・選手本人とは一切関係ありません。選手名は識別目的のみで使用しており、実在の選手を代表・推薦・関連付けるものではありません。選手パラメータはすべて独自の創作設定であり、実際の能力・評価とは無関係です。本コンテンツは非商業的ファン活動として制作されています。
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.12.0</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v1.13.0</div>
   </div>
 </div>
 
@@ -5187,9 +5187,9 @@ function startGame() {
     for (let i = 0; i < 3; i++) chanceResults.push(simulateChance(gameState, i));
     if (Math.random() < 0.5) chanceResults.push(simulateChance(gameState, 3));
   } else {
-    // 通常: 前半5 + 後半5 + ロスタイム最大2
-    for (let i = 0; i < 12; i++) chanceResults.push(simulateChance(gameState, i));
-    if (Math.random() < 0.5) chanceResults.push(simulateChance(gameState, 12));
+    // 通常: 前半8 + 後半8 + ロスタイム最大1
+    for (let i = 0; i < 16; i++) chanceResults.push(simulateChance(gameState, i));
+    if (Math.random() < 0.5) chanceResults.push(simulateChance(gameState, 16));
   }
 
   // Update UI
@@ -5475,12 +5475,11 @@ function calcTime(chanceNo) {
     if (chanceNo === 2) return `${t('etSecond')} ${Math.floor(r*4)+116}${t('minUnit')}`;
     return `${t('etSecond')} 120+${t('minUnit')}`;
   }
-  // 通常90分
-  if (chanceNo <= 4) return `${t('halfFirst')} ${Math.floor(r*7) + chanceNo*7 + 1}${t('minUnit')}`;
-  if (chanceNo === 5) return `${t('halfFirst')} ${Math.floor(r*4)+41}${t('minUnit')}`;
-  if (chanceNo <= 10) return `${t('halfSecond')} ${Math.floor(r*7) + (chanceNo-6)*7 + 46}${t('minUnit')}`;
-  if (chanceNo === 11) return `${t('halfSecond')} ${Math.floor(r*4)+87}${t('minUnit')}`;
-  if (chanceNo === 12) return t('overtimeLoss');
+  // 通常90分 (前半8シーン: 0-7, 後半8シーン: 8-15, オプション: 16)
+  if (chanceNo <= 6) return `${t('halfFirst')} ${Math.floor(r*6) + chanceNo*6 + 1}${t('minUnit')}`;
+  if (chanceNo === 7) return `${t('halfFirst')} 45+${Math.floor(r*3)+1}${t('minUnit')}`;
+  if (chanceNo <= 14) return `${t('halfSecond')} ${Math.floor(r*6) + (chanceNo-8)*6 + 46}${t('minUnit')}`;
+  if (chanceNo === 15) return `${t('halfSecond')} 90+${Math.floor(r*3)+1}${t('minUnit')}`;
   return t('overtimeLoss');
 }
 
@@ -6376,14 +6375,14 @@ function _recalcSecondHalf() {
   gameState = { team1: t1, team2: t2 };
 
   // 現在地点から後半終了まで再計算
-  const startIdx = Math.max(6, currentChanceIdx);
+  const startIdx = Math.max(8, currentChanceIdx);
   const firstPart = chanceResults.slice(0, startIdx);
   const newSecond = [];
-  for (let i = startIdx; i < 12; i++) {
+  for (let i = startIdx; i < 16; i++) {
     newSecond.push(simulateChance(gameState, i));
   }
-  if (newSecond.length === 6 && Math.random() < 0.5) {
-    newSecond.push(simulateChance(gameState, 12));
+  if (newSecond.length === 8 && Math.random() < 0.5) {
+    newSecond.push(simulateChance(gameState, 16));
   }
   chanceResults = [...firstPart, ...newSecond];
   document.getElementById('chance-total').textContent = chanceResults.length;
@@ -6987,12 +6986,12 @@ function runMultiGame(GAMES) {
     });
     const gs = { team1: t1, team2: t2 };
     const results = [];
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 16; i++) {
       results.push(simulateChance(gs, i));
     }
     // ロスタイムは50%で発生
     if (Math.random() < 0.5) {
-      results.push(simulateChance(gs, 12));
+      results.push(simulateChance(gs, 16));
     }
 
     const t1s = t1.score, t2s = t2.score;
@@ -7841,8 +7840,8 @@ function simulateSilent(t1data, t2data) {
   });
   const gs = { team1: t1, team2: t2 };
   const silentResults = [];
-  for (let i = 0; i < 12; i++) silentResults.push(simulateChance(gs, i));
-  if (Math.random() < 0.5) silentResults.push(simulateChance(gs, 12));
+  for (let i = 0; i < 16; i++) silentResults.push(simulateChance(gs, i));
+  if (Math.random() < 0.5) silentResults.push(simulateChance(gs, 16));
 
   // 詳細データ集計（t1・t2視点）
   const silentGoalScorers = [];
