@@ -9,7 +9,7 @@ const vm = require('vm');
 const HTML_PATH = __dirname + '/index.html';
 const html = fs.readFileSync(HTML_PATH, 'utf8');
 const lines = html.split('\n');
-const START_LINE = 2282;
+const START_LINE = 2299;
 const END_LINE = lines.findIndex((l, i) => i > START_LINE && l.trim() === '</script>');
 const jsCode = lines.slice(START_LINE, END_LINE).join('\n');
 
