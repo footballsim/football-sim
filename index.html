@@ -8557,6 +8557,9 @@ function showWCResult() {
     tourBtn.onclick = () => showWCR32(japanRank);
   }
 
+  const replayBtn = document.getElementById('wc-btn-replay');
+  if (replayBtn) replayBtn.style.display = advanced ? 'none' : '';
+
   showScreen('worldcup-result');
 }
 
