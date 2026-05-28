@@ -181,6 +181,18 @@ body {
   .match-list { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* ===== PC レイアウト：スマホ幅(430px)で中央寄せ ===== */
+@media (min-width: 600px) {
+  html {
+    background: #111;
+  }
+  body {
+    max-width: 430px;
+    margin: 0 auto;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+  }
+}
+
 .match-card {
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.15);
