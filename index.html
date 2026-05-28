@@ -1613,7 +1613,7 @@ body {
 
     <!-- トップメニュー -->
     <div class="top-menu">
-      <div class="top-menu-card top-menu-wc" onclick="showScreen('worldcup')">
+      <div class="top-menu-card top-menu-wc" onclick="resetWCMode()">
         <div class="top-menu-icon">🏆</div>
         <div>
           <div class="top-menu-label" id="top-lbl-wc">W杯モード</div>
@@ -1769,7 +1769,7 @@ body {
   <div style="width:100%;max-width:360px;padding:0 16px 32px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px">
     <button class="start-btn" id="wc-btn-tournament" style="display:none;background:linear-gradient(135deg,#b8860b,#ffd700);color:#1a1a1a">🏆 トーナメントへ</button>
     <button class="start-btn" id="wc-btn-replay" onclick="resetWCMode()" style="color:#ffffff">🔄 もう一度グループステージ</button>
-    <button class="start-btn" id="wc-btn-home-title" onclick="showScreen('title')" style="background:rgba(255,255,255,0.15);color:#ffffff">🏠 タイトルへ</button>
+    <button class="start-btn" id="wc-btn-home-title" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff">🏠 タイトルへ</button>
   </div>
 </div>
 
@@ -1790,7 +1790,7 @@ body {
     <div id="wc-r16-content"></div>
     <button class="start-btn" onclick="startWCR16Match()" style="color:#ffffff;margin-bottom:12px" id="wc-r16-start-btn">⚽ 試合開始</button>
     <button class="start-btn" onclick="resetWCMode()" style="background:rgba(255,255,255,0.15);color:#ffffff;margin-bottom:12px" id="wc-r16-again-btn">🔄 もう一度</button>
-    <button class="start-btn" onclick="showScreen('title')" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-r16-title-btn">🏠 タイトルへ</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-r16-title-btn">🏠 タイトルへ</button>
   </div>
 </div>
 <!-- WC R16 WIN PLACEHOLDER -->
@@ -1801,7 +1801,7 @@ body {
     <div style="font-size:15px;color:rgba(255,255,255,0.8);margin-bottom:8px" id="wc-r16-win-congrats">おめでとうございます！</div>
     <div style="font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:32px">続きは今後実装予定</div>
     <button class="start-btn" onclick="resetWCMode()" style="color:#ffffff;margin-bottom:12px" id="wc-r16-win-again-btn">🔄 もう一度</button>
-    <button class="start-btn" onclick="showScreen('title')" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-r16-win-title-btn">🏠 タイトルへ</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-r16-win-title-btn">🏠 タイトルへ</button>
   </div>
 </div>
 
@@ -1810,7 +1810,7 @@ body {
     <div id="wc-qf-content"></div>
     <button class="start-btn" onclick="startWCQFMatch()" style="color:#ffffff;margin-bottom:12px" id="wc-qf-start-btn">⚽ 試合開始</button>
     <button class="start-btn" onclick="resetWCMode()" style="background:rgba(255,255,255,0.15);color:#ffffff;margin-bottom:12px" id="wc-qf-again-btn">🔄 もう一度</button>
-    <button class="start-btn" onclick="showScreen('title')" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-qf-title-btn">🏠 タイトルへ</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-qf-title-btn">🏠 タイトルへ</button>
   </div>
 </div>
 <div id="screen-worldcup-qf-win" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:center">
@@ -1820,7 +1820,7 @@ body {
     <div style="font-size:15px;color:rgba(255,255,255,0.8);margin-bottom:8px" id="wc-qf-win-congrats">おめでとうございます！</div>
     <div style="font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:32px">続きは今後実装予定</div>
     <button class="start-btn" onclick="resetWCMode()" style="color:#ffffff;margin-bottom:12px" id="wc-qf-win-again-btn">🔄 もう一度</button>
-    <button class="start-btn" onclick="showScreen('title')" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-qf-win-title-btn">🏠 タイトルへ</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-qf-win-title-btn">🏠 タイトルへ</button>
   </div>
 </div>
 <div id="screen-worldcup-sf" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:center">
@@ -1828,7 +1828,7 @@ body {
     <div id="wc-sf-content"></div>
     <button class="start-btn" onclick="startWCSFMatch()" style="color:#ffffff;margin-bottom:12px" id="wc-sf-start-btn">⚽ 試合開始</button>
     <button class="start-btn" onclick="resetWCMode()" style="background:rgba(255,255,255,0.15);color:#ffffff;margin-bottom:12px" id="wc-sf-again-btn">🔄 もう一度</button>
-    <button class="start-btn" onclick="showScreen('title')" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-sf-title-btn">🏠 タイトルへ</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-sf-title-btn">🏠 タイトルへ</button>
   </div>
 </div>
 <div id="screen-worldcup-sf-win" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:center">
@@ -1838,7 +1838,7 @@ body {
     <div style="font-size:15px;color:rgba(255,255,255,0.8);margin-bottom:8px" id="wc-sf-win-congrats">おめでとうございます！</div>
     <div style="font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:32px">続きは今後実装予定</div>
     <button class="start-btn" onclick="resetWCMode()" style="color:#ffffff;margin-bottom:12px" id="wc-sf-win-again-btn">🔄 もう一度</button>
-    <button class="start-btn" onclick="showScreen('title')" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-sf-win-title-btn">🏠 タイトルへ</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-sf-win-title-btn">🏠 タイトルへ</button>
   </div>
 </div>
 <div id="screen-worldcup-f" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:center">
@@ -1846,7 +1846,7 @@ body {
     <div id="wc-f-content"></div>
     <button class="start-btn" onclick="startWCFMatch()" style="color:#ffffff;margin-bottom:12px" id="wc-f-start-btn">⚽ 試合開始</button>
     <button class="start-btn" onclick="resetWCMode()" style="background:rgba(255,255,255,0.15);color:#ffffff;margin-bottom:12px" id="wc-f-again-btn">🔄 もう一度</button>
-    <button class="start-btn" onclick="showScreen('title')" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-f-title-btn">🏠 タイトルへ</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-f-title-btn">🏠 タイトルへ</button>
   </div>
 </div>
 <div id="screen-worldcup-champion" class="screen" style="background:linear-gradient(160deg,#7b5c00 0%,#c9960c 50%,#ffd700 100%);align-items:center;justify-content:center">
@@ -1855,7 +1855,7 @@ body {
     <div style="font-size:30px;font-weight:900;color:#fff;margin-bottom:8px;text-shadow:0 2px 8px rgba(0,0,0,0.3)" id="wc-champion-title">日本代表、世界一！</div>
     <img id="champion-img" style="width:100%;max-width:380px;border-radius:12px;margin:16px 0 24px;display:block">
     <button class="start-btn" onclick="resetWCMode()" style="background:rgba(255,255,255,0.25);color:#fff;margin-bottom:12px" id="wc-champion-again-btn">🔄 もう一度</button>
-    <button class="start-btn" onclick="showScreen('title')" style="background:rgba(255,255,255,0.15);color:#fff" id="wc-champion-title-btn">🏠 タイトルへ</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#fff" id="wc-champion-title-btn">🏠 タイトルへ</button>
   </div>
 </div>
 
@@ -1870,7 +1870,7 @@ body {
     <div id="wc-eliminated-content" style="margin-top:16px"></div>
     <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
       <button class="start-btn" onclick="resetWCMode()" style="color:#ffffff" id="wc-eliminated-again-btn">🔄 もう一度</button>
-      <button class="start-btn" onclick="showScreen('title')" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-eliminated-title-btn">🏠 タイトルへ</button>
+      <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-eliminated-title-btn">🏠 タイトルへ</button>
     </div>
   </div>
 </div>
@@ -9635,6 +9635,13 @@ function resetWCMode() {
   renderWCTable();
   updateWCNextBtn();
   showScreen('worldcup');
+}
+
+function wcGoToTitle() {
+  // WCモードの状態をリセットしてからタイトルへ戻る
+  // resetWCMode()がshowScreen('worldcup')を呼ぶが、直後にtitleで上書き
+  resetWCMode();
+  showScreen('title');
 }
 
 function renderWCTable() {
