@@ -4487,14 +4487,29 @@ function generateWCEliminatedSummary() {
     var best = mvpE.sort(function(a,b){return (b[1].goals*3+b[1].assists*2+b[1].duelWins)-(a[1].goals*3+a[1].assists*2+a[1].duelWins);})[0];
     mvpText = best[0]+'('+best[1].goals+'ゴール/'+best[1].assists+'アシスト/デュエル勝利'+best[1].duelWins+'回)';
   }
-  var grpRank = wcGroupRank > 0 ? 'グループステージ'+wcGroupRank+'位' : '不明';
+  var grpRank = wcGroupRank > 0 ? wcGroupRank+'位' : '?位';
+  // GLスコアのみ
+  var glScoresText = wcMatchScores.map(function(m){ return '日本'+m.s1+'-'+m.s2+m.t2name; }).join(' / ');
+  // KOスコアのみ
+  var koL2 = {wc_r32:'ベスト32',wc_r16:'ベスト16',wc_qf:'準々決勝',wc_sf:'準決勝',wc_final:'決勝'};
+  var koScoresText = wcKnockoutResults.map(function(r){
+    var dec = r.decidedBy==='pk'?'(PK '+r.pkS1+'-'+r.pkS2+')':r.decidedBy==='et'?'(延長)':'';
+    return (koL2[r.stage]||r.stage)+' 日本'+r.s1+'-'+r.s2+r.oppName+dec+(r.won?' ✓':' ✗');
+  }).join(' / ');
+  // 大会ルート（どこまで進んだか）
+  var tournamentPath = wcKnockoutResults.map(function(r){
+    return (koL2[r.stage]||r.stage)+(r.won?'勝利':'敗退');
+  }).join('→');
   var matchData = {
     isWorldCup: true, isEliminated: true,
-    eliminatedAt: elimSt, groupRank: grpRank,
-    matches: matchLines.join(' / '),
-    totalScore: '日本 総得点'+totalGF+' 総失点'+totalGA,
+    // Worker が使うフィールド名に合わせる
+    standings: 'グループ'+grpRank+'突破 → トーナメント: '+tournamentPath,
+    japanResult: 'グループ'+grpRank+'→'+elimSt+'敗退',
+    japanScores: glScoresText,
+    autoScores: koScoresText,
+    eliminatedAt: elimSt,
     allScorers: scorerLines.join(', ')||'なし', mvp: mvpText,
-    team1:'日本', team2:'対戦相手', score1:totalGF, score2:totalGA,
+    team1:'日本', team2:'W杯2026', score1:totalGF, score2:totalGA,
     goals:scorerLines.join(', ')||'なし', mvp1:mvpText, mvp2:'-', topPattern:'',
   };
   var WORKER_URL = 'https://footballsimulator.m-iwasaki18.workers.dev';
