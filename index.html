@@ -8854,7 +8854,7 @@ function updateWCR16AfterResult() {
   }
   const retryBtn = document.getElementById('btn-retry');
   if (retryBtn) {
-    retryBtn.style.display = isDraw ? 'none' : '';
+    retryBtn.style.display = (isDraw || t1base > t2base) ? 'none' : '';
     retryBtn.onclick = () => resetWCMode();
   }
 }
@@ -8935,7 +8935,7 @@ function updateWCQFAfterResult() {
   }
   const retryBtn = document.getElementById('btn-retry');
   if (retryBtn) {
-    retryBtn.style.display = isDraw ? 'none' : '';
+    retryBtn.style.display = (isDraw || t1base > t2base) ? 'none' : '';
     retryBtn.onclick = () => resetWCMode();
   }
 }
@@ -9017,7 +9017,7 @@ function updateWCSFAfterResult() {
   }
   const retryBtn = document.getElementById('btn-retry');
   if (retryBtn) {
-    retryBtn.style.display = isDraw ? 'none' : '';
+    retryBtn.style.display = (isDraw || t1base > t2base) ? 'none' : '';
     retryBtn.onclick = () => resetWCMode();
   }
 }
@@ -9095,7 +9095,7 @@ function updateWCFAfterResult() {
   }
   const retryBtn = document.getElementById('btn-retry');
   if (retryBtn) {
-    retryBtn.style.display = isDraw ? 'none' : '';
+    retryBtn.style.display = (isDraw || t1base > t2base) ? 'none' : '';
     retryBtn.onclick = () => resetWCMode();
   }
 }
@@ -9580,7 +9580,7 @@ function updateWCR32AfterResult() {
 
   const retryBtn = document.getElementById('btn-retry');
   if (retryBtn) {
-    retryBtn.style.display = isDraw ? 'none' : '';
+    retryBtn.style.display = (isDraw || t1base > t2base) ? 'none' : '';
     retryBtn.onclick = () => resetWCMode();
   }
 }
