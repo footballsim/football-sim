@@ -10207,9 +10207,9 @@ function generateMultiSummary(t1wins, t2wins, draws, t1poss, t1shoot, t2shoot, G
   var patterns = window._multiPatterns || [];
   var topPat = patterns.length ? getActionLabel(patterns[0][0].split(' / ')[1]||patterns[0][0]) + '(' + patterns[0][1] + ')' : '';
 
-  // GK名取得
-  var t1gkP = gameState && gameState.team1 ? gameState.team1.players[gameState.team1.lineup[0]] : null;
-  var t2gkP = gameState && gameState.team2 ? gameState.team2.players[gameState.team2.lineup[0]] : null;
+  // GK名取得（team1Data/team2Data から取得 ─ gameState は simulateSilent では更新されないため使用不可）
+  var t1gkP = team1Data && team1Data.players ? team1Data.players[team1Data.default_lineup[0]] : null;
+  var t2gkP = team2Data && team2Data.players ? team2Data.players[team2Data.default_lineup[0]] : null;
   var t1gkName = t1gkP ? (isEn && t1gkP.en_name ? t1gkP.en_name : t1gkP.name) : '-';
   var t2gkName = t2gkP ? (isEn && t2gkP.en_name ? t2gkP.en_name : t2gkP.name) : '-';
 
