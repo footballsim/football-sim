@@ -59,6 +59,10 @@ const output = before + obfuscated.getObfuscatedCode() + after;
 fs.mkdirSync(path.join(__dirname, 'docs'), { recursive: true });
 fs.writeFileSync(DEST, output);
 
+// CNAMEファイルを維持（カスタムドメイン用）
+const cnamePath = path.join(__dirname, 'docs', 'CNAME');
+fs.writeFileSync(cnamePath, 'football-sim.com');
+
 const srcSize  = (html.length / 1024).toFixed(1);
 const destSize = (output.length / 1024).toFixed(1);
 console.log(`Done: ${srcSize} KB → ${destSize} KB`);
