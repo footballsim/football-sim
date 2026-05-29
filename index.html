@@ -2514,6 +2514,12 @@ const i18n = {
     wcStatsKnockout: 'トーナメント進出率',
     wcStatsMCFooter: '10000回シミュレーション ／ 毎回結果は変わります',
     wcStatsW: '勝', wcStatsD: '分', wcStatsL: '負', wcStatsMatches: '試合',
+    wcElimTournamentResults: '🏟 大会成績', wcElimTournamentStats: '📊 大会通算スタッツ',
+    wcElimTotalGF: '総得点', wcElimTotalGA: '総失点',
+    wcElimScorers: '⚽ 得点・アシスト（日本）', wcElimMVP: '🏅 日本MVP',
+    wcElimET: '延長', wcElimGoalLabel: 'ゴール', wcElimAssistLabel: 'アシスト',
+    wcElimDuelWinLabel: 'デュエル勝利', wcElimDuelWinSuffix: '回', wcElimDuelWinSep: ' ／ ',
+    wcElimJapan: '日本',
     wcStats90: '90分', wcStatsET: '延', wcStatsPK: 'PK',
     wcStatsFirebaseTitle: 'Firebase設定が必要です',
     wcStatsFirebaseSub: 'console.firebase.google.com でプロジェクトを作成し<br>Firestoreを有効化 → firebaseConfigを<br>コードのWC_FIREBASE_CONFIGに貼り付けてください',
@@ -2662,6 +2668,12 @@ const i18n = {
     wcStatsKnockout: 'Knockout Stage Odds',
     wcStatsMCFooter: '10,000 simulations / results vary each run',
     wcStatsW: 'W', wcStatsD: 'D', wcStatsL: 'L', wcStatsMatches: 'matches',
+    wcElimTournamentResults: '🏟 Tournament Results', wcElimTournamentStats: '📊 Tournament Stats',
+    wcElimTotalGF: 'Goals For', wcElimTotalGA: 'Goals Against',
+    wcElimScorers: '⚽ Goals & Assists (Japan)', wcElimMVP: '🏅 Japan MVP',
+    wcElimET: 'ET', wcElimGoalLabel: 'goal(s)', wcElimAssistLabel: 'assist(s)',
+    wcElimDuelWinLabel: 'Duel wins: ', wcElimDuelWinSuffix: '', wcElimDuelWinSep: ' / ',
+    wcElimJapan: 'Japan',
     wcStats90: '90m', wcStatsET: 'ET', wcStatsPK: 'PK',
     wcStatsFirebaseTitle: 'Firebase setup required',
     wcStatsFirebaseSub: 'Create a project at console.firebase.google.com<br>Enable Firestore → paste firebaseConfig<br>into WC_FIREBASE_CONFIG in the code',
@@ -4364,35 +4376,34 @@ function _recordKOResult(stageKey, decidedBy, pkS1, pkS2) {
 
 function showWCEliminated(stageKey) {
   _wcEliminatedStage = stageKey;
-  const stageNamesJa = {wc_r32:'ラウンド32', wc_r16:'ラウンド16', wc_qf:'準々決勝', wc_sf:'準決勝', wc_final:'決勝'};
-  const stageName = stageNamesJa[stageKey] || stageKey;
+  const msgKeys = {wc_r32:'wcEliminatedMsgR32', wc_r16:'wcEliminatedMsgR16', wc_qf:'wcEliminatedMsgQF', wc_sf:'wcEliminatedMsgSF', wc_final:'wcEliminatedMsgFin'};
   const msgEl = document.getElementById('wc-eliminated-msg');
-  if (msgEl) msgEl.textContent = 'W杯' + stageName + 'で敗退しました';
+  if (msgEl) msgEl.textContent = t(msgKeys[stageKey] || 'wcEliminatedMsg');
 
   let html = '';
 
   // ① 試合結果一覧（グループ + KO）
   html += `<div style="background:rgba(0,0,0,0.35);border-radius:10px;overflow:hidden;margin-bottom:12px">
-    <div style="padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.08)">🏟 大会成績</div>`;
+    <div style="padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.08)">${t('wcElimTournamentResults')}</div>`;
   wcMatchScores.forEach(function(m) {
-    const res = m.s1 > m.s2 ? '勝' : m.s1 < m.s2 ? '敗' : '分';
+    const res = m.s1 > m.s2 ? t('winLabel') : m.s1 < m.s2 ? t('loseLabel') : t('drawLabel');
     const col = m.s1 > m.s2 ? '#4ade80' : m.s1 < m.s2 ? '#f87171' : '#fbbf24';
     html += `<div style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.07)">
-      <span style="font-size:11px;color:rgba(255,255,255,0.4);min-width:36px">第${m.matchNum}戦</span>
-      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵日本 <b>${m.s1}–${m.s2}</b> ${m.t2flag}${m.t2name}</span>
+      <span style="font-size:11px;color:rgba(255,255,255,0.4);min-width:36px">${t('wcMatchLabel')}${m.matchNum}${t('wcMatchSuffix')}</span>
+      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵${t('wcElimJapan')} <b>${m.s1}–${m.s2}</b> ${m.t2flag}${m.t2name}</span>
       <span style="font-size:12px;font-weight:700;color:${col};min-width:14px;text-align:right">${res}</span>
     </div>`;
   });
-  const koLabels = {wc_r32:'ベスト32', wc_r16:'ベスト16', wc_qf:'準々決勝', wc_sf:'準決勝', wc_final:'決勝'};
+  const koLabels = {wc_r32:t('wcRound32'), wc_r16:t('wcRound16'), wc_qf:t('wcQuarterFinal'), wc_sf:t('wcSemiFinal'), wc_final:t('wcFinal')};
   wcKnockoutResults.forEach(function(r) {
-    const res = r.won ? '勝' : '敗';
+    const res = r.won ? t('winLabel') : t('loseLabel');
     const col = r.won ? '#4ade80' : '#f87171';
     let sc = `<b>${r.s1}–${r.s2}</b>`;
     if (r.decidedBy === 'pk') sc += ` <span style="font-size:10px;color:rgba(255,255,255,0.4)">(PK ${r.pkS1}–${r.pkS2})</span>`;
-    else if (r.decidedBy === 'et') sc += ` <span style="font-size:10px;color:rgba(255,255,255,0.4)">(延長)</span>`;
+    else if (r.decidedBy === 'et') sc += ` <span style="font-size:10px;color:rgba(255,255,255,0.4)">(${t('wcElimET')})</span>`;
     html += `<div style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.07)">
       <span style="font-size:11px;color:rgba(255,255,255,0.4);min-width:36px">${koLabels[r.stage]||r.stage}</span>
-      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵日本 ${sc} ${r.oppFlag}${r.oppName}</span>
+      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵${t('wcElimJapan')} ${sc} ${r.oppFlag}${r.oppName}</span>
       <span style="font-size:12px;font-weight:700;color:${col};min-width:14px;text-align:right">${res}</span>
     </div>`;
   });
@@ -4405,15 +4416,15 @@ function showWCEliminated(stageKey) {
   const totalD  = wcMatchScores.filter(m=>m.s1===m.s2).length;
   const totalL  = (wcMatchScores.length + wcKnockoutResults.length) - totalW - totalD;
   html += `<div style="background:rgba(0,0,0,0.35);border-radius:10px;padding:12px 16px;margin-bottom:12px">
-    <div style="font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;margin-bottom:10px">📊 大会通算スタッツ</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;margin-bottom:10px">${t('wcElimTournamentStats')}</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin-bottom:8px">
-      <div><div style="font-size:20px;font-weight:700;color:#4ade80">${totalW}</div><div style="font-size:10px;color:rgba(255,255,255,0.45)">勝</div></div>
-      <div><div style="font-size:20px;font-weight:700;color:#fbbf24">${totalD}</div><div style="font-size:10px;color:rgba(255,255,255,0.45)">分</div></div>
-      <div><div style="font-size:20px;font-weight:700;color:#f87171">${totalL}</div><div style="font-size:10px;color:rgba(255,255,255,0.45)">敗</div></div>
+      <div><div style="font-size:20px;font-weight:700;color:#4ade80">${totalW}</div><div style="font-size:10px;color:rgba(255,255,255,0.45)">${t('wcStatsW')}</div></div>
+      <div><div style="font-size:20px;font-weight:700;color:#fbbf24">${totalD}</div><div style="font-size:10px;color:rgba(255,255,255,0.45)">${t('wcStatsD')}</div></div>
+      <div><div style="font-size:20px;font-weight:700;color:#f87171">${totalL}</div><div style="font-size:10px;color:rgba(255,255,255,0.45)">${t('wcStatsL')}</div></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:center">
-      <div style="background:rgba(74,222,128,0.1);border-radius:8px;padding:8px 4px"><div style="font-size:22px;font-weight:700;color:#4ade80">${totalGF}</div><div style="font-size:10px;color:rgba(255,255,255,0.45)">総得点</div></div>
-      <div style="background:rgba(248,113,113,0.1);border-radius:8px;padding:8px 4px"><div style="font-size:22px;font-weight:700;color:#f87171">${totalGA}</div><div style="font-size:10px;color:rgba(255,255,255,0.45)">総失点</div></div>
+      <div style="background:rgba(74,222,128,0.1);border-radius:8px;padding:8px 4px"><div style="font-size:22px;font-weight:700;color:#4ade80">${totalGF}</div><div style="font-size:10px;color:rgba(255,255,255,0.45)">${t('wcElimTotalGF')}</div></div>
+      <div style="background:rgba(248,113,113,0.1);border-radius:8px;padding:8px 4px"><div style="font-size:22px;font-weight:700;color:#f87171">${totalGA}</div><div style="font-size:10px;color:rgba(255,255,255,0.45)">${t('wcElimTotalGA')}</div></div>
     </div>
   </div>`;
 
@@ -4425,7 +4436,7 @@ function showWCEliminated(stageKey) {
     .sort(function(a,b){ return (b.goals*10+b.assists) - (a.goals*10+a.assists); });
   if (scorerList.length > 0) {
     html += `<div style="background:rgba(0,0,0,0.35);border-radius:10px;overflow:hidden;margin-bottom:12px">
-      <div style="padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.08)">⚽ 得点・アシスト（日本）</div>`;
+      <div style="padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.08)">${t('wcElimScorers')}</div>`;
     scorerList.slice(0, 10).forEach(function(g) {
       html += `<div style="padding:7px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06)">
         <span style="color:#fff;font-size:13px">🇯🇵 ${g.name}</span>
@@ -4444,12 +4455,12 @@ function showWCEliminated(stageKey) {
     const best = mvpEntries.sort(function(a,b){return (b[1].goals*3+b[1].assists*2+b[1].duelWins)-(a[1].goals*3+a[1].assists*2+a[1].duelWins);})[0];
     const mvpName = best[0], mvpSt = best[1];
     const mvpStats = [
-      mvpSt.goals > 0 ? mvpSt.goals + 'ゴール' : '',
-      mvpSt.assists > 0 ? mvpSt.assists + 'アシスト' : '',
-      'デュエル勝利' + mvpSt.duelWins + '回' + (mvpSt.duels > 0 ? '（' + Math.round(mvpSt.duelWins/mvpSt.duels*100) + '%）' : ''),
-    ].filter(Boolean).join(' ／ ');
+      mvpSt.goals > 0 ? mvpSt.goals + t('wcElimGoalLabel') : '',
+      mvpSt.assists > 0 ? mvpSt.assists + t('wcElimAssistLabel') : '',
+      t('wcElimDuelWinLabel') + mvpSt.duelWins + t('wcElimDuelWinSuffix') + (mvpSt.duels > 0 ? '（' + Math.round(mvpSt.duelWins/mvpSt.duels*100) + '%）' : ''),
+    ].filter(Boolean).join(t('wcElimDuelWinSep'));
     html += `<div style="background:rgba(184,134,11,0.3);border:1px solid rgba(255,215,0,0.35);border-radius:10px;padding:14px;margin-bottom:12px;text-align:center">
-      <div style="font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;margin-bottom:6px">🏅 日本MVP</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;margin-bottom:6px">${t('wcElimMVP')}</div>
       <div style="font-size:22px;font-weight:700;color:#ffd700">${mvpName}</div>
       <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:4px">${mvpStats}</div>
     </div>`;
