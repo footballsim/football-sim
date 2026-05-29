@@ -1,0 +1,16 @@
+{
+  "name": "football-sim",
+  "version": "1.0.0",
+  "description": "Football Simulation Lab",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/footballsim/football-sim.git"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "javascript-obfuscator": "^5.4.3"
+  }
+}
