@@ -1,0 +1,66 @@
+<ons-page id="ingame-result" ng-controller="InGameResultCtrl">
+
+  <div align="center">
+    <div class="maintext">
+
+      <div class="orangebox">
+        <div>
+          <table width="95%" border="0" cellspacing="5" cellpadding="5" bgcolor="#FFFFFF">
+            <tr>
+              <td align="right" width="47%">{{game.team1.name}}　{{result.score1}}</td>
+              <td align="center"><p>対</p></td>
+              <td align="left" width="47%">{{result.score2}}　{{game.team2.name}}</td>
+            </tr>
+            <tr ng-if="result.pk1">
+              <td align="right">{{result.pk1}}</td>
+              <td align="center">PK</td>
+              <td align="left">{{result.pk2}}</td>
+            </tr>
+          </table>
+          <table width="95%" border="0" cellspacing="5" cellpadding="5" bgcolor="#FFFFFF">
+            <tr>
+              <td align="center">
+                <p ng-repeat="item1 in game.team1.goals">{{item1.time}}　{{item1.player.name}}</p>
+              </td>
+              <td align="center">&nbsp;</td>
+              <td align="center">
+                <p ng-repeat="item2 in game.team2.goals">{{item2.time}}　{{item2.player.name}}</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="right">&nbsp;</td>
+              <td align="center">&nbsp;</td>
+              <td align="left">&nbsp;</td>
+            </tr>
+            <tr>
+              <td align="center">決定機：{{game.team1.chanceCounter}}回<br />
+                シュート：{{game.team1.shootCounter}}回<br />
+                GKセーブ：{{game.team1.gkSaveCounter}}回</td>
+              <td align="center">&nbsp;</td>
+              <td align="center">決定機：{{game.team2.chanceCounter}}回<br />
+                シュート：{{game.team2.shootCounter}}回<br />
+                GKセーブ：{{game.team2.gkSaveCounter}}回</td>
+            </tr>
+            <tr>
+              <td align="right">&nbsp;</td>
+              <td align="center">&nbsp;</td>
+              <td align="left">&nbsp;</td>
+            </tr>
+          </table>
+        </div>
+
+        <ons-button ng-click="submit()" class="btn" style="margin-top: 10px;">TOPに戻る</ons-button>
+        <div class="guidebox">
+          <h2>【試合詳細】</h2>
+          <div id="gamereport" style="text-align: left;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="clear"></div>
+    <div class="footer">
+      <p>　</p>
+    </div>
+  </div>
+
+</ons-page>

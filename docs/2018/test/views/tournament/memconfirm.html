@@ -1,0 +1,109 @@
+<ons-page id="mem-confirm" ng-controller="MemConfirmCtrl">
+
+<ons-toolbar>
+<div class="left"><ons-back-button></ons-back-button></div>
+<div class="center">出場選手一覧</div>
+<div class="right"><ons-button ng-click="submit()" class="btn">決定</ons-button></div>
+</ons-toolbar>
+
+<div align="center">
+  <div class="maintext">
+
+    <div align="center"><img class="autoimg" src="images/memconfirm.png" alt="このメンバーでワールドカップに臨みます" /></div>
+    <div class="orangebox">
+      <table width="100%" border="1" cellspacing="0" cellpadding="2" bgcolor="#FFFFFF" class="memlist">
+        <tr>
+          <td width="33%" align="center">{{members[0].mposition}}<br />
+            <img ng-src="face/{{members[0].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[0])">{{members[0].longname}}</a></td>
+          <td width="33%" align="center">{{members[1].mposition}}<br />
+            <img ng-src="face/{{members[1].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[1])">{{members[1].longname}}</a></td>
+          <td width="33%" align="center">{{members[2].mposition}}<br />
+            <img ng-src="face/{{members[2].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[2])">{{members[2].longname}}</a></td>
+        </tr>
+        <tr>
+          <td width="33%" align="center">{{members[3].mposition}}<br />
+            <img ng-src="face/{{members[3].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[3])">{{members[3].longname}}</a></td>
+          <td width="33%" align="center">{{members[4].mposition}}<br />
+            <img ng-src="face/{{members[4].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[4])">{{members[4].longname}}</a></td>
+          <td width="33%" align="center">{{members[5].mposition}}<br />
+            <img ng-src="face/{{members[5].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[5])">{{members[5].longname}}</a></td>
+        </tr>
+        <tr>
+          <td width="33%" align="center">{{members[6].mposition}}<br />
+            <img ng-src="face/{{members[6].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[6])">{{members[6].longname}}</a></td>
+          <td width="33%" align="center">{{members[7].mposition}}<br />
+            <img ng-src="face/{{members[7].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[7])">{{members[7].longname}}</a></td>
+          <td width="33%" align="center">{{members[8].mposition}}<br />
+            <img ng-src="face/{{members[8].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[8])">{{members[8].longname}}</a></td>
+        </tr>
+        <tr>
+          <td width="33%" align="center">{{members[9].mposition}}<br />
+            <img ng-src="face/{{members[9].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[9])">{{members[9].longname}}</a></td>
+          <td width="33%" align="center">{{members[10].mposition}}<br />
+            <img ng-src="face/{{members[10].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[10])">{{members[10].longname}}</a></td>
+          <td width="33%" align="center">{{members[11].mposition}}<br />
+            <img ng-src="face/{{members[11].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[11])">{{members[11].longname}}</a></td>
+        </tr>
+        <tr>
+          <td width="33%" align="center">{{members[12].mposition}}<br />
+            <img ng-src="face/{{members[12].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[12])">{{members[12].longname}}</a></td>
+          <td width="33%" align="center">{{members[13].mposition}}<br />
+            <img ng-src="face/{{members[13].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[13])">{{members[13].longname}}</a></td>
+          <td width="33%" align="center">{{members[14].mposition}}<br />
+            <img ng-src="face/{{members[14].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[14])">{{members[14].longname}}</a></td>
+        </tr>
+        <tr>
+          <td width="33%" align="center">{{members[15].mposition}}<br />
+            <img ng-src="face/{{members[15].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[15])">{{members[15].longname}}</a></td>
+          <td width="33%" align="center">{{members[16].mposition}}<br />
+            <img ng-src="face/{{members[16].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[16])">{{members[16].longname}}</a></td>
+          <td width="33%" align="center">{{members[17].mposition}}<br />
+            <img ng-src="face/{{members[17].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[17])">{{members[17].longname}}</a></td>
+        </tr>
+        <tr>
+          <td width="33%" align="center">{{members[18].mposition}}<br />
+            <img ng-src="face/{{members[18].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[18])">{{members[18].longname}}</a></td>
+          <td width="33%" align="center">{{members[19].mposition}}<br />
+            <img ng-src="face/{{members[19].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[19])">{{members[19].longname}}</a></td>
+          <td width="33%" align="center">{{members[20].mposition}}<br />
+            <img ng-src="face/{{members[20].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[20])">{{members[20].longname}}</a></td>
+        </tr>
+        <tr>
+          <td width="33%" align="center">{{members[21].mposition}}<br />
+            <img ng-src="face/{{members[21].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[21])">{{members[21].longname}}</a></td>
+          <td width="33%" align="center">{{members[22].mposition}}<br />
+            <img ng-src="face/{{members[22].playerid}}.png" class="autoimg" alt="選手イメージ" /><br />
+            <a href="" ng-click="memstatus(lineup[22])">{{members[22].longname}}</a></td>
+        </tr>
+      </table>
+      <ons-button ng-click="submit()" class="btn" style="margin-top: 10px;">決　　定</ons-button>
+    </div>
+  </div>
+
+  <div class="clear"></div>
+  <div class="footer">
+    <p>　</p>
+  </div>
+</div>

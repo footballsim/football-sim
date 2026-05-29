@@ -1,0 +1,30 @@
+<ons-page id="setting-tactics" ng-controller="SettingTacticsCtrl">
+
+<ons-toolbar>
+<div class="left"><ons-back-button></ons-back-button></div>
+<div class="center">戦術</div>
+<div class="right"><ons-button ng-click="submit()" class="btn">決定</ons-button></div>
+</ons-toolbar>
+
+<div align="center">
+  <div class="maintext">
+
+    <div align="center"><img class="autoimg" src="images/strategy.png" alt="監督名を入力して下さい" /></div>
+    <div class="orangebox">
+      <table width="80%" border="0" cellspacing="10" cellpadding="5" bgcolor="#FFFFFF">
+        <tr ng-repeat="item in tacticslist">
+          <td style="padding: 0 10px;"><input type="radio" name="tactics" ng-model="$parent.tactics" ng-value="$index" /></td>
+          <td><strong><big>『{{item.name}}』</big></strong>
+            <p>{{item.description}}&#13;</p>
+            <p>{{item.description2}}&#13;</p></td>
+        </tr>
+      </table>
+      <ons-button ng-click="submit()" class="btn" style="margin-top: 10px;">決　　定</ons-button>
+    </div>
+  </div>
+
+  <div class="clear"></div>
+  <div class="footer">
+    <p>　</p>
+  </div>
+</div>

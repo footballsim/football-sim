@@ -1,0 +1,208 @@
+const FBSIM_VERSION = (new Date).getTime();
+
+(function(){
+    'use strict';
+
+//    window.onbeforeunload = function() { return "ゲームを終了します。"; };
+    
+    var app = angular.module('myApp', ['onsen']);
+
+    app.run(function($rootScope, $templateCache) {
+        $rootScope.$on('$viewContentLoaded', function() {
+            $templateCache.removeAll();
+        });
+    });
+
+    app.controller('AppCtrl', function($scope) { });
+
+    /**
+     * InputNameCtrl
+     */
+    app.controller('InputNameCtrl', ['$scope', '$rootScope', '$http',
+        function($scope, $rootScope, $http) {
+            ons.ready(function() {
+                if (sessionStorage.getItem('page') != 'init') {
+                    var url = location.origin + location.pathname;
+                    location.href = url.substring(0, url.lastIndexOf('/') + 1);
+                }
+                var env = JSON.parse(sessionStorage.getItem('env'));
+                $rootScope.name = $scope.name = env.name;
+
+                // 日本チームのデータを取得
+                $http.get('remote.php?action=getteam&id=59&t='
+                        + (new Date).getTime()).
+                    success(function(data, status, headers, config) {
+                        for (var i = data.players.length - 1; i >= 0; i--) {
+                            data.players[i].checked = (i < 23);
+                        }
+                        $rootScope.teamJPN = data;
+                    }).
+                    error(function(data, status, headers, config) {
+                        console.log("ERROR!!!!!!!!");
+                    });
+            });
+
+            $scope.submit = function() {
+                $rootScope.name = $scope.name;
+                $scope.myNavigator.pushPage(
+                    'views/tournament/selectmembers.html?v=' + FBSIM_VERSION);
+            };
+        }]);
+
+    /**
+     * SelectMembersCtrl
+     */
+    app.controller('SelectMembersCtrl', ['$scope', '$rootScope',
+        function($scope, $rootScope) {
+            $scope.updateCount = function () {
+                $scope.memcount = 0;
+                angular.forEach($scope.players, function(item) {
+                    if (item.checked) {
+                        $scope.memcount += 1;
+                    }
+                });
+                $scope.selecterror = $scope.memcount != 23;
+            };
+
+            ons.ready(function() {
+                $scope.players = $rootScope.teamJPN.players;
+                $scope.updateCount();
+            });
+
+            $scope.memstatus = function(i) {
+                $scope.myNavigator.pushPage(
+                    'views/tournament/memstatus.html?v=' + FBSIM_VERSION,
+                    {item: $scope.players[i]});
+            };
+
+            $scope.submit = function() {
+                var json = $rootScope.teamJPN;
+                var lineup = [];
+                for (var i = 0; i < json.players.length; i++) {
+                    if (json.players[i].checked)
+                        lineup.push(i);
+                }
+                $rootScope.teamJPN.lineup = lineup;
+
+                $rootScope.result = [];
+                $rootScope.glPoint = [
+                    {
+                        'country': '日本',
+                        'win': 0,
+                        'lose': 0,
+                        'draw': 0,
+                        'point': 0,
+                        'goalFor': 0,
+                        'goalAgainst': 0},
+                    {
+                        'country': 'コロンビア',
+                        'win': 2,
+                        'lose': 0,
+                        'draw': 0,
+                        'point': 6,
+                        'goalFor': 4,
+                        'goalAgainst': 0},
+                    {
+                        'country': 'セネガル',
+                        'win': 1,
+                        'lose': 1,
+                        'draw': 0,
+                        'point': 3,
+                        'goalFor': 2,
+                        'goalAgainst': 2},
+                    {
+                        'country': 'ポーランド',
+                        'win': 0,
+                        'lose': 2,
+                        'draw': 0,
+                        'point': 0,
+                        'goalFor': 1,
+                        'goalAgainst': 5},
+                ];
+
+                $scope.myNavigator.pushPage(
+                        'views/tournament/memconfirm.html?v=' + FBSIM_VERSION);
+            };
+        }]);
+
+    /**
+     * MemStatusCtrl
+     */
+    app.controller('MemStatusCtrl', ['$scope', function($scope) {
+        ons.ready(function() {
+            $scope.item = $scope.myNavigator.getCurrentPage().options.item;
+            $scope.sdata = [
+                Math.round(($scope.item.params[DRIBBLE_ACCURACY]
+                        + $scope.item.params[DRIBBLE_SPEED]
+                        + $scope.item.params[SHORTPASS_ACCURACY]
+                        + $scope.item.params[SHORTPASS_SPEED]
+                        + $scope.item.params[LONGPASS_ACCURACY]
+                        + $scope.item.params[LONGPASS_SPEED]
+                        + $scope.item.params[SHOOT_ACCURACY]
+                        + $scope.item.params[SHOOT_MAKING]
+                        + $scope.item.params[OFFENSIVE]) / 9),
+                Math.round(($scope.item.params[PASS_CUT]
+                        + $scope.item.params[TACKLE]
+                        + $scope.item.params[MAN_MARKING]
+                        + $scope.item.params[COVERING]
+                        + $scope.item.params[CHASING]) / 5),
+                Math.round(($scope.item.params[SHOOT_TECH]
+                        + $scope.item.params[FREEKICK_ACCURACY]
+                        + $scope.item.params[CURVE]
+                        + $scope.item.params[BALL_TECH]) / 4),
+                Math.round(($scope.item.params[POWER]
+                        + $scope.item.params[STAMINA]
+                        + $scope.item.params[JUMP]
+                        + $scope.item.params[HEADING]) / 4),
+                Math.round(($scope.item.params[TOP_SPEED]
+                        + $scope.item.params[ACCELERATION]
+                        + $scope.item.params[RESPONSE]
+                        + $scope.item.params[AGILITY]) / 4),
+                Math.round(($scope.item.params[POSITIONING]
+                        + $scope.item.params[MENTALITY]
+                        + $scope.item.params[CONDITION_STABILITY]
+                        + $scope.item.params[STRATEGIC_EYE]) / 4)
+                ];
+            if ($scope.item.mposition == 'GK') {
+                $scope.sdata[1] = Math.round(($scope.item.params[SAVING]
+                            + $scope.item.params[HIGHBALL]) / 2);
+            }
+        });
+    }]);
+
+    /**
+     * MemConfirmCtrl
+     */
+    app.controller('MemConfirmCtrl', ['$scope', '$rootScope',
+        function($scope, $rootScope) {
+            ons.ready(function() {
+                $scope.players = $rootScope.teamJPN.players;
+                $scope.lineup = $rootScope.teamJPN.lineup;
+                $scope.members = [];
+                for (var i = 0; i < $scope.lineup.length; i++) {
+                    $scope.members.push($scope.players[$scope.lineup[i]]);
+                }
+            });
+
+            $scope.memstatus = function(i) {
+                $scope.myNavigator.pushPage(
+                    'views/tournament/memstatus.html?v=' + FBSIM_VERSION,
+                    {item: $scope.players[i]});
+            };
+
+            $scope.submit = function() {
+                var env = JSON.parse(sessionStorage.getItem('env'));
+                env.teamJPN = $rootScope.teamJPN;
+                env.name = $rootScope.name;
+                env.result = $rootScope.result;
+                env.glPoint = $rootScope.glPoint;
+                env.playerPoint = 0;
+                env.stage = 0;
+                sessionStorage.setItem('env', JSON.stringify(env));
+                sessionStorage.setItem('page', 'schedule');
+                location.href = sessionStorage.getItem('url')
+                    + 'schedule.html';
+            };
+        }]);
+
+})();

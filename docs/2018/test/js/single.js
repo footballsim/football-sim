@@ -1,0 +1,223 @@
+const FBSIM_VERSION = (new Date).getTime();
+
+(function(){
+    'use strict';
+
+    //    window.onbeforeunload = function() { return "ゲームを終了します。"; };
+
+    var app = angular.module('myApp', ['onsen']);
+
+    app.controller('AppCtrl', function($scope) { });
+
+    /**
+     * InGameCtrl
+     */
+    app.controller('InGameCtrl',
+        ['$scope', '$rootScope', '$location', '$http', '$compile',
+        function($scope, $rootScope, $location, $http, $compile) {
+            ons.ready(function() {
+                $scope.cardid = $location.search().cardid;
+                $http.get('remote.php?action=getcard&id=' + $scope.cardid).
+                    success(function(data, status, headers, config) {
+                        $scope.card = data;
+                        $http.get('remote.php?action=getteam&id=' + data.team1).
+                            success(function(data, status, headers, config) {
+                                $scope.team1 = data;
+                                $scope.$emit("loaded");
+                            });
+                        $http.get('remote.php?action=getteam&id=' + data.team2).
+                            success(function(data, status, headers, config) {
+                                $scope.team2 = data;
+                                $scope.$emit("loaded");
+                            });
+                    }).
+                error(function(data, status, headers, config) {
+                    console.log("ERROR!!!!!!!!");
+                });
+            });
+
+            $scope.$on("loaded", function () {
+                if ($scope.team1 && $scope.team2) {
+                    $scope.game = $rootScope.game = new Game();
+                    $scope.game.team1 = new Team(
+                            $scope.team1.name,
+                            $scope.team1.players,
+                            $scope.team1.default_lineup,
+                            $scope.team1.default_system,
+                            $scope.team1.default_tactics,
+                            $scope.team1.default_keyplayer,
+                            $scope.team1.team_color,
+                            $scope.team1.flag_image);
+                    $scope.game.team2 = new Team(
+                            $scope.team2.name,
+                            $scope.team2.players,
+                            $scope.team2.default_lineup,
+                            $scope.team2.default_system,
+                            $scope.team2.default_tactics,
+                            $scope.team2.default_keyplayer,
+                            $scope.team2.team_color,
+                            $scope.team2.flag_image);
+                    $scope.game.reset();
+
+                    $scope.settingbuttondisabled = 'true';
+                    $scope.score1 = 0;
+                    $scope.score2 = 0;
+                    $scope.sceneCounter = 0;
+                    $scope.scenes = [];
+                    $scope.game.report = [];
+                    $scope.commentary = angular.element(
+                            document.getElementById('ingame-commentary'));
+
+                    $scope.nextChanceScene();
+                }
+            });
+
+            $scope.updateScene = function(scene) {
+                var x, y, fw;
+                switch (scene.area.substr(0, 2)) {
+                    case 'DF':
+                        x = -1;
+                        break;
+                    case 'MF':
+                        x = 0;
+                        break;
+                    default:
+                        x = 1;
+                        break;
+                }
+                switch (scene.area.substr(3, 1)) {
+                    case 'L':
+                        y = -1;
+                        break;
+                    case 'R':
+                        y = 1;
+                        break;
+                    default:
+                        y = 0;
+                        break;
+                }
+
+                if (scene.offence.name == $scope.game.team1.name) {
+                    $scope.matchup1 = scene.offence.getPlayerAtPosition(scene.ofsPos);
+                    $scope.matchup2 = scene.defence.getPlayerAtPosition(scene.dfsPos);
+                    $scope.ballimage = 'btl-left';
+                } else {
+                    $scope.matchup2 = scene.offence.getPlayerAtPosition(scene.ofsPos);
+                    $scope.matchup1 = scene.defence.getPlayerAtPosition(scene.dfsPos);
+                    $scope.ballimage = 'btl-right';
+                    x *= -1;
+                    y *= -1;
+                }
+                x = x * 25 + 50;
+                y = y * 30 + 50;
+                $scope.matchupPos = {left: x + '%', top: y + '%', margin: '-26px 0 0 -75px'};
+
+                fw = document.getElementById("fieldbox").clientWidth;
+                $scope.matchupIconSize = {height: (40 * fw / 450) + 'px'};
+
+                $scope.commentary.append($compile('<p>' + scene.text + '</p>')($scope));
+                $scope.game.report.push('<p>' + scene.text + '</p>');
+            };
+
+            $scope.nextChanceScene = function() {
+                if ($scope.game.chanceNo == 10 || $scope.game.chanceNo == 15) {
+                    // ロスタイム
+                    if (Math.random() < 0.5)
+                        $scope.game.chanceNo++;
+                }
+
+                if (($scope.game.chanceNo == 11
+                            && ($scope.game.team1.score != $scope.game.team2.score
+                                || $rootScope.stage <= 3))
+                        || $scope.game.chanceNo >= 16)
+                {
+                    var icon;
+
+                    if ($scope.game.team1.score > $scope.game.team2.score) {
+                        icon = '◯';
+                    } else if ($scope.game.team1.score < $scope.game.team2.score) {
+                        icon = '●';
+                    } else {
+                        icon = '△';
+                    }
+
+                    $rootScope.result = {country: $scope.game.team2.name,
+                        score1: $scope.game.team1.score,
+                        score2: $scope.game.team2.score,
+                        icon: icon};
+
+                    //              if ($scope.game.chanceNo >= 16 && icon == '△') {
+                    //                $scope.ons.navigator.resetToPage(
+                    //                    'views/single/ingame_pk.html?v='
+                    //                    + FBSIM_VERSION);
+                    //              } else {
+                    myNavigator.resetToPage(
+                            'views/single/ingame_result.html?v=' + FBSIM_VERSION);
+                    //              }
+                } else {
+                    var log = $scope.game.makeChanceScene();
+                    /*
+                   console.log(log);
+                   console.log($scope.game.scenes);
+                   */
+
+                    $scope.commentary.empty();
+                    $scope.commentary.append($compile("<p>" + $scope.game.chanceTime + "</p>")($scope));
+                    $scope.game.report.push('<p style="padding-top: 10px;"><big>' + $scope.game.chanceTime + '</big></p>');
+
+                    $scope.updateScene($scope.game.scenes[0]);
+
+                    $scope.sceneCounter = 1;
+
+                    if ($scope.game.scenes.length <= 1) {
+                        $scope.score1 = $scope.game.team1.score;
+                        $scope.score2 = $scope.game.team2.score;
+                        $scope.settingbuttondisabled = 'false';
+                    } else {
+                        $scope.settingbuttondisabled = 'true';
+                    }
+                }
+            };
+
+            $scope.nextButton = function() {
+                if ($scope.sceneCounter < $scope.game.scenes.length) {
+                    $scope.commentary.empty();
+                    $scope.updateScene($scope.game.scenes[$scope.sceneCounter++]);
+                } else {
+                    $scope.nextChanceScene();
+                }
+
+                if ($scope.sceneCounter >= $scope.game.scenes.length) {
+                    $scope.score1 = $scope.game.team1.score;
+                    $scope.score2 = $scope.game.team2.score;
+                    $scope.settingbuttondisabled = 'false';
+                }
+            };
+
+        }]);
+
+    /**
+     * InGameResultCtrl
+     */
+    app.controller('InGameResultCtrl', ['$scope', '$rootScope', '$compile',
+            function($scope, $rootScope, $compile) {
+                ons.ready(function() {
+                    // console.table($rootScope.result);
+
+                    $scope.result = $rootScope.result;
+
+                    $scope.game = $rootScope.game;
+                    // console.log($scope.game);
+                    $scope.report = angular.element(
+                            document.getElementById('gamereport'));
+                    $scope.game.report.forEach(function (item) {
+                        $scope.report.append($compile(item)($scope));
+                    });
+                });
+
+                $scope.submit = function() {
+                    location.href = "./gamelist.php";
+                }
+            }]);
+
+})();

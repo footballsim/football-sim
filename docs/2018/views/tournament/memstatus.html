@@ -1,0 +1,144 @@
+<ons-page id="mem-status" ng-controller="MemStatusCtrl">
+
+<ons-toolbar>
+<div class="left"><ons-back-button></ons-back-button></div>
+<div class="center">選手データ</div>
+</ons-toolbar>
+
+<div align="center">
+  <div class="maintext">
+    <div class="guidebox">
+      <table width="100%" border="1" cellspacing="0" cellpadding="10" class="memstatus">
+        <tr>
+          <td align="center" width="108"><img ng-src="face/{{item.playerid}}.png" class="autoimg" alt="選手イメージ" /></td>
+          <td>名前：{{item.longname}}<br />
+            ポジション：{{item.mposition}}<br />
+            身長：{{item.height}}cm<br />
+            体重：{{item.weight}}kg</td>
+        </tr>
+        <tr>
+          <td colspan="2">{{item.profile}}</td>
+        </tr>
+        <tr>
+          <td colspan="2">◇得意ポジション<br />
+            {{item.positions.join('／').replace('SW', 'LB')}}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">◇能力<br />
+            攻撃力：{{sdata[0]}}<br/>
+            守備力：{{sdata[1]}}<br/>
+            テクニック：{{sdata[2]}}<br/>
+            パワー：{{sdata[3]}}<br/>
+            スピード：{{sdata[4]}}<br/>
+            メンタル：{{sdata[5]}}</td>
+        </tr>
+      </table>
+      <h4>◆ステータス詳細◆</h4>
+      <table width="95%" border="1" cellpadding="0" cellspacing="0" class="memlist">
+        <col width="72" span="4" />
+        <tr>
+          <td width="40%" align="center" bgcolor="#FFFFCC">パワー</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[0]}}</td>
+          <td width="40%" align="center" bgcolor="#FFFFCC">フリーキック精度</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[16]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">スタミナ</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[1]}}</td>
+          <td align="center" bgcolor="#FFFFCC">カーブ</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[17]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">トップスピード</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[2]}}</td>
+          <td align="center" bgcolor="#FFFFCC">ボールテクニック</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[18]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">加速力</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[3]}}</td>
+          <td align="center" bgcolor="#FFFFCC">攻撃性</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[19]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">レスポンス</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[4]}}</td>
+          <td align="center" bgcolor="#FFFFCC">パスカット</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[20]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">ジャンプ</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[5]}}</td>
+          <td align="center" bgcolor="#FFFFCC">タックル</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[21]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">敏捷性</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[6]}}</td>
+          <td align="center" bgcolor="#FFFFCC">マンマーク</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[22]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">ドリブル精度</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[7]}}</td>
+          <td align="center" bgcolor="#FFFFCC">カバーリング</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[23]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">ドリブルスピード</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[8]}}</td>
+          <td align="center" bgcolor="#FFFFCC">チェイシング</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[24]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">ショートパス精度</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[9]}}</td>
+          <td align="center" bgcolor="#FFFFCC">セービング</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[25]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">ショートパススピード</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[10]}}</td>
+          <td align="center" bgcolor="#FFFFCC">ハイボール処理</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[26]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">ロングパス精度</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[11]}}</td>
+          <td align="center" bgcolor="#FFFFCC">ヘディング</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[27]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">ロングパススピード</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[12]}}</td>
+          <td align="center" bgcolor="#FFFFCC">ポジショニング</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[28]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">シュート精度</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[13]}}</td>
+          <td align="center" bgcolor="#FFFFCC">精神安定度</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[29]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">シュート力</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[14]}}</td>
+          <td align="center" bgcolor="#FFFFCC">連携</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[30]}}</td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#FFFFCC">シュートテクニック</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[15]}}</td>
+          <td align="center" bgcolor="#FFFFCC">コンディション安定度</td>
+          <td width="10%" align="center" bgcolor="#FFFFCC">{{item.params[31]}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="clear"></div>
+  <div class="footer">
+    <p>　</p>
+  </div>
+</div>

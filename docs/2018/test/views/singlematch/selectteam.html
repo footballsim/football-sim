@@ -1,0 +1,13 @@
+<ons-page id="selectteam" ng-controller="SelectTeamCtrl" class="maintext">
+  <ons-toolbar>
+    <div class="left"><ons-back-button></ons-back-button></div>
+    <div class="center">指揮するチームの選択</div>
+  </ons-toolbar>
+
+  <div align="center" style="margin: 10px 0;"><img class="autoimg" src="images/mes-sgl1.png" alt="試合結果" /></div>
+
+  <ons-list ng-repeat="team in teams">
+    <ons-list-item ng-click="submit(team.teamid);">{{team.name}}</ons-list-item>
+  </ons-list>
+  <div style="height: 60px;"></div>
+</ons-page>

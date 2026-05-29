@@ -1,0 +1,196 @@
+/* -- ヘッダ -- */
+
+#header {
+	margin-left : auto ; margin-right : auto ;
+	max-width: 1200px;
+}
+
+#headerbox {
+	float:right;
+	width:400px;
+	padding:0px;
+	margin:0px;
+}
+
+#headerbox a{
+	font-size:11px;
+	color:#000DFF;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+#headerbox a:hover {
+	text-decoration:underline;
+}
+
+/* -- フッタ -- */
+
+#footer {
+	margin-left : auto ; margin-right : auto ;
+	max-width: 1200px;
+	height:auto;
+	background-color:#006699;
+	color:#FFFFFF;
+	font-size:0.8em;
+	clear:both;
+}
+
+#footerbox {
+	margin-left : auto ; margin-right : auto ;
+	margin-bottom:20px;
+	max-width:1200px;
+	padding:10px;
+	font-size:0.9em;
+	line-height:1.1em;
+	color:#FFFFFF;
+}
+
+#footerbox a {
+	color:#FFFFFF;
+	text-decoration: none;
+}
+
+#footerbox a:hover {
+	font-weight: bold;
+	text-decoration:underline;
+}
+
+#footerbox .section {
+	border-bottom:#FFFFFF solid 1px;
+	color:#FFF;
+	font-weight:bold;
+}
+
+/* -- サイドメニュー -- */
+
+#left-sidebar {
+  float: left;
+  width: 150px;
+}
+
+#right-sidebar {
+  float: right;
+  width: 20%;
+}
+
+/* -- パン屑 -- */
+
+#pankuzu{
+max-width:1200px;
+text-align:right;
+font-size: 12px;
+color: #000099;
+margin-right:20px;
+border-bottom:solid 1px #EDEDED;
+}  
+
+#pankuzu a{
+font-size: 12px;
+color: #003399;
+}  
+
+	
+/* -- 本文領域 -- */
+
+#wrapper {
+	margin: 0 auto;
+	max-width: 1200px;
+}
+
+#container {
+	float: left;
+	max-width: 1200px;
+}
+
+#container2 {
+	float: left;
+	max-width: 1200px;
+	background-color: #00AAFF;
+}
+
+#maintext {
+	font-size:0.8em;
+	line-height:1.5em;
+	color:#393939;
+}
+
+#maintext .topcopy {
+	margin-left : auto;
+	margin-right : auto;
+	width: 100%;
+	margin: 5px;
+}
+
+/* -- コラム領域 -- */
+
+#topicbox {
+	float:left;
+	width: 100%;
+	background-color:#EFEFEF;
+	font-size:0.8em;
+}
+
+#whitebox {
+	margin-left : auto ; margin-right : auto ;
+	font-size:0.9em;
+	color:#333333;
+	margin:10px;
+	width:95%;
+	background-color:#EFEFEF;
+	padding:10px;
+	border-radius: 10px;        /* CSS3草案 */  
+    -webkit-border-radius: 10px;    /* Safari,Google Chrome用 */  
+    -moz-border-radius: 10px;   /* Firefox用 */  
+
+}
+
+#leftbox {
+	float:left;
+	max-width:550px;
+	margin-left:20px;
+	margin-right:10px;
+}
+
+#rightbox {
+	float:right;
+	max-width:550px;
+	margin-left:10px;
+	margin-right:20px;
+}
+
+#newsbox {
+	margin-left : auto ; margin-right : auto ;
+	font-size:0.7em;
+	background-color:#FFF;
+	width:100%;
+	padding:10px;
+}
+
+#samplebox {
+	margin-left : auto ; margin-right : auto ;
+	margin-top:20px;
+	margin-bottom:20px;
+	box-shadow:#CCC;
+	width:80%;
+	background-color:#CCFFFF;
+	padding:10px;
+	font-size:14px;
+	border:double #666;
+	border-radius: 10px;        /* CSS3草案 */  
+    -webkit-border-radius: 10px;    /* Safari,Google Chrome用 */  
+    -moz-border-radius: 10px;   /* Firefox用 */  
+}
+/* -- スライド領域 -- */
+#slidearea {
+	margin-left : auto ; margin-right : auto ;
+	max-width:1200px;
+	background-color:#EDEDED;
+}
+
+#slider2,
+#slider3 {
+	box-shadow: none;
+	-moz-box-shadow: none;
+	-webkit-box-shadow: none;
+	margin: 0 auto;
+}

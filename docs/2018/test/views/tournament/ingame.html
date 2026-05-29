@@ -1,0 +1,46 @@
+<ons-page id="ingame" ng-controller="InGameCtrl">
+
+<div align="center">
+  <div class="maintext">
+
+    <div class="whitebox">
+      <table width="90%" border="0" cellspacing="5" cellpadding="5" bgcolor="#FFFFFF">
+        <tr>
+          <td width="45%" align="right">{{game.team1.name}} <img ng-src="flag/{{game.team1.flag_image}}" class="flagimg" alt="自国旗" align="absmiddle"/></td>
+          <td align="center"><p> VS </p></td>
+          <td width="45%" align="left"><img ng-src="flag/{{game.team2.flag_image}}" class="flagimg" alt="敵国旗" align="absmiddle"/> {{game.team2.name}}</td>
+        </tr>
+        <tr>
+          <td align="right">{{score1}}</td>
+          <td align="center">対</td>
+          <td align="left">{{score2}}</td>
+        </tr>
+      </table>
+
+      <div class="fieldbox" id="fieldbox">
+        <img src="images/fieldbg.png" class="fieldimg" id="fieldimg">
+        <div ng-style="matchupPos" class="matchupimage">
+          <img ng-src="face/{{matchup1.playerid}}.png" ng-style="matchupIconSize" /><img ng-src="images/{{ballimage}}.png" alt="VS" ng-style="matchupIconSize" /><img ng-src="face/{{matchup2.playerid}}.png" ng-style="matchupIconSize" style="transform: scale(-1, 1);" />
+        </div>
+      </div>
+      <div class="guidebox">
+        <table width="100%" border="0" cellspacing="0" cellpadding="10" style="min-height: 9em;">
+          <tr>
+            <td><img src="face/jikkyo.png" alt="実況アナ" width="50" height="48" align="absmiddle" /></td>
+            <td width="10">&nbsp;</td>
+            <td id="ingame-commentary"></td>
+          </tr>
+        </table>
+        <ons-button ng-click="nextButton()" ng-disabled="!nextbuttonenabled" class="btn" style="margin-top: 10px;">次へ進む</ons-button>
+        <ons-button ng-click="setting()" ng-disabled="settingbuttondisabled" class="btn" style="margin-top: 10px;">チーム設定</ons-button>
+      </div>
+    </div>
+  </div>
+
+  <div class="clear"></div>
+  <div class="footer">
+    <p>　</p>
+  </div>
+</div>
+
+</ons-page>

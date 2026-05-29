@@ -1,0 +1,51 @@
+(function(){
+    'use strict';
+
+//    window.onbeforeunload = function() { return "ゲームを終了します。"; };
+    
+    var app = angular.module('myApp', ['onsen']);
+
+    app.run(function($rootScope, $templateCache) {
+        $rootScope.$on('$viewContentLoaded', function() {
+            $templateCache.removeAll();
+        });
+    });
+
+    app.controller('AppCtrl', function($scope) { });
+
+
+    /**
+     * SingleMatchResultCtrl
+     */
+    app.controller('SingleMatchResultCtrl', ['$scope', '$rootScope',
+        function($scope, $rootScope) {
+            ons.ready(function() {
+                var env = JSON.parse(sessionStorage.getItem('env'));
+                $scope.team1 = env.team1;
+                $scope.result = env.result;
+                $scope.sharetext = $scope.team1.name + "、"
+                    + $scope.result.country + "に" + $scope.result.score1
+                    + "-" + $scope.result.score2 + "で";
+                if ($scope.result.icon == '◯') {
+                    $scope.resultimg = 'win_small.jpg';
+                    $scope.sharetext += "勝利！";
+                } else if ($scope.result.icon == '●') {
+                    $scope.resultimg = 'lose_small.jpg';
+                    $scope.sharetext += "敗北。";
+                } else {
+                    $scope.resultimg = 'lose_small.jpg';
+                    $scope.sharetext += "引き分け。";
+                }
+                $scope.$apply();
+            });
+
+            $scope.restart = function() {
+                location.href = "./singlematch.html";
+            };
+
+            $scope.replay = function() {
+                location.href = "./singlematch_ingame.html";
+            };
+        }]);
+
+})();

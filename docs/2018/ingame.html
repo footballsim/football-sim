@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ja" ng-app="myApp">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Football Sim [フットボールシム] ｜世界のサッカーをシミュレート</title>
+    <meta name="keywords" content="Football sim,フットボールシム,サッカー,シミュレータ,ワールドカップ,W杯,フットボール,日本代表,シミュレーションゲーム">
+    <meta name="Description" content="フットボールシム(Football Sim)はサッカーの監督として試合を行うサッカーシミュレータサイト。ワールドカップ2018ロシア大会を日本代表の監督となってプレイできる他、欧州選手権、コパアメリカ、アジアカップなどの大陸別の大会や、Jリーグを含めた各リーグのクラブも随時実装予定です。試合は戦術、フォーメーション等の設定だけでなく、自チームのキープレイヤー、対戦相手の要注意プレイヤーも選択可能で戦い方は無限大！"/>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
+    <link rel="stylesheet" href="bower_components/OnsenUI/css/onsenui.css?v=0.2.5">
+    <link rel="stylesheet" href="bower_components/OnsenUI/css/onsen-css-components.css?v=0.2.5">
+
+    <script src="bower_components/angular/angular.js?v=0.2.5"></script>
+    <script src="bower_components/OnsenUI/js/onsenui.js?v=0.2.5"></script>
+
+    <link rel="stylesheet" href="css/app.css?v=0.2.5"/>
+
+    <script src="js/data.js?v=0.2.5"></script>
+    <script src="js/game.js?v=0.2.5"></script>
+    <script src="js/ingame.js?v=0.3.8"></script>
+
+<script>window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+  if (d.getElementById(id)) return t;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "https://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+
+  t._e = [];
+  t.ready = function(f) {
+    t._e.push(f);
+  };
+
+  return t;
+}(document, "script", "twitter-wjs"));</script>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-1332459136011969",
+          enable_page_level_ads: true
+     });
+</script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115288628-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115288628-1');
+</script>
+  </head>
+
+  <body ng-controller="AppCtrl">
+
+    <ons-screen>
+      <ons-navigator var="myNavigator">
+        <ons-page id="setting" ng-controller="SettingCtrl">
+
+          <ons-toolbar>
+            <div class="center">試合の準備</div>
+            <div class="right"><ons-button ng-click="submit()" class="btn">試合開始</ons-button></div>
+          </ons-toolbar>
+
+          <div align="center">
+            <div class="maintext">
+
+              <div align="center">
+                <table width="100%" border="0" cellspacing="5" cellpadding="5" bgcolor="#FFFFFF">
+                  <tr>
+                    <td width="45%" align="right">{{game.team1.name}} <img ng-src="flag/{{game.team1.flag_image}}" class="flagimg" alt="自国旗" align="absmiddle"/></td>
+                    <td align="center"><p> VS </p></td>
+                    <td width="45%" align="left"><img ng-src="flag/{{game.team2.flag_image}}" class="flagimg" alt="敵国旗" align="absmiddle"/> {{game.team2.name}}</td>
+                  </tr>
+                </table>
+                <img class="autoimg" ng-src="{{titleimg}}" alt="練習試合" />
+              </div>
+              <div class="whitebox">
+                <table width="100%" border="0" cellspacing="5" cellpadding="5" bgcolor="#FFFFFF">
+                  <tr>
+                    <td width="40%" align="right"><a href="" class="btn" ng-click="submit()">試合<br />
+                        開始</a></p></td>
+                    <td align="center">&nbsp;</td>
+                    <td width="60%">
+                      <span class="status"><a href="" ng-click="selectSystem()">フォーメーション：{{game.team1.getSystem().name}}</a></span><br />
+                      <span class="status"><a href="" ng-click="selectTactics()">戦略：{{game.team1.getTactics().name}}</a></span><br />
+                      <span class="status"><a href="" ng-click="selectKeyPlayer()">キープレイヤー：{{game.team1.getKeyPlayer().longname}}</a></span><br />
+                      <span class="status"><a href="" ng-click="selectMarkPlayer()">要注意プレイヤー:{{game.team2.getKeyPlayer().longname}}</a></span>
+                    </td>
+                  </tr>
+                </table>
+
+
+                <div class="fieldmapbox">
+                  <img src="images/field2.png" width="300" height="350">
+                  <img ng-src="flag/{{game.team2.flag_image}}" alt="敵国旗" align="absmiddle" style="position: absolute; left: 0; top: 0; width: 40px; height: auto; border: solid 2px #ffffff;"/>
+                  <img ng-src="flag/{{game.team1.flag_image}}" alt="自国旗" align="absmiddle" style="position: absolute; left: 0; bottom: 0; width: 40px; height: auto; border: solid 2px #ffffff;"/>
+                  <div ng-style="fieldplayerPos2[0]" class="fieldplayer"><a href="" ng-click="memstatus2(0)">{{game.team2.getPlayerAtPosition(0).name}}</a></div>
+                  <div ng-style="fieldplayerPos2[1]" class="fieldplayer"><a href="" ng-click="memstatus2(1)">{{game.team2.getPlayerAtPosition(1).name}}</a></div>
+                  <div ng-style="fieldplayerPos2[2]" class="fieldplayer"><a href="" ng-click="memstatus2(2)">{{game.team2.getPlayerAtPosition(2).name}}</a></div>
+                  <div ng-style="fieldplayerPos2[3]" class="fieldplayer"><a href="" ng-click="memstatus2(3)">{{game.team2.getPlayerAtPosition(3).name}}</a></div>
+                  <div ng-style="fieldplayerPos2[4]" class="fieldplayer"><a href="" ng-click="memstatus2(4)">{{game.team2.getPlayerAtPosition(4).name}}</a></div>
+                  <div ng-style="fieldplayerPos2[5]" class="fieldplayer"><a href="" ng-click="memstatus2(5)">{{game.team2.getPlayerAtPosition(5).name}}</a></div>
+                  <div ng-style="fieldplayerPos2[6]" class="fieldplayer"><a href="" ng-click="memstatus2(6)">{{game.team2.getPlayerAtPosition(6).name}}</a></div>
+                  <div ng-style="fieldplayerPos2[7]" class="fieldplayer"><a href="" ng-click="memstatus2(7)">{{game.team2.getPlayerAtPosition(7).name}}</a></div>
+                  <div ng-style="fieldplayerPos2[8]" class="fieldplayer"><a href="" ng-click="memstatus2(8)">{{game.team2.getPlayerAtPosition(8).name}}</a></div>
+                  <div ng-style="fieldplayerPos2[9]" class="fieldplayer"><a href="" ng-click="memstatus2(9)">{{game.team2.getPlayerAtPosition(9).name}}</a></div>
+                  <div ng-style="fieldplayerPos2[10]" class="fieldplayer"><a href="" ng-click="memstatus2(10)">{{game.team2.getPlayerAtPosition(10).name}}</a></div>
+
+                  <div ng-style="fieldplayerPos[0]" class="fieldplayer"><a href="" ng-click="memstatus(0)">{{game.team1.getPlayerAtPosition(0).name}}</a></div>
+                  <div ng-style="fieldplayerPos[1]" class="fieldplayer"><a href="" ng-click="memstatus(1)">{{game.team1.getPlayerAtPosition(1).name}}</a></div>
+                  <div ng-style="fieldplayerPos[2]" class="fieldplayer"><a href="" ng-click="memstatus(2)">{{game.team1.getPlayerAtPosition(2).name}}</a></div>
+                  <div ng-style="fieldplayerPos[3]" class="fieldplayer"><a href="" ng-click="memstatus(3)">{{game.team1.getPlayerAtPosition(3).name}}</a></div>
+                  <div ng-style="fieldplayerPos[4]" class="fieldplayer"><a href="" ng-click="memstatus(4)">{{game.team1.getPlayerAtPosition(4).name}}</a></div>
+                  <div ng-style="fieldplayerPos[5]" class="fieldplayer"><a href="" ng-click="memstatus(5)">{{game.team1.getPlayerAtPosition(5).name}}</a></div>
+                  <div ng-style="fieldplayerPos[6]" class="fieldplayer"><a href="" ng-click="memstatus(6)">{{game.team1.getPlayerAtPosition(6).name}}</a></div>
+                  <div ng-style="fieldplayerPos[7]" class="fieldplayer"><a href="" ng-click="memstatus(7)">{{game.team1.getPlayerAtPosition(7).name}}</a></div>
+                  <div ng-style="fieldplayerPos[8]" class="fieldplayer"><a href="" ng-click="memstatus(8)">{{game.team1.getPlayerAtPosition(8).name}}</a></div>
+                  <div ng-style="fieldplayerPos[9]" class="fieldplayer"><a href="" ng-click="memstatus(9)">{{game.team1.getPlayerAtPosition(9).name}}</a></div>
+                  <div ng-style="fieldplayerPos[10]" class="fieldplayer"><a href="" ng-click="memstatus(10)">{{game.team1.getPlayerAtPosition(10).name}}</a></div>
+                </div>
+                <p><a href="" ng-click="selectSystem()"><img src="images/btn-formation.gif" alt="フォーメーション" class="autoimg" border="0" /></a> <a href="" ng-click="selectTactics()"><img src="images/btn-strategy.gif" class="autoimg" border="0" alt="戦術設定" /></a></p>
+                <p><a href="" ng-click="swapPlayer()"><img src="images/btn-memchange.gif" class="autoimg" border="0" alt="スタメン設定" /></a> <a href="" ng-click="selectKeyPlayer()"><img src="images/btn-keyplayer.gif" class="autoimg" border="0" alt="キープレイヤー設定" /></a></p>
+                <p><a href="" ng-click="selectMarkPlayer()"><img src="images/btn-markplayer.gif" class="autoimg" border="0" alt="要注意プレイヤー" /></a></p>
+              </div>
+              <p>
+              <a href="index.html" class="btn btn-secondary">TOPに戻る</a>
+              </p>
+            </div>
+
+            <div class="clear"></div>
+            <div class="footer">
+              <p>　</p>
+            </div>
+          </div>
+
+        </ons-page>
+      </ons-navigator>
+    </ons-screen>
+
+<!-- i-mobile for SmartPhone client script -->
+<script type="text/javascript">
+imobile_tag_ver = "0.3";
+imobile_pid = "37435";
+imobile_asid = "1568559";
+imobile_type = "overlay";
+</script>
+<script type="text/javascript"
+src="http://spad.i-mobile.co.jp/script/adssp.js?20110215"></script>
+
+  </body>
+</html>

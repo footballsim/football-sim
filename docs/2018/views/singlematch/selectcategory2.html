@@ -1,0 +1,13 @@
+<ons-page id="selectcategory2" ng-controller="SelectCategory2Ctrl" class="maintext">
+  <ons-toolbar>
+    <div class="left"><ons-back-button></ons-back-button></div>
+    <div class="center">対戦相手チームの選択</div>
+  </ons-toolbar>
+
+  <div align="center" style="margin: 10px 0;"><img class="autoimg" src="images/mes-sgl2.png" alt="対戦相手チームの選択" /></div>
+
+  <ons-list ng-repeat="category in categories">
+    <ons-list-item ng-click="submit(category.category);">{{category.category}}</ons-list-item>
+  </ons-list>
+  <div style="height: 60px;"></div>
+</ons-page>

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ja" ng-app="myApp">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Football Sim [フットボールシム] ｜世界のサッカーをシミュレート</title>
+    <meta name="keywords" content="Football sim,フットボールシム,サッカー,シミュレータ,ワールドカップ,W杯,フットボール,日本代表,シミュレーションゲーム">
+    <meta name="Description" content="フットボールシム(Football Sim)はサッカーの監督として試合を行うサッカーシミュレータサイト。ワールドカップ2018ロシア大会を日本代表の監督となってプレイできる他、欧州選手権、コパアメリカ、アジアカップなどの大陸別の大会や、Jリーグを含めた各リーグのクラブも随時実装予定です。試合は戦術、フォーメーション等の設定だけでなく、自チームのキープレイヤー、対戦相手の要注意プレイヤーも選択可能で戦い方は無限大！"/>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
+    <link rel="stylesheet" href="bower_components/OnsenUI/css/onsenui.css?v=0.2.5">
+    <link rel="stylesheet" href="bower_components/OnsenUI/css/onsen-css-components.css?v=0.2.5">
+
+    <script src="bower_components/angular/angular.js?v=0.2.5"></script>
+    <script src="bower_components/OnsenUI/js/onsenui.js?v=0.2.5"></script>
+
+    <link rel="stylesheet" href="css/app.css?v=0.3.8.1"/>
+
+    <script src="js/data.js?v=0.2.5"></script>
+    <script src="js/game.js?v=0.2.5"></script>
+    <script src="js/singlematch_result.js?v=0.3.9.1"></script>
+
+<script>window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+  if (d.getElementById(id)) return t;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "https://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+
+  t._e = [];
+  t.ready = function(f) {
+    t._e.push(f);
+  };
+
+  return t;
+}(document, "script", "twitter-wjs"));</script>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script> (adsbygoogle = window.adsbygoogle || []).push({
+google_ad_client: "ca-pub-3333676301698499", enable_page_level_ads:
+true }); </script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115288628-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115288628-1');
+</script>
+  </head>
+
+  <body ng-controller="AppCtrl">
+
+    <ons-screen>
+      <ons-navigator var="myNavigator">
+        <ons-page id="singlematch-result" ng-controller="SingleMatchResultCtrl">
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = 'https://connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v3.1';
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+          <div align="center">
+            <div class="maintext">
+
+              <div align="center"><img class="autoimg" src="images/mes-sgl3.png" alt="試合結果" /></div>
+              <div class="orangebox">
+                <div class="guidebox">
+                  <p>【練習試合】</p>
+                  <p>{{team1.name}}　{{result.score1}} - {{result.score2}}　{{result.country}}</p>
+                </div>
+<!-- i-mobile for SmartPhone client script -->
+<script type="text/javascript">
+imobile_tag_ver = "0.3";
+imobile_pid = "37435";
+imobile_asid = "1557909";
+imobile_type = "inline";
+</script>
+<script type="text/javascript"
+src="http://spad.i-mobile.co.jp/script/adssp.js?20110215"></script>
+                <div style="border: solid medium #888; margin: 12px 0; max-width: 95%; padding: 20px;">
+                  <p style="font-size: 15px;">試合結果をシェアする</p>
+                  <ul class="sns-share-buttons">
+                    <li><a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-text="{{sharetext}}" data-url="http://football-sim.com" data-hashtags="フットボールシム" data-lang="ja" data-show-count="false">Tweet</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script></li>
+                      <li><div style="block: inline;" class="fb-share-button" data-href="http://football-sim.com" data-layout="button" data-size="small" data-mobile-iframe="true"><a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Ffootball-sim.com%2F&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore">シェア</a></div></li>
+                      <li><div class="line-it-button" data-lang="ja" data-type="share-a" data-url="http://football-sim.com" style="display: none;"></div><script src="https://d.line-scdn.net/r/web/social-plugin/js/thirdparty/loader.min.js" async="async" defer="defer"></script></li>
+                  </ul>
+                </div>
+                <p style="margin-top: 20px;"><ons-button ng-click="replay()" class="btn"><u>再チャレンジする</u></ons-button></p>
+                <p style="margin-top: 10px;"><ons-button ng-click="restart()" class="btn">　　<u>シングルマッチ画面へ</u>　　</u></ons-button></p>
+                <p style="margin-top: 20px; font-size: 16px;"><a href="./">TOPへ戻る</a></p>
+              </div>
+            </div>
+
+            <div class="clear"></div>
+            <div class="footer">
+              <p>　</p>
+            </div>
+          </div>
+
+        </ons-page>
+      </ons-navigator>
+    </ons-screen>
+
+<!-- i-mobile for SmartPhone client script -->
+<script type="text/javascript">
+imobile_tag_ver = "0.3";
+imobile_pid = "37435";
+imobile_asid = "1568559";
+imobile_type = "overlay";
+</script>
+<script type="text/javascript"
+src="http://spad.i-mobile.co.jp/script/adssp.js?20110215"></script>
+
+  </body>
+</html>

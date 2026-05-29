@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ja" ng-app="myApp">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Football Sim [フットボールシム] ｜世界のサッカーをシミュレート</title>
+    <meta name="keywords" content="Football sim,フットボールシム,サッカー,シミュレータ,ワールドカップ,W杯,フットボール,日本代表,シミュレーションゲーム">
+    <meta name="Description" content="フットボールシム(Football Sim)はサッカーの監督として試合を行うサッカーシミュレータサイト。ワールドカップ2018ロシア大会を日本代表の監督となってプレイできる他、欧州選手権、コパアメリカ、アジアカップなどの大陸別の大会や、Jリーグを含めた各リーグのクラブも随時実装予定です。試合は戦術、フォーメーション等の設定だけでなく、自チームのキープレイヤー、対戦相手の要注意プレイヤーも選択可能で戦い方は無限大！"/>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
+    <link rel="stylesheet" href="bower_components/OnsenUI/css/onsenui.css?v=0.2.5">
+    <link rel="stylesheet" href="bower_components/OnsenUI/css/onsen-css-components.css?v=0.2.5">
+
+    <script src="bower_components/angular/angular.js?v=0.2.5"></script>
+    <script src="bower_components/OnsenUI/js/onsenui.js?v=0.2.5"></script>
+
+    <link rel="stylesheet" href="css/app.css?v=0.2.6.3"/>
+
+    <script src="js/home.js?v=0.2.5.2"></script>
+
+<script>window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+  if (d.getElementById(id)) return t;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "https://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+
+  t._e = [];
+  t.ready = function(f) {
+    t._e.push(f);
+  };
+
+  return t;
+}(document, "script", "twitter-wjs"));</script>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-1332459136011969",
+          enable_page_level_ads: true
+     });
+</script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115288628-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115288628-1');
+</script>
+  </head>
+
+  <body ng-controller="AppCtrl">
+
+    <ons-screen>
+      <ons-navigator var="myNavigator">
+        <ons-page ng-controller="HomeCtrl">
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = 'https://connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v3.1';
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+          <ons-row align="center">
+            <ons-col align="center">
+              <div style="text-align: center;">
+                <img src="images/topimage.png" alt="ゲームスタート" border="0" style="width: 100%; max-width: 700px; height: auto;" />
+              </div>
+            </ons-col>
+          </ons-row>
+          <ons-row style="margin-top: 10px;">
+            <ons-col align="center">
+              <div class="content">
+                <div class="maintext" align="center">
+                  <div class="kickoffbox" style="margin-bottom: -2px;">
+                    <ons-button modifier="cta" ng-click="singlematch()" style="padding: 1em 1.6em; line-height: 1.5; background-color: #0045fc; vertical-align: baseline;"><image src="images/ball.png" style="height: 1em;" /> <span style="font-size: 130%;">シングルマッチ</span> <image src="images/ball.png" style="height: 1em;" /></ons-button>
+                    <p style="margin: 0.5em auto; font-size: 130%;"><strong>お好みのチームで試合を自由にシミュレート！</strong></p>
+                  </div>
+                  <div class="kickoffbox">
+                    <ons-button modifier="cta" ng-click="wc()" style="padding: 1em 1em; line-height: 1.5; background-color: #2e4e73;">2018 ロシア 〜日本代表編〜<br /><image src="flag/59.png" style="width: 1.5em; height: auto; vertical-align: baseline;" alt="日本国旗" /> <span style="font-size: 150%;"><u>キックオフ!!</u></span></ons-button>
+                    <br/>
+                    <br/>
+                    <ons-button ng-click="myNavigator.pushPage('views/tournament/ranking.html?v=0.2.6')"><u>スコアランキングトップ100</u></ons-button>
+                    <table class="playcounter">
+                      <tr>
+                        <td>総チャレンジ回数</td>
+                        <td> : {{pcount}}</td>
+                      </tr>
+                      <tr>
+                        <td>総GL突破回数</td>
+                        <td> : {{tcount}}</td>
+                      </tr>
+                      <tr>
+                        <td>総優勝回数</td>
+                        <td> : {{vcount}}</td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div style="margin: 15px 0;">
+                    <ul class="sns-share-buttons">
+                      <li><a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-text="スマホでサッカーW杯の試合をシミュレート中！" data-url="http://football-sim.com" data-hashtags="フットボールシム,W杯シミュレータ,ワールドカップ" data-lang="ja" data-show-count="false">Tweet</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script></li>
+                        <li><div style="block: inline;" class="fb-share-button" data-href="http://football-sim.com" data-layout="button" data-size="small" data-mobile-iframe="true"><a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Ffootball-sim.com%2F&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore">シェア</a></div></li>
+                        <li><div class="line-it-button" data-lang="ja" data-type="share-a" data-url="http://football-sim.com" style="display: none;"></div><script src="https://d.line-scdn.net/r/web/social-plugin/js/thirdparty/loader.min.js" async="async" defer="defer"></script></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+<a name="update"></a>
+<div class="whitebox">
+  <div class="maintext">
+    <h5>■アップデート内容</h5>
+    2018年12月5日<br />
+    ・シングルマッチ実装<br />
+    <br />
+    2018年8月14日<br />
+    ・日本代表候補に内田篤人、今野泰幸、中村俊輔、都倉賢を追加<br />
+    <br />
+    2018年7月27日<br />
+    ・決勝Tの対戦相手としてスウェーデン代表及びクロアチア代表を追加<br />
+    <br />
+    2018年7月18日<br />
+    ・フランス代表及びブラジル代表スタメンのアップデート<br />
+    <br />
+    2018年7月13日<br />
+    ・イングランド代表スタメンのアップデート<br />
+    <br />
+    2018年7月5日<br />
+    ・ベルギー代表スタメンのアップデート<br />
+    <br />
+    2018年7月1日<br />
+    ・Hグループ勝敗表のアップデート<br />
+    ・ポーランド代表スタメンのアップデート<br />
+    <br />
+    2018年6月27日<br />
+    ・最後の設定を引き継いでの再チャレンジ機能実装<br />
+    ・セネガル代表スタメンのアップデート<br />
+    <br />
+    2018年6月25日<br />
+    ・コロンビア代表スタメンのアップデート<br />
+    <br />
+    2018年6月13日<br />
+    ・日本代表デフォルト設定をパラグアイ戦のものにアップデート<br />
+    <br />
+    2018年6月9日<br />
+    ・日本代表デフォルトスタメン/フォーメーション更新<br />
+    ・広告枠の設置<br />
+    <br />
+    2018年6月5日<br />
+    ・ポイント＆ランキング機能実装<br />
+    <br />
+    2018年6月2日<br/>
+    ・日本代表デフォルト23名及びスタメンのアップデート<br />
+    <br />
+    2018年4月28日<br/>
+    ・一部マッチアップが正常に行われないバグの修正<br />
+    <br />
+    2018年4月26日<br/>
+    ・試合の結果がズレるバグの修正<br />
+    ・試合中に設定ボタンが押せなくなるバグの修正<br />
+    <br />
+    2018年4月24日<br/>
+    ・β版を公開<br />
+    <br />
+    <h5>■今後の主なアップデート予定</h5>
+    <br/>
+    ・日本代表選手の追加<br />
+    ・戦術/キープレイヤー等のバランス調整<br />
+    ・日本以外の国でのプレー実装<br />
+    ・選手別デュエル勝率などの試合後スタッツ追加<br />
+    ・対戦相手(NPC)側の選手交代の実装<br />
+  </div>
+</div>
+
+<a name="about"></a>
+<div align="center">
+  <div class="maintext" style="margin: 1em; text-align: left; line-height: 1.5;">
+    <h5>■フットボールシムとは</h5>
+    <br />
+    フットボールシムとは、サッカーの監督として試合を行うサッカーシミュレータです。各選手には30項目以上の能力パラメータが設定されており、他にも戦術やフォーメーションなどの選択も試合の結果に影響を及ぼします。<br />
+    <br />
+    不具合を確認された場合は、twitterアカウント(<a href="https://twitter.com/Iwasaki18M" target="_blank">@Iwasaki18M</a>)までご連絡お願いします。また、その他要望等ご意見も同アカウントにて随時受け付けております。<br />
+    <br />
+    <h5>■「サッカー×インターネット」を通じて社会に貢献</h5>
+    <br />
+    このウェブサイトは「サッカー インターネット」を通じて、社会に貢献することを目的とした非営利サイトです。<br />
+    <br />
+    今後、このウェブサイトで得られた収益は、サッカー関連の団体へ寄付を行うことを目標としています。活動報告は随時このサイトにアップする予定です。<br />
+    <br />
+  </div>
+</div>
+
+            </ons-col>
+          </ons-row>
+          <ons-row style="margin-top: 10px;">
+            <ons-col align="right">
+              <div style="margin-right: 10px; font-size: 10pt;">
+                Version 0.3.9
+              </div>
+            </ons-col>
+          </ons-row>
+          <div class="footer" align="center">
+            <ons-button ng-click="myNavigator.pushPage('views/tournament/policy.html?v=0.2.6')" style="margin: 4px 4px; font-size: 10pt; line-height: 1.2;">プライバシーポリシー</ons-button>
+          </div>
+          <div style="height: 60px;"></div>
+        </ons-page>
+      </ons-navigator>
+    </ons-screen>
+
+<!-- i-mobile for SmartPhone client script -->
+<script type="text/javascript">
+imobile_tag_ver = "0.3";
+imobile_pid = "37435";
+imobile_asid = "1568559";
+imobile_type = "overlay";
+</script>
+<script type="text/javascript"
+src="http://spad.i-mobile.co.jp/script/adssp.js?20110215"></script>
+
+  </body>
+</html>

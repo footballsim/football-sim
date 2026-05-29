@@ -1,0 +1,80 @@
+const FBSIM_VERSION = (new Date).getTime();
+
+(function(){
+    'use strict';
+
+    var app = angular.module('myApp', ['onsen']);
+
+    app.run(function($rootScope, $templateCache) {
+        $rootScope.$on('$viewContentLoaded', function() {
+            $templateCache.removeAll();
+        });
+    });
+
+    app.controller('AppCtrl', function($scope) { });
+
+    app.controller('HomeCtrl', ['$scope', '$rootScope', '$http',
+        function($scope, $rootScope, $http) {
+            ons.ready(function() {
+                var env = {};
+                sessionStorage.clear();
+                var url = location.origin + location.pathname;
+                url = url.substring(0, url.lastIndexOf('/') + 1);
+                sessionStorage.setItem('url', url);
+
+                var arg = new Object;
+                var pair = location.search.substring(1).split('&');
+                for(var i = 0; pair[i]; i++) {
+                    var kv = pair[i].split('=');
+                    arg[kv[0]] = kv[1];
+                }
+                if (arg['debug'])
+                    env.debugScore = parseInt(arg['debug']);
+                else
+                    env.debugScore = 0;
+                sessionStorage.setItem('env', JSON.stringify(env));
+
+                // カウンターデータを取得
+                $http.get('remote.php?action=getcounter').
+                    success(function(data, status, headers, config) {
+                        $scope.pcount = Number(data.play).toLocaleString();
+                        $scope.tcount
+                            = Number(data.tournament).toLocaleString();
+                        $scope.vcount = Number(data.victory).toLocaleString();
+                    }).
+                    error(function(data, status, headers, config) {
+                        console.log("ERROR!!!!!!!!");
+                    });
+            });
+
+            $scope.singlematch = function() {
+                location.href = sessionStorage.getItem('url')
+                    + 'singlematch.html';
+            };
+
+            $scope.wc = function() {
+                sessionStorage.setItem('page', 'init');
+                location.href = sessionStorage.getItem('url') + 'init.html';
+            };
+        }]);
+
+    /**
+     * RankingCtrl
+     */
+    app.controller('RankingCtrl', ['$scope', '$rootScope', '$http',
+        function($scope, $rootScope, $http) {
+            ons.ready(function() {
+                $http.get('remote.php?action=getranking').
+                    success(function(data, status, headers, config) {
+                        $scope.ranking = data.ranking;
+                        $scope.ranking.forEach(function(item, index, array) {
+                            item.point = Number(item.point).toLocaleString();
+                        });
+                    }).
+                    error(function(data, status, headers, config) {
+                        console.log("ERROR!!!!!!!!");
+                    });
+            });
+        }]);
+
+})();

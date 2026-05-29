@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>Sim Football Data Editor</title>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="memeid.css" />
+    <link rel="stylesheet" href="memeclass.css" />
+    <link rel="stylesheet" href="memehtml.css" />
+
+    <script type="text/javascript" src="../js/jquery-1.8.2.min.js"></script>
+    <style>
+      .member {width: 10em; margin: 2px 5px 0 2px;}
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <div id="maintext">
+
+        <div class="bodytext">
+          <p>
+          <a href="{{$root}}admin/editor.php?action=cards" class="btn">対戦カード</a> &nbsp; 
+          <a href="{{$root}}admin/editor.php?action=teams" class="btn btn-secondary">チーム情報</a>&nbsp; 
+          <a href="{{$root}}admin/editor.php?action=players" class="btn btn-sub">選 手 情 報</a>
+          </p>
+        </div>
+
+        <div class="topcopy">
+          <h3>チーム編集</h3>
+        </div>
+
+        <div class="bodytext">
+
+          <form id="mainform" action="{{$root}}admin/editor.php" method="post">
+            <input type="hidden" name="teamid" value="{{$data.teamid|escape}}"/>
+
+            <table width="90%" border="0" cellspacing="2" cellpadding="5">
+              <tr class="gb2">
+                <td align="right"><strong>チームID</strong></td>
+                <td align="left">{{$data.teamid|escape}}</td>
+              </tr>
+              <tbody>
+                <tr class="gb1">
+                  <td width="20%" align="right"><strong>チーム名</strong></td>
+                  <td align="left">
+                    <input name="name" type="text" id="CARD_NAME" value="{{$data.name|escape}}" />
+                  </td>
+                </tr>
+                <tr class="gb2">
+                  <td align="right"><strong>チーム区分</strong></td>
+                  <td align="left">
+                    <input name="category" type="text" id="CARD_NAME3" value="{{$data.category|escape}}" />
+                  </td>
+                </tr>
+                <tr class="gb1">
+                  <td align="right"><strong>年　号</strong></td>
+                  <td align="left">
+                    <input name="year" type="text" id="CARD_NAME4" value="{{$data.year|escape}}" />
+                  </td>
+                </tr>
+                <tr class="gb2">
+                  <td align="right"><strong>戦　術</strong></td>
+                  <td align="left">
+                    <select name="tactics" id="#TEAM_STRAT">
+                      <option value="0" {{if $data.tactics eq 0}}selected="selected"{{/if}}>ポゼッション重視</option>
+                      <option value="1" {{if $data.tactics eq 1}}selected="selected"{{/if}}>プレスディフェンス</option>
+                      <option value="2" {{if $data.tactics eq 2}}selected="selected"{{/if}}>カウンターアタック</option>
+                      <option value="3" {{if $data.tactics eq 3}}selected="selected"{{/if}}>カテナチオ</option>
+                      <option value="4" {{if $data.tactics eq 4}}selected="selected"{{/if}}>自由に戦え</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr class="gb1">
+                  <td align="right"><strong>システム</strong></td>
+                  <td align="left">
+                    <select name="system" id="#TEAM_SYSTEM">
+                      <option value="0" {{if $data.system eq 0}}selected="selected"{{/if}}>4-1-3-2</option>
+                      <option value="1" {{if $data.system eq 1}}selected="selected"{{/if}}>4-2-2-2</option>
+                      <option value="2" {{if $data.system eq 2}}selected="selected"{{/if}}>4-4-2</option>
+                      <option value="3" {{if $data.system eq 3}}selected="selected"{{/if}}>4-3-1-2</option>
+                      <option value="4" {{if $data.system eq 4}}selected="selected"{{/if}}>4-1-4-1</option>
+                      <option value="5" {{if $data.system eq 5}}selected="selected"{{/if}}>4-2-3-1</option>
+                      <option value="6" {{if $data.system eq 6}}selected="selected"{{/if}}>4-3-2-1A</option>
+                      <option value="7" {{if $data.system eq 7}}selected="selected"{{/if}}>4-3-2-1B</option>
+                      <option value="8" {{if $data.system eq 8}}selected="selected"{{/if}}>4-1-2-3</option>
+                      <option value="9" {{if $data.system eq 9}}selected="selected"{{/if}}>4-2-1-3</option>
+                      <option value="10" {{if $data.system eq 10}}selected="selected"{{/if}}>3-1-3-3</option>
+                      <option value="11" {{if $data.system eq 11}}selected="selected"{{/if}}>3-2-2-3</option>
+                      <option value="12" {{if $data.system eq 12}}selected="selected"{{/if}}>3-4-3</option>
+                      <option value="13" {{if $data.system eq 13}}selected="selected"{{/if}}>3-3-2-2</option>
+                      <option value="14" {{if $data.system eq 14}}selected="selected"{{/if}}>3-2-3-2</option>
+                      <option value="15" {{if $data.system eq 15}}selected="selected"{{/if}}>3-3-3-1</option>
+                      <option value="16" {{if $data.system eq 16}}selected="selected"{{/if}}>3-4-2-1</option>
+                      <option value="17" {{if $data.system eq 17}}selected="selected"{{/if}}>5-1-2-2</option>
+                      <option value="18" {{if $data.system eq 18}}selected="selected"{{/if}}>5-2-1-2</option>
+                      <option value="19" {{if $data.system eq 19}}selected="selected"{{/if}}>5-1-3-1</option>
+                      <option value="20" {{if $data.system eq 20}}selected="selected"{{/if}}>5-2-2-1</option>
+                      <option value="21" {{if $data.system eq 21}}selected="selected"{{/if}}>5-4-1</option>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="topcopy">
+              <h3 align="center">登録選手</h3>
+            </div>
+            <p style="text-align: center"><a href="{{$root}}admin/editor.php?action=players" target="_blank">選手リストを別タブで表示</a></p>
+            <table width="90%" border="0" cellspacing="2" cellpadding="5">
+              <tbody>
+                <tr class="gb1">
+                  <td width="10%" align="center" class="gb1">&nbsp;</td>
+                  <td width="40%" align="center" class="gb1">選手</td>
+                  <td width="10%" align="center">&nbsp;</td>
+                  <td width="40%" align="center" class="gb1">選手</td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">01</td>
+                  <td align="left"><input name="members[0]" type="text" value="{{$members[0]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">26</td>
+                  <td align="left"><input name="members[25]" type="text" value="{{$members[25]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">02</td>
+                  <td align="left"><input name="members[1]" type="text" value="{{$members[1]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">27</td>
+                  <td align="left"><input name="members[26]" type="text" value="{{$members[26]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">03</td>
+                  <td align="left"><input name="members[2]" type="text" value="{{$members[2]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">28</td>
+                  <td align="left"><input name="members[27]" type="text" value="{{$members[27]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">04</td>
+                  <td align="left"><input name="members[3]" type="text" value="{{$members[3]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">29</td>
+                  <td align="left"><input name="members[28]" type="text" value="{{$members[28]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">05</td>
+                  <td align="left"><input name="members[4]" type="text" value="{{$members[4]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">30</td>
+                  <td align="left"><input name="members[29]" type="text" value="{{$members[29]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">06</td>
+                  <td align="left"><input name="members[5]" type="text" value="{{$members[5]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">31</td>
+                  <td align="left"><input name="members[30]" type="text" value="{{$members[30]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">07</td>
+                  <td align="left"><input name="members[6]" type="text" value="{{$members[6]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">32</td>
+                  <td align="left"><input name="members[31]" type="text" value="{{$members[31]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">08</td>
+                  <td align="left"><input name="members[7]" type="text" value="{{$members[7]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">33</td>
+                  <td align="left"><input name="members[32]" type="text" value="{{$members[32]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">09</td>
+                  <td align="left"><input name="members[8]" type="text" value="{{$members[8]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">34</td>
+                  <td align="left"><input name="members[33]" type="text" value="{{$members[33]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">10</td>
+                  <td align="left"><input name="members[9]" type="text" value="{{$members[9]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">35</td>
+                  <td align="left"><input name="members[34]" type="text" value="{{$members[34]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">11</td>
+                  <td align="left"><input name="members[10]" type="text" value="{{$members[10]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">36</td>
+                  <td align="left"><input name="members[35]" type="text" value="{{$members[35]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">12</td>
+                  <td align="left"><input name="members[11]" type="text" value="{{$members[11]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">37</td>
+                  <td align="left"><input name="members[36]" type="text" value="{{$members[36]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">13</td>
+                  <td align="left"><input name="members[12]" type="text" value="{{$members[12]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">38</td>
+                  <td align="left"><input name="members[37]" type="text" value="{{$members[37]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">14</td>
+                  <td align="left"><input name="members[13]" type="text" value="{{$members[13]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">39</td>
+                  <td align="left"><input name="members[38]" type="text" value="{{$members[38]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">15</td>
+                  <td align="left"><input name="members[14]" type="text" value="{{$members[14]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">40</td>
+                  <td align="left"><input name="members[39]" type="text" value="{{$members[39]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">16</td>
+                  <td align="left"><input name="members[15]" type="text" value="{{$members[15]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">41</td>
+                  <td align="left"><input name="members[40]" type="text" value="{{$members[40]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">17</td>
+                  <td align="left"><input name="members[16]" type="text" value="{{$members[16]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">42</td>
+                  <td align="left"><input name="members[41]" type="text" value="{{$members[41]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">18</td>
+                  <td align="left"><input name="members[17]" type="text" value="{{$members[17]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">43</td>
+                  <td align="left"><input name="members[42]" type="text" value="{{$members[42]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">19</td>
+                  <td align="left"><input name="members[18]" type="text" value="{{$members[18]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">44</td>
+                  <td align="left"><input name="members[43]" type="text" value="{{$members[43]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">20</td>
+                  <td align="left"><input name="members[19]" type="text" value="{{$members[19]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">45</td>
+                  <td align="left"><input name="members[44]" type="text" value="{{$members[44]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">21</td>
+                  <td align="left"><input name="members[20]" type="text" value="{{$members[20]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">46</td>
+                  <td align="left"><input name="members[45]" type="text" value="{{$members[45]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">22</td>
+                  <td align="left"><input name="members[21]" type="text" value="{{$members[21]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">47</td>
+                  <td align="left"><input name="members[46]" type="text" value="{{$members[46]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">23</td>
+                  <td align="left"><input name="members[22]" type="text" value="{{$members[22]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">48</td>
+                  <td align="left"><input name="members[47]" type="text" value="{{$members[47]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">24</td>
+                  <td align="left"><input name="members[23]" type="text" value="{{$members[23]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">49</td>
+                  <td align="left"><input name="members[48]" type="text" value="{{$members[48]|escape}}" class="member"/><span> </span></td>
+                </tr>
+                <tr class="gb2">
+                  <td align="center" class="gb2">25</td>
+                  <td align="left"><input name="members[24]" type="text" value="{{$members[24]|escape}}" class="member"/><span> </span></td>
+                  <td align="center">50</td>
+                  <td align="left"><input name="members[49]" type="text" value="{{$members[49]|escape}}" class="member"/><span> </span></td>
+                </tr>
+              </tbody>
+            </table>
+            <p>&nbsp;</p>
+            <p align="center">
+            <input type="hidden" name="action" value="saveteam"/>
+            <input type="hidden" name="created" value="{{$data.created|escape}}"/>
+            <input type="submit" name="submit" value="保存して終了"/>
+            </p>
+            <p align="center"><a href="javascript:history.back();">保存せず戻る</a></p>
+          </form>
+        </div>
+
+      </div>
+
+      <div class="clear"></div>
+    </div>
+
+    <script type="text/javascript">
+$(document).ready(function() {
+  window.onbeforeunload = function() { return "編集を終了します。"; };
+
+  $(".member").change(function(event) {
+    $.get("{{$root}}remote.php",
+        { action: "getplayerinfo", id: event.target.value},
+        function(data) {
+          if (data == "")
+            event.target.value = "0";
+          event.target.nextSibling.innerHTML = data;
+        });
+  });
+
+  $(".member").each(function() {
+    var d = this;
+    $.get("{{$root}}remote.php",
+        { action: "getplayerinfo", id: d.value},
+        function(data) {
+          if (data == "")
+            d.value = "0";
+          d.nextSibling.innerHTML = data;
+        });
+  });
+});
+    </script>
+  </body>
+</html>

@@ -1,0 +1,70 @@
+<ons-page id="ingame-setting" ng-controller="IngameSettingCtrl">
+
+<ons-toolbar>
+<div class="left"><ons-back-button></ons-back-button></div>
+<div class="center">チーム設定</div>
+</ons-toolbar>
+
+<div align="center">
+  <div class="maintext">
+
+    <div class="whitebox">
+      <table width="100%" border="0" cellspacing="5" cellpadding="5" bgcolor="#FFFFFF">
+        <tr>
+          <td width="40%" align="right"><a href="" class="btn" ng-click="submit()">試合<br />
+              続行</a></td>
+          <td align="center">&nbsp;</td>
+          <td width="60%">
+            <span class="status"><a href="" ng-click="selectSystem()">フォーメーション：{{game.team1.getSystem().name}}</a></span><br />
+            <span class="status"><a href="" ng-click="selectTactics()">戦略：{{game.team1.getTactics().name}}</a></span><br />
+            <span class="status"><a href="" ng-click="selectKeyPlayer()">キープレイヤー：{{game.team1.getKeyPlayer().longname}}</a></span><br />
+            <span class="status"><a href="" ng-click="selectMarkPlayer()">要注意プレイヤー:{{game.team2.getKeyPlayer().longname}}</a></span>
+          </td>
+        </tr>
+      </table>
+
+
+      <div class="fieldmapbox">
+        <img src="images/field2.png" width="300" height="350">
+        <img ng-src="flag/{{game.team2.flag_image}}" alt="敵国旗" align="absmiddle" style="position: absolute; left: 0; top: 0; width: 40px; height: auto; border: solid 2px #ffffff;"/>
+        <img ng-src="flag/{{game.team1.flag_image}}" alt="自国旗" align="absmiddle" style="position: absolute; left: 0; bottom: 0; width: 40px; height: auto; border: solid 2px #ffffff;"/>
+        <div ng-style="fieldplayerPos2[0]" class="fieldplayer"><a href="" ng-click="memstatus2(0)">{{game.team2.getPlayerAtPosition(0).name}}</a></div>
+        <div ng-style="fieldplayerPos2[1]" class="fieldplayer"><a href="" ng-click="memstatus2(1)">{{game.team2.getPlayerAtPosition(1).name}}</a></div>
+        <div ng-style="fieldplayerPos2[2]" class="fieldplayer"><a href="" ng-click="memstatus2(2)">{{game.team2.getPlayerAtPosition(2).name}}</a></div>
+        <div ng-style="fieldplayerPos2[3]" class="fieldplayer"><a href="" ng-click="memstatus2(3)">{{game.team2.getPlayerAtPosition(3).name}}</a></div>
+        <div ng-style="fieldplayerPos2[4]" class="fieldplayer"><a href="" ng-click="memstatus2(4)">{{game.team2.getPlayerAtPosition(4).name}}</a></div>
+        <div ng-style="fieldplayerPos2[5]" class="fieldplayer"><a href="" ng-click="memstatus2(5)">{{game.team2.getPlayerAtPosition(5).name}}</a></div>
+        <div ng-style="fieldplayerPos2[6]" class="fieldplayer"><a href="" ng-click="memstatus2(6)">{{game.team2.getPlayerAtPosition(6).name}}</a></div>
+        <div ng-style="fieldplayerPos2[7]" class="fieldplayer"><a href="" ng-click="memstatus2(7)">{{game.team2.getPlayerAtPosition(7).name}}</a></div>
+        <div ng-style="fieldplayerPos2[8]" class="fieldplayer"><a href="" ng-click="memstatus2(8)">{{game.team2.getPlayerAtPosition(8).name}}</a></div>
+        <div ng-style="fieldplayerPos2[9]" class="fieldplayer"><a href="" ng-click="memstatus2(9)">{{game.team2.getPlayerAtPosition(9).name}}</a></div>
+        <div ng-style="fieldplayerPos2[10]" class="fieldplayer"><a href="" ng-click="memstatus2(10)">{{game.team2.getPlayerAtPosition(10).name}}</a></div>
+
+        <div ng-style="fieldplayerPos[0]" class="fieldplayer"><a href="" ng-click="memstatus(0)">{{game.team1.getPlayerAtPosition(0).name}}</a></div>
+        <div ng-style="fieldplayerPos[1]" class="fieldplayer"><a href="" ng-click="memstatus(1)">{{game.team1.getPlayerAtPosition(1).name}}</a></div>
+        <div ng-style="fieldplayerPos[2]" class="fieldplayer"><a href="" ng-click="memstatus(2)">{{game.team1.getPlayerAtPosition(2).name}}</a></div>
+        <div ng-style="fieldplayerPos[3]" class="fieldplayer"><a href="" ng-click="memstatus(3)">{{game.team1.getPlayerAtPosition(3).name}}</a></div>
+        <div ng-style="fieldplayerPos[4]" class="fieldplayer"><a href="" ng-click="memstatus(4)">{{game.team1.getPlayerAtPosition(4).name}}</a></div>
+        <div ng-style="fieldplayerPos[5]" class="fieldplayer"><a href="" ng-click="memstatus(5)">{{game.team1.getPlayerAtPosition(5).name}}</a></div>
+        <div ng-style="fieldplayerPos[6]" class="fieldplayer"><a href="" ng-click="memstatus(6)">{{game.team1.getPlayerAtPosition(6).name}}</a></div>
+        <div ng-style="fieldplayerPos[7]" class="fieldplayer"><a href="" ng-click="memstatus(7)">{{game.team1.getPlayerAtPosition(7).name}}</a></div>
+        <div ng-style="fieldplayerPos[8]" class="fieldplayer"><a href="" ng-click="memstatus(8)">{{game.team1.getPlayerAtPosition(8).name}}</a></div>
+        <div ng-style="fieldplayerPos[9]" class="fieldplayer"><a href="" ng-click="memstatus(9)">{{game.team1.getPlayerAtPosition(9).name}}</a></div>
+        <div ng-style="fieldplayerPos[10]" class="fieldplayer"><a href="" ng-click="memstatus(10)">{{game.team1.getPlayerAtPosition(10).name}}</a></div>
+      </div>
+      <p><a href="" ng-click="selectSystem()"><img src="images/btn-formation.gif" alt="フォーメーション" class="autoimg" border="0" /></a> <a href="" ng-click="selectTactics()"><img src="images/btn-strategy.gif" class="autoimg" border="0" alt="戦術設定" /></a></p>
+      <p><a href="" ng-click="swapPlayer()"><img src="images/btn-memchange.gif" class="autoimg" border="0" alt="スタメン設定" /></a> <a href="" ng-click="selectKeyPlayer()"><img src="images/btn-keyplayer.gif" class="autoimg" border="0" alt="キープレイヤー設定" /></a></p>
+      <p><a href="" ng-click="selectMarkPlayer()"><img src="images/btn-markplayer.gif" class="autoimg" border="0" alt="要注意プレイヤー" /></a></p>
+    </div>
+    <p>
+    <a href="index.html" class="btn btn-secondary">TOPに戻る</a>
+    </p>
+  </div>
+
+  <div class="clear"></div>
+  <div class="footer">
+    <p>　</p>
+  </div>
+</div>
+
+</ons-page>

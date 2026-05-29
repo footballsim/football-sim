@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>Sim Football Data Editor</title>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="memeid.css" />
+    <link rel="stylesheet" href="memeclass.css" />
+    <link rel="stylesheet" href="memehtml.css" />
+    <script type="text/javascript">
+function deleteCard(cid){
+  if (window.confirm('ID '+cid+' のデータを削除しますか？')) {
+    location.href = "{{$root}}admin/editor.php?action=deletecard&cardid="+cid;
+  }
+}
+    </script>
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <div id="maintext">
+
+        <div class="bodytext">
+          <p>
+          <a href="{{$root}}admin/editor.php?action=cards" class="btn">対戦カード</a> &nbsp; 
+          <a href="{{$root}}admin/editor.php?action=teams" class="btn btn-secondary">チーム情報</a>&nbsp; 
+          <a href="{{$root}}admin/editor.php?action=players" class="btn btn-sub">選 手 情 報</a>
+          </p>
+        </div>
+
+        <div class="topcopy">
+          <h3>対戦カード一覧</h3>
+        </div>
+
+        <div class="bodytext">
+
+          <p><a href="{{$root}}admin/editor.php?action=editcard" class="btn">新規カード作成</a></p>
+
+          <table width="90%" border="0" cellspacing="2" cellpadding="5">
+            <tbody>
+              <tr class="whitetitle">
+                <td width="10%" align="center" bgcolor="#005296">カードID</td>
+                <td width="15%" align="center" bgcolor="#005296">カード名</td>
+                <td width="15%" align="center" bgcolor="#005296">Aチーム</td>
+                <td width="15%" align="center" bgcolor="#005296">Bチーム</td>
+                <td align="center" bgcolor="#005296">対戦カード情報</td>
+                <td width="10%" align="center" bgcolor="#005296">登録日</td>
+                <td width="10%" align="center" bgcolor="#005296">削除</td>
+              </tr>
+              {{foreach from=$data item=i name=list}}
+              <tr class="gb1">
+                <td><a href="{{$root}}admin/editor.php?action=editcard&cardid={{$i.cardid|escape}}">{{$i.cardid|escape}}</a></td>
+                <td><strong>{{$i.name|escape}}</strong></td>
+                <td><strong>{{$i.team1name|escape}}</strong></td>
+                <td><strong>{{$i.team2name|escape}}</strong></td>
+                <td>{{$i.description|escape}}</td>
+                <td>{{$i.created|escape}}</td>
+                <td>【<a href="#" onclick="deleteCard({{$i.cardid|escape}});">削除</a>】</td>
+              </tr>
+              {{/foreach}}
+            </tbody>
+          </table>
+          <p align="center"><a href="{{$root}}admin/editor.php">TOPに戻る</a></p>
+        </div>
+
+      </div>
+
+      <div class="clear"></div>
+    </div>
+  </body>
+</html>

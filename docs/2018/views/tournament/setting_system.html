@@ -1,0 +1,27 @@
+<ons-page id="setting-system" ng-controller="SettingSystemCtrl">
+
+<ons-toolbar>
+<div class="left"><ons-back-button></ons-back-button></div>
+<div class="center">フォーメーション</div>
+<div class="right"><ons-button ng-click="submit()" class="btn">決定</ons-button></div>
+</ons-toolbar>
+
+<div align="center">
+  <div class="maintext">
+
+    <div align="center"><img class="autoimg" src="images/formation.png" alt="フォーメーション" /></div>
+    <div class="orangebox">
+      <ons-row>
+        <ons-col ng-repeat="item in systems" width="33%">
+        <label class="checkbox"><img ng-src="formation/{{item.name}}.png" alt="フォーメーション" class="autoimg" /><br/><input type="radio" name="system" ng-model="$parent.system" ng-value="$index" />{{item.name}}</label>
+        </ons-col>
+      </ons-row>
+      <ons-button ng-click="submit()" class="btn" style="margin-top: 10px;">決　　定</ons-button>
+    </div>
+  </div>
+
+  <div class="clear"></div>
+  <div class="footer">
+    <p>　</p>
+  </div>
+</div>

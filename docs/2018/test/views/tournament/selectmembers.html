@@ -1,0 +1,52 @@
+<ons-page id="select-members" ng-controller="SelectMembersCtrl">
+
+<ons-toolbar>
+<div class="left"><ons-back-button></ons-back-button></div>
+<div class="center">選手の選抜　{{memcount}}</span>／23名</div>
+<div class="right"><ons-button ng-click="submit()" class="btn" ng-disabled="selecterror">決定</ons-button></div>
+</ons-toolbar>
+
+<div align="center">
+  <div class="maintext">
+
+    <div align="center"><img class="autoimg" src="images/memselect.png" alt="出場メンバーを選択してください。" /></div>
+    <div class="orangebox">
+      <table ng-repeat="item in players" width="100%" border="1" cellspacing="0" cellpadding="2" bgcolor="#FFFFFF" class="memlist">
+        <tr>
+          <td width="50" rowspan="2" align="center">
+            <label class="checkbox">
+              <input type="checkbox" ng-model="item.checked" ng-disabled="$index &lt; 11" ng-change="updateCount()">
+              <div class="checkbox__checkmark"></div>
+            </label>
+          </td>
+          <td width="70" align="center">
+            <img ng-src="face/{{item.playerid}}.png" class="autoimg" alt="選手イメージ" style="width:60px; height:57px; margin: 5px 5px;"/>
+          </td>
+          <td align="left">
+            <div style="width: 100%; height: 100%; position: relative;">
+              <p>{{item.longname}}</p>
+              <p>■得意ポジション<br />
+              {{item.positions.join('／').replace('SW', 'LB')}}
+              </p>
+              <a href="" ng-click="memstatus($index)"><img src="images/btn-detail.gif" alt="詳細" width="80" height="30" border="0" style="position: absolute; top: 0px; right: 10px;" /></a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" align="left">{{item.profile}}</td>
+        </tr>
+      </table>
+      <ons-button ng-click="submit()" class="btn" ng-disabled="selecterror" style="margin-top: 10px;">決　　定</ons-button>
+    </div>
+    <p>
+    <a href="index.html" class="btn btn-secondary">TOPへ戻る</a>
+    </p>
+  </div>
+
+  <div class="clear"></div>
+  <div class="footer">
+    <p>　</p>
+  </div>
+</div>
+
+</ons-page>

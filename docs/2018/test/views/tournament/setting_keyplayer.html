@@ -1,0 +1,33 @@
+<ons-page id="setting-keyplayer" ng-controller="SettingKeyPlayerCtrl">
+
+<ons-toolbar>
+<div class="left"><ons-back-button></ons-back-button></div>
+<div class="center">キープレイヤー</div>
+<div class="right"><ons-button ng-click="submit()" class="btn">決定</ons-button></div>
+</ons-toolbar>
+
+<div align="center">
+  <div class="maintext">
+
+    <div align="center"><img class="autoimg" src="images/keyplayer.png" alt="キープレイヤー" /></div>
+    <div class="orangebox">
+      <ons-row>
+      <ons-col ng-repeat="item in lineup" width="33%" ng-hide="$index == 0">
+      <label class="checkbox">
+        <p>{{system.positions[$index].replace('SW', 'LB')}}</p>
+        <img ng-src="face/{{item.playerid}}.png" class="autoimg" alt="選手イメージ" />
+        <p><input type="radio" name="keyplayer" ng-model="$parent.keyplayer" ng-value="$index" />{{item.longname}}</p>
+      </label>
+      </ons-col>
+      </ons-row>
+      <ons-button ng-click="submit()" class="btn" style="margin-top: 10px;">決　　定</ons-button>
+      </div>
+    </div>
+
+    <div class="clear"></div>
+	<div class="footer">
+	  <p>　</p>
+	</div>
+</div>
+
+</ons-page>

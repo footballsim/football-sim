@@ -1,0 +1,36 @@
+<ons-page id="ranking" ng-controller="RankingCtrl">
+
+  <ons-toolbar>
+    <div class="left"><ons-back-button></ons-back-button></div>
+    <div class="center">ランキング</div>
+  </ons-toolbar>
+
+  <div class="whitebox">
+    <div class="maintext">
+      <div style="text-align: center; font-size: 14px; font-weight: bolder;">2018ロシア　日本代表監督ランキング</div>
+      <table class="ranking">
+        <thead>
+          <tr style="margin-bottom: 5px;">
+            <th>順位</th>
+            <th>監督名</th>
+            <th>スコア</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in ranking">
+            <td>{{$index + 1}}位</td>
+            <td>{{item.name}}</td>
+            <td>{{item.point}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <ons-bottom-toolbar>
+    <div class="bottom-bar__line-height" style="text-align: center;">
+      <ons-button ng-click="myNavigator.popPage()">戻る</ons-button>
+    </div>
+  </ons-bottom-toolbar>
+
+</ons-page>

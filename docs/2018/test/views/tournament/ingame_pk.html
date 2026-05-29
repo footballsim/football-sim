@@ -1,0 +1,63 @@
+<ons-page id="ingame-pk" ng-controller="InGamePkCtrl">
+
+<div align="center">
+  <div class="maintext">
+
+    <div class="whitebox">
+      <table width="90%" border="0" cellspacing="5" cellpadding="5" bgcolor="#FFFFFF">
+        <tr>
+          <td width="45%" align="right">{{game.team1.name}} <img ng-src="flag/{{game.team1.flag_image}}" class="flagimg" alt="自国旗" align="absmiddle"/></td>
+          <td align="center"><p> VS </p></td>
+          <td width="45%" align="left"><img ng-src="flag/{{game.team2.flag_image}}" class="flagimg" alt="敵国旗" align="absmiddle"/> {{game.team2.name}}</td>
+        </tr>
+        <tr>
+          <td align="right">{{score1}}</td>
+          <td align="center">対</td>
+          <td align="left">{{score2}}</td>
+        </tr>
+      </table>
+
+      <div class="guidebox">
+        <h2>PK戦</h2>
+        <table class="pktable">
+          <tr>
+            <th></th>
+            <th>{{offset + 1}}</th>
+            <th>{{offset + 2}}</th>
+            <th>{{offset + 3}}</th>
+            <th>{{offset + 4}}</th>
+            <th>{{offset + 5}}</th>
+            <th></th>
+          </tr>
+          <tr>
+            <th>{{game.team1.name}}</th>
+            <td>{{row1[0]}}</td>
+            <td>{{row1[1]}}</td>
+            <td>{{row1[2]}}</td>
+            <td>{{row1[3]}}</td>
+            <td>{{row1[4]}}</td>
+            <td>{{pk1}}</td>
+          </tr>
+          <tr>
+            <th>{{game.team2.name}}</th>
+            <td>{{row2[0]}}</td>
+            <td>{{row2[1]}}</td>
+            <td>{{row2[2]}}</td>
+            <td>{{row2[3]}}</td>
+            <td>{{row2[4]}}</td>
+            <td>{{pk2}}</td>
+          </tr>
+        </table>
+
+        <ons-button ng-click="nextButton()" class="btn" style="margin-top: 10px;">次へ進む</ons-button>
+      </div>
+    </div>
+  </div>
+
+  <div class="clear"></div>
+  <div class="footer">
+    <p>　</p>
+  </div>
+</div>
+
+</ons-page>

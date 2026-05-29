@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>Sim Football Data Editor</title>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="memeid.css" />
+    <link rel="stylesheet" href="memeclass.css" />
+    <link rel="stylesheet" href="memehtml.css" />
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <div id="maintext">
+
+        <div class="bodytext">
+          <p>
+          <a href="{{$root}}admin/editor.php?action=cards" class="btn">対戦カード</a> &nbsp; 
+          <a href="{{$root}}admin/editor.php?action=teams" class="btn btn-secondary">チーム情報</a>&nbsp; 
+          <a href="{{$root}}admin/editor.php?action=players" class="btn btn-sub">選 手 情 報</a>
+          </p>
+        </div>
+
+        <div class="topcopy">
+          <h3>対戦カード編集</h3>
+        </div>
+
+        <div class="bodytext">
+
+          <form id="mainform" action="{{$root}}admin/editor.php" method="post">
+            <input type="hidden" name="cardid" value="{{$data.cardid|escape}}"/>
+
+            <table width="90%" border="0" cellspacing="2" cellpadding="5">
+              <tbody>
+                <tr class="gb1">
+                  <td width="20%" align="right"><strong>対戦カード名</strong></td>
+                  <td align="left">
+                    <input name="name" type="text" id="CARD_NAME" value="{{$data.name|escape}}" />
+                  </td>
+                </tr>
+                <tr class="gb2">
+                  <td align="right"><strong>Aチーム選択</strong></td>
+                  <td align="left">
+                    <select name="team1" id="#TEAM_A">
+                      <option value="0">未選択</option>
+                      {{foreach from=$teams item=i name=list}}
+                      <option value="{{$i.teamid|escape}}" {{if $data.team1 eq $i.teamid}}selected="selected"{{/if}}>{{$i.name|escape}}（{{$i.category|escape}} / {{$i.year|escape}}）</option>
+                      {{/foreach}}
+                    </select>
+                  </td>
+                </tr>
+                <tr class="gb1">
+                  <td align="right"><strong>Bチーム選択</strong></td>
+                  <td align="left">
+                    <select name="team2" id="#TEAM_B">
+                      <option value="0">未選択</option>
+                      {{foreach from=$teams item=i name=list}}
+                      <option value="{{$i.teamid|escape}}" {{if $data.team2 eq $i.teamid}}selected="selected"{{/if}}>{{$i.name|escape}}（{{$i.category|escape}} / {{$i.year|escape}}）</option>
+                      {{/foreach}}
+                    </select>
+                  </td>
+                </tr>
+                <tr class="gb2">
+                  <td align="right"><strong>対戦カード情報</strong></td>
+                  <td align="left">
+                    <textarea name="description" id="textarea" cols="45" rows="5">{{$data.description|escape}}</textarea>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p align="center">
+            <input type="hidden" name="action" value="savecard"/>
+            <input type="hidden" name="created" value="{{$data.created|escape}}"/>
+            <input type="submit" name="submit" value="保存して終了"/>
+            </p>
+            <p align="center"><a href="javascript:history.back();">保存せず戻る</a></p>
+          </form>
+        </div>
+
+      </div>
+
+      <div class="clear"></div>
+    </div>
+
+    <script type="text/javascript">
+(function () {
+  window.onbeforeunload = function() { return "編集を終了します。"; };
+}());
+    </script>
+  </body>
+</html>

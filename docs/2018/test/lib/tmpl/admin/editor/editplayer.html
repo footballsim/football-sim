@@ -1,0 +1,377 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>Sim Football Data Editor</title>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="memeid.css" />
+    <link rel="stylesheet" href="memeclass.css" />
+    <link rel="stylesheet" href="memehtml.css" />
+  </head>
+  <body>
+    <div id="wrapper">
+
+      <div id="maintext">
+
+        <div class="bodytext">
+          <p>
+          <a href="{{$root}}admin/editor.php?action=cards" class="btn">対戦カード</a> &nbsp; 
+          <a href="{{$root}}admin/editor.php?action=teams" class="btn btn-secondary">チーム情報</a>&nbsp; 
+          <a href="{{$root}}admin/editor.php?action=players" class="btn btn-sub">選 手 情 報</a>
+          </p>
+        </div>
+
+        <div class="topcopy">
+          <h3>選手プロフィール編集</h3>
+        </div>
+
+        <div class="bodytext">
+
+          <form id="mainform" action="{{$root}}admin/editor.php" method="post">
+            <input type="hidden" name="playerid" value="{{$data.playerid|escape}}"/>
+
+            <table width="90%" border="0" cellspacing="2" cellpadding="5">
+              <tbody>
+                <tr class="gb2">
+                  <td width="150" align="right"><strong>選手ID</strong></td>
+                  <td align="left">{{$data.playerid}}</td>
+                </tr>
+                <tr class="gb1">
+                  <td align="right"><strong>名前</strong></td>
+                  <td align="left">フルネーム
+                    <input name="longname" type="text" id="CARD_NAME2" value="{{$data.longname|escape}}" />
+                    ／略称
+                    <input name="name" type="text" id="CARD_NAME3" value="{{$data.name|escape}}" />
+                  </td>
+                </tr>
+                <tr class="gb2">
+                  <td align="right"><strong>国籍</strong></td>
+                  <td align="left">
+                    <input name="country" type="text" id="CARD_NAME4" value="{{$data.country|escape}}" />
+                  </td>
+                </tr>
+                <tr class="gb1">
+                  <td align="right"><strong>選手区分</strong></td>
+                  <td align="left">
+                    <input name="category" type="text" id="CARD_NAME" value="{{$data.category|escape}}" size="40" />
+                  </td>
+                </tr>
+                <tr class="gb2">
+                  <td align="right"><strong>身長体重</strong></td>
+                  <td align="left">身長
+                    <input name="height" type="text" id="CARD_NAME5" value="{{$data.height|escape}}" />
+                    cm／体重
+                    <input name="weight" type="text" id="CARD_NAME6" value="{{$data.weight|escape}}" />
+                    kg
+                  </td>
+                </tr>
+                <tr class="gb1">
+                  <td align="right"><strong>プロフィール</strong></td>
+                  <td align="left">
+                    <textarea name="profile" id="MEM_INFO" cols="45" rows="5">{{$data.profile|escape}}</textarea>
+                  </td>
+                </tr>
+                <tr class="gb2">
+                  <td align="right"><strong>メインポジション</strong></td>
+                  <td align="left">
+                    <select name="mposition" id="MEM_POSITION">
+                      <option value="" {{if !$data.mposition}}selected="selected"{{/if}}>未選択</option>
+                      <option value="FW" {{if $data.mposition eq 'FW'}}selected="selected"{{/if}}>FW</option>
+                      <option value="MF" {{if $data.mposition eq 'MF'}}selected="selected"{{/if}}>MF</option>
+                      <option value="DF" {{if $data.mposition eq 'DF'}}selected="selected"{{/if}}>DF</option>
+                      <option value="GK" {{if $data.mposition eq 'GK'}}selected="selected"{{/if}}>GK</option>
+                    </select>
+                    ※必須					</td>
+                </tr>
+                <tr class="gb1">
+                  <td align="right"><strong>得意ポジション</strong></td>
+                  <td align="left">
+                    <input type="checkbox" name="positions[]" value="CF" {{if 'CF'|in_array:$data.positions}}checked="checked"{{/if}}>CF
+                    <input type="checkbox" name="positions[]" value="WG" {{if 'WG'|in_array:$data.positions}}checked="checked"{{/if}}>WG
+                    <input type="checkbox" name="positions[]" value="CMF" {{if 'CMF'|in_array:$data.positions}}checked="checked"{{/if}}>CMF
+                    <input type="checkbox" name="positions[]" value="SMF" {{if 'SMF'|in_array:$data.positions}}checked="checked"{{/if}}>SMF
+                    <input type="checkbox" name="positions[]" value="OMF" {{if 'OMF'|in_array:$data.positions}}checked="checked"{{/if}}>OMF
+                    <input type="checkbox" name="positions[]" value="DMF" {{if 'DMF'|in_array:$data.positions}}checked="checked"{{/if}}>DMF
+                    <input type="checkbox" name="positions[]" value="CB" {{if 'CB'|in_array:$data.positions}}checked="checked"{{/if}}>CB
+                    <input type="checkbox" name="positions[]" value="SB" {{if 'SB'|in_array:$data.positions}}checked="checked"{{/if}}>SB
+                    <input type="checkbox" name="positions[]" value="SW" {{if 'SW'|in_array:$data.positions}}checked="checked"{{/if}}>SW
+                    <input type="checkbox" name="positions[]" value="GK" {{if 'GK'|in_array:$data.positions}}checked="checked"{{/if}}>GK
+                    ※必須<br />
+                  </td>
+                </tr>
+                <tr class="gb2">
+                  <td align="right">攻撃系パラメータ</td>
+                  <td>
+                    <table border="0" cellpadding="2" cellspacing="0" align="left">
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">パワー</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="power" value="{{$data.power|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">スタミナ</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="stamina" value="{{$data.stamina|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">トップスピード</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="top_speed" value="{{$data.top_speed|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">加速力</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="acceleration" value="{{$data.acceleration|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">レスポンス</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="response" value="{{$data.response|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">ジャンプ</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="jump" value="{{$data.jump|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">敏捷性</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="agility" value="{{$data.agility|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">ドリブル精度</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="dribble_accuracy" value="{{$data.dribble_accuracy|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">ドリブルスピード</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="dribble_speed" value="{{$data.dribble_speed|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">ショートパス精度</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="shortpass_accuracy" value="{{$data.shortpass_accuracy|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">ショートパススピード</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="shortpass_speed" value="{{$data.shortpass_speed|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">ロングパス精度</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="longpass_accuracy" value="{{$data.longpass_accuracy|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">ロングパススピード</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="longpass_speed" value="{{$data.longpass_speed|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">シュート精度</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="shoot_accuracy" value="{{$data.shoot_accuracy|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">シュート力</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="shoot_making" value="{{$data.shoot_making|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">シュートテクニック</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="shoot_tech" value="{{$data.shoot_tech|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">フリーキック精度</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="freekick_accuracy" value="{{$data.freekick_accuracy|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">カーブ</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="curve" value="{{$data.curve|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">ボールテクニック</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="ball_tech" value="{{$data.ball_tech|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">攻撃性</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="offensive" value="{{$data.offensive|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr class="gb1">
+                  <td align="right">守備系パラメータ</td>
+                  <td>
+                    <table border="0" cellpadding="2" cellspacing="0" align="left">
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">パスカット</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="pass_cut" value="{{$data.pass_cut|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">タックル</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="tackle" value="{{$data.tackle|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">マンマーク</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="man_marking" value="{{$data.man_marking|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">カバーリング</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="covering" value="{{$data.covering|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">チェイシング</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="chasing" value="{{$data.chasing|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">セービング</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="saving" value="{{$data.saving|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">ハイボール処理</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="highball" value="{{$data.highball|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr class="gb2">
+                  <td align="right">攻撃・守備系パラメータ</td>
+                  <td>
+                    <table border="0" cellpadding="2" cellspacing="0" align="left">
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">ヘディング</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="heading" value="{{$data.heading|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">ポジショニング</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="positioning" value="{{$data.positioning|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr class="gb1">
+                  <td align="right">メンタルパラメータ</td>
+                  <td>
+                    <table border="0" cellpadding="2" cellspacing="0" align="left">
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">精神安定度</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="mentality" value="{{$data.mentality|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">連携</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="combination" value="{{$data.combination|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">コンディション安定度</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="condition_stability" value="{{$data.condition_stability|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">戦術眼</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="strategic_eye" value="{{$data.strategic_eye|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">創造性</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="creativity" value="{{$data.creativity|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">フェアプレー</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="fair_play" value="{{$data.fair_play|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr class="gb2">
+                  <td align="right">その他</td>
+                  <td>
+                    <table border="0" cellpadding="2" cellspacing="0" align="left">
+                      <tr>
+                        <td width="150" align="right" nowrap="nowrap">疲労度</td>
+                        <td align="left" nowrap="nowrap">
+                          <input name="fatigue" value="{{$data.fatigue|escape}}" type="text" size="4" maxlength="2" />
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p align="center">
+            <input type="hidden" name="action" value="saveplayer"/>
+            <input type="hidden" name="created" value="{{$data.created|escape}}"/>
+            <input type="submit" name="submit" value="保存して終了"/>
+            </p>
+            <p align="center"><a href="javascript:history.back();">保存せず戻る</a></p>
+          </form>
+        </div>
+
+      </div>
+
+      <div class="clear"></div>
+    </div>
+
+    <script type="text/javascript">
+(function () {
+  window.onbeforeunload = function() { return "編集を終了します。"; };
+}());
+    </script>
+  </body>
+</html>
