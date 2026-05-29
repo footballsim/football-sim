@@ -1693,26 +1693,6 @@ body {
         <div class="match-title-text" id="match-title-eng">日本 vs イングランド</div>
         <div class="match-desc" id="match-desc-eng">主力をスタメン起用した日本がフォーデン・パーマー擁するイングランドに挑む！</div>
       </div>
-      <div class="match-card" onclick="selectMatch('2026vsスコットランド')">
-        <div class="match-date" id="match-date-sco">2026年3月28日 ・ 親善試合</div>
-        <div class="match-flags">
-          <span class="flag-emoji">🇯🇵</span>
-          <span class="vs-text">VS</span>
-          <span class="flag-emoji">🏴󠁧󠁢󠁳󠁣󠁴󠁿</span>
-        </div>
-        <div class="match-title-text" id="match-title-sco">日本 vs スコットランド</div>
-        <div class="match-desc" id="match-desc-sco">W杯前最後の強化試合。若手中心の布陣でW杯出場国スコットランドに挑む！</div>
-      </div>
-      <div class="match-card" onclick="selectMatch('2018vsベルギー')">
-        <div class="match-date" id="match-date-bel">2018年7月2日 ・ ロシアW杯 決勝トーナメント</div>
-        <div class="match-flags">
-          <span class="flag-emoji">🇯🇵</span>
-          <span class="vs-text">VS</span>
-          <span class="flag-emoji">🇧🇪</span>
-        </div>
-        <div class="match-title-text" id="match-title-bel">日本 vs ベルギー</div>
-        <div class="match-desc" id="match-desc-bel">2点リードから逆転負けを喫した伝説の一戦。日本サッカー史上最高の舞台に挑む！</div>
-      </div>
       </div><!-- /match-list -->
     </div>
   </div>
@@ -2378,11 +2358,9 @@ const i18n = {
     matchDateTun: '2026年6月22日 ・ W杯グループステージ', matchTitleTun: '日本 vs チュニジア', matchDescTun: 'W杯2026グループF第2戦。北アフリカの鷲と激突！',
     matchDateSwe: '2026年6月26日 ・ W杯グループステージ', matchTitleSwe: '日本 vs スウェーデン', matchDescSwe: 'W杯2026グループF第3戦。イサク・ギェケレシュを擁するスウェーデンに挑む！',
     matchDateNed: '2026年6月14日 ・ W杯グループステージ', matchTitleNed: '日本 vs オランダ', matchDescNed: 'W杯2026グループF。日本とオランダが同組で激突！',
-    matchDateEng: '2026年3月31日 ・ 親善試合', matchDateSco: '2026年3月28日 ・ 親善試合', matchDateBel: '2018年7月2日 ・ ロシアW杯 決勝トーナメント',
-    matchTitleEng: '日本 vs イングランド', matchTitleSco: '日本 vs スコットランド', matchTitleBel: '日本 vs ベルギー',
+    matchDateEng: '2026年3月31日 ・ 親善試合',
+    matchTitleEng: '日本 vs イングランド',
     matchDescEng: '主力をスタメン起用した日本がフォーデン・パーマー擁するイングランドに挑む！',
-    matchDescSco: 'W杯前最後の強化試合。若手中心の布陣でW杯出場国スコットランドに挑む！',
-    matchDescBel: '2点リードから逆転負けを喫した伝説の一戦。日本サッカー史上最高の舞台に挑む！',
     btnPlayersList: '📋 選手データリスト',
     topLblWC: '2026W杯モード', topDescWC: 'グループステージから頂点を目指す',
     topLblSingle: 'シングルマッチ', topDescSingle: '好きな対戦カードをシミュレート',
@@ -2532,11 +2510,9 @@ const i18n = {
     matchDateTun: 'June 22, 2026 · W-Cup Group Stage', matchTitleTun: 'Japan vs Tunisia', matchDescTun: 'WC 2026 Group F, Matchday 2 — Eagles of Carthage!',
     matchDateSwe: 'June 26, 2026 · W-Cup Group Stage', matchTitleSwe: 'Japan vs Sweden', matchDescSwe: 'WC 2026 Group F, Matchday 3 — Isak & Gyokeres await!',
     matchDateNed: 'June 14, 2026 · W-Cup Group Stage', matchTitleNed: 'Japan vs Netherlands', matchDescNed: 'WC 2026 Group F — Japan and Netherlands in the same group!',
-    matchDateEng: 'March 31, 2026 · Friendly', matchDateSco: 'March 28, 2026 · Friendly', matchDateBel: 'July 2, 2018 · Russia WC Round of 16',
-    matchTitleEng: 'Japan vs England', matchTitleSco: 'Japan vs Scotland', matchTitleBel: 'Japan vs Belgium',
+    matchDateEng: 'March 31, 2026 · Friendly',
+    matchTitleEng: 'Japan vs England',
     matchDescEng: "Japan fields their best XI against Foden & Palmer's England!",
-    matchDescSco: "Japan's last tune-up before the W-Cup against WC-bound Scotland!",
-    matchDescBel: 'The legendary match where Japan led 2-0 only to lose. Face the greatest stage in Japanese football history!',
     btnPlayersList: '📋 Player Data List',
     topLblWC: '2026 W-Cup Mode', topDescWC: 'From group stage to the top',
     topLblSingle: 'Single Match', topDescSingle: 'Simulate any matchup',
@@ -2741,9 +2717,9 @@ function applyLang() {
   _setText('match-date-tun', t('matchDateTun')); _setText('match-title-tun', t('matchTitleTun')); _setText('match-desc-tun', t('matchDescTun'));
   _setText('match-date-swe', t('matchDateSwe')); _setText('match-title-swe', t('matchTitleSwe')); _setText('match-desc-swe', t('matchDescSwe'));
   _setText('match-date-ned', t('matchDateNed')); _setText('match-title-ned', t('matchTitleNed')); _setText('match-desc-ned', t('matchDescNed'));
-  _setText('match-date-eng', t('matchDateEng')); _setText('match-date-sco', t('matchDateSco')); _setText('match-date-bel', t('matchDateBel'));
-  _setText('match-title-eng', t('matchTitleEng')); _setText('match-title-sco', t('matchTitleSco')); _setText('match-title-bel', t('matchTitleBel'));
-  _setText('match-desc-eng', t('matchDescEng')); _setText('match-desc-sco', t('matchDescSco')); _setText('match-desc-bel', t('matchDescBel'));
+  _setText('match-date-eng', t('matchDateEng'));
+  _setText('match-title-eng', t('matchTitleEng'));
+  _setText('match-desc-eng', t('matchDescEng'));
   _setText('btn-players-list', t('btnPlayersList'));
   _setText('top-lbl-wc',      t('topLblWC'));
   _setText('top-desc-wc',     t('topDescWC'));
@@ -4653,15 +4629,12 @@ function selectMatch(key) {
   } else if (key === '2026fvsスペイン') {
     team1Data = TEAM_DATA.japan2026vsNetherlands;
     team2Data = TEAM_DATA.spain2026;
-  } else if (key === '2026vsスコットランド') {
-    team1Data = TEAM_DATA.japan2026;
-    team2Data = TEAM_DATA.scotland2026;
   } else if (key === '2026vsイングランド') {
     team1Data = TEAM_DATA.japan2026vsEngland;
     team2Data = TEAM_DATA.england2026;
   } else {
-    team1Data = TEAM_DATA.japan2018;
-    team2Data = TEAM_DATA.belgium2018;
+    team1Data = TEAM_DATA.japan2026vsEngland;
+    team2Data = TEAM_DATA.england2026;
   }
   initSettingScreen();
   showScreen('setting');
@@ -5135,8 +5108,7 @@ function getTeam1DataKey() {
   if (currentMatchKey === '2026vsスウェーデン') return 'japan2026vsSweden';
   if (currentMatchKey === '2026vsオランダ') return 'japan2026vsNetherlands';
   if (currentMatchKey === '2026vsイングランド') return 'japan2026vsEngland';
-  if (currentMatchKey === '2026vsスコットランド') return 'japan2026';
-  return 'japan2018';
+  return 'japan2026vsEngland';
 }
 
 // D&D 状態管理
