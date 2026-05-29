@@ -1821,11 +1821,14 @@ body {
     <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-f-title-btn">🏠 タイトルへ</button>
   </div>
 </div>
-<div id="screen-worldcup-champion" class="screen" style="background:linear-gradient(160deg,#7b5c00 0%,#c9960c 50%,#ffd700 100%);align-items:center;justify-content:center">
-  <div style="text-align:center;padding:32px 24px;max-width:420px">
-    <div style="font-size:72px;margin-bottom:16px">🏆</div>
-    <div style="font-size:30px;font-weight:900;color:#fff;margin-bottom:8px;text-shadow:0 2px 8px rgba(0,0,0,0.3)" id="wc-champion-title">日本代表、世界一！</div>
-    <img id="champion-img" style="width:100%;max-width:380px;border-radius:12px;margin:16px 0 24px;display:block">
+<div id="screen-worldcup-champion" class="screen" style="background:linear-gradient(160deg,#7b5c00 0%,#c9960c 50%,#ffd700 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div style="text-align:center;padding:32px 20px 16px;max-width:420px;width:100%">
+    <div style="font-size:72px;margin-bottom:8px">🏆</div>
+    <div style="font-size:28px;font-weight:900;color:#fff;margin-bottom:4px;text-shadow:0 2px 8px rgba(0,0,0,0.3)" id="wc-champion-title">日本代表、世界一！</div>
+    <img id="champion-img" style="width:100%;max-width:380px;border-radius:12px;margin:12px 0 16px;display:block">
+  </div>
+  <div id="wc-champion-content" style="width:100%;max-width:420px;padding:0 16px 16px"></div>
+  <div style="width:100%;max-width:420px;padding:0 16px 32px">
     <button class="start-btn" onclick="resetWCMode()" style="background:rgba(255,255,255,0.25);color:#fff;margin-bottom:12px" id="wc-champion-again-btn">🔄 もう一度</button>
     <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#fff" id="wc-champion-title-btn">🏠 タイトルへ</button>
   </div>
@@ -2431,7 +2434,7 @@ const i18n = {
     wcAdvancedF: '決勝進出！',
     wcCongrats: 'おめでとうございます！',
     wcChampion: '日本代表、世界一！',
-    wcChampionSub: 'FIFAワールドカップ2026 優勝',
+    wcChampionSub: '2026 W-Cup 優勝',
     wcEliminated2: 'トーナメント敗退',
     wcEliminatedMsg: 'W杯ラウンド32で敗退しました',
     wcToQF: '🏆 準々決勝へ',
@@ -2581,7 +2584,7 @@ const i18n = {
     wcAdvancedF: 'Into the Final!',
     wcCongrats: 'Congratulations!',
     wcChampion: 'Japan, World Champions!',
-    wcChampionSub: 'FIFA World Cup 2026 Champions',
+    wcChampionSub: '2026 W-Cup Champions',
     wcEliminated2: 'Eliminated',
     wcEliminatedMsg: 'Eliminated at Round of 32',
     wcToQF: '🏆 To Quarter Final',
@@ -4444,6 +4447,108 @@ function showWCEliminated(stageKey) {
   showScreen('worldcup-eliminated');
 }
 
+function showWCChampion() {
+  let html = '';
+
+  // ① 試合結果一覧（グループ + KO全試合）
+  const koLabels = {wc_r32:t('wcRound32'), wc_r16:t('wcRound16'), wc_qf:t('wcQuarterFinal'), wc_sf:t('wcSemiFinal'), wc_final:t('wcFinal')};
+  html += `<div style="background:rgba(0,0,0,0.2);border-radius:10px;overflow:hidden;margin-bottom:12px">
+    <div style="padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.15)">${t('wcElimTournamentResults')}</div>`;
+  wcMatchScores.forEach(function(m) {
+    const col = m.s1 > m.s2 ? '#4ade80' : m.s1 < m.s2 ? '#f87171' : '#fbbf24';
+    const res = m.s1 > m.s2 ? t('winLabel') : m.s1 < m.s2 ? t('loseLabel') : t('drawLabel');
+    html += `<div style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.1)">
+      <span style="font-size:11px;color:rgba(255,255,255,0.6);min-width:36px">${t('wcMatchLabel')}${m.matchNum}${t('wcMatchSuffix')}</span>
+      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵${t('wcElimJapan')} <b>${m.s1}–${m.s2}</b> ${m.t2flag}${m.t2name}</span>
+      <span style="font-size:12px;font-weight:700;color:${col};min-width:14px;text-align:right">${res}</span>
+    </div>`;
+  });
+  wcKnockoutResults.forEach(function(r) {
+    const col = r.won ? '#4ade80' : '#f87171';
+    const res = r.won ? t('winLabel') : t('loseLabel');
+    let sc = `<b>${r.s1}–${r.s2}</b>`;
+    if (r.decidedBy === 'pk') sc += ` <span style="font-size:10px;color:rgba(255,255,255,0.5)">(PK ${r.pkS1}–${r.pkS2})</span>`;
+    else if (r.decidedBy === 'et') sc += ` <span style="font-size:10px;color:rgba(255,255,255,0.5)">(${t('wcElimET')})</span>`;
+    html += `<div style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.1)">
+      <span style="font-size:11px;color:rgba(255,255,255,0.6);min-width:36px">${koLabels[r.stage]||r.stage}</span>
+      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵${t('wcElimJapan')} ${sc} ${r.oppFlag}${r.oppName}</span>
+      <span style="font-size:12px;font-weight:700;color:${col};min-width:14px;text-align:right">${res}</span>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // ② 大会通算スタッツ
+  const totalGF = wcMatchScores.reduce((s,m)=>s+m.s1,0) + wcKnockoutResults.reduce((s,r)=>s+r.s1,0);
+  const totalGA = wcMatchScores.reduce((s,m)=>s+m.s2,0) + wcKnockoutResults.reduce((s,r)=>s+r.s2,0);
+  const totalW  = wcMatchScores.filter(m=>m.s1>m.s2).length + wcKnockoutResults.filter(r=>r.won).length;
+  const totalD  = wcMatchScores.filter(m=>m.s1===m.s2).length;
+  const totalL  = (wcMatchScores.length + wcKnockoutResults.length) - totalW - totalD;
+  html += `<div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:12px 16px;margin-bottom:12px">
+    <div style="font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:1px;margin-bottom:10px">${t('wcElimTournamentStats')}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin-bottom:8px">
+      <div><div style="font-size:20px;font-weight:700;color:#4ade80">${totalW}</div><div style="font-size:10px;color:rgba(255,255,255,0.6)">${t('wcStatsW')}</div></div>
+      <div><div style="font-size:20px;font-weight:700;color:#fbbf24">${totalD}</div><div style="font-size:10px;color:rgba(255,255,255,0.6)">${t('wcStatsD')}</div></div>
+      <div><div style="font-size:20px;font-weight:700;color:#f87171">${totalL}</div><div style="font-size:10px;color:rgba(255,255,255,0.6)">${t('wcStatsL')}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:center">
+      <div style="background:rgba(74,222,128,0.15);border-radius:8px;padding:8px 4px"><div style="font-size:22px;font-weight:700;color:#4ade80">${totalGF}</div><div style="font-size:10px;color:rgba(255,255,255,0.6)">${t('wcElimTotalGF')}</div></div>
+      <div style="background:rgba(248,113,113,0.15);border-radius:8px;padding:8px 4px"><div style="font-size:22px;font-weight:700;color:#f87171">${totalGA}</div><div style="font-size:10px;color:rgba(255,255,255,0.6)">${t('wcElimTotalGA')}</div></div>
+    </div>
+  </div>`;
+
+  // ③ 得点・アシスト（日本）
+  const scorerList = Object.entries(wcPlayerStats)
+    .filter(function(kv){ return kv[1].goals > 0 || kv[1].assists > 0; })
+    .map(function(kv){ return {name: kv[0], goals: kv[1].goals||0, assists: kv[1].assists||0}; })
+    .sort(function(a,b){ return (b.goals*10+b.assists) - (a.goals*10+a.assists); });
+  if (scorerList.length > 0) {
+    html += `<div style="background:rgba(0,0,0,0.2);border-radius:10px;overflow:hidden;margin-bottom:12px">
+      <div style="padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.15)">${t('wcElimScorers')}</div>`;
+    scorerList.slice(0, 10).forEach(function(g) {
+      html += `<div style="padding:7px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.1)">
+        <span style="color:#fff;font-size:13px">🇯🇵 ${g.name}</span>
+        <span style="font-size:13px;font-weight:700;display:flex;gap:8px">
+          <span style="color:#ffd700;min-width:28px;text-align:right">${g.goals}G</span>
+          <span style="color:rgba(255,255,255,0.6);min-width:28px;text-align:right">${g.assists}A</span>
+        </span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // ④ 日本MVP
+  const mvpEntries = Object.entries(wcPlayerStats).filter(function(kv){return kv[1].goals>0||kv[1].assists>0||kv[1].duelWins>0;});
+  if (mvpEntries.length > 0) {
+    const best = mvpEntries.sort(function(a,b){return (b[1].goals*3+b[1].assists*2+b[1].duelWins)-(a[1].goals*3+a[1].assists*2+a[1].duelWins);})[0];
+    const mvpName = best[0], mvpSt = best[1];
+    const mvpStats = [
+      mvpSt.goals > 0 ? mvpSt.goals + t('wcElimGoalLabel') : '',
+      mvpSt.assists > 0 ? mvpSt.assists + t('wcElimAssistLabel') : '',
+      t('wcElimDuelWinLabel') + mvpSt.duelWins + t('wcElimDuelWinSuffix') + (mvpSt.duels > 0 ? '（' + Math.round(mvpSt.duelWins/mvpSt.duels*100) + '%）' : ''),
+    ].filter(Boolean).join(t('wcElimDuelWinSep'));
+    html += `<div style="background:rgba(255,215,0,0.2);border:1px solid rgba(255,215,0,0.5);border-radius:10px;padding:14px;margin-bottom:12px;text-align:center">
+      <div style="font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:1px;margin-bottom:6px">${t('wcElimMVP')}</div>
+      <div style="font-size:22px;font-weight:700;color:#ffd700">${mvpName}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px">${mvpStats}</div>
+    </div>`;
+  }
+
+  // ⑤ AI総括
+  html += `<div style="background:rgba(0,0,0,0.2);border-radius:10px;overflow:hidden;margin-bottom:8px">
+    <div style="padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:space-between">
+      <span>🤖 AI総括</span>
+      <button id="wc-champion-summary-btn" onclick="generateWCChampionSummary()" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.15);color:#fff;cursor:pointer;font-family:inherit;font-weight:700">生成する</button>
+    </div>
+    <div id="wc-champion-summary-content" style="padding:12px;font-size:13px;line-height:1.9;color:rgba(255,255,255,0.9)">
+      <span style="color:rgba(255,255,255,0.5);font-size:12px">「生成する」をタップするとAIが大会を総括します</span>
+    </div>
+  </div>`;
+
+  const contentEl = document.getElementById('wc-champion-content');
+  if (contentEl) contentEl.innerHTML = html;
+  showWCChampion();
+}
+
 function generateWCEliminatedSummary() {
   var btn = document.getElementById('wc-elim-summary-btn');
   var el  = document.getElementById('wc-elim-summary-content');
@@ -4509,6 +4614,74 @@ function generateWCEliminatedSummary() {
     if (!res.ok) return res.text().then(function(b){throw new Error('HTTP '+res.status+': '+b);});
     var reader=res.body.getReader(), decoder=new TextDecoder(), buffer='', fullText='';
     el.innerHTML='<div style="line-height:1.9;font-size:13px;color:rgba(255,255,255,0.85)"></div>';
+    var textEl=el.querySelector('div');
+    function read(){
+      reader.read().then(function(chunk){
+        if(chunk.done){btn.textContent='生成済み';btn.disabled=true;btn.style.opacity='0.6';return;}
+        buffer+=decoder.decode(chunk.value,{stream:true});
+        var lines=buffer.split('\n');buffer=lines.pop();
+        lines.forEach(function(line){
+          if(!line.startsWith('data: '))return;
+          var data=line.slice(6).trim();if(data==='[DONE]')return;
+          try{var json=JSON.parse(data);if(json.type==='content_block_delta'&&json.delta&&json.delta.text){fullText+=json.delta.text;textEl.innerHTML=fullText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}}catch(e){}
+        });read();
+      }).catch(function(err){el.innerHTML='<span style="color:#ff6b6b;font-size:11px">'+err.message+'</span>';btn.textContent='リトライ';btn.disabled=false;btn.style.opacity='1';});
+    }
+    read();
+  }).catch(function(err){
+    el.innerHTML='<span style="color:#ff6b6b;font-size:11px">'+err.message+'</span>';
+    btn.textContent='リトライ';btn.disabled=false;btn.style.opacity='1';
+  });
+}
+
+function generateWCChampionSummary() {
+  var btn = document.getElementById('wc-champion-summary-btn');
+  var el  = document.getElementById('wc-champion-summary-content');
+  if (!btn || !el) return;
+  btn.disabled = true; btn.textContent = '生成中…'; btn.style.opacity = '0.6';
+  el.innerHTML = '<span style="color:rgba(255,255,255,0.4);font-size:12px">生成中…</span>';
+
+  var koL = {wc_r32:'ベスト32',wc_r16:'ベスト16',wc_qf:'準々決勝',wc_sf:'準決勝',wc_final:'決勝'};
+  var totalGF = wcMatchScores.reduce(function(s,m){return s+m.s1;},0)+wcKnockoutResults.reduce(function(s,r){return s+r.s1;},0);
+  var totalGA = wcMatchScores.reduce(function(s,m){return s+m.s2;},0)+wcKnockoutResults.reduce(function(s,r){return s+r.s2;},0);
+  var scorerLines = [];
+  wcGoalScorers.forEach(function(g) { scorerLines.push('🇯🇵'+g.name+'('+g.time+')'); });
+  var mvpText = '-';
+  var mvpE = Object.entries(wcPlayerStats).filter(function(kv){return kv[1].goals>0||kv[1].duelWins>0;});
+  if (mvpE.length>0) {
+    var best = mvpE.sort(function(a,b){return (b[1].goals*3+b[1].assists*2+b[1].duelWins)-(a[1].goals*3+a[1].assists*2+a[1].duelWins);})[0];
+    mvpText = best[0]+'('+best[1].goals+'ゴール/'+best[1].assists+'アシスト/デュエル勝利'+best[1].duelWins+'回)';
+  }
+  var grpRank = wcGroupRank > 0 ? wcGroupRank+'位' : '?位';
+  var glScoresText = wcMatchScores.map(function(m){ return '日本'+m.s1+'-'+m.s2+m.t2name; }).join(' / ');
+  var koScoresText = wcKnockoutResults.map(function(r){
+    var dec = r.decidedBy==='pk'?'(PK '+r.pkS1+'-'+r.pkS2+')':r.decidedBy==='et'?'(延長)':'';
+    return (koL[r.stage]||r.stage)+' 日本'+r.s1+'-'+r.s2+r.oppName+dec+' ✓';
+  }).join(' / ');
+  var tournamentPath = 'グループ'+grpRank+'突破 → '+wcKnockoutResults.map(function(r){
+    return (koL[r.stage]||r.stage)+'勝利';
+  }).join('→')+' → 優勝';
+  var matchData = {
+    isWorldCup: true, isEliminated: true,
+    standings: tournamentPath,
+    japanResult: 'グループ'+grpRank+'突破→優勝',
+    japanScores: glScoresText,
+    autoScores: koScoresText,
+    allScorers: scorerLines.join(', ')||'なし', mvp: mvpText,
+    team1:'日本', team2:'W杯2026', score1:totalGF, score2:totalGA,
+  };
+  var WORKER_URL = 'https://footballsimulator.m-iwasaki18.workers.dev';
+  fetch(WORKER_URL, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({matchData: matchData, lang: window.LANG}),
+  }).then(function(res) {
+    if (res.status===429) {
+      el.innerHTML='<span style="color:#e67e00;font-size:12px;line-height:1.7">'+t('wcRateLimitMsg')+'</span>';
+      btn.textContent=t('wcRateLimit429'); btn.disabled=true; btn.style.opacity='0.6'; return;
+    }
+    if (!res.ok) return res.text().then(function(b){throw new Error('HTTP '+res.status+': '+b);});
+    var reader=res.body.getReader(), decoder=new TextDecoder(), buffer='', fullText='';
+    el.innerHTML='<div style="line-height:1.9;font-size:13px;color:rgba(255,255,255,0.9)"></div>';
     var textEl=el.querySelector('div');
     function read(){
       reader.read().then(function(chunk){
@@ -9059,7 +9232,7 @@ function updateWCFAfterResult() {
         btn.textContent = t('wcChampionBtn');
         btn.style.background = 'linear-gradient(135deg,#b8860b,#ffd700)';
         btn.style.color = '#1a1a1a';
-        btn.onclick = () => showScreen('worldcup-champion');
+        btn.onclick = () => showWCChampion();
         document.getElementById('btn-retry').style.display = 'none';
       } else {
         btn.textContent = t('wcDefeated');
@@ -9376,7 +9549,7 @@ function _finishPK() {
         } else { showWCEliminated('wc_sf'); }
       } else if (isWCFMode) {
         isWCFMode = false;
-        japanWon ? showScreen('worldcup-champion') : showWCEliminated('wc_final');
+        japanWon ? showWCChampion() : showWCEliminated('wc_final');
       } else {
         isWCR32Mode = false;
         if (japanWon) {
