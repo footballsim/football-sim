@@ -1611,13 +1611,6 @@ body {
       </div>
     </div>
 
-    <!-- ローディングオーバーレイ -->
-    <div id="loading-overlay" style="position:fixed;inset:0;background:rgba(0,48,135,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;pointer-events:all">
-      <div style="width:40px;height:40px;border:4px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite"></div>
-      <div style="color:#fff;font-size:14px;opacity:0.8">Loading...</div>
-    </div>
-    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-
     <!-- トップメニュー -->
     <div class="top-menu">
       <div class="top-menu-card top-menu-wc" onclick="resetWCMode()">
@@ -10332,10 +10325,6 @@ function generateMultiSummary(t1wins, t2wins, draws, t1poss, t1shoot, t2shoot, G
 
 // ページ初期ロード時に言語を適用
 document.addEventListener('DOMContentLoaded', function() {
-  // ローディングオーバーレイを非表示
-  var overlay = document.getElementById('loading-overlay');
-  if (overlay) overlay.style.display = 'none';
-
   // 言語ボタンの初期スタイルをLANGに合わせて設定
   var btnJa = document.getElementById('lang-btn-ja');
   var btnEn = document.getElementById('lang-btn-en');
