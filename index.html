@@ -1651,49 +1651,28 @@ body {
   </div>
 </div>
 
-<!-- SINGLE MATCH SCREEN -->
+<!-- SINGLE MATCH SCREEN: チーム1選択 -->
 <div id="screen-single" class="screen">
   <div class="screen-header">
     <button class="back-btn" onclick="showScreen('title')">← 戻る</button>
-    <div class="screen-title-text">⚽ シングルマッチ</div>
+    <div class="screen-title-text">⚽ チーム選択（1/2）</div>
   </div>
   <div class="title-content" style="padding-top:12px">
-    <div class="other-matches-section">
-      <div class="match-list">
-      <div class="match-card" onclick="selectMatch('2026vsオランダ')">
-        <div class="match-flags">
-          <span class="flag-emoji">🇯🇵</span>
-          <span class="vs-text">VS</span>
-          <span class="flag-emoji">🇳🇱</span>
-        </div>
-        <div class="match-title-text" id="match-title-ned">日本 vs オランダ</div>
-      </div>
-      <div class="match-card" onclick="selectMatch('2026vsチュニジア')">
-        <div class="match-flags">
-          <span class="flag-emoji">🇯🇵</span>
-          <span class="vs-text">VS</span>
-          <span class="flag-emoji">🇹🇳</span>
-        </div>
-        <div class="match-title-text" id="match-title-tun">日本 vs チュニジア</div>
-      </div>
-      <div class="match-card" onclick="selectMatch('2026vsスウェーデン')">
-        <div class="match-flags">
-          <span class="flag-emoji">🇯🇵</span>
-          <span class="vs-text">VS</span>
-          <span class="flag-emoji">🇸🇪</span>
-        </div>
-        <div class="match-title-text" id="match-title-swe">日本 vs スウェーデン</div>
-      </div>
-      <div class="match-card" onclick="selectMatch('2026vsイングランド')">
-        <div class="match-flags">
-          <span class="flag-emoji">🇯🇵</span>
-          <span class="vs-text">VS</span>
-          <span class="flag-emoji">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>
-        </div>
-        <div class="match-title-text" id="match-title-eng">日本 vs イングランド</div>
-      </div>
-      </div><!-- /match-list -->
-    </div>
+    <div style="text-align:center;color:rgba(255,255,255,0.7);font-size:13px;margin-bottom:12px">操作するチームを選んでください</div>
+    <div class="match-list" id="team1-select-list"></div>
+  </div>
+</div>
+
+<!-- SINGLE MATCH SCREEN: チーム2選択 -->
+<div id="screen-single2" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('single')">← 戻る</button>
+    <div class="screen-title-text">⚽ チーム選択（2/2）</div>
+  </div>
+  <div class="title-content" style="padding-top:12px">
+    <div style="text-align:center;color:rgba(255,255,255,0.7);font-size:13px;margin-bottom:4px">対戦相手を選んでください</div>
+    <div style="text-align:center;font-size:20px;margin-bottom:12px" id="single2-team1-display"></div>
+    <div class="match-list" id="team2-select-list"></div>
   </div>
 </div>
 
@@ -4718,6 +4697,9 @@ function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
   _applyTournamentI18n();
+  // シングルマッチ チーム1選択リストを初回表示時に構築
+  if (name === 'single') buildTeam1List();
+
   // 選手データ画面は初回表示時にJSで動的生成
   if (name === 'players' && !document.getElementById('players2018-body').dataset.built) {
     buildPlayersTable('players2018-body', [
@@ -4744,6 +4726,78 @@ function showScreen(name) {
     const champImg = document.getElementById('champion-img');
     if (champImg) champImg.src = IMG_CHAMPION;
   }
+}
+
+// シングルマッチ用チームリスト
+const SINGLE_TEAMS = [
+  {key:'japan2026vsEngland', label:'日本', flag:'🇯🇵'},
+  {key:'england2026',        label:'イングランド', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿'},
+  {key:'scotland2026',       label:'スコットランド', flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿'},
+  {key:'netherlands2026',    label:'オランダ', flag:'🇳🇱'},
+  {key:'tunisia2026',        label:'チュニジア', flag:'🇹🇳'},
+  {key:'sweden2026',         label:'スウェーデン', flag:'🇸🇪'},
+  {key:'morocco2026',        label:'モロッコ', flag:'🇲🇦'},
+  {key:'brazil2026',         label:'ブラジル', flag:'🇧🇷'},
+  {key:'mexico2026',         label:'メキシコ', flag:'🇲🇽'},
+  {key:'norway2026',         label:'ノルウェー', flag:'🇳🇴'},
+  {key:'argentina2026',      label:'アルゼンチン', flag:'🇦🇷'},
+  {key:'spain2026',          label:'スペイン', flag:'🇪🇸'},
+  {key:'france2026',         label:'フランス', flag:'🇫🇷'},
+];
+
+let _singleTeam1Key = null;
+
+// チーム1選択リストを構築
+function buildTeam1List() {
+  const list = document.getElementById('team1-select-list');
+  if (!list || list.dataset.built) return;
+  list.innerHTML = SINGLE_TEAMS.map(t =>
+    `<div class="match-card" onclick="selectTeam1('${t.key}')">
+      <div class="match-flags"><span class="flag-emoji">${t.flag}</span></div>
+      <div class="match-title-text">${t.label}</div>
+    </div>`
+  ).join('');
+  list.dataset.built = '1';
+}
+
+// チーム1決定 → チーム2選択画面へ
+function selectTeam1(key) {
+  _singleTeam1Key = key;
+  const t1 = SINGLE_TEAMS.find(t => t.key === key);
+  document.getElementById('single2-team1-display').textContent = t1.flag + ' ' + t1.label;
+
+  const list = document.getElementById('team2-select-list');
+  list.innerHTML = SINGLE_TEAMS
+    .filter(t => t.key !== key)
+    .map(t =>
+      `<div class="match-card" onclick="selectTeam2('${t.key}')">
+        <div class="match-flags"><span class="flag-emoji">${t.flag}</span></div>
+        <div class="match-title-text">${t.label}</div>
+      </div>`
+    ).join('');
+  showScreen('single2');
+}
+
+// チーム2決定 → 試合設定へ
+function selectTeam2(key) {
+  const t1key = _singleTeam1Key;
+  // 日本が team1 の場合は対戦相手別最適データを優先使用
+  if (t1key === 'japan2026vsEngland') {
+    const oppMap = {
+      'england2026':     'japan2026vsEngland',
+      'netherlands2026': 'japan2026vsNetherlands',
+      'tunisia2026':     'japan2026vsTunisia',
+      'sweden2026':      'japan2026vsSweden',
+    };
+    team1Data = TEAM_DATA[oppMap[key] || 'japan2026vsEngland'];
+  } else {
+    team1Data = TEAM_DATA[t1key];
+  }
+  team2Data = TEAM_DATA[key];
+  currentMatchKey = t1key + '_vs_' + key;
+  _settingBackScreen = 'single2';
+  initSettingScreen();
+  showScreen('setting');
 }
 
 function selectMatch(key) {
