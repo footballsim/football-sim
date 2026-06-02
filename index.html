@@ -8520,14 +8520,36 @@ function showResult() {
     // 引き分え（ET/PKへ）は ET後半 or _finishPK() で書き込む
   }
 
-  // Stats
-  const gs = gameState;
-  const t1 = gs.team1, t2 = gs.team2;
+  // Stats（_logSrcから全チャンス集計 ← _recalcSecondHalfのカウンターリセット問題を回避）
+  let _statT1chance=0,_statT2chance=0,_statT1shoot=0,_statT2shoot=0,_statT1gkSave=0,_statT2gkSave=0;
+  _logSrc.forEach(function(res) {
+    if (!res || !res.scenes) return;
+    var _ch1=false, _ch2=false;
+    res.scenes.forEach(function(sc) {
+      const isShoot = ['ゴール！！','GK防いだ！','枠を外した！'].includes(sc.result);
+      if (!isShoot && !['成功','失敗','ファール'].includes(sc.result)) return;
+      // チャンス：1チャンスにつき1カウント（FW到達 or シュートシーンを起点に）
+      if (isShoot || (sc.area && sc.area.substring(0,2)==='FW')) {
+        if (sc.offence.name === team1Data.name && !_ch1) { _statT1chance++; _ch1=true; }
+        if (sc.offence.name === team2Data.name && !_ch2) { _statT2chance++; _ch2=true; }
+      }
+      // シュート（ゴール/GK防/枠外）
+      if (isShoot) {
+        if (sc.offence.name === team1Data.name) _statT1shoot++;
+        if (sc.offence.name === team2Data.name) _statT2shoot++;
+      }
+      // GKセーブ
+      if (sc.result === 'GK防いだ！') {
+        if (sc.defence.name === team1Data.name) _statT1gkSave++;
+        if (sc.defence.name === team2Data.name) _statT2gkSave++;
+      }
+    });
+  });
   const statsGrid = document.getElementById('stats-grid');
   const stats = [
-    [t1.chanceCounter, window.LANG==='en'?'Chances':'チャンス', t2.chanceCounter],
-    [t1.shootCounter, window.LANG==='en'?'Shots':'シュート', t2.shootCounter],
-    [t1.gkSaveCounter, window.LANG==='en'?'GK Saves':'GKセーブ', t2.gkSaveCounter],
+    [_statT1chance, window.LANG==='en'?'Chances':'チャンス', _statT2chance],
+    [_statT1shoot, window.LANG==='en'?'Shots':'シュート', _statT2shoot],
+    [_statT1gkSave, window.LANG==='en'?'GK Saves':'GKセーブ', _statT2gkSave],
   ];
 
   statsGrid.innerHTML = '';
