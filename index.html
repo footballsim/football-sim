@@ -6019,16 +6019,27 @@ function startGame() {
   const t2 = buildTeam(team2Data, team2State);
 
   gameState = { team1: t1, team2: t2 };
-  // 相手がマークする日本の最前線選手を自動設定（CF > WG > OMF > SMF の優先順）
+  // 相手がマークする日本の最前線選手を自動設定
+  // CF/WG/OMF/SMF の中から攻撃能力上位2名をピックし、ランダムで1名を選ぶ
   coachMarkTarget = -1;
-  const _cmPriority = ['CF','WG','OMF','SMF'];
-  for (const _cmp of _cmPriority) {
-    for (let _pos = 1; _pos < 11; _pos++) {
-      if (t1.getPositionType(_pos) === _cmp) { coachMarkTarget = _pos; break; }
+  const _frontTypes = ['CF','WG','OMF','SMF'];
+  const _frontCandidates = [];
+  for (let _pos = 1; _pos < 11; _pos++) {
+    if (_frontTypes.includes(t1.getPositionType(_pos))) {
+      const _p = t1.players[t1.lineup[_pos]];
+      const _ofRating = (PLAYER_EXTRA[_p.name] && PLAYER_EXTRA[_p.name].of)
+        ? PLAYER_EXTRA[_p.name].of
+        : (_p.params[11] + _p.params[12] + _p.params[13] + _p.params[17]) / 4;
+      _frontCandidates.push({ pos: _pos, rating: _ofRating });
     }
-    if (coachMarkTarget >= 0) break;
   }
-  if (coachMarkTarget < 0) coachMarkTarget = 10;
+  _frontCandidates.sort(function(a, b) { return b.rating - a.rating; });
+  const _top2front = _frontCandidates.slice(0, 2);
+  if (_top2front.length > 0) {
+    coachMarkTarget = _top2front[Math.floor(Math.random() * _top2front.length)].pos;
+  } else {
+    coachMarkTarget = 10;
+  }
   t1.score = 0; t2.score = 0;
   t1.chanceCounter = 0; t2.chanceCounter = 0;
   t1.shootCounter = 0; t2.shootCounter = 0;
@@ -7082,7 +7093,7 @@ function _showHalfTimeModal() {
     const isEn = window.LANG === 'en';
     htAdvEl.innerHTML = '<div style="color:#888;font-size:12px;padding:4px 0">⚙️ ' + (isEn ? 'Analysing...' : '分析中...') + '</div>';
     setTimeout(function() {
-      const duelStats = _runHtDuelSim(5);
+      const duelStats = _runHtDuelSim(50);
       const entries = Object.entries(duelStats)
         .filter(function(kv) { return (kv[1].win + kv[1].lose) >= 2; })
         .map(function(kv) {
