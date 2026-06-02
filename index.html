@@ -7106,17 +7106,17 @@ function _showHalfTimeModal() {
           + '<div style="width:5em;font-size:11px;font-weight:700;overflow:hidden;white-space:nowrap">' + dispName + '</div>'
           + '<div style="flex:1;background:#eee;border-radius:4px;height:7px;overflow:hidden"><div style="width:' + e.rate + '%;background:' + barColor + ';height:100%;border-radius:4px"></div></div>'
           + '<div style="width:3em;text-align:right;font-size:11px;font-weight:700;color:' + barColor + '">' + e.rate + '%</div>'
-          + '<div style="width:4em;text-align:right;font-size:10px;color:#aaa">' + e.win + 'W ' + e.lose + 'L</div>'
+          + ''
           + '</div>';
       }).join('');
 
       const advice = isEn
-        ? '<b>' + worstName + '</b> is struggling in duels. Consider a substitution.'
-        : '<b>' + worstName + '</b> 選手が苦戦しています。選手交代を検討しましょう。';
+        ? '<b>' + worstName + '</b> is struggling in duels. Consider your options.'
+        : '<b>' + worstName + '</b> 選手が苦戦しています。対策を検討しましょう。';
 
       htAdvEl.innerHTML =
         '<div style="margin-bottom:6px;font-size:12px;font-weight:700;color:#1a3a6b">📊 '
-        + (isEn ? 'Duel Forecast (5 sim runs)' : 'デュエル予測（5回シミュレーション）') + '</div>'
+        + (isEn ? 'Duel Situation' : 'デュエル状況') + '</div>'
         + rows
         + '<div style="margin-top:10px;padding:10px 12px;background:linear-gradient(135deg,#0a2a5c,#0d4a28);border-left:4px solid #f39c12;border-radius:8px;color:white;font-size:12px;line-height:1.6">'
         + '🎙️ ' + advice + '</div>';
