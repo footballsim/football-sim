@@ -2152,7 +2152,7 @@ body {
 
     <!-- エリア勝率 -->
     <div class="result-log-section">
-      <div class="result-log-header" id="header-area-win">【エリア別 日本の勝率】</div>
+      <div class="result-log-header" id="header-area-win">【エリア別 日本の傾向】</div>
       <div id="area-win-content" style="padding:8px 0"></div>
     </div>
 
@@ -2388,7 +2388,7 @@ const i18n = {
     etFirst: '延長前半', etSecond: '延長後半',
     draw: '引き分け', win: 'の勝利！',
     btnRetry: '🔄 もう一度', btnHome: '🏠 トップへ', shareX: 'Share',
-    headerAreaWin: '【エリア別 日本の勝率】', headerDuel: '【デュエル傾向】',
+    headerAreaWin: '【エリア別 日本の傾向】', headerDuel: '【デュエル傾向】',
     headerSummary: '【AI試合総括】', btnGenerate: '✨ 生成',
     summaryPlaceholder: '「✨ 生成」ボタンを押すと、AIが試合を総括します',
     headerPossession: '【ポゼッション】', headerMvp: '【選手別関与シーン数】',
@@ -2539,7 +2539,7 @@ const i18n = {
     etFirst: 'ET 1st', etSecond: 'ET 2nd',
     draw: 'Draw', win: ' wins!',
     btnRetry: '🔄 Play Again', btnHome: '🏠 Top', shareX: 'Share',
-    headerAreaWin: '[Japan Win Rate by Area]', headerDuel: '[Duel Tendency]',
+    headerAreaWin: '[Japan Tendency by Area]', headerDuel: '[Duel Tendency]',
     headerSummary: '[AI Match Summary]', btnGenerate: '✨ Generate',
     summaryPlaceholder: 'Press "✨ Generate" to get an AI match summary.',
     headerPossession: '[Possession]', headerMvp: '[Player Scene Involvement]',
@@ -7064,8 +7064,10 @@ function _maybeInsertCoachCard() {
 }
 
 function _runDuelSimBothSides(n) {
-  // 攻守両面のデュエルデータを n 回シミュレーションで集計（ハーフタイム・試合終了共通）
+  // 攻守両面のデュエル＋エリア別勝率を n 回シミュレーションで集計（ハーフタイム・試合終了共通）
   const stats1 = {}, stats2 = {};
+  const areaAtk = {}, areaDef = {}; // team1 のエリア別攻撃/防守傾向
+  const _aFlip = {'DF':'FW','FW':'DF','MF':'MF','CR':'CR','SHOOT':'CR'};
   for (let i = 0; i < n; i++) {
     const _bldSt = function(data) {
       const si = system_data.findIndex(function(s) { return s.name === data.default_system; });
@@ -7087,30 +7089,54 @@ function _runDuelSimBothSides(n) {
     bRes.forEach(function(res) {
       if (!res || !res.scenes) return;
       res.scenes.forEach(function(sc) {
-        if (!['成功','失敗','ファール'].includes(sc.result)) return;
-        const win = sc.result === '成功' || sc.result === 'ファール';
+        const isShoot  = ['ゴール！！','GK防いだ！','枠を外した！'].includes(sc.result);
+        const isNormal = ['成功','失敗','ファール'].includes(sc.result);
+        if (!isNormal && !isShoot) return;
+        const win = isShoot ? sc.result === 'ゴール！！' : sc.result === '成功' || sc.result === 'ファール';
         const ofsP = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
         const dfsP = sc.defence.players[sc.defence.lineup[sc.dfsPos]];
-        if (sc.offence === bt1 && ofsP) {
-          if (!stats1[ofsP.name]) stats1[ofsP.name] = { win: 0, lose: 0, enName: ofsP.en_name };
-          win ? stats1[ofsP.name].win++ : stats1[ofsP.name].lose++;
+        // デュエル集計（通常シーンのみ）
+        if (isNormal) {
+          if (sc.offence === bt1 && ofsP) {
+            if (!stats1[ofsP.name]) stats1[ofsP.name] = { win: 0, lose: 0, enName: ofsP.en_name };
+            win ? stats1[ofsP.name].win++ : stats1[ofsP.name].lose++;
+          }
+          if (sc.defence === bt1 && dfsP) {
+            if (!stats1[dfsP.name]) stats1[dfsP.name] = { win: 0, lose: 0, enName: dfsP.en_name };
+            win ? stats1[dfsP.name].lose++ : stats1[dfsP.name].win++;
+          }
+          if (sc.offence === bt2 && ofsP) {
+            if (!stats2[ofsP.name]) stats2[ofsP.name] = { win: 0, lose: 0, enName: ofsP.en_name };
+            win ? stats2[ofsP.name].win++ : stats2[ofsP.name].lose++;
+          }
+          if (sc.defence === bt2 && dfsP) {
+            if (!stats2[dfsP.name]) stats2[dfsP.name] = { win: 0, lose: 0, enName: dfsP.en_name };
+            win ? stats2[dfsP.name].lose++ : stats2[dfsP.name].win++;
+          }
         }
-        if (sc.defence === bt1 && dfsP) {
-          if (!stats1[dfsP.name]) stats1[dfsP.name] = { win: 0, lose: 0, enName: dfsP.en_name };
-          win ? stats1[dfsP.name].lose++ : stats1[dfsP.name].win++;
+        // エリア別集計（通常＋シュートシーン）
+        if (sc.offence === bt1) {
+          const ak = (['FW_L','CR_L'].includes(sc.area)) ? 'GOAL_L'
+                   : (['FW_M','CR_M','SHOOT_M'].includes(sc.area)) ? 'GOAL_M'
+                   : (['FW_R','CR_R'].includes(sc.area)) ? 'GOAL_R' : sc.area;
+          if (!areaAtk[ak]) areaAtk[ak] = { win: 0, lose: 0 };
+          win ? areaAtk[ak].win++ : areaAtk[ak].lose++;
         }
-        if (sc.offence === bt2 && ofsP) {
-          if (!stats2[ofsP.name]) stats2[ofsP.name] = { win: 0, lose: 0, enName: ofsP.en_name };
-          win ? stats2[ofsP.name].win++ : stats2[ofsP.name].lose++;
-        }
-        if (sc.defence === bt2 && dfsP) {
-          if (!stats2[dfsP.name]) stats2[dfsP.name] = { win: 0, lose: 0, enName: dfsP.en_name };
-          win ? stats2[dfsP.name].lose++ : stats2[dfsP.name].win++;
+        if (sc.defence === bt1) {
+          const rw = sc.area === 'SHOOT_M' ? 'CR_M' : sc.area;
+          const p2 = rw.substring(0, rw.indexOf('_'));
+          const s2 = rw.substring(rw.indexOf('_')+1);
+          const fa = (_aFlip[p2]||p2) + '_' + (s2==='L'?'R':s2==='R'?'L':s2);
+          const dk = (['FW_L','CR_L'].includes(fa)) ? 'GOAL_L'
+                   : (['FW_M','CR_M','SHOOT_M','CR_CENTER'].includes(fa)) ? 'GOAL_M'
+                   : (['FW_R','CR_R'].includes(fa)) ? 'GOAL_R' : fa;
+          if (!areaDef[dk]) areaDef[dk] = { win: 0, lose: 0 };
+          win ? areaDef[dk].lose++ : areaDef[dk].win++;
         }
       });
     });
   }
-  return { stats1: stats1, stats2: stats2 };
+  return { stats1: stats1, stats2: stats2, areaAtk: areaAtk, areaDef: areaDef };
 }
 
 function _showHalfTimeModal() {
@@ -8541,56 +8567,9 @@ function showResult() {
     }).join('');
   }
 
-  // エリア別勝率の集計
-  const areaMap = {}; // key: area → {win, lose} ※日本が攻撃側のシーンのみ
-  const AREA_LABELS = {
-    'DF_L': 'DF左', 'DF_M': 'DF中', 'DF_R': 'DF右',
-    'MF_L': 'MF左', 'MF_M': 'MF中', 'MF_R': 'MF右',
-    'FW_L': 'FW左', 'FW_M': 'FW中', 'FW_R': 'FW右',
-    'CR_L': 'CR左', 'CR_M': 'CRセット', 'CR_R': 'CR右',
-    'SHOOT_M': 'シュート'
-  };
-
-  _logSrc.forEach(res => {
-    res.scenes.forEach(sc => {
-      if (sc.offence.name !== team1Data.name) return;
-      const isShoot = ['ゴール！！','GK防いだ！','枠を外した！'].includes(sc.result);
-      const isNormal = ['成功','失敗','ファール'].includes(sc.result);
-      if (!isNormal && !isShoot) return;
-      const win = isShoot ? sc.result === 'ゴール！！' : sc.result === '成功' || sc.result === 'ファール';
-      const atkArea = (['FW_L','CR_L'].includes(sc.area)) ? 'GOAL_L'
-                    : (['FW_M','CR_M','SHOOT_M'].includes(sc.area)) ? 'GOAL_M'
-                    : (['FW_R','CR_R'].includes(sc.area)) ? 'GOAL_R'
-                    : sc.area;
-      if (!areaMap[atkArea]) areaMap[atkArea] = { win: 0, lose: 0 };
-      win ? areaMap[atkArea].win++ : areaMap[atkArea].lose++;
-    });
-  });
-  // エリア別勝率（共通関数で描画）
-  const areaDefResult = {};
-  _logSrc.forEach(res => {
-    res.scenes.forEach(sc => {
-      if (sc.defence.name !== team1Data.name) return;
-      const isShoot = ['ゴール！！','GK防いだ！','枠を外した！'].includes(sc.result);
-      const isNormal = ['成功','失敗','ファール'].includes(sc.result);
-      if (!isNormal && !isShoot) return;
-      const win = isShoot ? sc.result === 'ゴール！！' : sc.result === '成功' || sc.result === 'ファール';
-      const aFlip = {'DF':'FW','FW':'DF','MF':'MF','CR':'CR','SHOOT':'CR'};
-      const rawArea = sc.area === 'SHOOT_M' ? 'CR_M' : sc.area;
-      const pos2 = rawArea.substring(0, rawArea.indexOf('_'));
-      const side2 = rawArea.substring(rawArea.indexOf('_')+1);
-      const flippedPos = aFlip[pos2] || pos2;
-      const flippedSide = side2==='L'?'R':side2==='R'?'L':side2;
-      const flipArea = flippedPos + '_' + flippedSide;
-      const defKey = (['FW_L','CR_L'].includes(flipArea)) ? 'GOAL_L'
-                   : (['FW_M','CR_M','SHOOT_M','CR_CENTER'].includes(flipArea)) ? 'GOAL_M'
-                   : (['FW_R','CR_R'].includes(flipArea)) ? 'GOAL_R'
-                   : flipArea;
-      if (!areaDefResult[defKey]) areaDefResult[defKey] = { win: 0, lose: 0 };
-      win ? areaDefResult[defKey].lose++ : areaDefResult[defKey].win++;
-    });
-  });
-  buildFieldWithTabs(areaMap, areaDefResult, 320, 170, 'area-win-content');
+  // エリア別勝率・デュエル傾向はまとめて非同期で計算（ローディング表示を先出し）
+  document.getElementById('area-win-content').innerHTML =
+    '<div style="color:#888;font-size:12px;padding:8px 0">⚙️ ' + (window.LANG==='en' ? 'Calculating...' : '計算中...') + '</div>';
 
 
   // GKセーブ率は実データから集計
@@ -8625,12 +8604,15 @@ function showResult() {
       + '</div>';
   }).join('');
 
-  // デュエル傾向（50回シミュレーション・攻守両面）を非同期で計算
+  // エリア別勝率＋デュエル傾向（50回シミュレーション）を1回のシムで非同期計算
   const duelEl = document.getElementById('duel-stats-content');
   duelEl.innerHTML = '<div style="color:#888;font-size:12px;padding:8px 12px">⚙️ ' + (window.LANG==='en' ? 'Calculating...' : '計算中...') + '</div>'
     + '<div style="margin-top:12px"><div style="background:#555;color:white;font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px 8px 0 0">🧤 ' + (window.LANG==='en'?'GK Save Rate':'GKセーブ率') + '</div>' + gkHtml1 + '</div>';
   setTimeout(function() {
     const _sd = _runDuelSimBothSides(50);
+    // エリア別勝率を描画
+    buildFieldWithTabs(_sd.areaAtk, _sd.areaDef, 320, 170, 'area-win-content');
+    // デュエル傾向を描画
     function _buildSimDuels(team, teamData, simStats) {
       const arr = [];
       for (let _pos = 1; _pos < 11; _pos++) {
