@@ -2158,7 +2158,7 @@ body {
 
     <!-- デュエル統計 -->
     <div class="result-log-section">
-      <div class="result-log-header" id="header-duel">【デュエル勝率】</div>
+      <div class="result-log-header" id="header-duel">【デュエル傾向】</div>
       <div id="duel-stats-content"></div>
     </div>
 
@@ -2388,7 +2388,7 @@ const i18n = {
     etFirst: '延長前半', etSecond: '延長後半',
     draw: '引き分け', win: 'の勝利！',
     btnRetry: '🔄 もう一度', btnHome: '🏠 トップへ', shareX: 'Share',
-    headerAreaWin: '【エリア別 日本の勝率】', headerDuel: '【デュエル勝率】',
+    headerAreaWin: '【エリア別 日本の勝率】', headerDuel: '【デュエル傾向】',
     headerSummary: '【AI試合総括】', btnGenerate: '✨ 生成',
     summaryPlaceholder: '「✨ 生成」ボタンを押すと、AIが試合を総括します',
     headerPossession: '【ポゼッション】', headerMvp: '【選手別関与シーン数】',
@@ -2539,7 +2539,7 @@ const i18n = {
     etFirst: 'ET 1st', etSecond: 'ET 2nd',
     draw: 'Draw', win: ' wins!',
     btnRetry: '🔄 Play Again', btnHome: '🏠 Top', shareX: 'Share',
-    headerAreaWin: '[Japan Win Rate by Area]', headerDuel: '[Duel Win Rate]',
+    headerAreaWin: '[Japan Win Rate by Area]', headerDuel: '[Duel Tendency]',
     headerSummary: '[AI Match Summary]', btnGenerate: '✨ Generate',
     summaryPlaceholder: 'Press "✨ Generate" to get an AI match summary.',
     headerPossession: '[Possession]', headerMvp: '[Player Scene Involvement]',
@@ -7063,49 +7063,54 @@ function _maybeInsertCoachCard() {
   }
 }
 
-function _runHtDuelSim(n) {
-  // n回サイレントシミュレーションを実行しteam1のデュエル統計を集計して返す
-  const stats = {};
+function _runDuelSimBothSides(n) {
+  // 攻守両面のデュエルデータを n 回シミュレーションで集計（ハーフタイム・試合終了共通）
+  const stats1 = {}, stats2 = {};
   for (let i = 0; i < n; i++) {
-    const res = simulateSilent(team1Data, team2Data);
-    if (!res || !res.playerStats) continue;
-    Object.entries(res.playerStats).forEach(function(kv) {
-      const name = kv[0], st = kv[1];
-      if (!stats[name]) stats[name] = { win: 0, lose: 0, enName: st.enName };
-      stats[name].win  += st.duelWins || 0;
-      stats[name].lose += Math.max(0, (st.duels || 0) - (st.duelWins || 0));
+    const _bldSt = function(data) {
+      const si = system_data.findIndex(function(s) { return s.name === data.default_system; });
+      return { systemIdx: si >= 0 ? si : 0, tactics: data.default_tactics,
+               keyplayer: data.default_keyplayer,
+               marked_player: data.default_marked_player !== undefined ? data.default_marked_player : -1,
+               lineup: [...data.default_lineup.slice(0, 11)] };
+    };
+    const bt1 = buildTeam(team1Data, _bldSt(team1Data));
+    const bt2 = buildTeam(team2Data, _bldSt(team2Data));
+    [bt1, bt2].forEach(function(t) {
+      t.score = 0; t.chanceCounter = 0; t.shootCounter = 0; t.gkSaveCounter = 0;
+      t.players.forEach(function(p) { p.chance_counter = 0; p.fatigue = 0; });
+    });
+    const bgs = { team1: bt1, team2: bt2 };
+    const bRes = [];
+    for (let j = 0; j < 16; j++) bRes.push(simulateChance(bgs, j));
+    if (Math.random() < 0.5) bRes.push(simulateChance(bgs, 16));
+    bRes.forEach(function(res) {
+      if (!res || !res.scenes) return;
+      res.scenes.forEach(function(sc) {
+        if (!['成功','失敗','ファール'].includes(sc.result)) return;
+        const win = sc.result === '成功' || sc.result === 'ファール';
+        const ofsP = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+        const dfsP = sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+        if (sc.offence === bt1 && ofsP) {
+          if (!stats1[ofsP.name]) stats1[ofsP.name] = { win: 0, lose: 0, enName: ofsP.en_name };
+          win ? stats1[ofsP.name].win++ : stats1[ofsP.name].lose++;
+        }
+        if (sc.defence === bt1 && dfsP) {
+          if (!stats1[dfsP.name]) stats1[dfsP.name] = { win: 0, lose: 0, enName: dfsP.en_name };
+          win ? stats1[dfsP.name].lose++ : stats1[dfsP.name].win++;
+        }
+        if (sc.offence === bt2 && ofsP) {
+          if (!stats2[ofsP.name]) stats2[ofsP.name] = { win: 0, lose: 0, enName: ofsP.en_name };
+          win ? stats2[ofsP.name].win++ : stats2[ofsP.name].lose++;
+        }
+        if (sc.defence === bt2 && dfsP) {
+          if (!stats2[dfsP.name]) stats2[dfsP.name] = { win: 0, lose: 0, enName: dfsP.en_name };
+          win ? stats2[dfsP.name].lose++ : stats2[dfsP.name].win++;
+        }
+      });
     });
   }
-  return stats;
-}
-
-function _getFirstHalfDuelData() {
-  // chanceResults の前半分（最大6チャンス）から team1 の実デュエルデータを集計
-  const stats = {};
-  if (!gameState) return stats;
-  const half1 = chanceResults.slice(0, 6);
-  half1.forEach(function(res) {
-    if (!res || !res.scenes) return;
-    res.scenes.forEach(function(sc) {
-      if (!['成功','失敗','ファール'].includes(sc.result)) return;
-      const win = sc.result === '成功' || sc.result === 'ファール';
-      if (sc.offence === gameState.team1) {
-        const p = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
-        if (p) {
-          if (!stats[p.name]) stats[p.name] = { win: 0, lose: 0, enName: p.en_name };
-          win ? stats[p.name].win++ : stats[p.name].lose++;
-        }
-      }
-      if (sc.defence === gameState.team1) {
-        const p = sc.defence.players[sc.defence.lineup[sc.dfsPos]];
-        if (p) {
-          if (!stats[p.name]) stats[p.name] = { win: 0, lose: 0, enName: p.en_name };
-          win ? stats[p.name].lose++ : stats[p.name].win++;
-        }
-      }
-    });
-  });
-  return stats;
+  return { stats1: stats1, stats2: stats2 };
 }
 
 function _showHalfTimeModal() {
@@ -7116,36 +7121,25 @@ function _showHalfTimeModal() {
   // 戦術ボタン描画
   _buildHtTactics();
 
-  // デュエルアドバイス（実データ優先＋シミュレーション補完）
+  // デュエル傾向（50回シミュレーション・攻守両面）
   const htAdvEl = document.getElementById('ht-duel-advice');
   if (htAdvEl) {
     const isEn = window.LANG === 'en';
     htAdvEl.innerHTML = '<div style="color:#888;font-size:12px;padding:4px 0">⚙️ ' + (isEn ? 'Analysing...' : '分析中...') + '</div>';
     setTimeout(function() {
-      // 実データ（前半）とシミュレーションデータを取得
-      const realData = _getFirstHalfDuelData();
-      const simData  = _runHtDuelSim(50);
+      const simData = _runDuelSimBothSides(50);
+      const stats1  = simData.stats1;
 
-      // フィールドプレイヤー全10名について実データ優先・シム補完でマージ
       const entries = [];
       if (gameState && gameState.team1) {
         for (let _p = 1; _p < 11; _p++) {
           const pl = gameState.team1.players[gameState.team1.lineup[_p]];
           if (!pl) continue;
-          const real = realData[pl.name];
-          const sim  = simData[pl.name];
-          const realTotal = real ? (real.win + real.lose) : 0;
-          let win, lose, source;
-          if (realTotal >= 2) {
-            win = real.win; lose = real.lose; source = 'real';
-          } else if (sim && (sim.win + sim.lose) > 0) {
-            win = sim.win; lose = sim.lose; source = 'sim';
-          } else {
-            continue;
-          }
-          const total = win + lose;
-          const rate  = total > 0 ? Math.round(win / total * 100) : 0;
-          entries.push({ name: pl.name, enName: pl.en_name, win: win, lose: lose, rate: rate, source: source });
+          const st = stats1[pl.name];
+          if (!st) continue;
+          const total = st.win + st.lose;
+          const rate  = total > 0 ? Math.round(st.win / total * 100) : 0;
+          entries.push({ name: pl.name, enName: pl.en_name, rate: rate });
         }
       }
       entries.sort(function(a, b) { return a.rate - b.rate; });
@@ -7158,10 +7152,8 @@ function _showHalfTimeModal() {
       const rows = entries.map(function(e) {
         const dispName = isEn ? (e.enName || e.name) : e.name;
         const barColor = e.rate >= 60 ? '#2d7a3a' : e.rate >= 40 ? '#e07a00' : '#B8001F';
-        // シム補完の場合は名前をグレーで表示
-        const nameColor = e.source === 'sim' ? '#aaa' : '#333';
         return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0">'
-          + '<div style="width:5em;font-size:11px;font-weight:700;overflow:hidden;white-space:nowrap;color:' + nameColor + '">' + dispName + '</div>'
+          + '<div style="width:5em;font-size:11px;font-weight:700;overflow:hidden;white-space:nowrap">' + dispName + '</div>'
           + '<div style="flex:1;background:#eee;border-radius:4px;height:7px;overflow:hidden"><div style="width:' + e.rate + '%;background:' + barColor + ';height:100%;border-radius:4px"></div></div>'
           + '<div style="width:3em;text-align:right;font-size:11px;font-weight:700;color:' + barColor + '">' + e.rate + '%</div>'
           + '</div>';
@@ -7171,19 +7163,10 @@ function _showHalfTimeModal() {
         ? '<b>' + worstName + '</b> is struggling in duels. Consider your options.'
         : '<b>' + worstName + '</b> 選手が苦戦しています。対策を検討しましょう。';
 
-      // ＊印の凡例（シム補完選手がいる場合のみ）
-      const hasSimEntry = entries.some(function(e) { return e.source === 'sim'; });
-      const legend = hasSimEntry
-        ? '<div style="font-size:10px;color:#aaa;margin-top:4px">'
-          + (isEn ? '* Grey: simulation estimate (insufficient first-half data)' : '※ グレー：前半データ不足のためシミュレーション補完')
-          + '</div>'
-        : '';
-
       htAdvEl.innerHTML =
         '<div style="margin-bottom:6px;font-size:12px;font-weight:700;color:#1a3a6b">📊 '
         + (isEn ? 'Duel Situation' : 'デュエル状況') + '</div>'
         + rows
-        + legend
         + '<div style="margin-top:10px;padding:10px 12px;background:linear-gradient(135deg,#0a2a5c,#0d4a28);border-left:4px solid #f39c12;border-radius:8px;color:white;font-size:12px;line-height:1.6">'
         + '🎙️ ' + advice + '</div>';
     }, 80);
@@ -8610,40 +8593,14 @@ function showResult() {
   buildFieldWithTabs(areaMap, areaDefResult, 320, 170, 'area-win-content');
 
 
-  // デュエル勝率の集計と描画（先発11名を初期値0で登録）
-  const duelMap = {};
+  // GKセーブ率は実データから集計
   const gkSave1 = {};
   const scenesAll1 = [];
-
-  // 両チームの先発11名を0で初期化（未登場でも表示するため）
-  [gameState.team1, gameState.team2].forEach(team => {
-    for (let pos = 1; pos < 11; pos++) { // GK(0)は除く
-      const p = team.players[team.lineup[pos]];
-      if (!p) return;
-      const key = team.name + '_' + p.name;
-      if (!duelMap[key]) duelMap[key] = { name: p.name, enName: p.en_name, teamName: team.name, color: team.team_color, win: 0, lose: 0 };
-    }
-  });
-
   _logSrc.forEach(res => {
     res.scenes.forEach(sc => {
       const isShoot = ['ゴール！！','GK防いだ！','枠を外した！'].includes(sc.result);
       const isNormal = ['成功','失敗','ファール'].includes(sc.result);
-      if (!isNormal && !isShoot) return;
-      if (isNormal) {
-        scenesAll1.push(sc);
-        const win = (sc.result === '成功' || sc.result === 'ファール');
-        const ofsP = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
-        const ofsName = ofsP ? ofsP.name : undefined;
-        const ofsKey = sc.offence.name + '_' + ofsName;
-        if (!duelMap[ofsKey]) duelMap[ofsKey] = { name: ofsName, enName: ofsP ? ofsP.en_name : undefined, teamName: sc.offence.name, color: sc.offence.team_color, win: 0, lose: 0 };
-        win ? duelMap[ofsKey].win++ : duelMap[ofsKey].lose++;
-        const dfsP = sc.defence.players[sc.defence.lineup[sc.dfsPos]];
-        const dfsName = dfsP ? dfsP.name : undefined;
-        const dfsKey = sc.defence.name + '_' + dfsName;
-        if (!duelMap[dfsKey]) duelMap[dfsKey] = { name: dfsName, enName: dfsP ? dfsP.en_name : undefined, teamName: sc.defence.name, color: sc.defence.team_color, win: 0, lose: 0 };
-        win ? duelMap[dfsKey].lose++ : duelMap[dfsKey].win++;
-      }
+      if (isNormal) scenesAll1.push(sc);
       if (isShoot) {
         const gkP = sc.defence.players[sc.defence.lineup[0]];
         const gkName = gkP ? gkP.name : undefined;
@@ -8653,31 +8610,7 @@ function showResult() {
       }
     });
   });
-
-  // チーム別に分けて試合数の多い順にソート
-  const t1Duels = Object.values(duelMap).filter(d => d.teamName === team1Data.name).sort((a,b) => (b.win+b.lose)-(a.win+a.lose));
-  const t2Duels = Object.values(duelMap).filter(d => d.teamName === team2Data.name).sort((a,b) => (b.win+b.lose)-(a.win+a.lose));
-
-  function renderDuelTable(duels, teamData) {
-    if (!duels.length) return '';
-    const rows = duels.map(d => {
-      const total = d.win + d.lose;
-      const rate = total > 0 ? Math.round(d.win / total * 100) : 0;
-      const barColor = rate >= 60 ? '#003087' : rate >= 40 ? '#2d7a3a' : '#B8001F';
-      const dispName = (window.LANG === 'en' && d.enName) ? d.enName : d.name;
-      return '<div style="display:flex;align-items:center;padding:6px 12px;border-bottom:1px solid #f0f0f0;gap:8px">'
-        + '<div style="width:5em;font-size:12px;font-weight:700;overflow:hidden;white-space:nowrap;cursor:pointer;text-decoration:underline;color:#1a3a6b" onclick="showDuelDetail(this)"'
-        + ' data-name="' + d.name + '" data-team="' + d.teamName + '" data-win="' + d.win + '" data-lose="' + d.lose + '">' + dispName + '</div>'
-        + '<div style="flex:1;background:#eee;border-radius:4px;height:8px;overflow:hidden"><div style="width:' + rate + '%;background:' + barColor + ';height:100%;border-radius:4px;transition:width 0.3s"></div></div>'
-        + '<div style="width:3em;text-align:right;font-size:12px;font-weight:700;color:' + barColor + '">' + rate + '%</div>'
-        + '<div style="width:4em;text-align:right;font-size:10px;color:#aaa">' + d.win + t('duelWin') + d.lose + t('duelLose') + '</div>'
-        + '</div>';
-    }).join('');
-    return `<div style="margin-bottom:16px">
-      <div style="background:${teamData.team_color};color:white;font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px 8px 0 0">${teamData.flag} ${getTeamName(teamData)}</div>
-      ${rows}
-    </div>`;
-  }
+  _duelScenesCache = scenesAll1;
 
   const gkHtml1 = Object.values(gkSave1).map(gk => {
     const total = gk.save + gk.goal;
@@ -8692,10 +8625,45 @@ function showResult() {
       + '</div>';
   }).join('');
 
-  _duelScenesCache = scenesAll1;
+  // デュエル傾向（50回シミュレーション・攻守両面）を非同期で計算
   const duelEl = document.getElementById('duel-stats-content');
-  duelEl.innerHTML = renderDuelTable(t1Duels, team1Data) + renderDuelTable(t2Duels, team2Data)
+  duelEl.innerHTML = '<div style="color:#888;font-size:12px;padding:8px 12px">⚙️ ' + (window.LANG==='en' ? 'Calculating...' : '計算中...') + '</div>'
     + '<div style="margin-top:12px"><div style="background:#555;color:white;font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px 8px 0 0">🧤 ' + (window.LANG==='en'?'GK Save Rate':'GKセーブ率') + '</div>' + gkHtml1 + '</div>';
+  setTimeout(function() {
+    const _sd = _runDuelSimBothSides(50);
+    function _buildSimDuels(team, teamData, simStats) {
+      const arr = [];
+      for (let _pos = 1; _pos < 11; _pos++) {
+        const _p = team.players[team.lineup[_pos]];
+        if (!_p) continue;
+        const _st = simStats[_p.name] || { win: 0, lose: 0 };
+        arr.push({ name: _p.name, enName: _p.en_name, teamName: teamData.name, win: _st.win, lose: _st.lose });
+      }
+      arr.sort((a, b) => (b.win + b.lose) - (a.win + a.lose));
+      return arr;
+    }
+    function renderDuelTableSim(duels, teamData) {
+      if (!duels.length) return '';
+      const rows = duels.map(d => {
+        const total = d.win + d.lose;
+        const rate = total > 0 ? Math.round(d.win / total * 100) : 0;
+        const barColor = rate >= 60 ? '#003087' : rate >= 40 ? '#2d7a3a' : '#B8001F';
+        const dispName = (window.LANG === 'en' && d.enName) ? d.enName : d.name;
+        return '<div style="display:flex;align-items:center;padding:6px 12px;border-bottom:1px solid #f0f0f0;gap:8px">'
+          + '<div style="width:5em;font-size:12px;font-weight:700;overflow:hidden;white-space:nowrap">' + dispName + '</div>'
+          + '<div style="flex:1;background:#eee;border-radius:4px;height:8px;overflow:hidden"><div style="width:' + rate + '%;background:' + barColor + ';height:100%;border-radius:4px;transition:width 0.3s"></div></div>'
+          + '<div style="width:3em;text-align:right;font-size:12px;font-weight:700;color:' + barColor + '">' + rate + '%</div>'
+          + '</div>';
+      }).join('');
+      return '<div style="margin-bottom:16px">'
+        + '<div style="background:' + teamData.team_color + ';color:white;font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px 8px 0 0">' + teamData.flag + ' ' + getTeamName(teamData) + '</div>'
+        + rows + '</div>';
+    }
+    const t1Duels = _buildSimDuels(gameState.team1, team1Data, _sd.stats1);
+    const t2Duels = _buildSimDuels(gameState.team2, team2Data, _sd.stats2);
+    duelEl.innerHTML = renderDuelTableSim(t1Duels, team1Data) + renderDuelTableSim(t2Duels, team2Data)
+      + '<div style="margin-top:12px"><div style="background:#555;color:white;font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px 8px 0 0">🧤 ' + (window.LANG==='en'?'GK Save Rate':'GKセーブ率') + '</div>' + gkHtml1 + '</div>';
+  }, 50);
 
   // 試合詳細ログ（延長後半時は90分+ET1+ET2を結合して表示）
   const logContent = document.getElementById('result-log-content');
