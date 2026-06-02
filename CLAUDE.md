@@ -84,14 +84,50 @@
 ### 今後のTODO
 1. **残り34チームのデータ追加**（2026W杯48チーム全実装が目標）
    - データ取得方法:
-     - ロスター: ussoccer.com / 各国サッカー協会公式 / ESPN等
-     - スタッツ: EA Sports公式（`https://www.ea.com/en/games/ea-sports-fc/ratings/player-ratings/<name>/<id>`）
-     - sofifa.comはアクセス禁止のため使用不可
+     - ロスター照合: **transfermarkt.co.uk**（正式選出スクワッドの確認に必須）
+     - FC26スタッツ: **sofifa.com**（simプロファイルのChromeにClaude拡張機能を入れているのでアクセス可能）
+       - チームURL例: `https://sofifa.com/team/1354/portugal/260035/`
+       - 列の順: PAC/DIV｜SHO/HAN｜PAS/KIC｜DRI/REF｜DEF/SPD｜PHY/POS
+       - GKはDIV/HAN/KIC/REF/SPD/POSの順で読み替える
+       - ⚠️ **sofifa.com アクセス不可の場合**: `https://www.ea.com/games/ea-sports-fc/ratings` または各選手の FC26 個別ページ（Google検索「FC26 [選手名] ratings」）を参照してパラメータを取得する
+     - ロスター補助: ussoccer.com / 各国協会公式 / ESPN等
+   - **得意ポジション（`positions`配列）設定ルール**:
+     - **Step 1 - Transfermarkt**: メイン＋サブポジションを取得し、以下の対応表でシミュレータコードに変換。配列の先頭はTMのメインポジション固定。
+       | Transfermarkt | シミュレータ |
+       |---------------|-------------|
+       | Goalkeeper | GK |
+       | Centre-Back | CB（方向なし） |
+       | Right-Back | 右SB |
+       | Left-Back | 左SB |
+       | Right Wing-Back | 右SMF |
+       | Left Wing-Back | 左SMF |
+       | Defensive Midfield | DMF |
+       | Central Midfield | CMF |
+       | Attacking Midfield | OMF |
+       | Right Midfield | 右SMF |
+       | Left Midfield | 左SMF |
+       | Second Striker | OMF |
+       | Right Winger | 右WG |
+       | Left Winger | 左WG |
+       | Centre-Forward | CF |
+     - **Step 2 - Sofifa**: 選手ページの「Preferred Positions」欄のレーティングを確認。**メインポジションのレーティング − 3 以内**のポジションをすべてシミュレータコードに変換して追加（閾値は今後変更の可能性あり）。
+       - ⚠️ **Sofifa アクセス不可の場合**: Step 2 はスキップし、**TM のみの情報を採用**する。
+     - **重複排除**: Step 1・2で重複したポジションは1つにまとめる。
+     - **例（Son Heung-min）**: TM→左WG(メイン)/CF/OMF、Sofifa→84(CF)メイン、83の左右WG・左右SMF・OMF → `["左WG","CF","OMF","右WG","左SMF","右SMF"]`
    - 新チーム追加手順:
-     1. `TEAM_DATA` にエントリ追加（`germany2026`/`usa2026` を参考）
-     2. `buildPlayersTable()` の配列に追加
-     3. `SINGLE_TEAMS` に追加
-     4. `PLAYER_EXTRA` に全選手のプロフィール・身長・体重を追加
+     1. transfermarkt.co.ukで正式26名ロスターを確認
+     2. sofifa.comでチームページを開き、全選手のFC26スタッツ（PAC/SHO/PAS/DRI/DEF/PHY）を取得
+     3. sofifa.comのチームページでフォーメーション（`default_system`）を確認し `TEAM_DATA` に反映
+        - フォーメーションはページ内の「戦術」セクションまたは先発配置から読み取る
+     4. `TEAM_DATA` にエントリ追加（`germany2026`/`usa2026`/`portugal2026` を参考）
+     5. `buildPlayersTable()` の配列に追加
+     6. `SINGLE_TEAMS` に追加
+     7. `PLAYER_EXTRA` に全選手のプロフィール・身長・体重を追加
+        - **プロフィール文章の禁止事項（日英両方）**:
+          - ❌ FIFA / ワールドカップ / W杯 / World Cup
+          - ❌ チャンピオンズリーグ / Champions League
+          - ❌ 特定のクラブ名（例: PSG, マンチェスター・シティ, バルセロナ, ベンフィカ等）
+          - ✅ 代わりに選手の特徴・プレースタイル・代表での役割を中心に記述する
 
 2. **W杯モードの汎用化**
    - 現状: 日本のグループC（日本・オランダ・チュニジア・スウェーデン）にハードコード
