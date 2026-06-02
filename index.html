@@ -758,6 +758,28 @@ body {
 .log-text {
   color: var(--text);
 }
+.coach-card {
+  margin: 6px 0;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #0a2a5c 0%, #0d4a28 100%);
+  border-left: 4px solid #f39c12;
+  border-radius: 8px;
+  color: white;
+  font-size: 12px;
+  line-height: 1.6;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  animation: coachSlideIn 0.4s ease;
+}
+@keyframes coachSlideIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.coach-card-icon  { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.coach-card-label { font-size: 10px; color: #f39c12; font-weight: 700; margin-bottom: 3px; letter-spacing: 0.5px; }
+.coach-card-body  { font-size: 12px; }
+.coach-card-body b { color: #ffe066; }
 
 /* GAME CONTROLS */
 .game-controls {
@@ -2059,6 +2081,9 @@ body {
       <div style="font-size:13px;font-weight:700;color:#444;margin-bottom:8px">⚙️ 戦術変更</div>
       <div id="ht-tactics-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
     </div>
+
+    <!-- コーチ デュエルアドバイス -->
+    <div id="ht-duel-advice" style="margin-bottom:16px"></div>
 
     <!-- システム・選手変更 -->
     <div style="margin-bottom:20px;display:flex;gap:8px">
@@ -4351,6 +4376,7 @@ let wcGroupRank    = 0;  // グループステージ順位 (1-4)
 let team1State = {}, team2State = {};
 let gameState = null;
 let chanceResults = [];
+let coachMarkTarget = -1; // 相手がマークする日本選手のポジション（lineup index 0-10）
 let _duelScenesCache = [];
 let _duelPlayerCache = {};
 let currentChanceIdx = 0;
@@ -5993,6 +6019,16 @@ function startGame() {
   const t2 = buildTeam(team2Data, team2State);
 
   gameState = { team1: t1, team2: t2 };
+  // 相手がマークする日本の最前線選手を自動設定（CF > WG > OMF > SMF の優先順）
+  coachMarkTarget = -1;
+  const _cmPriority = ['CF','WG','OMF','SMF'];
+  for (const _cmp of _cmPriority) {
+    for (let _pos = 1; _pos < 11; _pos++) {
+      if (t1.getPositionType(_pos) === _cmp) { coachMarkTarget = _pos; break; }
+    }
+    if (coachMarkTarget >= 0) break;
+  }
+  if (coachMarkTarget < 0) coachMarkTarget = 10;
   t1.score = 0; t2.score = 0;
   t1.chanceCounter = 0; t2.chanceCounter = 0;
   t1.shootCounter = 0; t2.shootCounter = 0;
@@ -6974,6 +7010,64 @@ function renderSceneField(sc, prevSc) {
 // ============================================================
 // ハーフタイムモーダル
 // ============================================================
+// ============================================================
+// コーチ情報カード
+// ============================================================
+function _buildCoachCard(label, body) {
+  const div = document.createElement('div');
+  div.className = 'coach-card';
+  div.innerHTML = '<div class="coach-card-icon">🎙️</div><div><div class="coach-card-label">' + label + '</div><div class="coach-card-body">' + body + '</div></div>';
+  return div;
+}
+
+function _maybeInsertCoachCard() {
+  if (wcPhase === 'et_first' || wcPhase === 'et_second') return;
+  const logArea = document.getElementById('log-area');
+  const isEn = window.LANG === 'en';
+
+  // 前半序盤（チャンス1完了後 = currentChanceIdx===2）: 相手キープレイヤー
+  if (currentChanceIdx === 2 && gameState && gameState.team2) {
+    const kp = gameState.team2.players[gameState.team2.lineup[gameState.team2.keyplayer]];
+    if (kp) {
+      const name = isEn ? (kp.en_name || kp.name) : kp.name;
+      const msg = isEn
+        ? 'The opponent is building their attack around <b>' + name + '</b>.'
+        : '相手は <b>' + name + '</b> 選手にボールを集めているようです。';
+      logArea.appendChild(_buildCoachCard(isEn ? '📋 Early Report' : '📋 前半序盤の情報', msg));
+      logArea.scrollTop = logArea.scrollHeight;
+    }
+  }
+
+  // 前半中盤（チャンス3完了後 = currentChanceIdx===4）: 相手がマークする日本選手
+  if (currentChanceIdx === 4 && coachMarkTarget >= 0 && gameState && gameState.team1) {
+    const jp = gameState.team1.players[gameState.team1.lineup[coachMarkTarget]];
+    if (jp) {
+      const name = isEn ? (jp.en_name || jp.name) : jp.name;
+      const msg = isEn
+        ? 'The opponent is closely marking <b>' + name + '</b>. Watch out for tight coverage.'
+        : '日本の <b>' + name + '</b> 選手へのマークがキツイですね。';
+      logArea.appendChild(_buildCoachCard(isEn ? '📋 Mid-Half Report' : '📋 前半中盤の情報', msg));
+      logArea.scrollTop = logArea.scrollHeight;
+    }
+  }
+}
+
+function _runHtDuelSim(n) {
+  // n回サイレントシミュレーションを実行しteam1のデュエル統計を集計して返す
+  const stats = {};
+  for (let i = 0; i < n; i++) {
+    const res = simulateSilent(team1Data, team2Data);
+    if (!res || !res.playerStats) continue;
+    Object.entries(res.playerStats).forEach(function(kv) {
+      const name = kv[0], st = kv[1];
+      if (!stats[name]) stats[name] = { win: 0, lose: 0, enName: st.enName };
+      stats[name].win  += st.duelWins || 0;
+      stats[name].lose += Math.max(0, (st.duels || 0) - (st.duelWins || 0));
+    });
+  }
+  return stats;
+}
+
 function _showHalfTimeModal() {
   const s1 = halfTimeScore.t1, s2 = halfTimeScore.t2;
   document.getElementById('ht-score').textContent =
@@ -6981,6 +7075,53 @@ function _showHalfTimeModal() {
 
   // 戦術ボタン描画
   _buildHtTactics();
+
+  // デュエルアドバイス（5回サイレントシミュレーションで集計）
+  const htAdvEl = document.getElementById('ht-duel-advice');
+  if (htAdvEl) {
+    const isEn = window.LANG === 'en';
+    htAdvEl.innerHTML = '<div style="color:#888;font-size:12px;padding:4px 0">⚙️ ' + (isEn ? 'Analysing...' : '分析中...') + '</div>';
+    setTimeout(function() {
+      const duelStats = _runHtDuelSim(5);
+      const entries = Object.entries(duelStats)
+        .filter(function(kv) { return (kv[1].win + kv[1].lose) >= 2; })
+        .map(function(kv) {
+          const name = kv[0], d = kv[1];
+          const total = d.win + d.lose;
+          const rate = total > 0 ? Math.round(d.win / total * 100) : 0;
+          return { name: name, enName: d.enName, win: d.win, lose: d.lose, rate: rate };
+        })
+        .sort(function(a, b) { return a.rate - b.rate; });
+
+      if (!entries.length) { htAdvEl.innerHTML = ''; return; }
+
+      const top3 = entries.slice(0, 3);
+      const worst = top3[0];
+      const worstName = isEn ? (worst.enName || worst.name) : worst.name;
+
+      const rows = top3.map(function(e) {
+        const dispName = isEn ? (e.enName || e.name) : e.name;
+        const barColor = e.rate >= 60 ? '#2d7a3a' : e.rate >= 40 ? '#e07a00' : '#B8001F';
+        return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0">'
+          + '<div style="width:5em;font-size:11px;font-weight:700;overflow:hidden;white-space:nowrap">' + dispName + '</div>'
+          + '<div style="flex:1;background:#eee;border-radius:4px;height:7px;overflow:hidden"><div style="width:' + e.rate + '%;background:' + barColor + ';height:100%;border-radius:4px"></div></div>'
+          + '<div style="width:3em;text-align:right;font-size:11px;font-weight:700;color:' + barColor + '">' + e.rate + '%</div>'
+          + '<div style="width:4em;text-align:right;font-size:10px;color:#aaa">' + e.win + 'W ' + e.lose + 'L</div>'
+          + '</div>';
+      }).join('');
+
+      const advice = isEn
+        ? '<b>' + worstName + '</b> is struggling in duels. Consider a substitution.'
+        : '<b>' + worstName + '</b> 選手が苦戦しています。選手交代を検討しましょう。';
+
+      htAdvEl.innerHTML =
+        '<div style="margin-bottom:6px;font-size:12px;font-weight:700;color:#1a3a6b">📊 '
+        + (isEn ? 'Duel Forecast (5 sim runs)' : 'デュエル予測（5回シミュレーション）') + '</div>'
+        + rows
+        + '<div style="margin-top:10px;padding:10px 12px;background:linear-gradient(135deg,#0a2a5c,#0d4a28);border-left:4px solid #f39c12;border-radius:8px;color:white;font-size:12px;line-height:1.6">'
+        + '🎙️ ' + advice + '</div>';
+    }, 80);
+  }
 
   document.getElementById('halftime-modal').style.display = 'flex';
   document.getElementById('next-btn').disabled = true;
@@ -7278,6 +7419,7 @@ function nextChance() {
     currentSceneIdx = 0;
     currentEventDiv = null;
     document.getElementById('chance-count').textContent = currentChanceIdx;
+    _maybeInsertCoachCard();
     // ハーフタイム（chanceNo=5＝前半ロスタイム完了後）
     if (currentChanceIdx === 6 && !halfTimeShown) {
       halfTimeShown = true;
