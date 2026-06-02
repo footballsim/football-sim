@@ -5,8 +5,22 @@
 ファイル: `index.html`（約8500行）
 目標: W杯シミュレーターとして完成させる
 
+## ファイル構成（2026/06/02 分割済み）
+```
+football-sim/
+├── index.html        # UIのみ（727行）
+├── js/
+│   ├── players.js    # i18n・定数・PLAYER_EXTRA・TEAM_DATA（2048行）
+│   ├── simulate.js   # STATE・画面管理・ゲームエンジン・シーン描画（3665行）
+│   ├── narration.js  # 10試合・WCモード・AI総括・画像生成（3242行）
+│   └── ui.js         # Firebase・WC統計（319行）
+└── css/
+    └── style.css     # スタイル（1561行）
+```
+- ロード順: players.js → simulate.js → narration.js → ui.js（依存関係に注意）
+- 全ファイルがグローバルスコープを共有（ES modulesではない）
+
 ## 絶対ルール
-- **単一HTMLファイルで完結**させること（外部JSファイル等に分割しない）
 - **デュエルカウントロジックには触れない**（既知の未解決バグあり）
 - 変更は該当箇所のdiffのみ提示。全文出力は求められた時だけ
 
