@@ -7079,6 +7079,35 @@ function _runHtDuelSim(n) {
   return stats;
 }
 
+function _getFirstHalfDuelData() {
+  // chanceResults の前半分（最大6チャンス）から team1 の実デュエルデータを集計
+  const stats = {};
+  if (!gameState) return stats;
+  const half1 = chanceResults.slice(0, 6);
+  half1.forEach(function(res) {
+    if (!res || !res.scenes) return;
+    res.scenes.forEach(function(sc) {
+      if (!['成功','失敗','ファール'].includes(sc.result)) return;
+      const win = sc.result === '成功' || sc.result === 'ファール';
+      if (sc.offence === gameState.team1) {
+        const p = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+        if (p) {
+          if (!stats[p.name]) stats[p.name] = { win: 0, lose: 0, enName: p.en_name };
+          win ? stats[p.name].win++ : stats[p.name].lose++;
+        }
+      }
+      if (sc.defence === gameState.team1) {
+        const p = sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+        if (p) {
+          if (!stats[p.name]) stats[p.name] = { win: 0, lose: 0, enName: p.en_name };
+          win ? stats[p.name].lose++ : stats[p.name].win++;
+        }
+      }
+    });
+  });
+  return stats;
+}
+
 function _showHalfTimeModal() {
   const s1 = halfTimeScore.t1, s2 = halfTimeScore.t2;
   document.getElementById('ht-score').textContent =
@@ -7087,37 +7116,54 @@ function _showHalfTimeModal() {
   // 戦術ボタン描画
   _buildHtTactics();
 
-  // デュエルアドバイス（5回サイレントシミュレーションで集計）
+  // デュエルアドバイス（実データ優先＋シミュレーション補完）
   const htAdvEl = document.getElementById('ht-duel-advice');
   if (htAdvEl) {
     const isEn = window.LANG === 'en';
     htAdvEl.innerHTML = '<div style="color:#888;font-size:12px;padding:4px 0">⚙️ ' + (isEn ? 'Analysing...' : '分析中...') + '</div>';
     setTimeout(function() {
-      const duelStats = _runHtDuelSim(50);
-      const entries = Object.entries(duelStats)
-        .filter(function(kv) { return (kv[1].win + kv[1].lose) >= 2; })
-        .map(function(kv) {
-          const name = kv[0], d = kv[1];
-          const total = d.win + d.lose;
-          const rate = total > 0 ? Math.round(d.win / total * 100) : 0;
-          return { name: name, enName: d.enName, win: d.win, lose: d.lose, rate: rate };
-        })
-        .sort(function(a, b) { return a.rate - b.rate; });
+      // 実データ（前半）とシミュレーションデータを取得
+      const realData = _getFirstHalfDuelData();
+      const simData  = _runHtDuelSim(50);
+
+      // フィールドプレイヤー全10名について実データ優先・シム補完でマージ
+      const entries = [];
+      if (gameState && gameState.team1) {
+        for (let _p = 1; _p < 11; _p++) {
+          const pl = gameState.team1.players[gameState.team1.lineup[_p]];
+          if (!pl) continue;
+          const real = realData[pl.name];
+          const sim  = simData[pl.name];
+          const realTotal = real ? (real.win + real.lose) : 0;
+          let win, lose, source;
+          if (realTotal >= 2) {
+            win = real.win; lose = real.lose; source = 'real';
+          } else if (sim && (sim.win + sim.lose) > 0) {
+            win = sim.win; lose = sim.lose; source = 'sim';
+          } else {
+            continue;
+          }
+          const total = win + lose;
+          const rate  = total > 0 ? Math.round(win / total * 100) : 0;
+          entries.push({ name: pl.name, enName: pl.en_name, win: win, lose: lose, rate: rate, source: source });
+        }
+      }
+      entries.sort(function(a, b) { return a.rate - b.rate; });
 
       if (!entries.length) { htAdvEl.innerHTML = ''; return; }
 
-      const top3 = entries.slice(0, 10);
-      const worst = top3[0];
+      const worst     = entries[0];
       const worstName = isEn ? (worst.enName || worst.name) : worst.name;
 
-      const rows = top3.map(function(e) {
+      const rows = entries.map(function(e) {
         const dispName = isEn ? (e.enName || e.name) : e.name;
         const barColor = e.rate >= 60 ? '#2d7a3a' : e.rate >= 40 ? '#e07a00' : '#B8001F';
+        // シム補完の場合は名前をグレーで表示
+        const nameColor = e.source === 'sim' ? '#aaa' : '#333';
         return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0">'
-          + '<div style="width:5em;font-size:11px;font-weight:700;overflow:hidden;white-space:nowrap">' + dispName + '</div>'
+          + '<div style="width:5em;font-size:11px;font-weight:700;overflow:hidden;white-space:nowrap;color:' + nameColor + '">' + dispName + '</div>'
           + '<div style="flex:1;background:#eee;border-radius:4px;height:7px;overflow:hidden"><div style="width:' + e.rate + '%;background:' + barColor + ';height:100%;border-radius:4px"></div></div>'
           + '<div style="width:3em;text-align:right;font-size:11px;font-weight:700;color:' + barColor + '">' + e.rate + '%</div>'
-          + ''
           + '</div>';
       }).join('');
 
@@ -7125,10 +7171,19 @@ function _showHalfTimeModal() {
         ? '<b>' + worstName + '</b> is struggling in duels. Consider your options.'
         : '<b>' + worstName + '</b> 選手が苦戦しています。対策を検討しましょう。';
 
+      // ＊印の凡例（シム補完選手がいる場合のみ）
+      const hasSimEntry = entries.some(function(e) { return e.source === 'sim'; });
+      const legend = hasSimEntry
+        ? '<div style="font-size:10px;color:#aaa;margin-top:4px">'
+          + (isEn ? '* Grey: simulation estimate (insufficient first-half data)' : '※ グレー：前半データ不足のためシミュレーション補完')
+          + '</div>'
+        : '';
+
       htAdvEl.innerHTML =
         '<div style="margin-bottom:6px;font-size:12px;font-weight:700;color:#1a3a6b">📊 '
         + (isEn ? 'Duel Situation' : 'デュエル状況') + '</div>'
         + rows
+        + legend
         + '<div style="margin-top:10px;padding:10px 12px;background:linear-gradient(135deg,#0a2a5c,#0d4a28);border-left:4px solid #f39c12;border-radius:8px;color:white;font-size:12px;line-height:1.6">'
         + '🎙️ ' + advice + '</div>';
     }, 80);
