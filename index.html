@@ -8520,6 +8520,10 @@ function showResult() {
     // 引き分え（ET/PKへ）は ET後半 or _finishPK() で書き込む
   }
 
+  // 延長終了時は 90分+ET1+ET2 を結合したソースを使う（ゴールスコアラー・デュエル・ログ・各スタッツ共通）
+  const _isKOET2 = (isWCR32Mode || isWCR16Mode || isWCQFMode || isWCSFMode || isWCFMode) && wcPhase === 'et_second';
+  const _logSrc = _isKOET2 ? wcMatchLog.concat(chanceResults) : chanceResults;
+
   // Stats（_logSrcから全チャンス集計 ← _recalcSecondHalfのカウンターリセット問題を回避）
   let _statT1chance=0,_statT2chance=0,_statT1shoot=0,_statT2shoot=0,_statT1gkSave=0,_statT2gkSave=0;
   _logSrc.forEach(function(res) {
@@ -8560,10 +8564,6 @@ function showResult() {
       <div style="padding:12px 16px;text-align:center;font-size:16px;font-weight:700;border-top:1px solid rgba(0,0,0,0.08)">${r}</div>
     `;
   });
-
-  // 延長終了時は 90分+ET1+ET2 を結合したソースを使う（ゴールスコアラー・デュエル・ログ・各スタッツ共通）
-  const _isKOET2 = (isWCR32Mode || isWCR16Mode || isWCQFMode || isWCSFMode || isWCFMode) && wcPhase === 'et_second';
-  const _logSrc = _isKOET2 ? wcMatchLog.concat(chanceResults) : chanceResults;
 
   // ゴールスコアラー（延長時は90分+ET全ゴールを表示）
   const scorersEl = document.getElementById('result-scorers');
