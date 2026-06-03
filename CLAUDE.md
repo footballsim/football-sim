@@ -1,24 +1,45 @@
 # Football Simulation Lab - プロジェクトルール
 
 ## 概要
-単一HTMLファイルのサッカーシミュレーター。
-ファイル: `index.html`（約8500行）
-目標: W杯シミュレーターとして完成させる
+サッカーシミュレーター（W杯モード・シングルマッチ対応）。
+目標: 2026W杯48チーム全実装 + W杯モードの汎用化。
 
 ## ファイル構成（2026/06/02 分割済み）
 ```
 football-sim/
-├── index.html        # UIのみ（727行）
+├── index.html        # HTMLシェルのみ（727行）
 ├── js/
-│   ├── players.js    # i18n・定数・PLAYER_EXTRA・TEAM_DATA（2048行）
-│   ├── simulate.js   # STATE・画面管理・ゲームエンジン・シーン描画（3665行）
-│   ├── narration.js  # 10試合・WCモード・AI総括・画像生成（3242行）
-│   └── ui.js         # Firebase・WC統計（319行）
+│   ├── players.js    # i18n・定数・PLAYER_EXTRA・system_data・TEAM_DATA（2048行）
+│   ├── simulate.js   # STATE・画面管理・設定画面・ゲームエンジン・シーン描画（3665行）
+│   ├── narration.js  # 10試合モード・WCモード・AI総括・画像生成（3242行）
+│   └── ui.js         # Firebase・WC統計システム（319行）
 └── css/
-    └── style.css     # スタイル（1561行）
+    └── style.css     # 全スタイル（1561行）
 ```
-- ロード順: players.js → simulate.js → narration.js → ui.js（依存関係に注意）
-- 全ファイルがグローバルスコープを共有（ES modulesではない）
+
+### ファイル別の主要な関数・変数
+| 変数/関数 | 場所 |
+|-----------|------|
+| `PLAYER_EXTRA` | js/players.js |
+| `TEAM_DATA` | js/players.js |
+| `system_data`, `TACTICS_NAMES` | js/players.js |
+| `i18n`, `t()`, `setLang()`, `applyLang()` | js/players.js |
+| `scenario_data_ja/en` | js/players.js |
+| `currentMatchKey`, `team1Data`, `team2Data` | js/simulate.js（STATE） |
+| `showScreen()`, `buildPlayersTable()` | js/simulate.js |
+| `startGame()`, `simulateChance()` | js/simulate.js |
+| `buildTeam()`, `selectAction()` | js/simulate.js |
+| `sceneToText()`, `renderSceneField()` | js/simulate.js |
+| `renderFormation()`, `renderBench()` | js/simulate.js |
+| `runMultiGame()`, `showResult()` | js/narration.js |
+| `startWCMatch()`, `showWCR32()` など | js/narration.js |
+| `generateSummary()`, `generateShareImage()` | js/narration.js |
+| Firebase設定、`showWCStats()` | js/ui.js |
+
+### ロード順・スコープ
+- ロード順: `players.js` → `simulate.js` → `narration.js` → `ui.js`
+- ES modulesではなく通常の `<script>` タグ → 全変数がグローバルスコープを共有
+- 新チーム追加は **players.js** のみ編集すれば OK
 
 ## 絶対ルール
 - **デュエルカウントロジックには触れない**（既知の未解決バグあり）
@@ -27,7 +48,8 @@ football-sim/
 ## 技術スタック
 - 純粋なHTML/CSS/JavaScript（フレームワークなし）
 - Google Fonts（Noto Sans JP, Bebas Neue）
-- Google Analytics（G-CY06KBG4N8）
+- Google Analytics（G-JEPGS2HPDE）
+- Firebase Firestore（WC統計機能用）
 
 ## 変更時の注意
 - diff提示の際は変更箇所と理由を簡潔に説明する
@@ -39,16 +61,17 @@ football-sim/
 - **本番URL**: https://football-sim.com （GitHub Pages でホスト）
 - **リポジトリ**: https://github.com/footballsim/football-sim
 - **公開ディレクトリ**: `docs/` フォルダ（`docs/index.html` がトップページ）
+  - ⚠️ `docs/` は現在も旧単一ファイル構成。本番反映時は `js/` `css/` も `docs/` にコピーが必要
 - **VPS**: GMOクラウドVPSマイクロ / IP: 153.122.40.240 / CentOS 6.6
   - SSH: `ssh -oHostKeyAlgorithms=+ssh-rsa root@153.122.40.240`
   - http→https リダイレクト設定済み（Apache `/etc/httpd/conf/httpd.conf`）
   - VPSはリダイレクト専用。コンテンツはGitHub Pagesが配信
 
-## 現在の実装状況（2026/06/01時点）
+## 現在の実装状況（2026/06/03時点）
 
 ### シングルマッチ
 - チーム1・チーム2を自由選択できる2ステップUI実装済み
-- `SINGLE_TEAMS` 配列でチームリストを管理（`selectTeam1()` / `selectTeam2()` 関数）
+- `SINGLE_TEAMS` 配列でチームリストを管理（`selectTeam1()` / `selectTeam2()` 関数）→ **js/simulate.js**
 - 日本選択時は対戦相手別最適データを自動使用（下記oppMap参照）
 - **日本のデフォルトスタメン = `japan2026vsNetherlands`（W杯モード第1戦と同一）**
   - スタメン: 鈴木彩/谷口/渡辺/伊藤洋/佐野海/遠藤航/堂安/中村敬/久保/鎌田/上田
@@ -63,7 +86,7 @@ football-sim/
 それ以外          → japan2026vsNetherlands（フォールバック）
 ```
 
-### 実装済みTEAM_DATAキー一覧
+### 実装済みTEAM_DATAキー一覧（js/players.js）
 #### 日本系
 - `japan2026` — 汎用日本データ（旧）
 - `japan2026vsEngland` — 対イングランド最適（伊東・後藤スタメン）
@@ -90,10 +113,9 @@ football-sim/
 | `usa2026` | アメリカ | 2026W杯正式26名、FC26データ準拠 |
 
 ### 選手データ一覧（screen-players）
-- `buildPlayersTable()` に渡す配列に全チームを列挙（index.html 約4880行付近）
+- `buildPlayersTable()` に渡す配列に全チームを列挙 → **js/simulate.js** を検索
 - ドイツ・アメリカ含む全16チームデータが表示される
-- 各選手の身長・体重・日英プロフィールは `PLAYER_EXTRA` オブジェクト（約2798行）に定義
-  - ドイツ26名 ✅、アメリカ26名 ✅ 追加済み
+- 各選手の身長・体重・日英プロフィールは `PLAYER_EXTRA` オブジェクト → **js/players.js** の先頭付近
 
 ### 今後のTODO
 1. **残り34チームのデータ追加**（2026W杯48チーム全実装が目標）
@@ -128,15 +150,15 @@ football-sim/
        - ⚠️ **Sofifa アクセス不可の場合**: Step 2 はスキップし、**TM のみの情報を採用**する。
      - **重複排除**: Step 1・2で重複したポジションは1つにまとめる。
      - **例（Son Heung-min）**: TM→左WG(メイン)/CF/OMF、Sofifa→84(CF)メイン、83の左右WG・左右SMF・OMF → `["左WG","CF","OMF","右WG","左SMF","右SMF"]`
-   - 新チーム追加手順:
+   - 新チーム追加手順（**編集ファイルは js/players.js のみ**）:
      1. transfermarkt.co.ukで正式26名ロスターを確認
      2. sofifa.comでチームページを開き、全選手のFC26スタッツ（PAC/SHO/PAS/DRI/DEF/PHY）を取得
      3. sofifa.comのチームページでフォーメーション（`default_system`）を確認し `TEAM_DATA` に反映
         - フォーメーションはページ内の「戦術」セクションまたは先発配置から読み取る
-     4. `TEAM_DATA` にエントリ追加（`germany2026`/`usa2026`/`portugal2026` を参考）
-     5. `buildPlayersTable()` の配列に追加
-     6. `SINGLE_TEAMS` に追加
-     7. `PLAYER_EXTRA` に全選手のプロフィール・身長・体重を追加
+     4. `TEAM_DATA` にエントリ追加（`germany2026`/`usa2026` を参考）→ **js/players.js**
+     5. `buildPlayersTable()` の配列に追加 → **js/simulate.js**
+     6. `SINGLE_TEAMS` に追加 → **js/simulate.js**
+     7. `PLAYER_EXTRA` に全選手のプロフィール・身長・体重を追加 → **js/players.js**
         - **プロフィール文章の禁止事項（日英両方）**:
           - ❌ FIFA / ワールドカップ / W杯 / World Cup
           - ❌ チャンピオンズリーグ / Champions League
@@ -147,6 +169,10 @@ football-sim/
    - 現状: 日本のグループC（日本・オランダ・チュニジア・スウェーデン）にハードコード
    - 目標: 選択した国の実際の2026W杯グループで戦えるように
    - 2026W杯は12グループ×4チーム = 48チーム
+
+3. **本番（docs/）への反映**
+   - `docs/` フォルダはまだ旧単一ファイル構成のまま
+   - 反映時は `index.html`, `js/`, `css/` を `docs/` 以下にコピーが必要
 
 ### パラメータ体系（29個）
 ```
