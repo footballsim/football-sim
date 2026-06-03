@@ -801,9 +801,9 @@ function buildTeam1List() {
   const list = document.getElementById('team1-select-list');
   if (!list || list.dataset.built) return;
   list.innerHTML = SINGLE_TEAMS.map(t =>
-    `<div class="match-card" onclick="selectTeam1('${t.key}')">
-      <div class="match-flags"><span class="flag-emoji">${t.flag}</span></div>
-      <div class="match-title-text">${t.label}</div>
+    `<div class="team-select-item" onclick="selectTeam1('${t.key}')">
+      <span class="tsi-flag">${t.flag}</span>
+      <span class="tsi-name">${t.label}</span>
     </div>`
   ).join('');
   list.dataset.built = '1';
@@ -819,9 +819,9 @@ function selectTeam1(key) {
   list.innerHTML = SINGLE_TEAMS
     .filter(t => t.key !== key)
     .map(t =>
-      `<div class="match-card" onclick="selectTeam2('${t.key}')">
-        <div class="match-flags"><span class="flag-emoji">${t.flag}</span></div>
-        <div class="match-title-text">${t.label}</div>
+      `<div class="team-select-item" onclick="selectTeam2('${t.key}')">
+        <span class="tsi-flag">${t.flag}</span>
+        <span class="tsi-name">${t.label}</span>
       </div>`
     ).join('');
   showScreen('single2');
