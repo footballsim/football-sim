@@ -2552,6 +2552,11 @@ function setResultImage(team1Score, team2Score) {
   const img = document.getElementById('result-img');
   const wrap = document.getElementById('result-img-wrap');
   if (!img) return;
+  if (team1Data.en_name !== 'Japan') {
+    img.src = '';
+    if (wrap) wrap.style.display = 'none';
+    return;
+  }
   if (team1Score > team2Score) {
     img.src = IMG_WIN;
     img.alt = t('imgAltWin');
