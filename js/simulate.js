@@ -1740,6 +1740,9 @@ function startGame() {
   document.getElementById('score1').textContent = '0';
   document.getElementById('score2').textContent = '0';
   document.getElementById('log-area').innerHTML = '';
+  // 案A: ライブフィールドをリセット
+  const _lfw = document.getElementById('live-field-wrap');
+  if (_lfw) { _lfw.style.display = 'none'; _lfw.innerHTML = ''; }
   document.getElementById('chance-count').textContent = '0';
   document.getElementById('chance-total').textContent = chanceResults.length;
   document.getElementById('next-btn').disabled = false;
@@ -2538,7 +2541,10 @@ const AREA_COORDS_H = {
 };
 
 function renderSceneField(sc, prevSc) {
-  const W = 300, H = 160;
+  // ============================================================
+  // 案A: フォーカスモードフィールド（全幅・ゾーンカラー・軌跡）
+  // ============================================================
+  const W = 390, H = 195;
   const isTeam1Offence = sc.offence === gameState.team1;
   const ofColor = sc.offence.team_color || '#003087';
   const dfColor = sc.defence.team_color || '#CC6600';
@@ -2549,120 +2555,45 @@ function renderSceneField(sc, prevSc) {
 
   const flip = !isTeam1Offence;
   const toX = (px) => ((flip ? (100 - px) : px) / 100) * W;
-  const toY = (py) => ((flip ? (100 - py) : py) / 100) * H;
+  const toY = (py) => (py / 100) * H;  // Y軸はフリップしない（横向きフィールド）
 
   const raw = AREA_COORDS_H[sc.area] || { x: 50, y: 50 };
   const cx = toX(raw.x), cy = toY(raw.y);
+
+  // 前シーン座標（ボール軌跡用）
   const prevRaw = prevSc ? (AREA_COORDS_H[prevSc.area] || null) : null;
-  // カウンター遷移では前シーンのoffenceが変わるためflipも逆になる
-  // 前シーンの座標は前シーンのflipで計算しないと矢印方向が逆になる
   const isCounterTransition = prevSc && (prevSc.offence !== sc.offence);
   const prevFlip = isCounterTransition ? !flip : flip;
   const prevToX = (px) => ((prevFlip ? (100 - px) : px) / 100) * W;
-  const prevToY = (py) => ((prevFlip ? (100 - py) : py) / 100) * H;
+  const prevToY = (py) => (py / 100) * H;
   const pcx = prevRaw ? prevToX(prevRaw.x) : null;
   const pcy = prevRaw ? prevToY(prevRaw.y) : null;
 
   const uid = `fs${currentChanceIdx}_${currentSceneIdx}`;
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.style.cssText = 'width:100%;border-radius:8px;display:block;margin-bottom:8px';
 
-  svg.innerHTML = `
-    <defs>
-      <linearGradient id="bg${uid}" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#1a5c1a"/>
-        <stop offset="50%" stop-color="#236b23"/>
-        <stop offset="100%" stop-color="#1a5c1a"/>
-      </linearGradient>
-      <marker id="arr${uid}" markerWidth="5" markerHeight="5" refX="3" refY="2.5" orient="auto">
-        <path d="M0,0 L5,2.5 L0,5 Z" fill="rgba(255,230,0,0.9)"/>
-      </marker>
-    </defs>
-    <rect width="${W}" height="${H}" fill="url(#bg${uid})" rx="6"/>
-    <rect x="6" y="5" width="${W-12}" height="${H-10}" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
-    <line x1="${W/2}" y1="5" x2="${W/2}" y2="${H-5}" stroke="rgba(255,255,255,0.45)" stroke-width="0.8"/>
-    <circle cx="${W/2}" cy="${H/2}" r="26" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="0.8"/>
-    <circle cx="${W/2}" cy="${H/2}" r="1.5" fill="rgba(255,255,255,0.6)"/>
-    <rect x="6" y="${H/2-28}" width="30" height="56" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.7"/>
-    <rect x="6" y="${H/2-13}" width="13" height="26" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.7"/>
-    <rect x="${W-36}" y="${H/2-28}" width="30" height="56" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.7"/>
-    <rect x="${W-19}" y="${H/2-13}" width="13" height="26" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.7"/>
-    ${prevRaw ? `` : ''}
-  `;
+  // ゾーン境界（team1基準で固定: 左=team1守備、右=team1攻撃）
+  const zoneLeft  = Math.round(W * 0.28);  // 109px
+  const zoneRight = Math.round(W * 0.72);  // 281px
 
-  // エリアハイライト
-  const hl = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
-  hl.setAttribute('cx', cx); hl.setAttribute('cy', cy);
-  hl.setAttribute('rx', '24'); hl.setAttribute('ry', '20');
-  hl.setAttribute('fill', 'rgba(255,255,100,0.13)');
-  hl.setAttribute('stroke', 'rgba(255,255,100,0.5)');
-  hl.setAttribute('stroke-width', '0.8');
-  svg.appendChild(hl);
+  // ゴールポスト
+  const goalH = 36, goalW = 10;
+  const goalY = H / 2 - goalH / 2;
 
-  // team1攻撃時: 攻撃=左(cx-16)、守備=右(cx+16)
-  // team2攻撃時: 攻撃=右(cx+16)、守備=左(cx-16) ← 右から左へ攻める向きに合わせる
-  const ofX = flip ? Math.min(W - 16, cx + 16) : Math.max(16, cx - 16);
-  const dfX = flip ? Math.max(16, cx - 16)      : Math.min(W - 16, cx + 16);
-
-  [{x: ofX, color: ofColor, name: ofName}, {x: dfX, color: dfColor, name: dfName}].forEach(({x, color, name}) => {
-    const circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circ.setAttribute('cx', x); circ.setAttribute('cy', cy);
-    circ.setAttribute('r', '12'); circ.setAttribute('fill', color);
-    circ.setAttribute('stroke', 'white'); circ.setAttribute('stroke-width', '1.5');
-    svg.appendChild(circ);
-
-    const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    lbl.setAttribute('x', x); lbl.setAttribute('y', cy + 4);
-    lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('font-size', '7.5');
-    lbl.setAttribute('font-weight', 'bold'); lbl.setAttribute('fill', 'white');
-    lbl.setAttribute('font-family', 'sans-serif');
-    lbl.textContent = name.length > 4 ? name.substring(0, 4) : name;
-    svg.appendChild(lbl);
-
-    const ntag = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    ntag.setAttribute('x', x); ntag.setAttribute('y', cy - 15);
-    ntag.setAttribute('text-anchor', 'middle'); ntag.setAttribute('font-size', '8.5');
-    ntag.setAttribute('font-weight', 'bold'); ntag.setAttribute('fill', 'white');
-    ntag.setAttribute('font-family', 'sans-serif');
-    ntag.setAttribute('paint-order', 'stroke');
-    ntag.setAttribute('stroke', 'rgba(0,0,0,0.7)'); ntag.setAttribute('stroke-width', '2');
-    ntag.textContent = name;
-    svg.appendChild(ntag);
-  });
-
-  // 結果バッジ
-  const resultColor = sc.result === 'ゴール！！' ? '#FFD700' : sc.result === '成功' ? '#44DD66' :
-    sc.result === 'カウンター' ? '#FF8C00' : sc.result === 'ファール' ? '#FFD700' : '#FF4444';
-
+  // 結果バッジテキスト
   const _isEn = window.LANG === 'en';
-  const resultText = sc.result === 'ゴール！！' ? '⚽ GOAL!!' :
-    sc.result === '成功'      ? (_isEn ? '✅ Success'   : '✅ 成功') :
-    sc.result === 'カウンター'? (_isEn ? '↩️ Counter'   : '↩️ カウンター') :
-    sc.result === 'ファール'  ? (_isEn ? '🟨 Foul'      : '🟨 ファール') :
-    sc.result === 'GK防いだ！'? (_isEn ? '🧤 Saved'     : '🧤 セーブ') :
-    sc.result === '枠を外した！'?(_isEn ? '💨 Off Target': '💨 枠外') :
-    sc.result === 'ブロック'  ? (_isEn ? '🛡️ Blocked'   : '🛡️ ブロック') :
-                                (_isEn ? '❌ Failed'    : '❌ 失敗');
-
-  const rbg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  rbg.setAttribute('x', '8'); rbg.setAttribute('y', H - 20);
-  rbg.setAttribute('width', '90'); rbg.setAttribute('height', '14');
-  rbg.setAttribute('rx', '4'); rbg.setAttribute('fill', 'rgba(0,0,0,0.5)');
-  svg.appendChild(rbg);
-
-  const rbadge = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  rbadge.setAttribute('x', '53'); rbadge.setAttribute('y', H - 9);
-  rbadge.setAttribute('text-anchor', 'middle'); rbadge.setAttribute('font-size', '9');
-  rbadge.setAttribute('font-weight', 'bold'); rbadge.setAttribute('fill', resultColor);
-  rbadge.setAttribute('font-family', 'sans-serif');
-  rbadge.textContent = resultText;
-  svg.appendChild(rbadge);
-
-  const albl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  albl.setAttribute('x', W - 8); albl.setAttribute('y', H - 9);
-  albl.setAttribute('text-anchor', 'end'); albl.setAttribute('font-size', '8');
-  albl.setAttribute('fill', 'rgba(255,255,255,0.45)'); albl.setAttribute('font-family', 'sans-serif');
+  const resultColor = sc.result === 'ゴール！！' ? '#FFD700'
+    : sc.result === '成功'       ? '#44DD66'
+    : sc.result === 'カウンター' ? '#FF8C00'
+    : sc.result === 'ファール'   ? '#FFD700'
+    : '#FF6666';
+  const resultText = sc.result === 'ゴール！！' ? '⚽ GOAL!!'
+    : sc.result === '成功'       ? (_isEn ? '✅ Success'    : '✅ 成功')
+    : sc.result === 'カウンター' ? (_isEn ? '↩️ Counter'    : '↩️ カウンター')
+    : sc.result === 'ファール'   ? (_isEn ? '🟨 Foul'       : '🟨 ファール')
+    : sc.result === 'GK防いだ！' ? (_isEn ? '🧤 Saved'      : '🧤 セーブ')
+    : sc.result === '枠を外した！'? (_isEn ? '💨 Off Target' : '💨 枠外')
+    : sc.result === 'ブロック'   ? (_isEn ? '🛡️ Blocked'    : '🛡️ ブロック')
+    :                               (_isEn ? '❌ Failed'     : '❌ 失敗');
   const AREA_NAME_EN = {
     'DF_L':'DF Left','DF_M':'DF Center','DF_R':'DF Right',
     'MF_L':'MF Left','MF_M':'MF Center','MF_R':'MF Right',
@@ -2672,15 +2603,172 @@ function renderSceneField(sc, prevSc) {
   const _areaName = window.LANG === 'en'
     ? (AREA_NAME_EN[sc.area] || sc.area)
     : (area_data[sc.area] ? area_data[sc.area].name : sc.area);
-  albl.textContent = _areaName;
-  svg.appendChild(albl);
 
+  // 攻撃チームのラベル（左右）
+  const atkLabel = _isEn ? (sc.offence.name + ' →') : ('⬅ ' + sc.offence.name);
+  const t1Label  = _isEn ? (gameState.team1.name + ' →') : (gameState.team1.name + ' →');
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.style.cssText = 'display:block;width:100%';
+
+  // ────── 1. 背景グラデーション ──────
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="bg${uid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#1a5c1a"/>
+        <stop offset="50%"  stop-color="#236b23"/>
+        <stop offset="100%" stop-color="#1a5c1a"/>
+      </linearGradient>
+    </defs>
+    <rect width="${W}" height="${H}" fill="url(#bg${uid})"/>
+
+    <!-- ゾーンオーバーレイ（team1基準固定） -->
+    <rect x="0"          y="0" width="${zoneLeft}"       height="${H}" fill="rgba(0,48,135,0.18)"/>
+    <rect x="${zoneRight}" y="0" width="${W-zoneRight}"  height="${H}" fill="rgba(188,0,45,0.14)"/>
+
+    <!-- ゾーン区切り線 -->
+    <line x1="${zoneLeft}"  y1="0" x2="${zoneLeft}"  y2="${H}" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="4 4"/>
+    <line x1="${zoneRight}" y1="0" x2="${zoneRight}" y2="${H}" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="4 4"/>
+
+    <!-- ピッチライン -->
+    <rect x="8" y="6" width="${W-16}" height="${H-12}" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.2"/>
+    <line x1="${W/2}" y1="6" x2="${W/2}" y2="${H-6}" stroke="rgba(255,255,255,0.4)" stroke-width="0.9"/>
+    <circle cx="${W/2}" cy="${H/2}" r="32" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.9"/>
+    <circle cx="${W/2}" cy="${H/2}" r="2"  fill="rgba(255,255,255,0.55)"/>
+
+    <!-- ゴールエリア（左） -->
+    <rect x="8"  y="${H/2-32}" width="36" height="64" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="0.8"/>
+    <rect x="8"  y="${H/2-16}" width="16" height="32" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.35)" stroke-width="0.8"/>
+    <!-- ゴールポスト（左） -->
+    <rect x="${8-goalW}" y="${goalY}" width="${goalW}" height="${goalH}" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+
+    <!-- ゴールエリア（右） -->
+    <rect x="${W-44}" y="${H/2-32}" width="36" height="64" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="0.8"/>
+    <rect x="${W-24}" y="${H/2-16}" width="16" height="32" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.35)" stroke-width="0.8"/>
+    <!-- ゴールポスト（右） -->
+    <rect x="${W-8}" y="${goalY}" width="${goalW}" height="${goalH}" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+
+    <!-- ゾーンラベル -->
+    <text x="${zoneLeft/2}"           y="${H-6}" text-anchor="middle" font-size="8" fill="rgba(120,170,255,0.7)" font-family="sans-serif" font-weight="bold">${_isEn ? 'DEF' : '自陣'}</text>
+    <text x="${(zoneLeft+zoneRight)/2}" y="${H-6}" text-anchor="middle" font-size="8" fill="rgba(255,220,100,0.55)" font-family="sans-serif" font-weight="bold">${_isEn ? 'MID' : '中盤'}</text>
+    <text x="${(zoneRight+W)/2}"      y="${H-6}" text-anchor="middle" font-size="8" fill="rgba(255,120,100,0.7)"  font-family="sans-serif" font-weight="bold">${_isEn ? 'ATK' : '敵陣'}</text>
+  `;
+
+  // ────── 2. ボール軌跡アニメーション ──────
+  if (pcx !== null && pcy !== null && (Math.abs(pcx - cx) > 5 || Math.abs(pcy - cy) > 5)) {
+    const trailLen = Math.round(Math.hypot(cx - pcx, cy - pcy)) + 20;
+    const trail = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    trail.setAttribute('d', `M ${pcx},${pcy} L ${cx},${cy}`);
+    trail.setAttribute('stroke', isCounterTransition ? 'rgba(255,140,0,0.75)' : 'rgba(255,220,50,0.7)');
+    trail.setAttribute('stroke-width', '2.2');
+    trail.setAttribute('fill', 'none');
+    trail.setAttribute('stroke-dasharray', '7 5');
+    trail.setAttribute('stroke-linecap', 'round');
+    trail.innerHTML = `<animate attributeName="stroke-dashoffset" from="${trailLen}" to="0" dur="0.5s" fill="freeze"/>`;
+    svg.appendChild(trail);
+
+    // 軌跡の矢印（終点）
+    const angle = Math.atan2(cy - pcy, cx - pcx);
+    const ax = cx - Math.cos(angle) * 14;
+    const ay = cy - Math.sin(angle) * 14;
+    const arrowPath = `M ${cx},${cy} L ${ax + Math.cos(angle+0.45)*8},${ay + Math.sin(angle+0.45)*8} M ${cx},${cy} L ${ax + Math.cos(angle-0.45)*8},${ay + Math.sin(angle-0.45)*8}`;
+    const arrowEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    arrowEl.setAttribute('d', arrowPath);
+    arrowEl.setAttribute('stroke', isCounterTransition ? 'rgba(255,140,0,0.85)' : 'rgba(255,220,50,0.85)');
+    arrowEl.setAttribute('stroke-width', '2');
+    arrowEl.setAttribute('stroke-linecap', 'round');
+    arrowEl.setAttribute('fill', 'none');
+    svg.appendChild(arrowEl);
+  }
+
+  // ────── 3. エリアハイライト ──────
+  const hl = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+  hl.setAttribute('cx', cx); hl.setAttribute('cy', cy);
+  hl.setAttribute('rx', '30'); hl.setAttribute('ry', '26');
+  hl.setAttribute('fill', sc.result === 'ゴール！！' ? 'rgba(255,215,0,0.18)' : 'rgba(255,255,100,0.11)');
+  hl.setAttribute('stroke', sc.result === 'ゴール！！' ? 'rgba(255,215,0,0.7)' : 'rgba(255,255,100,0.45)');
+  hl.setAttribute('stroke-width', '1');
+  svg.appendChild(hl);
+
+  // ────── 4. 選手バッジ（名前タグ付き） ──────
+  const ofX = flip ? Math.min(W - 18, cx + 20) : Math.max(18, cx - 20);
+  const dfX = flip ? Math.max(18, cx - 20)      : Math.min(W - 18, cx + 20);
+
+  [[ofX, ofColor, ofName], [dfX, dfColor, dfName]].forEach(([px, color, name]) => {
+    // 影
+    const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    shadow.setAttribute('cx', px); shadow.setAttribute('cy', cy + 2);
+    shadow.setAttribute('r', '15'); shadow.setAttribute('fill', 'rgba(0,0,0,0.35)');
+    svg.appendChild(shadow);
+
+    // 選手サークル
+    const circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circ.setAttribute('cx', px); circ.setAttribute('cy', cy);
+    circ.setAttribute('r', '14'); circ.setAttribute('fill', color);
+    circ.setAttribute('stroke', 'white'); circ.setAttribute('stroke-width', '2');
+    svg.appendChild(circ);
+
+    // 円内テキスト（短縮名）
+    const shortName = name.length > 3 ? name.slice(0, 3) : name;
+    const inner = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    inner.setAttribute('x', px); inner.setAttribute('y', cy + 4);
+    inner.setAttribute('text-anchor', 'middle'); inner.setAttribute('font-size', '8.5');
+    inner.setAttribute('font-weight', 'bold'); inner.setAttribute('fill', 'white');
+    inner.setAttribute('font-family', 'sans-serif');
+    inner.textContent = shortName;
+    svg.appendChild(inner);
+
+    // 名前バッジ（バッジ背景 + テキスト）
+    const nameStr = name.length > 6 ? name.slice(0, 6) : name;
+    const badgeW = Math.max(36, nameStr.length * 8 + 10);
+    const badgeX = Math.max(4, Math.min(W - badgeW - 4, px - badgeW / 2));
+    const badgeY = cy - 32;
+
+    const badgeBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    badgeBg.setAttribute('x', badgeX); badgeBg.setAttribute('y', badgeY);
+    badgeBg.setAttribute('width', badgeW); badgeBg.setAttribute('height', '15');
+    badgeBg.setAttribute('rx', '4'); badgeBg.setAttribute('fill', 'rgba(0,0,0,0.68)');
+    svg.appendChild(badgeBg);
+
+    const badgeText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    badgeText.setAttribute('x', badgeX + badgeW / 2); badgeText.setAttribute('y', badgeY + 11);
+    badgeText.setAttribute('text-anchor', 'middle'); badgeText.setAttribute('font-size', '9.5');
+    badgeText.setAttribute('font-weight', 'bold'); badgeText.setAttribute('fill', 'white');
+    badgeText.setAttribute('font-family', 'sans-serif');
+    badgeText.textContent = nameStr;
+    svg.appendChild(badgeText);
+  });
+
+  // ────── 5. ゴール時フラッシュ ──────
   if (sc.result === 'ゴール！！') {
     const flash = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     flash.setAttribute('width', W); flash.setAttribute('height', H);
-    flash.setAttribute('fill', 'rgba(255,215,0,0.15)'); flash.setAttribute('rx', '6');
+    flash.setAttribute('fill', 'rgba(255,215,0,0.14)');
     svg.appendChild(flash);
   }
+
+  // ────── 6. 結果バッジ（左下）+ エリア名（右下） ──────
+  const rbg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rbg.setAttribute('x', '8'); rbg.setAttribute('y', H - 22);
+  rbg.setAttribute('width', '98'); rbg.setAttribute('height', '16');
+  rbg.setAttribute('rx', '5'); rbg.setAttribute('fill', 'rgba(0,0,0,0.55)');
+  svg.appendChild(rbg);
+
+  const rbadge = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  rbadge.setAttribute('x', '57'); rbadge.setAttribute('y', H - 10);
+  rbadge.setAttribute('text-anchor', 'middle'); rbadge.setAttribute('font-size', '9.5');
+  rbadge.setAttribute('font-weight', 'bold'); rbadge.setAttribute('fill', resultColor);
+  rbadge.setAttribute('font-family', 'sans-serif');
+  rbadge.textContent = resultText;
+  svg.appendChild(rbadge);
+
+  const albl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  albl.setAttribute('x', W - 10); albl.setAttribute('y', H - 10);
+  albl.setAttribute('text-anchor', 'end'); albl.setAttribute('font-size', '9');
+  albl.setAttribute('fill', 'rgba(255,255,255,0.5)'); albl.setAttribute('font-family', 'sans-serif');
+  albl.textContent = _areaName;
+  svg.appendChild(albl);
 
   return svg;
 }
@@ -3134,14 +3222,19 @@ function nextChance() {
     document.getElementById('chance-team-label').textContent = offTeam ? `${t('attackLabel')} ${getTeamName(offTeam)}` : '';
   }
 
-  // 1シーン1フィールド：テキストの前にフィールドを追加
+  // 案A: ライブフィールドを上部パネルに更新（ログには差し込まない）
   const textDiv = document.getElementById('log-text-' + currentChanceIdx);
   const sc = res.scenes[currentSceneIdx];
   const prevSc = currentSceneIdx > 0 ? res.scenes[currentSceneIdx - 1] : null;
   const fieldSvg = renderSceneField(sc, prevSc);
-  textDiv.appendChild(fieldSvg);
+  const liveFieldWrap = document.getElementById('live-field-wrap');
+  if (liveFieldWrap) {
+    liveFieldWrap.style.display = '';
+    liveFieldWrap.innerHTML = '';
+    liveFieldWrap.appendChild(fieldSvg);
+  }
 
-  // テキストを追加
+  // テキストを追加（ログはテキストのみ）
   const line = document.createElement('div');
   line.style.cssText = 'margin-bottom:8px';
   line.innerHTML = res.textScenes[currentSceneIdx];

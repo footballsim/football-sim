@@ -598,6 +598,19 @@ body {
   background: var(--dark);
 }
 
+/* ===== LIVE FIELD（案A: フォーカスモードフィールド）===== */
+#live-field-wrap {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  border-bottom: 2px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+#live-field-wrap svg {
+  display: block;
+  width: 100%;
+}
+
 .scoreboard {
   background: linear-gradient(90deg, #003087, #001f6e, #003087);
   padding: 16px 20px;
