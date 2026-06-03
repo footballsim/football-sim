@@ -147,7 +147,8 @@ football-sim/
        | Left Winger | 左WG |
        | Centre-Forward | CF |
      - **Step 2 - Sofifa**: 選手ページの「Preferred Positions」欄のレーティングを確認。**メインポジションのレーティング − 3 以内**のポジションをすべてシミュレータコードに変換して追加（閾値は今後変更の可能性あり）。
-       - ⚠️ **Sofifa アクセス不可の場合**: Step 2 はスキップし、**TM のみの情報を採用**する。
+       - ⚠️ **sofifa.com に直接アクセス不可の場合**: `WebSearch` ツールで `「FC26 [選手名] preferred positions sofifa ratings」` を検索してデータを取得する（今回の作業で有効と確認済み）。
+       - ⚠️ **WebSearch でも取得不可の場合**: Step 2 はスキップし、**TM のみの情報を採用**する。
      - **重複排除**: Step 1・2で重複したポジションは1つにまとめる。
      - **例（Son Heung-min）**: TM→左WG(メイン)/CF/OMF、Sofifa→84(CF)メイン、83の左右WG・左右SMF・OMF → `["左WG","CF","OMF","右WG","左SMF","右SMF"]`
    - 新チーム追加手順（**編集ファイルは js/players.js のみ**）:

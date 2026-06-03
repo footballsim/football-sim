@@ -2716,14 +2716,14 @@ function _maybeInsertCoachCard() {
     }
   }
 
-  // 前半中盤（チャンス3完了後 = currentChanceIdx===4）: 相手がマークする日本選手
+  // 前半中盤（チャンス3完了後 = currentChanceIdx===4）: 相手がマークするteam1選手
   if (currentChanceIdx === 4 && coachMarkTarget >= 0 && gameState && gameState.team1) {
     const jp = gameState.team1.players[gameState.team1.lineup[coachMarkTarget]];
     if (jp) {
       const name = isEn ? (jp.en_name || jp.name) : jp.name;
       const msg = isEn
         ? 'The opponent is closely marking <b>' + name + '</b>. Watch out for tight coverage.'
-        : '日本の <b>' + name + '</b> 選手へのマークがキツイですね。';
+        : gameState.team1.name + 'の <b>' + name + '</b> 選手へのマークがキツイですね。';
       logArea.appendChild(_buildCoachCard(isEn ? '📋 Mid-Half Report' : '📋 前半中盤の情報', msg));
       logArea.scrollTop = logArea.scrollHeight;
     }

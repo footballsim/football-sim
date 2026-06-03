@@ -1810,7 +1810,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // GK: Neuer (FC26 OVR84)
       {name:"ノイアー",en_name:"Neuer",long_name:"マヌエル・ノイアー",positions:["GK"],params:[50,50,50,50,84,78,50,50,50,50,88,50,50,50,50,50,50,50,50,50,50,50,50,84,82,50,83,80,75]},
       // RB/cap: Kimmich (FC26 OVR89, PAC72, SHO74, PAS89, DRI84, DEF83, PHY79)
-      {name:"キミッヒ",en_name:"Kimmich",long_name:"ヨシュア・キミッヒ",positions:["右SB","DMF","CMF"],params:[79,83,72,70,82,76,78,82,77,89,84,66,68,70,72,74,84,68,84,83,84,84,82,50,50,74,82,84,75]},
+      {name:"キミッヒ",en_name:"Kimmich",long_name:"ヨシュア・キミッヒ",positions:["DMF","右SB","CMF"],params:[79,83,72,70,82,76,78,82,77,89,84,66,68,70,72,74,84,68,84,83,84,84,82,50,50,74,82,84,75]},
       // CB: Rüdiger (FC26 OVR86, PAC79, SHO55, PAS72, DRI70, DEF84, PHY86)
       {name:"リュディガー",en_name:"Rudiger",long_name:"アントニオ・リュディガー",positions:["CB"],params:[86,82,79,77,80,88,66,66,74,68,72,46,42,50,42,48,66,46,82,84,84,84,80,50,50,84,78,84,75]},
       // CB: Tah (FC26 OVR87, PAC63, SHO38, PAS60, DRI63, DEF87, PHY86)
@@ -1822,7 +1822,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // CMF: Goretzka (FC26 OVR82, PAC77, SHO78, PAS80, DRI80, DEF80, PHY82)
       {name:"ゴレツカ",en_name:"Goretzka",long_name:"レオン・ゴレツカ",positions:["CMF","DMF"],params:[82,82,77,74,82,84,76,78,78,80,78,70,72,74,66,68,80,74,80,80,80,80,78,50,50,78,78,82,75]},
       // RW: Sané (FC26 OVR82, PAC87, SHO81, PAS78, DRI85, DEF37, PHY68)
-      {name:"ザネ",en_name:"Sane",long_name:"レロイ・ザネ",positions:["右SMF","左SMF","右WG","左WG"],params:[68,72,87,88,78,62,84,84,86,78,72,76,74,76,68,76,82,76,36,36,36,35,34,50,50,56,74,76,75]},
+      {name:"ザネ",en_name:"Sane",long_name:"レロイ・ザネ",positions:["右WG","左WG","OMF","左SMF","右SMF"],params:[68,72,87,88,78,62,84,84,86,78,72,76,74,76,68,76,82,76,36,36,36,35,34,50,50,56,74,76,75]},
       // CAM: Wirtz (FC26 OVR89, PAC80, SHO82, PAS88, DRI90, DEF54, PHY67)
       {name:"ヴィルツ",en_name:"Wirtz",long_name:"フロリアン・ヴィルツ",positions:["OMF","CMF","左SMF"],params:[67,72,80,82,86,64,88,90,84,88,84,80,82,82,78,80,88,84,50,52,52,52,50,50,50,58,86,86,75]},
       // LAM: Musiala (FC26 OVR88, PAC80, SHO82, PAS80, DRI90, DEF66, PHY65)
@@ -1836,7 +1836,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CB: Schlotterbeck (FC26 OVR85, PAC74, SHO60, PAS75, DRI73, DEF85, PHY82)
       {name:"シュロッターベック",en_name:"Schlotterbeck",long_name:"ニコ・シュロッターベック",positions:["CB","左SB"],params:[82,80,74,72,78,84,68,68,72,74,72,52,48,54,48,52,70,48,82,85,84,84,82,50,50,80,78,82,75]},
       // Sub CB: Anton (FC26 OVR82, PAC69, SHO47, PAS67, DRI66, DEF84, PHY84)
-      {name:"アントン",en_name:"Anton",long_name:"ヴァルデマール・アントン",positions:["CB","DMF"],params:[84,80,69,67,76,86,62,62,66,67,65,40,36,44,38,42,62,40,82,84,84,83,80,50,50,82,76,80,75]},
+      {name:"アントン",en_name:"Anton",long_name:"ヴァルデマール・アントン",positions:["CB","DMF","右SB"],params:[84,80,69,67,76,86,62,62,66,67,65,40,36,44,38,42,62,40,82,84,84,83,80,50,50,82,76,80,75]},
       // Sub CB: Thiaw (FC26 OVR78, PAC72, SHO47, PAS69, DRI72, DEF78, PHY80)
       {name:"ティアウ",en_name:"Thiaw",long_name:"マリック・ティアウ",positions:["CB"],params:[80,78,72,70,74,82,66,66,70,68,66,40,36,44,36,42,66,40,76,78,78,77,74,50,50,78,72,76,75]},
       // Sub LB: Brown (FC26 OVR77, PAC83, SHO53, PAS71, DRI77, DEF71, PHY51)
@@ -1858,15 +1858,15 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub FW: Undav (FC26 OVR80, PAC66, SHO82, PAS74, DRI80, DEF33, PHY77)
       {name:"ウンダフ",en_name:"Undav",long_name:"デニス・ウンダフ",positions:["CF","OMF"],params:[77,76,66,64,74,74,74,78,72,74,70,78,80,80,66,68,78,80,30,32,30,29,28,50,50,72,68,76,75]},
       // Sub FW: Woltemade (FC26 OVR79, PAC67, SHO78, PAS65, DRI79, DEF41, PHY74)
-      {name:"ヴォルテマーデ",en_name:"Woltemade",long_name:"ニック・ヴォルテマーデ",positions:["CF","左SMF"],params:[74,74,67,64,72,76,74,76,70,65,62,74,76,76,58,62,76,76,38,40,38,37,36,50,50,72,66,74,75]}
+      {name:"ヴォルテマーデ",en_name:"Woltemade",long_name:"ニック・ヴォルテマーデ",positions:["CF","OMF"],params:[74,74,67,64,72,76,74,76,70,65,62,74,76,76,58,62,76,76,38,40,38,37,36,50,50,72,66,74,75]}
     ]
   },
 
   usa2026: {
     name:"アメリカ",en_name:"United States",team_color:"#002868",flag:"🇺🇸",
-    default_system:"4-2-3-1",default_tactics:TACTICS_FREE,
+    default_system:"4-1-2-3",default_tactics:TACTICS_FREE,
     default_keyplayer:8,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_lineup:[0,1,2,3,4,5,6,9,7,8,21],
     players:[
       // GK: Turner (FC26 OVR74, DIV76, HAN72, KIC67, REF74, POS73)
       {name:"ターナー",en_name:"Turner",long_name:"マット・ターナー",positions:["GK"],params:[50,50,50,50,74,70,50,50,50,50,67,50,50,50,50,50,50,50,50,50,50,50,50,76,72,50,73,73,75]},
@@ -1883,9 +1883,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // CMF: McKennie (FC26 OVR78, PAC77, SHO71, PAS77, DRI77, DEF80, PHY80)
       {name:"マッケニー",en_name:"McKennie",long_name:"ウェストン・マッケニー",positions:["CMF","DMF"],params:[78,82,76,76,78,91,74,76,77,77,74,62,66,68,58,64,76,70,80,82,78,78,78,50,50,86,72,80,75]},
       // RMF: T.Weah (FC26 OVR77, PAC87, SHO75, PAS72, DRI78, DEF68, PHY65)
-      {name:"ウェア",en_name:"Weah",long_name:"ティモシー・ウェア",positions:["右SMF","右WG"],params:[58,70,88,86,78,74,86,78,83,75,68,68,70,72,58,68,76,70,66,69,68,68,66,50,50,62,70,72,75]},
+      {name:"ウェア",en_name:"Weah",long_name:"ティモシー・ウェア",positions:["右SMF","右WG","右SB"],params:[58,70,88,86,78,74,86,78,83,75,68,68,70,72,58,68,76,70,66,69,68,68,66,50,50,62,70,72,75]},
       // OMF: Pulisic (FC26 OVR84, PAC88, SHO82, PAS80, DRI86, DEF46, PHY65)
-      {name:"プリシッチ",en_name:"Pulisic",long_name:"クリスチャン・プリシッチ",positions:["OMF","右SMF","左SMF"],params:[58,76,86,88,85,58,88,86,87,81,79,82,84,80,75,80,86,82,40,42,42,42,44,50,50,60,84,82,75]},
+      {name:"プリシッチ",en_name:"Pulisic",long_name:"クリスチャン・プリシッチ",positions:["右WG","左WG","OMF","右SMF","左SMF"],params:[58,76,86,88,85,58,88,86,87,81,79,82,84,80,75,80,86,82,40,42,42,42,44,50,50,60,84,82,75]},
       // LMF: Aaronson (FC26 OVR74, PAC80, SHO66, PAS70, DRI78, DEF57, PHY61)
       {name:"アーロンソン",en_name:"Aaronson",long_name:"ブレンデン・アーロンソン",positions:["左SMF","OMF"],params:[56,84,79,80,74,60,77,78,80,73,66,58,64,62,52,66,76,64,54,58,56,56,54,50,50,56,66,70,75]},
       // CF: Pepi (FC26 OVR76, PAC73, SHO78, PAS60, DRI72, DEF46, PHY73)
@@ -1927,12 +1927,12 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     name:"ポルトガル",en_name:"Portugal",team_color:"#D20000",flag:"🇵🇹",
     default_system:"4-2-1-3",default_tactics:TACTICS_POSSESSION,
     default_keyplayer:7,default_marked_player:9,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_lineup:[0,1,2,3,4,5,6,7,8,10,9],
     players:[
       // GK: Diogo Costa (SoFIFA FC26 OVR84, DIV83, HAN78, KIC82, REF86, SPD35, POS83)
       {name:"コスタ",en_name:"D.Costa",long_name:"ジオゴ・コスタ",positions:["GK"],params:[50,50,50,50,86,35,50,50,50,50,82,50,50,50,50,50,50,50,50,50,50,50,50,83,78,50,83,82,75]},
       // RB: Cancelo (SoFIFA FC26 OVR84, PAC83, SHO73, PAS84, DRI84, DEF78, PHY71)
-      {name:"カンセロ",en_name:"Cancelo",long_name:"ジョアン・カンセロ",positions:["右SB","左SB","CB"],params:[70,74,83,82,83,70,84,82,83,84,80,62,64,68,58,68,82,64,76,78,76,75,74,50,50,66,76,78,75]},
+      {name:"カンセロ",en_name:"Cancelo",long_name:"ジョアン・カンセロ",positions:["右SB","左SB","右SMF"],params:[70,74,83,82,83,70,84,82,83,84,80,62,64,68,58,68,82,64,76,78,76,75,74,50,50,66,76,78,75]},
       // CB: Rúben Dias (SoFIFA FC26 OVR87, PAC59, SHO39, PAS69, DRI69, DEF87, PHY84)
       {name:"ルベン・ディアス",en_name:"R.Dias",long_name:"ルベン・ディアス",positions:["CB"],params:[84,82,59,57,64,86,65,67,64,69,65,30,28,36,28,32,65,32,86,87,86,86,84,50,50,86,78,84,75]},
       // CB: Gonçalo Inácio (SoFIFA FC26 OVR81, PAC77, SHO37, PAS71, DRI73, DEF82, PHY81)
@@ -1946,13 +1946,13 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // OMF: Bruno Fernandes (SoFIFA FC26 OVR88, PAC67, SHO84, PAS90, DRI84, DEF67, PHY75)
       {name:"ブルーノ",en_name:"B.Fernandes",long_name:"ブルーノ・フェルナンデス",positions:["OMF","CMF"],params:[72,78,67,70,75,74,84,84,75,90,85,80,82,80,82,82,84,84,62,67,64,63,62,50,50,72,80,84,75]},
       // RW: Francisco Conceição (SoFIFA FC26 OVR79, PAC88, SHO73, PAS74, DRI85, DEF37, PHY50)
-      {name:"コンセイサン",en_name:"Conceicao",long_name:"フランシスコ・コンセイサン",positions:["右SMF","右WG","OMF"],params:[46,54,88,88,86,48,88,84,86,74,68,66,68,66,58,64,84,66,34,37,33,32,30,50,50,44,68,68,75]},
+      {name:"コンセイサン",en_name:"Conceicao",long_name:"フランシスコ・コンセイサン",positions:["右WG","左WG","OMF","右SMF"],params:[46,54,88,88,86,48,88,84,86,74,68,66,68,66,58,64,84,66,34,37,33,32,30,50,50,44,68,68,75]},
       // CF: Cristiano Ronaldo (SoFIFA FC26 OVR85, PAC76, SHO88, PAS76, DRI80, DEF34, PHY76)
-      {name:"ロナウド",en_name:"Ronaldo",long_name:"クリスティアーノ・ロナウド",positions:["CF","左SMF"],params:[76,76,76,78,78,80,78,78,78,76,72,90,88,88,82,76,78,84,30,34,30,29,28,50,50,82,82,86,75]},
+      {name:"ロナウド",en_name:"Ronaldo",long_name:"クリスティアーノ・ロナウド",positions:["CF","左WG","右WG"],params:[76,76,76,78,78,80,78,78,78,76,72,90,88,88,82,76,78,84,30,34,30,29,28,50,50,82,82,86,75]},
       // LW: Rafael Leão (SoFIFA FC26 OVR84, PAC93, SHO78, PAS80, DRI86, DEF28, PHY75)
-      {name:"レオン",en_name:"Leao",long_name:"ラファエル・レオン",positions:["左SMF","右SMF","左WG"],params:[72,76,93,92,89,72,88,86,89,80,74,72,74,74,62,68,86,76,24,28,24,23,22,50,50,62,76,74,75]},
+      {name:"レオン",en_name:"Leao",long_name:"ラファエル・レオン",positions:["左WG","CF","OMF","右SMF","左SMF"],params:[72,76,93,92,89,72,88,86,89,80,74,72,74,74,62,68,86,76,24,28,24,23,22,50,50,62,76,74,75]},
       // Sub RB: Matheus Nunes (SoFIFA FC26 OVR82, PAC87, SHO70, PAS79, DRI79, DEF78, PHY77) - used as RB
-      {name:"M.ヌネス",en_name:"M.Nunes",long_name:"マテウス・ヌネス",positions:["右SB","CMF","DMF"],params:[74,78,87,86,83,76,80,78,83,79,74,60,62,64,54,58,78,62,76,78,76,74,74,50,50,70,70,74,75]},
+      {name:"M.ヌネス",en_name:"M.Nunes",long_name:"マテウス・ヌネス",positions:["右SB","CMF","右SMF"],params:[74,78,87,86,83,76,80,78,83,79,74,60,62,64,54,58,78,62,76,78,76,74,74,50,50,70,70,74,75]},
       // Sub RB: Dalot (SoFIFA FC26 OVR78, PAC82, SHO62, PAS73, DRI75, DEF74, PHY78)
       {name:"ダロト",en_name:"Dalot",long_name:"ジオゴ・ダロト",positions:["右SB","左SB"],params:[74,78,82,80,78,74,76,74,78,73,68,52,54,56,46,54,74,52,72,74,72,70,70,50,50,68,68,72,75]},
       // Sub RB: Semedo (SoFIFA FC26 OVR78, PAC80, SHO63, PAS71, DRI79, DEF74, PHY73)
@@ -1960,7 +1960,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CB: Tomás Araújo (SoFIFA FC26 OVR78, PAC82, SHO30, PAS69, DRI72, DEF77, PHY79)
       {name:"T.アラウジョ",en_name:"T.Araujo",long_name:"トマス・アラウジョ",positions:["CB","右SB"],params:[76,78,82,80,77,80,68,68,77,69,64,22,20,26,20,24,68,22,74,77,74,73,72,50,50,78,66,72,75]},
       // Sub CB: Renato Veiga (SoFIFA FC26 OVR78, PAC80, SHO60, PAS73, DRI72, DEF77, PHY82)
-      {name:"レナト・ヴェイガ",en_name:"R.Veiga",long_name:"レナト・ヴェイガ",positions:["CB","CMF"],params:[80,80,80,78,76,82,70,70,76,73,68,50,50,54,44,48,70,46,74,77,75,74,72,50,50,78,68,72,75]},
+      {name:"レナト・ヴェイガ",en_name:"R.Veiga",long_name:"レナト・ヴェイガ",positions:["CB","左SB","DMF"],params:[80,80,80,78,76,82,70,70,76,73,68,50,50,54,44,48,70,46,74,77,75,74,72,50,50,78,68,72,75]},
       // Sub CMF: Bernardo Silva (SoFIFA FC26 OVR83, PAC56, SHO77, PAS83, DRI88, DEF70, PHY64)
       {name:"ベルナルド",en_name:"B.Silva",long_name:"ベルナルド・シルバ",positions:["CMF","右SMF","OMF"],params:[62,68,56,60,72,62,90,88,72,83,78,72,74,72,68,72,88,74,66,70,67,66,64,50,50,58,78,78,75]},
       // Sub CMF: Rúben Neves (SoFIFA FC26 OVR85, PAC57, SHO75, PAS87, DRI78, DEF78, PHY77)
@@ -1986,9 +1986,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   korea2026: {
     name:"韓国",en_name:"Korea Republic",team_color:"#C60C30",flag:"🇰🇷",
-    default_system:"4-2-3-1",default_tactics:TACTICS_FREE,
+    default_system:"3-4-3",default_tactics:TACTICS_FREE,
     default_keyplayer:9,default_marked_player:2,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_lineup:[0,2,14,3,5,6,1,4,7,10,9],
     players:[
       // GK: Jo Hyeon-woo (FC26 OVR75, DIV79, HAN72, KIC62, REF77, SPD79, POS73)
       {name:"ジョ・ヒョヌ",en_name:"Jo Hyeon-woo",long_name:"ジョ・ヒョヌ",positions:["GK"],params:[50,50,50,50,77,79,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,79,72,50,73,73,75]},
