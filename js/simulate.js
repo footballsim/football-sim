@@ -1740,6 +1740,7 @@ function startGame() {
   document.getElementById('score1').textContent = '0';
   document.getElementById('score2').textContent = '0';
   document.getElementById('log-area').innerHTML = '';
+  _pendingCoachCardEl = null; // コーチカード保留をリセット
   // 案A: ライブフィールドをリセット
   const _lfw = document.getElementById('live-field-wrap');
   if (_lfw) { _lfw.style.display = 'none'; _lfw.innerHTML = ''; }
@@ -2519,6 +2520,7 @@ function coloredName(team, pos) {
 // 現在表示中のチャンス内のシーンインデックス
 let currentSceneIdx = 0;
 let currentEventDiv = null;
+let _pendingCoachCardEl = null; // 次の「次へ」で表示するコーチカードを一時退避
 
 // ============================================================
 // FIELD GRAPHIC
@@ -2788,7 +2790,6 @@ function _buildCoachCard(label, body) {
 
 function _maybeInsertCoachCard() {
   if (wcPhase === 'et_first' || wcPhase === 'et_second') return;
-  const logArea = document.getElementById('log-area');
   const isEn = window.LANG === 'en';
 
   // 前半序盤（チャンス1完了後 = currentChanceIdx===2）: 相手キープレイヤー
@@ -2799,8 +2800,8 @@ function _maybeInsertCoachCard() {
       const msg = isEn
         ? 'The opponent is building their attack around <b>' + name + '</b>.'
         : '相手は <b>' + name + '</b> 選手にボールを集めているようです。';
-      logArea.appendChild(_buildCoachCard(isEn ? '📋 Early Report' : '📋 前半序盤の情報', msg));
-      logArea.scrollTop = logArea.scrollHeight;
+      // 直接挿入せず保留変数に退避 → 次の「次へ」で表示
+      _pendingCoachCardEl = _buildCoachCard(isEn ? '📋 Early Report' : '📋 前半序盤の情報', msg);
     }
   }
 
@@ -2812,8 +2813,8 @@ function _maybeInsertCoachCard() {
       const msg = isEn
         ? 'The opponent is closely marking <b>' + name + '</b>. Watch out for tight coverage.'
         : gameState.team1.name + 'の <b>' + name + '</b> 選手へのマークがキツイですね。';
-      logArea.appendChild(_buildCoachCard(isEn ? '📋 Mid-Half Report' : '📋 前半中盤の情報', msg));
-      logArea.scrollTop = logArea.scrollHeight;
+      // 直接挿入せず保留変数に退避 → 次の「次へ」で表示
+      _pendingCoachCardEl = _buildCoachCard(isEn ? '📋 Mid-Half Report' : '📋 前半中盤の情報', msg);
     }
   }
 }
@@ -3186,6 +3187,16 @@ function _recalcSecondHalf() {
 }
 
 function nextChance() {
+  // 保留中のコーチカードがあれば、まずそれだけ表示して終了
+  // （テキスト最終シーンとコーチカードの間に「次へ」を挟む）
+  if (_pendingCoachCardEl) {
+    const logArea = document.getElementById('log-area');
+    logArea.appendChild(_pendingCoachCardEl);
+    logArea.scrollTop = logArea.scrollHeight;
+    _pendingCoachCardEl = null;
+    return;
+  }
+
   if (currentChanceIdx >= chanceResults.length) {
     showResult();
     return;
@@ -3295,6 +3306,7 @@ function allChances() {
     showResult();
     return;
   }
+  _pendingCoachCardEl = null; // スキップ時はコーチカード保留をクリア
   // 延長中に「結果を見る」が押された場合、ET全体をスキップして最終結果へ
   if (wcPhase === 'et_first' || wcPhase === 'et_second') _wcSkipToEnd = true;
   halfTimeShown = true; // スキップ時はモーダルを出さない
