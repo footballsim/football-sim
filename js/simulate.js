@@ -3215,8 +3215,12 @@ function nextChance() {
 
     logArea.appendChild(currentEventDiv);
 
-    document.getElementById('score1').textContent = res.t1score;
-    document.getElementById('score2').textContent = res.t2score;
+    // スコアはゴールのないチャンスのみ開始時に更新する。
+    // ゴールがあるチャンスはゴールシーン表示タイミングで更新（下記）。
+    if (!res.scenes.some(s => s.result === 'ゴール！！')) {
+      document.getElementById('score1').textContent = res.t1score;
+      document.getElementById('score2').textContent = res.t2score;
+    }
     document.getElementById('game-time-display').textContent = res.time;
     const offTeam = res.scenes[0] ? res.scenes[0].offence : null;
     document.getElementById('chance-team-label').textContent = offTeam ? `${t('attackLabel')} ${getTeamName(offTeam)}` : '';
@@ -3241,6 +3245,9 @@ function nextChance() {
   textDiv.appendChild(line);
 
   if (sc && sc.result === 'ゴール！！') {
+    // ゴールシーンが画面に出たタイミングでスコアを更新する
+    document.getElementById('score1').textContent = res.t1score;
+    document.getElementById('score2').textContent = res.t2score;
     const anim = document.getElementById('goal-anim');
     anim.style.display = 'block';
     setTimeout(() => anim.style.display = 'none', 1600);
