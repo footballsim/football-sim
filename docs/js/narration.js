@@ -801,6 +801,11 @@ function showResult() {
   const normalVisible = !isWorldCupMode;
   document.getElementById('btn-retry').style.display = normalVisible ? '' : 'none';
   document.getElementById('btn-home').style.display  = normalVisible ? '' : 'none';
+  // シングルマッチ時はWCボタンを必ず非表示（前回WC試合の状態が残らないよう）
+  if (normalVisible) {
+    const _wcBackBtn = document.getElementById('wc-result-back-btn');
+    if (_wcBackBtn) _wcBackBtn.style.display = 'none';
+  }
 
   if (isWCR32Mode || isWCR16Mode || isWCQFMode || isWCSFMode || isWCFMode) {
     if (wcPhase === 'et_first' || wcPhase === 'et_second') {
@@ -2417,6 +2422,8 @@ function renderWCTable() {
 
 function retryGame() {
   _resetSummary();
+  // シングルマッチ時は設定画面を正しく再初期化（チームデータ・フォーメーションを維持）
+  if (!isWorldCupMode) initSettingScreen();
   showScreen('setting');
 }
 

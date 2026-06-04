@@ -1285,6 +1285,17 @@ function openKeyPlayerModal() {
   document.getElementById('modal-keyplayer').classList.add('open');
 }
 
+// 案②: 適正外バッジタップ時のトースト
+let _oopToastTimer = null;
+function showOopToast(msg) {
+  const el = document.getElementById('oop-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  if (_oopToastTimer) clearTimeout(_oopToastTimer);
+  _oopToastTimer = setTimeout(() => { el.classList.remove('show'); }, 2500);
+}
+
 function renderFormation() {
   const display = document.getElementById('formation-display');
   const sys = system_data[team1State.systemIdx];
@@ -1310,6 +1321,29 @@ function renderFormation() {
     circle.className = 'player-circle';
     circle.style.background = team1Data.team_color;
     circle.textContent = sys.positions[pos].replace(/[左右]/g, '').substring(0, 2);
+
+    // 適正外ポジション判定（getActionParamのペナルティ条件と同一）
+    // ① フォーメーションの要求ポジション名（例: "右SMF"）が得意ポジションに含まれない
+    // ② かつ 左右を除いたベース（例: "SMF"）も含まれない → 適正外
+    const _fieldPos = sys.positions[pos];
+    const _posType = (_fieldPos[0] === '左' || _fieldPos[0] === '右') ? _fieldPos.slice(1) : _fieldPos;
+    const _isOutOfPos = player && !player.positions.includes(_fieldPos) && !player.positions.includes(_posType);
+
+    const circleWrap = document.createElement('div');
+    circleWrap.style.cssText = 'position:relative;display:inline-flex;';
+    circleWrap.appendChild(circle);
+    if (_isOutOfPos) {
+      const badge = document.createElement('div');
+      badge.className = 'pos-badge';
+      badge.textContent = '!';
+      badge.onclick = (e) => {
+        e.stopPropagation();
+        const pname = player ? getPlayerName(player) : '?';
+        const preferred = player ? player.positions.join(' / ') : '';
+        showOopToast(`${pname}｜${_fieldPos} は非得意ポジション（得意: ${preferred}）全能力5%ダウン`);
+      };
+      circleWrap.appendChild(badge);
+    }
 
     // タッチ（モバイル）
     dot.addEventListener('touchstart', e => {
@@ -1371,7 +1405,7 @@ function renderFormation() {
     nameTag.textContent = player ? getPlayerName(player) : '?';
     nameTag.style.cssText = '-webkit-text-size-adjust:none;text-size-adjust:none;font-size:9px;font-weight:700;';
 
-    dot.appendChild(circle);
+    dot.appendChild(circleWrap);
     dot.appendChild(nameTag);
     display.appendChild(dot);
   }
@@ -3515,12 +3549,12 @@ function buildPositionMap(positions) {
   svg += `<text x="26" y="31" text-anchor="middle" font-size="12" font-weight="700" font-family="sans-serif" fill="${textColor(wgL)}">WG</text>`;
 
   // --- CF (x=52, y=0, w=52, h=28) ---
-  const cf = cellColor(['CF']);
+  const cf = cellColor(['CF', '右CF', '左CF']);
   svg += `<rect x="52" y="0" width="52" height="28" fill="${cf}" stroke="#ccc" stroke-width="0.5"/>`;
   svg += `<text x="78" y="18" text-anchor="middle" font-size="12" font-weight="700" font-family="sans-serif" fill="${textColor(cf)}">CF</text>`;
 
   // --- OMF (x=52, y=28, w=52, h=28) ---
-  const omf = cellColor(['OMF']);
+  const omf = cellColor(['OMF', '右OMF', '左OMF']);
   svg += `<rect x="52" y="28" width="52" height="28" fill="${omf}" stroke="#ccc" stroke-width="0.5"/>`;
   svg += `<text x="78" y="46" text-anchor="middle" font-size="12" font-weight="700" font-family="sans-serif" fill="${textColor(omf)}">OMF</text>`;
 
@@ -3535,12 +3569,12 @@ function buildPositionMap(positions) {
   svg += `<text x="26" y="87" text-anchor="middle" font-size="12" font-weight="700" font-family="sans-serif" fill="${textColor(smfL)}">SMF</text>`;
 
   // --- CMF (x=52, y=56, w=52, h=28) ---
-  const cmf = cellColor(['CMF']);
+  const cmf = cellColor(['CMF', '右CMF', '左CMF']);
   svg += `<rect x="52" y="56" width="52" height="28" fill="${cmf}" stroke="#ccc" stroke-width="0.5"/>`;
   svg += `<text x="78" y="74" text-anchor="middle" font-size="12" font-weight="700" font-family="sans-serif" fill="${textColor(cmf)}">CMF</text>`;
 
   // --- DMF (x=52, y=84, w=52, h=28) ---
-  const dmf = cellColor(['DMF']);
+  const dmf = cellColor(['DMF', '右DMF', '左DMF']);
   svg += `<rect x="52" y="84" width="52" height="28" fill="${dmf}" stroke="#ccc" stroke-width="0.5"/>`;
   svg += `<text x="78" y="102" text-anchor="middle" font-size="12" font-weight="700" font-family="sans-serif" fill="${textColor(dmf)}">DMF</text>`;
 

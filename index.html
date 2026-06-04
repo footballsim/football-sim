@@ -26,8 +26,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <!-- Firebase SDK（みんなの戦績 機能用） -->
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 <title>Football Simulation Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -107,7 +107,7 @@
         <span id="x-follow-label">@Iwasaki18M をフォロー</span>
       </a>
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v2.1.0</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v2.1.1</div>
   </div>
 </div>
 
@@ -400,7 +400,13 @@
             </svg>
             <div class="formation-display" id="formation-display"></div>
           </div>
-          <div class="hint" id="label-drag" style="text-align:right;margin-top:4px">ドラッグで選手入れ替え</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+            <div class="oop-legend">
+              <span class="oop-legend-badge">!</span>
+              <span id="label-oop-legend">非得意ポジション（全能力5%ダウン）</span>
+            </div>
+            <div class="hint" id="label-drag">ドラッグで選手入れ替え</div>
+          </div>
         </div>
         <div class="bench-panel">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
@@ -727,5 +733,6 @@
 <script src="js/simulate.js"></script>
 <script src="js/narration.js"></script>
 <script src="js/ui.js"></script>
+<div id="oop-toast"></div>
 </body>
 </html>
