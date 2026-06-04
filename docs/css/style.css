@@ -645,6 +645,11 @@ body {
 /* ===== GAME SCREEN ===== */
 #screen-game {
   background: var(--dark);
+  /* ボタンを常にファーストビューに固定するため、画面高さを100dvhで固定する。
+     dvh = dynamic viewport height（SafariのツールバーUI変化に対応）。
+     .screen の min-height:100vh を上書きする。 */
+  height: 100dvh;
+  min-height: 0;
 }
 
 /* ===== LIVE FIELD（案A: フォーカスモードフィールド）===== */
@@ -741,8 +746,8 @@ body {
   border: 1px solid rgba(0,0,0,0.1);
   padding: 16px;
   overflow-y: auto;
-  min-height: 200px;
-  max-height: 400px;
+  /* min-height/max-height は削除。flex:1 で残り高さをすべて占有し、
+     その範囲内でスクロールする。ボタンは常にビューポート内に収まる。 */
 }
 
 .log-event {
@@ -812,6 +817,8 @@ body {
 .game-controls {
   display: flex;
   gap: 10px;
+  flex-shrink: 0; /* 絶対に縮まないようにする */
+  padding-bottom: env(safe-area-inset-bottom, 8px); /* iPhoneホームインジケーター対応 */
 }
 
 .next-btn, .all-btn {
