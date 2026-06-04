@@ -3153,8 +3153,12 @@ function closeHalfTimeModal() {
 }
 
 function _recalcSecondHalf() {
-  // 現在の進行地点のスコアを取得（ハーフタイム直後はhalfTimeScore、後半途中はその時点のスコア）
-  const baseIdx = Math.max(5, currentChanceIdx - 1);
+  // 後半開始スコアの基準点：
+  //   ・chanceNo 0-6 = 前半通常 (1-43分)、chanceNo 7 = 前半ロスタイム (45+X分)
+  //   ・ハーフタイムは currentChanceIdx===6 で発火するが、
+  //     chanceResults[6] と chanceResults[7]（ロスタイム）はシミュレーション済みで firstPart に含まれる
+  //   → baseIdx は必ず 7（前半ロスタイム終了時点）以上を使い、ロスタイムゴールを引き継ぐ
+  const baseIdx = Math.max(7, currentChanceIdx - 1);
   const baseRes = chanceResults[baseIdx];
   const baseScore = baseRes
     ? { t1: baseRes.t1score, t2: baseRes.t2score }
@@ -3273,10 +3277,12 @@ function nextChance() {
     currentEventDiv = null;
     document.getElementById('chance-count').textContent = currentChanceIdx;
     _maybeInsertCoachCard();
-    // ハーフタイム（chanceNo=5＝前半ロスタイム完了後）
+    // ハーフタイム（currentChanceIdx===6 = chanceNo5完了後に発火）
+    // ※ chanceNo7 が前半ロスタイム（45+X分）なので、halfTimeScore は
+    //   chanceResults[7]（ロスタイム込み）を基準にする
     if (currentChanceIdx === 6 && !halfTimeShown) {
       halfTimeShown = true;
-      const htRes = chanceResults[5];
+      const htRes = chanceResults[7] || chanceResults[5]; // ロスタイム含む最終前半スコア
       halfTimeScore = { t1: htRes.t1score, t2: htRes.t2score };
       // 次のシーンボタンをハーフタイムモーダル表示に差し替え
       const nextBtn = document.getElementById('next-btn');
