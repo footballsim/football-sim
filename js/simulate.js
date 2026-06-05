@@ -3312,12 +3312,11 @@ function nextChance() {
     currentEventDiv = null;
     document.getElementById('chance-count').textContent = currentChanceIdx;
     _maybeInsertCoachCard();
-    // ハーフタイム（currentChanceIdx===6 = chanceNo5完了後に発火）
-    // ※ chanceNo7 が前半ロスタイム（45+X分）なので、halfTimeScore は
-    //   chanceResults[7]（ロスタイム込み）を基準にする
-    if (currentChanceIdx === 6 && !halfTimeShown) {
+    // ハーフタイム（currentChanceIdx===8 = chanceNo7完了後に発火）
+    // chanceNo 0-6: 前半通常、chanceNo 7: 前半ロスタイム(45+X分)、chanceNo 8-: 後半
+    if (currentChanceIdx === 8 && !halfTimeShown) {
       halfTimeShown = true;
-      const htRes = chanceResults[7] || chanceResults[5]; // ロスタイム含む最終前半スコア
+      const htRes = chanceResults[7] || chanceResults[6]; // chanceNo7(ロスタイム)の最終スコア
       halfTimeScore = { t1: htRes.t1score, t2: htRes.t2score };
       // 次のシーンボタンをハーフタイムモーダル表示に差し替え
       const nextBtn = document.getElementById('next-btn');
@@ -3331,7 +3330,7 @@ function nextChance() {
     }
     // 後半・延長戦中：チャンス完了時のみ交代ボタンを表示
     const _isET = wcPhase === 'et_first' || wcPhase === 'et_second';
-    if ((_isET ? currentChanceIdx > 0 : currentChanceIdx > 6) && currentChanceIdx < chanceResults.length) {
+    if ((_isET ? currentChanceIdx > 0 : currentChanceIdx > 8) && currentChanceIdx < chanceResults.length) {
       _updateSubBtn();
     }
     if (currentChanceIdx >= chanceResults.length) {
