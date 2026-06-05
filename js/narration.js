@@ -474,6 +474,11 @@ function showResult() {
 
   document.getElementById('result-name1').textContent = getTeamName(team1Data);
   document.getElementById('result-name2').textContent = getTeamName(team2Data);
+  // エリア別ヘッダーをチーム1の実名で上書き（"日本"固定を解消）
+  const _areaHdr = document.getElementById('header-area-win');
+  if (_areaHdr) _areaHdr.textContent = window.LANG === 'en'
+    ? '[' + getTeamName(team1Data) + ' Tendency by Area]'
+    : '【エリア別 ' + getTeamName(team1Data) + 'の傾向】';
   document.getElementById('result-score1').textContent = t1score;
   document.getElementById('result-score1').style.color = team1Data.team_color;
   document.getElementById('result-score2').textContent = t2score;
