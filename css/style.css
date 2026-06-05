@@ -888,9 +888,14 @@ body {
 /* GAME CONTROLS */
 .game-controls {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
   flex-shrink: 0; /* 絶対に縮まないようにする */
   padding-bottom: env(safe-area-inset-bottom, 8px); /* iPhoneホームインジケーター対応 */
+}
+.game-controls-row {
+  display: flex;
+  gap: 10px;
 }
 
 .next-btn, .all-btn {
