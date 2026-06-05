@@ -2173,7 +2173,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // RDM: Kovacic (FC26 OVR83, PAC79, SHO66, PAS85, DRI86, DEF72, PHY68)
       {name:"コバチッチ",en_name:"Kovacic",long_name:"マテオ・コバチッチ",positions:["CMF","OMF","DMF"],params:[66,78,78,80,80,64,86,84,82,84,80,62,64,68,60,64,86,78,70,72,70,68,68,50,50,64,80,82,75]},
       // LDM: Pasalic (FC26 OVR78, PAC72, SHO75, PAS75, DRI77, DEF55, PHY74)
-      {name:"パシャリッチ",en_name:"Pasalic",long_name:"マリオ・パシャリッチ",positions:["CMF","OMF"],params:[72,76,70,72,74,72,78,76,74,74,70,74,76,76,56,60,78,76,52,54,52,52,52,50,50,70,72,74,75]},
+      {name:"パシャリッチ",en_name:"Pasalic",long_name:"マリオ・パシャリッチ",positions:["CMF","OMF","DMF"],params:[72,76,70,72,74,72,78,76,74,74,70,74,76,76,56,60,78,76,52,54,52,52,52,50,50,70,72,74,75]},
       // RSM: Kramaric (FC26 OVR80, PAC78, SHO79, PAS72, DRI78, DEF45, PHY75)
       {name:"クラマリッチ",en_name:"Kramaric",long_name:"アンドレイ・クラマリッチ",positions:["右SMF","CF","右WG"],params:[72,78,76,80,78,72,80,78,78,72,66,78,80,80,62,68,80,82,42,40,38,42,55,50,50,70,76,78,75]},
       // LSM: Perisic (FC26 OVR80, PAC77, SHO72, PAS76, DRI80, DEF58, PHY78)
