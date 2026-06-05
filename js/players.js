@@ -2124,7 +2124,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   korea2026: {
     name:"韓国",en_name:"Korea Republic",team_color:"#C60C30",flag:"🇰🇷",
     default_system:"3-4-3",default_tactics:TACTICS_FREE,
-    default_keyplayer:9,default_marked_player:2,
+    default_keyplayer:10,default_marked_player:2,
     default_lineup:[0,2,14,3,5,6,1,4,7,10,9],
     players:[
       // GK: Jo Hyeon-woo (FC26 OVR75, DIV79, HAN72, KIC62, REF77, SPD79, POS73)
