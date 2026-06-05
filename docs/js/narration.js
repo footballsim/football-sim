@@ -591,19 +591,37 @@ function showResult() {
     }).join('');
   }
 
-  // エリア別勝率・デュエル傾向はまとめて非同期で計算（ローディング表示を先出し）
+  // エリア別勝率は非同期で計算（ローディング表示を先出し）
   document.getElementById('area-win-content').innerHTML =
     '<div style="color:#888;font-size:12px;padding:8px 0">⚙️ ' + (window.LANG==='en' ? 'Calculating...' : '計算中...') + '</div>';
 
 
-  // GKセーブ率は実データから集計
+  // GKセーブ率・デュエル勝率は実データから集計
   const gkSave1 = {};
   const scenesAll1 = [];
+  const _actualDuels1 = {}, _actualDuels2 = {};
   _logSrc.forEach(res => {
+    if (!res || !res.scenes) return;
     res.scenes.forEach(sc => {
       const isShoot = ['ゴール！！','GK防いだ！','枠を外した！'].includes(sc.result);
       const isNormal = ['成功','失敗','ファール'].includes(sc.result);
-      if (isNormal) scenesAll1.push(sc);
+      if (isNormal) {
+        scenesAll1.push(sc);
+        // デュエル集計（攻撃側）
+        const _win = sc.result === '成功' || sc.result === 'ファール';
+        const _ofsP = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+        const _dfsP = sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+        const _ofsTgt = sc.offence.name === team1Data.name ? _actualDuels1 : sc.offence.name === team2Data.name ? _actualDuels2 : null;
+        const _dfsTgt = sc.defence.name === team1Data.name ? _actualDuels1 : sc.defence.name === team2Data.name ? _actualDuels2 : null;
+        if (_ofsP && _ofsTgt) {
+          if (!_ofsTgt[_ofsP.name]) _ofsTgt[_ofsP.name] = { win: 0, lose: 0, enName: _ofsP.en_name };
+          _win ? _ofsTgt[_ofsP.name].win++ : _ofsTgt[_ofsP.name].lose++;
+        }
+        if (_dfsP && _dfsTgt) {
+          if (!_dfsTgt[_dfsP.name]) _dfsTgt[_dfsP.name] = { win: 0, lose: 0, enName: _dfsP.en_name };
+          _win ? _dfsTgt[_dfsP.name].lose++ : _dfsTgt[_dfsP.name].win++;
+        }
+      }
       if (isShoot) {
         const gkP = sc.defence.players[sc.defence.lineup[0]];
         const gkName = gkP ? gkP.name : undefined;
@@ -614,6 +632,58 @@ function showResult() {
     });
   });
   _duelScenesCache = scenesAll1;
+
+  // デュエルシーン未登場でも出場した全選手を0/0で補完
+  if (gameState && gameState.team1) {
+    for (let _pp = 1; _pp < 11; _pp++) {
+      const _p = gameState.team1.players[gameState.team1.lineup[_pp]];
+      if (_p && !_actualDuels1[_p.name]) _actualDuels1[_p.name] = { win: 0, lose: 0, enName: _p.en_name };
+    }
+  }
+  if (typeof _subbedOff !== 'undefined') {
+    _subbedOff.forEach(function(idx) {
+      const _p = team1Data && team1Data.players[idx];
+      if (_p && !_actualDuels1[_p.name]) _actualDuels1[_p.name] = { win: 0, lose: 0, enName: _p.en_name };
+    });
+  }
+  if (gameState && gameState.team2) {
+    for (let _pp = 1; _pp < 11; _pp++) {
+      const _p = gameState.team2.players[gameState.team2.lineup[_pp]];
+      if (_p && !_actualDuels2[_p.name]) _actualDuels2[_p.name] = { win: 0, lose: 0, enName: _p.en_name };
+    }
+  }
+
+  // 試合終了時点のピッチ上の選手名セット（交代退場者の識別用）
+  const _onPitch1 = new Set(), _onPitch2 = new Set();
+  if (gameState) {
+    for (let _pp = 1; _pp < 11; _pp++) {
+      const _p1 = gameState.team1 && gameState.team1.players[gameState.team1.lineup[_pp]]; if (_p1) _onPitch1.add(_p1.name);
+      const _p2 = gameState.team2 && gameState.team2.players[gameState.team2.lineup[_pp]]; if (_p2) _onPitch2.add(_p2.name);
+    }
+  }
+
+  function _renderActualDuelTable(actualStats, onPitch, teamData) {
+    const entries = Object.entries(actualStats).sort((a, b) => (b[1].win + b[1].lose) - (a[1].win + a[1].lose));
+    if (!entries.length) return '';
+    const isEn = window.LANG === 'en';
+    const rows = entries.map(([name, st]) => {
+      const total = st.win + st.lose;
+      const rate = total > 0 ? Math.round(st.win / total * 100) : 0;
+      const isOn = onPitch.has(name);
+      const barColor = isOn ? (rate >= 60 ? '#003087' : rate >= 40 ? '#2d7a3a' : '#B8001F') : '#bbb';
+      const dispName = (isEn && st.enName) ? st.enName : name;
+      const subBadge = isOn ? '' : '<span style="font-size:9px;color:#bbb;margin-left:2px">↩</span>';
+      return '<div style="display:flex;align-items:center;padding:6px 12px;border-bottom:1px solid #f0f0f0;gap:8px;opacity:' + (isOn ? '1' : '0.55') + '">'
+        + '<div style="width:5em;font-size:12px;font-weight:700;overflow:hidden;white-space:nowrap">' + dispName + subBadge + '</div>'
+        + '<div style="flex:1;background:#eee;border-radius:4px;height:8px;overflow:hidden"><div style="width:' + rate + '%;background:' + barColor + ';height:100%;border-radius:4px"></div></div>'
+        + '<div style="width:3em;text-align:right;font-size:12px;font-weight:700;color:' + barColor + '">' + rate + '%</div>'
+        + '<div style="width:5em;text-align:right;font-size:10px;color:#aaa">' + st.win + (isEn ? 'W ' : '勝') + st.lose + (isEn ? 'L' : '敗') + '</div>'
+        + '</div>';
+    }).join('');
+    return '<div style="margin-bottom:16px">'
+      + '<div style="background:' + teamData.team_color + ';color:white;font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px 8px 0 0">' + teamData.flag + ' ' + getTeamName(teamData) + '</div>'
+      + rows + '</div>';
+  }
 
   const gkHtml1 = Object.values(gkSave1).map(gk => {
     const total = gk.save + gk.goal;
@@ -628,47 +698,16 @@ function showResult() {
       + '</div>';
   }).join('');
 
-  // エリア別勝率＋デュエル傾向（50回シミュレーション）を1回のシムで非同期計算
+  // デュエル勝率（実データ）を即時描画
   const duelEl = document.getElementById('duel-stats-content');
-  duelEl.innerHTML = '<div style="color:#888;font-size:12px;padding:8px 12px">⚙️ ' + (window.LANG==='en' ? 'Calculating...' : '計算中...') + '</div>'
+  duelEl.innerHTML = _renderActualDuelTable(_actualDuels1, _onPitch1, team1Data)
+    + _renderActualDuelTable(_actualDuels2, _onPitch2, team2Data)
     + '<div style="margin-top:12px"><div style="background:#555;color:white;font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px 8px 0 0">🧤 ' + (window.LANG==='en'?'GK Save Rate':'GKセーブ率') + '</div>' + gkHtml1 + '</div>';
+
+  // エリア別勝率（50回シミュレーション）を非同期計算
   setTimeout(function() {
     const _sd = _runDuelSimBothSides(50);
-    // エリア別勝率を描画
     buildFieldWithTabs(_sd.areaAtk, _sd.areaDef, 320, 170, 'area-win-content');
-    // デュエル傾向を描画
-    function _buildSimDuels(team, teamData, simStats) {
-      const arr = [];
-      for (let _pos = 1; _pos < 11; _pos++) {
-        const _p = team.players[team.lineup[_pos]];
-        if (!_p) continue;
-        const _st = simStats[_p.name] || { win: 0, lose: 0 };
-        arr.push({ name: _p.name, enName: _p.en_name, teamName: teamData.name, win: _st.win, lose: _st.lose });
-      }
-      arr.sort((a, b) => (b.win + b.lose) - (a.win + a.lose));
-      return arr;
-    }
-    function renderDuelTableSim(duels, teamData) {
-      if (!duels.length) return '';
-      const rows = duels.map(d => {
-        const total = d.win + d.lose;
-        const rate = total > 0 ? Math.round(d.win / total * 100) : 0;
-        const barColor = rate >= 60 ? '#003087' : rate >= 40 ? '#2d7a3a' : '#B8001F';
-        const dispName = (window.LANG === 'en' && d.enName) ? d.enName : d.name;
-        return '<div style="display:flex;align-items:center;padding:6px 12px;border-bottom:1px solid #f0f0f0;gap:8px">'
-          + '<div style="width:5em;font-size:12px;font-weight:700;overflow:hidden;white-space:nowrap">' + dispName + '</div>'
-          + '<div style="flex:1;background:#eee;border-radius:4px;height:8px;overflow:hidden"><div style="width:' + rate + '%;background:' + barColor + ';height:100%;border-radius:4px;transition:width 0.3s"></div></div>'
-          + '<div style="width:3em;text-align:right;font-size:12px;font-weight:700;color:' + barColor + '">' + rate + '%</div>'
-          + '</div>';
-      }).join('');
-      return '<div style="margin-bottom:16px">'
-        + '<div style="background:' + teamData.team_color + ';color:white;font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px 8px 0 0">' + teamData.flag + ' ' + getTeamName(teamData) + '</div>'
-        + rows + '</div>';
-    }
-    const t1Duels = _buildSimDuels(gameState.team1, team1Data, _sd.stats1);
-    const t2Duels = _buildSimDuels(gameState.team2, team2Data, _sd.stats2);
-    duelEl.innerHTML = renderDuelTableSim(t1Duels, team1Data) + renderDuelTableSim(t2Duels, team2Data)
-      + '<div style="margin-top:12px"><div style="background:#555;color:white;font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px 8px 0 0">🧤 ' + (window.LANG==='en'?'GK Save Rate':'GKセーブ率') + '</div>' + gkHtml1 + '</div>';
   }, 50);
 
   // 試合詳細ログ（延長後半時は90分+ET1+ET2を結合して表示）

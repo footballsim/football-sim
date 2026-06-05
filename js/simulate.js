@@ -2859,15 +2859,16 @@ function _runDuelSimBothSides(n) {
   const areaAtk = {}, areaDef = {}; // team1 のエリア別攻撃/防守傾向
   const _aFlip = {'DF':'FW','FW':'DF','MF':'MF','CR':'CR','SHOOT':'CR'};
   for (let i = 0; i < n; i++) {
-    const _bldSt = function(data) {
+    const _bldSt = function(data, overrideLineup) {
       const si = system_data.findIndex(function(s) { return s.name === data.default_system; });
+      const ln = (overrideLineup && overrideLineup.length >= 11) ? overrideLineup : data.default_lineup;
       return { systemIdx: si >= 0 ? si : 0, tactics: data.default_tactics,
                keyplayer: data.default_keyplayer,
                marked_player: data.default_marked_player !== undefined ? data.default_marked_player : -1,
-               lineup: [...data.default_lineup.slice(0, 11)] };
+               lineup: [...ln.slice(0, 11)] };
     };
-    const bt1 = buildTeam(team1Data, _bldSt(team1Data));
-    const bt2 = buildTeam(team2Data, _bldSt(team2Data));
+    const bt1 = buildTeam(team1Data, _bldSt(team1Data, team1State && team1State.lineup));
+    const bt2 = buildTeam(team2Data, _bldSt(team2Data, team2State && team2State.lineup));
     [bt1, bt2].forEach(function(t) {
       t.score = 0; t.chanceCounter = 0; t.shootCounter = 0; t.gkSaveCounter = 0;
       t.players.forEach(function(p) { p.chance_counter = 0; p.fatigue = 0; });
