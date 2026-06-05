@@ -884,7 +884,34 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "デ・ウィンター": {"profile": "フィジカルの強さとヘディング能力を活かした対人守備が武器の若きCB。高いスプリント能力も持ち合わせ、現代的なディフェンダーとして成長著しい。", "profile_en": "A young centre-back whose weapons are physical strength and aerial ability in one-on-one defending. His sprint speed adds a modern dimension to his developing game.", "height": 186, "weight": 81},
 "メシェレ": {"profile": "圧倒的な守備意識とインターセプト能力を武器とするCB。セットプレーでの強さと安定した対人守備でベルギー守備陣を補強する経験豊富なディフェンダー。", "profile_en": "A centre-back whose weapons are outstanding defensive awareness and interception ability. His aerial strength at set pieces and reliable one-on-one defending add defensive experience to Belgium.", "height": 186, "weight": 82},
 "ンゴイ": {"profile": "フィジカルとヘディングを武器とする若きCB。高い成長潜力を持ち代表でのデビューを目指す次世代のベルギー守備陣の主力候補。", "profile_en": "A young centre-back whose weapons are physicality and aerial ability. With high growth potential, he is a next-generation candidate working toward breaking into the national team.", "height": 184, "weight": 78},
-"セイス": {"profile": "スプリント能力と積極的な攻撃参加で右サイドを活性化するSB。守備でも安定感を示し将来有望な若きベルギー代表のサイドバック。", "profile_en": "A right-back who activates the flank with sprint speed and aggressive runs forward. Equally reliable defensively, he is a promising young option in Belgium's squad.", "height": 180, "weight": 72}
+"セイス": {"profile": "スプリント能力と積極的な攻撃参加で右サイドを活性化するSB。守備でも安定感を示し将来有望な若きベルギー代表のサイドバック。", "profile_en": "A right-back who activates the flank with sprint speed and aggressive runs forward. Equally reliable defensively, he is a promising young option in Belgium's squad.", "height": 180, "weight": 72},
+// Colombia 2026
+"C・バルガス": {"profile": "安定したポジショニングと確実なセービングでコロンビアのゴールを守る守護神。落ち着いた判断力とコーチングでDFラインを統率する信頼の壁。", "profile_en": "Colombia's reliable goalkeeper who guards the net with steady positioning and confident saves. Composed decision-making and strong communication organise the defensive line.", "height": 191, "weight": 88},
+"D・ムニョス": {"profile": "高い運動量と積極的なオーバーラップで右サイドを制圧するアタッキングSB。攻守両面で献身的に走り続ける現代的なサイドバック。", "profile_en": "An attacking right-back who dominates the flank with tireless overlapping runs and work rate. A modern fullback who contributes fully at both ends of the pitch.", "height": 182, "weight": 78},
+"ルクミ": {"profile": "高い身体能力と空中戦の強さでバックラインを支える大型CB。フィジカルを活かした対人守備でコロンビアの守備を牽引する。", "profile_en": "A physically imposing centre-back who anchors the defensive line with aerial dominance and strong one-on-one defending. A cornerstone of Colombia's defensive structure.", "height": 190, "weight": 84},
+"D・サンチェス": {"profile": "豊富な国際経験と高い守備意識でコロンビアのバックラインを統率するCB。フィジカルと空中戦の強さが武器の頼れるディフェンスリーダー。", "profile_en": "An experienced centre-back with strong defensive awareness who commands Colombia's backline. Reliable physicality and aerial ability make him a trusted defensive leader.", "height": 192, "weight": 82},
+"モヒカ": {"profile": "スプリント力と積極的なオーバーラップで左サイドに推進力をもたらすSB。正確なクロスと精力的な守備でチームに欠かせない左の砲台。", "profile_en": "A marauding left-back whose sprint ability and overlapping runs give the team forward thrust on the left. Accurate crossing and energetic defending make him a key asset.", "height": 181, "weight": 78},
+"R・リオス": {"profile": "豊富なスタミナとインターセプト能力で中盤を制圧する若きアンカー。ショートパスの精度も高くビルドアップの起点にもなる万能型ボランチ。", "profile_en": "A young holding midfielder who controls the midfield with outstanding stamina and interception ability. Sharp in short passing, he also serves as a reliable starting point for build-up play.", "height": 181, "weight": 75},
+"ウリベ": {"profile": "正確なパスと高い守備意識で中盤を統率する経験豊富なボランチ。ロングシュートの精度も高くセットプレーでも存在感を発揮する。", "profile_en": "An experienced holding midfielder who controls the midfield with precise passing and strong defensive awareness. Also capable with long-range shots and effective at set pieces.", "height": 186, "weight": 82},
+"J・アリアス": {"profile": "爆発的なスプリントと鋭いドリブルで右サイドを切り裂くアタッカー。得点への貢献度も高くゴールとアシストを量産する右サイドの推進力。", "profile_en": "An attacker who tears through the right flank with explosive pace and sharp dribbling. High goal contribution with goals and assists makes him a consistent offensive threat on the right.", "height": 178, "weight": 74},
+"J・ロドリゲス": {"profile": "卓越したビジョンと精密なパス技術でコロンビアの攻撃を司るゲームメイカー。正確な左足のFK・シュートでゴールに直結するプレーを見せるスター選手。", "profile_en": "Colombia's playmaker who orchestrates the attack with outstanding vision and pinpoint passing technique. His precise left-footed free kicks and shooting create direct goal threats, making him the team's star player.", "height": 180, "weight": 76},
+"L・ディアス": {"profile": "圧倒的なスピードと高度なドリブル技術で左サイドから相手守備を破壊するエース。コロンビア代表の核として攻撃を牽引するプレミアリーグでも活躍する世界クラスの左ウィング。", "profile_en": "Colombia's ace who destroys opposing defences from the left with overwhelming speed and advanced dribbling. A world-class left winger excelling at the highest level, leading the national team's attack as its central figure.", "height": 178, "weight": 73},
+"ボレ": {"profile": "高さとポストプレーを武器にチームの攻撃を前進させるCF。前線での献身的な守備とリンクアッププレーでコロンビアの攻撃を活性化するストライカー。", "profile_en": "A forward who drives the team's attack forward using his height and hold-up play. A striker who activates Colombia's offence with relentless pressing and intelligent link-up play.", "height": 180, "weight": 76},
+"A・モンテロ": {"profile": "安定したセービングと高い反応速度を誇るGK。コーチングの質も高くDFラインと緊密に連携するバックアップ守護神。", "profile_en": "A goalkeeper with reliable saves and sharp reflexes. His strong communication and close coordination with the defensive line make him a dependable backup.", "height": 188, "weight": 84},
+"キンタナ": {"profile": "高い身体能力を活かしたダイナミックなセービングが武器の若きGK。成長著しく将来が期待される次世代の守護神候補。", "profile_en": "A young goalkeeper whose dynamic saves demonstrate impressive athleticism. A rapidly improving talent attracting attention as a next-generation keeper.", "height": 194, "weight": 89},
+"C・モスケラ": {"profile": "スプリント能力とフィジカルを兼備する若きCB。対人守備の強さと成長ポテンシャルでコロンビア守備陣の未来を担う期待の新星。", "profile_en": "A young centre-back combining sprint speed with physicality. Strong one-on-one defending and high growth potential make him a promising cornerstone of Colombia's defensive future.", "height": 185, "weight": 78},
+"Y・モスケラ": {"profile": "高い守備意識とカバーリング能力を持つ若手CB。経験を積みながらコロンビア代表の守備を支える将来有望なディフェンダー。", "profile_en": "A young centre-back with strong defensive awareness and coverage ability. A promising defender growing into the role of anchoring Colombia's backline.", "height": 187, "weight": 81},
+"S・アリアス": {"profile": "豊富な経験と安定した守備でコロンビア代表の右サイドを支えるベテランSB。適切なポジショニングと攻守バランスでバックラインに落ち着きをもたらす。", "profile_en": "A veteran right-back whose experience and steady defending provide reliability on Colombia's right flank. His positional sense and balanced contribution bring composure to the backline.", "height": 181, "weight": 75},
+"ファブラ": {"profile": "積極的な攻撃参加と正確なクロスで左サイドを制圧する攻撃的SB。守備での安定感も持ち合わせコロンビアの左サイドを長年支え続ける。", "profile_en": "An attacking left-back who dominates his flank with forward runs and accurate crossing. Equally stable in defence, he has been a long-term fixture on Colombia's left side.", "height": 184, "weight": 77},
+"レルマ": {"profile": "豊富なスタミナと高い守備意識で中盤を統率するボランチ。フィジカルの強さとインターセプトの精度でコロンビアの守備の要として機能する。", "profile_en": "A holding midfielder who organises the midfield with outstanding stamina and defensive awareness. Physical strength and sharp interceptions make him a key defensive asset for Colombia.", "height": 186, "weight": 82},
+"プエルタ": {"profile": "技術とスタミナを兼備する若き万能型MF。攻守両面でエネルギッシュに貢献し、鋭いパスセンスでコロンビアの中盤に新しい推進力をもたらす。", "profile_en": "A young all-round midfielder combining technique with stamina. Bringing energetic contribution at both ends of the pitch, his sharp passing instinct adds new midfield drive to Colombia.", "height": 179, "weight": 73},
+"S・ゴメス": {"profile": "正確なパスと読みの鋭さを武器とする技術派ボランチ。守備でも貢献し安定したプレーでコロンビアの中盤に落ち着きをもたらす。", "profile_en": "A technically-minded defensive midfielder whose weapons are precise passing and sharp game-reading. Contributes defensively and brings calm composure to Colombia's midfield.", "height": 183, "weight": 79},
+"クチョ": {"profile": "爆発的なスプリントとフィニッシュ力を兼備するアタッカー。決定的な場面での冷静さとフレキシブルなポジショニングでコロンビアの攻撃に多彩な選択肢をもたらす。", "profile_en": "An attacker combining explosive pace with clinical finishing. Composure in decisive moments and flexible positioning provide Colombia's attack with a variety of options.", "height": 183, "weight": 80},
+"シニステラ": {"profile": "鋭いドリブルと積極的な縦の突破で左サイドに脅威をもたらす若手ウィンガー。高いスプリント能力と柔軟性で両サイドをこなす万能アタッカー。", "profile_en": "A young winger who threatens from the left with sharp dribbling and direct vertical runs. A versatile attacker whose sprint speed and flexibility allow him to operate on both flanks.", "height": 176, "weight": 73},
+"クアドラード": {"profile": "豊富な経験と高いテクニックで右サイドから攻撃を演出するベテランウィンガー。正確なドリブルとクロスでコロンビアの右サイドに創造性をもたらす。", "profile_en": "A veteran winger who uses vast experience and high technique to create from the right flank. Precise dribbling and crossing bring creativity and experience to Colombia's right side.", "height": 179, "weight": 73},
+"J・コルドバ": {"profile": "高さとフィジカルを武器にポストプレーで前線を牽引する大型ストライカー。ヘディングと体の強さでDFを圧倒し、チームに別の攻撃パターンをもたらす。", "profile_en": "A physically imposing target striker who leads the line with hold-up play using his height and strength. Dominant in aerial duels, he offers Colombia an alternative attacking option.", "height": 195, "weight": 89},
+"M・ボルハ": {"profile": "力強いフィジカルとゴール前での勝負強さを誇るストライカー。ボックス内での決定力とポストプレーでコロンビアの攻撃を活性化する。", "profile_en": "A powerful striker with physicality and clinical finishing in front of goal. His box presence and hold-up play bring consistent attacking contribution to Colombia.", "height": 187, "weight": 86},
+"アルサーテ": {"profile": "豊富なスタミナと正確なパスで中盤のバランスを保つ守備的MF。守備貢献と安定したボール回しでコロンビアの中盤を支えるユーティリティプレイヤー。", "profile_en": "A defensive midfielder who maintains midfield balance with outstanding stamina and accurate passing. A utility player who supports Colombia's midfield through defensive contribution and reliable distribution.", "height": 181, "weight": 74}
 };
 
 const PARAM_NAMES = [
@@ -2212,6 +2239,66 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ピャツァ",en_name:"Pjaca",long_name:"マルコ・ピャツァ",positions:["左WG","右WG"],params:[60,66,76,78,72,58,76,72,76,66,60,62,62,66,52,58,74,68,34,32,30,32,40,50,50,56,64,64,75]},
       // Sub CF: Spikic (young talent, estimated)
       {name:"スピキッチ",en_name:"Spikic",long_name:"ダリオ・スピキッチ",positions:["CF","右WG"],params:[62,68,76,80,74,62,72,70,76,62,58,62,62,66,48,52,72,66,32,30,28,30,38,50,50,58,62,62,75]}
+    ]
+  },
+  colombia2026: {
+    name:"コロンビア",en_name:"Colombia",team_color:"#FCD116",flag:"🇨🇴",
+    default_system:"4-2-3-1",default_tactics:TACTICS_FREE,
+    default_keyplayer:9,default_marked_player:8,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Camilo Vargas (est. OVR79, DIV78, HAN77, KIC74, REF79, SPD65, POS79)
+      {name:"C・バルガス",en_name:"C.Vargas",long_name:"カミロ・バルガス",positions:["GK"],params:[50,50,50,50,79,65,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,78,77,50,79,74,75]},
+      // RB: Daniel Muñoz (est. OVR77, PAC80, SHO62, PAS71, DRI75, DEF75, PHY76)
+      {name:"D・ムニョス",en_name:"D.Munoz",long_name:"ダニエル・ムニョス",positions:["右SB","右SMF"],params:[74,78,80,82,78,72,76,72,78,70,66,54,54,60,38,40,72,58,74,74,72,72,70,50,50,68,70,72,75]},
+      // RCB: Jhon Lucumí (est. OVR80, PAC73, SHO47, PAS67, DRI64, DEF82, PHY83)
+      {name:"ルクミ",en_name:"Lucumi",long_name:"ジョン・ルクミ",positions:["CB"],params:[82,82,72,70,72,84,62,62,68,66,60,38,36,46,30,32,60,42,80,82,82,80,80,50,50,82,72,78,75]},
+      // LCB: Davinson Sánchez (est. OVR80, PAC75, SHO41, PAS63, DRI65, DEF82, PHY83)
+      {name:"D・サンチェス",en_name:"D.Sanchez",long_name:"ダヴィンソン・サンチェス",positions:["CB"],params:[82,80,74,72,72,82,62,62,68,64,58,34,32,44,28,30,58,40,80,82,82,80,80,50,50,82,70,78,75]},
+      // LB: Johan Mojica (est. OVR77, PAC80, SHO56, PAS73, DRI76, DEF70, PHY68)
+      {name:"モヒカ",en_name:"Mojica",long_name:"ヨハン・モヒカ",positions:["左SB"],params:[64,74,80,82,76,62,78,74,80,72,68,50,48,54,44,50,74,60,68,70,68,66,66,50,50,58,70,70,75]},
+      // CDM: Richard Ríos (est. OVR79, PAC77, SHO68, PAS78, DRI79, DEF75, PHY74)
+      {name:"R・リオス",en_name:"R.Rios",long_name:"リチャード・リオス",positions:["DMF","CMF"],params:[70,78,76,78,78,68,80,78,78,78,74,64,66,68,54,58,78,68,74,76,74,72,72,50,50,64,74,76,75]},
+      // CDM: Matheus Uribe (est. OVR78, PAC72, SHO70, PAS76, DRI74, DEF79, PHY78)
+      {name:"ウリベ",en_name:"M.Uribe",long_name:"マテウス・ウリベ",positions:["DMF","CMF"],params:[78,80,70,72,74,72,74,72,72,76,72,66,68,70,60,62,74,68,78,80,78,76,76,50,50,72,72,76,75]},
+      // RAM: Jhon Arias (est. OVR78, PAC85, SHO72, PAS75, DRI83, DEF52, PHY68)
+      {name:"J・アリアス",en_name:"J.Arias",long_name:"ジョン・アリアス",positions:["右SMF","右WG","OMF"],params:[64,70,84,86,78,62,84,82,84,74,68,70,72,74,56,62,82,74,50,48,46,50,58,50,50,58,72,72,75]},
+      // CAM: James Rodríguez (est. OVR84, PAC68, SHO82, PAS91, DRI87, DEF46, PHY73)
+      {name:"J・ロドリゲス",en_name:"James",long_name:"ハメス・ロドリゲス",positions:["OMF","CMF"],params:[70,70,68,66,84,66,88,86,78,90,86,78,80,80,82,86,88,84,44,44,42,40,46,50,50,64,84,82,75]},
+      // LAM: Luis Díaz (est. OVR87, PAC91, SHO83, PAS79, DRI89, DEF44, PHY72)
+      {name:"L・ディアス",en_name:"L.Diaz",long_name:"ルイス・ディアス",positions:["左WG","左SMF","CF"],params:[68,72,90,92,84,68,92,88,90,78,72,80,82,82,66,72,90,82,40,38,36,40,52,50,50,60,80,80,75]},
+      // ST: Rafael Santos Borré (est. OVR79, PAC78, SHO78, PAS70, DRI73, DEF45, PHY78)
+      {name:"ボレ",en_name:"Borre",long_name:"ラファエル・サントス・ボレ",positions:["CF"],params:[76,76,78,80,76,76,72,72,76,68,64,76,78,78,52,56,72,78,42,40,38,42,50,50,50,74,72,76,75]},
+      // Sub GK: Álvaro Montero (est. OVR78, DIV77, HAN76, KIC72, REF77, SPD66, POS77)
+      {name:"A・モンテロ",en_name:"A.Montero",long_name:"アルバロ・モンテロ",positions:["GK"],params:[50,50,50,50,77,66,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,77,76,50,77,70,75]},
+      // Sub GK: Aldair Quintana (est. OVR74, DIV74, HAN72, KIC68, REF73, SPD68, POS73)
+      {name:"キンタナ",en_name:"Quintana",long_name:"アルダイル・キンタナ",positions:["GK"],params:[50,50,50,50,73,68,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,74,72,50,73,68,75]},
+      // Sub CB: Cristhian Mosquera (est. OVR75, PAC78, SHO42, PAS60, DRI66, DEF78, PHY80)
+      {name:"C・モスケラ",en_name:"C.Mosquera",long_name:"クリスティアン・モスケラ",positions:["CB"],params:[78,82,78,76,72,82,64,62,72,60,54,34,32,44,28,30,60,38,76,78,76,76,74,50,50,78,68,72,75]},
+      // Sub CB: Yerson Mosquera (est. OVR73, PAC72, SHO40, PAS60, DRI62, DEF76, PHY76)
+      {name:"Y・モスケラ",en_name:"Y.Mosquera",long_name:"イェルソン・モスケラ",positions:["CB"],params:[76,78,72,70,68,78,60,58,66,60,52,32,30,42,28,28,58,36,74,76,74,74,72,50,50,76,66,70,75]},
+      // Sub RB: Santiago Arias (est. OVR75, PAC78, SHO56, PAS70, DRI70, DEF74, PHY70)
+      {name:"S・アリアス",en_name:"S.Arias",long_name:"サンティアゴ・アリアス",positions:["右SB"],params:[66,72,78,80,72,66,72,70,74,68,64,50,48,54,38,42,70,54,72,74,72,72,70,50,50,62,68,68,75]},
+      // Sub LB: Frank Fabra (est. OVR76, PAC78, SHO55, PAS72, DRI74, DEF70, PHY72)
+      {name:"ファブラ",en_name:"Fabra",long_name:"フランク・ファブラ",positions:["左SB","左SMF"],params:[68,74,78,80,74,66,76,72,78,70,66,48,46,52,44,48,72,60,68,70,68,66,66,50,50,64,68,70,75]},
+      // Sub CDM: Jefferson Lerma (est. OVR78, PAC72, SHO64, PAS75, DRI73, DEF80, PHY82)
+      {name:"レルマ",en_name:"Lerma",long_name:"ジェファーソン・レルマ",positions:["DMF","CMF"],params:[82,82,72,70,74,80,72,72,72,74,70,60,62,66,50,52,72,64,80,82,80,78,78,50,50,78,72,76,75]},
+      // Sub CM: Gustavo Puerta (est. OVR75, PAC76, SHO72, PAS78, DRI78, DEF62, PHY72)
+      {name:"プエルタ",en_name:"Puerta",long_name:"グスタボ・プエルタ",positions:["CMF","DMF"],params:[68,78,76,78,78,68,80,76,78,78,74,68,70,72,58,62,78,70,62,64,62,60,60,50,50,66,72,74,75]},
+      // Sub CM: Sebastián Gómez (est. OVR74, PAC71, SHO64, PAS76, DRI74, DEF70, PHY68)
+      {name:"S・ゴメス",en_name:"S.Gomez",long_name:"セバスティアン・ゴメス",positions:["CMF","DMF"],params:[64,72,70,72,74,64,76,72,72,76,72,60,62,64,52,56,74,66,68,70,68,66,66,50,50,60,68,68,75]},
+      // Sub CF: Cucho Hernández (est. OVR82, PAC88, SHO81, PAS72, DRI85, DEF40, PHY78)
+      {name:"クチョ",en_name:"Cucho",long_name:"フアン・カミロ・エルナンデス",positions:["CF","左WG","右WG"],params:[76,72,86,88,80,76,86,84,88,70,64,78,80,80,52,58,84,78,38,36,34,36,52,50,50,76,74,76,75]},
+      // Sub LW: Luis Sinisterra (est. OVR79, PAC85, SHO74, PAS74, DRI83, DEF44, PHY70)
+      {name:"シニステラ",en_name:"Sinisterra",long_name:"ルイス・シニステラ",positions:["左WG","右WG","左SMF"],params:[66,68,84,86,78,64,84,82,84,72,66,72,74,76,56,64,82,72,42,40,38,40,50,50,50,58,72,68,75]},
+      // Sub RW: Juan Cuadrado (est. OVR80, PAC82, SHO72, PAS78, DRI85, DEF58, PHY66)
+      {name:"クアドラード",en_name:"Cuadrado",long_name:"フアン・クアドラード",positions:["右WG","右SMF","右SB"],params:[62,66,80,82,80,58,86,84,82,76,70,68,70,72,64,70,84,72,54,52,50,54,60,50,50,52,72,70,75]},
+      // Sub CF: Jhon Córdoba (est. OVR78, PAC78, SHO75, PAS62, DRI68, DEF38, PHY84)
+      {name:"J・コルドバ",en_name:"J.Cordoba",long_name:"ジョン・コルドバ",positions:["CF"],params:[84,78,78,80,70,86,66,66,70,60,56,74,74,78,44,46,66,76,36,34,32,34,44,50,50,84,68,72,75]},
+      // Sub CF: Miguel Borja (est. OVR76, PAC76, SHO76, PAS64, DRI66, DEF36, PHY80)
+      {name:"M・ボルハ",en_name:"M.Borja",long_name:"ミゲル・ボルハ",positions:["CF"],params:[80,78,74,76,68,82,62,62,68,62,56,74,74,78,42,44,62,74,34,32,30,32,40,50,50,80,66,70,75]},
+      // Sub CM: Stiven Alzate (est. OVR74, PAC76, SHO65, PAS74, DRI76, DEF60, PHY68)
+      {name:"アルサーテ",en_name:"Alzate",long_name:"スティベン・アルサーテ",positions:["CMF","DMF","右SMF"],params:[64,74,76,78,74,64,78,74,76,74,70,60,62,64,52,56,74,66,58,60,58,56,56,50,50,60,68,68,75]}
     ]
   },
 };
