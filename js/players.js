@@ -2206,7 +2206,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // LSM: Perisic (FC26 OVR80, PAC77, SHO72, PAS76, DRI80, DEF58, PHY78)
       {name:"ペリシッチ",en_name:"Perisic",long_name:"イヴァン・ペリシッチ",positions:["左SMF","左WG","左SB"],params:[76,80,76,78,76,76,80,78,76,76,72,70,72,74,58,64,80,76,54,52,50,52,60,50,50,74,74,76,75]},
       // OMF: Modric (FC26 OVR84, PAC78, SHO72, PAS92, DRI88, DEF67, PHY68)
-      {name:"モドリッチ",en_name:"Modric",long_name:"ルカ・モドリッチ",positions:["OMF","CMF"],params:[64,76,76,78,82,62,90,88,82,92,86,68,70,72,72,76,90,86,64,66,64,62,62,50,50,60,84,84,75]},
+      {name:"モドリッチ",en_name:"Modric",long_name:"ルカ・モドリッチ",positions:["OMF","CMF","DMF"],params:[64,76,76,78,82,62,90,88,82,92,86,68,70,72,72,76,90,86,64,66,64,62,62,50,50,60,84,84,75]},
       // CF: Petkovic (FC26 OVR74, PAC66, SHO72, PAS63, DRI67, DEF40, PHY80)
       {name:"ペトコビッチ",en_name:"Petkovic",long_name:"ブルーノ・ペトコビッチ",positions:["CF"],params:[80,78,64,68,66,82,64,64,66,62,58,72,72,76,44,46,64,76,36,36,34,36,44,50,50,80,68,72,75]},
       // Sub GK: Grbic (FC26 OVR75, DIV76, HAN74, KIC71, REF76, SPD75, POS74)
