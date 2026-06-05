@@ -2244,7 +2244,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   colombia2026: {
     name:"コロンビア",en_name:"Colombia",team_color:"#FCD116",flag:"🇨🇴",
     default_system:"4-2-3-1",default_tactics:TACTICS_FREE,
-    default_keyplayer:9,default_marked_player:8,
+    default_keyplayer:8,default_marked_player:9,
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
     players:[
       // GK: Camilo Vargas (est. OVR79, DIV78, HAN77, KIC74, REF79, SPD65, POS79)
@@ -2263,10 +2263,10 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ウリベ",en_name:"M.Uribe",long_name:"マテウス・ウリベ",positions:["DMF","CMF"],params:[78,80,70,72,74,72,74,72,72,76,72,66,68,70,60,62,74,68,78,80,78,76,76,50,50,72,72,76,75]},
       // RAM: Jhon Arias (est. OVR78, PAC85, SHO72, PAS75, DRI83, DEF52, PHY68)
       {name:"J・アリアス",en_name:"J.Arias",long_name:"ジョン・アリアス",positions:["右SMF","右WG","OMF"],params:[64,70,84,86,78,62,84,82,84,74,68,70,72,74,56,62,82,74,50,48,46,50,58,50,50,58,72,72,75]},
-      // CAM: James Rodríguez (est. OVR84, PAC68, SHO82, PAS91, DRI87, DEF46, PHY73)
-      {name:"J・ロドリゲス",en_name:"James",long_name:"ハメス・ロドリゲス",positions:["OMF","CMF"],params:[70,70,68,66,84,66,88,86,78,90,86,78,80,80,82,86,88,84,44,44,42,40,46,50,50,64,84,82,75]},
       // LAM: Luis Díaz (est. OVR87, PAC91, SHO83, PAS79, DRI89, DEF44, PHY72)
       {name:"L・ディアス",en_name:"L.Diaz",long_name:"ルイス・ディアス",positions:["左WG","左SMF","CF"],params:[68,72,90,92,84,68,92,88,90,78,72,80,82,82,66,72,90,82,40,38,36,40,52,50,50,60,80,80,75]},
+      // CAM: James Rodríguez (est. OVR84, PAC68, SHO82, PAS91, DRI87, DEF46, PHY73)
+      {name:"J・ロドリゲス",en_name:"James",long_name:"ハメス・ロドリゲス",positions:["OMF","CMF"],params:[70,70,68,66,84,66,88,86,78,90,86,78,80,80,82,86,88,84,44,44,42,40,46,50,50,64,84,82,75]},
       // ST: Rafael Santos Borré (est. OVR79, PAC78, SHO78, PAS70, DRI73, DEF45, PHY78)
       {name:"ボレ",en_name:"Borre",long_name:"ラファエル・サントス・ボレ",positions:["CF"],params:[76,76,78,80,76,76,72,72,76,68,64,76,78,78,52,56,72,78,42,40,38,42,50,50,50,74,72,76,75]},
       // Sub GK: Álvaro Montero (est. OVR78, DIV77, HAN76, KIC72, REF77, SPD66, POS77)
