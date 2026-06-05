@@ -59,6 +59,7 @@ let subsUsed = 0;    // 交代回数（最大3、ハーフタイムはカウン�
 let htSubsCount = 0; // ハーフタイム中の交代人数（closeHalfTimeModal時にsubsCountへ加算）
 let _htMode = false; // ハーフタイム選手変更中フラグ
 let _subbedOff = new Set(); // 一度交代で退いた選手のインデックス（再出場不可）
+let _pendingSubLog = []; // 交代ログ一時保留 [{out, outEn, in, inEn}]
 
 // ============================================================
 // SCREEN MANAGEMENT
@@ -833,7 +834,6 @@ function selectTeam2(key) {
   // 日本が team1 の場合は対戦相手別最適データを優先使用
   if (t1key === 'japan2026vsNetherlands') {
     const oppMap = {
-      'england2026':     'japan2026vsEngland',
       'netherlands2026': 'japan2026vsNetherlands',
       'tunisia2026':     'japan2026vsTunisia',
       'sweden2026':      'japan2026vsSweden',
@@ -904,10 +904,10 @@ function selectMatch(key) {
     team1Data = TEAM_DATA.japan2026vsNetherlands;
     team2Data = TEAM_DATA.spain2026;
   } else if (key === '2026vsイングランド') {
-    team1Data = TEAM_DATA.japan2026vsEngland;
+    team1Data = TEAM_DATA.japan2026vsNetherlands;
     team2Data = TEAM_DATA.england2026;
   } else {
-    team1Data = TEAM_DATA.japan2026vsEngland;
+    team1Data = TEAM_DATA.japan2026vsNetherlands;
     team2Data = TEAM_DATA.england2026;
   }
   _team1DataKey = Object.keys(TEAM_DATA).find(k => TEAM_DATA[k] === team1Data) || 'japan2026vsNetherlands';
@@ -1595,6 +1595,10 @@ function applyDrop(x, y) {
       htSubsCount++;
       _updateHtSubsLabel();
     }
+    // 交代ログに記録
+    const _outP = team1Data.players[targetPlayerIdx];
+    const _inP  = team1Data.players[dragState.sourcePlayerIdx];
+    if (_outP && _inP) _pendingSubLog.push({ out: _outP.name, outEn: _outP.en_name, in: _inP.name, inEn: _inP.en_name });
     team1State.lineup[targetPos] = dragState.sourcePlayerIdx;
   } else if (dragState.sourceType === 'starter') {
     // スタメン→スタメン（ポジション入れ替え、交代消費なし）
@@ -1714,6 +1718,7 @@ function startGame() {
   htSubsCount = 0;
   _htMode = false;
   _subbedOff = new Set();
+  _pendingSubLog = [];
 
   // Build team objects
   const t1 = buildTeam(team1Data, team1State);
@@ -2813,12 +2818,41 @@ function renderSceneField(sc, prevSc) {
 // ハーフタイムモーダル
 // ============================================================
 // ============================================================
+// 交代ログ挿入
+// ============================================================
+function _insertSubLog(timeLabel) {
+  if (!_pendingSubLog.length) return;
+  const logArea = document.getElementById('log-area');
+  if (!logArea) { _pendingSubLog = []; return; }
+  const isEn = window.LANG === 'en';
+  const div = document.createElement('div');
+  div.className = 'log-event normal';
+  div.style.cssText = 'background:#f0f8f2;border-left:3px solid #2d7a3a;padding:8px 12px;margin-bottom:8px;border-radius:4px';
+  const timeDiv = document.createElement('div');
+  timeDiv.className = 'log-time';
+  timeDiv.textContent = timeLabel;
+  div.appendChild(timeDiv);
+  const textDiv = document.createElement('div');
+  textDiv.className = 'log-text';
+  textDiv.style.color = '#2d7a3a';
+  textDiv.innerHTML = _pendingSubLog.map(function(s) {
+    const outDisp = (isEn && s.outEn) ? s.outEn : s.out;
+    const inDisp  = (isEn && s.inEn)  ? s.inEn  : s.in;
+    return '🔄 ' + outDisp + ' → ' + inDisp;
+  }).join('<br>');
+  div.appendChild(textDiv);
+  logArea.appendChild(div);
+  logArea.scrollTop = logArea.scrollHeight;
+  _pendingSubLog = [];
+}
+
+// ============================================================
 // コーチ情報カード
 // ============================================================
 function _buildCoachCard(label, body) {
   const div = document.createElement('div');
   div.className = 'coach-card';
-  div.innerHTML = '<div class="coach-card-icon">🎙️</div><div><div class="coach-card-label">' + label + '</div><div class="coach-card-body">' + body + '</div></div>';
+  div.innerHTML = '<div class="coach-card-icon">💬</div><div><div class="coach-card-label">' + label + '</div><div class="coach-card-body">' + body + '</div></div>';
   return div;
 }
 
@@ -2835,7 +2869,7 @@ function _maybeInsertCoachCard() {
         ? 'The opponent is building their attack around <b>' + name + '</b>.'
         : '相手は <b>' + name + '</b> 選手にボールを集めているようです。';
       // 直接挿入せず保留変数に退避 → 次の「次へ」で表示
-      _pendingCoachCardEl = _buildCoachCard(isEn ? '📋 Early Report' : '📋 前半序盤の情報', msg);
+      _pendingCoachCardEl = _buildCoachCard(isEn ? "Coach's Note" : 'コーチからの指摘', msg);
     }
   }
 
@@ -2848,7 +2882,7 @@ function _maybeInsertCoachCard() {
         ? 'The opponent is closely marking <b>' + name + '</b>. Watch out for tight coverage.'
         : gameState.team1.name + 'の <b>' + name + '</b> 選手へのマークがキツイですね。';
       // 直接挿入せず保留変数に退避 → 次の「次へ」で表示
-      _pendingCoachCardEl = _buildCoachCard(isEn ? '📋 Mid-Half Report' : '📋 前半中盤の情報', msg);
+      _pendingCoachCardEl = _buildCoachCard(isEn ? "Coach's Note" : 'コーチからの指摘', msg);
     }
   }
 }
@@ -3167,7 +3201,10 @@ function closeSecondHalfSub() {
   }
   // 後半再計算（交代反映）
   _recalcSecondHalf();
+  const _subTime = (currentChanceIdx > 0 && chanceResults[currentChanceIdx - 1])
+    ? chanceResults[currentChanceIdx - 1].time : '';
   showScreen('game');
+  _insertSubLog(_subTime);
   _updateSubBtn();
 }
 
@@ -3183,6 +3220,7 @@ function _updateHtSubsLabel() {
 function closeHalfTimeModal() {
   document.getElementById('halftime-modal').style.display = 'none';
   _recalcSecondHalf();
+  _insertSubLog('HT');
   document.getElementById('next-btn').disabled = false;
   document.getElementById('all-btn').disabled = false;
 }
