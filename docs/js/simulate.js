@@ -765,6 +765,9 @@ function showScreen(name) {
       {data: TEAM_DATA.usa2026,               key: 'usa2026'},
       {data: TEAM_DATA.portugal2026,          key: 'portugal2026'},
       {data: TEAM_DATA.korea2026,             key: 'korea2026'},
+      {data: TEAM_DATA.croatia2026,           key: 'croatia2026'},
+      {data: TEAM_DATA.belgium2026,           key: 'belgium2026'},
+      {data: TEAM_DATA.colombia2026,          key: 'colombia2026'},
     ]);
     document.getElementById('players2018-body').dataset.built = '1';
   }
@@ -793,6 +796,9 @@ const SINGLE_TEAMS = [
   {key:'usa2026',            label:'アメリカ', flag:'🇺🇸'},
   {key:'portugal2026',       label:'ポルトガル', flag:'🇵🇹'},
   {key:'korea2026',          label:'韓国', flag:'🇰🇷'},
+  {key:'croatia2026',        label:'クロアチア', flag:'🇭🇷'},
+  {key:'belgium2026',        label:'ベルギー', flag:'🇧🇪'},
+  {key:'colombia2026',       label:'コロンビア', flag:'🇨🇴'},
 ];
 
 let _singleTeam1Key = null;
@@ -3030,6 +3036,7 @@ function _showHalfTimeModal() {
 
 function _buildHtTactics() {
   const list = document.getElementById('ht-tactics-list');
+  if (!list) return; // モーダルから戦術セクションを削除した場合は無視
   list.innerHTML = '';
   const names = t('tacticsNames');
   names.forEach((name, i) => {
@@ -3123,6 +3130,7 @@ function _updateSubBtn() {
   const canSub = subsCount < 5 && subsUsed < 3 && afterKickoff && currentChanceIdx < chanceResults.length;
   btn.style.display = canSub ? 'block' : 'none';
   btn.textContent = `${t('wcSub')}（${t('wcSubRemain')}${5 - subsCount}${t('wcSubPeople')}${3 - subsUsed}${t('wcSubTimes')}`;
+  // スクロールは nextChance() の double rAF が担うため、ここでは不要
 }
 
 function openSecondHalfSub() {
@@ -3341,7 +3349,10 @@ function nextChance() {
     setTimeout(() => anim.style.display = 'none', 1600);
   }
 
-  logArea.scrollTop = logArea.scrollHeight;
+  // double rAF: _updateSubBtn等によるレイアウト変化が終わってからスクロール
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    logArea.scrollTop = logArea.scrollHeight;
+  }));
   currentSceneIdx++;
 
   if (currentSceneIdx >= res.textScenes.length) {
