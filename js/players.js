@@ -913,6 +913,7 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "M・ボルハ": {"profile": "力強いフィジカルとゴール前での勝負強さを誇るストライカー。ボックス内での決定力とポストプレーでコロンビアの攻撃を活性化する。", "profile_en": "A powerful striker with physicality and clinical finishing in front of goal. His box presence and hold-up play bring consistent attacking contribution to Colombia.", "height": 187, "weight": 86},
 "アルサーテ": {"profile": "豊富なスタミナと正確なパスで中盤のバランスを保つ守備的MF。守備貢献と安定したボール回しでコロンビアの中盤を支えるユーティリティプレイヤー。", "profile_en": "A defensive midfielder who maintains midfield balance with outstanding stamina and accurate passing. A utility player who supports Colombia's midfield through defensive contribution and reliable distribution.", "height": 181, "weight": 74},
 // Uruguay 2026
+"ロシェ": {"profile": "安定したセービングとエリア内の統率力を誇るウルグアイの正GK。冷静な判断力と正確なポジショニングでゴールを守る信頼の守護神。", "profile_en": "Uruguay's first-choice goalkeeper, renowned for consistent shot-stopping and commanding his penalty area. Composed decision-making and precise positioning make him a dependable presence in goal.", "height": 190, "weight": 85},
 "ムスレラ": {"profile": "多くの代表キャップを持つベテランGK。豊富な経験とリーダーシップでゴールを死守するウルグアイ不動の守護神。", "profile_en": "Uruguay's legendary veteran goalkeeper with an exceptional number of international caps. His experience and leadership have made him an enduring presence between the posts.", "height": 190, "weight": 85},
 "バレラ": {"profile": "豊富な経験と安定した守備でウルグアイの右サイドを支えるベテランSB。バランスの取れた攻守でチームに落ち着きをもたらす。", "profile_en": "A veteran right-back who supports Uruguay's right flank with experience and steady defending. His balanced play on both sides of the ball brings composure to the backline.", "height": 180, "weight": 76},
 "R・アラウホ": {"profile": "圧倒的なフィジカルと高い守備能力を誇るウルグアイの主力CB。空中戦の強さと果敢なタックルで相手の攻撃を無力化する守備の砦。", "profile_en": "Uruguay's powerhouse centre-back, combining exceptional physicality with elite defensive ability. His aerial dominance and aggressive tackling neutralise opposing attacks.", "height": 188, "weight": 82},
@@ -937,7 +938,11 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "B・ロドリゲス": {"profile": "爆発的なスピードと突破力でサイドを制圧するウィンガー。直線的なドリブルと鋭いシュートで相手守備に脅威を与える。", "profile_en": "A winger who commands the flank with explosive pace and penetrating runs. His direct dribbling and sharp shooting pose a constant threat to opposing defences.", "height": 178, "weight": 73},
 "ペリストリ": {"profile": "スピードとドリブルを武器とする若き右ウィンガー。積極的な仕掛けと高い技術でウルグアイの攻撃に勢いをもたらす期待の選手。", "profile_en": "A young right winger whose weapons are pace and dribbling. His direct play and technical quality inject energy into Uruguay's forward line.", "height": 175, "weight": 70},
 "F・ビーニャス": {"profile": "フィジカルとゴール前での決定力を備えるポストプレイヤー型FW。高さを活かしたターゲットマンとしてウルグアイの攻撃に厚みをもたらす。", "profile_en": "A target-man type forward with physicality and clinical finishing in the box. His height and hold-up play add depth to Uruguay's attacking options.", "height": 188, "weight": 83},
-"アギーレ": {"profile": "ゴール前での勝負強さと豊富な経験を持つベテランストライカー。ポジショニングの良さとシュートの正確さで安定して得点を積み重ねる。", "profile_en": "A veteran striker with clinical finishing and vast experience in front of goal. Consistent goalscoring through intelligent positioning and accurate shooting.", "height": 183, "weight": 80}
+"J・サナブリア": {"profile": "安定した守備と豊富なスタミナを武器とする左SB。堅実なポジショニングでウルグアイのバックラインを支える。", "profile_en": "A left-back whose weapons are solid defending and high stamina. His dependable positioning provides support to Uruguay's defensive line.", "height": 183, "weight": 76},
+"J・L・ロドリゲス": {"profile": "攻守バランスの取れたプレーでウルグアイの右サイドを支えるSB。安定した守備と適切なポジショニングが持ち味。", "profile_en": "A full-back who supports Uruguay's right flank with a balanced contribution on both sides of the ball. Dependable defending and good positioning are his hallmarks.", "height": 178, "weight": 72},
+"フォンセカ": {"profile": "高い守備意識とボール奪取能力を誇るDMF。豊富なスタミナとポジショニングでウルグアイの中盤を守る。", "profile_en": "A defensive midfielder with strong positional awareness and ball-winning ability. His stamina and positioning protect Uruguay's midfield.", "height": 185, "weight": 78},
+"F・トーレス": {"profile": "爆発的なスプリントとドリブルで右サイドから仕掛ける攻撃的ウィンガー。ゴールへの積極的な姿勢でウルグアイの攻撃に推進力をもたらす。", "profile_en": "An attacking winger who drives at defences from the right with explosive pace and dribbling. His direct approach and attacking intent provide forward thrust for Uruguay.", "height": 180, "weight": 75},
+"A・アルバレス": {"profile": "ゴール前での積極性と鋭いシュートセンスを武器とする若きストライカー。高い成長潜力を持つウルグアイ期待のCF。", "profile_en": "A young striker whose weapons are an aggressive edge in front of goal and sharp shooting sense. A high-potential forward with great promise for Uruguay.", "height": 181, "weight": 75}
 };
 
 const PARAM_NAMES = [
@@ -2329,12 +2334,12 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   uruguay2026: {
     name:"ウルグアイ",en_name:"Uruguay",team_color:"#4EB5E0",flag:"🇺🇾",
-    default_system:"4-3-2-1B",default_tactics:TACTICS_FREE,
-    default_keyplayer:6,default_marked_player:10,
+    default_system:"4-2-3-1",default_tactics:TACTICS_FREE,
+    default_keyplayer:5,default_marked_player:10,
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
     players:[
-      // GK: Muslera (FC26 OVR79, DIV81, HAN80, KIC66, REF77, SPD43, POS78)
-      {name:"ムスレラ",en_name:"Muslera",long_name:"フェルナンド・ムスレラ",positions:["GK"],params:[50,50,50,50,77,43,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,81,80,50,78,76,75]},
+      // GK: Rochet (est. OVR76, DIV76, HAN74, KIC72, REF78, SPD58, POS76) ← starter
+      {name:"ロシェ",en_name:"Rochet",long_name:"セルヒオ・ロシェ",positions:["GK"],params:[50,50,50,50,78,58,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,76,72,75]},
       // RB: Varela (est. OVR70)
       {name:"バレラ",en_name:"G.Varela",long_name:"ギジェルモ・バレラ",positions:["右SB"],params:[66,68,72,73,70,64,68,68,70,66,60,44,44,50,36,36,67,47,68,70,68,68,66,50,50,62,68,70,75]},
       // RCB: R.Araujo (FC26 OVR83, PAC80, SHO53, PAS63, DRI61, DEF81, PHY83)
@@ -2343,46 +2348,48 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ヒメネス",en_name:"Gimenez",long_name:"ホセ・マリア・ヒメネス",positions:["CB"],params:[82,80,72,74,68,82,60,62,68,60,54,40,38,46,36,38,60,40,84,86,84,84,82,50,50,84,78,82,75]},
       // LSB: M.Olivera (FC26 OVR78, PAC70, SHO51, PAS69, DRI72, DEF77, PHY73)
       {name:"M・オリベラ",en_name:"M.Olivera",long_name:"マティアス・オリベラ",positions:["左SB"],params:[72,74,70,72,71,70,72,72,71,68,62,46,46,52,44,42,70,54,76,78,76,76,74,50,50,66,74,74,75]},
-      // DMF: Ugarte (FC26 OVR79, PAC62, SHO65, PAS72, DRI76, DEF77, PHY75)
-      {name:"ウガルテ",en_name:"Ugarte",long_name:"マヌエル・ウガルテ",positions:["DMF"],params:[74,78,62,64,69,72,76,76,69,72,68,62,64,66,52,50,74,70,76,78,76,76,74,50,50,68,76,78,75]},
-      // RCMF: Valverde (FC26 OVR89, PAC88, SHO84, PAS84, DRI84, DEF83, PHY85)
+      // RDM: Valverde (FC26 OVR89, PAC88, SHO84, PAS84, DRI84, DEF83, PHY85) ← sofifa RDM・captain
       {name:"バルベルデ",en_name:"Valverde",long_name:"フェデリコ・バルベルデ",positions:["CMF","OMF","DMF"],params:[85,87,88,89,86,82,84,84,86,84,78,82,80,84,70,68,84,84,82,84,82,80,80,50,50,76,84,84,75]},
-      // LCMF: Bentancur (FC26 OVR80, PAC64, SHO68, PAS78, DRI79, DEF78, PHY72)
-      {name:"ベンタンクール",en_name:"Bentancur",long_name:"ロドリゴ・ベンタンクール",positions:["CMF","DMF"],params:[70,76,64,66,72,68,78,78,72,78,74,64,66,68,58,56,78,72,76,78,76,76,74,50,50,64,76,78,75]},
-      // ROMF: M.Araujo (FC26 OVR77, PAC85, SHO63, PAS70, DRI79, DEF68, PHY68)
-      {name:"M・アラウホ",en_name:"M.Araujo",long_name:"マクシミリアーノ・アラウホ",positions:["左SB","右WG","右SMF","左WG"],params:[66,70,85,86,82,64,78,80,82,70,64,60,60,62,46,50,74,70,66,68,66,66,64,50,50,60,74,74,75]},
-      // LOMF: De Arrascaeta (FC26 OVR83, est. PAC75, SHO78, PAS83, DRI86, DEF25, PHY62)
+      // LDM: Ugarte (FC26 OVR79, PAC62, SHO65, PAS72, DRI76, DEF77, PHY75) ← sofifa LDM
+      {name:"ウガルテ",en_name:"Ugarte",long_name:"マヌエル・ウガルテ",positions:["DMF"],params:[74,78,62,64,69,72,76,76,69,72,68,62,64,66,52,50,74,70,76,78,76,76,74,50,50,68,76,78,75]},
+      // RSM: Pellistri (FC26 OVR73, PAC82, SHO64, PAS66, DRI75, DEF38, PHY63) ← sofifa RM
+      {name:"ペリストリ",en_name:"Pellistri",long_name:"ファクンド・ペリストリ",positions:["右WG","右SMF"],params:[60,64,82,84,79,58,74,76,79,66,60,62,62,64,48,54,70,68,36,36,34,34,36,50,50,54,70,70,75]},
+      // LSM: B.Rodriguez (est. OVR73, PAC85) ← sofifa LM
+      {name:"B・ロドリゲス",en_name:"B.Rodriguez",long_name:"ブライアン・ロドリゲス",positions:["左WG","左SMF"],params:[60,64,85,87,80,56,76,76,80,64,58,64,64,68,46,50,70,70,28,28,26,26,28,50,50,52,68,68,75]},
+      // OMF: De Arrascaeta (FC26 OVR83, est. PAC75, SHO78, PAS83, DRI86, DEF25, PHY62)
       {name:"デ・アラスカエタ",en_name:"De Arrascaeta",long_name:"ジョルジアン・デ・アラスカエタ",positions:["OMF","左WG"],params:[60,64,74,76,80,56,86,86,80,84,78,76,76,78,70,72,86,82,24,26,24,24,26,50,50,54,80,80,75]},
       // CF: D.Nunez (FC26 OVR79, PAC88, SHO79, PAS72, DRI76, DEF49, PHY82)
       {name:"D・ヌニェス",en_name:"D.Nunez",long_name:"ダーウィン・ヌニェス",positions:["CF","左WG"],params:[82,82,88,89,82,80,74,76,82,70,64,78,76,80,52,50,74,78,44,44,42,42,46,50,50,80,76,74,75]},
-      // Sub GK: Rochet (est. OVR76, DIV76, HAN74, KIC72, REF78, SPD58, POS76)
-      {name:"ロシェ",en_name:"Rochet",long_name:"セルヒオ・ロシェ",positions:["GK"],params:[50,50,50,50,78,58,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,76,72,75]},
+      // Sub GK: Muslera (FC26 OVR79, DIV81, HAN80, KIC66, REF77, SPD43, POS78)
+      {name:"ムスレラ",en_name:"Muslera",long_name:"フェルナンド・ムスレラ",positions:["GK"],params:[50,50,50,50,77,43,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,81,80,50,78,76,75]},
       // Sub GK: Mele (est. OVR72, DIV72, HAN70, KIC68, REF73, SPD55, POS70)
       {name:"メレ",en_name:"Mele",long_name:"サンティアゴ・メレ",positions:["GK"],params:[50,50,50,50,73,55,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,72,70,50,70,68,75]},
       // Sub CB: S.Bueno (FC26 OVR76, PAC50, SHO31, PAS56, DRI56, DEF77, PHY77)
       {name:"S・ブエノ",en_name:"S.Bueno",long_name:"サンティアゴ・ブエノ",positions:["CB"],params:[76,78,50,52,53,76,54,56,53,56,50,26,26,32,28,26,56,34,76,78,76,76,74,50,50,78,72,72,75]},
       // Sub CB: Caceres (est. OVR74)
       {name:"カセレス",en_name:"Caceres",long_name:"セバスティアン・カセレス",positions:["CB"],params:[76,76,60,62,58,74,54,56,58,58,52,30,30,36,28,26,57,38,72,74,72,72,70,50,50,76,70,70,75]},
-      // Sub LB: Piquerez (est. OVR73)
-      {name:"ピケレス",en_name:"Piquerez",long_name:"ホアキン・ピケレス",positions:["左SB"],params:[66,70,76,78,73,64,68,70,73,66,60,44,44,50,38,40,68,52,70,72,70,70,68,50,50,62,70,70,75]},
       // Sub LB: M.Vina (est. OVR71)
       {name:"M・ビーニャ",en_name:"M.Vina",long_name:"マティアス・ビーニャ",positions:["左SB"],params:[62,66,74,76,71,60,66,68,71,62,56,40,40,46,34,34,65,50,66,68,66,66,64,50,50,58,68,68,75]},
-      // Sub CMF: De la Cruz (est. OVR77)
-      {name:"デ・ラ・クルス",en_name:"De la Cruz",long_name:"ニコラス・デ・ラ・クルス",positions:["CMF","OMF"],params:[60,64,72,74,77,56,82,82,77,82,76,72,72,74,66,66,82,78,40,40,38,38,40,50,50,56,74,74,75]},
+      // Sub LB: J.M.Sanabria (est. OVR72)
+      {name:"J・サナブリア",en_name:"Sanabria",long_name:"フアン・マヌエル・サナブリア",positions:["左SB"],params:[64,66,72,74,70,60,66,68,70,62,56,40,40,46,34,34,65,48,68,70,68,68,66,50,50,58,68,68,75]},
+      // Sub RB: J.L.Rodriguez (est. OVR70)
+      {name:"J・L・ロドリゲス",en_name:"J.L.Rodriguez",long_name:"ホセ・ルイス・ロドリゲス",positions:["右SB"],params:[66,68,70,72,69,64,64,66,69,62,56,42,42,48,34,34,64,46,66,68,66,66,64,50,50,60,66,68,75]},
+      // Sub LM/LB: M.Araujo (FC26 OVR77, PAC85)
+      {name:"M・アラウホ",en_name:"M.Araujo",long_name:"マクシミリアーノ・アラウホ",positions:["左SB","右WG","右SMF","左WG"],params:[66,70,85,86,82,64,78,80,82,70,64,60,60,62,46,50,74,70,66,68,66,66,64,50,50,60,74,74,75]},
+      // Sub LW: Canobbio (FC26 OVR74)
+      {name:"カノビオ",en_name:"Canobbio",long_name:"アグスティン・カノビオ",positions:["左WG","右WG"],params:[62,66,78,80,77,58,76,76,77,66,60,64,64,68,50,52,71,70,36,36,34,34,36,50,50,56,70,70,75]},
       // Sub DMF: E.Martinez (est. OVR73)
       {name:"E・マルティネス",en_name:"E.Martinez",long_name:"エミリアーノ・マルティネス",positions:["DMF"],params:[72,76,68,70,68,68,66,68,68,70,64,54,54,58,46,44,69,62,70,72,70,70,68,50,50,64,70,70,75]},
-      // Sub OMF: Zalazar (FC26 OVR79, PAC80, SHO81, PAS79, DRI78, DEF67, PHY74)
-      {name:"サラサル",en_name:"Zalazar",long_name:"ロドリゴ・サラサル",positions:["OMF","CMF"],params:[72,76,80,82,79,70,78,78,79,78,74,78,78,80,68,68,78,78,64,66,64,64,62,50,50,66,78,76,75]},
-      // Sub LW: Canobbio (FC26 OVR74, est. PAC78, SHO68, DRI76)
-      {name:"カノビオ",en_name:"Canobbio",long_name:"アグスティン・カノビオ",positions:["左WG","右WG"],params:[62,66,78,80,77,58,76,76,77,66,60,64,64,68,50,52,71,70,36,36,34,34,36,50,50,56,70,70,75]},
-      // Sub LW: B.Rodriguez (est. OVR73, PAC85)
-      {name:"B・ロドリゲス",en_name:"B.Rodriguez",long_name:"ブライアン・ロドリゲス",positions:["左WG","左SMF"],params:[60,64,85,87,80,56,76,76,80,64,58,64,64,68,46,50,70,70,28,28,26,26,28,50,50,52,68,68,75]},
-      // Sub RW: Pellistri (FC26 OVR73, PAC82, SHO64, PAS66, DRI75, DEF38, PHY63)
-      {name:"ペリストリ",en_name:"Pellistri",long_name:"ファクンド・ペリストリ",positions:["右WG","右SMF"],params:[60,64,82,84,79,58,74,76,79,66,60,62,62,64,48,54,70,68,36,36,34,34,36,50,50,54,70,70,75]},
+      // Sub CMF: De la Cruz (est. OVR77)
+      {name:"デ・ラ・クルス",en_name:"De la Cruz",long_name:"ニコラス・デ・ラ・クルス",positions:["CMF","OMF"],params:[60,64,72,74,77,56,82,82,77,82,76,72,72,74,66,66,82,78,40,40,38,38,40,50,50,56,74,74,75]},
+      // Sub DM: N.Fonseca (est. OVR74)
+      {name:"フォンセカ",en_name:"Fonseca",long_name:"ニコラス・フォンセカ",positions:["DMF","CMF"],params:[70,74,66,68,67,68,66,68,67,70,64,56,58,60,46,44,69,62,72,74,72,72,70,50,50,64,70,70,75]},
+      // Sub RW: F.Torres (est. OVR73, PAC80)
+      {name:"F・トーレス",en_name:"F.Torres",long_name:"ファクンド・トーレス",positions:["右WG","左WG"],params:[58,62,80,82,78,54,76,76,78,64,58,64,64,68,48,52,70,70,34,32,30,32,36,50,50,50,68,68,75]},
       // Sub CF: F.Vinas (FC26 OVR72, PAC73, SHO72, PAS56, DRI70, DEF25, PHY76)
       {name:"F・ビーニャス",en_name:"F.Vinas",long_name:"フェデリコ・ビーニャス",positions:["CF"],params:[76,76,73,75,72,72,68,70,72,56,50,70,70,72,48,46,63,70,22,22,22,22,24,50,50,74,70,68,75]},
-      // Sub CF: Aguirre (est. OVR71)
-      {name:"アギーレ",en_name:"Aguirre",long_name:"ロドリゴ・アギーレ",positions:["CF"],params:[70,68,62,64,63,68,62,64,63,56,50,70,70,72,46,44,60,66,26,26,24,24,28,50,50,70,68,66,75]}
+      // Sub CF: Agustín Álvarez (est. OVR72)
+      {name:"A・アルバレス",en_name:"A.Alvarez",long_name:"アグスティン・アルバレス",positions:["CF"],params:[68,68,70,72,70,66,67,69,70,62,56,72,72,74,46,44,68,70,34,32,30,30,36,50,50,64,68,68,75]}
     ]
   },
 };
