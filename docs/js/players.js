@@ -911,7 +911,33 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "クアドラード": {"profile": "豊富な経験と高いテクニックで右サイドから攻撃を演出するベテランウィンガー。正確なドリブルとクロスでコロンビアの右サイドに創造性をもたらす。", "profile_en": "A veteran winger who uses vast experience and high technique to create from the right flank. Precise dribbling and crossing bring creativity and experience to Colombia's right side.", "height": 179, "weight": 73},
 "J・コルドバ": {"profile": "高さとフィジカルを武器にポストプレーで前線を牽引する大型ストライカー。ヘディングと体の強さでDFを圧倒し、チームに別の攻撃パターンをもたらす。", "profile_en": "A physically imposing target striker who leads the line with hold-up play using his height and strength. Dominant in aerial duels, he offers Colombia an alternative attacking option.", "height": 195, "weight": 89},
 "M・ボルハ": {"profile": "力強いフィジカルとゴール前での勝負強さを誇るストライカー。ボックス内での決定力とポストプレーでコロンビアの攻撃を活性化する。", "profile_en": "A powerful striker with physicality and clinical finishing in front of goal. His box presence and hold-up play bring consistent attacking contribution to Colombia.", "height": 187, "weight": 86},
-"アルサーテ": {"profile": "豊富なスタミナと正確なパスで中盤のバランスを保つ守備的MF。守備貢献と安定したボール回しでコロンビアの中盤を支えるユーティリティプレイヤー。", "profile_en": "A defensive midfielder who maintains midfield balance with outstanding stamina and accurate passing. A utility player who supports Colombia's midfield through defensive contribution and reliable distribution.", "height": 181, "weight": 74}
+"アルサーテ": {"profile": "豊富なスタミナと正確なパスで中盤のバランスを保つ守備的MF。守備貢献と安定したボール回しでコロンビアの中盤を支えるユーティリティプレイヤー。", "profile_en": "A defensive midfielder who maintains midfield balance with outstanding stamina and accurate passing. A utility player who supports Colombia's midfield through defensive contribution and reliable distribution.", "height": 181, "weight": 74},
+// Uruguay 2026
+"ムスレラ": {"profile": "多くの代表キャップを持つベテランGK。豊富な経験とリーダーシップでゴールを死守するウルグアイ不動の守護神。", "profile_en": "Uruguay's legendary veteran goalkeeper with an exceptional number of international caps. His experience and leadership have made him an enduring presence between the posts.", "height": 190, "weight": 85},
+"バレラ": {"profile": "豊富な経験と安定した守備でウルグアイの右サイドを支えるベテランSB。バランスの取れた攻守でチームに落ち着きをもたらす。", "profile_en": "A veteran right-back who supports Uruguay's right flank with experience and steady defending. His balanced play on both sides of the ball brings composure to the backline.", "height": 180, "weight": 76},
+"R・アラウホ": {"profile": "圧倒的なフィジカルと高い守備能力を誇るウルグアイの主力CB。空中戦の強さと果敢なタックルで相手の攻撃を無力化する守備の砦。", "profile_en": "Uruguay's powerhouse centre-back, combining exceptional physicality with elite defensive ability. His aerial dominance and aggressive tackling neutralise opposing attacks.", "height": 188, "weight": 82},
+"ヒメネス": {"profile": "ウルグアイ代表キャプテン。豊富な経験と卓越したリーダーシップで最終ラインを統率する守備のシンボル。高い守備意識と対人守備の強さで代表の要を担う。", "profile_en": "Uruguay's captain and defensive symbol. A centre-back with vast experience and outstanding leadership who commands the defensive line. His awareness and strength in duels make him the team's defensive cornerstone.", "height": 189, "weight": 84},
+"M・オリベラ": {"profile": "積極的な攻撃参加と安定した守備を両立するウルグアイの主力左SB。正確なクロスとスタミナ豊富な上下動でサイドを制圧する。", "profile_en": "Uruguay's first-choice left-back who combines attacking intent with defensive solidity. His accurate crossing and tireless end-to-end runs dominate the flank.", "height": 185, "weight": 79},
+"ウガルテ": {"profile": "圧倒的なデュエル勝率と豊富な運動量でボールを奪うスペシャリスト。中盤の番人として守備と攻撃をつなぎ、ウルグアイの中盤を掌握する。", "profile_en": "A specialist in winning the ball through dominant duels and relentless work rate. Operating as the midfield enforcer, he connects defence and attack while controlling Uruguay's midfield.", "height": 182, "weight": 74},
+"バルベルデ": {"profile": "ウルグアイが誇る世界クラスのCMF。圧倒的な運動量と多彩なスキルセットでチームの心臓となり、攻守両面に絶え間なく貢献し続けるダイナモ。", "profile_en": "Uruguay's world-class central midfielder. An unstoppable engine who becomes the heart of the team with exceptional work rate and a versatile skill set, contributing continuously at both ends of the pitch.", "height": 182, "weight": 78},
+"ベンタンクール": {"profile": "テクニックと守備能力を兼備するオールラウンドMF。正確なパスと広大な運動範囲でゲームをコントロールし、攻守の切り替えで中盤を牽引する。", "profile_en": "An all-round midfielder combining technique with defensive quality. His precise passing and wide range of motion control the game, while his transitions lead the midfield.", "height": 188, "weight": 80},
+"M・アラウホ": {"profile": "爆発的なスピードとテクニックを兼備するウルグアイの多用途プレイヤー。SBからウィングまでこなせる推進力あふれるプレーでチームの攻撃を活性化する。", "profile_en": "A versatile Uruguayan player combining explosive pace with technical ability. Equally capable as a full-back or winger, his driving style energises the team's attack.", "height": 180, "weight": 72},
+"デ・アラスカエタ": {"profile": "卓越したドリブル技術と視野でウルグアイの攻撃を操るクリエイター。狭いスペースでも冷静にチャンスを生み出す南米屈指の技巧派OMF。", "profile_en": "Uruguay's attacking creator who controls the offence with exceptional dribbling and vision. One of South America's most refined offensive midfielders, producing chances with composure in tight spaces.", "height": 172, "weight": 67},
+"D・ヌニェス": {"profile": "圧倒的なスピードとフィジカルを武器とするウルグアイの主砲。最前線でプレッシャーをかけ続け、豪快なゴールでチームを牽引するダイナミックなストライカー。", "profile_en": "Uruguay's main striker, wielding overwhelming pace and physicality. A dynamic striker who applies relentless pressure up front and leads the team with powerful goals.", "height": 187, "weight": 81},
+"ロシェ": {"profile": "安定したセービングとエリア内の統率力を誇るGK候補。冷静な判断力と正確なポジショニングでゴールを守る信頼の守護神。", "profile_en": "A reliable goalkeeper known for consistent shot-stopping and command of his penalty area. Composed decision-making and precise positioning make him a trustworthy presence in goal.", "height": 190, "weight": 85},
+"メレ": {"profile": "機敏な反応と安定したポジショニングでゴールを守る若きGK。将来を期待される次世代の守護神候補。", "profile_en": "A young goalkeeper with sharp reflexes and composed positioning. A promising next-generation keeper with high expectations.", "height": 189, "weight": 82},
+"S・ブエノ": {"profile": "堅実な対人守備と高い闘争心でバックラインを支えるCB。フィジカルを活かした守備でチームを牽引する。", "profile_en": "A dependable centre-back who supports the backline with solid one-on-one defending and combative spirit. Uses his physicality to lead defensively.", "height": 187, "weight": 82},
+"カセレス": {"profile": "高い守備意識と安定したポジショニングを誇るCB。対人守備の強さとカバーリングでウルグアイ守備陣に厚みをもたらす。", "profile_en": "A centre-back with strong defensive awareness and reliable positioning. His one-on-one defending and covering ability add depth to Uruguay's defensive options.", "height": 185, "weight": 80},
+"ピケレス": {"profile": "スプリント能力と積極的な攻撃参加を武器とする攻撃的な左SB。正確なクロスと豊富なスタミナでウルグアイの左サイドを活性化する。", "profile_en": "An attack-minded left-back who uses sprint speed and overlapping runs as main weapons. His accurate crossing and high stamina activate Uruguay's left flank.", "height": 179, "weight": 74},
+"M・ビーニャ": {"profile": "スタミナと守備意識を兼備する左SB。安定したプレーと適切なポジショニングでウルグアイのバックラインに貢献する。", "profile_en": "A left-back combining stamina with defensive awareness. Consistent performances and good positional discipline contribute to Uruguay's defensive stability.", "height": 186, "weight": 77},
+"デ・ラ・クルス": {"profile": "繊細なテクニックと創造的なパスでゲームを作るプレイメイカー。ゴールへの意識も高く、チャンスを演出し続ける技巧派CMF。", "profile_en": "A playmaker who creates the game with delicate technique and creative passing. With a sharp eye for goal, he is a skilful central midfielder who continually generates opportunities.", "height": 179, "weight": 73},
+"E・マルティネス": {"profile": "スタミナと守備意識を武器とするハードワーカーのDMF。ボール奪取能力とポジショニングでウルグアイの中盤の守備を安定させる。", "profile_en": "A hardworking defensive midfielder whose weapons are stamina and defensive awareness. His ball-winning ability and positional discipline bring stability to Uruguay's midfield defence.", "height": 184, "weight": 79},
+"サラサル": {"profile": "豊富な得点力とパス技術を兼備する攻撃的MF。ゴール前での冷静さとシュート精度でウルグアイの攻撃に多彩な選択肢をもたらす。", "profile_en": "An attacking midfielder combining goal threat with passing quality. His composure in front of goal and shooting accuracy provide Uruguay's attack with varied options.", "height": 183, "weight": 74},
+"カノビオ": {"profile": "スピードとドリブルでサイドから崩すウィンガー。積極的な仕掛けとゴールへの意識でウルグアイの攻撃を活性化する。", "profile_en": "A winger who breaks down defences from the flanks with pace and dribbling. His direct running and goal-scoring awareness invigorate Uruguay's attack.", "height": 177, "weight": 73},
+"B・ロドリゲス": {"profile": "爆発的なスピードと突破力でサイドを制圧するウィンガー。直線的なドリブルと鋭いシュートで相手守備に脅威を与える。", "profile_en": "A winger who commands the flank with explosive pace and penetrating runs. His direct dribbling and sharp shooting pose a constant threat to opposing defences.", "height": 178, "weight": 73},
+"ペリストリ": {"profile": "スピードとドリブルを武器とする若き右ウィンガー。積極的な仕掛けと高い技術でウルグアイの攻撃に勢いをもたらす期待の選手。", "profile_en": "A young right winger whose weapons are pace and dribbling. His direct play and technical quality inject energy into Uruguay's forward line.", "height": 175, "weight": 70},
+"F・ビーニャス": {"profile": "フィジカルとゴール前での決定力を備えるポストプレイヤー型FW。高さを活かしたターゲットマンとしてウルグアイの攻撃に厚みをもたらす。", "profile_en": "A target-man type forward with physicality and clinical finishing in the box. His height and hold-up play add depth to Uruguay's attacking options.", "height": 188, "weight": 83},
+"アギーレ": {"profile": "ゴール前での勝負強さと豊富な経験を持つベテランストライカー。ポジショニングの良さとシュートの正確さで安定して得点を積み重ねる。", "profile_en": "A veteran striker with clinical finishing and vast experience in front of goal. Consistent goalscoring through intelligent positioning and accurate shooting.", "height": 183, "weight": 80}
 };
 
 const PARAM_NAMES = [
@@ -2299,6 +2325,64 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"M・ボルハ",en_name:"M.Borja",long_name:"ミゲル・ボルハ",positions:["CF"],params:[80,78,74,76,68,82,62,62,68,62,56,74,74,78,42,44,62,74,34,32,30,32,40,50,50,80,66,70,75]},
       // Sub CM: Stiven Alzate (est. OVR74, PAC76, SHO65, PAS74, DRI76, DEF60, PHY68)
       {name:"アルサーテ",en_name:"Alzate",long_name:"スティベン・アルサーテ",positions:["CMF","DMF","右SMF"],params:[64,74,76,78,74,64,78,74,76,74,70,60,62,64,52,56,74,66,58,60,58,56,56,50,50,60,68,68,75]}
+    ]
+  },
+  uruguay2026: {
+    name:"ウルグアイ",en_name:"Uruguay",team_color:"#4EB5E0",flag:"🇺🇾",
+    default_system:"4-3-2-1B",default_tactics:TACTICS_FREE,
+    default_keyplayer:6,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Muslera (FC26 OVR79, DIV81, HAN80, KIC66, REF77, SPD43, POS78)
+      {name:"ムスレラ",en_name:"Muslera",long_name:"フェルナンド・ムスレラ",positions:["GK"],params:[50,50,50,50,77,43,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,81,80,50,78,76,75]},
+      // RB: Varela (est. OVR70)
+      {name:"バレラ",en_name:"G.Varela",long_name:"ギジェルモ・バレラ",positions:["右SB"],params:[66,68,72,73,70,64,68,68,70,66,60,44,44,50,36,36,67,47,68,70,68,68,66,50,50,62,68,70,75]},
+      // RCB: R.Araujo (FC26 OVR83, PAC80, SHO53, PAS63, DRI61, DEF81, PHY83)
+      {name:"R・アラウホ",en_name:"R.Araujo",long_name:"ロナルド・アラウホ",positions:["CB"],params:[82,82,80,81,71,82,60,62,71,62,58,48,46,54,38,40,62,44,80,82,80,80,78,50,50,82,76,80,75]},
+      // LCB: Gimenez (FC26 OVR83, PAC73, SHO46, PAS60, DRI62, DEF85, PHY82)
+      {name:"ヒメネス",en_name:"Gimenez",long_name:"ホセ・マリア・ヒメネス",positions:["CB"],params:[82,80,72,74,68,82,60,62,68,60,54,40,38,46,36,38,60,40,84,86,84,84,82,50,50,84,78,82,75]},
+      // LSB: M.Olivera (FC26 OVR78, PAC70, SHO51, PAS69, DRI72, DEF77, PHY73)
+      {name:"M・オリベラ",en_name:"M.Olivera",long_name:"マティアス・オリベラ",positions:["左SB"],params:[72,74,70,72,71,70,72,72,71,68,62,46,46,52,44,42,70,54,76,78,76,76,74,50,50,66,74,74,75]},
+      // DMF: Ugarte (FC26 OVR79, PAC62, SHO65, PAS72, DRI76, DEF77, PHY75)
+      {name:"ウガルテ",en_name:"Ugarte",long_name:"マヌエル・ウガルテ",positions:["DMF"],params:[74,78,62,64,69,72,76,76,69,72,68,62,64,66,52,50,74,70,76,78,76,76,74,50,50,68,76,78,75]},
+      // RCMF: Valverde (FC26 OVR89, PAC88, SHO84, PAS84, DRI84, DEF83, PHY85)
+      {name:"バルベルデ",en_name:"Valverde",long_name:"フェデリコ・バルベルデ",positions:["CMF","OMF","DMF"],params:[85,87,88,89,86,82,84,84,86,84,78,82,80,84,70,68,84,84,82,84,82,80,80,50,50,76,84,84,75]},
+      // LCMF: Bentancur (FC26 OVR80, PAC64, SHO68, PAS78, DRI79, DEF78, PHY72)
+      {name:"ベンタンクール",en_name:"Bentancur",long_name:"ロドリゴ・ベンタンクール",positions:["CMF","DMF"],params:[70,76,64,66,72,68,78,78,72,78,74,64,66,68,58,56,78,72,76,78,76,76,74,50,50,64,76,78,75]},
+      // ROMF: M.Araujo (FC26 OVR77, PAC85, SHO63, PAS70, DRI79, DEF68, PHY68)
+      {name:"M・アラウホ",en_name:"M.Araujo",long_name:"マクシミリアーノ・アラウホ",positions:["左SB","右WG","右SMF","左WG"],params:[66,70,85,86,82,64,78,80,82,70,64,60,60,62,46,50,74,70,66,68,66,66,64,50,50,60,74,74,75]},
+      // LOMF: De Arrascaeta (FC26 OVR83, est. PAC75, SHO78, PAS83, DRI86, DEF25, PHY62)
+      {name:"デ・アラスカエタ",en_name:"De Arrascaeta",long_name:"ジョルジアン・デ・アラスカエタ",positions:["OMF","左WG"],params:[60,64,74,76,80,56,86,86,80,84,78,76,76,78,70,72,86,82,24,26,24,24,26,50,50,54,80,80,75]},
+      // CF: D.Nunez (FC26 OVR79, PAC88, SHO79, PAS72, DRI76, DEF49, PHY82)
+      {name:"D・ヌニェス",en_name:"D.Nunez",long_name:"ダーウィン・ヌニェス",positions:["CF","左WG"],params:[82,82,88,89,82,80,74,76,82,70,64,78,76,80,52,50,74,78,44,44,42,42,46,50,50,80,76,74,75]},
+      // Sub GK: Rochet (est. OVR76, DIV76, HAN74, KIC72, REF78, SPD58, POS76)
+      {name:"ロシェ",en_name:"Rochet",long_name:"セルヒオ・ロシェ",positions:["GK"],params:[50,50,50,50,78,58,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,76,72,75]},
+      // Sub GK: Mele (est. OVR72, DIV72, HAN70, KIC68, REF73, SPD55, POS70)
+      {name:"メレ",en_name:"Mele",long_name:"サンティアゴ・メレ",positions:["GK"],params:[50,50,50,50,73,55,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,72,70,50,70,68,75]},
+      // Sub CB: S.Bueno (FC26 OVR76, PAC50, SHO31, PAS56, DRI56, DEF77, PHY77)
+      {name:"S・ブエノ",en_name:"S.Bueno",long_name:"サンティアゴ・ブエノ",positions:["CB"],params:[76,78,50,52,53,76,54,56,53,56,50,26,26,32,28,26,56,34,76,78,76,76,74,50,50,78,72,72,75]},
+      // Sub CB: Caceres (est. OVR74)
+      {name:"カセレス",en_name:"Caceres",long_name:"セバスティアン・カセレス",positions:["CB"],params:[76,76,60,62,58,74,54,56,58,58,52,30,30,36,28,26,57,38,72,74,72,72,70,50,50,76,70,70,75]},
+      // Sub LB: Piquerez (est. OVR73)
+      {name:"ピケレス",en_name:"Piquerez",long_name:"ホアキン・ピケレス",positions:["左SB"],params:[66,70,76,78,73,64,68,70,73,66,60,44,44,50,38,40,68,52,70,72,70,70,68,50,50,62,70,70,75]},
+      // Sub LB: M.Vina (est. OVR71)
+      {name:"M・ビーニャ",en_name:"M.Vina",long_name:"マティアス・ビーニャ",positions:["左SB"],params:[62,66,74,76,71,60,66,68,71,62,56,40,40,46,34,34,65,50,66,68,66,66,64,50,50,58,68,68,75]},
+      // Sub CMF: De la Cruz (est. OVR77)
+      {name:"デ・ラ・クルス",en_name:"De la Cruz",long_name:"ニコラス・デ・ラ・クルス",positions:["CMF","OMF"],params:[60,64,72,74,77,56,82,82,77,82,76,72,72,74,66,66,82,78,40,40,38,38,40,50,50,56,74,74,75]},
+      // Sub DMF: E.Martinez (est. OVR73)
+      {name:"E・マルティネス",en_name:"E.Martinez",long_name:"エミリアーノ・マルティネス",positions:["DMF"],params:[72,76,68,70,68,68,66,68,68,70,64,54,54,58,46,44,69,62,70,72,70,70,68,50,50,64,70,70,75]},
+      // Sub OMF: Zalazar (FC26 OVR79, PAC80, SHO81, PAS79, DRI78, DEF67, PHY74)
+      {name:"サラサル",en_name:"Zalazar",long_name:"ロドリゴ・サラサル",positions:["OMF","CMF"],params:[72,76,80,82,79,70,78,78,79,78,74,78,78,80,68,68,78,78,64,66,64,64,62,50,50,66,78,76,75]},
+      // Sub LW: Canobbio (FC26 OVR74, est. PAC78, SHO68, DRI76)
+      {name:"カノビオ",en_name:"Canobbio",long_name:"アグスティン・カノビオ",positions:["左WG","右WG"],params:[62,66,78,80,77,58,76,76,77,66,60,64,64,68,50,52,71,70,36,36,34,34,36,50,50,56,70,70,75]},
+      // Sub LW: B.Rodriguez (est. OVR73, PAC85)
+      {name:"B・ロドリゲス",en_name:"B.Rodriguez",long_name:"ブライアン・ロドリゲス",positions:["左WG","左SMF"],params:[60,64,85,87,80,56,76,76,80,64,58,64,64,68,46,50,70,70,28,28,26,26,28,50,50,52,68,68,75]},
+      // Sub RW: Pellistri (FC26 OVR73, PAC82, SHO64, PAS66, DRI75, DEF38, PHY63)
+      {name:"ペリストリ",en_name:"Pellistri",long_name:"ファクンド・ペリストリ",positions:["右WG","右SMF"],params:[60,64,82,84,79,58,74,76,79,66,60,62,62,64,48,54,70,68,36,36,34,34,36,50,50,54,70,70,75]},
+      // Sub CF: F.Vinas (FC26 OVR72, PAC73, SHO72, PAS56, DRI70, DEF25, PHY76)
+      {name:"F・ビーニャス",en_name:"F.Vinas",long_name:"フェデリコ・ビーニャス",positions:["CF"],params:[76,76,73,75,72,72,68,70,72,56,50,70,70,72,48,46,63,70,22,22,22,22,24,50,50,74,70,68,75]},
+      // Sub CF: Aguirre (est. OVR71)
+      {name:"アギーレ",en_name:"Aguirre",long_name:"ロドリゴ・アギーレ",positions:["CF"],params:[70,68,62,64,63,68,62,64,63,56,50,70,70,72,46,44,60,66,26,26,24,24,28,50,50,70,68,66,75]}
     ]
   },
 };
