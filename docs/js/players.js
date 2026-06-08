@@ -224,6 +224,8 @@ const i18n = {
     wcStatsGLNL: '🇳🇱 オランダ', wcStatsGLTN: '🇹🇳 チュニジア', wcStatsGLSW: '🇸🇪 スウェーデン',
     wcStatsKOStages: ['1回戦','2回戦','準々決勝','準決勝','決勝','🏆優勝'],
     wcStatsTypeLabels: {wc_group:'GL',wc_r32:'1回戦',wc_r16:'2回戦',wc_qf:'準々決勝',wc_sf:'準決勝',wc_final:'決勝'},
+    singleTitle1: '⚽ チーム選択（1/2）', singleDesc1: '操作するチームを選んでください',
+    singleTitle2: '⚽ チーム選択（2/2）', singleDesc2: '対戦相手を選んでください',
   },
   en: {
     titleMain: '',
@@ -375,6 +377,8 @@ const i18n = {
     wcStatsGLNL: '🇳🇱 Netherlands', wcStatsGLTN: '🇹🇳 Tunisia', wcStatsGLSW: '🇸🇪 Sweden',
     wcStatsKOStages: ['R32','R16','QF','SF','Final','🏆Champions'],
     wcStatsTypeLabels: {wc_group:'GL',wc_r32:'R32',wc_r16:'R16',wc_qf:'QF',wc_sf:'SF',wc_final:'Final'},
+    singleTitle1: '⚽ Team Selection (1/2)', singleDesc1: 'Choose your team',
+    singleTitle2: '⚽ Team Selection (2/2)', singleDesc2: 'Choose your opponent',
   }
 };
 
@@ -472,6 +476,11 @@ function applyLang() {
   _setText('btn-kickoff-bottom',      t('btnKickoff'));
   _setText('btn-multi',               t('btnMulti'));
   _setText('btn-multi100',            t('btnMulti100'));
+  // シングルマッチ チーム選択
+  _setText('single-title1', t('singleTitle1'));
+  _setText('single-desc1',  t('singleDesc1'));
+  _setText('single-title2', t('singleTitle2'));
+  _setText('single-desc2',  t('singleDesc2'));
   // スクリーンタイトル
   _setText('screen-formation-title',    t('screenFormation'));
   _setText('screen-tactics-title',      t('screenTactics'));

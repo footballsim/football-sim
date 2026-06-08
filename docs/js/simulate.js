@@ -739,6 +739,7 @@ function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
   _applyTournamentI18n();
+  if (name === 'single' || name === 'single2') applyLang();
   // シングルマッチ チーム1選択リストを初回表示時に構築
   if (name === 'single') buildTeam1List();
 
