@@ -1043,7 +1043,28 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ブルーン・ラーセン": {"profile": "スピードと積極的な仕掛けを武器とするデンマーク代表のサイドアタッカー。縦への突破と鋭いシュートで相手守備を脅かし、デンマークの攻撃に奥行きと広がりをもたらす。", "profile_en": "A wide attacker who weaponises pace and direct running. His vertical driving and sharp shooting threaten opposing defences, adding depth and width to Denmark's attack.", "height": 183, "weight": 74},
 "ポールセン": {"profile": "ゴール前での嗅覚と高いフィジカルを持つCF。勤勉なプレスバックと前線でのポストプレーでチームに貢献するオールラウンドなストライカー。", "profile_en": "A CF with a keen goal instinct and strong physical presence. His tireless pressing and hold-up play up front make him a well-rounded contributor.", "height": 189, "weight": 85},
 "ドルベルグ": {"profile": "冷静な決定力と技術的なフィニッシュを持つCF。スペースへの賢い動き出しとシュート技術でデンマークの攻撃に得点オプションを提供する。", "profile_en": "A CF with composed finishing and technical quality in front of goal. His intelligent movement into space and finishing technique give Denmark an additional scoring option.", "height": 186, "weight": 83},
-"アディングラ": {"profile": "驚異的な加速力と突破力を誇る若き左WG。ドリブルと裏への飛び出しでサイドから相手守備を切り裂き、デンマーク攻撃に爆発的なスピードと幅をもたらす。", "profile_en": "A young left winger with astonishing acceleration and directness. His dribbling and runs in behind slice through defences from wide, bringing explosive pace and width to Denmark's attack.", "height": 178, "weight": 72}
+"アディングラ": {"profile": "驚異的な加速力と突破力を誇る若き左WG。ドリブルと裏への飛び出しでサイドから相手守備を切り裂き、デンマーク攻撃に爆発的なスピードと幅をもたらす。", "profile_en": "A young left winger with astonishing acceleration and directness. His dribbling and runs in behind slice through defences from wide, bringing explosive pace and width to Denmark's attack.", "height": 178, "weight": 72},
+"ペンツ": {"profile": "安定したセービングとコーチングでオーストリアのゴールを守るGK。1対1の強さと高い集中力でゴールラインに立ちはだかる信頼性の高い守護神。", "profile_en": "Austria's reliable goalkeeper who guards the goal with consistent shot-stopping and vocal command. His one-on-one strength and high concentration make him a dependable last line of defence.", "height": 193, "weight": 84},
+"ポッシュ": {"profile": "スピードとタフな守備を武器にオーストリアの右サイドを担う右SB。積極的なオーバーラップと正確なクロスでオーストリアの攻撃に幅と推進力をもたらす。", "profile_en": "A right-back who covers Austria's right flank with pace and tough defending. His overlapping runs and precise crossing add width and drive to Austria's attack.", "height": 188, "weight": 78},
+"ダンソ": {"profile": "爆発的なスピードと強靭なフィジカルを兼備するフランス出身のCB。オーストリア代表として頭角を現した長身CB で、デュエルの強さとカバーリング能力は世界トップクラス。", "profile_en": "A CB of Franco-Austrian roots with explosive pace and powerful physicality. An imposing centre-back who established himself with Austria, his aerial duels and covering ability are world-class.", "height": 191, "weight": 86},
+"アラバ": {"profile": "類いまれな技術と戦術眼でCBからMFまで複数ポジションをこなす万能型プレイヤー。オーストリア代表の象徴として長年チームを引っ張る不動のリーダー。", "profile_en": "A uniquely versatile player who operates from CB to midfield with extraordinary technique and tactical intelligence. The enduring leader and symbol of Austrian football.", "height": 180, "weight": 78},
+"ウェーバー": {"profile": "ビルドアップ参加と高いカバーリングを誇る左利きのDF。CBとLBをこなすポリバレント性でオーストリア守備陣に安定感と柔軟性をもたらす。", "profile_en": "A left-footed defender who excels at build-up participation and covering. His versatility across CB and LB brings stability and flexibility to Austria's defence.", "height": 189, "weight": 82},
+"ライマー": {"profile": "絶え間ないプレスと広大なカバー範囲でオーストリア中盤を支配するCMF。バイエルンで磨いた戦術理解と高いフィジカルでオーストリアの中盤に圧倒的なエネルギーをもたらす。", "profile_en": "A CMF who dominates Austria's midfield with relentless pressing and vast coverage. The tactical intelligence and physical quality honed at Bayern bring overwhelming energy to Austria's engine room.", "height": 181, "weight": 77},
+"ザイワルト": {"profile": "高い守備意識と正確なパス捌きでオーストリア中盤を安定させるDMF。ボール奪取とパスワークを兼備する知性的なミッドフィールダーとして代表に欠かせない存在。", "profile_en": "A DMF who stabilises Austria's midfield with strong defensive awareness and precise distribution. An intelligent midfielder combining ball-winning and passing, indispensable to the national team.", "height": 183, "weight": 78},
+"ザビッツァー": {"profile": "技術とクリエイティビティを兼備する攻撃的なMF。オーストリア代表の中盤を彩る創造力と得点感覚で相手守備を崩し、チームに質の高い攻撃をもたらすオールラウンダー。", "profile_en": "An attacking MF combining technique and creativity. His inventive playmaking and goal sense for Austria's midfield break down defences and bring quality to the team's attack.", "height": 177, "weight": 74},
+"バウムガルトナー": {"profile": "卓越したテクニックと豊かなビジョンでオーストリア攻撃の司令塔を担うOMF。高い創造性と正確なフィニッシュでオーストリアの攻撃を牽引するチームのエース。", "profile_en": "The orchestrator of Austria's attack with outstanding technique and rich vision. His high creativity and precise finishing make him the team's driving force.", "height": 181, "weight": 74},
+"カインツ": {"profile": "テクニックと運動量を兼備する左サイドのアタッカー。独創的なドリブルと正確なパスでオーストリアの攻撃に変化をもたらすクリエイティブなプレイヤー。", "profile_en": "A left-sided attacker combining technique and work rate. His inventive dribbling and precise passing inject variety into Austria's attacks.", "height": 172, "weight": 68},
+"アルナウトヴィッチ": {"profile": "長身と豊かなテクニックを兼備するオーストリア代表のベテランストライカー。フィジカルとキープ力を活かしたポストプレーと強烈なシュートでオーストリア前線を牽引するリーダー。", "profile_en": "Austria's veteran striker combining tall stature with rich technique. His physical hold-up play and powerful shooting lead Austria's forward line.", "height": 192, "weight": 91},
+"シュラーガー": {"profile": "高いセービング技術と冷静な判断力を誇る控えGK。スタメンへの信頼性の高いバックアップとしてオーストリア代表のGK陣に厚みをもたらす。", "profile_en": "A backup GK with strong shot-stopping technique and calm decision-making. He adds depth to Austria's goalkeeping options as a reliable second choice.", "height": 189, "weight": 84},
+"ヘドル": {"profile": "プレミアリーグでの経験を積む若手GK。反射神経と俊敏な動きを武器とし、オーストリア代表のGK競争に名乗りを上げる将来有望な守護神候補。", "profile_en": "A young GK gaining experience at the top level. Armed with sharp reflexes and agile movement, a promising future candidate for Austria's no.1 jersey.", "height": 196, "weight": 93},
+"リーエンハルト": {"profile": "安定したポジショニングと強靭なデュエルを誇るCB。確実な守備と冷静さでオーストリアの守備ラインに安心感をもたらすベテランDF。", "profile_en": "A CB with reliable positioning and powerful duels. His consistent defending and composure bring security to Austria's defensive line.", "height": 187, "weight": 79},
+"トラウナー": {"profile": "高いフィジカルと読みの鋭さで相手FWを封じるCB。セットプレーにも強く、オーストリア守備陣に頼もしい選択肢を提供するDF。", "profile_en": "A CB who shuts down forwards with physicality and sharp reading. His aerial strength at set pieces makes him a dependable option in Austria's backline.", "height": 191, "weight": 85},
+"ムヴェーネ": {"profile": "スピードと積極的な攻撃参加でサイドを活性化するSB。左右のSBをこなすポリバレント性でオーストリアのサイドに柔軟性をもたらすダイナミックなDF。", "profile_en": "A full-back who activates the flanks with pace and proactive forward runs. His ability to play both sides brings flexibility to Austria's defence.", "height": 179, "weight": 73},
+"ヴィマー": {"profile": "爆発的なスピードを武器に右サイドを駆け上がるウィンガー兼右SB。積極的な仕掛けとクロスでオーストリアの右サイドに脅威をもたらすアタッカー。", "profile_en": "A winger-cum-right-back who explodes up the right flank with pace. His direct running and crossing threaten defences and enrich Austria's right side.", "height": 181, "weight": 75},
+"グリリッチュ": {"profile": "インテリジェントなポジショニングと幅広いカバー範囲でオーストリア中盤を支えるDMF。プレスへの貢献と安定したパスワークで中盤の守備的なバランスを維持する。", "profile_en": "A DMF who supports Austria's midfield with intelligent positioning and wide coverage. His pressing work and stable passing maintain the team's defensive midfield balance.", "height": 188, "weight": 83},
+"R・シュミット": {"profile": "高い技術とドリブルを武器とする若手アタッカー。左サイドからの積極的な仕掛けとシュート意欲の高さでオーストリアの攻撃に推進力をもたらすダイナミックなプレイヤー。", "profile_en": "A technically gifted young attacker with strong dribbling. His direct running from the left and eagerness to shoot bring momentum to Austria's attack.", "height": 176, "weight": 72},
+"グレゴリッチュ": {"profile": "高さとフィジカルを活かしたポストプレーと力強いシュートで前線に存在感を放つCF。オーストリアの攻撃に高さと厚みをもたらすターゲットマン。", "profile_en": "A CF who makes his presence felt up front with aerial hold-up play and powerful shooting. A target-man who gives Austria's attack height and depth.", "height": 192, "weight": 89},
+"オニシヴォ": {"profile": "爆発的なスプリントを武器とするCF。裏への飛び出しと鋭いシュートで相手DFを脅かし、試合の流れを変える切り札として機能するスピードスター。", "profile_en": "A CF who weaponises explosive sprint pace. His runs in behind and sharp shooting threaten defences, functioning as an impact substitute who can change the game.", "height": 175, "weight": 73}
 };
 
 const PARAM_NAMES = [
@@ -2672,6 +2693,57 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ダムスゴー",en_name:"Damsgaard",long_name:"ミケル・ダムスゴー",positions:["左WG","OMF"],params:[66,68,80,82,79,64,80,82,79,78,72,72,72,74,64,68,82,76,42,44,42,42,44,50,50,62,74,74,75]},
       // Sub LW: Adingra (FC26 OVR76, PAC92, SHO72, PAS68, DRI80, DEF40, PHY66)
       {name:"アディングラ",en_name:"Adingra",long_name:"シモン・アディングラ",positions:["左WG","右WG"],params:[64,66,92,94,82,60,78,80,82,68,62,68,68,70,52,54,80,72,36,38,36,36,38,50,50,58,72,72,75]}
+    ]
+  },
+
+  austria2026: {
+    name:"オーストリア",en_name:"Austria",team_color:"#ED2939",flag:"🇦🇹",
+    default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
+    default_keyplayer:5,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Pentz (FC26 OVR78, DIV79, HAN77, KIC74, REF79, SPD60, POS78)
+      {name:"ペンツ",en_name:"Pentz",long_name:"パトリック・ペンツ",positions:["GK"],params:[50,50,50,50,79,60,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,79,77,50,78,74,75]},
+      // RB: Posch (FC26 OVR76, PAC80, SHO58, PAS72, DRI72, DEF76, PHY76)
+      {name:"ポッシュ",en_name:"Posch",long_name:"ステファン・ポッシュ",positions:["右SB"],params:[76,76,80,81,75,72,70,70,75,72,66,48,50,52,42,44,70,52,74,76,74,74,72,50,50,70,72,72,75]},
+      // RCB: Danso (FC26 OVR82, PAC84, SHO44, PAS66, DRI68, DEF84, PHY83)
+      {name:"ダンソ",en_name:"Danso",long_name:"ケビン・ダンソ",positions:["CB"],params:[82,82,84,85,76,84,66,66,76,66,60,36,34,42,28,32,66,36,84,86,84,84,82,50,50,84,78,78,75]},
+      // LCB: Alaba (FC26 OVR85, PAC78, SHO76, PAS86, DRI88, DEF82, PHY78) ← captain
+      {name:"アラバ",en_name:"Alaba",long_name:"ダビド・アラバ",positions:["CB","左SB","DMF"],params:[78,78,78,79,84,74,86,88,84,86,82,72,72,76,68,72,88,78,80,82,82,80,80,50,50,72,84,84,75]},
+      // LSB: Wöber (FC26 OVR78, PAC76, SHO50, PAS72, DRI72, DEF78, PHY76)
+      {name:"ウェーバー",en_name:"Woeber",long_name:"マキシミリアン・ウェーバー",positions:["左SB","CB"],params:[76,76,76,77,73,74,70,70,73,72,66,42,42,48,38,38,70,46,76,78,76,76,74,50,50,70,74,72,75]},
+      // RDMF: Laimer (FC26 OVR82, PAC84, SHO72, PAS78, DRI80, DEF78, PHY82) ← keyplayer
+      {name:"ライマー",en_name:"Laimer",long_name:"コンラート・ライマー",positions:["CMF","DMF"],params:[82,84,84,85,81,80,78,80,81,78,74,68,70,72,54,58,80,74,76,78,76,76,74,50,50,76,78,78,75]},
+      // LDMF: Seiwald (FC26 OVR79, PAC76, SHO68, PAS78, DRI76, DEF80, PHY78)
+      {name:"ザイワルト",en_name:"Seiwald",long_name:"ニコラス・ザイワルト",positions:["DMF","CMF"],params:[78,80,76,77,76,76,74,74,76,78,72,62,64,66,52,54,74,68,78,80,78,78,76,50,50,72,76,76,75]},
+      // RSM: Sabitzer (FC26 OVR82, PAC78, SHO78, PAS82, DRI82, DEF68, PHY78)
+      {name:"ザビッツァー",en_name:"Sabitzer",long_name:"マルセル・ザビッツァー",positions:["OMF","CMF","右SMF"],params:[78,80,78,79,80,76,80,82,80,82,78,74,76,78,64,68,82,78,64,66,64,64,66,50,50,70,78,78,75]},
+      // LSM: Baumgartner (FC26 OVR81, PAC79, SHO76, PAS82, DRI82, DEF58, PHY72)
+      {name:"バウムガルトナー",en_name:"Baumgartner",long_name:"クリストフ・バウムガルトナー",positions:["OMF","左SMF","左WG"],params:[72,74,79,80,80,68,80,82,80,82,78,72,72,74,64,68,82,78,54,56,54,54,56,50,50,66,76,76,75]},
+      // OMF: Kainz (FC26 OVR76, PAC76, SHO72, PAS76, DRI78, DEF50, PHY68)
+      {name:"カインツ",en_name:"Kainz",long_name:"フローリアン・カインツ",positions:["OMF","左WG"],params:[66,68,76,78,75,64,76,78,75,76,72,68,68,70,62,66,78,72,46,48,46,46,48,50,50,62,72,72,75]},
+      // CF: Arnautovic (FC26 OVR80, PAC73, SHO78, PAS67, DRI76, DEF46, PHY82) ← marked
+      {name:"アルナウトヴィッチ",en_name:"Arnautovic",long_name:"マルコ・アルナウトヴィッチ",positions:["CF","左WG"],params:[82,82,73,74,76,80,74,76,76,66,60,76,74,78,58,60,76,76,42,42,40,40,44,50,50,78,72,70,75]},
+      // Sub GK: Schlager (FC26 OVR77, DIV78, HAN76, KIC72, REF78, SPD62, POS77)
+      {name:"シュラーガー",en_name:"Schlager",long_name:"アレクサンダー・シュラーガー",positions:["GK"],params:[50,50,50,50,78,62,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,78,76,50,77,72,75]},
+      // Sub GK: Hedl (FC26 OVR74, DIV75, HAN73, KIC70, REF75, SPD64, POS74)
+      {name:"ヘドル",en_name:"Hedl",long_name:"パトリック・ヘドル",positions:["GK"],params:[50,50,50,50,75,64,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,75,73,50,74,70,75]},
+      // Sub CB: Lienhart (FC26 OVR76, PAC74, SHO42, PAS66, DRI64, DEF78, PHY78)
+      {name:"リーエンハルト",en_name:"Lienhart",long_name:"フィリップ・リーエンハルト",positions:["CB"],params:[78,78,74,75,68,78,62,62,68,66,60,34,32,40,28,30,62,32,78,80,78,78,76,50,50,80,74,72,75]},
+      // Sub CB: Trauner (FC26 OVR76, PAC72, SHO40, PAS64, DRI62, DEF79, PHY80)
+      {name:"トラウナー",en_name:"Trauner",long_name:"フィリップ・トラウナー",positions:["CB"],params:[80,80,72,73,66,80,60,60,66,64,58,32,30,38,26,28,60,30,78,80,78,78,76,50,50,82,72,70,75]},
+      // Sub LB: Mwene (FC26 OVR73, PAC82, SHO52, PAS66, DRI70, DEF70, PHY70)
+      {name:"ムヴェーネ",en_name:"Mwene",long_name:"フィリップ・ムヴェーネ",positions:["左SB","右SB"],params:[70,70,82,83,74,66,68,68,74,66,60,44,44,48,38,40,68,50,68,70,68,68,66,50,50,64,68,68,75]},
+      // Sub RW: P.Wimmer (FC26 OVR75, PAC86, SHO66, PAS68, DRI76, DEF46, PHY66)
+      {name:"ヴィマー",en_name:"Wimmer",long_name:"パトリック・ヴィマー",positions:["右WG","右SMF"],params:[64,66,86,88,78,60,74,76,78,68,62,62,62,66,50,54,74,68,42,44,42,42,44,50,50,58,68,68,75]},
+      // Sub DMF: Grillitsch (FC26 OVR77, PAC68, SHO62, PAS76, DRI72, DEF78, PHY76)
+      {name:"グリリッチュ",en_name:"Grillitsch",long_name:"フロリアン・グリリッチュ",positions:["DMF","CMF"],params:[76,78,68,70,73,74,70,70,73,76,70,56,58,60,50,52,70,62,76,78,76,76,74,50,50,70,74,74,75]},
+      // Sub LW/OMF: R.Schmid (FC26 OVR74, PAC82, SHO70, PAS68, DRI76, DEF42, PHY66)
+      {name:"R・シュミット",en_name:"R.Schmid",long_name:"ロマノ・シュミット",positions:["左WG","OMF"],params:[64,66,82,84,76,60,74,76,76,68,62,66,66,70,54,58,74,68,38,40,38,38,40,50,50,58,68,68,75]},
+      // Sub CF: Gregoritsch (FC26 OVR75, PAC76, SHO76, PAS66, DRI70, DEF38, PHY80)
+      {name:"グレゴリッチュ",en_name:"Gregoritsch",long_name:"ミヒャエル・グレゴリッチュ",positions:["CF"],params:[80,80,76,77,75,78,68,68,75,66,60,74,72,74,52,52,68,68,34,34,32,32,36,50,50,80,70,68,75]},
+      // Sub CF: Onisiwo (FC26 OVR73, PAC84, SHO70, PAS64, DRI70, DEF38, PHY72)
+      {name:"オニシヴォ",en_name:"Onisiwo",long_name:"カレム・オニシヴォ",positions:["CF","左WG"],params:[72,72,84,86,76,68,68,68,76,64,58,66,66,68,48,50,68,66,34,34,32,32,36,50,50,68,66,66,75]}
     ]
   },
 };
