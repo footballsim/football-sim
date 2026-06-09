@@ -994,7 +994,33 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ファスナハト": {"profile": "スピードとドリブルで右サイドを駆け上がる運動量豊富なウィンガー。積極的な仕掛けとクロス精度でスイスの攻撃を活性化する。", "profile_en": "An energetic winger who charges down the right flank with pace and dribbling. His direct running and crossing ability activate Switzerland's attacking play.", "height": 183, "weight": 77},
 "ゼフェロヴィッチ": {"profile": "ポストプレーと高さを活かした動きで前線に起点を作る大型ストライカー。力強いフィジカルと嗅覚の鋭さでゴールを狙い続けるベテランCF。", "profile_en": "A powerful target-man who creates a focal point upfront with his height and hold-up play. A veteran CF who uses his physicality and sharp instincts to remain a constant goal threat.", "height": 187, "weight": 82},
 "ムヘイム": {"profile": "スピードとスタミナを武器にスイスの左サイドを疾走する若手左SB。正確なクロスと安定した守備でロドリゲスの後継候補として代表に定着しつつある。", "profile_en": "A young left-back who charges down Switzerland's left flank with pace and stamina. His precise crossing and solid defending make him an emerging candidate to succeed Rodriguez.", "height": 181, "weight": 74},
-"アメンダ": {"profile": "192cmの長身と機動力を兼備するスイス期待の若手CB。フィジカルの強さと読みの鋭さで守備ラインを統率するポテンシャルを秘めた大型センターバック。", "profile_en": "A promising young Swiss CB combining a 192cm frame with mobility. His physicality and sharp reading of the game give him the potential to marshal the defensive line.", "height": 192, "weight": 85}
+"アメンダ": {"profile": "192cmの長身と機動力を兼備するスイス期待の若手CB。フィジカルの強さと読みの鋭さで守備ラインを統率するポテンシャルを秘めた大型センターバック。", "profile_en": "A promising young Swiss CB combining a 192cm frame with mobility. His physicality and sharp reading of the game give him the potential to marshal the defensive line.", "height": 192, "weight": 85},
+"ドンナルンマ": {"profile": "190cmの長身と圧倒的な反射神経でゴールを守るイタリア最高のGK。ビッグセーブを連発し代表の守護神として不動の地位を確立している。", "profile_en": "Italy's supreme goalkeeper at 190cm, with extraordinary reflexes and shot-stopping. An unshakeable No.1 who regularly produces match-winning saves.", "height": 190, "weight": 90},
+"ディ・ロレンツォ": {"profile": "攻守両面で高いパフォーマンスを発揮するイタリア代表キャプテン。精力的なオーバーラップと安定した守備でイタリアの右サイドを支配する。", "profile_en": "Italy's captain who delivers consistently at both ends. His energetic overlapping runs and solid defending make him the dominant force on Italy's right.", "height": 183, "weight": 78},
+"ブオンジョルノ": {"profile": "圧倒的な読みと空中戦の強さで相手FWを完封するイタリア期待の若手CB。フィジカルの強さと正確なカバーリングで守備ラインを統率する。", "profile_en": "A promising young Italian CB who smothers opposing forwards with excellent reading and aerial dominance. His physicality and precise covering anchor the defensive line.", "height": 193, "weight": 88},
+"バストーニ": {"profile": "ビルドアップ能力と守備強度を兼備する左利きのCB。インテルで培った高いポジショニングと精度の高いパスでイタリアの後方から攻撃を組み立てる。", "profile_en": "A left-footed CB who combines defensive strength with outstanding build-up ability. Developed at Inter, he orchestrates from the back with precise positioning and passing.", "height": 190, "weight": 83},
+"ディマルコ": {"profile": "優れたクロス精度と左足のキックで攻撃にアクセントをもたらす左SB。精力的な上下動でイタリアの左サイドを活性化するダイナミックなプレーヤー。", "profile_en": "A left-back who adds attacking flair with his crossing precision and left-footed delivery. His energetic shuttling activates Italy's left side.", "height": 175, "weight": 68},
+"バレッラ": {"profile": "圧倒的なスタミナと高い技術で中盤を支配するイタリア代表の心臓。インテルでの経験を代表に持ち込み、攻守両面で最高水準のパフォーマンスを発揮する。", "profile_en": "The beating heart of Italy's midfield, dominating with boundless stamina and technical excellence. He carries his Inter form into the national team, performing at the highest level in both phases.", "height": 172, "weight": 68},
+"トナーリ": {"profile": "力強い守備貢献と精確なパスワークでイタリア中盤に安定感をもたらすDMF。旺盛なプレス強度とインテリジェントな動きでチームのバランスを保つ。", "profile_en": "A DMF who brings stability to Italy's midfield with aggressive defending and precise passing. His pressing intensity and intelligent movement keep the team balanced.", "height": 182, "weight": 73},
+"キエーザ": {"profile": "爆発的なスピードと鋭いドリブルで右サイドを切り裂くイタリア代表の切り込み隊長。得点力も高く、試合を一変させる破壊力を持つサイドアタッカー。", "profile_en": "Italy's slashing right-side attacker with explosive pace and incisive dribbling. His goal threat and match-changing ability make him one of the team's most dangerous weapons.", "height": 175, "weight": 70},
+"ペッレグリーニ": {"profile": "テクニックとビジョンに優れた攻撃的MF。正確なパスと積極的なシュートでイタリアの攻撃を牽引し、セットプレーのキッカーとしても欠かせない存在。", "profile_en": "A technically gifted attacking midfielder with sharp vision. He drives Italy's attack with precise passing and proactive shooting, and is indispensable as a set-piece taker.", "height": 177, "weight": 71},
+"ラスパドーリ": {"profile": "テクニックとインテリジェンスを兼備する万能型アタッカー。狭いスペースでのプレーを得意とし、トップ下からCFまで複数ポジションをこなすイタリアの攻撃の軸。", "profile_en": "A versatile attacker combining technique and intelligence. At home in tight spaces, he covers multiple attacking positions from behind the striker to centre-forward.", "height": 168, "weight": 63},
+"レテギ": {"profile": "強靭なフィジカルと高い決定力を武器とするイタリア代表CF。ポストプレーとヘディングシュートを得意とし、前線のターゲットマンとして存在感を放つ。", "profile_en": "Italy's powerhouse centre-forward armed with physical strength and clinical finishing. A dominant target-man who excels in hold-up play and aerial finishing.", "height": 186, "weight": 82},
+"メレ": {"profile": "セービング技術と安定したハンドリングで評価される控えGK。高い反射神経を持ち、正GKへの信頼できるバックアップとしてイタリア代表に貢献する。", "profile_en": "A backup GK valued for his shot-stopping technique and reliable handling. His sharp reflexes make him a trustworthy alternative to the first-choice keeper.", "height": 187, "weight": 73},
+"ビカーリオ": {"profile": "プレミアリーグで急成長を遂げたGK。プレス耐性とフットワークに優れ、イタリア代表のGK陣に高い競争をもたらす実力派守護神。", "profile_en": "A GK who has rapidly developed in the Premier League. His composure under pressure and excellent footwork make him a strong contender in Italy's competitive goalkeeping pool.", "height": 195, "weight": 89},
+"カラフィオーリ": {"profile": "左足の精度と高い機動力で攻守両面に貢献する若手DF。CBとLBをこなすポリバレント性と積極的なビルドアップ参加でイタリア守備陣の重要な構成要素。", "profile_en": "A young defender who contributes at both ends with precise left-foot delivery and high mobility. His versatility across CB and LB, combined with proactive build-up involvement, makes him an essential part of Italy's defence.", "height": 185, "weight": 77},
+"アチェルビ": {"profile": "長年にわたりイタリア守備を支えるベテランCB。経験から磨かれた読みの鋭さと安定したマーキングでチームに安心感をもたらす実力派ディフェンダー。", "profile_en": "A veteran CB who has underpinned Italy's defence for many years. Honed by experience, his sharp reading and reliable marking bring a sense of security to the team.", "height": 192, "weight": 82},
+"カンビアーゾ": {"profile": "爆発的なスピードとスタミナを誇る多才なSB。右SBと左SBをハイレベルでこなし、サイドを高い頻度でオーバーラップする攻撃的なプレースタイルが武器。", "profile_en": "A versatile full-back with explosive pace and tremendous stamina. He plays both right and left at a high level, his overlapping runs making him a persistent attacking threat.", "height": 180, "weight": 68},
+"フラッテージ": {"profile": "飛び出しのタイミングと得点感覚に優れたCMF。ボックス内への積極的な走り込みで多くのゴールを量産し、イタリア中盤に得点力をもたらすダイナミックな選手。", "profile_en": "A CMF with exceptional timing and a sharp eye for goal. His energetic runs into the box yield a high number of goals, adding a scoring dimension to Italy's midfield.", "height": 172, "weight": 68},
+"ロカテッリ": {"profile": "正確なパス捌きと豊富な運動量でイタリア中盤を支えるDMF。スペース認識能力が高く、守備時のポジショニングと攻守の切り替えの速さが持ち味。", "profile_en": "A DMF who supports Italy's midfield with precise distribution and tireless running. His spatial awareness and quick transitions make him a reliable anchor.", "height": 187, "weight": 81},
+"ザニョーロ": {"profile": "フィジカルと技術を兼備する右WG。シュート力とドリブルでサイドから積極的に仕掛け、試合の流れを変えるポテンシャルを持つダイナミックなアタッカー。", "profile_en": "A right winger combining physicality and technique. He drives from wide positions with goal threat and dribbling, possessing the potential to change a game's momentum.", "height": 183, "weight": 81},
+"スカマッカ": {"profile": "長身と高いシュート技術を誇る大型CF。ポストプレーとヘディングシュートを得意とし、強靭なフィジカルでイタリア前線に迫力と得点力をもたらす。", "profile_en": "A tall CF with outstanding shooting technique. He excels at hold-up play and aerial finishing, bringing physicality and goal threat to Italy's forward line.", "height": 195, "weight": 92},
+"クリスタンテ": {"profile": "守備的センスと広い視野を持つ万能型CMF。球際の強さとインテリジェントなポジショニングでチームのバランスを整え、緊急時に複数ポジションをカバーする。", "profile_en": "A versatile CMF with strong defensive instincts and wide vision. His physicality and intelligent positioning keep the team balanced, and he can cover multiple positions in an emergency.", "height": 186, "weight": 76},
+"ベッラノーバ": {"profile": "爆発的な加速力と積極的なオーバーラップを武器とする右SB。スプリント力と縦への推進力でイタリアの右サイドに迫力と幅をもたらす。", "profile_en": "A right-back who weaponises explosive acceleration and aggressive overlapping. His sprinting and vertical drive add width and thrust to Italy's right flank.", "height": 185, "weight": 75},
+"ファジョーリ": {"profile": "正確なパスセンスとテクニックで周囲を活かす若手CMF。ゲームのリズムを作る能力が高く、ユヴェントスで磨いたプレーメイクスキルを代表でも発揮する。", "profile_en": "A young CMF who uses precise passing and technique to bring out the best in teammates. His rhythm-setting ability is high, and he brings the playmaking skills polished at Juventus to the national team.", "height": 177, "weight": 70},
+"ミレッティ": {"profile": "巧みなボールタッチとパスセンスを持つ若手CMF。判断速度が高く、狭いスペースでの技術的なプレーでイタリア中盤に創造性をもたらす将来の核候補。", "profile_en": "A young CMF with excellent touch and passing instinct. His quick decision-making and technical play in tight spaces bring creativity to Italy's midfield.", "height": 179, "weight": 70},
+"キーン": {"profile": "フィジカルとスピードを兼備する万能型CF。左WGとCFをこなすポリバレント性と高い得点感覚でイタリア前線に厚みをもたらす期待の若手FW。", "profile_en": "A versatile CF combining physicality with pace. His ability to play left wing and centre-forward, combined with sharp finishing, adds depth to Italy's attacking options.", "height": 186, "weight": 83},
+"ガッティ": {"profile": "パワーと闘争心で相手FWに食らいつくCB。フィジカルの強さと献身的なハードワークでイタリア守備陣に活力をもたらす実直なディフェンダー。", "profile_en": "A CB who clings to opposing forwards with power and fighting spirit. His physicality and relentless work rate bring energy and vigour to Italy's defensive unit.", "height": 186, "weight": 81}
 };
 
 const PARAM_NAMES = [
@@ -2507,6 +2533,67 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ムヘイム",en_name:"Muheim",long_name:"ミロ・ムヘイム",positions:["左SB","左SMF"],params:[72,74,80,82,76,68,70,70,76,68,64,44,46,48,38,44,70,48,70,72,72,71,70,50,50,62,66,70,75]},
       // Sub CB: Amenda (FC26 OVR78, PAC78, SHO46, PAS70, DRI70, DEF78, PHY82)
       {name:"アメンダ",en_name:"Amenda",long_name:"アンソニー・アメンダ",positions:["CB"],params:[82,78,78,76,74,82,66,66,74,70,66,36,32,40,32,38,66,36,76,78,78,77,76,50,50,82,72,76,75]}
+    ]
+  },
+
+  italy2026: {
+    name:"イタリア",en_name:"Italy",team_color:"#003DA5",flag:"🇮🇹",
+    default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
+    default_keyplayer:5,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Donnarumma (FC26 OVR90, DIV87, HAN85, KIC84, REF90, SPD54, POS88)
+      {name:"ドンナルンマ",en_name:"Donnarumma",long_name:"ジャンルイジ・ドンナルンマ",positions:["GK"],params:[50,50,50,50,90,54,50,50,50,50,84,50,50,50,50,50,50,50,50,50,50,50,50,87,85,50,88,84,75]},
+      // RB: Di Lorenzo (FC26 OVR84, PAC83, SHO64, PAS76, DRI78, DEF83, PHY79) ← captain
+      {name:"ディ・ロレンツォ",en_name:"Di Lorenzo",long_name:"ジョバンニ・ディ・ロレンツォ",positions:["右SB"],params:[78,80,83,84,79,76,76,78,79,76,72,56,58,60,50,52,78,62,82,84,82,82,80,50,50,74,78,78,75]},
+      // RCB: Buongiorno (FC26 OVR83, PAC78, SHO42, PAS67, DRI66, DEF84, PHY83)
+      {name:"ブオンジョルノ",en_name:"Buongiorno",long_name:"アレッサンドロ・ブオンジョルノ",positions:["CB"],params:[82,82,78,79,72,84,64,66,72,66,62,36,34,42,32,34,66,38,84,86,84,84,82,50,50,84,76,80,75]},
+      // LCB: Bastoni (FC26 OVR87, PAC78, SHO55, PAS86, DRI84, DEF87, PHY82)
+      {name:"バストーニ",en_name:"Bastoni",long_name:"アレッサンドロ・バストーニ",positions:["CB","左SB"],params:[82,82,78,79,83,80,84,84,83,86,82,48,48,54,44,48,84,62,86,88,86,86,84,50,50,80,84,84,75]},
+      // LSB: Dimarco (FC26 OVR82, PAC78, SHO70, PAS78, DRI80, DEF78, PHY74)
+      {name:"ディマルコ",en_name:"Dimarco",long_name:"フェデリコ・ディマルコ",positions:["左SB","左WG"],params:[74,76,78,79,77,72,78,80,77,78,74,64,66,68,62,68,80,70,76,78,76,76,74,50,50,68,76,76,75]},
+      // RDMF: Barella (FC26 OVR88, PAC76, SHO79, PAS84, DRI86, DEF82, PHY82) ← keyplayer
+      {name:"バレッラ",en_name:"Barella",long_name:"ニコロ・バレッラ",positions:["CMF","DMF","OMF"],params:[82,84,76,77,83,80,86,86,83,84,80,74,76,78,62,68,86,84,82,84,82,80,80,50,50,76,84,84,75]},
+      // LDMF: Tonali (FC26 OVR85, PAC75, SHO77, PAS83, DRI82, DEF84, PHY83)
+      {name:"トナーリ",en_name:"Tonali",long_name:"サンドロ・トナーリ",positions:["DMF","CMF"],params:[82,84,75,76,81,82,80,82,81,82,78,72,74,76,60,64,82,80,84,86,84,82,82,50,50,78,82,82,75]},
+      // RSM: Chiesa (FC26 OVR83, PAC88, SHO80, PAS74, DRI84, DEF52, PHY70)
+      {name:"キエーザ",en_name:"Chiesa",long_name:"フェデリコ・キエーザ",positions:["右WG","左WG","右SMF"],params:[70,72,88,90,82,66,82,84,82,74,68,76,74,78,62,68,84,80,48,50,48,48,50,50,50,62,80,78,75]},
+      // LSM: Pellegrini (FC26 OVR83, PAC72, SHO80, PAS83, DRI83, DEF54, PHY74)
+      {name:"ペッレグリーニ",en_name:"Pellegrini",long_name:"ロレンツォ・ペッレグリーニ",positions:["OMF","CMF","左WG"],params:[74,76,72,73,80,70,82,82,80,82,78,76,76,78,70,72,82,80,50,52,50,50,52,50,50,68,78,78,75]},
+      // OMF: Raspadori (FC26 OVR82, PAC80, SHO80, PAS78, DRI82, DEF44, PHY66)
+      {name:"ラスパドーリ",en_name:"Raspadori",long_name:"ジャコモ・ラスパドーリ",positions:["OMF","CF","左WG"],params:[64,66,80,82,80,62,80,82,80,78,72,76,76,78,62,66,82,80,40,42,40,40,42,50,50,58,76,76,75]},
+      // CF: Retegui (FC26 OVR83, PAC73, SHO85, PAS65, DRI73, DEF40, PHY83) ← marked
+      {name:"レテギ",en_name:"Retegui",long_name:"マテオ・レテギ",positions:["CF"],params:[82,82,73,74,77,84,72,72,77,64,58,82,80,84,58,62,72,80,36,38,36,36,38,50,50,84,74,74,75]},
+      // Sub GK: Meret (FC26 OVR80, DIV82, HAN79, KIC80, REF82, SPD60, POS80)
+      {name:"メレ",en_name:"Meret",long_name:"アレックス・メレ",positions:["GK"],params:[50,50,50,50,82,60,50,50,50,50,80,50,50,50,50,50,50,50,50,50,50,50,50,82,79,50,80,80,75]},
+      // Sub GK: Vicario (FC26 OVR81, DIV83, HAN81, KIC76, REF83, SPD62, POS81)
+      {name:"ビカーリオ",en_name:"Vicario",long_name:"グリエルモ・ビカーリオ",positions:["GK"],params:[50,50,50,50,83,62,50,50,50,50,76,50,50,50,50,50,50,50,50,50,50,50,50,83,81,50,81,76,75]},
+      // Sub CB/LB: Calafiori (FC26 OVR82, PAC82, SHO56, PAS76, DRI78, DEF79, PHY76)
+      {name:"カラフィオーリ",en_name:"Calafiori",long_name:"リカルド・カラフィオーリ",positions:["CB","左SB"],params:[76,78,82,83,78,74,78,78,78,76,72,48,50,54,44,48,78,58,78,80,78,78,76,50,50,70,76,76,75]},
+      // Sub CB: Acerbi (FC26 OVR80, PAC67, SHO42, PAS66, DRI65, DEF82, PHY80)
+      {name:"アチェルビ",en_name:"Acerbi",long_name:"フランチェスコ・アチェルビ",positions:["CB"],params:[80,80,67,68,69,82,64,64,69,66,60,36,34,42,32,34,64,36,82,84,82,82,80,50,50,82,76,78,75]},
+      // Sub RB/LB: Cambiaso (FC26 OVR82, PAC86, SHO66, PAS78, DRI80, DEF78, PHY74)
+      {name:"カンビアーゾ",en_name:"Cambiaso",long_name:"アンドレア・カンビアーゾ",positions:["右SB","左SB"],params:[74,76,86,87,80,72,78,80,80,78,74,58,60,64,52,56,80,66,76,78,76,76,74,50,50,68,78,78,75]},
+      // Sub CMF: Frattesi (FC26 OVR83, PAC79, SHO79, PAS78, DRI80, DEF76, PHY78)
+      {name:"フラッテージ",en_name:"Frattesi",long_name:"ダビデ・フラッテージ",positions:["CMF","DMF"],params:[78,80,79,80,78,76,78,80,78,78,72,76,76,78,56,60,80,78,74,76,74,74,72,50,50,72,78,78,75]},
+      // Sub DMF: Locatelli (FC26 OVR81, PAC68, SHO70, PAS82, DRI79, DEF79, PHY75)
+      {name:"ロカテッリ",en_name:"Locatelli",long_name:"マヌエル・ロカテッリ",positions:["DMF","CMF"],params:[74,76,68,70,77,72,78,78,77,82,78,64,66,68,58,62,78,72,78,80,78,78,76,50,50,68,78,78,75]},
+      // Sub RW: Zaniolo (FC26 OVR78, PAC80, SHO74, PAS70, DRI78, DEF47, PHY76)
+      {name:"ザニョーロ",en_name:"Zaniolo",long_name:"ニコロ・ザニョーロ",positions:["右WG","右SMF"],params:[76,78,80,82,77,72,76,78,77,70,64,70,70,72,54,58,78,74,42,44,42,42,44,50,50,68,72,72,75]},
+      // Sub CF: Scamacca (FC26 OVR82, PAC76, SHO84, PAS63, DRI77, DEF37, PHY84)
+      {name:"スカマッカ",en_name:"Scamacca",long_name:"ジャンルカ・スカマッカ",positions:["CF"],params:[84,84,76,77,78,84,76,76,78,62,56,82,80,84,56,60,76,78,32,34,32,32,34,50,50,86,72,72,75]},
+      // Sub DMF/CMF: Cristante (FC26 OVR78, PAC66, SHO68, PAS79, DRI74, DEF77, PHY78)
+      {name:"クリスタンテ",en_name:"Cristante",long_name:"ブライアン・クリスタンテ",positions:["DMF","CMF"],params:[78,80,66,68,74,76,70,72,74,78,74,62,64,66,56,58,72,68,76,78,76,76,74,50,50,72,74,76,75]},
+      // Sub RB: Bellanova (FC26 OVR78, PAC86, SHO56, PAS72, DRI74, DEF72, PHY72)
+      {name:"ベッラノーバ",en_name:"Bellanova",long_name:"ラウル・ベッラノーバ",positions:["右SB"],params:[72,74,86,87,78,70,72,72,78,72,66,48,50,52,40,44,72,56,70,72,70,70,68,50,50,66,72,72,75]},
+      // Sub CMF: Fagioli (FC26 OVR76, PAC64, SHO66, PAS80, DRI78, DEF64, PHY68)
+      {name:"ファジョーリ",en_name:"Fagioli",long_name:"ニコロ・ファジョーリ",positions:["CMF","DMF"],params:[66,68,64,66,73,64,76,78,73,80,74,60,62,64,52,54,78,68,62,64,62,62,60,50,50,62,74,74,75]},
+      // Sub CMF: Miretti (FC26 OVR74, PAC72, SHO64, PAS76, DRI76, DEF62, PHY68)
+      {name:"ミレッティ",en_name:"Miretti",long_name:"ファビオ・ミレッティ",positions:["CMF"],params:[66,68,72,74,71,64,74,76,71,76,70,58,60,62,48,50,76,66,60,62,60,60,58,50,50,62,72,72,75]},
+      // Sub CF/LW: Kean (FC26 OVR82, PAC84, SHO82, PAS66, DRI78, DEF36, PHY82)
+      {name:"キーン",en_name:"Kean",long_name:"モイーズ・キーン",positions:["CF","左WG"],params:[82,82,84,85,80,80,76,78,80,66,60,78,78,80,52,56,78,78,32,32,30,30,34,50,50,82,74,74,75]},
+      // Sub CB: Gatti (FC26 OVR78, PAC72, SHO46, PAS62, DRI64, DEF79, PHY82)
+      {name:"ガッティ",en_name:"Gatti",long_name:"フェデリコ・ガッティ",positions:["CB"],params:[82,80,72,73,68,82,62,62,68,62,56,38,36,44,34,36,62,36,78,80,78,78,76,50,50,82,74,74,75]}
     ]
   },
 };
