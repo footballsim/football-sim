@@ -830,7 +830,7 @@ function showResult() {
     el.innerHTML = list.map(v =>
       `<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12px">
         <span style="color:${v.tcolor};font-weight:700;min-width:60px">${v.teamName}</span>
-        <span style="flex:1">${v.label}</span>
+        <span style="flex:1">${getActionLabel(v.label)}</span>
         <span style="font-weight:700">⚽×${v.count}</span>
       </div>`
     ).join('');
