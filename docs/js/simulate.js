@@ -1355,7 +1355,9 @@ function renderFormation() {
         e.stopPropagation();
         const pname = player ? getPlayerName(player) : '?';
         const preferred = player ? player.positions.join(' / ') : '';
-        showOopToast(`${pname}｜${_fieldPos} は非得意ポジション（得意: ${preferred}）全能力5%ダウン`);
+        showOopToast(window.LANG === 'en'
+          ? `${pname} | ${_fieldPos}: off-position (prefers: ${preferred}) −5% all stats`
+          : `${pname}｜${_fieldPos} は非得意ポジション（得意: ${preferred}）全能力5%ダウン`);
       };
       circleWrap.appendChild(badge);
     }
