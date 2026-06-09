@@ -1122,7 +1122,46 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "アレアガ": {"profile": "フィジカルと高い守備強度でエクアドル守備陣に厚みをもたらすDF。CBとLBをこなすポリバレント性で守備ラインに柔軟性を与える。", "profile_en": "A defender who adds physical depth to Ecuador's backline with high defensive intensity. His versatility across CB and LB gives the defensive line tactical flexibility.", "height": 185, "weight": 78},
 "D・レアスコ": {"profile": "スピードと積極的な仕掛けでサイドから相手守備を崩すウィンガー。縦への突破力と高い得点意欲でエクアドルの攻撃に推進力をもたらすアタッカー。", "profile_en": "A winger who breaks through defences from wide with pace and directness. His vertical penetration and eagerness to score bring momentum to Ecuador's attack.", "height": 176, "weight": 70},
 "J・カイセド": {"profile": "高さとフィジカルを活かしたポストプレーでエクアドル前線に存在感を放つCF。強靭な体幹と積極的なシュートで相手守備に脅威を与えるターゲットマン。", "profile_en": "A CF who makes his presence felt up front with aerial hold-up play and strong physicality. His powerful frame and proactive shooting threaten opposing defences as a target-man.", "height": 188, "weight": 84},
-"F・マルティネス": {"profile": "鋭いスプリントとドリブルでエクアドルのサイドを活性化するアタッカー。裏への飛び出しと仕掛けの速さで相手守備を揺さぶるスピードスター。", "profile_en": "A wide attacker who activates Ecuador's flanks with sharp sprints and dribbling. His runs in behind and quick attacking intent unsettle opposing defences.", "height": 172, "weight": 68}
+"F・マルティネス": {"profile": "鋭いスプリントとドリブルでエクアドルのサイドを活性化するアタッカー。裏への飛び出しと仕掛けの速さで相手守備を揺さぶるスピードスター。", "profile_en": "A wide attacker who activates Ecuador's flanks with sharp sprints and dribbling. His runs in behind and quick attacking intent unsettle opposing defences.", "height": 172, "weight": 68},
+"M・ライアン": {"profile": "確実なセービングと的確なコーチングでオーストラリアのゴールを守るGK。代表で長年の経験を積み、困難な局面でもチームを落ち着かせる守護神。", "profile_en": "Australia's experienced goalkeeper who guards the goal with reliable shot-stopping and precise command. His years of international experience calm the team in difficult moments.", "height": 184, "weight": 75},
+"アトキンソン": {"profile": "積極的なオーバーラップと安定した守備でオーストラリアの右サイドを担う右SB。豊富なスタミナとタフな守備で代表の右サイドに欠かせない存在。", "profile_en": "A right-back who covers Australia's right flank with energetic overlaps and solid defending. His stamina and toughness make him indispensable on the right of the national team.", "height": 178, "weight": 73},
+"サウター": {"profile": "196cmの長身と空中戦の強さでオーストラリア守備を統率するCB。フィジカルの圧倒的な強さと高いカバーリングでオーストラリア守備の要を担う若きリーダー。", "profile_en": "A 196cm CB who commands Australia's defence with aerial dominance and physical strength. His imposing physique and wide coverage make him the cornerstone of Australia's defence.", "height": 196, "weight": 90},
+"ロールズ": {"profile": "安定したポジショニングと読みの鋭さでオーストラリア守備ラインを支えるCB。冷静な判断力と技術的な守備でチームに信頼性の高い選択肢を提供する。", "profile_en": "A CB who supports Australia's defensive line with reliable positioning and sharp reading. His composed decision-making and technical defending make him a dependable option.", "height": 186, "weight": 78},
+"ベヒッチ": {"profile": "スピードと積極的な攻撃参加でオーストラリアの左サイドを活性化する左SB。果敢な突破とクロス精度でオーストラリア代表の左サイドに迫力をもたらすダイナミックなDF。", "profile_en": "A left-back who energises Australia's left side with pace and forward runs. His daring dribbles and crossing ability bring menace to the national team's left flank.", "height": 172, "weight": 70},
+"J・アーバイン": {"profile": "豊富なスタミナと広いカバー範囲でオーストラリア中盤を支配するCMF。キャプテンとして高いリーダーシップを発揮し、攻守両面でチームを牽引するオーストラリアの心臓。", "profile_en": "Australia's heartbeat who dominates the midfield with boundless stamina and wide coverage. As captain, he leads with high authority at both ends, driving the team forward.", "height": 192, "weight": 86},
+"マクグリー": {"profile": "テクニックと得点感覚を兼備するオーストラリア代表の中盤のエース。ボックスへの積極的な飛び込みと精度の高いシュートで攻撃に厚みをもたらすダイナミックなCMF。", "profile_en": "Australia's midfield ace combining technique and a sharp eye for goal. His energetic runs into the box and precise shooting add depth to the attack.", "height": 178, "weight": 72},
+"M・レッキー": {"profile": "鋭いスプリントと巧みなドリブルでオーストラリアの右サイドを切り裂くウィンガー。長年代表の右サイドを担い、ゴールとアシストでチームに貢献するベテランアタッカー。", "profile_en": "A veteran winger who slashes through Australia's right side with sharp pace and clever dribbling. He has long been the right flank's mainstay, contributing goals and assists.", "height": 175, "weight": 68},
+"マビル": {"profile": "爆発的な加速力と積極的な仕掛けでオーストラリアの左サイドを活性化するウィンガー。スピードを活かした縦への突破と高いクロス精度で相手守備を脅かす。", "profile_en": "A left-side winger who activates Australia's attack with explosive pace and directness. His vertical drives and precise crossing threaten opposing defences.", "height": 176, "weight": 70},
+"フルスティッチ": {"profile": "高いパスセンスと創造性でオーストラリア攻撃を彩るOMF。精確なパスとシュートの積極性でアタッキングサードに変化をもたらすクリエイター。", "profile_en": "An OMF who embellishes Australia's attack with creative passing and invention. His precise distribution and eagerness to shoot inject variety into the final third.", "height": 182, "weight": 76},
+"デューク": {"profile": "高さとポストプレーを武器にオーストラリア前線の起点を作るCF。献身的なプレスバックと高い決定力でチームに得点をもたらすターゲットマン。", "profile_en": "A CF who creates a focal point for Australia's attack with his height and hold-up play. His relentless pressing-back and clinical finishing bring goals to the team.", "height": 187, "weight": 83},
+"ヴコヴィッチ": {"profile": "経験豊富なGKとして代表に帯同する控え守護神。安定したセービングとリーダーシップでオーストラリアGK陣に頼もしい存在感を放つ。", "profile_en": "An experienced backup goalkeeper who brings a reassuring presence to Australia's goalkeeping options with reliable shot-stopping and leadership.", "height": 192, "weight": 87},
+"ガルシア": {"profile": "若い才能と積極的なプレーで台頭するGK。オーストラリア代表のGK競争に加わり、将来の正GK候補として着実に経験を積んでいる。", "profile_en": "A young goalkeeper rising with talent and proactive play. Entering Australia's goalkeeping competition, steadily accumulating experience as a future first-choice candidate.", "height": 188, "weight": 80},
+"ネデリコヴィッチ": {"profile": "スピードと的確な守備でオーストラリアの右サイドを担う右SB。機動力と豊富なスタミナで縦を高い強度でカバーし、守備時の粘り強さも持ち味。", "profile_en": "A right-back who covers Australia's right side with pace and sound defending. His mobility and stamina allow him to cover the flank with relentless intensity.", "height": 183, "weight": 76},
+"カラシッチ": {"profile": "強靭なフィジカルとパス精度でオーストラリア守備の厚みをもたらすCB。フィジカルの強さと安定したポジショニングで守備ラインの信頼性を高める。", "profile_en": "A CB who strengthens Australia's defensive depth with physical presence and passing accuracy. His physicality and reliable positioning raise the defensive line's dependability.", "height": 189, "weight": 83},
+"ロゴスキー": {"profile": "強靭なフィジカルとセカンドボールへの反応でオーストラリア中盤の守備的バランスを保つDMF。中盤の底で地道な守備貢献でチームを支えるワーカー。", "profile_en": "A DMF who maintains Australia's midfield defensive balance with physicality and sharp reactions to second balls. A hardworking anchor who quietly underpins the team.", "height": 186, "weight": 81},
+"グリーンフェルド": {"profile": "テクニックと視野の広さでオーストラリアの中盤を活性化するCMF。若い才能とパスセンスでゲームのリズムを作り、オーストラリア代表の次世代を担う期待の存在。", "profile_en": "A CMF who activates Australia's midfield with technique and wide vision. A young talent whose passing instinct controls game rhythm — a future cornerstone of the national team.", "height": 179, "weight": 72},
+"ダンカン": {"profile": "スピードと積極的な縦への突破でオーストラリアのサイドを活性化するウィンガー。クロス精度と得点センスを兼備し、試合の流れを変えるポテンシャルを持つ。", "profile_en": "A winger who activates Australia's flanks with pace and aggressive vertical running. His crossing ability and goal sense give him the potential to change the course of a match.", "height": 176, "weight": 68},
+"クオル": {"profile": "爆発的なスピードと積極的な仕掛けで将来を嘱望されるオーストラリアの若きFW。ドリブルとゴール前での動き出しの鋭さでオーストラリア代表の将来を担う新世代。", "profile_en": "A young Australian forward of great promise, with explosive pace and direct attacking play. His dribbling and sharp movement in front of goal represent the next generation of Australian attack.", "height": 183, "weight": 76},
+"タガート": {"profile": "豊富なゴール経験と献身的なプレーでオーストラリア前線に得点力をもたらすCF。国内と海外のリーグで培った得点感覚でチームに頼もしい選択肢を提供する。", "profile_en": "A CF who brings goal threat to Australia's forward line with a rich scoring record and relentless effort. His instinct for goal, forged in domestic and overseas leagues, provides a reliable option.", "height": 182, "weight": 76},
+"バイウンドゥル": {"profile": "反射神経と1対1の強さでトルコのゴールを守るGK。プレミアリーグ屈指のクラブでの経験を代表に持ち込み、冷静な判断力でトルコ守備を安定させる。", "profile_en": "Turkey's goalkeeper who guards the goal with sharp reflexes and strong one-on-one stopping. Bringing experience from a top Premier League club, his composure steadies Turkey's defence.", "height": 200, "weight": 88},
+"Z・チェリク": {"profile": "正確な守備と精力的な攻撃参加でトルコの右サイドを担うSB。イタリアのトップリーグで磨いたフィジカルとテクニックで代表の右サイドに安定感をもたらす。", "profile_en": "A right-back who covers Turkey's flank with precise defending and energetic runs. Physicality and technique refined in Italian top-flight football bring consistency to the national team's right side.", "height": 180, "weight": 74},
+"デミラル": {"profile": "圧倒的なフィジカルと積極的なデュエルでトルコ守備の要を担うキャプテンCB。一体的な守備ブロックを形成し、相手FWに立ちはだかるトルコのディフェンスリーダー。", "profile_en": "Turkey's captain and defensive cornerstone who commands the backline with imposing physicality and aggressive duelling. He forges a cohesive defensive block and stands firm against opposing forwards.", "height": 190, "weight": 85},
+"アカイドゥン": {"profile": "安定したポジショニングと冷静な判断力でトルコ守備陣に安心感をもたらすCB。フィジカルの強さと読みの鋭さで相手の攻撃を食い止める信頼性の高いDF。", "profile_en": "A CB whose stable positioning and composed decision-making bring reassurance to Turkey's defence. His physical strength and sharp reading shut down opposing attacks reliably.", "height": 188, "weight": 82},
+"カドゥオール": {"profile": "スピードと正確なクロスでトルコの左サイドを制圧する左SB。プレミアリーグで培った攻守両面の高いパフォーマンスで代表の左サイドを担う精力的なDF。", "profile_en": "A left-back who dominates Turkey's left flank with pace and precise crossing. High performance at both ends, refined in the Premier League, covers the national team's left side.", "height": 178, "weight": 72},
+"チャルハノール": {"profile": "比類ない技術とビジョンでトルコ中盤を操る天才的なCMF。イタリアのトップクラブで世界最高のピボーテとして名声を確立し、トルコ代表に圧倒的な技術と組み立て能力をもたらす。", "profile_en": "A genius CMF who orchestrates Turkey's midfield with unmatched technique and vision. Having established himself as the world's finest pivot at a top Italian club, he brings overwhelming quality and build-up ability to the national team.", "height": 181, "weight": 75},
+"S・オズジャン": {"profile": "広いカバー範囲と豊富なスタミナでトルコ中盤の守備バランスを保つCMF。チャルハノールを支える縁の下の力持ちとして、勤勉な守備貢献でチームを支える。", "profile_en": "A CMF who maintains Turkey's midfield defensive balance with wide coverage and high stamina. Supporting Çalhanoğlu as an unsung hero, he underpins the team with diligent defensive work.", "height": 185, "weight": 78},
+"アクトゥルコール": {"profile": "爆発的なスプリントと鋭いドリブルでトルコの右サイドを制圧するウィンガー。プレミアリーグで評価を高めたスピードと技術でゴールとアシストを量産するアタッカー。", "profile_en": "A right-side winger who dominates Turkey's flank with explosive pace and sharp dribbling. His pace and technique, highly rated in the Premier League, produce goals and assists in quantity.", "height": 178, "weight": 68},
+"K・イルドゥズ": {"profile": "若くして世界最高クラスのクラブでレギュラーを掴んだトルコ期待のMF。テクニックと得点感覚を兼備し、トルコの未来を担う天才的な若きアタッカー。", "profile_en": "A highly talented Turkish MF who secured a regular place at a world-class club at a young age. Combining technique and a sharp eye for goal, he is the gifted young attacker carrying Turkey's future.", "height": 180, "weight": 73},
+"ギュレル": {"profile": "世界屈指のクラブでデビューを飾ったトルコが誇る稀代の天才OMF。圧倒的な技術とドリブルで相手守備を崩し、トルコ代表の攻撃に革命的な輝きをもたらすファンタジスタ。", "profile_en": "Turkey's once-in-a-generation fantasy OMF who made his debut at one of the world's greatest clubs. With overwhelming technique and dribbling, he dismantles opposing defences and brings revolutionary brilliance to Turkey's attack.", "height": 175, "weight": 66},
+"B・イルドゥズ": {"profile": "スピードと積極的な仕掛けでトルコの前線を牽引するCF。高い運動量と得点へのどん欲さで相手守備を脅かし、チームの攻撃を活性化するストライカー。", "profile_en": "A CF who leads Turkey's forward line with pace and direct attacking play. His high work rate and hunger for goals threaten defences and activate the team's attack.", "height": 176, "weight": 70},
+"ウールカン": {"profile": "安定したセービングと高い集中力を誇るトルコ代表の控えGK。経験とプレーの安定性でGK陣に厚みをもたらし、正GKへの信頼性の高いバックアップを担う。", "profile_en": "Turkey's backup GK boasting reliable shot-stopping and high concentration. His experience and consistency add depth to the goalkeeping options as a dependable second choice.", "height": 189, "weight": 83},
+"U・チャクル": {"profile": "高いセービング技術と冷静な判断力を誇るGK。国内屈指のクラブで実績を積み、代表GK陣の競争に名乗りを上げる実力派守護神。", "profile_en": "A GK with strong shot-stopping technique and composed decision-making. His record at top domestic clubs makes him a strong contender in the national team's goalkeeping battle.", "height": 190, "weight": 83},
+"ムルドゥル": {"profile": "スピードと縦への推進力でトルコの右サイドに動きを与える右SB。積極的なオーバーラップと守備への貢献でトルコのサイド攻撃に厚みをもたらす。", "profile_en": "A right-back who brings movement to Turkey's right flank with pace and vertical drive. His energetic overlaps and defensive contributions add depth to Turkey's side attacks.", "height": 180, "weight": 75},
+"サマット": {"profile": "高さとフィジカルでトルコ守備に安定感をもたらすCB。強靭なデュエルと空中戦の強さで相手FWを封じ込め、守備ラインの頼もしいバックアップとして機能する。", "profile_en": "A CB who brings stability to Turkey's defence with height and physicality. His powerful duelling and aerial strength shut down forwards, functioning as a dependable defensive backup.", "height": 192, "weight": 88},
+"ヤルチン": {"profile": "長身とパワーを武器にトルコのフォワード陣に迫力をもたらすCF。ポストプレーと強引な突破でゴールに迫り、試合の流れを変える切り札として機能する。", "profile_en": "A CF who adds physical menace to Turkey's forward line with his height and power. Threatening goal with hold-up play and determined runs, he functions as a game-changing impact substitute.", "height": 190, "weight": 86},
+"ユルマズ B": {"profile": "豊富なゴール経験と巧みなポジショニングを持つベテランCF。代表での豊富な経験を活かし、若いアタッカーをサポートしながら前線に得点力と安定感をもたらす。", "profile_en": "A veteran CF with a rich goal record and clever positioning. Using his extensive national team experience, he supports younger attackers while adding scoring ability and stability to the forward line.", "height": 182, "weight": 74},
+"イン＝ミン・タシュ": {"profile": "タフな守備と豊富な運動量でトルコの中盤に安定感をもたらすDMF。守備への貢献とセカンドボール回収の強さでチームの守備ブロックを機能させる。", "profile_en": "A DMF who brings stability to Turkey's midfield with tough defending and high energy. His defensive contribution and second-ball recovery make the team's defensive structure work.", "height": 183, "weight": 78},
+"T・ユルドゥズ": {"profile": "高い技術と豊富なスタミナでトルコ中盤を支えるCMF。正確なパス捌きとインテリジェントな動きでゲームのリズムを作り、チームにバランスをもたらすMF。", "profile_en": "A CMF who supports Turkey's midfield with high technique and abundant stamina. His precise distribution and intelligent movement control game rhythm and bring balance to the team.", "height": 179, "weight": 72}
 };
 
 const PARAM_NAMES = [
@@ -2945,6 +2984,102 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"J・カイセド",en_name:"J.Caicedo",long_name:"ホルヘ・カイセド",positions:["CF"],params:[80,80,74,75,73,78,64,64,73,58,52,72,70,72,48,50,64,70,32,32,30,30,34,50,50,78,66,64,75]},
       // Sub RW: F.Martinez (FC26 OVR72, PAC82, SHO66, PAS62, DRI72, DEF38, PHY60)
       {name:"F・マルティネス",en_name:"F.Martinez",long_name:"フィデル・マルティネス",positions:["右WG","左WG"],params:[58,60,82,84,74,54,70,72,74,62,56,62,62,64,48,52,70,64,34,36,34,34,36,50,50,52,64,64,75]}
+    ]
+  },
+
+  australia2026: {
+    name:"オーストラリア",en_name:"Australia",team_color:"#00843D",flag:"🇦🇺",
+    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:5,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: M.Ryan (FC26 OVR78, DIV79, HAN77, KIC74, REF79, SPD60, POS78)
+      {name:"M・ライアン",en_name:"M.Ryan",long_name:"マシュー・ライアン",positions:["GK"],params:[50,50,50,50,79,60,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,79,77,50,78,74,75]},
+      // RB: N.Atkinson (FC26 OVR74, PAC80, SHO52, PAS66, DRI68, DEF72, PHY72)
+      {name:"アトキンソン",en_name:"Atkinson",long_name:"ナサニエル・アトキンソン",positions:["右SB"],params:[72,72,80,81,72,68,66,66,72,66,60,44,44,48,36,38,66,48,70,72,70,70,68,50,50,66,66,66,75]},
+      // RCB: H.Souttar (FC26 OVR79, PAC72, SHO44, PAS66, DRI64, DEF80, PHY82)
+      {name:"サウター",en_name:"Souttar",long_name:"ハリー・サウター",positions:["CB"],params:[82,80,72,73,70,84,62,62,70,66,60,36,34,42,28,30,62,32,80,82,80,80,78,50,50,84,74,72,75]},
+      // LCB: K.Rowles (FC26 OVR76, PAC76, SHO42, PAS65, DRI64, DEF78, PHY78)
+      {name:"ロールズ",en_name:"Rowles",long_name:"カイ・ロールズ",positions:["CB"],params:[78,78,76,77,70,78,62,62,70,64,58,34,32,40,28,30,62,32,78,80,78,78,76,50,50,78,72,70,75]},
+      // LSB: A.Behich (FC26 OVR72, PAC82, SHO52, PAS64, DRI68, DEF68, PHY68)
+      {name:"ベヒッチ",en_name:"Behich",long_name:"アジズ・ベヒッチ",positions:["左SB"],params:[68,68,82,83,72,64,66,66,72,64,58,44,44,48,36,40,66,50,66,68,66,66,64,50,50,62,64,64,75]},
+      // RDMF: J.Irvine (FC26 OVR75, PAC74, SHO66, PAS74, DRI72, DEF74, PHY80) ← captain/keyplayer
+      {name:"J・アーバイン",en_name:"J.Irvine",long_name:"ジャクソン・アーバイン",positions:["CMF","DMF"],params:[80,82,74,75,73,76,70,70,73,74,68,60,62,64,50,52,70,64,72,74,72,72,70,50,50,74,70,72,75]},
+      // LDMF: R.McGree (FC26 OVR77, PAC76, SHO74, PAS74, DRI76, DEF68, PHY72)
+      {name:"マクグリー",en_name:"McGree",long_name:"ライリー・マクグリー",positions:["CMF","OMF"],params:[72,74,76,77,75,68,74,74,75,74,68,70,70,72,56,58,74,68,66,68,66,66,64,50,50,66,70,72,75]},
+      // RSM: M.Leckie (FC26 OVR74, PAC84, SHO68, PAS68, DRI76, DEF44, PHY66)
+      {name:"M・レッキー",en_name:"M.Leckie",long_name:"マシュー・レッキー",positions:["右WG","右SMF"],params:[64,66,84,86,77,60,74,76,77,68,62,64,64,66,52,54,74,68,40,42,40,40,42,50,50,58,68,68,75]},
+      // LSM: A.Mabil (FC26 OVR74, PAC86, SHO68, PAS66, DRI76, DEF40, PHY64)
+      {name:"マビル",en_name:"Mabil",long_name:"アウアル・マビル",positions:["左WG","左SMF"],params:[62,64,86,88,78,58,74,76,78,66,60,64,64,66,52,54,74,68,36,38,36,36,38,50,50,56,66,66,75]},
+      // OMF: A.Hrustic (FC26 OVR75, PAC72, SHO70, PAS76, DRI74, DEF50, PHY68)
+      {name:"フルスティッチ",en_name:"Hrustic",long_name:"アイドゥン・フルスティッチ",positions:["OMF","CMF"],params:[66,68,72,73,73,64,72,72,73,76,70,66,66,68,60,64,72,68,46,48,46,46,48,50,50,62,68,70,75]},
+      // CF: M.Duke (FC26 OVR74, PAC74, SHO74, PAS60, DRI68, DEF40, PHY80) ← marked
+      {name:"デューク",en_name:"Duke",long_name:"ミッチェル・デューク",positions:["CF"],params:[80,80,74,75,73,78,66,66,73,60,54,72,70,72,48,50,66,70,36,36,34,34,38,50,50,80,66,64,75]},
+      // Sub GK: Vukovic (FC26 OVR76, DIV77, HAN75, KIC72, REF77, SPD52, POS76)
+      {name:"ヴコヴィッチ",en_name:"Vukovic",long_name:"ダニー・ヴコヴィッチ",positions:["GK"],params:[50,50,50,50,77,52,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,77,75,50,76,72,75]},
+      // Sub GK: Francis (FC26 OVR72, DIV73, HAN71, KIC68, REF73, SPD58, POS72)
+      {name:"ガルシア",en_name:"Francis",long_name:"ジョー・ガルシア",positions:["GK"],params:[50,50,50,50,73,58,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,73,71,50,72,68,75]},
+      // Sub RB: Nedelkovic (FC26 OVR73, PAC80, SHO50, PAS64, DRI66, DEF70, PHY70)
+      {name:"ネデリコヴィッチ",en_name:"Nedelkovic",long_name:"アレクサンドル・ネデリコヴィッチ",positions:["右SB"],params:[70,70,80,81,71,66,64,64,71,64,58,42,42,46,34,36,64,48,68,70,68,68,66,50,50,64,64,64,75]},
+      // Sub CB: Karacic (FC26 OVR74, PAC76, SHO42, PAS64, DRI64, DEF74, PHY76)
+      {name:"カラシッチ",en_name:"Karacic",long_name:"フラン・カラシッチ",positions:["CB","右SB"],params:[76,76,76,77,68,74,62,62,68,64,58,34,32,40,28,30,62,32,74,76,74,74,72,50,50,74,70,70,75]},
+      // Sub DMF: Rogic (FC26 OVR74, PAC68, SHO68, PAS74, DRI74, DEF62, PHY72)
+      {name:"ロゴスキー",en_name:"Rogic",long_name:"トム・ロギック",positions:["CMF","DMF"],params:[72,74,68,70,71,68,72,72,71,74,68,64,64,66,54,56,72,66,60,62,60,60,58,50,50,66,68,68,75]},
+      // Sub CMF: Grnwald (FC26 OVR73, PAC72, SHO64, PAS72, DRI72, DEF60, PHY68)
+      {name:"グリーンフェルド",en_name:"Grnwald",long_name:"デニス・グレンヴァルト",positions:["CMF"],params:[68,70,72,73,70,64,70,70,70,72,66,60,60,62,50,52,70,62,58,60,58,58,56,50,50,62,66,66,75]},
+      // Sub LW: Duncan (FC26 OVR73, PAC84, SHO66, PAS64, DRI72, DEF38, PHY62)
+      {name:"ダンカン",en_name:"Duncan",long_name:"ブランドン・ダンカン",positions:["左WG","右WG"],params:[60,62,84,86,75,56,70,72,75,64,58,62,62,64,48,52,70,64,34,36,34,34,36,50,50,54,64,64,75]},
+      // Sub CF: G.Kuol (FC26 OVR72, PAC88, SHO68, PAS60, DRI72, DEF34, PHY66)
+      {name:"クオル",en_name:"G.Kuol",long_name:"ガーランガ・クオル",positions:["CF","右WG"],params:[64,64,88,90,76,60,70,70,76,60,54,64,64,66,44,48,68,64,30,32,30,30,32,50,50,58,62,62,75]},
+      // Sub CF: Taggart (FC26 OVR73, PAC74, SHO74, PAS58, DRI66, DEF36, PHY76)
+      {name:"タガート",en_name:"Taggart",long_name:"アダム・タガート",positions:["CF"],params:[76,76,74,75,72,74,64,64,72,58,52,72,70,72,46,48,64,68,32,32,30,30,34,50,50,74,64,62,75]}
+    ]
+  },
+
+  turkey2026: {
+    name:"トルコ",en_name:"Turkey",team_color:"#E30A17",flag:"🇹🇷",
+    default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
+    default_keyplayer:5,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Bayindir (FC26 OVR80, DIV81, HAN79, KIC76, REF81, SPD60, POS80)
+      {name:"バイウンドゥル",en_name:"Bayindir",long_name:"アルタイ・バイウンドゥル",positions:["GK"],params:[50,50,50,50,81,60,50,50,50,50,76,50,50,50,50,50,50,50,50,50,50,50,50,81,79,50,80,76,75]},
+      // RB: Z.Celik (FC26 OVR79, PAC82, SHO60, PAS74, DRI76, DEF78, PHY78)
+      {name:"Z・チェリク",en_name:"Z.Celik",long_name:"ゼキ・チェリク",positions:["右SB"],params:[78,78,82,83,78,74,74,76,78,74,68,52,54,56,46,48,76,58,76,78,76,76,74,50,50,72,74,74,75]},
+      // RCB: M.Demiral (FC26 OVR82, PAC80, SHO50, PAS70, DRI70, DEF84, PHY86) ← captain
+      {name:"デミラル",en_name:"Demiral",long_name:"メリフ・デミラル",positions:["CB"],params:[86,84,80,81,79,88,68,68,79,70,64,42,40,48,32,36,68,38,84,86,84,84,82,50,50,88,80,80,75]},
+      // LCB: S.Akaydin (FC26 OVR76, PAC72, SHO44, PAS68, DRI64, DEF78, PHY80)
+      {name:"アカイドゥン",en_name:"Akaydin",long_name:"サメト・アカイドゥン",positions:["CB"],params:[80,80,72,73,70,80,62,62,70,68,62,36,34,42,28,30,62,32,78,80,78,78,76,50,50,80,74,72,75]},
+      // LSB: F.Kadioglu (FC26 OVR80, PAC84, SHO62, PAS76, DRI78, DEF76, PHY72)
+      {name:"カドゥオール",en_name:"Kadioglu",long_name:"フェルディ・カドゥオール",positions:["左SB","左WG"],params:[72,74,84,85,79,70,76,78,79,76,70,56,58,60,52,58,78,66,74,76,74,74,72,50,50,66,76,76,75]},
+      // RDMF: H.Calhanoglu (FC26 OVR87, PAC78, SHO82, PAS90, DRI86, DEF82, PHY80) ← keyplayer
+      {name:"チャルハノール",en_name:"Calhanoglu",long_name:"ハカン・チャルハノール",positions:["DMF","CMF","OMF"],params:[80,82,78,79,86,78,84,86,86,90,86,80,80,84,72,76,86,84,82,84,82,80,80,50,50,74,86,88,75]},
+      // LDMF: S.Ozcan (FC26 OVR75, PAC74, SHO62, PAS74, DRI72, DEF76, PHY76)
+      {name:"S・オズジャン",en_name:"S.Ozcan",long_name:"サリフ・オズジャン",positions:["DMF","CMF"],params:[76,78,74,75,73,74,70,70,73,74,68,56,58,60,48,50,70,62,74,76,74,74,72,50,50,70,72,72,75]},
+      // RSM: Akturkoğlu (FC26 OVR79, PAC90, SHO74, PAS72, DRI82, DEF46, PHY68)
+      {name:"アクトゥルコール",en_name:"Akturkoğlu",long_name:"ケレム・アクトゥルコール",positions:["右WG","右SMF"],params:[66,68,90,92,82,62,80,82,82,72,66,70,70,72,56,60,82,72,42,44,42,42,44,50,50,60,72,72,75]},
+      // LSM: K.Yildiz (FC26 OVR81, PAC82, SHO80, PAS78, DRI84, DEF50, PHY72)
+      {name:"K・イルドゥズ",en_name:"K.Yildiz",long_name:"ケナン・イルドゥズ",positions:["左WG","左SMF","OMF"],params:[72,74,82,84,82,68,82,84,82,78,72,78,76,80,66,70,84,80,46,48,46,46,48,50,50,66,78,78,75]},
+      // OMF: Arda Güler (FC26 OVR84, PAC80, SHO82, PAS84, DRI88, DEF48, PHY68)
+      {name:"ギュレル",en_name:"Guler",long_name:"アルダ・ギュレル",positions:["OMF","右WG"],params:[68,70,80,82,84,64,86,88,84,84,80,80,80,82,74,78,88,84,44,46,44,44,46,50,50,62,82,82,75]},
+      // CF: B.Yilmaz (FC26 OVR78, PAC78, SHO78, PAS66, DRI76, DEF42, PHY74) ← marked
+      {name:"B・イルドゥズ",en_name:"B.Yilmaz",long_name:"バリシュ・アルペル・イルマズ",positions:["CF","右WG"],params:[74,76,78,79,77,70,74,76,77,66,60,76,74,78,58,60,74,76,38,40,38,38,40,50,50,68,72,70,75]},
+      // Sub GK: Uğurcan Çakır (FC26 OVR79, DIV80, HAN78, KIC74, REF80, SPD58, POS79)
+      {name:"U・チャクル",en_name:"U.Cakir",long_name:"ウールカン・チャクル",positions:["GK"],params:[50,50,50,50,80,58,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,80,78,50,79,74,75]},
+      // Sub GK: Uurkan (FC26 OVR76, DIV77, HAN75, KIC70, REF77, SPD55, POS76)
+      {name:"ウールカン",en_name:"Uurkan",long_name:"ウールカン・ヤイシュ",positions:["GK"],params:[50,50,50,50,77,55,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,77,75,50,76,70,75]},
+      // Sub RB: Müldür (FC26 OVR76, PAC82, SHO54, PAS68, DRI70, DEF72, PHY72)
+      {name:"ムルドゥル",en_name:"Muldur",long_name:"エフェ・アクマン",positions:["右SB","左SB"],params:[72,72,82,83,74,68,68,68,74,68,62,46,46,50,38,40,68,50,70,72,70,70,68,50,50,66,68,68,75]},
+      // Sub CB: Samet (FC26 OVR76, PAC70, SHO42, PAS64, DRI62, DEF78, PHY80)
+      {name:"サマット",en_name:"Samet",long_name:"サマット・アカイドゥン",positions:["CB"],params:[80,80,70,71,68,80,60,60,68,64,58,34,32,40,28,30,60,30,78,80,78,78,76,50,50,80,72,70,75]},
+      // Sub CMF: T.Yildiz (FC26 OVR75, PAC74, SHO68, PAS74, DRI74, DEF64, PHY72)
+      {name:"T・ユルドゥズ",en_name:"T.Yildiz",long_name:"トルクト・ユルドゥズ",positions:["CMF","DMF"],params:[72,74,74,75,72,68,72,72,72,74,68,62,64,66,52,54,72,64,62,64,62,62,60,50,50,66,70,70,75]},
+      // Sub DMF: Tasdemir (FC26 OVR74, PAC70, SHO58, PAS72, DRI70, DEF74, PHY74)
+      {name:"イン＝ミン・タシュ",en_name:"Tasdemir",long_name:"ヌーリ・タシュデミル",positions:["DMF","CMF"],params:[74,76,70,71,70,70,68,68,70,72,66,52,54,56,44,46,68,58,72,74,72,72,70,50,50,68,70,68,75]},
+      // Sub CF: Yalcin (FC26 OVR76, PAC72, SHO76, PAS62, DRI70, DEF38, PHY80)
+      {name:"ヤルチン",en_name:"Yalcin",long_name:"ドゥクアン・ヤルチン",positions:["CF"],params:[80,80,72,73,75,78,68,68,75,62,56,74,72,76,52,54,68,72,34,34,32,32,36,50,50,80,68,66,75]},
+      // Sub CF/RW: B.Yilmaz veteran (FC26 OVR74, PAC72, SHO74, PAS64, DRI70, DEF36, PHY72)
+      {name:"ユルマズ B",en_name:"Yilmaz_B",long_name:"ブラク・イルマズ",positions:["CF","右WG"],params:[72,72,72,73,72,68,68,68,72,64,58,72,70,74,52,54,68,70,32,32,30,30,34,50,50,68,64,62,75]}
     ]
   },
 };
