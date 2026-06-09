@@ -3098,7 +3098,7 @@ function htOpenLineup() {
   const _htBackBtn = document.createElement('button');
   _htBackBtn.className = 'back-btn';
   _htBackBtn.id = 'ht-lineup-back-btn';
-  _htBackBtn.textContent = '← ハーフタイムへ';
+  _htBackBtn.textContent = window.LANG === 'en' ? '← Half Time' : '← ハーフタイムへ';
   _htBackBtn.onclick = htCloseLineup;
   const header = document.querySelector('#screen-setting .screen-header');
   header.dataset.htMode = '1';
@@ -3232,7 +3232,9 @@ function _updateHtSubsLabel() {
   if (!label) return;
   const total = subsCount + htSubsCount;
   const remaining = 5 - total;
-  label.textContent = `交代枠: ${total}/5人（残り${remaining}人）`;
+  label.textContent = window.LANG === 'en'
+    ? `Substitutions: ${total}/5 (${remaining} left)`
+    : `交代枠: ${total}/5人（残り${remaining}人）`;
   label.style.color = remaining === 0 ? '#cc0000' : '#888';
 }
 
