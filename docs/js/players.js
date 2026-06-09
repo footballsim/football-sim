@@ -1201,7 +1201,45 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "リネッティ": {"profile": "豊富なスタミナと献身的なプレーでポーランド中盤を支えるCMF。攻守両面へのハードワークとインテリジェントなポジショニングでチームのバランスを維持する。", "profile_en": "A CMF who supports Poland's midfield with high stamina and dedicated play. His hard work at both ends and intelligent positioning maintain the team's balance.", "height": 181, "weight": 77},
 "J・カミンスキ": {"profile": "スピードと積極的な仕掛けでポーランドの左サイドを活性化する若手ウィンガー。高い突破力と得点意欲でポーランドの攻撃に迫力をもたらすダイナミックなアタッカー。", "profile_en": "A young winger who energises Poland's left side with pace and direct attacking play. His penetrating runs and desire to score bring dynamism to Poland's attack.", "height": 183, "weight": 74},
 "シフデルスキ": {"profile": "ヨーロッパで磨いた得点力とスピードを武器とするCF。裏への抜け出しと的確なフィニッシュでポーランドの前線に活力と得点オプションを加える。", "profile_en": "A CF armed with the goalscoring ability and pace developed in Europe. His runs in behind and accurate finishing add energy and a scoring option to Poland's forward line.", "height": 185, "weight": 77},
-"ミリク": {"profile": "高い決定力と多彩なシュートパターンでポーランド前線に迫力をもたらすCF。ヨーロッパのトップリーグで長年活躍するベテランストライカー。", "profile_en": "A CF who brings menace to Poland's forward line with high finishing quality and varied shooting. A veteran striker who has long been active in Europe's top leagues.", "height": 188, "weight": 82}
+"ミリク": {"profile": "高い決定力と多彩なシュートパターンでポーランド前線に迫力をもたらすCF。ヨーロッパのトップリーグで長年活躍するベテランストライカー。", "profile_en": "A CF who brings menace to Poland's forward line with high finishing quality and varied shooting. A veteran striker who has long been active in Europe's top leagues.", "height": 188, "weight": 82},
+"ルニン": {"profile": "守備範囲の広さと卓越した反射神経でウクライナゴールを守るGK。ビッグクラブで磨いた高い技術と集中力でウクライナ代表のゴールに立ちはだかる守護神。", "profile_en": "A GK who protects Ukraine's goal with wide coverage and exceptional reflexes. Honed at a top club, his technique and concentration make him a formidable guardian of the national team's net.", "height": 191, "weight": 83},
+"コノプリャ": {"profile": "豊富なスタミナと積極的なオーバーラップでウクライナの右サイドを担うSB。安定した守備と前線への参加でウクライナの右サイドを活性化するダイナミックなDF。", "profile_en": "A right-back who covers Ukraine's flank with high stamina and proactive overlapping runs. Solid defending and forward involvement energise Ukraine's right side dynamically.", "height": 179, "weight": 72},
+"ザバルニ": {"profile": "高いフィジカルとインテリジェントなポジショニングでウクライナ守備を支えるCB。プレミアリーグで経験を積んだ若手DF。", "profile_en": "A CB who supports Ukraine's defence with physicality and intelligent positioning. A young defender who has built experience in the Premier League.", "height": 193, "weight": 86},
+"マトヴィエンコ": {"profile": "高い読みとカバーリングでウクライナ守備ラインを支えるDF。安定したプレーとパスセンスでチームの守備に信頼性をもたらす。", "profile_en": "A defender who supports Ukraine's defensive line with reading and covering. His reliable play and passing sense bring dependability to the team's defence.", "height": 181, "weight": 74},
+"ジンチェンコ": {"profile": "高い技術と攻撃センスを兼備するウクライナの多機能DF。左SBながらインサイドハーフとしても活躍し、独創的なビルドアップでウクライナの左サイドに革新をもたらす。", "profile_en": "Ukraine's versatile defender combining high technique with attacking instincts. Playing as a left-back who thrives as an inside half, he brings innovation to Ukraine's left side with creative build-up play.", "height": 175, "weight": 64},
+"シドルチュク": {"profile": "豊富な運動量と高い守備意識でウクライナ中盤を支えるDMF。セカンドボールへの強さとインテリジェントなポジショニングでチームの守備的バランスを保つ。", "profile_en": "A DMF who supports Ukraine's midfield with high work rate and strong defensive awareness. His second-ball strength and intelligent positioning maintain the team's defensive balance.", "height": 179, "weight": 75},
+"シャパレンコ": {"profile": "テクニックと創造性でウクライナ中盤を操るCMF。正確なパスと積極的なプレーでゲームのリズムを作り出し、ウクライナ代表の中心的存在。", "profile_en": "A CMF who controls Ukraine's midfield with technique and creativity. His precise passing and proactive play create game rhythm, making him a central figure in the national team.", "height": 181, "weight": 78},
+"ツィガンコフ": {"profile": "爆発的なスピードとドリブルでウクライナ右サイドを活性化するウィンガー。鋭いスルーパスと積極的な仕掛けで相手守備を脅かすダイナミックなアタッカー。", "profile_en": "A winger who activates Ukraine's right side with explosive pace and dribbling. His incisive through-balls and direct running threaten opposing defences dynamically.", "height": 174, "weight": 66},
+"ムドリク": {"profile": "超人的なスピードとテクニックでウクライナ左サイドを席巻するウィンガー。ドリブルの切れ味と加速力は世界トップレベルで、ウクライナ代表の攻撃に革命をもたらすスーパースター。", "profile_en": "A winger who sweeps Ukraine's left side with superhuman pace and technique. His dribbling sharpness and acceleration are at the world's highest level — a superstar bringing revolution to Ukraine's attack.", "height": 175, "weight": 68},
+"スダコフ": {"profile": "高い技術と卓越したビジョンでウクライナ攻撃を司るOMF。若くしてウクライナ代表の攻撃の軸となった天才的プレーメイカー。", "profile_en": "An OMF who orchestrates Ukraine's attack with high technique and outstanding vision. A gifted playmaker who became the creative hub of Ukraine's attack at a young age.", "height": 179, "weight": 71},
+"ドフビク": {"profile": "高い決定力とポストプレーでウクライナ前線を牽引するCF。プレミアリーグと欧州トップリーグで磨いた得点センスでウクライナ代表の希望を背負うエースストライカー。", "profile_en": "A CF who leads Ukraine's forward line with high finishing ability and hold-up play. Honed in the Premier League and Europe's top leagues, he is the ace striker carrying Ukraine's hopes.", "height": 193, "weight": 84},
+"トルビン": {"profile": "安定したセービングと冷静なハンドリングを誇る若手GK。欧州の名門で培った高い技術でウクライナのGK陣にバックアップを提供する。", "profile_en": "A young GK boasting stable shot-stopping and composed handling. Developed at a top European club, he provides backup to Ukraine's goalkeeping group.", "height": 190, "weight": 82},
+"カラベツ": {"profile": "豊富なスタミナとインテリジェントなプレーでウクライナ中盤を支えるMF。左右両サイドをこなすポリバレント性でチームに柔軟性をもたらす。", "profile_en": "An MF who supports Ukraine's midfield with high stamina and intelligent play. His versatility across both flanks gives the team tactical flexibility.", "height": 178, "weight": 72},
+"ミコレンコ": {"profile": "スピードと積極的な攻撃参加でウクライナ左サイドを担う左SB。攻守両面にわたる豊富な運動量でウクライナのサイドに活力をもたらす。", "profile_en": "A left-back who covers Ukraine's left side with pace and proactive forward runs. His high energy in both defence and attack brings vitality to Ukraine's flank.", "height": 179, "weight": 73},
+"ポポフ": {"profile": "安定したポジショニングと広いカバー範囲でウクライナ守備ラインの安定性を高めるCB。シンプルで確実な守備でチームに頼もしい選択肢を提供する。", "profile_en": "A CB who enhances Ukraine's defensive stability with reliable positioning and wide coverage. Simple and dependable defending gives the team a solid option.", "height": 188, "weight": 81},
+"ヤレムチュク": {"profile": "スピードと得点力を兼備するウクライナ代表のCF。ゴール前での決定力とダイナミックな動きでウクライナ前線に得点オプションをもたらす。", "profile_en": "A Ukrainian CF combining pace with goalscoring ability. His finishing in front of goal and dynamic movement add a scoring option to Ukraine's forward line.", "height": 186, "weight": 80},
+"スタネク": {"profile": "鋭い反射神経とポジショニングの正確さでチェコのゴールを守るGK。欧州の名門クラブで経験を積み、チェコ代表のゴールマウスに安定感をもたらす守護神。", "profile_en": "A GK who protects Czech Republic's goal with sharp reflexes and precise positioning. Having gained experience at a top European club, he brings stability to the national team's goalmouth.", "height": 195, "weight": 88},
+"コウファル": {"profile": "豊富なスタミナと積極的なオーバーラップでチェコの右サイドを活性化するSB。プレミアリーグで磨いたフィジカルと技術でチェコ代表の右サイドを強固にする。", "profile_en": "A right-back who energises Czech Republic's right side with high stamina and proactive overlaps. Physicality and technique refined in the Premier League make Czech Republic's right side robust.", "height": 181, "weight": 76},
+"T・ホレシュ": {"profile": "安定したポジショニングと高いカバーリングでチェコ守備を支えるCB。インテリジェントな読みと安定したパスワークでチームの守備組織を整えるDF。", "profile_en": "A CB who supports Czech Republic's defence with reliable positioning and wide coverage. Intelligent reading and stable passing organise the team's defensive structure.", "height": 185, "weight": 79},
+"L・クレイチ": {"profile": "技術の高さとパスセンスでチェコ守備ラインを安定させるCB。ビルドアップ能力に優れ、後方からチームを組み立てる視野の広いDF。", "profile_en": "A CB who stabilises Czech Republic's defensive line with high technique and passing sense. Excellent at building from the back, he is a wide-visioned defender.", "height": 187, "weight": 80},
+"ドゥデラ": {"profile": "スピードと積極的な参加でチェコの左サイドを担う若手左SB。豊富なスタミナとオーバーラップ能力でチームの左サイドに推進力をもたらす。", "profile_en": "A young left-back who covers Czech Republic's left side with pace and proactive involvement. His stamina and overlapping ability drive the team's left flank forward.", "height": 178, "weight": 72},
+"スーチェク": {"profile": "屈強なフィジカルと得点能力を兼備するチェコ中盤の要。プレミアリーグで高い評価を受けるボックス・トゥ・ボックスCMFで、ゴール前への飛び込みとセカンドボール争いでチームを牽引する。", "profile_en": "The cornerstone of Czech Republic's midfield combining powerful physicality with goalscoring ability. A highly regarded box-to-box CMF in the Premier League who leads the team with runs into the box and second-ball duels.", "height": 192, "weight": 88},
+"プロボド": {"profile": "豊富な運動量と積極的なプレーでチェコ中盤を支えるCMF。高いスタミナとプレスバックでゲームの両局面に貢献するハードワーカー。", "profile_en": "A CMF who supports Czech Republic's midfield with high energy and proactive play. A hard worker who contributes to both phases of the game with stamina and pressing.", "height": 179, "weight": 74},
+"フロジェク": {"profile": "スピードとテクニックを兼備するチェコの若きスター。世界屈指のクラブで磨いた切れ味あるドリブルとシュートセンスでチェコ代表の攻撃に躍動感をもたらす才能あふれるアタッカー。", "profile_en": "Czech Republic's young star combining pace and technique. Honed at one of the world's top clubs, his sharp dribbling and shooting instinct bring dynamism to Czech Republic's attack.", "height": 183, "weight": 75},
+"リングル": {"profile": "スピードと鋭いドリブルでチェコの右サイドを活性化するウィンガー。積極的な突破と精度の高いクロスで攻撃に幅をもたらす。", "profile_en": "A right-side winger who activates Czech Republic's attack with pace and sharp dribbling. His direct running and accurate crossing add width to the attack.", "height": 179, "weight": 73},
+"バラク": {"profile": "創造性と技術に優れたチェコのOMF。正確なパスとシュートセンスでゲームを動かし、チェコ代表の攻撃の起点となる存在。", "profile_en": "Czech Republic's creative and technical OMF. He drives the game with precise passing and goalscoring instinct, serving as the focal point of Czech Republic's attack.", "height": 183, "weight": 77},
+"シック": {"profile": "欧州トップリーグで磨いた高い得点力と多様な攻撃スタイルを持つCF。強靭なフィジカルと精度の高いシュートでチェコ代表の最前線に圧倒的な存在感を放つ。", "profile_en": "A CF with high goalscoring quality and diverse attacking style refined in Europe's top league. Powerful physique and precise shooting make him a dominant presence at the tip of Czech Republic's attack.", "height": 191, "weight": 87},
+"ヌワバリ": {"profile": "反射神経と的確なポジショニングでナイジェリアゴールを守るGK。国内で台頭した正GKとして代表の守護神を担う実力派。", "profile_en": "A GK who guards Nigeria's goal with sharp reflexes and precise positioning. Having emerged domestically, he bears responsibility as the national team's first-choice goalkeeper.", "height": 188, "weight": 85},
+"O・アイナ": {"profile": "スピードと機動力でナイジェリアの右サイドを担うSB。積極的な攻撃参加と安定した守備でサイドを支配するダイナミックなDF。", "profile_en": "A right-back who covers Nigeria's flank with pace and mobility. Proactive forward runs and solid defending give him control of the flank.", "height": 178, "weight": 74},
+"トロースト＝エコング": {"profile": "強靭なフィジカルと高い空中戦能力でナイジェリア守備を率いるCB。代表キャプテンとして守備陣をまとめ、チームに精神的支柱をもたらすリーダーCB。", "profile_en": "Nigeria's captain CB who leads the defence with powerful physicality and aerial dominance. As national team captain he unifies the defensive unit and provides a spiritual pillar for the team.", "height": 190, "weight": 88},
+"ベイシー": {"profile": "機動力と高い守備能力を兼備するナイジェリアCB。プレミアリーグで急成長を遂げ、ナイジェリア代表守備の中心として頭角を現した強靭なDF。", "profile_en": "A Nigerian CB combining mobility with high defensive ability. Having rapidly developed in the Premier League, he has emerged as the centre of Nigeria's defensive line.", "height": 188, "weight": 85},
+"ザイドゥ": {"profile": "スピードとスタミナを武器とするナイジェリアの左SB。積極的なオーバーラップと広い守備範囲でナイジェリアの左サイドに推進力をもたらす。", "profile_en": "Nigeria's left-back using pace and stamina as weapons. Proactive overlapping runs and wide defensive coverage drive Nigeria's left flank forward.", "height": 177, "weight": 73},
+"ンディディ": {"profile": "圧倒的な守備力と広いカバー範囲でナイジェリア中盤を守るDMF。ボール奪取能力の高さはアフリカ屈指の水準で、ナイジェリア代表の守備的バランスを整えるキーマン。", "profile_en": "A DMF who guards Nigeria's midfield with overwhelming defensive ability and wide coverage. His ball-winning ranks among Africa's best — a key figure who balances Nigeria's defensive structure.", "height": 183, "weight": 80},
+"アリボ": {"profile": "多才なプレースタイルと豊富なスタミナでナイジェリア中盤に活力をもたらすCMF。積極的な動きと守備貢献でチームのバランスを維持するハードワーカー。", "profile_en": "A versatile CMF who brings energy to Nigeria's midfield with varied playing style and high stamina. His proactive movement and defensive contribution maintain the team's balance.", "height": 183, "weight": 74},
+"ルックマン": {"profile": "爆発的なスピードとテクニックでナイジェリア右サイドを席巻するウィンガー。欧州トップリーグでの活躍で評価を高め、ナイジェリア代表の攻撃を牽引するスーパースター。", "profile_en": "A winger who dominates Nigeria's right side with explosive pace and technique. Having earned recognition in Europe's top league, he is the superstar driving Nigeria's attack.", "height": 176, "weight": 70},
+"チュクウェゼ": {"profile": "超人的な加速力と積極的な仕掛けでナイジェリアのサイドに脅威をもたらすウィンガー。相手守備を切り裂くスピードとドリブルで代表の攻撃に迫力を加える。", "profile_en": "A winger who threatens Nigeria's flank with superhuman acceleration and direct running. His pace and dribbling that cut through opposing defences add power to the national team's attack.", "height": 170, "weight": 67},
+"エゼ": {"profile": "卓越したテクニックと創造性でナイジェリア攻撃の核を担うOMF。ドリブルとパスの多様性でゲームを操り、ナイジェリア代表の攻撃に知性をもたらす天才的プレーメイカー。", "profile_en": "A genius OMF who commands the core of Nigeria's attack with outstanding technique and creativity. He controls the game through dribbling and passing variety, bringing intelligence to Nigeria's attack.", "height": 179, "weight": 71},
+"オシムヘン": {"profile": "恐怖の決定力と爆発的なスピードでナイジェリア前線に君臨するCF。ゴールへの嗅覚と圧倒的な存在感はアフリカ屈指の水準で、ナイジェリア代表の全攻撃が集約される絶対的エース。", "profile_en": "A CF who reigns over Nigeria's forward line with terrifying finishing and explosive pace. His nose for goal and overwhelming presence rank among Africa's best — the undisputed ace around whom all of Nigeria's attack revolves.", "height": 185, "weight": 78}
 };
 
 const PARAM_NAMES = [
@@ -3218,6 +3256,149 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"シフデルスキ",en_name:"Swiderski",long_name:"カロル・シフデルスキ",positions:["CF","右WG"],params:[78,78,82,83,78,74,70,70,78,64,58,74,72,74,52,54,70,70,34,34,32,32,36,50,50,76,68,68,75]},
       // Sub CF: A.Milik (FC26 OVR80, PAC72, SHO84, PAS64, DRI74, DEF36, PHY80)
       {name:"ミリク",en_name:"Milik",long_name:"アルカジウシュ・ミリク",positions:["CF"],params:[80,80,72,73,78,78,72,74,78,64,58,82,80,84,58,62,72,78,32,32,30,30,34,50,50,80,72,70,75]}
+    ]
+  },
+
+  ukraine2026: {
+    name:"ウクライナ",en_name:"Ukraine",team_color:"#005BBB",flag:"🇺🇦",
+    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:8,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Lunin (FC26 OVR80, DIV81, HAN79, KIC74, REF81, SPD62, POS80)
+      {name:"ルニン",en_name:"Lunin",long_name:"アンドリー・ルニン",positions:["GK"],params:[50,50,50,50,81,62,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,81,79,50,80,74,75]},
+      // RB: Konoplya (FC26 OVR75, PAC80, SHO52, PAS68, DRI72, DEF74, PHY72)
+      {name:"コノプリャ",en_name:"Konoplya",long_name:"ユキム・コノプリャ",positions:["右SB"],params:[72,72,80,81,72,68,70,70,72,68,62,44,44,48,36,38,70,46,72,74,72,72,70,50,50,66,68,68,75]},
+      // RCB: Zabarnyi (FC26 OVR76, PAC78, SHO44, PAS64, DRI62, DEF78, PHY80)
+      {name:"ザバルニ",en_name:"Zabarnyi",long_name:"イリャ・ザバルニ",positions:["CB"],params:[80,80,78,79,73,80,60,60,73,64,58,36,34,42,28,30,60,32,78,80,78,78,76,50,50,80,74,72,75]},
+      // LCB: Matviyenko (FC26 OVR76, PAC76, SHO44, PAS68, DRI66, DEF78, PHY78)
+      {name:"マトヴィエンコ",en_name:"Matviyenko",long_name:"ミコラ・マトヴィエンコ",positions:["CB","左SB"],params:[78,78,76,77,72,78,64,64,72,68,62,36,34,42,28,30,64,32,78,80,78,78,76,50,50,76,72,70,75]},
+      // LSB: Zinchenko (FC26 OVR79, PAC80, SHO60, PAS80, DRI78, DEF72, PHY68)
+      {name:"ジンチェンコ",en_name:"Zinchenko",long_name:"オレクサンドル・ジンチェンコ",positions:["左SB","CMF"],params:[66,68,80,81,78,64,76,78,78,80,74,54,56,58,50,56,78,64,70,72,70,70,68,50,50,62,74,74,75]},
+      // RDMF: Sydorchuk (FC26 OVR76, PAC72, SHO60, PAS74, DRI72, DEF80, PHY78)
+      {name:"シドルチュク",en_name:"Sydorchuk",long_name:"セルヒー・シドルチュク",positions:["DMF","CMF"],params:[78,78,72,73,72,76,70,70,72,74,68,54,56,58,44,46,70,56,78,80,78,78,76,50,50,74,72,70,75]},
+      // LDMF: Shaparenko (FC26 OVR78, PAC76, SHO70, PAS78, DRI78, DEF72, PHY74)
+      {name:"シャパレンコ",en_name:"Shaparenko",long_name:"ミコラ・シャパレンコ",positions:["CMF","DMF"],params:[74,76,76,77,76,72,76,76,76,78,72,64,66,68,54,58,76,66,70,72,70,70,68,50,50,68,72,72,75]},
+      // RSM: Tsygankov (FC26 OVR77, PAC86, SHO72, PAS72, DRI78, DEF52, PHY68)
+      {name:"ツィガンコフ",en_name:"Tsygankov",long_name:"ヴィクトル・ツィガンコフ",positions:["右WG","右SMF"],params:[66,68,86,88,78,62,76,78,78,72,66,68,68,70,54,58,78,66,48,50,48,48,50,50,50,60,70,70,75]},
+      // LSM: Mudryk (FC26 OVR81, PAC93, SHO72, PAS72, DRI84, DEF42, PHY72) ← keyplayer
+      {name:"ムドリク",en_name:"Mudryk",long_name:"ミハイロ・ムドリク",positions:["左WG","左SMF"],params:[70,72,93,95,82,66,82,84,82,72,66,68,68,70,54,58,84,72,38,40,38,38,40,50,50,64,74,74,75]},
+      // OMF: Sudakov (FC26 OVR80, PAC80, SHO76, PAS82, DRI82, DEF62, PHY72)
+      {name:"スダコフ",en_name:"Sudakov",long_name:"ヘオルヒー・スダコフ",positions:["OMF","CMF"],params:[70,72,80,81,80,66,80,82,80,82,76,72,72,76,66,70,82,74,58,60,58,58,60,50,50,64,76,76,75]},
+      // CF: Dovbyk (FC26 OVR83, PAC76, SHO86, PAS70, DRI78, DEF40, PHY80) ← marked
+      {name:"ドフビク",en_name:"Dovbyk",long_name:"アルテム・ドフビク",positions:["CF"],params:[80,80,76,77,82,78,76,78,82,70,64,84,82,86,60,64,76,78,36,38,36,36,38,50,50,80,76,76,75]},
+      // Sub GK: Trubin (FC26 OVR79, DIV80, HAN78, KIC72, REF80, SPD62, POS79)
+      {name:"トルビン",en_name:"Trubin",long_name:"アナトリー・トルビン",positions:["GK"],params:[50,50,50,50,80,62,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,80,78,50,79,72,75]},
+      // Sub GK: Riznyk D (FC26 OVR74, DIV75, HAN73, KIC68, REF75, SPD56, POS74)
+      {name:"リズニク",en_name:"Riznyk",long_name:"デニス・リズニク",positions:["GK"],params:[50,50,50,50,75,56,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,75,73,50,74,68,75]},
+      // Sub LB: Mikolenko (FC26 OVR74, PAC82, SHO52, PAS66, DRI68, DEF72, PHY68)
+      {name:"ミコレンコ",en_name:"Mikolenko",long_name:"ヴィタリー・ミコレンコ",positions:["左SB"],params:[66,66,82,83,72,62,66,66,72,66,60,44,44,48,36,38,66,46,70,72,70,70,68,50,50,62,66,64,75]},
+      // Sub CB: Popov (FC26 OVR73, PAC72, SHO42, PAS62, DRI60, DEF74, PHY76)
+      {name:"ポポフ",en_name:"Popov",long_name:"アレクセイ・ポポフ",positions:["CB"],params:[76,74,72,73,68,74,58,58,68,62,56,34,32,40,26,28,58,30,74,76,74,74,72,50,50,74,70,68,75]},
+      // Sub CMF: Karabets (FC26 OVR75, PAC76, SHO64, PAS74, DRI72, DEF66, PHY68)
+      {name:"カラベツ",en_name:"Karabets",long_name:"ヴォロディミル・カラベツ",positions:["CMF","DMF"],params:[68,68,76,77,72,64,70,70,72,74,68,58,60,62,50,52,70,60,64,66,64,64,62,50,50,62,68,68,75]},
+      // Sub RW: Yarmolenko (FC26 OVR73, PAC72, SHO72, PAS72, DRI72, DEF40, PHY68)
+      {name:"ヤルモレンコ",en_name:"Yarmolenko",long_name:"アンドリー・ヤルモレンコ",positions:["右WG","OMF"],params:[66,66,72,73,72,62,70,72,72,72,66,68,68,72,54,58,72,64,36,38,36,36,38,50,50,60,64,64,75]},
+      // Sub OMF: Buyalskyi (FC26 OVR74, PAC74, SHO66, PAS72, DRI72, DEF56, PHY68)
+      {name:"ブヤルスキ",en_name:"Buyalskyi",long_name:"ヴィタリー・ブヤルスキー",positions:["CMF","OMF"],params:[66,68,74,75,72,64,70,72,72,72,66,60,62,64,50,52,70,62,54,56,54,54,52,50,50,62,66,66,75]},
+      // Sub CF: Yaremchuk (FC26 OVR78, PAC82, SHO78, PAS64, DRI74, DEF40, PHY76)
+      {name:"ヤレムチュク",en_name:"Yaremchuk",long_name:"ロマン・ヤレムチュク",positions:["CF"],params:[76,76,82,83,78,72,72,74,78,64,58,76,74,76,50,54,72,72,36,38,36,36,38,50,50,72,68,68,75]}
+    ]
+  },
+
+  czech2026: {
+    name:"チェコ",en_name:"Czech Republic",team_color:"#D7141A",flag:"🇨🇿",
+    default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
+    default_keyplayer:5,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Staněk (FC26 OVR79, DIV80, HAN78, KIC74, REF80, SPD60, POS79)
+      {name:"スタネク",en_name:"Stanek",long_name:"ジンドジフ・スタネク",positions:["GK"],params:[50,50,50,50,80,60,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,80,78,50,79,74,75]},
+      // RB: Coufal (FC26 OVR76, PAC80, SHO54, PAS68, DRI72, DEF76, PHY74)
+      {name:"コウファル",en_name:"Coufal",long_name:"ウラジミール・コウファル",positions:["右SB"],params:[74,74,80,81,74,70,70,70,74,68,62,46,46,50,38,40,70,48,74,76,74,74,72,50,50,68,70,68,75]},
+      // RCB: T.Holeš (FC26 OVR75, PAC74, SHO44, PAS64, DRI62, DEF76, PHY80)
+      {name:"T・ホレシュ",en_name:"T.Holes",long_name:"トマーシュ・ホレシュ",positions:["CB","DMF"],params:[80,78,74,75,70,78,60,60,70,64,58,36,34,42,28,30,60,30,76,78,76,76,74,50,50,78,72,70,75]},
+      // LCB: L.Krejčí (FC26 OVR74, PAC72, SHO42, PAS62, DRI62, DEF76, PHY78)
+      {name:"L・クレイチ",en_name:"L.Krejci",long_name:"ラディスラフ・クレイチー",positions:["CB"],params:[78,78,72,73,70,76,60,60,70,62,56,34,32,40,26,28,60,30,76,78,76,76,74,50,50,76,70,68,75]},
+      // LSB: D.Doudera (FC26 OVR73, PAC80, SHO50, PAS64, DRI66, DEF70, PHY68)
+      {name:"ドゥデラ",en_name:"Doudera",long_name:"ダビド・ドゥデラ",positions:["左SB"],params:[66,66,80,81,72,62,64,64,72,64,58,42,42,46,34,36,64,46,68,70,68,68,66,50,50,60,64,62,75]},
+      // RDMF: T.Souček (FC26 OVR80, PAC72, SHO74, PAS76, DRI74, DEF80, PHY84) ← keyplayer
+      {name:"スーチェク",en_name:"Soucek",long_name:"トマーシュ・スーチェク",positions:["CMF","DMF"],params:[84,84,72,73,77,82,72,72,77,76,70,70,70,74,54,58,72,68,78,80,78,78,76,50,50,82,76,74,75]},
+      // LDMF: L.Provod (FC26 OVR75, PAC76, SHO66, PAS74, DRI74, DEF68, PHY70)
+      {name:"プロボド",en_name:"Provod",long_name:"ルカーシュ・プロボド",positions:["CMF","DMF"],params:[70,72,76,77,72,66,72,72,72,74,68,60,62,64,50,52,72,60,66,68,66,66,64,50,50,64,68,68,75]},
+      // RSM: A.Hložek (FC26 OVR80, PAC84, SHO76, PAS76, DRI80, DEF48, PHY68)
+      {name:"フロジェク",en_name:"Hlozek",long_name:"アダム・フロジェク",positions:["右WG","OMF","右SMF"],params:[66,68,84,86,80,62,78,80,80,76,70,72,72,74,60,64,80,70,44,46,44,44,46,50,50,60,72,72,75]},
+      // LSM: O.Lingr (FC26 OVR74, PAC84, SHO66, PAS68, DRI74, DEF44, PHY64)
+      {name:"リングル",en_name:"Lingr",long_name:"オンドジェイ・リングル",positions:["左WG","右WG"],params:[62,64,84,86,76,58,72,74,76,68,62,62,62,64,48,52,72,62,40,42,40,40,42,50,50,56,64,64,75]},
+      // OMF: A.Barák (FC26 OVR77, PAC72, SHO74, PAS78, DRI76, DEF60, PHY72)
+      {name:"バラク",en_name:"Barak",long_name:"アントニン・バラク",positions:["OMF","CMF"],params:[70,72,72,73,76,66,74,76,76,78,72,70,70,74,62,66,76,68,56,58,56,56,58,50,50,64,72,72,75]},
+      // CF: P.Schick (FC26 OVR81, PAC76, SHO84, PAS68, DRI76, DEF38, PHY78) ← marked
+      {name:"シック",en_name:"Schick",long_name:"パトリク・シック",positions:["CF"],params:[78,78,76,77,80,74,74,76,80,68,62,82,80,84,58,62,74,76,34,36,34,34,36,50,50,74,74,74,75]},
+      // Sub GK: Mandous M (FC26 OVR75, DIV76, HAN74, KIC70, REF76, SPD58, POS75)
+      {name:"マンドゥース",en_name:"Mandous",long_name:"ミカル・マンドゥース",positions:["GK"],params:[50,50,50,50,76,58,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,75,70,75]},
+      // Sub GK: Kovar M (FC26 OVR74, DIV75, HAN73, KIC68, REF75, SPD56, POS74)
+      {name:"コヴァール",en_name:"Kovar",long_name:"マルティン・コヴァール",positions:["GK"],params:[50,50,50,50,75,56,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,75,73,50,74,68,75]},
+      // Sub RB: Kadeřábek (FC26 OVR75, PAC78, SHO52, PAS66, DRI70, DEF74, PHY74)
+      {name:"カデジャベク",en_name:"Kaderabek",long_name:"パヴェル・カデジャベク",positions:["右SB"],params:[74,74,78,79,72,70,68,68,72,66,60,44,44,48,36,38,68,46,72,74,72,72,70,50,50,68,68,66,75]},
+      // Sub CB: D.Zima (FC26 OVR73, PAC74, SHO42, PAS60, DRI60, DEF74, PHY76)
+      {name:"ジマ",en_name:"Zima",long_name:"ダビド・ジマ",positions:["CB"],params:[76,76,74,75,68,74,58,58,68,60,54,34,32,40,26,28,58,28,74,76,74,74,72,50,50,74,68,66,75]},
+      // Sub DMF/CMF: Ševčík (FC26 OVR73, PAC70, SHO60, PAS72, DRI68, DEF72, PHY72)
+      {name:"シェフチーク",en_name:"Sevcik",long_name:"ペトル・シェフチーク",positions:["CMF","DMF"],params:[72,72,70,71,70,68,66,66,70,72,66,54,56,58,44,46,66,54,70,72,70,70,68,50,50,66,66,64,75]},
+      // Sub CF/OMF: Kuchta J (FC26 OVR76, PAC76, SHO76, PAS64, DRI72, DEF42, PHY76)
+      {name:"クフタ",en_name:"Kuchta",long_name:"ヤン・クフタ",positions:["CF","OMF"],params:[76,76,76,77,74,72,70,72,74,64,58,74,72,74,50,54,70,70,38,40,38,38,40,50,50,72,66,64,75]},
+      // Sub LW: J.Pešek (FC26 OVR73, PAC82, SHO64, PAS66, DRI72, DEF42, PHY64)
+      {name:"ペシェク",en_name:"Pesek",long_name:"ヤクブ・ペシェク",positions:["左WG","右WG"],params:[62,62,82,84,74,58,70,72,74,66,60,60,60,62,46,50,70,60,38,40,38,38,40,50,50,56,60,60,75]},
+      // Sub CF: Jurečka (FC26 OVR74, PAC74, SHO72, PAS60, DRI66, DEF36, PHY74)
+      {name:"ユレチュカ",en_name:"Jurecka",long_name:"ヴァーツラフ・ユレチュカ",positions:["CF"],params:[74,74,74,75,72,70,64,64,72,60,54,70,68,72,44,48,62,66,32,32,30,30,34,50,50,70,62,60,75]}
+    ]
+  },
+
+  nigeria2026: {
+    name:"ナイジェリア",en_name:"Nigeria",team_color:"#008751",flag:"🇳🇬",
+    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:7,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Nwabali (FC26 OVR76, DIV77, HAN75, KIC70, REF77, SPD58, POS76)
+      {name:"ヌワバリ",en_name:"Nwabali",long_name:"スタンレー・ヌワバリ",positions:["GK"],params:[50,50,50,50,77,58,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,77,75,50,76,70,75]},
+      // RB: Ola Aina (FC26 OVR76, PAC84, SHO56, PAS70, DRI74, DEF74, PHY74)
+      {name:"O・アイナ",en_name:"O.Aina",long_name:"オラ・アイナ",positions:["右SB","左SB"],params:[74,74,84,85,74,70,72,74,74,70,64,48,50,52,42,44,72,52,72,74,72,72,70,50,50,68,70,70,75]},
+      // RCB: Troost-Ekong (FC26 OVR78, PAC72, SHO46, PAS66, DRI64, DEF80, PHY82)
+      {name:"トロースト＝エコング",en_name:"Troost-Ekong",long_name:"ウィリアム・トロースト＝エコング",positions:["CB"],params:[82,80,72,73,75,84,62,62,75,66,60,38,36,44,28,30,62,34,80,82,80,80,78,50,50,84,76,74,75]},
+      // LCB: Bassey C (FC26 OVR77, PAC76, SHO44, PAS66, DRI64, DEF78, PHY80)
+      {name:"ベイシー",en_name:"Bassey",long_name:"カルヴィン・ベイシー",positions:["CB"],params:[80,80,76,77,73,80,62,62,73,66,60,36,34,42,28,30,62,32,78,80,78,78,76,50,50,80,74,72,75]},
+      // LSB: Zaidu (FC26 OVR73, PAC84, SHO50, PAS62, DRI68, DEF70, PHY70)
+      {name:"ザイドゥ",en_name:"Zaidu",long_name:"ザイドゥ・サヌシ",positions:["左SB"],params:[70,70,84,85,70,66,66,66,70,62,56,42,42,46,34,36,66,44,68,70,68,68,66,50,50,64,64,62,75]},
+      // RDMF: Ndidi (FC26 OVR79, PAC78, SHO62, PAS72, DRI72, DEF84, PHY82)
+      {name:"ンディディ",en_name:"Ndidi",long_name:"ウィルフレッド・ンディディ",positions:["DMF","CMF"],params:[82,82,78,79,76,80,70,70,76,72,66,56,58,60,46,50,70,58,82,84,82,82,80,50,50,80,76,74,75]},
+      // LDMF: Aribo (FC26 OVR76, PAC76, SHO66, PAS72, DRI74, DEF66, PHY72)
+      {name:"アリボ",en_name:"Aribo",long_name:"ジョー・アリボ",positions:["CMF","DMF"],params:[72,74,76,77,74,68,72,74,74,72,66,60,62,64,50,52,72,62,64,66,64,64,62,50,50,66,68,68,75]},
+      // RSM: Lookman (FC26 OVR83, PAC88, SHO80, PAS76, DRI86, DEF52, PHY72) ← keyplayer
+      {name:"ルックマン",en_name:"Lookman",long_name:"アデモラ・ルックマン",positions:["右WG","右SMF","左WG"],params:[70,72,88,90,84,66,84,86,84,76,70,76,76,80,64,70,86,76,48,50,48,48,50,50,50,64,76,76,75]},
+      // LSM: Chukwueze (FC26 OVR79, PAC92, SHO72, PAS68, DRI80, DEF42, PHY66)
+      {name:"チュクウェゼ",en_name:"Chukwueze",long_name:"サミュエル・チュクウェゼ",positions:["右WG","左WG"],params:[64,66,92,94,80,60,78,80,80,68,62,68,68,70,54,58,80,68,38,40,38,38,40,50,50,58,68,68,75]},
+      // OMF: Eze (FC26 OVR82, PAC84, SHO78, PAS82, DRI84, DEF56, PHY74)
+      {name:"エゼ",en_name:"Eze",long_name:"エベレチ・エゼ",positions:["OMF","CMF"],params:[72,74,84,86,82,68,82,84,82,82,76,74,74,78,64,70,84,74,52,54,52,52,54,50,50,66,76,76,75]},
+      // CF: Osimhen (FC26 OVR87, PAC92, SHO87, PAS68, DRI84, DEF38, PHY80) ← marked
+      {name:"オシムヘン",en_name:"Osimhen",long_name:"ヴィクター・オシムヘン",positions:["CF"],params:[80,80,92,94,86,76,82,84,86,68,62,84,82,88,60,64,84,80,34,36,34,34,36,50,50,78,82,82,75]},
+      // Sub GK: Okoye M (FC26 OVR75, DIV76, HAN74, KIC70, REF76, SPD58, POS75)
+      {name:"オコイェ",en_name:"Okoye",long_name:"マドゥカ・オコイェ",positions:["GK"],params:[50,50,50,50,76,58,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,75,70,75]},
+      // Sub GK: Francis (FC26 OVR72, DIV73, HAN71, KIC66, REF73, SPD56, POS72)
+      {name:"フランシス",en_name:"Francis",long_name:"フランシス・ウチェ",positions:["GK"],params:[50,50,50,50,73,56,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,73,71,50,72,66,75]},
+      // Sub RB: Taiwo (FC26 OVR71, PAC80, SHO48, PAS60, DRI62, DEF68, PHY68)
+      {name:"タイウォ",en_name:"Taiwo",long_name:"タイウォ・アウォニイ",positions:["右SB","左SB"],params:[68,68,80,81,68,64,60,60,68,60,54,40,40,44,32,34,60,42,66,68,66,66,64,50,50,62,62,60,75]},
+      // Sub CB: Ekwah (FC26 OVR72, PAC72, SHO40, PAS60, DRI58, DEF72, PHY76)
+      {name:"エクワ",en_name:"Ekwah",long_name:"ピエール・エクワ",positions:["CB","DMF"],params:[76,74,72,73,68,74,56,56,68,60,54,32,30,38,24,26,56,28,72,74,72,72,70,50,50,74,68,66,75]},
+      // Sub CMF: Iwobi (FC26 OVR80, PAC80, SHO70, PAS78, DRI78, DEF70, PHY72)
+      {name:"イウォビ",en_name:"Iwobi",long_name:"アレックス・イウォビ",positions:["CMF","右WG","OMF"],params:[70,72,80,81,78,68,76,78,78,78,72,64,66,68,54,58,78,66,66,68,66,66,64,50,50,66,72,72,75]},
+      // Sub DMF: Onyeka (FC26 OVR75, PAC76, SHO60, PAS70, DRI70, DEF76, PHY78)
+      {name:"オニェカ",en_name:"Onyeka",long_name:"フランク・オニェカ",positions:["DMF","CMF"],params:[78,78,76,77,72,74,68,68,72,70,64,54,56,58,44,46,68,56,74,76,74,74,72,50,50,74,68,66,75]},
+      // Sub RW: Moses Simon (FC26 OVR76, PAC90, SHO68, PAS70, DRI78, DEF44, PHY66)
+      {name:"モーゼス",en_name:"M.Simon",long_name:"モーゼス・サイモン",positions:["左WG","右WG"],params:[64,66,90,92,78,60,76,78,78,70,64,64,64,66,52,56,78,64,40,42,40,40,42,50,50,58,64,64,75]},
+      // Sub CF: Terem Moffi (FC26 OVR75, PAC86, SHO74, PAS60, DRI74, DEF36, PHY72)
+      {name:"モフィ",en_name:"Moffi",long_name:"テレム・モフィ",positions:["CF","右WG"],params:[72,72,86,88,76,68,72,74,76,60,54,72,70,74,50,52,72,68,32,32,30,30,34,50,50,68,64,64,75]},
+      // Sub CF: Onuachu P (FC26 OVR76, PAC68, SHO76, PAS60, DRI66, DEF36, PHY82)
+      {name:"オヌアチュ",en_name:"Onuachu",long_name:"ポール・オヌアチュ",positions:["CF"],params:[82,80,68,69,76,80,64,64,76,60,54,74,72,76,46,50,64,78,32,32,30,30,34,50,50,82,64,62,75]}
     ]
   },
 };
