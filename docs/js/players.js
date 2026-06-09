@@ -966,7 +966,33 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "J・L・ロドリゲス": {"profile": "攻守バランスの取れたプレーでウルグアイの右サイドを支えるSB。安定した守備と適切なポジショニングが持ち味。", "profile_en": "A full-back who supports Uruguay's right flank with a balanced contribution on both sides of the ball. Dependable defending and good positioning are his hallmarks.", "height": 178, "weight": 72},
 "フォンセカ": {"profile": "高い守備意識とボール奪取能力を誇るDMF。豊富なスタミナとポジショニングでウルグアイの中盤を守る。", "profile_en": "A defensive midfielder with strong positional awareness and ball-winning ability. His stamina and positioning protect Uruguay's midfield.", "height": 185, "weight": 78},
 "F・トーレス": {"profile": "爆発的なスプリントとドリブルで右サイドから仕掛ける攻撃的ウィンガー。ゴールへの積極的な姿勢でウルグアイの攻撃に推進力をもたらす。", "profile_en": "An attacking winger who drives at defences from the right with explosive pace and dribbling. His direct approach and attacking intent provide forward thrust for Uruguay.", "height": 180, "weight": 75},
-"A・アルバレス": {"profile": "ゴール前での積極性と鋭いシュートセンスを武器とする若きストライカー。高い成長潜力を持つウルグアイ期待のCF。", "profile_en": "A young striker whose weapons are an aggressive edge in front of goal and sharp shooting sense. A high-potential forward with great promise for Uruguay.", "height": 181, "weight": 75}
+"A・アルバレス": {"profile": "ゴール前での積極性と鋭いシュートセンスを武器とする若きストライカー。高い成長潜力を持つウルグアイ期待のCF。", "profile_en": "A young striker whose weapons are an aggressive edge in front of goal and sharp shooting sense. A high-potential forward with great promise for Uruguay.", "height": 181, "weight": 75},
+"コベル": {"profile": "優れた反応速度と足元の技術を兼備するスイス代表の守護神。1対1に強く、攻守の切り替えが速いモダン型GK。", "profile_en": "Switzerland's No.1, combining sharp reflexes with strong footwork. A modern goalkeeper who excels in one-on-one situations with quick transition play.", "height": 190, "weight": 85},
+"ウィドマー": {"profile": "高い機動力と正確なオーバーラップでスイスの右サイドを活性化する攻撃的右SB。対人守備も堅実なオールラウンダー。", "profile_en": "An attacking right-back who energises Switzerland's right flank with mobility and precise overlapping runs. Solid in one-on-one defending too.", "height": 183, "weight": 78},
+"アカンジ": {"profile": "高いフィジカルとインテリジェンスを兼備するCBリーダー。ビルドアップでも貢献できるスイス守備の中核を担う。", "profile_en": "A physically imposing and intelligent CB who leads Switzerland's defensive line. Equally capable of contributing to build-up play.", "height": 186, "weight": 81},
+"シェア": {"profile": "長距離砲のロングシュートと高精度のフィードを誇る攻撃的センターバック。空中戦でもチームに貢献するスイス守備の要。", "profile_en": "An attacking CB known for his long-range strikes and precise distribution. A key aerial presence and a cornerstone of Switzerland's defence.", "height": 186, "weight": 82},
+"R・ロドリゲス": {"profile": "安定した守備と積極的な攻撃参加を兼備するスイス代表の不動の左SB。豊富な代表経験がチームを下支えする。", "profile_en": "Switzerland's long-serving left-back who balances reliable defending with energetic forward runs. His vast international experience is a key asset.", "height": 185, "weight": 77},
+"フロイラー": {"profile": "高いボール奪取能力と正確な配球でスイスの中盤をコントロールするDMF。攻守の切り替えが速く、献身的なハードワークが持ち味。", "profile_en": "A DMF who controls Switzerland's midfield with strong ball-winning ability and precise distribution. Known for quick transitions and tireless hard work.", "height": 183, "weight": 74},
+"ジャカ": {"profile": "スイス代表のキャプテン。広い視野と正確なパスでゲームを組み立てるCMFで、力強いリーダーシップでチームを牽引する代表の心臓。", "profile_en": "Switzerland's captain and midfield commander. Builds the game with excellent vision and precise passing, driving the team with strong leadership.", "height": 186, "weight": 80},
+"シャキリ": {"profile": "鋭いドリブルとシュートでスイスの攻撃を彩る技巧派WG。コンパクトな体格から繰り出す機動力と創造性でゲームを変える存在。", "profile_en": "A skilful winger who brightens Switzerland's attack with sharp dribbling and shooting. His mobility and creativity from a compact frame can change any game.", "height": 169, "weight": 77},
+"バルガス": {"profile": "爆発的なスプリントとゴール前での仕掛けを武器とするアタッカー。右サイドからの突破と積極的なシュートでスイスの攻撃を勢いづける。", "profile_en": "An attacker whose weapons are explosive pace and a direct approach in the final third. His runs from the right and direct shooting give Switzerland attacking momentum.", "height": 175, "weight": 68},
+"ンドワイエ": {"profile": "圧倒的なスピードと高さを兼備する若きアタッカー。左サイドからの縦突破と積極的なシュートでスイスの攻撃に迫力をもたらす。", "profile_en": "A young attacker combining exceptional pace with impressive physical presence. Direct drives from the left and ambitious shooting add real power to Switzerland's attack.", "height": 186, "weight": 80},
+"エンボロ": {"profile": "長身とパワフルなフィジカルで前線に君臨するCF。ポストプレーと力強いフィニッシュでスイスの攻撃の矢面に立つエースストライカー。", "profile_en": "A physically imposing CF who commands Switzerland's attack with his powerful frame. His hold-up play and powerful finishing make him the focal point of the Swiss forward line.", "height": 188, "weight": 86},
+"ゾマー": {"profile": "反応速度と的確なポジショニングに優れた経験豊富なGK。スイスの守護神として長年活躍し、ビッグセーブで幾度もチームを救ってきた守護者。", "profile_en": "An experienced goalkeeper with sharp reflexes and excellent positioning. Switzerland's long-standing keeper who has saved the team on countless occasions with crucial stops.", "height": 183, "weight": 82},
+"エルヴェディ": {"profile": "高さとビルドアップ能力を兼備する堅実なCB。スイス守備陣に不可欠な存在で、空中戦の強さと安定した守備でチームを支える。", "profile_en": "A reliable CB who combines aerial presence with solid build-up play. An indispensable part of Switzerland's defensive set-up, providing aerial strength and defensive stability.", "height": 189, "weight": 86},
+"ステルジオウ": {"profile": "機動力と積極的な攻撃参加で右サイドをカバーする若手右SB。守備の堅さと豊富なスタミナでチームに安定をもたらす。", "profile_en": "A young right-back who covers the flank with mobility and energetic overlapping runs. His defensive solidity and stamina bring reliability to the team.", "height": 182, "weight": 79},
+"フレイ": {"profile": "守備の安定感と豊富なスタミナを誇る左SB。着実なパフォーマンスを発揮し、スイスの左サイドに安心感をもたらす信頼できるオプション。", "profile_en": "A left-back known for defensive reliability and stamina. Delivers consistent performances and provides a trustworthy option on Switzerland's left side.", "height": 181, "weight": 75},
+"ザカリア": {"profile": "長身とパワーを兼備するパワフルなCMF。中盤での制空権と激しい守備でスイスのミッドフィールドに厚みをもたらすハードワーカー。", "profile_en": "A powerful and tall CMF who brings physical presence to midfield. His aerial dominance and intense defending add depth to Switzerland's midfield.", "height": 190, "weight": 88},
+"ヤシャリ": {"profile": "正確なパスと高いボール奪取能力でスイス代表の中盤に貢献する若き実力派DMF。将来のスイス代表中心を担うことが期待される逸材。", "profile_en": "A talented young DMF who contributes to Switzerland's midfield with accurate passing and strong ball-winning ability. A highly promising player tipped to become central to the Swiss squad.", "height": 182, "weight": 75},
+"リーダー": {"profile": "スタミナと積極的なプレスを武器とするCMF。高い運動量と技術でゲームを動かし続ける堅実なミッドフィールダー。", "profile_en": "A CMF whose weapons are stamina and aggressive pressing. A hardworking midfielder who keeps the game moving with his energy and technical quality.", "height": 177, "weight": 70},
+"アムドゥーニ": {"profile": "ゴール前での決定力と鋭い動き出しで知られるストライカー。スペースへの飛び出しとシュートの鋭さでスイスの攻撃に得点力を加える。", "profile_en": "A striker known for clinical finishing and sharp movement off the ball. His runs in behind and incisive shooting add a goal threat to Switzerland's attack.", "height": 185, "weight": 79},
+"オカフォー": {"profile": "爆発的な加速力と高い技術を武器にサイドから仕掛ける若きアタッカー。マルチポジションをこなし、試合の流れを変える切り札的存在。", "profile_en": "A young attacker who drives from wide positions with explosive pace and technical quality. Versatile and capable of changing the game as an impact substitute.", "height": 181, "weight": 77},
+"デュア": {"profile": "鋭いスプリントと積極的な仕掛けを武器とする右WG。代表での経験を積みながらスイスの攻撃に推進力と得点力をもたらす。", "profile_en": "A right winger armed with explosive pace and direct attacking intent. Growing his international experience while providing pace and goal threat to the Swiss attack.", "height": 185, "weight": 79},
+"ゾウ": {"profile": "勤勉な守備貢献と豊富なスタミナでスイス中盤を支えるCMF。試合を通じて高い強度を維持しながらチームのバランスを整える。", "profile_en": "A CMF who supports Switzerland's midfield with diligent defensive work and high stamina. Maintains intensity throughout the game while keeping the team balanced.", "height": 184, "weight": 78},
+"ツェジガー": {"profile": "193cmの長身を活かした制空権と安定したポジショニングを誇るCB。スイス守備の厚みをもたらす大型センターバック。", "profile_en": "A 193cm CB who dominates aerially with reliable positioning. Adds physical depth to Switzerland's defensive options.", "height": 193, "weight": 87},
+"ムボゴ": {"profile": "反応速度と高いセービング能力を誇るGK。経験豊富な控えGKとして代表に帯同し、守護神陣に厚みをもたらす。", "profile_en": "A goalkeeper with sharp reflexes and strong shot-stopping ability. A capable backup keeper who adds depth to Switzerland's goalkeeping options.", "height": 190, "weight": 88},
+"ファスナハト": {"profile": "スピードとドリブルで右サイドを駆け上がる運動量豊富なウィンガー。積極的な仕掛けとクロス精度でスイスの攻撃を活性化する。", "profile_en": "An energetic winger who charges down the right flank with pace and dribbling. His direct running and crossing ability activate Switzerland's attacking play.", "height": 183, "weight": 77},
+"ゼフェロヴィッチ": {"profile": "ポストプレーと高さを活かした動きで前線に起点を作る大型ストライカー。力強いフィジカルと嗅覚の鋭さでゴールを狙い続けるベテランCF。", "profile_en": "A powerful target-man who creates a focal point upfront with his height and hold-up play. A veteran CF who uses his physicality and sharp instincts to remain a constant goal threat.", "height": 187, "weight": 82}
 };
 
 const PARAM_NAMES = [
@@ -2414,6 +2440,67 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"F・ビーニャス",en_name:"F.Vinas",long_name:"フェデリコ・ビーニャス",positions:["CF"],params:[76,76,73,75,72,72,68,70,72,56,50,70,70,72,48,46,63,70,22,22,22,22,24,50,50,74,70,68,75]},
       // Sub CF: Agustín Álvarez (est. OVR72)
       {name:"A・アルバレス",en_name:"A.Alvarez",long_name:"アグスティン・アルバレス",positions:["CF"],params:[68,68,70,72,70,66,67,69,70,62,56,72,72,74,46,44,68,70,34,32,30,30,36,50,50,64,68,68,75]}
+    ]
+  },
+
+  switzerland2026: {
+    name:"スイス",en_name:"Switzerland",team_color:"#DA291C",flag:"🇨🇭",
+    default_system:"4-2-3-1",default_tactics:TACTICS_FREE,
+    default_keyplayer:6,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Kobel (FC26 OVR84, DIV82, HAN80, KIC78, REF84, SPD66, POS82)
+      {name:"コベル",en_name:"Kobel",long_name:"グレゴール・コベル",positions:["GK"],params:[50,50,50,50,84,66,50,50,50,50,78,50,50,50,50,50,50,50,50,50,50,50,50,82,80,50,82,80,75]},
+      // RB: Widmer (FC26 OVR77, PAC80, SHO55, PAS72, DRI74, DEF75, PHY76)
+      {name:"ウィドマー",en_name:"Widmer",long_name:"シルヴァン・ウィドマー",positions:["右SB","右SMF"],params:[76,78,80,78,77,72,70,72,77,72,68,46,50,52,44,48,72,56,74,74,74,73,72,50,50,70,70,74,75]},
+      // CB: Akanji (FC26 OVR85, PAC78, SHO48, PAS72, DRI74, DEF86, PHY82)
+      {name:"アカンジ",en_name:"Akanji",long_name:"マヌエル・アカンジ",positions:["CB"],params:[82,80,78,76,76,84,68,68,76,72,68,38,34,42,34,40,68,38,84,86,86,85,84,50,50,82,78,82,75]},
+      // CB: Schar (FC26 OVR83, PAC74, SHO64, PAS78, DRI72, DEF82, PHY82)
+      {name:"シェア",en_name:"Schar",long_name:"ファビアン・シェア",positions:["CB"],params:[82,80,74,72,73,84,66,66,73,78,74,54,50,56,48,52,68,52,82,82,82,81,80,50,50,80,76,80,75]},
+      // LB: Rodriguez (FC26 OVR79, PAC74, SHO56, PAS76, DRI75, DEF77, PHY77)
+      {name:"R・ロドリゲス",en_name:"R.Rodriguez",long_name:"リカルド・ロドリゲス",positions:["左SB","左SMF"],params:[77,78,74,72,74,72,72,72,74,76,72,48,50,52,46,54,73,54,76,76,76,76,74,50,50,70,72,76,75]},
+      // CDM: Freuler (FC26 OVR82, PAC72, SHO64, PAS81, DRI79, DEF78, PHY78)
+      {name:"フロイラー",en_name:"Freuler",long_name:"レモ・フロイラー",positions:["DMF","CMF"],params:[78,80,72,70,75,74,76,78,75,81,76,56,58,60,52,56,78,58,78,78,78,77,76,50,50,72,76,78,75]},
+      // CMF/CDM: Xhaka (FC26 OVR84, PAC66, SHO74, PAS84, DRI80, DEF79, PHY76)
+      {name:"ジャカ",en_name:"Xhaka",long_name:"グラニト・ジャカ",positions:["CMF","DMF"],params:[76,78,66,64,73,72,76,80,73,84,80,66,68,70,66,68,80,68,79,79,80,79,78,50,50,74,78,82,75]},
+      // RAM: Shaqiri (FC26 OVR80, PAC74, SHO78, PAS80, DRI84, DEF48, PHY66)
+      {name:"シャキリ",en_name:"Shaqiri",long_name:"シェルダン・シャキリ",positions:["右SMF","OMF","右WG"],params:[66,70,74,76,79,62,82,84,79,80,76,74,72,76,72,76,84,72,44,46,46,46,44,50,50,60,76,76,75]},
+      // CAM: Vargas (FC26 OVR79, PAC82, SHO72, PAS74, DRI80, DEF55, PHY70)
+      {name:"バルガス",en_name:"Vargas",long_name:"ルーベン・バルガス",positions:["OMF","右SMF","左SMF"],params:[70,72,82,84,81,66,80,80,81,74,70,66,68,68,60,66,80,68,52,54,54,53,52,50,50,62,74,74,75]},
+      // LAM: Ndoye (FC26 OVR78, PAC88, SHO68, PAS72, DRI80, DEF54, PHY70)
+      {name:"ンドワイエ",en_name:"Ndoye",long_name:"ダン・ンドワイエ",positions:["左SMF","左WG","右SMF"],params:[70,72,88,90,84,66,80,80,84,72,68,60,62,64,54,62,80,64,50,52,52,51,50,50,50,60,72,72,75]},
+      // CF: Embolo (FC26 OVR79, PAC79, SHO74, PAS66, DRI76, DEF38, PHY82)
+      {name:"エンボロ",en_name:"Embolo",long_name:"ブリール・エンボロ",positions:["CF","左WG"],params:[82,80,79,80,77,82,74,76,77,66,62,70,72,72,56,60,76,72,34,36,36,35,34,50,50,78,74,76,75]},
+      // Sub GK: Sommer (FC26 OVR84, DIV83, HAN80, KIC82, REF83, SPD40, POS84)
+      {name:"ゾマー",en_name:"Sommer",long_name:"ヤン・ゾマー",positions:["GK"],params:[50,50,50,50,83,40,50,50,50,50,82,50,50,50,50,50,50,50,50,50,50,50,50,83,80,50,84,82,75]},
+      // Sub CB: Elvedi (FC26 OVR78, PAC68, SHO42, PAS66, DRI64, DEF78, PHY80)
+      {name:"エルヴェディ",en_name:"Elvedi",long_name:"ニコ・エルヴェディ",positions:["CB"],params:[80,78,68,66,66,82,60,60,66,66,62,34,30,38,30,36,62,36,76,78,78,78,76,50,50,80,72,76,75]},
+      // Sub RB: Stergiou (FC26 OVR74, PAC78, SHO48, PAS64, DRI70, DEF70, PHY74)
+      {name:"ステルジオウ",en_name:"Stergiou",long_name:"スタリム・ステルジオウ",positions:["右SB"],params:[74,76,78,78,74,72,66,68,74,64,60,38,40,42,34,40,68,44,68,70,70,70,68,50,50,68,68,72,75]},
+      // Sub LB: Frei (FC26 OVR75, PAC72, SHO50, PAS68, DRI70, DEF72, PHY72)
+      {name:"フレイ",en_name:"Frei",long_name:"ケヴィン・フレイ",positions:["左SB"],params:[72,74,72,72,71,68,66,68,71,68,64,40,42,44,36,42,68,46,70,72,72,71,70,50,50,64,66,70,75]},
+      // Sub CMF: Zakaria (FC26 OVR78, PAC80, SHO62, PAS72, DRI76, DEF76, PHY82)
+      {name:"ザカリア",en_name:"Zakaria",long_name:"ドニ・ザカリア",positions:["CMF","DMF"],params:[82,82,80,80,78,82,74,76,78,72,68,52,56,58,48,52,74,56,76,76,76,75,74,50,50,78,70,78,75]},
+      // Sub DMF: Jashari (FC26 OVR78, PAC74, SHO62, PAS78, DRI78, DEF74, PHY74)
+      {name:"ヤシャリ",en_name:"Jashari",long_name:"アルドン・ヤシャリ",positions:["DMF","CMF"],params:[74,78,74,72,76,70,74,76,76,78,74,52,54,56,48,52,76,54,74,74,74,73,72,50,50,68,74,76,75]},
+      // Sub CMF: Rieder (FC26 OVR74, PAC74, SHO64, PAS72, DRI74, DEF68, PHY72)
+      {name:"リーダー",en_name:"Rieder",long_name:"ファビアン・リーダー",positions:["CMF","OMF"],params:[72,74,74,74,74,68,70,72,74,72,68,56,58,60,48,54,72,58,66,68,68,67,66,50,50,66,70,72,75]},
+      // Sub CF: Amdouni (FC26 OVR76, PAC80, SHO74, PAS68, DRI74, DEF42, PHY74)
+      {name:"アムドゥーニ",en_name:"Amdouni",long_name:"ゼキ・アムドゥーニ",positions:["CF","左WG"],params:[74,74,80,82,77,70,72,74,77,68,64,70,72,70,56,60,73,70,38,40,40,39,38,50,50,68,70,72,75]},
+      // Sub LW/CF: Okafor (FC26 OVR78, PAC88, SHO74, PAS66, DRI78, DEF42, PHY72)
+      {name:"オカフォー",en_name:"Okafor",long_name:"ノア・オカフォー",positions:["左WG","CF","右WG"],params:[72,74,88,90,83,70,76,78,83,66,62,68,70,70,54,60,77,70,38,40,40,39,38,50,50,66,72,74,75]},
+      // Sub RW: Duah (FC26 OVR74, PAC84, SHO68, PAS64, DRI74, DEF44, PHY68)
+      {name:"デュア",en_name:"Duah",long_name:"クワドウォ・デュア",positions:["右WG","CF"],params:[68,70,84,86,79,64,72,72,79,64,60,62,64,64,52,58,72,64,40,42,42,41,40,50,50,60,68,70,75]},
+      // Sub CMF: Sow (FC26 OVR74, PAC72, SHO64, PAS70, DRI72, DEF70, PHY76)
+      {name:"ゾウ",en_name:"Sow",long_name:"エリアス・ゾウ",positions:["CMF","DMF"],params:[76,78,72,72,72,70,68,70,72,70,66,56,58,60,46,50,70,58,68,70,70,69,68,50,50,70,66,70,75]},
+      // Sub CB: Zesiger (FC26 OVR73, PAC72, SHO40, PAS62, DRI60, DEF74, PHY78)
+      {name:"ツェジガー",en_name:"Zesiger",long_name:"モルガン・ツェジガー",positions:["CB"],params:[78,76,72,70,66,80,56,56,66,62,58,32,28,36,28,34,58,34,72,74,74,73,72,50,50,76,66,72,75]},
+      // Sub GK: Mvogo (FC26 OVR76, DIV76, HAN74, KIC74, REF77, SPD66, POS75)
+      {name:"ムボゴ",en_name:"Mvogo",long_name:"オマリン・ムボゴ",positions:["GK"],params:[50,50,50,50,77,66,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,75,74,75]},
+      // Sub RW: Fassnacht (FC26 OVR73, PAC80, SHO68, PAS68, DRI74, DEF48, PHY68)
+      {name:"ファスナハト",en_name:"Fassnacht",long_name:"クリスティアン・ファスナハト",positions:["右SMF","右WG","左SMF"],params:[68,70,80,82,77,64,72,72,77,68,64,62,64,64,50,56,72,62,44,46,46,45,44,50,50,62,68,68,75]},
+      // Sub CF: Seferovic (FC26 OVR72, PAC75, SHO72, PAS60, DRI68, DEF34, PHY74)
+      {name:"ゼフェロヴィッチ",en_name:"Seferovic",long_name:"ハリス・ゼフェロヴィッチ",positions:["CF"],params:[74,74,75,76,71,72,66,68,71,60,56,70,68,70,52,56,66,68,30,32,32,31,30,50,50,72,68,70,75]}
     ]
   },
 };
