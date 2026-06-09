@@ -1064,7 +1064,65 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "グリリッチュ": {"profile": "インテリジェントなポジショニングと幅広いカバー範囲でオーストリア中盤を支えるDMF。プレスへの貢献と安定したパスワークで中盤の守備的なバランスを維持する。", "profile_en": "A DMF who supports Austria's midfield with intelligent positioning and wide coverage. His pressing work and stable passing maintain the team's defensive midfield balance.", "height": 188, "weight": 83},
 "R・シュミット": {"profile": "高い技術とドリブルを武器とする若手アタッカー。左サイドからの積極的な仕掛けとシュート意欲の高さでオーストリアの攻撃に推進力をもたらすダイナミックなプレイヤー。", "profile_en": "A technically gifted young attacker with strong dribbling. His direct running from the left and eagerness to shoot bring momentum to Austria's attack.", "height": 176, "weight": 72},
 "グレゴリッチュ": {"profile": "高さとフィジカルを活かしたポストプレーと力強いシュートで前線に存在感を放つCF。オーストリアの攻撃に高さと厚みをもたらすターゲットマン。", "profile_en": "A CF who makes his presence felt up front with aerial hold-up play and powerful shooting. A target-man who gives Austria's attack height and depth.", "height": 192, "weight": 89},
-"オニシヴォ": {"profile": "爆発的なスプリントを武器とするCF。裏への飛び出しと鋭いシュートで相手DFを脅かし、試合の流れを変える切り札として機能するスピードスター。", "profile_en": "A CF who weaponises explosive sprint pace. His runs in behind and sharp shooting threaten defences, functioning as an impact substitute who can change the game.", "height": 175, "weight": 73}
+"オニシヴォ": {"profile": "爆発的なスプリントを武器とするCF。裏への飛び出しと鋭いシュートで相手DFを脅かし、試合の流れを変える切り札として機能するスピードスター。", "profile_en": "A CF who weaponises explosive sprint pace. His runs in behind and sharp shooting threaten defences, functioning as an impact substitute who can change the game.", "height": 175, "weight": 73},
+"ボルヤン": {"profile": "反射神経と1対1の強さを誇るカナダ代表の守護神。豊富な経験とリーダーシップでゴールラインを守り、チームに安心感をもたらすベテランGK。", "profile_en": "Canada's experienced goalkeeper with sharp reflexes and strong one-on-one stopping. His leadership and calm authority protect the goal and bring security to the team.", "height": 191, "weight": 83},
+"ジョンストン": {"profile": "精力的なオーバーラップと的確な守備でカナダの右サイドを担うSB。スコットランドリーグで評価を高め、代表でも右サイドの主力として定着している。", "profile_en": "A right-back who covers Canada's right flank with energetic overlaps and reliable defending. Established himself in Scottish football before becoming a fixture in the national team.", "height": 179, "weight": 75},
+"K・ミラー": {"profile": "フィジカルと空中戦の強さでカナダ守備を支えるCB。粘り強いデュエルと読みの鋭さで相手FWを封じ込め、守備ラインを統率するリーダー的存在。", "profile_en": "A CB who anchors Canada's defence with physicality and aerial dominance. His tenacious duels and sharp reading shut down opposing forwards as he marshals the backline.", "height": 185, "weight": 83},
+"コーネリウス": {"profile": "高い守備能力と安定したポジショニングを誇るカナダ代表CB。北欧のリーグで経験を積み、代表では守備ラインの確実な担い手として活躍する。", "profile_en": "A Canadian CB with strong defensive ability and reliable positioning. Experienced in European football, he is a dependable component of Canada's defensive line.", "height": 190, "weight": 82},
+"アデクグベ": {"profile": "スピードと豊富なスタミナでカナダの左サイドを活性化する左SB。積極的な攻撃参加と守備の安定性を兼備し、サイドを高い強度でカバーするダイナミックなDF。", "profile_en": "A left-back who activates Canada's left flank with pace and high stamina. Balancing proactive forward runs with defensive solidity, he covers his side with relentless intensity.", "height": 175, "weight": 72},
+"ユスタキオ": {"profile": "精確なパス捌きとインテリジェントな守備貢献でカナダ中盤の要を担うCMF。ポルトガル語圏出身の技巧派MFとして、カナダ中盤に高い技術と創造性をもたらす。", "profile_en": "The hub of Canada's midfield with precise distribution and intelligent defensive work. A technically gifted midfielder of Portuguese heritage who brings creativity and quality to Canada's engine room.", "height": 178, "weight": 72},
+"オソリオ": {"profile": "豊富な運動量とハードワークでカナダ中盤を支えるCMF。ボックス・トゥ・ボックスの運動量と的確なポジショニングで攻守両面に貢献するカナダの中盤の良心。", "profile_en": "A box-to-box CMF who supports Canada's midfield with high energy and hard work. His precise positioning and contribution at both ends make him the conscience of Canada's midfield.", "height": 178, "weight": 74},
+"ブキャナン": {"profile": "爆発的なスプリントと鋭いドリブルでカナダの右サイドを切り裂くウィンガー。イタリアのトップクラブで経験を積み、縦への突破とシュートでゴールを量産する。", "profile_en": "A right-side winger who slashes through Canada's flank with explosive pace and incisive dribbling. Seasoned at a top Italian club, he produces goals with his vertical driving and shooting.", "height": 182, "weight": 77},
+"A・デイビス": {"profile": "世界最高クラスのスピードと無尽蔵のスタミナを誇るカナダ代表のスーパースター。バイエルンで左SBとして世界制覇を経験し、カナダ代表ではウィング的な役割でもチームを牽引する。", "profile_en": "Canada's superstar boasting world-class pace and boundless stamina. Having won major honours at Bayern as a left-back, he also drives the national team forward in a wider role.", "height": 177, "weight": 75},
+"コネ": {"profile": "高いボール奪取能力と正確なパスワークを兼備するカナダ期待の若手CMF。チェルシーでの経験を代表に持ち込み、カナダ中盤に活力とダイナミズムをもたらす逸材。", "profile_en": "A talented young Canadian CMF combining strong ball-winning and precise passing. Bringing experience from Chelsea into the national team, he injects energy and dynamism into Canada's midfield.", "height": 185, "weight": 80},
+"J・デービッド": {"profile": "卓越した決定力と高いスピードでヨーロッパのトップリーグを席巻するカナダの至宝。ゴール感覚とポジショニングの鋭さはヨーロッパでも指折りのストライカーとして名を馳せる。", "profile_en": "Canada's gem who has swept through European top leagues with exceptional finishing and pace. His goalscoring instinct and sharp positioning have earned him recognition as one of Europe's finest strikers.", "height": 179, "weight": 74},
+"クレポー": {"profile": "正確なセービングとフットワークを誇るカナダ代表の実力派GK。長身を活かした制空権とリフレックスセービングでゴールを守るもう一人の守護神候補。", "profile_en": "A capable Canadian goalkeeper with precise shot-stopping and good footwork. His aerial command and reflex saves make him a strong candidate for the top spot in goal.", "height": 189, "weight": 85},
+"セントクレア": {"profile": "若くして代表に名乗りを上げる将来有望なGK。高い反射神経と冷静な判断力を武器に、カナダGK陣の次世代を担う存在として着実に成長している。", "profile_en": "A promising young goalkeeper who has already made his mark on the national team. Armed with sharp reflexes and calm decision-making, he is steadily developing as the next generation of Canadian goalkeeping.", "height": 192, "weight": 84},
+"ラリア": {"profile": "爆発的な加速力と積極的な攻撃参加でカナダの右サイドに推進力をもたらす右SB。スプリント能力の高さはチームでも指折りで、サイドを高い強度でこなすダイナミックなDF。", "profile_en": "A right-back who brings drive to Canada's right side with explosive acceleration and proactive forward runs. One of the team's fastest players, he covers his flank with relentless energy.", "height": 174, "weight": 68},
+"マヴィンガ": {"profile": "強靭なフィジカルと安定した守備でカナダ守備ラインに厚みをもたらすCB。豊富な経験とタフなデュエルで相手の攻撃を跳ね返し、チームに頼もしい選択肢を提供する。", "profile_en": "A CB who adds physical depth to Canada's defensive line with his physique and reliability. His experience and tough duelling repel opposing attacks, providing a dependable option.", "height": 188, "weight": 85},
+"D・ヘンリー": {"profile": "タフな守備と高い集中力でカナダ守備の厚みをもたらすCB。長年代表に貢献してきたベテランDFとして、守備ラインに経験と安定感をもたらす。", "profile_en": "A veteran CB who adds experience and stability to Canada's backline with tough defending and consistent concentration. A long-serving contributor to the national team.", "height": 188, "weight": 82},
+"ケイ": {"profile": "幅広いカバー範囲と安定したパス捌きでカナダ中盤を支えるCMF。守備貢献と攻撃参加のバランスに優れ、チームに柔軟性と中盤の厚みをもたらす。", "profile_en": "A CMF who supports Canada's midfield with wide coverage and consistent distribution. Balancing defensive work and forward runs, he brings flexibility and midfield depth.", "height": 181, "weight": 75},
+"L・ミラー": {"profile": "スピードと積極的な仕掛けでサイドを活性化するウィンガー。カナダ代表で経験を積みながら、左サイドからの突破とシュートでゴールに迫るアタッカー。", "profile_en": "A winger who activates the flanks with pace and directness. Building his international experience, he threatens goal with driving runs and shooting from the left.", "height": 179, "weight": 72},
+"ラリン": {"profile": "豊富なゴール経験と高いフィジカルを誇るカナダ代表のベテランストライカー。ポストプレーと力強いシュートでカナダの前線を支える頼もしいCF。", "profile_en": "Canada's experienced veteran striker boasting a rich goal record and strong physicality. His hold-up play and powerful shooting are a reliable focal point for Canada's attack.", "height": 188, "weight": 88},
+"アキノラ": {"profile": "爆発的なスピードと積極的な飛び出しでカナダの前線を活性化するCF。裏への動き出しの鋭さと決定力を兼備し、試合終盤に相手を脅かす切り札的存在。", "profile_en": "A CF who activates Canada's forward line with explosive pace and proactive runs. Combining sharp movement in behind with clinical finishing, he is a dangerous impact substitute.", "height": 180, "weight": 72},
+"E・メンディ": {"profile": "189cmの長身と優れた1対1の強さでセネガルのゴールを守るGK。ビッグクラブで磨いたセービング技術とコーチングでセネガル守備陣の要を担う。", "profile_en": "Senegal's goalkeeper at 189cm, protecting the goal with excellent one-on-one stopping. Shot-stopping technique and vocal command refined at a major club underpin his crucial role in Senegal's defence.", "height": 197, "weight": 90},
+"F・メンディ": {"profile": "スピードと積極的な攻撃参加でセネガルの右サイドを活性化するSB。守備の確実さと攻撃センスを兼備し、プレッシングの中でも積極的にボールを運ぶ。", "profile_en": "A right-back who activates Senegal's right flank with pace and forward runs. Combining defensive reliability with attacking instinct, he carries the ball forward even under pressing.", "height": 177, "weight": 73},
+"クリバリ": {"profile": "圧倒的なフィジカルと高いリーダーシップでセネガル守備を統率するCB。世界最高峰のDFとして名を馳せ、代表キャプテンとしてチームを引っ張るセネガルの守護者。", "profile_en": "Senegal's defensive guardian who commands the backline with imposing physicality and outstanding leadership. Acclaimed as one of the world's finest defenders, he captains and anchors the team.", "height": 190, "weight": 89},
+"PA・シス": {"profile": "高さとフィジカルでセネガル守備ラインを支えるCB。空中戦の強さと精力的なカバーリングで相手FWを封じ込め、セネガル守備の厚みをもたらす頼れるDF。", "profile_en": "A CB who supports Senegal's defensive line with height and physicality. His aerial strength and energetic covering shut down opposing forwards and add depth to Senegal's defence.", "height": 194, "weight": 87},
+"ニャカテ": {"profile": "スピードと読みの鋭さを兼備するDF。CBと左SBをこなすポリバレント性でセネガルの守備に柔軟性をもたらし、攻守両面で高いパフォーマンスを発揮する。", "profile_en": "A versatile defender with pace and sharp reading. His ability to play both CB and left-back gives Senegal's defence flexibility, and he performs at a high level in both phases.", "height": 185, "weight": 77},
+"PM・サール": {"profile": "高いボール奪取能力と精確なパスワークでセネガル中盤を支配するCMF。プレミアリーグ屈指の若手MFとして名を馳せ、セネガル代表の次世代の核として期待される逸材。", "profile_en": "A CMF who dominates Senegal's midfield with strong ball-winning and precise passing. Acclaimed as one of the Premier League's finest young midfielders, he is expected to be the next-generation cornerstone of the Senegal national team.", "height": 177, "weight": 72},
+"L・カマラ": {"profile": "献身的なプレスと豊富なスタミナでセネガル中盤を支えるCMF。スペイン屈指のクラブで磨いた守備貢献と積極的なポジショニングでチームに欠かせない存在。", "profile_en": "A CMF who supports Senegal's midfield with relentless pressing and high stamina. His defensive work and proactive positioning, refined at a top Spanish club, make him indispensable.", "height": 181, "weight": 75},
+"I・ンディアイ": {"profile": "テクニックと創造性を武器にセネガル攻撃を牽引するOMF。狭いスペースでも活きる技術とシュート精度でアタッキングサードに活気をもたらすクリエイター。", "profile_en": "The creative engine of Senegal's attack, armed with technique and ingenuity. He brings life to the attacking third with his quality in tight spaces and precise shooting.", "height": 178, "weight": 68},
+"I・サール": {"profile": "爆発的な加速力と鋭いドリブルでセネガルの右サイドを切り裂くウィンガー。高い突破力と得点力でチームの攻撃を活性化するダイナミックなアタッカー。", "profile_en": "A right-side winger who cuts through defences with explosive pace and sharp dribbling. His powerful running and goalscoring ability bring dynamism to Senegal's attack.", "height": 183, "weight": 78},
+"マネ": {"profile": "ドリブルとスプリントでサイドを制圧するセネガルのレジェンドFW。並外れたスピードとゴール前での的確な判断でセネガル代表に欠かせない攻撃の中心。", "profile_en": "Senegal's legendary forward who dominates the flank with dribbling and sprint pace. His extraordinary speed and composure in front of goal make him the irreplaceable focal point of Senegal's attack.", "height": 175, "weight": 69},
+"N・ジャクソン": {"profile": "スピードと高い決定力を誇るセネガル代表の主力CF。プレミアリーグで得点を量産する若きストライカーとして、セネガルの前線に新たな次元をもたらす期待の大型FW。", "profile_en": "Senegal's main striker boasting pace and clinical finishing. A young forward who regularly scores in the Premier League, he brings a new dimension to Senegal's attack.", "height": 187, "weight": 82},
+"S・ディエン": {"profile": "安定したセービングとコーチングを誇るGK。セネガル代表のGK陣に競争をもたらし、正GKへの信頼性の高いバックアップとして貢献する。", "profile_en": "A GK with reliable shot-stopping and commanding presence. He adds competitive depth to Senegal's goalkeeping options as a dependable backup.", "height": 195, "weight": 91},
+"A・ゴミス": {"profile": "高い技術と落ち着きを誇る控えGK。セネガル代表の経験豊富なバックアップとして代表に帯同し、GK陣の安心感を高める。", "profile_en": "An experienced backup GK with polished technique and composure. His presence adds reassurance to Senegal's goalkeeping depth.", "height": 186, "weight": 84},
+"B・サール": {"profile": "タフな守備と積極的な攻撃参加でサイドを担う右SB。セネガル代表での豊富な経験を活かし、守備的役割だけでなく攻撃でも貢献するダイナミックなDF。", "profile_en": "A right-back who covers the flank with tough defending and proactive runs. He uses his extensive international experience to contribute offensively as well as defensively.", "height": 178, "weight": 75},
+"A・ジャロ": {"profile": "強靭なフィジカルと高いカバーリングでセネガル守備の厚みをもたらすCB。安定したポジショニングと激しいデュエルで相手FWに立ちはだかる。", "profile_en": "A CB who adds physical depth to Senegal's defence with his strength and wide coverage. Reliable positioning and fierce duelling stand firm against opposing forwards.", "height": 189, "weight": 83},
+"G・ゲイェ": {"profile": "長年セネガル中盤を支えたベテランDMF。豊富な経験とインテリジェントな守備でチームの守備的バランスを保つ、代替の効かない中盤の要。", "profile_en": "A veteran DMF who has long underpinned Senegal's midfield. His extensive experience and intelligent defending maintain the team's defensive balance — an irreplaceable midfield anchor.", "height": 174, "weight": 68},
+"N・メンディ": {"profile": "豊富なスタミナと広いカバー範囲でセネガル中盤を支えるDMF。地道な守備貢献でチームを支え、ピッチ上の縁の下の力持ちとして機能する。", "profile_en": "A DMF who supports Senegal's midfield with high stamina and wide coverage. His unsung defensive work underpins the team, functioning as a vital behind-the-scenes contributor.", "height": 174, "weight": 70},
+"クレパン・ジャッタ": {"profile": "鋭い仕掛けと突破力でセネガルのサイドを活性化するウィンガー。スピードとドリブルで相手守備を崩し、得点やアシストで貢献するアタッカー。", "profile_en": "A winger who activates Senegal's flanks with sharp driving and penetration. He breaks down defences with pace and dribbling, contributing with goals and assists.", "height": 175, "weight": 69},
+"H・ジャロ": {"profile": "高さとパワーを武器にセネガルの前線に迫力をもたらすCF。ポストプレーとヘディングシュートでチームに得点力を加える大型ストライカー。", "profile_en": "A powerful CF who brings physical menace to Senegal's front line. His hold-up play and headed finishing add a goal threat and focal point to the team's attack.", "height": 188, "weight": 83},
+"B・ジア": {"profile": "スピードと積極的な仕掛けでセネガルの攻撃を活性化するアタッカー。CFとLWをこなすポリバレント性と高い得点感覚でセネガルの前線に厚みをもたらす。", "profile_en": "An attacker who energises Senegal's attack with pace and directness. His versatility across CF and left wing, combined with a sharp eye for goal, adds depth to Senegal's forward options.", "height": 180, "weight": 76},
+"P・ゲイェ": {"profile": "インテリジェントなポジショニングと技術的なパスワークを誇るCMF。豊富なスタミナとハードワークでセネガル中盤のバランスを保つ堅実なミッドフィールダー。", "profile_en": "A CMF with intelligent positioning and technical passing. His stamina and hard work maintain the balance of Senegal's midfield.", "height": 184, "weight": 76},
+"ガリンデス": {"profile": "確実なセービングと落ち着いた判断力を誇るエクアドル代表の守護神。長年にわたり代表のゴールを守り続けるベテランGK。", "profile_en": "Ecuador's veteran goalkeeper boasting reliable shot-stopping and calm decision-making. He has guarded the national team's goal for many years.", "height": 187, "weight": 76},
+"B・カスティジョ": {"profile": "タフな守備と積極的な攻撃参加でエクアドルの右サイドを担うSB。長所は力強いフィジカルとピッチ上の広いカバー範囲で、プレスの強度でもチームを牽引する。", "profile_en": "A right-back who covers Ecuador's right flank with tough defending and forward runs. His strengths are powerful physicality and wide pitch coverage, and he leads the team with pressing intensity.", "height": 179, "weight": 77},
+"F・トーレス": {"profile": "高さと強靭なフィジカルでエクアドル守備の要を担うCB。空中戦の強さとカバーリング能力で相手FWを封じ込め、守備ラインを統率するセンターバック。", "profile_en": "A CB who anchors Ecuador's defence with height and powerful physicality. His aerial strength and covering ability shut down opposing forwards as he marshals the defensive line.", "height": 190, "weight": 83},
+"インカピエ": {"profile": "卓越したフィジカルとパス能力を兼備するエクアドルの若きCB。ブンデスリーガの強豪で磨いた高い守備意識と攻守の切り替えの速さでエクアドル守備の核を担う。", "profile_en": "Ecuador's talented young CB combining outstanding physicality and passing ability. Defensive awareness and quick transitions honed at a Bundesliga powerhouse make him the cornerstone of Ecuador's defence.", "height": 184, "weight": 80},
+"エストゥピニャン": {"profile": "爆発的な攻撃参加と鋭いクロスでエクアドルの左サイドに推進力をもたらす左SB。プレミアリーグで身につけたスピードと戦術眼で代表左サイドを制圧するダイナミックなDF。", "profile_en": "A left-back who drives Ecuador's left side with explosive forward runs and incisive crossing. The pace and tactical intelligence developed in the Premier League dominate the national team's left flank.", "height": 175, "weight": 72},
+"M・カイセド": {"profile": "圧倒的なボール奪取能力と正確なパスでエクアドル中盤を支配するDMF。欧州トップリーグで世界屈指のアンカーとして認められたエクアドル代表の絶対的エース。", "profile_en": "Ecuador's undisputed ace who dominates the midfield with overwhelming ball-winning and precise passing. Recognised in Europe's top leagues as one of the world's finest holding midfielders.", "height": 180, "weight": 72},
+"シフエンテス": {"profile": "正確なパスとインテリジェントなポジショニングでエクアドル中盤を支えるCMF。視野の広さとボール技術でゲームをコントロールし、チームに安定したビルドアップを提供する。", "profile_en": "A CMF who supports Ecuador's midfield with precise passing and intelligent positioning. His wide vision and technical quality control the game and provide a stable base for Ecuador's build-up.", "height": 178, "weight": 75},
+"G・プラタ": {"profile": "スピードとドリブルでエクアドルの右サイドを切り裂くウィンガー。鋭い仕掛けとシュートの正確さでゴールに迫り、チームの攻撃に推進力をもたらす若きアタッカー。", "profile_en": "A winger who slashes down Ecuador's right side with pace and dribbling. His sharp runs and accurate shooting threaten goal, a young attacker who drives the team's attack forward.", "height": 174, "weight": 65},
+"サルミエント": {"profile": "テクニックと巧みなドリブルでエクアドルの左サイドを担うアタッカー。高い突破力とアシスト力でチームの攻撃に変化をもたらすクリエイティブなサイドプレイヤー。", "profile_en": "An attacker who covers Ecuador's left side with technique and inventive dribbling. His penetrating runs and assist ability inject variety into the team's attack.", "height": 175, "weight": 68},
+"イバーラ": {"profile": "精確なパスセンスと動き出しの鋭さでエクアドル攻撃を活性化するアタッカー。トップ下とウィングをこなすポリバレント性でエクアドルの攻撃に柔軟性をもたらす。", "profile_en": "An attacker who activates Ecuador's attack with precise passing and sharp movement. His versatility across the number 10 and wide roles gives Ecuador's attack tactical flexibility.", "height": 175, "weight": 69},
+"E・バレンシア": {"profile": "高さとパワーを活かしたポストプレーと力強いシュートでエクアドルの前線を牽引するベテランCF。長年代表の象徴として活躍し、前線の起点として欠かせない存在。", "profile_en": "Ecuador's veteran CF who leads the forward line with powerful hold-up play and forceful shooting. Having served as the team's symbol for many years, he remains an indispensable focal point up front.", "height": 186, "weight": 84},
+"アルボレダ": {"profile": "安定したセービングと冷静な判断力を誇る控えGK。エクアドル代表のGK競争に名乗りを上げ、正GKへの信頼性の高いバックアップとして機能する。", "profile_en": "A backup GK with reliable shot-stopping and calm decision-making. He enters the competition for Ecuador's first-choice jersey, functioning as a dependable second option.", "height": 189, "weight": 80},
+"ポロソ": {"profile": "若くして代表に定着した新世代のCB。高いポジショニング能力とパス精度でエクアドル守備に新鮮さをもたらす期待の若手ディフェンダー。", "profile_en": "A new-generation CB who established himself in the national team at a young age. He brings freshness to Ecuador's defence with strong positioning and passing accuracy.", "height": 188, "weight": 80},
+"アレアガ": {"profile": "フィジカルと高い守備強度でエクアドル守備陣に厚みをもたらすDF。CBとLBをこなすポリバレント性で守備ラインに柔軟性を与える。", "profile_en": "A defender who adds physical depth to Ecuador's backline with high defensive intensity. His versatility across CB and LB gives the defensive line tactical flexibility.", "height": 185, "weight": 78},
+"D・レアスコ": {"profile": "スピードと積極的な仕掛けでサイドから相手守備を崩すウィンガー。縦への突破力と高い得点意欲でエクアドルの攻撃に推進力をもたらすアタッカー。", "profile_en": "A winger who breaks through defences from wide with pace and directness. His vertical penetration and eagerness to score bring momentum to Ecuador's attack.", "height": 176, "weight": 70},
+"J・カイセド": {"profile": "高さとフィジカルを活かしたポストプレーでエクアドル前線に存在感を放つCF。強靭な体幹と積極的なシュートで相手守備に脅威を与えるターゲットマン。", "profile_en": "A CF who makes his presence felt up front with aerial hold-up play and strong physicality. His powerful frame and proactive shooting threaten opposing defences as a target-man.", "height": 188, "weight": 84},
+"F・マルティネス": {"profile": "鋭いスプリントとドリブルでエクアドルのサイドを活性化するアタッカー。裏への飛び出しと仕掛けの速さで相手守備を揺さぶるスピードスター。", "profile_en": "A wide attacker who activates Ecuador's flanks with sharp sprints and dribbling. His runs in behind and quick attacking intent unsettle opposing defences.", "height": 172, "weight": 68}
 };
 
 const PARAM_NAMES = [
@@ -2744,6 +2802,149 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"グレゴリッチュ",en_name:"Gregoritsch",long_name:"ミヒャエル・グレゴリッチュ",positions:["CF"],params:[80,80,76,77,75,78,68,68,75,66,60,74,72,74,52,52,68,68,34,34,32,32,36,50,50,80,70,68,75]},
       // Sub CF: Onisiwo (FC26 OVR73, PAC84, SHO70, PAS64, DRI70, DEF38, PHY72)
       {name:"オニシヴォ",en_name:"Onisiwo",long_name:"カレム・オニシヴォ",positions:["CF","左WG"],params:[72,72,84,86,76,68,68,68,76,64,58,66,66,68,48,50,68,66,34,34,32,32,36,50,50,68,66,66,75]}
+    ]
+  },
+
+  canada2026: {
+    name:"カナダ",en_name:"Canada",team_color:"#FF0000",flag:"🇨🇦",
+    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:8,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Borjan (FC26 OVR77, DIV78, HAN76, KIC72, REF79, SPD55, POS77)
+      {name:"ボルヤン",en_name:"Borjan",long_name:"ミラン・ボルヤン",positions:["GK"],params:[50,50,50,50,79,55,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,78,76,50,77,72,75]},
+      // RB: Johnston (FC26 OVR76, PAC80, SHO58, PAS70, DRI72, DEF76, PHY76)
+      {name:"ジョンストン",en_name:"Johnston",long_name:"アリスター・ジョンストン",positions:["右SB"],params:[76,76,80,81,75,72,70,70,75,70,64,48,50,52,40,42,70,52,74,76,74,74,72,50,50,70,70,70,75]},
+      // RCB: K.Miller (FC26 OVR77, PAC78, SHO44, PAS68, DRI66, DEF78, PHY80)
+      {name:"K・ミラー",en_name:"K.Miller",long_name:"カマル・ミラー",positions:["CB"],params:[80,80,78,79,72,80,64,64,72,68,62,36,34,42,28,30,64,34,78,80,78,78,76,50,50,80,74,72,75]},
+      // LCB: Cornelius (FC26 OVR74, PAC76, SHO40, PAS64, DRI62, DEF76, PHY79)
+      {name:"コーネリウス",en_name:"Cornelius",long_name:"デレク・コーネリウス",positions:["CB"],params:[78,78,76,77,68,78,60,60,68,64,58,32,30,38,26,28,60,30,76,78,76,76,74,50,50,78,72,70,75]},
+      // LSB: Adekugbe (FC26 OVR73, PAC82, SHO54, PAS68, DRI72, DEF70, PHY70)
+      {name:"アデクグベ",en_name:"Adekugbe",long_name:"サミュエル・アデクグベ",positions:["左SB"],params:[70,70,82,83,74,66,70,70,74,68,62,46,48,50,40,42,70,54,68,70,68,68,66,50,50,64,68,68,75]},
+      // RDMF: Eustaquio (FC26 OVR80, PAC74, SHO73, PAS82, DRI80, DEF78, PHY76)
+      {name:"ユスタキオ",en_name:"Eustaquio",long_name:"ステファン・ユスタキオ",positions:["CMF","DMF"],params:[76,78,74,75,78,74,78,80,78,82,78,68,70,72,54,58,80,72,76,78,76,76,74,50,50,70,78,78,75]},
+      // LDMF: Osorio (FC26 OVR76, PAC72, SHO68, PAS76, DRI76, DEF72, PHY72)
+      {name:"オソリオ",en_name:"Osorio",long_name:"ジョナサン・オソリオ",positions:["CMF","DMF"],params:[72,74,72,73,73,70,74,74,73,76,70,62,64,66,52,54,74,66,70,72,70,70,68,50,50,66,72,72,75]},
+      // RSM: Buchanan (FC26 OVR78, PAC90, SHO70, PAS72, DRI82, DEF48, PHY68)
+      {name:"ブキャナン",en_name:"Buchanan",long_name:"テイジョン・ブキャナン",positions:["右WG","右SMF"],params:[66,68,90,92,82,62,80,82,82,72,66,66,66,68,54,58,82,72,44,46,44,44,46,50,50,60,72,72,75]},
+      // LSM: A.Davies (FC26 OVR87, PAC97, SHO74, PAS76, DRI86, DEF78, PHY80) ← keyplayer
+      {name:"A・デイビス",en_name:"A.Davies",long_name:"アルフォンソ・デイビス",positions:["左WG","左SB","左SMF"],params:[80,82,97,98,87,78,84,86,87,76,70,70,70,74,58,62,86,78,76,78,76,76,74,50,50,72,82,80,75]},
+      // OMF: Kone (FC26 OVR79, PAC80, SHO72, PAS76, DRI78, DEF72, PHY76)
+      {name:"コネ",en_name:"Kone",long_name:"イスマエル・コネ",positions:["CMF","OMF"],params:[76,78,80,81,76,74,76,78,76,76,72,68,68,70,56,58,78,70,70,72,70,70,68,50,50,70,74,74,75]},
+      // CF: J.David (FC26 OVR86, PAC87, SHO87, PAS77, DRI85, DEF44, PHY72) ← marked
+      {name:"J・デービッド",en_name:"J.David",long_name:"ジョナサン・デービッド",positions:["CF"],params:[72,74,87,88,84,68,83,85,84,77,70,84,82,86,64,66,85,84,40,42,40,40,42,50,50,64,82,82,75]},
+      // Sub GK: Crepeau (FC26 OVR77, DIV78, HAN76, KIC74, REF79, SPD60, POS77)
+      {name:"クレポー",en_name:"Crepeau",long_name:"マキシム・クレポー",positions:["GK"],params:[50,50,50,50,79,60,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,78,76,50,77,74,75]},
+      // Sub GK: St.Clair (FC26 OVR74, DIV75, HAN73, KIC70, REF75, SPD62, POS74)
+      {name:"セントクレア",en_name:"St.Clair",long_name:"タイラー・セントクレア",positions:["GK"],params:[50,50,50,50,75,62,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,75,73,50,74,70,75]},
+      // Sub RB: Laryea (FC26 OVR75, PAC86, SHO58, PAS68, DRI72, DEF72, PHY68)
+      {name:"ラリア",en_name:"Laryea",long_name:"リッチー・ラリア",positions:["右SB"],params:[68,70,86,87,77,64,70,70,77,68,62,48,48,52,40,42,70,52,70,72,70,70,68,50,50,62,68,68,75]},
+      // Sub CB: Mavinga (FC26 OVR74, PAC76, SHO40, PAS62, DRI62, DEF76, PHY78)
+      {name:"マヴィンガ",en_name:"Mavinga",long_name:"クリス・マヴィンガ",positions:["CB"],params:[78,78,76,77,68,76,60,60,68,62,56,32,30,38,26,28,60,30,74,76,74,74,72,50,50,78,72,70,75]},
+      // Sub CB: D.Henry (FC26 OVR74, PAC76, SHO40, PAS64, DRI62, DEF76, PHY79)
+      {name:"D・ヘンリー",en_name:"D.Henry",long_name:"ドニール・ヘンリー",positions:["CB"],params:[78,78,76,77,68,76,60,60,68,64,58,32,30,38,26,28,60,30,76,78,76,76,74,50,50,78,72,70,75]},
+      // Sub CMF: Kaye (FC26 OVR74, PAC76, SHO64, PAS74, DRI74, DEF72, PHY72)
+      {name:"ケイ",en_name:"Kaye",long_name:"マーク・アンソニー・ケイ",positions:["CMF","DMF"],params:[72,74,76,77,73,68,72,72,73,74,68,58,60,62,48,50,72,64,70,72,70,70,68,50,50,66,70,70,75]},
+      // Sub LW: L.Millar (FC26 OVR74, PAC82, SHO68, PAS70, DRI76, DEF42, PHY66)
+      {name:"L・ミラー",en_name:"L.Millar",long_name:"リアム・ミラー",positions:["左WG","右WG"],params:[64,66,82,84,76,62,74,76,76,70,64,64,64,68,52,54,74,68,38,40,38,38,40,50,50,58,68,68,75]},
+      // Sub CF: Larin (FC26 OVR75, PAC77, SHO77, PAS62, DRI72, DEF40, PHY82)
+      {name:"ラリン",en_name:"Larin",long_name:"サイル・ラリン",positions:["CF","左WG"],params:[82,82,77,78,76,80,70,70,76,62,56,74,74,76,48,50,70,72,36,36,34,34,38,50,50,80,70,68,75]},
+      // Sub CF: Akinola (FC26 OVR73, PAC88, SHO72, PAS62, DRI72, DEF36, PHY72)
+      {name:"アキノラ",en_name:"Akinola",long_name:"アヨ・アキノラ",positions:["CF"],params:[72,72,88,90,78,68,70,70,78,62,56,68,68,70,44,48,70,68,32,32,30,30,34,50,50,68,66,66,75]}
+    ]
+  },
+
+  senegal2026: {
+    name:"セネガル",en_name:"Senegal",team_color:"#00853F",flag:"🇸🇳",
+    default_system:"4-2-1-3",default_tactics:TACTICS_PRESS,
+    default_keyplayer:9,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: E.Mendy (FC26 OVR80, DIV81, HAN79, KIC74, REF81, SPD55, POS80)
+      {name:"E・メンディ",en_name:"E.Mendy",long_name:"エドゥアール・メンディ",positions:["GK"],params:[50,50,50,50,81,55,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,81,79,50,80,74,75]},
+      // RB: F.Mendy (FC26 OVR74, PAC82, SHO54, PAS68, DRI72, DEF72, PHY70)
+      {name:"F・メンディ",en_name:"F.Mendy",long_name:"フォルモーズ・メンディ",positions:["右SB"],params:[70,72,82,83,75,68,70,70,75,68,62,46,46,50,38,40,70,52,70,72,70,70,68,50,50,64,68,68,75]},
+      // RCB: Koulibaly (FC26 OVR82, PAC77, SHO52, PAS72, DRI72, DEF84, PHY86) ← captain
+      {name:"クリバリ",en_name:"Koulibaly",long_name:"カリドゥ・クリバリ",positions:["CB"],params:[86,84,77,78,79,88,70,72,79,72,66,44,42,50,36,38,72,40,84,86,84,84,82,50,50,88,80,80,75]},
+      // LCB: PA.Cisse (FC26 OVR77, PAC72, SHO44, PAS66, DRI66, DEF78, PHY82)
+      {name:"PA・シス",en_name:"PA.Cisse",long_name:"パプ・アブー・シス",positions:["CB"],params:[82,82,72,73,70,84,64,64,70,66,60,36,34,42,28,30,64,32,78,80,78,78,76,50,50,84,74,74,75]},
+      // LSB: Niakhate (FC26 OVR76, PAC80, SHO46, PAS68, DRI68, DEF76, PHY76)
+      {name:"ニャカテ",en_name:"Niakhate",long_name:"ムサ・ニャカテ",positions:["左SB","CB"],params:[76,76,80,81,72,74,66,66,72,68,62,38,36,44,32,34,66,38,74,76,74,74,72,50,50,72,72,70,75]},
+      // RDMF: PM.Sarr (FC26 OVR80, PAC76, SHO72, PAS80, DRI80, DEF80, PHY76) ← keyplayer
+      {name:"PM・サール",en_name:"PM.Sarr",long_name:"パプ・マタル・サール",positions:["CMF","DMF"],params:[76,78,76,77,78,74,78,80,78,80,76,68,70,72,54,58,80,72,78,80,78,78,76,50,50,70,78,78,75]},
+      // LDMF: L.Camara (FC26 OVR78, PAC76, SHO66, PAS76, DRI76, DEF76, PHY78)
+      {name:"L・カマラ",en_name:"L.Camara",long_name:"ラミン・カマラ",positions:["DMF","CMF"],params:[78,80,76,77,76,76,74,74,76,76,72,62,64,66,52,54,74,68,74,76,74,74,72,50,50,72,76,74,75]},
+      // OMF: Iliman Ndiaye (FC26 OVR79, PAC80, SHO76, PAS78, DRI82, DEF46, PHY68)
+      {name:"I・ンディアイ",en_name:"I.Ndiaye",long_name:"イリマン・ンディアイ",positions:["OMF","左WG"],params:[66,68,80,82,79,64,80,82,79,78,72,72,72,74,64,68,82,76,42,44,42,42,44,50,50,62,74,74,75]},
+      // RW: I.Sarr (FC26 OVR78, PAC88, SHO72, PAS70, DRI80, DEF46, PHY72)
+      {name:"I・サール",en_name:"I.Sarr",long_name:"イスマイラ・サール",positions:["右WG","左WG"],params:[72,72,88,90,82,68,78,80,82,70,64,68,66,70,56,60,80,72,42,44,42,42,44,50,50,64,72,72,75]},
+      // LW: Mane (FC26 OVR82, PAC87, SHO82, PAS76, DRI86, DEF51, PHY76) ← keyplayer
+      {name:"マネ",en_name:"Mane",long_name:"サディオ・マネ",positions:["左WG","右WG","CF"],params:[76,78,87,88,84,72,84,86,84,76,70,80,78,82,62,66,86,82,48,50,48,48,50,50,50,68,82,80,75]},
+      // CF: N.Jackson (FC26 OVR83, PAC84, SHO82, PAS66, DRI80, DEF44, PHY78) ← marked
+      {name:"N・ジャクソン",en_name:"N.Jackson",long_name:"ニコラス・ジャクソン",positions:["CF","左WG"],params:[78,80,84,85,81,76,78,80,81,66,60,80,78,82,54,58,80,80,40,42,40,40,42,50,50,74,76,76,75]},
+      // Sub GK: Seny Dieng (FC26 OVR76, DIV77, HAN75, KIC70, REF77, SPD58, POS76)
+      {name:"S・ディエン",en_name:"S.Dieng",long_name:"セニー・ディエン",positions:["GK"],params:[50,50,50,50,77,58,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,77,75,50,76,70,75]},
+      // Sub GK: Gomis A (FC26 OVR74, DIV75, HAN73, KIC68, REF75, SPD55, POS74)
+      {name:"A・ゴミス",en_name:"A.Gomis",long_name:"アルフレッド・ゴミス",positions:["GK"],params:[50,50,50,50,75,55,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,75,73,50,74,68,75]},
+      // Sub RB: B.Sarr (FC26 OVR74, PAC78, SHO54, PAS66, DRI68, DEF72, PHY74)
+      {name:"B・サール",en_name:"B.Sarr",long_name:"ブーナ・サール",positions:["右SB"],params:[74,74,78,79,72,70,66,68,72,66,60,46,46,50,38,40,68,50,70,72,70,70,68,50,50,68,68,66,75]},
+      // Sub CB: A.Diallo (FC26 OVR77, PAC78, SHO44, PAS68, DRI68, DEF78, PHY78)
+      {name:"A・ジャロ",en_name:"A.Diallo",long_name:"アブドゥー・ジャロ",positions:["CB","左SB"],params:[78,78,78,79,72,78,66,66,72,68,62,36,34,42,28,30,66,34,78,80,78,78,76,50,50,78,74,72,75]},
+      // Sub DMF: Gana Gueye (FC26 OVR77, PAC67, SHO60, PAS74, DRI73, DEF82, PHY76)
+      {name:"G・ゲイェ",en_name:"G.Gueye",long_name:"イドリッサ・ガナ・ゲイェ",positions:["DMF","CMF"],params:[76,78,67,68,73,74,70,72,73,74,70,54,56,58,46,48,72,60,82,84,82,82,80,50,50,72,76,74,75]},
+      // Sub CMF: N.Mendy (FC26 OVR75, PAC68, SHO58, PAS72, DRI70, DEF76, PHY76)
+      {name:"N・メンディ",en_name:"N.Mendy",long_name:"ナンパリス・メンディ",positions:["DMF","CMF"],params:[76,78,68,70,71,72,68,68,71,72,66,52,54,56,44,46,68,60,76,78,76,76,74,50,50,70,72,70,75]},
+      // Sub RW: Krepin Diatta (FC26 OVR75, PAC84, SHO70, PAS68, DRI76, DEF44, PHY68)
+      {name:"クレパン・ジャッタ",en_name:"K.Diatta",long_name:"クレパン・ジャッタ",positions:["右WG","左WG"],params:[66,68,84,86,78,62,74,76,78,68,62,66,66,68,54,58,74,68,40,42,40,40,42,50,50,60,68,68,75]},
+      // Sub CF: H.Diallo (FC26 OVR77, PAC78, SHO78, PAS62, DRI74, DEF38, PHY80)
+      {name:"H・ジャロ",en_name:"H.Diallo",long_name:"アビブ・ジャロ",positions:["CF"],params:[80,80,78,79,77,78,72,72,77,62,56,76,76,78,52,54,72,76,34,34,32,32,36,50,50,78,70,68,75]},
+      // Sub CF/LW: Boulaye Dia (FC26 OVR78, PAC84, SHO76, PAS68, DRI78, DEF42, PHY72)
+      {name:"B・ジア",en_name:"B.Dia",long_name:"ブライ・ジア",positions:["CF","左WG"],params:[72,74,84,85,79,68,76,78,79,68,62,74,72,76,54,56,76,76,38,40,38,38,40,50,50,66,70,70,75]},
+      // Sub CMF: Pape Gueye (FC26 OVR74, PAC72, SHO62, PAS72, DRI72, DEF74, PHY76)
+      {name:"P・ゲイェ",en_name:"P.Gueye",long_name:"パプ・ゲイェ",positions:["CMF","DMF"],params:[76,78,72,73,71,72,70,70,71,72,66,56,58,60,46,48,70,60,74,76,74,74,72,50,50,70,72,70,75]}
+    ]
+  },
+
+  ecuador2026: {
+    name:"エクアドル",en_name:"Ecuador",team_color:"#FFD100",flag:"🇪🇨",
+    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:5,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Galindez (FC26 OVR75, DIV76, HAN74, KIC70, REF76, SPD55, POS75)
+      {name:"ガリンデス",en_name:"Galindez",long_name:"エルナン・ガリンデス",positions:["GK"],params:[50,50,50,50,76,55,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,75,70,75]},
+      // RB: B.Castillo (FC26 OVR75, PAC80, SHO54, PAS68, DRI70, DEF74, PHY76)
+      {name:"B・カスティジョ",en_name:"B.Castillo",long_name:"バイロン・カスティジョ",positions:["右SB"],params:[76,76,80,81,74,72,68,68,74,68,62,44,46,48,38,40,68,50,72,74,72,72,70,50,50,70,70,70,75]},
+      // RCB: F.Torres (FC26 OVR77, PAC76, SHO44, PAS67, DRI66, DEF78, PHY80)
+      {name:"F・トーレス",en_name:"F.Torres",long_name:"フェリックス・トーレス",positions:["CB"],params:[80,80,76,77,72,80,64,64,72,66,60,36,34,42,28,30,64,34,78,80,78,78,76,50,50,80,74,72,75]},
+      // LCB: Hincapie (FC26 OVR82, PAC82, SHO50, PAS76, DRI74, DEF80, PHY80)
+      {name:"インカピエ",en_name:"Hincapie",long_name:"ピエロ・インカピエ",positions:["CB","左SB"],params:[80,80,82,83,77,80,72,72,77,76,70,42,42,48,36,38,72,42,80,82,80,80,78,50,50,80,78,78,75]},
+      // LSB: Estupinan (FC26 OVR81, PAC85, SHO66, PAS76, DRI78, DEF76, PHY72)
+      {name:"エストゥピニャン",en_name:"Estupinan",long_name:"ペルビス・エストゥピニャン",positions:["左SB","左WG"],params:[72,74,85,86,80,70,76,78,80,76,70,62,62,66,58,64,78,68,74,76,74,74,72,50,50,66,76,76,75]},
+      // RDMF: M.Caicedo (FC26 OVR85, PAC78, SHO68, PAS82, DRI82, DEF86, PHY80) ← keyplayer
+      {name:"M・カイセド",en_name:"M.Caicedo",long_name:"モイセス・カイセド",positions:["DMF","CMF"],params:[80,82,78,79,82,78,80,82,82,82,78,62,64,66,50,54,82,72,86,88,86,84,84,50,50,74,82,82,75]},
+      // LDMF: Cifuentes (FC26 OVR75, PAC72, SHO64, PAS76, DRI74, DEF72, PHY72)
+      {name:"シフエンテス",en_name:"Cifuentes",long_name:"ホセ・シフエンテス",positions:["CMF","DMF"],params:[72,74,72,73,72,70,72,72,72,76,70,60,62,64,50,52,72,64,70,72,70,70,68,50,50,66,72,70,75]},
+      // RSM: G.Plata (FC26 OVR76, PAC86, SHO70, PAS68, DRI78, DEF42, PHY64)
+      {name:"G・プラタ",en_name:"G.Plata",long_name:"ゴンサロ・プラタ",positions:["右WG","右SMF"],params:[62,64,86,88,78,58,76,78,78,68,62,66,66,68,54,58,76,68,38,40,38,38,40,50,50,56,68,68,75]},
+      // LSM: Sarmiento (FC26 OVR75, PAC82, SHO70, PAS72, DRI76, DEF42, PHY64)
+      {name:"サルミエント",en_name:"Sarmiento",long_name:"ジェレミー・サルミエント",positions:["左WG","左SMF"],params:[62,64,82,84,76,58,74,76,76,72,66,66,66,68,52,56,74,68,38,40,38,38,40,50,50,56,68,68,75]},
+      // OMF: R.Ibarra (FC26 OVR73, PAC80, SHO68, PAS70, DRI74, DEF42, PHY64)
+      {name:"イバーラ",en_name:"Ibarra",long_name:"ロマリオ・イバーラ",positions:["OMF","左WG","右WG"],params:[62,64,80,82,73,58,72,74,73,70,64,64,64,66,52,54,72,66,38,40,38,38,40,50,50,56,66,66,75]},
+      // CF: E.Valencia (FC26 OVR76, PAC73, SHO76, PAS62, DRI70, DEF42, PHY82) ← marked
+      {name:"E・バレンシア",en_name:"E.Valencia",long_name:"エネル・バレンシア",positions:["CF"],params:[82,82,73,74,76,80,68,70,76,62,56,74,74,76,52,54,68,74,38,38,36,36,40,50,50,80,68,68,75]},
+      // Sub GK: Arboleda (FC26 OVR73, DIV74, HAN72, KIC68, REF74, SPD54, POS73)
+      {name:"アルボレダ",en_name:"Arboleda",long_name:"モイセス・ラモン",positions:["GK"],params:[50,50,50,50,74,54,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,74,72,50,73,68,75]},
+      // Sub CB: Porozo (FC26 OVR74, PAC74, SHO40, PAS64, DRI62, DEF75, PHY78)
+      {name:"ポロソ",en_name:"Porozo",long_name:"ジャクソン・ポロソ",positions:["CB"],params:[78,78,74,75,68,76,60,60,68,64,58,32,30,38,26,28,60,30,74,76,74,74,72,50,50,76,72,70,75]},
+      // Sub CB/LB: Arreaga (FC26 OVR73, PAC74, SHO42, PAS64, DRI62, DEF74, PHY76)
+      {name:"アレアガ",en_name:"Arreaga",long_name:"ロバート・アレアガ",positions:["CB","左SB"],params:[76,76,74,75,67,74,60,60,67,64,58,34,32,40,28,30,60,32,72,74,72,72,70,50,50,74,70,68,75]},
+      // Sub RW: D.Reasco (FC26 OVR73, PAC84, SHO68, PAS64, DRI74, DEF38, PHY62)
+      {name:"D・レアスコ",en_name:"D.Reasco",long_name:"ジョルカエフ・レアスコ",positions:["右WG","左WG"],params:[60,62,84,86,76,56,72,74,76,64,58,64,64,66,50,54,72,66,34,36,34,34,36,50,50,54,66,66,75]},
+      // Sub CF: J.Caicedo (FC26 OVR73, PAC74, SHO74, PAS58, DRI66, DEF36, PHY80)
+      {name:"J・カイセド",en_name:"J.Caicedo",long_name:"ホルヘ・カイセド",positions:["CF"],params:[80,80,74,75,73,78,64,64,73,58,52,72,70,72,48,50,64,70,32,32,30,30,34,50,50,78,66,64,75]},
+      // Sub RW: F.Martinez (FC26 OVR72, PAC82, SHO66, PAS62, DRI72, DEF38, PHY60)
+      {name:"F・マルティネス",en_name:"F.Martinez",long_name:"フィデル・マルティネス",positions:["右WG","左WG"],params:[58,60,82,84,74,54,70,72,74,62,56,62,62,64,48,52,70,64,34,36,34,34,36,50,50,52,64,64,75]}
     ]
   },
 };
