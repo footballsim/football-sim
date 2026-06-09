@@ -1161,7 +1161,47 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ヤルチン": {"profile": "長身とパワーを武器にトルコのフォワード陣に迫力をもたらすCF。ポストプレーと強引な突破でゴールに迫り、試合の流れを変える切り札として機能する。", "profile_en": "A CF who adds physical menace to Turkey's forward line with his height and power. Threatening goal with hold-up play and determined runs, he functions as a game-changing impact substitute.", "height": 190, "weight": 86},
 "ユルマズ B": {"profile": "豊富なゴール経験と巧みなポジショニングを持つベテランCF。代表での豊富な経験を活かし、若いアタッカーをサポートしながら前線に得点力と安定感をもたらす。", "profile_en": "A veteran CF with a rich goal record and clever positioning. Using his extensive national team experience, he supports younger attackers while adding scoring ability and stability to the forward line.", "height": 182, "weight": 74},
 "イン＝ミン・タシュ": {"profile": "タフな守備と豊富な運動量でトルコの中盤に安定感をもたらすDMF。守備への貢献とセカンドボール回収の強さでチームの守備ブロックを機能させる。", "profile_en": "A DMF who brings stability to Turkey's midfield with tough defending and high energy. His defensive contribution and second-ball recovery make the team's defensive structure work.", "height": 183, "weight": 78},
-"T・ユルドゥズ": {"profile": "高い技術と豊富なスタミナでトルコ中盤を支えるCMF。正確なパス捌きとインテリジェントな動きでゲームのリズムを作り、チームにバランスをもたらすMF。", "profile_en": "A CMF who supports Turkey's midfield with high technique and abundant stamina. His precise distribution and intelligent movement control game rhythm and bring balance to the team.", "height": 179, "weight": 72}
+"T・ユルドゥズ": {"profile": "高い技術と豊富なスタミナでトルコ中盤を支えるCMF。正確なパス捌きとインテリジェントな動きでゲームのリズムを作り、チームにバランスをもたらすMF。", "profile_en": "A CMF who supports Turkey's midfield with high technique and abundant stamina. His precise distribution and intelligent movement control game rhythm and bring balance to the team.", "height": 179, "weight": 72},
+"V・ミリンコヴィッチ": {"profile": "長身と反射神経でセルビアのゴールを守るGK。守備的な安定感とコーチングでゴールラインに立ちはだかる、セルビア代表の頼れる守護神。", "profile_en": "Serbia's dependable goalkeeper who guards the goal with his imposing frame and sharp reflexes. His defensive reliability and vocal command make him a formidable presence on the goalline.", "height": 200, "weight": 93},
+"ネデリコヴィッチ": {"profile": "スピードと積極的なプレーでセルビアの右サイドを担うSB。豊富なスタミナとタフな守備で代表の右サイドを機能させるダイナミックなDF。", "profile_en": "A right-back who covers Serbia's right flank with pace and proactive play. His stamina and tough defending make the national team's right side function effectively.", "height": 181, "weight": 74},
+"ミレンコヴィッチ": {"profile": "高い制空権とフィジカルでセルビア守備を統率するCB。空中戦の圧倒的な強さと鋭い読みでセルビアの守備ラインを安定させるリーダー。", "profile_en": "A CB who commands Serbia's defence with aerial dominance and physicality. His overwhelming strength in the air and sharp reading stabilise Serbia's defensive line.", "height": 196, "weight": 90},
+"S・パヴロヴィッチ": {"profile": "爆発的なスピードと強靭なフィジカルを兼備するセルビアの若きCB。高い守備意識と激しいデュエルでセルビア守備の要として頭角を現した期待の大型DF。", "profile_en": "A young Serbian CB combining explosive pace and powerful physicality. His strong defensive awareness and ferocious duelling have established him as the cornerstone of Serbia's defence.", "height": 192, "weight": 87},
+"エラコヴィッチ": {"profile": "高い守備強度と機動力でセルビアのDFライン左サイドを担うDF。強靭なフィジカルとカバーリングの広さで代表守備に安定感をもたらす。", "profile_en": "A defender who covers the left side of Serbia's defensive line with high defensive intensity and mobility. His physicality and wide coverage bring stability to the national team's defence.", "height": 190, "weight": 83},
+"S・ミリンコヴィッチ": {"profile": "圧倒的なフィジカルと万能な技術で中盤を支配するセルビア代表のエース。高いシュート精度とパスセンス、守備貢献を兼備し、セルビア代表の戦術の中心を担うスーパースター。", "profile_en": "Serbia's ace who dominates the midfield with overwhelming physicality and all-round technical quality. Combining precise shooting, passing instinct and defensive contribution, he is the tactical centrepiece of the national team.", "height": 192, "weight": 88},
+"ルキッチ": {"profile": "インテリジェントなポジショニングと正確なパスワークでセルビア中盤を支えるCMF。豊富な運動量と守備貢献でチームのバランスを維持するハードワーカー。", "profile_en": "A CMF who supports Serbia's midfield with intelligent positioning and precise passing. His high energy and defensive work maintain the team's balance.", "height": 183, "weight": 76},
+"ジヴコヴィッチ": {"profile": "スピードと鋭いドリブルでセルビアの右サイドを活性化するウィンガー。積極的な仕掛けとクロスで相手守備を脅かし、試合の流れを変えるポテンシャルを持つ。", "profile_en": "A right-side winger who activates Serbia's attack with pace and sharp dribbling. His direct running and crossing threaten opposing defences with the potential to change the game.", "height": 183, "weight": 74},
+"コスティッチ": {"profile": "爆発的な加速力と正確なクロスでセルビアの左サイドを席巻するウィンガー。左足のクロス精度とスピードは世界屈指の水準で、セルビア代表の攻撃に不可欠な存在。", "profile_en": "A left-side winger who sweeps Serbia's attack with explosive pace and precise crossing. His left-footed delivery and pace are of the highest world standard, making him indispensable to Serbia's attack.", "height": 184, "weight": 81},
+"タディッチ": {"profile": "テクニックと創造性でセルビア攻撃を操るOMF。左足の精度と高いビジョンでゲームを動かし、長年にわたりセルビア代表を牽引してきたキャプテン。", "profile_en": "An OMF who orchestrates Serbia's attack with technique and creativity. His left-footed precision and wide vision drive the game, a long-serving captain who has led Serbia for many years.", "height": 181, "weight": 77},
+"ヴラホヴィッチ": {"profile": "圧倒的な得点力と高いフィジカルでセルビアの前線を牽引するCF。ゴール前での精度の高いシュートとフィジカルの強さでセルビア代表に欠かせない攻撃の中心。", "profile_en": "Serbia's CF who leads the forward line with overwhelming goalscoring ability and physicality. His precise shooting in front of goal and physical dominance make him the indispensable focal point of Serbia's attack.", "height": 190, "weight": 88},
+"R・ラヨコヴィッチ": {"profile": "反射神経と1対1の強さで評価されるGK。代表GK陣への競争力ある存在として、セルビアのGK陣に厚みをもたらす実力派守護神。", "profile_en": "A GK valued for sharp reflexes and strong one-on-one stopping. A competitive presence in Serbia's goalkeeping group, adding depth to the national team's options.", "height": 194, "weight": 83},
+"D・ペトロヴィッチ": {"profile": "プレミアリーグで頭角を現した若手GK。高い反射神経と冷静なハンドリングで評価を高め、セルビア代表のGK陣に将来の核として期待される。", "profile_en": "A young GK who has distinguished himself in the Premier League. Highly rated for sharp reflexes and calm handling, he is expected to become the future cornerstone of Serbia's goalkeeping.", "height": 194, "weight": 88},
+"S・バビッチ": {"profile": "高いポジショニングと安定した守備でセルビアの守備に厚みをもたらすDF。複数ポジションをこなすポリバレント性でチームに柔軟性を与える。", "profile_en": "A defender who adds depth to Serbia's defence with sound positioning and reliable play. His versatility across multiple positions gives the team tactical flexibility.", "height": 187, "weight": 83},
+"グデリ": {"profile": "広いカバー範囲と高い球際の強さでセルビア中盤の守備バランスを保つDMF。勤勉な守備貢献とインテリジェントなポジショニングでチームを支えるベテランMF。", "profile_en": "A veteran DMF who maintains Serbia's midfield defensive balance with wide coverage and strong ball-winning. Diligent defensive work and intelligent positioning underpin the team.", "height": 190, "weight": 82},
+"S・イリッチ": {"profile": "正確なパスと高いボール奪取能力を兼備するセルビアの若手CMF。高い潜在能力とハードワークでセルビア中盤に新風をもたらす期待の新世代MF。", "profile_en": "A young Serbian CMF combining precise passing and strong ball-winning. His high potential and hard work bring fresh energy to Serbia's midfield as a next-generation talent.", "height": 182, "weight": 76},
+"ラドニッチ": {"profile": "スピードと豊富な運動量でセルビアのサイドを活性化するウィンガー。積極的な仕掛けと高い突破力で相手守備を脅かすダイナミックなアタッカー。", "profile_en": "A winger who activates Serbia's flanks with pace and abundant energy. His direct running and penetrating ability threaten opposing defences dynamically.", "height": 182, "weight": 75},
+"L・ヨヴィッチ": {"profile": "テクニックと嗅覚の鋭さで前線に危険をもたらすCF。狭いスペースでの創造性とシュートの多様性でセルビアの前線に得点オプションを加える。", "profile_en": "A CF who creates danger up front with technique and sharp instinct. His creativity in tight spaces and varied shooting add a scoring option to Serbia's forward line.", "height": 181, "weight": 80},
+"A・ミトロヴィッチ": {"profile": "比類ない得点力と圧倒的なフィジカルでセルビアの前線に君臨するストライカー。ヘディングシュートとポストプレーの強さは世界屈指で、セルビア代表最多得点記録を持つスーパースター。", "profile_en": "A striker who reigns over Serbia's forward line with unmatched goal-scoring and imposing physique. His aerial finishing and hold-up play rank among the world's best, and he is a superstar holding the all-time Serbia scoring record.", "height": 191, "weight": 88},
+"スコルプスキ": {"profile": "安定したセービングとフットワークでポーランドのゴールを守るGK。ボローニャで評価を高め、代表の正GKとして確かな地位を築いた守護神。", "profile_en": "Poland's goalkeeper who guards the goal with reliable shot-stopping and good footwork. Having gained recognition at Bologna, he has established a firm position as the national team's first choice.", "height": 194, "weight": 87},
+"キャッシュ": {"profile": "精力的なオーバーラップと安定した守備でポーランドの右サイドを担うSB。イングランドのトップリーグで培ったフィジカルと技術で代表の右サイドを安定させる。", "profile_en": "A right-back who covers Poland's flank with energetic overlaps and solid defending. Physicality and technique refined in England's top flight stabilise the national team's right side.", "height": 181, "weight": 76},
+"ベドナレク": {"profile": "安定したポジショニングと読みの鋭さでポーランド守備の要を担うCB。プレミアリーグで長年磨いた高い守備能力でチームに頼もしい選択肢を提供するベテランDF。", "profile_en": "A veteran CB who is the mainstay of Poland's defence with reliable positioning and sharp reading. Defensive quality honed in the Premier League for many years makes him a dependable option.", "height": 188, "weight": 85},
+"J・キヴィオル": {"profile": "技術と高いビルドアップ能力でポーランド守備ラインを支えるCB。左利きを活かしたパスと攻撃参加でチームの後方からゲームを組み立てる若手DF。", "profile_en": "A young CB who supports Poland's defensive line with technical quality and strong build-up ability. His left-footed passing and forward involvement help the team build from the back.", "height": 186, "weight": 78},
+"ザレフスキ": {"profile": "スピードと正確なクロスでポーランドの左サイドを活性化する左SB。攻撃への積極的な参加とサイドでの巧みなプレーでポーランドの左サイドに推進力をもたらす。", "profile_en": "A left-back who activates Poland's left side with pace and precise crossing. His proactive offensive involvement and clever play on the flank drive Poland's left side forward.", "height": 176, "weight": 68},
+"J・ゴラルスキ": {"profile": "強靭なフィジカルと広いカバー範囲でポーランド中盤の守備バランスを保つDMF。セカンドボールへの強さと高い守備意識でチームの守備的バランスを整える。", "profile_en": "A DMF who maintains Poland's midfield defensive balance with physical strength and wide coverage. His second-ball strength and high defensive awareness keep the team's defensive structure sound.", "height": 186, "weight": 83},
+"K・ビエリク": {"profile": "正確なパスと高い守備意識でポーランド中盤を支えるCMF。ゲームのリズムを作るパスセンスと積極的なプレスバックでチームに欠かせないMF。", "profile_en": "A CMF who supports Poland's midfield with precise passing and strong defensive awareness. His passing instinct to set game rhythm and proactive pressing make him indispensable.", "height": 186, "weight": 75},
+"フランコフスキ": {"profile": "爆発的な加速力と積極的な仕掛けでポーランドの右サイドを活性化するウィンガー。高い突破力とクロス精度で相手守備を脅かし、チームの攻撃に幅をもたらす。", "profile_en": "A right-side winger who activates Poland's attack with explosive pace and direct running. His penetrating ability and crossing accuracy threaten defences and add width to the team's attack.", "height": 170, "weight": 62},
+"S・シマンスキ": {"profile": "テクニックと豊富なスタミナを兼備するポーランド代表のダイナミックなCMF。高い守備貢献と攻撃センスでゲームの両局面に影響を与えるオールラウンドなMF。", "profile_en": "A dynamic Polish CMF combining technique and high stamina. He influences both phases of the game with strong defensive contribution and attacking instinct.", "height": 183, "weight": 77},
+"ジエリンスキ": {"profile": "圧倒的な技術と閃きでポーランド中盤に魔法をかけるOMF。セリエAのトップクラブで世界屈指のプレイメイカーとして名を轟かせ、ポーランド代表の攻撃の核を担う天才的MF。", "profile_en": "A genius OMF who casts his spell on Poland's midfield with overwhelming technique and creativity. Having made his name as one of the world's finest playmakers at a top Serie A club, he is the creative hub of Poland's attack.", "height": 181, "weight": 75},
+"レバンドフスキ": {"profile": "世界最高のストライカーとして名を轟かせるポーランドが誇る絶対的エース。精度の高いシュートと卓越したポジショニングで得点を量産し、ポーランド代表の全攻撃が集約される不朽のレジェンド。", "profile_en": "The undisputed ace of Poland and one of the world's greatest strikers. He produces goals in quantity with his precise shooting and exceptional positioning — Poland's entire attack revolves around this timeless legend.", "height": 184, "weight": 80},
+"グラバラ": {"profile": "コペンハーゲンで急成長を遂げた若手GK。反射神経と安定したハンドリングを誇り、ポーランド代表のGK陣に将来性豊かなバックアップを提供する。", "profile_en": "A young GK who developed rapidly at Copenhagen. Boasting sharp reflexes and reliable handling, he provides Poland's goalkeeping options with a highly promising backup.", "height": 197, "weight": 90},
+"クシャチャク": {"profile": "高い反射神経と落ち着きを誇る控えGK。ポーランド代表のGK陣に安定したバックアップとして貢献し、ゴールキーパー陣の競争を高める。", "profile_en": "A backup GK with sharp reflexes and composure. He contributes a stable backup option to Poland's goalkeeping group, raising the competition.", "height": 192, "weight": 85},
+"ベレシンスキ": {"profile": "守備の安定性と攻撃参加のバランスに優れたSB。左右のSBをこなすポリバレント性でポーランドのサイドに柔軟性をもたらす。", "profile_en": "A full-back who excels in balancing defensive reliability with forward runs. His versatility across both right and left back gives Poland's defence flexibility.", "height": 178, "weight": 74},
+"ダヴィドヴィッチ": {"profile": "正確なポジショニングとカバーリングでポーランド守備の安定性を高めるCB。シンプルで確実な守備でチームに頼もしい選択肢を提供する。", "profile_en": "A CB who enhances Poland's defensive stability with precise positioning and covering. His simple, reliable defending provides the team with a dependable option.", "height": 191, "weight": 83},
+"プハチ": {"profile": "スピードと積極的な攻撃参加でポーランドの左サイドを担う左SB。サイドを縦に駆け上がる推進力でポーランドの攻撃に変化をもたらす。", "profile_en": "A left-back who covers Poland's left flank with pace and proactive forward runs. His driving runs up the flank inject variety into Poland's attack.", "height": 185, "weight": 80},
+"クリホヴィアク": {"profile": "長年ポーランド中盤を支えてきたベテランDMF。豊富な国際経験と高い守備意識でチームのバランスを整え、若い世代をサポートする経験豊富なリーダー。", "profile_en": "A veteran DMF who has long underpinned Poland's midfield. His wealth of international experience and strong defensive awareness balance the team and support the next generation.", "height": 187, "weight": 81},
+"リネッティ": {"profile": "豊富なスタミナと献身的なプレーでポーランド中盤を支えるCMF。攻守両面へのハードワークとインテリジェントなポジショニングでチームのバランスを維持する。", "profile_en": "A CMF who supports Poland's midfield with high stamina and dedicated play. His hard work at both ends and intelligent positioning maintain the team's balance.", "height": 181, "weight": 77},
+"J・カミンスキ": {"profile": "スピードと積極的な仕掛けでポーランドの左サイドを活性化する若手ウィンガー。高い突破力と得点意欲でポーランドの攻撃に迫力をもたらすダイナミックなアタッカー。", "profile_en": "A young winger who energises Poland's left side with pace and direct attacking play. His penetrating runs and desire to score bring dynamism to Poland's attack.", "height": 183, "weight": 74},
+"シフデルスキ": {"profile": "ヨーロッパで磨いた得点力とスピードを武器とするCF。裏への抜け出しと的確なフィニッシュでポーランドの前線に活力と得点オプションを加える。", "profile_en": "A CF armed with the goalscoring ability and pace developed in Europe. His runs in behind and accurate finishing add energy and a scoring option to Poland's forward line.", "height": 185, "weight": 77},
+"ミリク": {"profile": "高い決定力と多彩なシュートパターンでポーランド前線に迫力をもたらすCF。ヨーロッパのトップリーグで長年活躍するベテランストライカー。", "profile_en": "A CF who brings menace to Poland's forward line with high finishing quality and varied shooting. A veteran striker who has long been active in Europe's top leagues.", "height": 188, "weight": 82}
 };
 
 const PARAM_NAMES = [
@@ -3080,6 +3120,104 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ヤルチン",en_name:"Yalcin",long_name:"ドゥクアン・ヤルチン",positions:["CF"],params:[80,80,72,73,75,78,68,68,75,62,56,74,72,76,52,54,68,72,34,34,32,32,36,50,50,80,68,66,75]},
       // Sub CF/RW: B.Yilmaz veteran (FC26 OVR74, PAC72, SHO74, PAS64, DRI70, DEF36, PHY72)
       {name:"ユルマズ B",en_name:"Yilmaz_B",long_name:"ブラク・イルマズ",positions:["CF","右WG"],params:[72,72,72,73,72,68,68,68,72,64,58,72,70,74,52,54,68,70,32,32,30,30,34,50,50,68,64,62,75]}
+    ]
+  },
+
+  serbia2026: {
+    name:"セルビア",en_name:"Serbia",team_color:"#C6363C",flag:"🇷🇸",
+    default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
+    default_keyplayer:5,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: V.Milinković-Savić (FC26 OVR78, DIV79, HAN77, KIC72, REF79, SPD60, POS78)
+      {name:"V・ミリンコヴィッチ",en_name:"V.Milinkovic",long_name:"ヴァーニャ・ミリンコヴィッチ＝サヴィッチ",positions:["GK"],params:[50,50,50,50,79,60,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,79,77,50,78,72,75]},
+      // RB: Nedeljković (FC26 OVR75, PAC78, SHO52, PAS68, DRI70, DEF74, PHY72)
+      {name:"ネデリコヴィッチ",en_name:"Nedeljkovic",long_name:"ニコラ・ネデリコヴィッチ",positions:["右SB"],params:[72,72,78,79,72,70,68,68,72,68,62,44,44,48,36,38,68,46,72,74,72,72,70,50,50,68,68,68,75]},
+      // RCB: N.Milenković (FC26 OVR80, PAC80, SHO46, PAS68, DRI66, DEF82, PHY84)
+      {name:"ミレンコヴィッチ",en_name:"Milenkovic",long_name:"ニコラ・ミレンコヴィッチ",positions:["CB"],params:[84,82,80,81,76,84,64,64,76,68,62,38,36,44,30,32,64,36,82,84,82,82,80,50,50,84,78,76,75]},
+      // LCB: S.Pavlović (FC26 OVR82, PAC84, SHO46, PAS68, DRI68, DEF83, PHY84)
+      {name:"S・パヴロヴィッチ",en_name:"S.Pavlovic",long_name:"ストラヒニャ・パヴロヴィッチ",positions:["CB"],params:[84,82,84,85,77,84,66,66,77,68,62,38,36,44,30,32,66,36,83,85,83,83,81,50,50,84,78,78,75]},
+      // LSB: S.Eraković (FC26 OVR76, PAC78, SHO44, PAS64, DRI66, DEF76, PHY80)
+      {name:"エラコヴィッチ",en_name:"Erakovic",long_name:"ストラヒニャ・エラコヴィッチ",positions:["左SB","CB"],params:[80,80,78,79,73,78,64,64,73,64,58,36,34,42,28,30,64,32,76,78,76,76,74,50,50,78,72,70,75]},
+      // RDMF: S.Milinković-Savić (FC26 OVR86, PAC78, SHO80, PAS82, DRI82, DEF78, PHY86) ← keyplayer
+      {name:"S・ミリンコヴィッチ",en_name:"S.Milinkovic",long_name:"セルジェイ・ミリンコヴィッチ＝サヴィッチ",positions:["CMF","DMF"],params:[86,86,78,79,84,84,80,82,84,82,78,78,78,80,62,66,82,80,76,78,76,76,76,50,50,82,84,84,75]},
+      // LDMF: S.Lukić (FC26 OVR78, PAC74, SHO66, PAS76, DRI76, DEF76, PHY78)
+      {name:"ルキッチ",en_name:"Lukic",long_name:"サーシャ・ルキッチ",positions:["CMF","DMF"],params:[78,80,74,75,75,76,74,74,75,76,70,60,62,64,50,52,74,64,74,76,74,74,72,50,50,72,74,74,75]},
+      // RSM: A.Živković (FC26 OVR74, PAC84, SHO68, PAS68, DRI76, DEF48, PHY68)
+      {name:"ジヴコヴィッチ",en_name:"Zivkovic",long_name:"アンドリヤ・ジヴコヴィッチ",positions:["右WG","右SMF"],params:[66,68,84,86,76,62,74,76,76,68,62,64,64,68,52,56,76,68,44,46,44,44,46,50,50,60,66,66,75]},
+      // LSM: F.Kostić (FC26 OVR80, PAC84, SHO72, PAS76, DRI80, DEF60, PHY76)
+      {name:"コスティッチ",en_name:"Kostic",long_name:"フィリップ・コスティッチ",positions:["左WG","左SMF"],params:[76,78,84,85,80,72,78,80,80,76,70,68,68,70,60,64,80,72,56,58,56,56,58,50,50,68,76,76,75]},
+      // OMF: D.Tadić (FC26 OVR80, PAC76, SHO78, PAS84, DRI84, DEF50, PHY68)
+      {name:"タディッチ",en_name:"Tadic",long_name:"ドゥシャン・タディッチ",positions:["OMF","左WG"],params:[66,68,76,77,82,62,82,84,82,84,80,74,74,76,70,74,84,80,46,48,46,46,48,50,50,60,78,78,75]},
+      // CF: D.Vlahović (FC26 OVR87, PAC78, SHO89, PAS66, DRI80, DEF40, PHY84) ← marked
+      {name:"ヴラホヴィッチ",en_name:"Vlahovic",long_name:"ドゥシャン・ヴラホヴィッチ",positions:["CF"],params:[84,84,78,79,84,84,78,80,84,66,60,86,84,90,62,66,80,82,36,38,36,36,38,50,50,86,78,78,75]},
+      // Sub GK: Rajković (FC26 OVR76, DIV77, HAN75, KIC70, REF77, SPD58, POS76)
+      {name:"R・ラヨコヴィッチ",en_name:"Rajkovic",long_name:"プレドラグ・ラヨコヴィッチ",positions:["GK"],params:[50,50,50,50,77,58,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,77,75,50,76,70,75]},
+      // Sub GK: Đ.Petrović (FC26 OVR77, DIV78, HAN76, KIC72, REF78, SPD60, POS77)
+      {name:"D・ペトロヴィッチ",en_name:"D.Petrovic",long_name:"ジョルジェ・ペトロヴィッチ",positions:["GK"],params:[50,50,50,50,78,60,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,78,76,50,77,72,75]},
+      // Sub CB/RB: S.Babić (FC26 OVR75, PAC80, SHO46, PAS64, DRI64, DEF76, PHY78)
+      {name:"S・バビッチ",en_name:"S.Babic",long_name:"スルジャン・バビッチ",positions:["CB","右SB"],params:[78,78,80,81,72,76,62,62,72,64,58,38,36,44,28,30,62,32,76,78,76,76,74,50,50,76,72,70,75]},
+      // Sub DMF: N.Gudelj (FC26 OVR76, PAC70, SHO60, PAS76, DRI72, DEF80, PHY80)
+      {name:"グデリ",en_name:"Gudelj",long_name:"ネマニャ・グデリ",positions:["DMF","CMF"],params:[80,80,70,71,73,78,70,70,73,76,70,54,56,58,46,50,70,60,78,80,78,78,76,50,50,76,72,70,75]},
+      // Sub CMF: S.Ilić (FC26 OVR77, PAC76, SHO68, PAS78, DRI76, DEF68, PHY74)
+      {name:"S・イリッチ",en_name:"S.Ilic",long_name:"サンドロ・イリッチ",positions:["CMF","DMF"],params:[74,76,76,77,75,70,74,74,75,78,72,62,64,66,54,58,74,66,66,68,66,66,64,50,50,68,72,72,75]},
+      // Sub LW: Radonjić (FC26 OVR73, PAC88, SHO66, PAS62, DRI72, DEF42, PHY66)
+      {name:"ラドニッチ",en_name:"Radonjic",long_name:"ネマニャ・ラドニッチ",positions:["左WG","右WG"],params:[64,66,88,90,74,60,70,72,74,62,56,62,60,64,48,52,70,64,38,40,38,38,40,50,50,58,64,64,75]},
+      // Sub CF: L.Jović (FC26 OVR78, PAC78, SHO80, PAS68, DRI78, DEF38, PHY74)
+      {name:"L・ヨヴィッチ",en_name:"L.Jovic",long_name:"ルカ・ヨヴィッチ",positions:["CF"],params:[74,74,78,79,78,70,76,78,78,68,62,78,76,80,54,58,76,74,34,36,34,34,36,50,50,70,70,70,75]},
+      // Sub CF: A.Mitrović (FC26 OVR84, PAC74, SHO87, PAS62, DRI76, DEF40, PHY88)
+      {name:"A・ミトロヴィッチ",en_name:"A.Mitrovic",long_name:"アレクサンダル・ミトロヴィッチ",positions:["CF"],params:[88,86,74,75,83,88,74,76,83,62,56,84,82,88,54,58,74,84,36,38,36,36,38,50,50,90,74,72,75]}
+    ]
+  },
+
+  poland2026: {
+    name:"ポーランド",en_name:"Poland",team_color:"#DC143C",flag:"🇵🇱",
+    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:9,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Skorupski (FC26 OVR77, DIV78, HAN76, KIC72, REF78, SPD58, POS77)
+      {name:"スコルプスキ",en_name:"Skorupski",long_name:"ルカシュ・スコルプスキ",positions:["GK"],params:[50,50,50,50,78,58,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,78,76,50,77,72,75]},
+      // RB: M.Cash (FC26 OVR78, PAC82, SHO58, PAS72, DRI74, DEF78, PHY76)
+      {name:"キャッシュ",en_name:"Cash",long_name:"マテウシュ・キャッシュ",positions:["右SB"],params:[76,76,82,83,76,72,72,74,76,72,66,50,52,54,44,46,72,54,76,78,76,76,74,50,50,70,72,72,75]},
+      // RCB: J.Bednarek (FC26 OVR78, PAC76, SHO46, PAS68, DRI66, DEF80, PHY82)
+      {name:"ベドナレク",en_name:"Bednarek",long_name:"ヤン・ベドナレク",positions:["CB"],params:[82,80,76,77,74,82,64,64,74,68,62,38,36,44,30,32,64,34,80,82,80,80,78,50,50,82,76,74,75]},
+      // LCB: J.Kiwior (FC26 OVR78, PAC78, SHO46, PAS70, DRI68, DEF79, PHY78)
+      {name:"J・キヴィオル",en_name:"J.Kiwior",long_name:"ヤクブ・キヴィオル",positions:["CB","左SB"],params:[78,78,78,79,74,78,66,66,74,70,64,38,36,44,30,32,66,34,79,81,79,79,77,50,50,78,74,74,75]},
+      // LSB: N.Zalewski (FC26 OVR77, PAC84, SHO62, PAS76, DRI78, DEF68, PHY68)
+      {name:"ザレフスキ",en_name:"Zalewski",long_name:"ニコラ・ザレフスキ",positions:["左SB","左WG"],params:[68,68,84,85,76,64,76,78,76,76,70,56,58,60,50,56,78,64,66,68,66,66,64,50,50,62,72,72,75]},
+      // RDMF: J.Góralski (FC26 OVR75, PAC74, SHO58, PAS72, DRI70, DEF78, PHY78)
+      {name:"J・ゴラルスキ",en_name:"J.Goralski",long_name:"ヤクブ・ゴラルスキ",positions:["DMF","CMF"],params:[78,78,74,75,72,76,68,68,72,72,66,50,52,54,42,44,68,56,76,78,76,76,74,50,50,74,70,70,75]},
+      // LDMF: K.Bielik (FC26 OVR76, PAC72, SHO60, PAS76, DRI74, DEF78, PHY74)
+      {name:"K・ビエリク",en_name:"K.Bielik",long_name:"クリストフ・ビエリク",positions:["DMF","CMF"],params:[74,76,72,73,73,72,72,72,73,76,70,54,56,58,46,48,72,60,76,78,76,76,74,50,50,70,72,72,75]},
+      // RSM: P.Frankowski (FC26 OVR76, PAC88, SHO68, PAS72, DRI76, DEF58, PHY66)
+      {name:"フランコフスキ",en_name:"Frankowski",long_name:"プシェミスワフ・フランコフスキ",positions:["右WG","右SMF"],params:[64,66,88,90,78,60,74,76,78,72,66,64,64,66,52,56,76,66,54,56,54,54,56,50,50,58,70,70,75]},
+      // LSM: S.Szymański (FC26 OVR79, PAC78, SHO74, PAS80, DRI80, DEF64, PHY72)
+      {name:"S・シマンスキ",en_name:"S.Szymanski",long_name:"セバスティアン・シマンスキ",positions:["CMF","OMF","左SMF"],params:[72,74,78,79,78,68,78,80,78,80,74,70,70,72,62,66,80,72,62,64,62,62,60,50,50,66,74,74,75]},
+      // OMF: P.Zieliński (FC26 OVR86, PAC78, SHO82, PAS88, DRI88, DEF60, PHY74) ← keyplayer
+      {name:"ジエリンスキ",en_name:"Zielinski",long_name:"ピョートル・ジエリンスキ",positions:["OMF","CMF"],params:[74,76,78,79,86,70,86,88,86,88,84,80,80,84,74,78,88,84,56,58,56,56,58,50,50,68,86,86,75]},
+      // CF: R.Lewandowski (FC26 OVR88, PAC78, SHO91, PAS79, DRI86, DEF44, PHY82) ← marked
+      {name:"レバンドフスキ",en_name:"Lewandowski",long_name:"ロベルト・レバンドフスキ",positions:["CF"],params:[82,82,78,79,86,80,84,86,86,79,72,88,86,92,72,74,86,88,40,42,40,40,42,50,50,80,88,90,75]},
+      // Sub GK: K.Grabara (FC26 OVR77, DIV78, HAN76, KIC72, REF78, SPD60, POS77)
+      {name:"グラバラ",en_name:"Grabara",long_name:"カミル・グラバラ",positions:["GK"],params:[50,50,50,50,78,60,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,78,76,50,77,72,75]},
+      // Sub GK: M.Bułka (FC26 OVR75, DIV76, HAN74, KIC70, REF76, SPD58, POS75)
+      {name:"クシャチャク",en_name:"Bulka",long_name:"マルチン・ブウカ",positions:["GK"],params:[50,50,50,50,76,58,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,75,70,75]},
+      // Sub RB: B.Bereszyński (FC26 OVR75, PAC78, SHO52, PAS68, DRI68, DEF76, PHY74)
+      {name:"ベレシンスキ",en_name:"Bereszynski",long_name:"バルトシュ・ベレシンスキ",positions:["右SB","左SB"],params:[74,74,78,79,73,70,66,66,73,68,62,44,44,48,36,38,66,46,74,76,74,74,72,50,50,68,70,68,75]},
+      // Sub CB: P.Dawidowicz (FC26 OVR75, PAC74, SHO44, PAS64, DRI62, DEF78, PHY80)
+      {name:"ダヴィドヴィッチ",en_name:"Dawidowicz",long_name:"パヴェル・ダヴィドヴィッチ",positions:["CB"],params:[80,80,74,75,70,78,60,60,70,64,58,36,34,42,28,30,60,30,78,80,78,78,76,50,50,78,72,70,75]},
+      // Sub LSB: T.Puchacz (FC26 OVR73, PAC80, SHO52, PAS66, DRI66, DEF72, PHY72)
+      {name:"プハチ",en_name:"Puchacz",long_name:"ティモテウシュ・プハチ",positions:["左SB","左WG"],params:[72,72,80,81,70,68,64,64,70,66,60,44,44,48,36,38,64,44,70,72,70,70,68,50,50,66,66,66,75]},
+      // Sub DMF: G.Krychowiak (FC26 OVR77, PAC72, SHO64, PAS76, DRI72, DEF82, PHY80)
+      {name:"クリホヴィアク",en_name:"Krychowiak",long_name:"グジェゴジュ・クリホヴィアク",positions:["DMF","CMF"],params:[80,80,72,73,74,78,70,70,74,76,70,58,60,62,48,50,70,60,80,82,80,80,78,50,50,76,74,72,75]},
+      // Sub CMF: K.Linetty (FC26 OVR75, PAC74, SHO64, PAS74, DRI72, DEF68, PHY72)
+      {name:"リネッティ",en_name:"Linetty",long_name:"カロル・リネッティ",positions:["CMF","DMF"],params:[72,72,74,75,72,68,70,70,72,74,68,58,60,62,48,50,70,60,66,68,66,66,64,50,50,66,68,68,75]},
+      // Sub LW: J.Kamiński (FC26 OVR74, PAC86, SHO66, PAS68, DRI74, DEF44, PHY66)
+      {name:"J・カミンスキ",en_name:"J.Kaminski",long_name:"ヤクブ・カミンスキ",positions:["左WG","右WG"],params:[64,66,86,88,76,60,72,74,76,68,62,62,62,64,48,52,72,64,40,42,40,40,42,50,50,58,64,64,75]},
+      // Sub CF: K.Świderski (FC26 OVR76, PAC82, SHO76, PAS64, DRI72, DEF38, PHY78)
+      {name:"シフデルスキ",en_name:"Swiderski",long_name:"カロル・シフデルスキ",positions:["CF","右WG"],params:[78,78,82,83,78,74,70,70,78,64,58,74,72,74,52,54,70,70,34,34,32,32,36,50,50,76,68,68,75]},
+      // Sub CF: A.Milik (FC26 OVR80, PAC72, SHO84, PAS64, DRI74, DEF36, PHY80)
+      {name:"ミリク",en_name:"Milik",long_name:"アルカジウシュ・ミリク",positions:["CF"],params:[80,80,72,73,78,78,72,74,78,64,58,82,80,84,58,62,72,78,32,32,30,30,34,50,50,80,72,70,75]}
     ]
   },
 };

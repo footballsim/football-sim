@@ -779,6 +779,8 @@ function showScreen(name) {
       {data: TEAM_DATA.ecuador2026,           key: 'ecuador2026'},
       {data: TEAM_DATA.australia2026,         key: 'australia2026'},
       {data: TEAM_DATA.turkey2026,            key: 'turkey2026'},
+      {data: TEAM_DATA.serbia2026,            key: 'serbia2026'},
+      {data: TEAM_DATA.poland2026,            key: 'poland2026'},
     ]);
     document.getElementById('players2018-body').dataset.built = '1';
   }
@@ -820,6 +822,8 @@ const SINGLE_TEAMS = [
   {key:'ecuador2026',        label:'エクアドル', flag:'🇪🇨'},
   {key:'australia2026',      label:'オーストラリア', flag:'🇦🇺'},
   {key:'turkey2026',         label:'トルコ', flag:'🇹🇷'},
+  {key:'serbia2026',         label:'セルビア', flag:'🇷🇸'},
+  {key:'poland2026',         label:'ポーランド', flag:'🇵🇱'},
 ];
 
 let _singleTeam1Key = null;
