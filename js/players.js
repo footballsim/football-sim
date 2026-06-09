@@ -2462,13 +2462,13 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // LB: Rodriguez (FC26 OVR79, PAC74, SHO56, PAS76, DRI75, DEF77, PHY77)
       {name:"R・ロドリゲス",en_name:"R.Rodriguez",long_name:"リカルド・ロドリゲス",positions:["左SB","左SMF"],params:[77,78,74,72,74,72,72,72,74,76,72,48,50,52,46,54,73,54,76,76,76,76,74,50,50,70,72,76,75]},
       // CDM: Freuler (FC26 OVR82, PAC72, SHO64, PAS81, DRI79, DEF78, PHY78)
-      {name:"フロイラー",en_name:"Freuler",long_name:"レモ・フロイラー",positions:["DMF","CMF"],params:[78,80,72,70,75,74,76,78,75,81,76,56,58,60,52,56,78,58,78,78,78,77,76,50,50,72,76,78,75]},
+      {name:"フロイラー",en_name:"Freuler",long_name:"レモ・フロイラー",positions:["DMF","CMF","OMF"],params:[78,80,72,70,75,74,76,78,75,81,76,56,58,60,52,56,78,58,78,78,78,77,76,50,50,72,76,78,75]},
       // CMF/CDM: Xhaka (FC26 OVR84, PAC66, SHO74, PAS84, DRI80, DEF79, PHY76)
       {name:"ジャカ",en_name:"Xhaka",long_name:"グラニト・ジャカ",positions:["CMF","DMF"],params:[76,78,66,64,73,72,76,80,73,84,80,66,68,70,66,68,80,68,79,79,80,79,78,50,50,74,78,82,75]},
       // RAM: Shaqiri (FC26 OVR80, PAC74, SHO78, PAS80, DRI84, DEF48, PHY66)
       {name:"シャキリ",en_name:"Shaqiri",long_name:"シェルダン・シャキリ",positions:["右SMF","OMF","右WG"],params:[66,70,74,76,79,62,82,84,79,80,76,74,72,76,72,76,84,72,44,46,46,46,44,50,50,60,76,76,75]},
       // CAM: Vargas (FC26 OVR79, PAC82, SHO72, PAS74, DRI80, DEF55, PHY70)
-      {name:"バルガス",en_name:"Vargas",long_name:"ルーベン・バルガス",positions:["OMF","右SMF","左SMF"],params:[70,72,82,84,81,66,80,80,81,74,70,66,68,68,60,66,80,68,52,54,54,53,52,50,50,62,74,74,75]},
+      {name:"バルガス",en_name:"Vargas",long_name:"ルーベン・バルガス",positions:["OMF","右SMF","左SMF","右WG"],params:[70,72,82,84,81,66,80,80,81,74,70,66,68,68,60,66,80,68,52,54,54,53,52,50,50,62,74,74,75]},
       // LAM: Ndoye (FC26 OVR78, PAC88, SHO68, PAS72, DRI80, DEF54, PHY70)
       {name:"ンドワイエ",en_name:"Ndoye",long_name:"ダン・ンドワイエ",positions:["左SMF","左WG","右SMF"],params:[70,72,88,90,84,66,80,80,84,72,68,60,62,64,54,62,80,64,50,52,52,51,50,50,50,60,72,72,75]},
       // CF: Embolo (FC26 OVR79, PAC79, SHO74, PAS66, DRI76, DEF38, PHY82)
