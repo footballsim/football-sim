@@ -227,6 +227,9 @@ const i18n = {
     singleTitle1: '⚽ チーム選択（1/2）', singleDesc1: '操作するチームを選んでください',
     singleTitle2: '⚽ チーム選択（2/2）', singleDesc2: '対戦相手を選んでください',
     oopLegend: '非得意ポジション（全能力5%ダウン）',
+    htTitle: '⏸ ハーフタイム',
+    htBtnLineup: '🔄 戦術・システム・選手交代',
+    htBtnKickoff: '▶ 後半キックオフ',
   },
   en: {
     titleMain: '',
@@ -381,6 +384,9 @@ const i18n = {
     singleTitle1: '⚽ Team Selection (1/2)', singleDesc1: 'Choose your team',
     singleTitle2: '⚽ Team Selection (2/2)', singleDesc2: 'Choose your opponent',
     oopLegend: 'Off-position (−5% all stats)',
+    htTitle: '⏸ Half Time',
+    htBtnLineup: '🔄 Tactics / Formation / Substitution',
+    htBtnKickoff: '▶ 2nd Half Kick Off',
   }
 };
 
@@ -484,6 +490,9 @@ function applyLang() {
   _setText('single-title2',   t('singleTitle2'));
   _setText('single-desc2',    t('singleDesc2'));
   _setText('label-oop-legend', t('oopLegend'));
+  _setText('ht-modal-title',   t('htTitle'));
+  _setText('ht-btn-lineup',    t('htBtnLineup'));
+  _setText('ht-btn-kickoff',   t('htBtnKickoff'));
   // チーム選択リストを言語に合わせて再構築
   const _tl1 = document.getElementById('team1-select-list');
   if (_tl1) { _tl1.dataset.built = ''; buildTeam1List && buildTeam1List(); }
@@ -2168,7 +2177,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
 
   korea2026: {
-    name:"韓国",en_name:"Korea Republic",team_color:"#C60C30",flag:"🇰🇷",
+    name:"韓国",en_name:"South Korea",team_color:"#C60C30",flag:"🇰🇷",
     default_system:"3-4-3",default_tactics:TACTICS_FREE,
     default_keyplayer:10,default_marked_player:2,
     default_lineup:[0,2,14,3,5,6,1,4,7,10,9],

@@ -524,15 +524,15 @@
   <div style="background:white;border-radius:16px;width:92%;max-width:400px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden">
     <!-- スクロール可能エリア -->
     <div style="overflow-y:auto;flex:1;padding:20px 20px 12px">
-      <div style="font-size:18px;font-weight:800;color:#1a3a6b;text-align:center;margin-bottom:12px">⏸ ハーフタイム</div>
+      <div id="ht-modal-title" style="font-size:18px;font-weight:800;color:#1a3a6b;text-align:center;margin-bottom:12px">⏸ ハーフタイム</div>
       <div id="ht-score" style="text-align:center;font-size:22px;font-weight:800;color:#1a3a6b;margin-bottom:16px"></div>
       <!-- コーチ デュエルアドバイス -->
       <div id="ht-duel-advice"></div>
     </div>
     <!-- sticky フッター（常に表示） -->
     <div style="flex-shrink:0;padding:12px 20px 16px;border-top:1px solid #eee;display:flex;flex-direction:column;gap:8px">
-      <button onclick="htOpenLineup()" style="width:100%;padding:11px;border-radius:10px;border:2px solid #1a3a6b;background:white;color:#1a3a6b;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">🔄 戦術・システム・選手交代</button>
-      <button onclick="closeHalfTimeModal()" style="width:100%;padding:13px;background:#1a3a6b;color:white;border:none;border-radius:10px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer">▶ 後半キックオフ</button>
+      <button id="ht-btn-lineup" onclick="htOpenLineup()" style="width:100%;padding:11px;border-radius:10px;border:2px solid #1a3a6b;background:white;color:#1a3a6b;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">🔄 戦術・システム・選手交代</button>
+      <button id="ht-btn-kickoff" onclick="closeHalfTimeModal()" style="width:100%;padding:13px;background:#1a3a6b;color:white;border:none;border-radius:10px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer">▶ 後半キックオフ</button>
     </div>
   </div>
 </div>
