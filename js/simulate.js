@@ -784,6 +784,11 @@ function showScreen(name) {
       {data: TEAM_DATA.ukraine2026,           key: 'ukraine2026'},
       {data: TEAM_DATA.czech2026,             key: 'czech2026'},
       {data: TEAM_DATA.nigeria2026,           key: 'nigeria2026'},
+      {data: TEAM_DATA.ivorycoast2026,        key: 'ivorycoast2026'},
+      {data: TEAM_DATA.egypt2026,             key: 'egypt2026'},
+      {data: TEAM_DATA.cameroon2026,          key: 'cameroon2026'},
+      {data: TEAM_DATA.iran2026,              key: 'iran2026'},
+      {data: TEAM_DATA.saudiarabia2026,       key: 'saudiarabia2026'},
     ]);
     document.getElementById('players2018-body').dataset.built = '1';
   }
@@ -830,6 +835,11 @@ const SINGLE_TEAMS = [
   {key:'ukraine2026',        label:'ウクライナ', flag:'🇺🇦'},
   {key:'czech2026',          label:'チェコ', flag:'🇨🇿'},
   {key:'nigeria2026',        label:'ナイジェリア', flag:'🇳🇬'},
+  {key:'ivorycoast2026',     label:'コートジボワール', flag:'🇨🇮'},
+  {key:'egypt2026',          label:'エジプト', flag:'🇪🇬'},
+  {key:'cameroon2026',       label:'カメルーン', flag:'🇨🇲'},
+  {key:'iran2026',           label:'イラン', flag:'🇮🇷'},
+  {key:'saudiarabia2026',    label:'サウジアラビア', flag:'🇸🇦'},
 ];
 
 let _singleTeam1Key = null;
