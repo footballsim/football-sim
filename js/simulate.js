@@ -3382,7 +3382,7 @@ function nextChance() {
       halfTimeScore = { t1: htRes.t1score, t2: htRes.t2score };
       // 次のシーンボタンをハーフタイムモーダル表示に差し替え
       const nextBtn = document.getElementById('next-btn');
-      nextBtn.textContent = '⏸ ハーフタイム';
+      nextBtn.textContent = window.LANG === 'en' ? '⏸ Half Time' : '⏸ ハーフタイム';
       nextBtn.onclick = () => {
         nextBtn.textContent = t('btnNextScene');
         nextBtn.onclick = nextChance;
