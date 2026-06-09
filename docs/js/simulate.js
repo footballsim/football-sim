@@ -772,6 +772,7 @@ function showScreen(name) {
       {data: TEAM_DATA.uruguay2026,           key: 'uruguay2026'},
       {data: TEAM_DATA.switzerland2026,       key: 'switzerland2026'},
       {data: TEAM_DATA.italy2026,             key: 'italy2026'},
+      {data: TEAM_DATA.denmark2026,           key: 'denmark2026'},
     ]);
     document.getElementById('players2018-body').dataset.built = '1';
   }
@@ -806,6 +807,7 @@ const SINGLE_TEAMS = [
   {key:'uruguay2026',        label:'ウルグアイ', flag:'🇺🇾'},
   {key:'switzerland2026',    label:'スイス', flag:'🇨🇭'},
   {key:'italy2026',          label:'イタリア', flag:'🇮🇹'},
+  {key:'denmark2026',        label:'デンマーク', flag:'🇩🇰'},
 ];
 
 let _singleTeam1Key = null;

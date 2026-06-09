@@ -1020,7 +1020,30 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ファジョーリ": {"profile": "正確なパスセンスとテクニックで周囲を活かす若手CMF。ゲームのリズムを作る能力が高く、ユヴェントスで磨いたプレーメイクスキルを代表でも発揮する。", "profile_en": "A young CMF who uses precise passing and technique to bring out the best in teammates. His rhythm-setting ability is high, and he brings the playmaking skills polished at Juventus to the national team.", "height": 177, "weight": 70},
 "ミレッティ": {"profile": "巧みなボールタッチとパスセンスを持つ若手CMF。判断速度が高く、狭いスペースでの技術的なプレーでイタリア中盤に創造性をもたらす将来の核候補。", "profile_en": "A young CMF with excellent touch and passing instinct. His quick decision-making and technical play in tight spaces bring creativity to Italy's midfield.", "height": 179, "weight": 70},
 "キーン": {"profile": "フィジカルとスピードを兼備する万能型CF。左WGとCFをこなすポリバレント性と高い得点感覚でイタリア前線に厚みをもたらす期待の若手FW。", "profile_en": "A versatile CF combining physicality with pace. His ability to play left wing and centre-forward, combined with sharp finishing, adds depth to Italy's attacking options.", "height": 186, "weight": 83},
-"ガッティ": {"profile": "パワーと闘争心で相手FWに食らいつくCB。フィジカルの強さと献身的なハードワークでイタリア守備陣に活力をもたらす実直なディフェンダー。", "profile_en": "A CB who clings to opposing forwards with power and fighting spirit. His physicality and relentless work rate bring energy and vigour to Italy's defensive unit.", "height": 186, "weight": 81}
+"ガッティ": {"profile": "パワーと闘争心で相手FWに食らいつくCB。フィジカルの強さと献身的なハードワークでイタリア守備陣に活力をもたらす実直なディフェンダー。", "profile_en": "A CB who clings to opposing forwards with power and fighting spirit. His physicality and relentless work rate bring energy and vigour to Italy's defensive unit.", "height": 186, "weight": 81},
+"K・シュマイケル": {"profile": "正確な1対1とリーダーシップを誇るデンマーク代表GK。名門の血を受け継ぎ、長年デンマークのゴールを守り続ける頼れる守護神。", "profile_en": "Denmark's reliable goalkeeper with sharp one-on-one stopping and natural leadership. Inheriting a famous footballing name, he has guarded Denmark's goal for many years.", "height": 193, "weight": 91},
+"R・クリステンセン": {"profile": "爆発的な加速力と積極的な攻撃参加でデンマークの右サイドを活性化するSB。プレミアリーグで培ったフィジカルと技術で安定したプレーを披露する。", "profile_en": "A right-back who activates Denmark's right flank with explosive pace and forward runs. The physicality and technique developed in the Premier League underpin his consistent displays.", "height": 182, "weight": 75},
+"J・アンデルセン": {"profile": "卓越した読みとビルドアップ能力を誇るデンマーク代表の中心CB。フィジカルと技術を兼備し、スウォーツクリスタルパレスで確固たる地位を築いた高信頼性のDF。", "profile_en": "Denmark's central CB with exceptional reading of play and build-up ability. Combining physique and technique, he has cemented his status as a highly reliable defender.", "height": 190, "weight": 88},
+"ヴェスタゴー": {"profile": "199cmの巨躯を活かした制空権と強靭なフィジカルで相手FWを封じるデンマークの大型CB。セットプレーでも脅威となり、守備ラインを高い位置で支配する。", "profile_en": "A towering 199cm CB who shuts down opposing forwards with aerial dominance and physical strength. A set-piece threat too, he commands the defensive line from a high position.", "height": 199, "weight": 96},
+"マーレ": {"profile": "爆発的なスピードとスタミナを武器にサイドを縦横無尽に駆け回る左SB。高い攻撃参加頻度と的確なクロスでデンマークの左サイドに迫力をもたらす。", "profile_en": "A left-back who charges up and down the flank with explosive speed and stamina. His frequent forward runs and precise crossing give Denmark's left side real menace.", "height": 185, "weight": 77},
+"ホイビャー": {"profile": "精力的なプレスと広大なカバー範囲でデンマーク中盤の要を担うDMF。デンマーク代表キャプテンとして攻守両面でチームを牽引するハードワーカー。", "profile_en": "The cornerstone of Denmark's midfield with intense pressing and vast coverage. As national team captain, he leads by example at both ends of the pitch.", "height": 183, "weight": 78},
+"ノアゴー": {"profile": "球際の強さと高い読みでデンマーク中盤を安定させるDMF。プレミアリーグで評価を高めた守備強度とインテリジェンスでチームのバランスを維持する。", "profile_en": "A DMF who stabilises Denmark's midfield with tenacity and high reading. His defensive intensity and intelligence, refined in the Premier League, keep the team balanced.", "height": 188, "weight": 80},
+"エリクセン": {"profile": "心臓手術を乗り越えデンマーク代表に完全復帰を果たした天才的なOMF。ゲームを読む高いビジョンと精確なパスでデンマークの攻撃を司るクリエイター。", "profile_en": "A brilliant OMF who made a full comeback to the national team after a cardiac incident. His exceptional vision and precise passing orchestrate Denmark's entire attack.", "height": 182, "weight": 76},
+"リンドストロム": {"profile": "爆発的な加速力と積極的なドリブルでデンマークの右サイドを切り裂くウィンガー。スピードと技術を兼備し、高い得点力でチームの攻撃に貢献する。", "profile_en": "A winger who slashes through Denmark's right side with explosive pace and direct dribbling. He combines speed and technique to contribute goals to the team's attack.", "height": 175, "weight": 69},
+"スコウ・オルセン": {"profile": "鋭い仕掛けとシュート精度を武器にデンマークの左サイドから攻撃を活性化するウィンガー。ハードワークで守備にも貢献するオールラウンドなサイドアタッカー。", "profile_en": "A left-side winger who activates Denmark's attack with incisive running and accurate shooting. An all-round wide attacker who also works hard defensively.", "height": 186, "weight": 80},
+"ダムスゴー": {"profile": "テクニックとクリエイティビティを兼備するデンマーク代表のアタッカー。正確なシュートと豊かな発想力で相手守備を崩し、デンマーク攻撃の核を担う。", "profile_en": "A creative and technically gifted Danish attacker. He breaks down opposing defences with precise shooting and inventive play, acting as a key component of Denmark's attack.", "height": 178, "weight": 71},
+"ホイルンド": {"profile": "爆発的なスプリントと高い決定力を誇るデンマーク期待の若きストライカー。プレミアリーグで磨いた実力でデンマーク代表の前線に新たな次元をもたらすCF。", "profile_en": "Denmark's exciting young striker with explosive sprint pace and clinical finishing. The quality refined in the Premier League gives Denmark's forward line a new dimension.", "height": 191, "weight": 86},
+"O・クリステンセン": {"profile": "安定したセービングと高いフットワークを誇る若手GK。デンマーク代表の強力なGK競争に加わり、将来の正GK候補として着実に実力を蓄えている。", "profile_en": "A young GK with reliable shot-stopping and good footwork. Entering Denmark's competitive goalkeeping pool, he is steadily developing as a future first-choice candidate.", "height": 195, "weight": 89},
+"レノウ": {"profile": "冷静な判断力と安定したセービングを誇る控えGK。スタメンGKへの信頼性の高いバックアップとしてデンマーク代表に欠かせないGK陣の一角を担う。", "profile_en": "A backup GK with cool decision-making and consistent shot-stopping. He plays an essential part in Denmark's goalkeeping options as a reliable backup.", "height": 193, "weight": 87},
+"バー": {"profile": "スプリント能力とタフな守備を誇る右SB。攻撃でも積極的に関与し、試合によってはウィングバックとしても機能するダイナミックな右サイドの守備者。", "profile_en": "A right-back who combines sprinting ability with tough defending. He contributes offensively too and can function as a wing-back, a dynamic presence on the right.", "height": 183, "weight": 79},
+"A・クリステンセン": {"profile": "ビルドアップ能力と冷静なポジショニングに優れたCB。代表での経験を豊富に積み重ね、デンマーク守備陣のリーダーとして後方から攻撃を組み立てる実力派DF。", "profile_en": "A CB excelling at build-up play and calm positioning. With extensive international experience, he is a defensive leader who orchestrates attacks from the back.", "height": 185, "weight": 79},
+"キェア": {"profile": "長年デンマーク代表を支えるベテランCB。精度の高いカバーリングとセットプレーでの存在感でチームを安定させる経験豊富なディフェンスリーダー。", "profile_en": "A veteran CB who has supported Denmark for many years. His precise covering and set-piece presence stabilise the team, the experience of a true defensive leader.", "height": 190, "weight": 84},
+"M・イェンセン": {"profile": "正確なパス捌きと豊富なスタミナでデンマーク中盤を支えるCMF。プレスへの貢献と攻守両面での安定したパフォーマンスでチームに欠かせない存在。", "profile_en": "A CMF who supports Denmark's midfield with precise distribution and abundant stamina. His pressing contribution and consistency at both ends make him indispensable.", "height": 185, "weight": 78},
+"ドロニー": {"profile": "強靭なフィジカルと高い守備意識でデンマーク中盤の底を支えるDMF。セカンドボールへの反応と激しい守備貢献で相手の攻撃を食い止めるハードワーカー。", "profile_en": "A DMF who anchors Denmark's midfield with physical strength and strong defensive awareness. His reaction to second balls and relentless defending shut down opposition attacks.", "height": 184, "weight": 80},
+"ブルーン・ラーセン": {"profile": "スピードと積極的な仕掛けを武器とするデンマーク代表のサイドアタッカー。縦への突破と鋭いシュートで相手守備を脅かし、デンマークの攻撃に奥行きと広がりをもたらす。", "profile_en": "A wide attacker who weaponises pace and direct running. His vertical driving and sharp shooting threaten opposing defences, adding depth and width to Denmark's attack.", "height": 183, "weight": 74},
+"ポールセン": {"profile": "ゴール前での嗅覚と高いフィジカルを持つCF。勤勉なプレスバックと前線でのポストプレーでチームに貢献するオールラウンドなストライカー。", "profile_en": "A CF with a keen goal instinct and strong physical presence. His tireless pressing and hold-up play up front make him a well-rounded contributor.", "height": 189, "weight": 85},
+"ドルベルグ": {"profile": "冷静な決定力と技術的なフィニッシュを持つCF。スペースへの賢い動き出しとシュート技術でデンマークの攻撃に得点オプションを提供する。", "profile_en": "A CF with composed finishing and technical quality in front of goal. His intelligent movement into space and finishing technique give Denmark an additional scoring option.", "height": 186, "weight": 83},
+"アディングラ": {"profile": "驚異的な加速力と突破力を誇る若き左WG。ドリブルと裏への飛び出しでサイドから相手守備を切り裂き、デンマーク攻撃に爆発的なスピードと幅をもたらす。", "profile_en": "A young left winger with astonishing acceleration and directness. His dribbling and runs in behind slice through defences from wide, bringing explosive pace and width to Denmark's attack.", "height": 178, "weight": 72}
 };
 
 const PARAM_NAMES = [
@@ -2594,6 +2617,61 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"キーン",en_name:"Kean",long_name:"モイーズ・キーン",positions:["CF","左WG"],params:[82,82,84,85,80,80,76,78,80,66,60,78,78,80,52,56,78,78,32,32,30,30,34,50,50,82,74,74,75]},
       // Sub CB: Gatti (FC26 OVR78, PAC72, SHO46, PAS62, DRI64, DEF79, PHY82)
       {name:"ガッティ",en_name:"Gatti",long_name:"フェデリコ・ガッティ",positions:["CB"],params:[82,80,72,73,68,82,62,62,68,62,56,38,36,44,34,36,62,36,78,80,78,78,76,50,50,82,74,74,75]}
+    ]
+  },
+
+  denmark2026: {
+    name:"デンマーク",en_name:"Denmark",team_color:"#C60C30",flag:"🇩🇰",
+    default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
+    default_keyplayer:9,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: K.Schmeichel (FC26 OVR79, DIV80, HAN78, KIC73, REF80, SPD58, POS79)
+      {name:"K・シュマイケル",en_name:"K.Schmeichel",long_name:"カスパー・シュマイケル",positions:["GK"],params:[50,50,50,50,80,58,50,50,50,50,73,50,50,50,50,50,50,50,50,50,50,50,50,80,78,50,79,73,75]},
+      // RB: Kristensen (FC26 OVR76, PAC84, SHO58, PAS72, DRI72, DEF74, PHY74)
+      {name:"R・クリステンセン",en_name:"Kristensen",long_name:"ラスムス・クリステンセン",positions:["右SB"],params:[74,76,84,85,77,70,70,70,77,72,66,48,50,52,42,44,70,54,72,74,72,72,70,50,50,68,70,72,75]},
+      // RCB: J.Andersen (FC26 OVR83, PAC82, SHO47, PAS75, DRI70, DEF84, PHY83)
+      {name:"J・アンデルセン",en_name:"J.Andersen",long_name:"ヨアキム・アンデルセン",positions:["CB"],params:[82,82,82,83,75,84,68,70,75,74,70,40,38,46,34,38,70,38,84,86,84,84,82,50,50,84,78,80,75]},
+      // LCB: Vestergaard (FC26 OVR80, PAC72, SHO44, PAS68, DRI66, DEF82, PHY83)
+      {name:"ヴェスタゴー",en_name:"Vestergaard",long_name:"ヤニク・ヴェスタゴー",positions:["CB"],params:[82,82,72,73,70,84,64,64,70,68,62,36,34,42,30,32,64,34,82,84,82,82,80,50,50,86,76,76,75]},
+      // LSB: Maehle (FC26 OVR80, PAC84, SHO66, PAS74, DRI78, DEF76, PHY74)
+      {name:"マーレ",en_name:"Maehle",long_name:"ヨアキム・マーレ",positions:["左SB","左WG"],params:[74,76,84,85,79,72,76,78,79,74,70,60,62,64,56,60,78,68,74,76,74,74,72,50,50,70,76,76,75]},
+      // RDMF: Hojbjerg (FC26 OVR83, PAC74, SHO73, PAS81, DRI78, DEF83, PHY82) ← captain
+      {name:"ホイビャー",en_name:"Hojbjerg",long_name:"ピエール＝エミル・ホイビャー",positions:["DMF","CMF"],params:[82,84,74,75,79,80,76,78,79,80,76,68,70,72,56,58,78,74,82,84,82,82,80,50,50,78,80,80,75]},
+      // LDMF: Norgaard (FC26 OVR78, PAC68, SHO62, PAS75, DRI74, DEF78, PHY80)
+      {name:"ノアゴー",en_name:"Norgaard",long_name:"クリスティアン・ノアゴー",positions:["DMF","CMF"],params:[80,82,68,70,74,78,72,72,74,74,70,56,58,60,48,50,72,64,78,80,78,78,76,50,50,76,74,74,75]},
+      // RSM: Lindstrom (FC26 OVR78, PAC88, SHO72, PAS74, DRI80, DEF47, PHY66)
+      {name:"リンドストロム",en_name:"Lindstrom",long_name:"イェスパー・リンドストロム",positions:["右WG","右SMF"],params:[64,66,88,90,82,60,78,80,82,74,68,68,66,70,58,62,80,72,42,44,42,42,44,50,50,58,74,74,75]},
+      // LSM: Skov Olsen (FC26 OVR78, PAC84, SHO72, PAS72, DRI80, DEF44, PHY66)
+      {name:"スコウ・オルセン",en_name:"Skov Olsen",long_name:"ニコラス・スコウ・オルセン",positions:["左WG","左SMF"],params:[64,66,84,86,78,62,78,80,78,72,66,68,66,70,56,60,80,72,40,42,40,40,42,50,50,58,72,72,75]},
+      // OMF: Eriksen (FC26 OVR82, PAC72, SHO77, PAS88, DRI83, DEF52, PHY68) ← keyplayer
+      {name:"エリクセン",en_name:"Eriksen",long_name:"クリスティアン・エリクセン",positions:["OMF","CMF"],params:[66,68,72,73,80,64,82,82,80,88,84,74,74,76,76,80,82,80,48,50,48,48,50,50,50,62,78,78,75]},
+      // CF: Hojlund (FC26 OVR85, PAC88, SHO84, PAS68, DRI82, DEF47, PHY82) ← marked
+      {name:"ホイルンド",en_name:"Hojlund",long_name:"ラスムス・ホイルンド",positions:["CF"],params:[82,82,88,90,83,80,80,82,83,68,62,80,80,84,54,58,82,82,42,44,42,42,44,50,50,82,78,76,75]},
+      // Sub GK: O.Christensen (FC26 OVR78, DIV79, HAN77, KIC76, REF79, SPD64, POS78)
+      {name:"O・クリステンセン",en_name:"O.Christensen",long_name:"オリバー・クリステンセン",positions:["GK"],params:[50,50,50,50,79,64,50,50,50,50,76,50,50,50,50,50,50,50,50,50,50,50,50,79,77,50,78,76,75]},
+      // Sub GK: Rönnow (FC26 OVR75, DIV77, HAN74, KIC70, REF76, SPD59, POS75)
+      {name:"レノウ",en_name:"Ronnow",long_name:"フレデリク・レノウ",positions:["GK"],params:[50,50,50,50,76,59,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,77,74,50,75,70,75]},
+      // Sub RB: Bah (FC26 OVR75, PAC86, SHO54, PAS68, DRI72, DEF72, PHY70)
+      {name:"バー",en_name:"Bah",long_name:"アレクサンダー・バー",positions:["右SB"],params:[70,72,86,87,77,68,70,70,77,68,62,46,48,50,40,42,70,54,70,72,70,70,68,50,50,66,70,70,75]},
+      // Sub CB: A.Christensen (FC26 OVR80, PAC76, SHO44, PAS74, DRI72, DEF80, PHY74)
+      {name:"A・クリステンセン",en_name:"A.Christensen",long_name:"アンドレアス・クリステンセン",positions:["CB"],params:[74,76,76,77,74,74,70,70,74,74,68,36,34,42,32,34,70,36,80,82,80,80,78,50,50,74,76,76,75]},
+      // Sub CB: Kjaer (FC26 OVR77, PAC68, SHO42, PAS68, DRI64, DEF80, PHY78)
+      {name:"キェア",en_name:"Kjaer",long_name:"シモン・キェア",positions:["CB"],params:[78,78,68,69,68,80,62,62,68,68,62,34,32,40,28,30,62,32,80,82,80,80,78,50,50,82,74,74,75]},
+      // Sub CMF: M.Jensen (FC26 OVR76, PAC74, SHO64, PAS78, DRI76, DEF68, PHY70)
+      {name:"M・イェンセン",en_name:"M.Jensen",long_name:"マティアス・イェンセン",positions:["CMF","DMF"],params:[70,72,74,75,73,68,72,74,73,78,72,58,60,62,50,52,74,66,66,68,66,66,64,50,50,66,72,72,75]},
+      // Sub DMF: Delaney (FC26 OVR76, PAC66, SHO62, PAS73, DRI72, DEF76, PHY80)
+      {name:"ドロニー",en_name:"Delaney",long_name:"トーマス・ドロニー",positions:["DMF","CMF"],params:[80,82,66,68,72,76,68,70,72,72,68,56,58,60,48,50,70,62,76,78,76,76,74,50,50,72,72,72,75]},
+      // Sub RW/LW: Bruun Larsen (FC26 OVR74, PAC82, SHO68, PAS68, DRI76, DEF42, PHY64)
+      {name:"ブルーン・ラーセン",en_name:"Bruun Larsen",long_name:"ヤコブ・ブルーン・ラーセン",positions:["右WG","左WG"],params:[62,64,82,84,76,60,74,76,76,68,62,64,64,68,52,56,74,68,38,40,38,38,40,50,50,56,68,68,75]},
+      // Sub CF/LW: Poulsen (FC26 OVR75, PAC82, SHO72, PAS64, DRI70, DEF42, PHY80)
+      {name:"ポールセン",en_name:"Poulsen",long_name:"ユスフ・ポールセン",positions:["CF","左WG"],params:[80,80,82,83,77,76,68,68,77,64,58,68,68,70,50,50,70,68,38,38,36,36,40,50,50,76,70,68,75]},
+      // Sub CF: Dolberg (FC26 OVR76, PAC78, SHO76, PAS64, DRI72, DEF38, PHY74)
+      {name:"ドルベルグ",en_name:"Dolberg",long_name:"カスパー・ドルベルグ",positions:["CF"],params:[74,76,78,79,75,72,70,70,75,64,58,74,72,76,50,54,70,72,34,34,32,32,36,50,50,70,70,68,75]},
+      // Sub LW: Damsgaard (FC26 OVR79, PAC80, SHO76, PAS78, DRI82, DEF46, PHY68)
+      {name:"ダムスゴー",en_name:"Damsgaard",long_name:"ミケル・ダムスゴー",positions:["左WG","OMF"],params:[66,68,80,82,79,64,80,82,79,78,72,72,72,74,64,68,82,76,42,44,42,42,44,50,50,62,74,74,75]},
+      // Sub LW: Adingra (FC26 OVR76, PAC92, SHO72, PAS68, DRI80, DEF40, PHY66)
+      {name:"アディングラ",en_name:"Adingra",long_name:"シモン・アディングラ",positions:["左WG","右WG"],params:[64,66,92,94,82,60,78,80,82,68,62,68,68,70,52,54,80,72,36,38,36,36,38,50,50,58,72,72,75]}
     ]
   },
 };
