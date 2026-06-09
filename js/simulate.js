@@ -781,6 +781,9 @@ function showScreen(name) {
       {data: TEAM_DATA.turkey2026,            key: 'turkey2026'},
       {data: TEAM_DATA.serbia2026,            key: 'serbia2026'},
       {data: TEAM_DATA.poland2026,            key: 'poland2026'},
+      {data: TEAM_DATA.ukraine2026,           key: 'ukraine2026'},
+      {data: TEAM_DATA.czech2026,             key: 'czech2026'},
+      {data: TEAM_DATA.nigeria2026,           key: 'nigeria2026'},
     ]);
     document.getElementById('players2018-body').dataset.built = '1';
   }
@@ -824,6 +827,9 @@ const SINGLE_TEAMS = [
   {key:'turkey2026',         label:'トルコ', flag:'🇹🇷'},
   {key:'serbia2026',         label:'セルビア', flag:'🇷🇸'},
   {key:'poland2026',         label:'ポーランド', flag:'🇵🇱'},
+  {key:'ukraine2026',        label:'ウクライナ', flag:'🇺🇦'},
+  {key:'czech2026',          label:'チェコ', flag:'🇨🇿'},
+  {key:'nigeria2026',        label:'ナイジェリア', flag:'🇳🇬'},
 ];
 
 let _singleTeam1Key = null;
