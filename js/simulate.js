@@ -3102,6 +3102,9 @@ function htOpenLineup() {
   _htBackBtn.onclick = htCloseLineup;
   const header = document.querySelector('#screen-setting .screen-header');
   header.dataset.htMode = '1';
+  // 元の「戻る」ボタンを非表示（ハーフタイム中は対戦相手変更を防ぐ）
+  const _origBack = header.querySelector('.back-btn:not(#ht-lineup-back-btn)');
+  if (_origBack) _origBack.style.display = 'none';
   header.insertBefore(_htBackBtn, header.firstChild);
   // 交代人数ラベルを追加
   const subLabel = document.createElement('div');
@@ -3122,6 +3125,9 @@ function htCloseLineup() {
   if (header.dataset.htMode) {
     const addedBack = document.getElementById('ht-lineup-back-btn');
     if (addedBack) header.removeChild(addedBack);
+    // 元の「戻る」ボタンを復元
+    const origBack = header.querySelector('.back-btn');
+    if (origBack) origBack.style.display = '';
     delete header.dataset.htMode;
   }
   const subLabel = document.getElementById('ht-subs-label');
