@@ -481,6 +481,9 @@ function applyLang() {
   _setText('single-desc1',  t('singleDesc1'));
   _setText('single-title2', t('singleTitle2'));
   _setText('single-desc2',  t('singleDesc2'));
+  // チーム選択リストを言語に合わせて再構築
+  const _tl1 = document.getElementById('team1-select-list');
+  if (_tl1) { _tl1.dataset.built = ''; buildTeam1List && buildTeam1List(); }
   // スクリーンタイトル
   _setText('screen-formation-title',    t('screenFormation'));
   _setText('screen-tactics-title',      t('screenTactics'));

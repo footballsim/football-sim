@@ -806,24 +806,30 @@ const SINGLE_TEAMS = [
 
 let _singleTeam1Key = null;
 
-// チーム1選択リストを構築
+// 現在言語に応じたチーム表示名を返す
+function teamLabel(t) {
+  return (window.LANG === 'en' && TEAM_DATA[t.key] && TEAM_DATA[t.key].en_name)
+    ? TEAM_DATA[t.key].en_name : t.label;
+}
+
+// チーム1選択リストを構築（言語切替時に再構築）
 function buildTeam1List() {
   const list = document.getElementById('team1-select-list');
-  if (!list || list.dataset.built) return;
+  if (!list || list.dataset.built === (window.LANG || 'ja')) return;
   list.innerHTML = SINGLE_TEAMS.map(t =>
     `<div class="team-select-item" onclick="selectTeam1('${t.key}')">
       <span class="tsi-flag">${t.flag}</span>
-      <span class="tsi-name">${t.label}</span>
+      <span class="tsi-name">${teamLabel(t)}</span>
     </div>`
   ).join('');
-  list.dataset.built = '1';
+  list.dataset.built = window.LANG || 'ja';
 }
 
 // チーム1決定 → チーム2選択画面へ
 function selectTeam1(key) {
   _singleTeam1Key = key;
   const t1 = SINGLE_TEAMS.find(t => t.key === key);
-  document.getElementById('single2-team1-display').textContent = t1.flag + ' ' + t1.label;
+  document.getElementById('single2-team1-display').textContent = t1.flag + ' ' + teamLabel(t1);
 
   const list = document.getElementById('team2-select-list');
   list.innerHTML = SINGLE_TEAMS
@@ -831,7 +837,7 @@ function selectTeam1(key) {
     .map(t =>
       `<div class="team-select-item" onclick="selectTeam2('${t.key}')">
         <span class="tsi-flag">${t.flag}</span>
-        <span class="tsi-name">${t.label}</span>
+        <span class="tsi-name">${teamLabel(t)}</span>
       </div>`
     ).join('');
   showScreen('single2');
