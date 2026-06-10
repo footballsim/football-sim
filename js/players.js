@@ -1356,7 +1356,14 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "マザ": {"profile": "若さと卓越した技術センスで台頭したアルジェリア期待のMF。ドリブルと配球でゲームを変えるポテンシャルを持ち、将来のアルジェリア代表の中心を担う次世代スター。", "profile_en": "A rising Algerian MF who has emerged with youthful energy and outstanding technical sense. Possessing the potential to change games with dribbling and distribution, he is the next-generation star set to become central to Algeria's national team.", "height": 182, "weight": 74},
 "アニス・ハジ・ムッサ": {"profile": "スピードとドリブルでアルジェリアの右サイドから積極的に仕掛けるウィンガー。鋭い突破と正確なクロスでチームの攻撃に幅をもたらし、欧州の強豪クラブで成長を続ける期待の新星。", "profile_en": "A winger who proactively attacks from Algeria's right side with pace and dribbling. Sharp runs and precise crossing add width to the team's attack, a rising star continuing to grow at a top European club.", "height": 175, "weight": 68},
 "ベンブアリ": {"profile": "献身的なプレスと運動量で前線からチームの守備を牽引するCF。ゴール前での落ち着きと決定力でアルジェリアの攻撃オプションを広げる働き者のストライカー。", "profile_en": "A hard-working striker who leads the team's defensive work from the front with dedicated pressing and energy. Composure and finishing in front of goal expand Algeria's attacking options.", "height": 180, "weight": 74},
-"トゥガイ": {"profile": "スピードと堅実な守備でアルジェリアのサイドを支えるSB。豊富な運動量とポジショニングで右サイドバックとCBをこなせるポリバレントなDF。", "profile_en": "A versatile full-back who supports Algeria's flank with pace and solid defending. High energy and good positioning allow him to operate at right-back and centre-back.", "height": 183, "weight": 76}
+"トゥガイ": {"profile": "スピードと堅実な守備でアルジェリアのサイドを支えるSB。豊富な運動量とポジショニングで右サイドバックとCBをこなせるポリバレントなDF。", "profile_en": "A versatile full-back who supports Algeria's flank with pace and solid defending. High energy and good positioning allow him to operate at right-back and centre-back.", "height": 183, "weight": 76},
+"ベンボット": {"profile": "アルジェリア国内リーグで長年実績を積んだ守護神。確実なセービングと的確なコーチングでチームの守備を安定させ、代表のゴールを守る経験豊富なGK。", "profile_en": "A goalkeeper who has built a long track record in Algerian domestic football. He stabilises the team's defence with reliable shot-stopping and precise coaching, an experienced custodian protecting the national team's goal.", "height": 185, "weight": 82},
+"マスティル": {"profile": "スイスを拠点に経験を積むアルジェリア系GK。安定したポジショニングと高いポテンシャルを持ち、代表バックアップとして期待される若い守護神。", "profile_en": "An Algerian-heritage goalkeeper developing his career in Switzerland. With composed positioning and high potential, he is a young custodian expected to provide reliable backup for the national team.", "height": 186, "weight": 79},
+"シェルギ": {"profile": "フランスリーグで活躍する堅実なCB。インテリジェントなカバーリングとパスの配給力を兼備し、アルジェリア守備陣に安定をもたらす。", "profile_en": "A composed CB active in the French league. Combining intelligent covering with accurate distribution, he brings stability to Algeria's defensive unit.", "height": 185, "weight": 78},
+"アバダ": {"profile": "アルジェリア国内で台頭した潜在能力の高いCB。屈強なフィジカルと空中戦の強さを武器に守備ラインを支え、国際舞台でのさらなる成長が期待される若いDF。", "profile_en": "A high-potential CB who has emerged in Algerian domestic football. Anchoring the defensive line with powerful physicality and aerial dominance, this young defender is expected to continue growing on the international stage.", "height": 187, "weight": 82},
+"ティトラウイ": {"profile": "俊敏な動きとテクニックを兼備するDMF。ボール奪取能力とパスセンスを武器に中盤を引き締め、攻守の切り替えで存在感を示す若い守備的MF。", "profile_en": "A defensive midfielder combining quick movement with technical quality. Using ball-winning ability and passing sense to tighten the midfield, this young DMF stands out in transitions.", "height": 170, "weight": 65},
+"ブルビナ": {"profile": "鋭いスピードと決定力でアルジェリア攻撃に厚みをもたらすウィンガー。若くして国内リーグで得点王を獲得し、爆発的な突破力でチームの切り札的存在となる。", "profile_en": "A winger who adds depth to Algeria's attack with sharp pace and clinical finishing. Having won a domestic league golden boot at a young age, his explosive penetrating runs make him a trump card for the team.", "height": 179, "weight": 65},
+"ゲジェミス": {"profile": "左足の正確なボールタッチと鋭い動き出しでアルジェリア右サイドに変化をもたらすウィンガー。ドリブルと積極的なシュートで相手守備にプレッシャーをかける若いアタッカー。", "profile_en": "A winger who brings variety to Algeria's right flank with precise left-footed touch and sharp movement off the ball. A young attacker who pressures opposing defences with dribbling and proactive shooting.", "height": 183, "weight": 73}
 };
 
 const PARAM_NAMES = [
@@ -3949,9 +3956,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // CMF: Hicham Boudaoui (FC26 OVR76, PAC72, SHO64, PAS70, DRI74, DEF66, PHY74)
       {name:"ブダウィ",en_name:"Boudaoui",long_name:"ヒシャム・ブダウィ",positions:["CMF","DMF","右SMF"],params:[72,72,72,73,72,70,68,68,72,70,64,54,56,60,44,48,66,62,64,66,64,64,62,50,50,70,66,68,75]},
       // RMF: Riyad Mahrez (FC26 OVR84, PAC78, SHO80, PAS81, DRI88, DEF39, PHY63)
-      {name:"マフレズ",en_name:"Mahrez",long_name:"リヤド・マフレズ",positions:["右WG","OMF","CF"],params:[60,62,78,79,80,58,86,88,82,81,77,78,80,76,68,72,88,76,36,38,36,36,38,50,50,58,78,78,75]},
+      {name:"マフレズ",en_name:"Mahrez",long_name:"リヤド・マフレズ",positions:["右WG","右SMF","OMF","CF"],params:[60,62,78,79,80,58,86,88,82,81,77,78,80,76,68,72,88,76,36,38,36,36,38,50,50,58,78,78,75]},
       // OMF: Houssem Aouar (FC26 OVR77, PAC66, SHO73, PAS75, DRI79, DEF64, PHY66)
-      {name:"アワル",en_name:"Aouar",long_name:"フサム・アワル",positions:["OMF","CMF","左WG"],params:[62,64,66,67,74,60,76,76,72,75,71,70,72,68,58,62,78,70,60,62,60,60,62,50,50,60,72,72,75]},
+      {name:"アワル",en_name:"Aouar",long_name:"フサム・アワル",positions:["OMF","左SMF","CMF","左WG"],params:[62,64,66,67,74,60,76,76,72,75,71,70,72,68,58,62,78,70,60,62,60,60,62,50,50,60,72,72,75]},
       // LMF: Amine Gouiri (FC26 OVR79, PAC77, SHO80, PAS72, DRI78, DEF46, PHY68)
       {name:"グイリ",en_name:"Gouiri",long_name:"アミン・グイリ",positions:["CF","左WG","OMF"],params:[66,66,77,78,76,64,74,74,77,72,66,78,80,76,52,56,72,72,42,44,42,42,44,50,50,62,72,72,75]},
       // CF: Mohamed Amoura (FC26 OVR80, PAC90, SHO81, PAS71, DRI86, DEF47, PHY61)
@@ -3971,7 +3978,21 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CF: Nadir Benbouali (~OVR73, PAC74, SHO72, PAS62, DRI70, DEF44, PHY68)
       {name:"ベンブアリ",en_name:"Benbouali",long_name:"ナディル・ベンブアリ",positions:["CF","左WG"],params:[66,64,74,75,70,64,66,66,72,62,56,70,72,68,46,50,64,68,40,42,40,40,42,50,50,62,62,62,75]},
       // Sub RB: Mohamed Amine Tougai (~OVR69, PAC73, SHO44, PAS60, DRI62, DEF68, PHY66)
-      {name:"トゥガイ",en_name:"Tougai",long_name:"モハメド・アミン・トゥガイ",positions:["右SB","CB"],params:[64,64,73,74,66,62,56,56,65,60,54,36,36,40,28,30,56,40,66,68,66,66,64,50,50,60,58,58,75]}
+      {name:"トゥガイ",en_name:"Tougai",long_name:"モハメド・アミン・トゥガイ",positions:["右SB","CB"],params:[64,64,73,74,66,62,56,56,65,60,54,36,36,40,28,30,56,40,66,68,66,66,64,50,50,60,58,58,75]},
+      // Sub GK: Oussama Benbot (~OVR63, DIV64, HAN62, KIC60, REF64, SPD50, POS63)
+      {name:"ベンボット",en_name:"Benbot",long_name:"ウサマ・ベンボット",positions:["GK"],params:[50,50,50,50,64,50,50,50,50,50,60,50,50,50,50,50,50,50,50,50,50,50,50,64,62,50,63,62,75]},
+      // Sub GK: Melvin Mastil (~OVR57, DIV57, HAN55, KIC52, REF57, SPD56, POS56)
+      {name:"マスティル",en_name:"Mastil",long_name:"メルヴァン・マスティル",positions:["GK"],params:[50,50,50,50,57,56,50,50,50,50,52,50,50,50,50,50,50,50,50,50,50,50,50,57,55,50,56,55,75]},
+      // Sub CB: Samir Chergui (FC26 OVR70, PAC48, SHO43, PAS64, DRI65, DEF70, PHY66)
+      {name:"シェルギ",en_name:"Chergui",long_name:"サミル・シェルギ",positions:["CB","右SB"],params:[66,66,48,49,66,66,60,60,60,64,60,38,40,40,28,30,58,28,68,72,68,68,68,50,50,70,66,68,75]},
+      // Sub CB: Achref Abada (~OVR62, PAC66, SHO40, PAS58, DRI60, DEF64, PHY70)
+      {name:"アバダ",en_name:"Abada",long_name:"アシュレフ・アバダ",positions:["CB"],params:[70,70,66,67,62,72,56,56,56,58,54,36,38,38,28,28,54,26,62,66,62,62,62,50,50,76,58,60,75]},
+      // Sub DMF: Yacine Titraoui (FC26 OVR68, PAC66, SHO53, PAS65, DRI70, DEF62, PHY63)
+      {name:"ティトラウイ",en_name:"Titraoui",long_name:"ヤシン・ティトラウイ",positions:["DMF","CMF"],params:[60,62,66,67,66,58,66,66,68,65,60,46,48,50,38,42,64,52,62,64,62,62,60,50,50,60,60,62,75]},
+      // Sub LW: Adil Boulbina (~OVR70, PAC80, SHO70, PAS64, DRI75, DEF36, PHY58)
+      {name:"ブルビナ",en_name:"Boulbina",long_name:"アディル・ブルビナ",positions:["左WG","CF"],params:[56,58,80,82,72,56,70,70,72,64,58,62,64,66,46,50,70,70,36,38,36,36,38,50,50,54,64,62,75]},
+      // Sub RW: Farès Ghedjemis (FC26 OVR63, PAC67, SHO64, PAS56, DRI64, DEF29, PHY38)
+      {name:"ゲジェミス",en_name:"Ghedjemis",long_name:"ファレス・ゲジェミス",positions:["右WG"],params:[36,40,67,69,60,36,62,62,63,56,52,58,60,60,42,44,62,60,28,30,28,28,30,50,50,36,58,58,75]}
     ]
   },
 };
