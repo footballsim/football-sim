@@ -1363,7 +1363,33 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "アバダ": {"profile": "アルジェリア国内で台頭した潜在能力の高いCB。屈強なフィジカルと空中戦の強さを武器に守備ラインを支え、国際舞台でのさらなる成長が期待される若いDF。", "profile_en": "A high-potential CB who has emerged in Algerian domestic football. Anchoring the defensive line with powerful physicality and aerial dominance, this young defender is expected to continue growing on the international stage.", "height": 187, "weight": 82},
 "ティトラウイ": {"profile": "俊敏な動きとテクニックを兼備するDMF。ボール奪取能力とパスセンスを武器に中盤を引き締め、攻守の切り替えで存在感を示す若い守備的MF。", "profile_en": "A defensive midfielder combining quick movement with technical quality. Using ball-winning ability and passing sense to tighten the midfield, this young DMF stands out in transitions.", "height": 170, "weight": 65},
 "ブルビナ": {"profile": "鋭いスピードと決定力でアルジェリア攻撃に厚みをもたらすウィンガー。若くして国内リーグで得点王を獲得し、爆発的な突破力でチームの切り札的存在となる。", "profile_en": "A winger who adds depth to Algeria's attack with sharp pace and clinical finishing. Having won a domestic league golden boot at a young age, his explosive penetrating runs make him a trump card for the team.", "height": 179, "weight": 65},
-"ゲジェミス": {"profile": "左足の正確なボールタッチと鋭い動き出しでアルジェリア右サイドに変化をもたらすウィンガー。ドリブルと積極的なシュートで相手守備にプレッシャーをかける若いアタッカー。", "profile_en": "A winger who brings variety to Algeria's right flank with precise left-footed touch and sharp movement off the ball. A young attacker who pressures opposing defences with dribbling and proactive shooting.", "height": 183, "weight": 73}
+"ゲジェミス": {"profile": "左足の正確なボールタッチと鋭い動き出しでアルジェリア右サイドに変化をもたらすウィンガー。ドリブルと積極的なシュートで相手守備にプレッシャーをかける若いアタッカー。", "profile_en": "A winger who brings variety to Algeria's right flank with precise left-footed touch and sharp movement off the ball. A young attacker who pressures opposing defences with dribbling and proactive shooting.", "height": 183, "weight": 73},
+"バシリ": {"profile": "長身と鋭い反応を兼備する守護神。確実なセービングと的確なポジショニングでボスニアのゴールを守り、チームに安心感をもたらす正GK。", "profile_en": "A goalkeeper combining imposing height with sharp reflexes. He guards Bosnia's goal as first choice with reliable shot-stopping and precise positioning, bringing composure to the team.", "height": 193, "weight": 86},
+"デディッチ": {"profile": "圧倒的なスタミナと爆発的なスピードで右サイドを支配するRB。精力的な上下動とテクニックで攻守の両面に貢献するダイナミックなサイドバック。", "profile_en": "A right-back who dominates the right flank with exceptional stamina and explosive speed. A dynamic full-back contributing in both phases with energetic up-and-down movement and technique.", "height": 180, "weight": 74},
+"ムハレモヴィッチ": {"profile": "インテリジェントなポジショニングと空中戦でボスニア守備を支えるCB。冷静な判断と高い守備意識でバックラインを組織する若い守備の要。", "profile_en": "A CB supporting Bosnia's defence with intelligent positioning and aerial ability. A young defensive cornerstone who organises the backline with composure and strong defensive awareness.", "height": 187, "weight": 82},
+"カティッチ": {"profile": "圧倒的なフィジカルを誇る大型CB。191cmの体格を活かした空中戦の強さで相手FWを封じ込め、ボスニア守備に堅牢な壁を作る。", "profile_en": "A large CB boasting overwhelming physical ability. Shutting down opposing forwards with aerial dominance using his 191cm frame, he forms a solid wall in Bosnia's defence.", "height": 191, "weight": 87},
+"コラシナツ": {"profile": "強烈なフィジカルと豊富な経験でボスニア守備の中核を担うベテランDF。強さとリーダーシップでバックラインを統率し、代表の精神的支柱として機能する。", "profile_en": "A veteran defender who forms the core of Bosnia's defence with powerful physicality and extensive experience. Marshalling the backline with strength and leadership, he functions as the team's spiritual backbone.", "height": 183, "weight": 85},
+"ハジアフメトヴィッチ": {"profile": "正確な配球とボール奪取能力でボスニア中盤を制御するDMF。広い視野と高い戦術理解でゲームのリズムを管理する知性的なバランサー。", "profile_en": "A DMF who controls Bosnia's midfield with precise distribution and ball-winning ability. An intelligent balancer managing the game's rhythm with broad vision and strong tactical understanding.", "height": 181, "weight": 78},
+"タヒロヴィッチ": {"profile": "献身的なワークレートとパスセンスを兼備するCMF。守備とつなぎの両面に積極的に関与し、将来のボスニア代表の中心を担う次世代MF。", "profile_en": "A CMF combining dedicated work rate with passing sense. Actively involved in both defending and linking play, a next-generation MF set to become central to Bosnia's team in future.", "height": 181, "weight": 76},
+"メミッチ": {"profile": "チームトップクラスの俊足を武器にボスニアの右サイドを席巻するウィンガー。爆発的な加速で相手守備を切り裂き、精確なクロスと推進力でゲームを動かす快速アタッカー。", "profile_en": "A winger who tears through Bosnia's right flank with one of the team's top speeds. Shredding defences with explosive acceleration, he moves the game with precise crossing and driving runs as a lightning-fast attacker.", "height": 175, "weight": 70},
+"バイラクタレヴィッチ": {"profile": "卓越したドリブルセンスと創造的なプレーでボスニア攻撃に閃きをもたらすウィンガー。狭いスペースでの仕掛けと決定的なパスで代表の攻撃の鍵を握る切り札的存在。", "profile_en": "A winger who brings flashes of brilliance to Bosnia's attack with outstanding dribbling sense and creative play. A trump card holding the key to the national team's attack with incisive runs in tight spaces and decisive passes.", "height": 174, "weight": 68},
+"アライベゴヴィッチ": {"profile": "若さと持ち前のテクニックでボスニアの左サイドに活力を与えるウィンガー。鋭い得点感覚と積極的な仕掛けで、18歳にして代表の左サイドを担う期待の新星。", "profile_en": "A winger who brings vitality to Bosnia's left flank with youth and natural technique. A rising star who holds the national team's left side at 18 with sharp finishing instinct and proactive attacking play.", "height": 175, "weight": 68},
+"デミロヴィッチ": {"profile": "高い得点力と献身的なワークレートでボスニア攻撃を牽引する主力CF。フィジカルの強さと豊富なスタミナで最前線から守備に走り、ゴール前の嗅覚と決定力でチームを勝利へ導く。", "profile_en": "Bosnia's key striker who leads the attack with strong scoring ability and a dedicated work rate. Running from the front to press and defend with powerful physicality and abundant stamina, he guides the team to victory with instinctive positioning and clinical finishing.", "height": 185, "weight": 84},
+"ジェコ": {"profile": "ボスニア最多得点記録を持つ伝説的ストライカー。40歳にして衰えぬシュートセンスと精巧なポストプレー、圧倒的なメンタルの強さで代表を長年引っ張るキャプテン。", "profile_en": "A legendary striker holding Bosnia's all-time scoring record. The captain who has led the national team for years with shot-making sense that refuses to fade at 40, exquisite link-up play, and overwhelming mental fortitude.", "height": 193, "weight": 80},
+"タバコヴィッチ": {"profile": "196cmの長身と圧倒的なフィジカルを武器にするパワーストライカー。空中戦の強さとゴール前の迫力あるプレーで相手守備にプレッシャーをかける得点力豊富なCF。", "profile_en": "A powerful striker who uses his imposing 196cm frame and overwhelming physicality as weapons. A prolific forward who pressures opposing defences with aerial dominance and forceful play in front of goal.", "height": 196, "weight": 89},
+"バジュダル": {"profile": "技術と動きの質の高さで前線に変化をもたらすアタッカー。積極的なポジション取りと精確なパスセンスを武器に、サブとして試合の流れを変える攻撃のオプション。", "profile_en": "An attacker who brings variety to the frontline with quality technique and movement. An attacking option who changes the course of matches from the bench using proactive positioning and precise passing sense.", "height": 180, "weight": 74},
+"J・ルキッチ": {"profile": "フィジカルの強さと力強いポストプレーで前線を牽引するCF。ゴール前での決定力と組み立て参加でボスニア攻撃に厚みをもたらす。", "profile_en": "A striker who leads the frontline with physical strength and powerful link-up play. He adds depth to Bosnia's attack with finishing ability and involvement in build-up play around the penalty area.", "height": 184, "weight": 80},
+"ギゴヴィッチ": {"profile": "バランスの取れた攻守貢献と高い運動量でボスニア中盤を支えるCMF。精確なパスとドリブルで攻撃を組み立て、広い守備範囲でチームのバランスを保つ万能MF。", "profile_en": "An all-round MF who supports Bosnia's midfield with balanced contributions and high energy. Building attacks with precise passing and dribbling, he maintains the team's balance with a wide defensive range.", "height": 181, "weight": 78},
+"ブルニッチ": {"profile": "スピードとダイナミックな動きでボスニア中盤に活力をもたらすCMF。縦への積極的な走り込みと堅実な守備参加でゲームを活性化する攻守両面に関与するMF。", "profile_en": "A CMF who brings energy to Bosnia's midfield with pace and dynamic movement. An MF involved in both phases who activates the game with proactive forward runs and committed defensive contributions.", "height": 181, "weight": 75},
+"シュニッチ": {"profile": "ボール奪取とスペース管理に長けたDMF。豊富な欧州での経験で磨いた守備センスとポジショニングでチームの守備バランスを維持する堅実な守備的MF。", "profile_en": "A DMF skilled at ball-winning and space management. A dependable defensive midfielder who maintains the team's defensive balance with defensive sense and positioning developed across an extensive European career.", "height": 185, "weight": 80},
+"バシッチ": {"profile": "高い戦術理解力と献身的なワークレートで中盤をつなぐMF。守備への積極的な貢献と精確なパス配給を両立し、チームのバランスを陰で支える信頼できるミッドフィールダー。", "profile_en": "A MF who links the midfield with strong tactical understanding and dedicated work rate. A reliable midfielder supporting the team's balance behind the scenes by combining active defensive contribution with precise passing.", "height": 180, "weight": 76},
+"マフミッチ": {"profile": "スピードと豊富な運動量で中盤を駆け回るエナジッシュなMF。積極的なプレッシングとワークレートでチームの守備を支え、試合の空気を変えられる控えのオプション。", "profile_en": "An energetic MF who covers the midfield with pace and high energy. Supporting the team's defence with proactive pressing and work rate, a substitute option capable of changing the atmosphere of a match.", "height": 177, "weight": 72},
+"チェリク": {"profile": "安定したポジショニングと空中戦でボスニア守備の選択肢を広げるCB。落ち着いたプレーと守備への意識の高さで、バックラインのデプスを提供するオプションDF。", "profile_en": "A CB who broadens Bosnia's defensive options with composed positioning and aerial ability. An option defender providing depth to the backline with calm play and strong defensive awareness.", "height": 186, "weight": 80},
+"ムヤキッチ": {"profile": "体格を活かした力強い守備でゴール前を制圧するCB。ヘディングの強さと積極的なボールチェックを武器に、代表守備のデプスを提供するフィジカル系DF。", "profile_en": "A CB who dominates in front of goal with powerful defending leveraging his large frame. A physical defender providing depth to the national team's back line with aerial dominance and aggressive challenges.", "height": 188, "weight": 82},
+"ハジカドゥニッチ": {"profile": "守備の安定感とビルドアップ能力を兼備するCB。戦術的な理解と確実なカバーリングでバックラインを補強する欧州で磨かれた万能型DF。", "profile_en": "A CB combining defensive stability with build-up ability. A versatile defender who reinforces the backline with tactical understanding and reliable covering, refined across a European career.", "height": 186, "weight": 80},
+"ラデリッチ": {"profile": "スピードと堅実な守備でボスニアの左サイドを担う控えSB。精力的な走りとポジショニングで側面を安定させ、代表のサイドバック層を厚くする。", "profile_en": "A backup full-back who covers Bosnia's left side with pace and solid defending. He stabilises the flank with energetic running and positioning, adding depth to the national team's full-back options.", "height": 180, "weight": 75},
+"ズロミスリッチ": {"profile": "クロアチアリーグで経験を積む控えGK。安定したセービングとポジショニングでチームを支え、代表GK候補として着実に成長している2番手守護神。", "profile_en": "A backup goalkeeper gaining experience in the Croatian league. Supporting the team with composed shot-stopping and positioning, a second-choice goalkeeper steadily developing as a national team candidate.", "height": 186, "weight": 81},
+"ハジキッチ": {"profile": "代表第3GKとしてスクワッドに名を連ねるバックアップ守護神。冷静なセービングと判断力でゴールを守り、いざという時の備えとして代表のGK層を支える。", "profile_en": "A backup goalkeeper listed in the squad as the national team's third GK. Guarding the goal with composed shot-stopping and decision-making, supporting the national team's goalkeeping depth as a reliable emergency option.", "height": 185, "weight": 80}
 };
 
 const PARAM_NAMES = [
@@ -3993,6 +4019,66 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ブルビナ",en_name:"Boulbina",long_name:"アディル・ブルビナ",positions:["左WG","CF"],params:[56,58,80,82,72,56,70,70,72,64,58,62,64,66,46,50,70,70,36,38,36,36,38,50,50,54,64,62,75]},
       // Sub RW: Farès Ghedjemis (FC26 OVR63, PAC67, SHO64, PAS56, DRI64, DEF29, PHY38)
       {name:"ゲジェミス",en_name:"Ghedjemis",long_name:"ファレス・ゲジェミス",positions:["右WG"],params:[36,40,67,69,60,36,62,62,63,56,52,58,60,60,42,44,62,60,28,30,28,28,30,50,50,36,58,58,75]}
+    ]
+  },
+  bosnia2026: {
+    name:"ボスニア・ヘルツェゴビナ",en_name:"Bosnia & Herzegovina",team_color:"#002868",flag:"🇧🇦",
+    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:10,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Nikola Vasilj (FC26 OVR77, DIV77, HAN72, KIC65, REF79, SPD77, POS77)
+      {name:"バシリ",en_name:"Vasilj",long_name:"ニコラ・バシリ",positions:["GK"],params:[50,50,50,50,79,77,50,50,50,50,65,50,50,50,50,50,50,50,50,50,50,50,50,77,72,50,77,74,75]},
+      // RB: Amar Dedić (FC26 OVR73, PAC83, SHO58, PAS68, DRI74, DEF66, PHY74)
+      {name:"デディッチ",en_name:"Dedic",long_name:"アマル・デディッチ",positions:["右SB","右SMF"],params:[74,76,83,84,72,70,72,72,73,68,63,50,52,54,42,44,68,52,64,66,64,64,68,50,50,68,68,70,75]},
+      // CB: Tarik Muharemović (FC26 OVR74, PAC62, SHO23, PAS53, DRI60, DEF76, PHY74)
+      {name:"ムハレモヴィッチ",en_name:"Muharemovic",long_name:"タリク・ムハレモヴィッチ",positions:["CB"],params:[74,72,62,63,72,78,56,56,56,53,48,20,22,24,22,22,52,24,74,76,74,76,74,50,50,80,70,72,75]},
+      // CB: Nikola Katić (FC26 OVR72, PAC58, SHO35, PAS46, DRI53, DEF70, PHY86)
+      {name:"カティッチ",en_name:"Katic",long_name:"ニコラ・カティッチ",positions:["CB"],params:[86,80,58,59,68,88,48,48,48,46,42,32,34,36,26,26,46,22,68,72,70,70,68,50,50,84,66,68,75]},
+      // CB/LB: Sead Kolašinac (FC26 OVR79, PAC61, SHO63, PAS68, DRI69, DEF79, PHY82)
+      {name:"コラシナツ",en_name:"Kolasinac",long_name:"セアド・コラシナツ",positions:["CB","左SB"],params:[82,80,61,62,75,80,64,64,65,68,62,55,57,59,46,48,62,30,77,79,77,79,77,50,50,80,74,76,75]},
+      // CDM: Amir Hadžiahmetović (FC26 OVR71, PAC52, SHO60, PAS72, DRI68, DEF68, PHY70)
+      {name:"ハジアフメトヴィッチ",en_name:"Hadziahmetovic",long_name:"アミル・ハジアフメトヴィッチ",positions:["DMF","CMF"],params:[70,72,52,53,64,68,64,64,65,72,67,52,54,56,42,44,62,58,68,70,68,68,66,50,50,68,64,66,75]},
+      // CDM: Benjamin Tahirović (FC26 OVR66, PAC51, SHO50, PAS62, DRI65, DEF61, PHY70)
+      {name:"タヒロヴィッチ",en_name:"Tahirovic",long_name:"ベンジャミン・タヒロヴィッチ",positions:["DMF","CMF"],params:[68,70,51,52,61,66,60,60,61,62,57,44,46,48,36,38,58,50,60,63,60,60,59,50,50,66,58,60,75]},
+      // RMF: Amar Memić (FC26 OVR75, PAC89, SHO69, PAS71, DRI73, DEF62, PHY68)
+      {name:"メミッチ",en_name:"Memic",long_name:"アマル・メミッチ",positions:["右WG","右SMF"],params:[66,68,89,91,70,62,70,70,71,71,65,63,65,67,50,54,68,66,60,62,60,60,62,50,50,62,66,68,75]},
+      // RW/OMF: Esmir Bajraktarević (FC26 OVR72, PAC77, SHO61, PAS67, DRI79, DEF44, PHY61)
+      {name:"バイラクタレヴィッチ",en_name:"Bajraktarevic",long_name:"エスミル・バイラクタレヴィッチ",positions:["右WG","OMF","右SMF"],params:[58,60,77,79,76,56,76,76,77,67,61,55,57,59,44,48,74,64,42,44,42,42,46,50,50,54,68,66,75]},
+      // LMF: Kerim Alajbegović (FC26 OVR68, PAC70, SHO70, PAS66, DRI71, DEF39, PHY58)
+      {name:"アライベゴヴィッチ",en_name:"Alajbegovic",long_name:"ケリム・アライベゴヴィッチ",positions:["左WG","左SMF","OMF"],params:[56,58,70,72,68,54,68,68,69,66,61,65,67,68,48,50,66,64,37,41,39,39,41,50,50,52,62,60,75]},
+      // CF: Ermedin Demirović (FC26 OVR80, PAC72, SHO81, PAS73, DRI78, DEF42, PHY78)
+      {name:"デミロヴィッチ",en_name:"Demirovic",long_name:"エルメディン・デミロヴィッチ",positions:["CF","OMF"],params:[78,80,72,74,74,76,74,74,75,73,67,77,79,78,58,60,72,76,40,44,40,40,44,50,50,74,76,76,75]},
+      // Sub CF: Edin Džeko (FC26 OVR81, PAC55, SHO82, PAS74, DRI77, DEF40, PHY72)
+      {name:"ジェコ",en_name:"Dzeko",long_name:"エディン・ジェコ",positions:["CF","OMF"],params:[72,66,55,56,73,76,71,71,73,74,68,78,80,79,62,62,71,76,38,42,38,38,44,50,50,80,78,80,75]},
+      // Sub ST: Haris Tabaković (FC26 OVR75, PAC60, SHO74, PAS52, DRI67, DEF33, PHY80)
+      {name:"タバコヴィッチ",en_name:"Tabakovic",long_name:"ハリス・タバコヴィッチ",positions:["CF"],params:[80,74,60,61,63,84,61,61,63,52,48,68,70,71,48,50,60,72,32,35,32,32,37,50,50,84,68,70,75]},
+      // Sub ST: Samed Baždar (FC26 OVR67, PAC61, SHO65, PAS69, DRI73, DEF40, PHY59)
+      {name:"バジュダル",en_name:"Bazdar",long_name:"サメド・バジュダル",positions:["CF","左WG","OMF"],params:[58,60,61,63,68,54,68,68,69,69,64,60,62,63,46,48,66,62,38,42,38,38,42,50,50,52,58,60,75]},
+      // Sub ST: Jovo Lukić (FC26 OVR70, PAC67, SHO69, PAS59, DRI64, DEF29, PHY76)
+      {name:"J・ルキッチ",en_name:"Lukic",long_name:"ヨヴォ・ルキッチ",positions:["CF"],params:[76,72,67,68,60,78,60,60,61,59,54,63,65,66,44,46,57,66,28,31,28,28,33,50,50,72,62,64,75]},
+      // Sub CMF: Armin Gigović (FC26 OVR71, PAC65, SHO60, PAS70, DRI74, DEF63, PHY75)
+      {name:"ギゴヴィッチ",en_name:"Gigovic",long_name:"アルミン・ギゴヴィッチ",positions:["CMF","DMF","右SMF"],params:[74,76,65,66,70,72,70,70,71,70,65,54,56,58,42,44,68,60,62,65,62,62,61,50,50,72,64,66,75]},
+      // Sub CMF: Denis Burnić (FC26 OVR69, PAC76, SHO59, PAS66, DRI71, DEF64, PHY68)
+      {name:"ブルニッチ",en_name:"Burnic",long_name:"デニス・ブルニッチ",positions:["CMF","右SMF","DMF"],params:[68,70,76,78,67,64,67,67,69,66,61,52,54,56,40,42,65,58,62,66,62,62,64,50,50,64,62,64,75]},
+      // Sub DMF: Ivan Šunjić (~OVR66, PAC55, SHO42, PAS60, DRI56, DEF65, PHY68)
+      {name:"シュニッチ",en_name:"Sunjic",long_name:"イヴァン・シュニッチ",positions:["DMF","CMF"],params:[70,70,55,56,58,68,58,58,60,65,60,38,40,42,32,34,55,50,64,68,64,64,64,50,50,66,60,62,75]},
+      // Sub MF: Ivan Bašić (~OVR65, PAC62, SHO52, PAS64, DRI62, DEF59, PHY60)
+      {name:"バシッチ",en_name:"Basic",long_name:"イヴァン・バシッチ",positions:["CMF","DMF"],params:[62,64,68,69,62,60,62,62,63,64,59,51,53,55,38,40,60,55,56,60,56,56,58,50,50,58,58,60,75]},
+      // Sub MF: Ermin Mahmić (~OVR63, PAC66, SHO50, PAS60, DRI60, DEF55, PHY56)
+      {name:"マフミッチ",en_name:"Mahmic",long_name:"エルミン・マフミッチ",positions:["CMF","左SMF"],params:[60,62,70,72,60,56,60,60,61,60,55,48,50,52,36,38,58,52,54,58,54,54,56,50,50,56,54,56,75]},
+      // Sub CB: Nidal Čelik (FC26 OVR69, PAC60, SHO35, PAS52, DRI53, DEF67, PHY72)
+      {name:"チェリク",en_name:"Celik",long_name:"ニダル・チェリク",positions:["CB"],params:[72,70,60,61,63,76,49,49,50,52,47,32,34,36,24,24,46,24,65,67,65,65,65,50,50,76,62,64,75]},
+      // Sub CB: Nihad Mujakić (FC26 OVR67, PAC71, SHO28, PAS50, DRI55, DEF66, PHY77)
+      {name:"ムヤキッチ",en_name:"Mujakic",long_name:"ニハド・ムヤキッチ",positions:["CB","右SB"],params:[76,72,71,72,64,81,51,51,52,50,45,26,28,30,22,22,48,22,64,66,64,64,64,50,50,79,60,62,75]},
+      // Sub CB: Denis Hadžikadunić (FC26 OVR69, PAC64, SHO32, PAS52, DRI53, DEF67, PHY74)
+      {name:"ハジカドゥニッチ",en_name:"Hadzikadunic",long_name:"デニス・ハジカドゥニッチ",positions:["CB","左SB"],params:[72,70,64,65,64,74,52,52,53,52,47,32,34,36,24,24,49,24,66,68,66,66,66,50,50,76,62,64,75]},
+      // Sub LB: Stjepan Radeljić (~OVR65, PAC72, SHO40, PAS58, DRI55, DEF62, PHY62)
+      {name:"ラデリッチ",en_name:"Radeljic",long_name:"ステパン・ラデリッチ",positions:["左SB","右SB"],params:[64,66,72,73,60,62,58,58,59,58,53,37,39,41,28,30,55,36,60,64,60,60,62,50,50,62,56,58,75]},
+      // Sub GK: Martin Zlomislić (~OVR61, DIV62, HAN60, KIC56, REF62, SPD58, POS62)
+      {name:"ズロミスリッチ",en_name:"Zlomislic",long_name:"マルティン・ズロミスリッチ",positions:["GK"],params:[50,50,50,50,62,58,50,50,50,50,56,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,62,60,75]},
+      // Sub GK: Osman Hadžikić (~OVR58, DIV58, HAN56, KIC52, REF58, SPD55, POS58)
+      {name:"ハジキッチ",en_name:"Hadzikic",long_name:"オスマン・ハジキッチ",positions:["GK"],params:[50,50,50,50,58,55,50,50,50,50,52,50,50,50,50,50,50,50,50,50,50,50,50,58,56,50,58,57,75]}
     ]
   },
 };
