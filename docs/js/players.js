@@ -988,10 +988,8 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "オカフォー": {"profile": "爆発的な加速力と高い技術を武器にサイドから仕掛ける若きアタッカー。マルチポジションをこなし、試合の流れを変える切り札的存在。", "profile_en": "A young attacker who drives from wide positions with explosive pace and technical quality. Versatile and capable of changing the game as an impact substitute.", "height": 181, "weight": 77},
 "デュア": {"profile": "鋭いスプリントと積極的な仕掛けを武器とする右WG。代表での経験を積みながらスイスの攻撃に推進力と得点力をもたらす。", "profile_en": "A right winger armed with explosive pace and direct attacking intent. Growing his international experience while providing pace and goal threat to the Swiss attack.", "height": 185, "weight": 79},
 "ゾウ": {"profile": "勤勉な守備貢献と豊富なスタミナでスイス中盤を支えるCMF。試合を通じて高い強度を維持しながらチームのバランスを整える。", "profile_en": "A CMF who supports Switzerland's midfield with diligent defensive work and high stamina. Maintains intensity throughout the game while keeping the team balanced.", "height": 184, "weight": 78},
-"ツェジガー": {"profile": "193cmの長身を活かした制空権と安定したポジショニングを誇るCB。スイス守備の厚みをもたらす大型センターバック。", "profile_en": "A 193cm CB who dominates aerially with reliable positioning. Adds physical depth to Switzerland's defensive options.", "height": 193, "weight": 87},
 "ムボゴ": {"profile": "反応速度と高いセービング能力を誇るGK。経験豊富な控えGKとして代表に帯同し、守護神陣に厚みをもたらす。", "profile_en": "A goalkeeper with sharp reflexes and strong shot-stopping ability. A capable backup keeper who adds depth to Switzerland's goalkeeping options.", "height": 190, "weight": 88},
 "ファスナハト": {"profile": "スピードとドリブルで右サイドを駆け上がる運動量豊富なウィンガー。積極的な仕掛けとクロス精度でスイスの攻撃を活性化する。", "profile_en": "An energetic winger who charges down the right flank with pace and dribbling. His direct running and crossing ability activate Switzerland's attacking play.", "height": 183, "weight": 77},
-"ゼフェロヴィッチ": {"profile": "ポストプレーと高さを活かした動きで前線に起点を作る大型ストライカー。力強いフィジカルと嗅覚の鋭さでゴールを狙い続けるベテランCF。", "profile_en": "A powerful target-man who creates a focal point upfront with his height and hold-up play. A veteran CF who uses his physicality and sharp instincts to remain a constant goal threat.", "height": 187, "weight": 82},
 "ムヘイム": {"profile": "スピードとスタミナを武器にスイスの左サイドを疾走する若手左SB。正確なクロスと安定した守備でロドリゲスの後継候補として代表に定着しつつある。", "profile_en": "A young left-back who charges down Switzerland's left flank with pace and stamina. His precise crossing and solid defending make him an emerging candidate to succeed Rodriguez.", "height": 181, "weight": 74},
 "アメンダ": {"profile": "192cmの長身と機動力を兼備するスイス期待の若手CB。フィジカルの強さと読みの鋭さで守備ラインを統率するポテンシャルを秘めた大型センターバック。", "profile_en": "A promising young Swiss CB combining a 192cm frame with mobility. His physicality and sharp reading of the game give him the potential to marshal the defensive line.", "height": 192, "weight": 85},
 "ドンナルンマ": {"profile": "190cmの長身と圧倒的な反射神経でゴールを守るイタリア最高のGK。ビッグセーブを連発し代表の守護神として不動の地位を確立している。", "profile_en": "Italy's supreme goalkeeper at 190cm, with extraordinary reflexes and shot-stopping. An unshakeable No.1 who regularly produces match-winning saves.", "height": 190, "weight": 90},
@@ -3062,14 +3060,10 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"デュア",en_name:"Duah",long_name:"クワドウォ・デュア",positions:["右WG","CF"],params:[68,70,84,86,79,64,72,72,79,64,60,62,64,64,52,58,72,64,40,42,42,41,40,50,50,60,68,70,75]},
       // Sub CMF: Sow (FC26 OVR74, PAC72, SHO64, PAS70, DRI72, DEF70, PHY76)
       {name:"ゾウ",en_name:"Sow",long_name:"エリアス・ゾウ",positions:["CMF","DMF"],params:[76,78,72,72,72,70,68,70,72,70,66,56,58,60,46,50,70,58,68,70,70,69,68,50,50,70,66,70,75]},
-      // Sub CB: Zesiger (FC26 OVR73, PAC72, SHO40, PAS62, DRI60, DEF74, PHY78)
-      {name:"ツェジガー",en_name:"Zesiger",long_name:"モルガン・ツェジガー",positions:["CB"],params:[78,76,72,70,66,80,56,56,66,62,58,32,28,36,28,34,58,34,72,74,74,73,72,50,50,76,66,72,75]},
       // Sub GK: Mvogo (FC26 OVR76, DIV76, HAN74, KIC74, REF77, SPD66, POS75)
       {name:"ムボゴ",en_name:"Mvogo",long_name:"オマリン・ムボゴ",positions:["GK"],params:[50,50,50,50,77,66,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,75,74,75]},
       // Sub RW: Fassnacht (FC26 OVR73, PAC80, SHO68, PAS68, DRI74, DEF48, PHY68)
       {name:"ファスナハト",en_name:"Fassnacht",long_name:"クリスティアン・ファスナハト",positions:["右SMF","右WG","左SMF"],params:[68,70,80,82,77,64,72,72,77,68,64,62,64,64,50,56,72,62,44,46,46,45,44,50,50,62,68,68,75]},
-      // Sub CF: Seferovic (FC26 OVR72, PAC75, SHO72, PAS60, DRI68, DEF34, PHY74)
-      {name:"ゼフェロヴィッチ",en_name:"Seferovic",long_name:"ハリス・ゼフェロヴィッチ",positions:["CF"],params:[74,74,75,76,71,72,66,68,71,60,56,70,68,70,52,56,66,68,30,32,32,31,30,50,50,72,68,70,75]},
       // Sub LB: Muheim (FC26 OVR75, PAC80, SHO54, PAS68, DRI72, DEF72, PHY72)
       {name:"ムヘイム",en_name:"Muheim",long_name:"ミロ・ムヘイム",positions:["左SB","左SMF"],params:[72,74,80,82,76,68,70,70,76,68,64,44,46,48,38,44,70,48,70,72,72,71,70,50,50,62,66,70,75]},
       // Sub CB: Amenda (FC26 OVR78, PAC78, SHO46, PAS70, DRI70, DEF78, PHY82)
