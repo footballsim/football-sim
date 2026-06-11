@@ -4181,10 +4181,10 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ムバタ",en_name:"Mbatha",long_name:"タランテ・ムバタ",positions:["CMF","DMF"],params:[66,68,70,72,65,64,61,61,67,68,63,50,52,52,38,39,59,49,60,62,60,62,60,50,50,60,57,63,75]},
       // RW: Oswin Appollis (FC26 OVR75, ~PAC88, SHO66, PAS67, DRI78, DEF30, PHY60)
       {name:"アポリス",en_name:"Appollis",long_name:"オスウィン・アポリス",positions:["右WG","右SMF"],params:[60,60,88,90,82,56,76,76,83,67,62,62,64,64,48,49,74,62,28,32,28,28,32,50,50,52,71,71,75]},
-      // OMF: Themba Zwane (~OVR66, PAC68, SHO64, PAS66, DRI70, DEF35, PHY56)
-      {name:"ズワネ",en_name:"Zwane",long_name:"テンバ・ズワネ",positions:["左WG","OMF","右WG"],params:[56,55,68,70,67,52,67,67,69,66,61,60,62,62,46,47,65,61,31,36,31,31,36,50,50,48,63,63,75]},
       // 左SMF: Tshepang Moremi (~OVR63, PAC75, SHO57, PAS61, DRI67, DEF29, PHY58)
       {name:"モレミ",en_name:"Moremi",long_name:"チェパン・モレミ",positions:["左SMF","左WG","OMF"],params:[58,58,75,77,69,54,65,65,71,61,56,53,55,55,41,42,63,54,25,30,25,25,30,50,50,50,60,60,75]},
+      // OMF: Themba Zwane (~OVR66, PAC68, SHO64, PAS66, DRI70, DEF35, PHY56)
+      {name:"ズワネ",en_name:"Zwane",long_name:"テンバ・ズワネ",positions:["左WG","OMF","右WG"],params:[56,55,68,70,67,52,67,67,69,66,61,60,62,62,46,47,65,61,31,36,31,31,36,50,50,48,63,63,75]},
       // CF: Lyle Foster (FC26 OVR72, PAC81, SHO72, PAS61, DRI69, DEF36, PHY73)
       {name:"フォスター",en_name:"Foster",long_name:"ライル・フォスター",positions:["CF"],params:[73,74,81,83,75,70,65,65,75,61,57,68,70,70,52,53,63,68,32,37,32,32,37,50,50,70,69,68,75]},
       // Sub CF: Evidence Makgopa (~OVR68, PAC72, SHO68, PAS52, DRI64, DEF30, PHY74)
