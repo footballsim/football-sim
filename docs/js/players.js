@@ -4181,18 +4181,18 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ムバタ",en_name:"Mbatha",long_name:"タランテ・ムバタ",positions:["CMF","DMF"],params:[66,68,70,72,65,64,61,61,67,68,63,50,52,52,38,39,59,49,60,62,60,62,60,50,50,60,57,63,75]},
       // RW: Oswin Appollis (FC26 OVR75, ~PAC88, SHO66, PAS67, DRI78, DEF30, PHY60)
       {name:"アポリス",en_name:"Appollis",long_name:"オスウィン・アポリス",positions:["右WG","右SMF"],params:[60,60,88,90,82,56,76,76,83,67,62,62,64,64,48,49,74,62,28,32,28,28,32,50,50,52,71,71,75]},
-      // CAM: Relebohile Mofokeng (FC26 OVR65, ~PAC82, SHO62, PAS62, DRI72, DEF28, PHY54)
-      {name:"モフォケン",en_name:"Mofokeng",long_name:"レレボヒレ・モフォケン",positions:["左WG","OMF","右WG"],params:[54,54,82,84,75,50,70,70,77,62,57,58,60,60,45,46,68,59,24,29,24,24,29,50,50,46,62,62,75]},
-      // LAM: Tshepang Moremi (~OVR63, PAC75, SHO57, PAS61, DRI67, DEF29, PHY58)
-      {name:"モレミ",en_name:"Moremi",long_name:"チェパン・モレミ",positions:["左WG","OMF"],params:[58,58,75,77,69,54,65,65,71,61,56,53,55,55,41,42,63,54,25,30,25,25,30,50,50,50,60,60,75]},
+      // OMF: Themba Zwane (~OVR66, PAC68, SHO64, PAS66, DRI70, DEF35, PHY56)
+      {name:"ズワネ",en_name:"Zwane",long_name:"テンバ・ズワネ",positions:["左WG","OMF","右WG"],params:[56,55,68,70,67,52,67,67,69,66,61,60,62,62,46,47,65,61,31,36,31,31,36,50,50,48,63,63,75]},
+      // 左SMF: Tshepang Moremi (~OVR63, PAC75, SHO57, PAS61, DRI67, DEF29, PHY58)
+      {name:"モレミ",en_name:"Moremi",long_name:"チェパン・モレミ",positions:["左SMF","左WG","OMF"],params:[58,58,75,77,69,54,65,65,71,61,56,53,55,55,41,42,63,54,25,30,25,25,30,50,50,50,60,60,75]},
       // CF: Lyle Foster (FC26 OVR72, PAC81, SHO72, PAS61, DRI69, DEF36, PHY73)
       {name:"フォスター",en_name:"Foster",long_name:"ライル・フォスター",positions:["CF"],params:[73,74,81,83,75,70,65,65,75,61,57,68,70,70,52,53,63,68,32,37,32,32,37,50,50,70,69,68,75]},
       // Sub CF: Evidence Makgopa (~OVR68, PAC72, SHO68, PAS52, DRI64, DEF30, PHY74)
       {name:"マクゴパ",en_name:"Makgopa",long_name:"エビデンス・マクゴパ",positions:["CF"],params:[74,74,72,74,68,72,60,60,68,52,48,64,66,66,49,50,58,64,26,31,26,26,31,50,50,72,65,65,75]},
       // Sub CF: Iqraam Rayners (~OVR67, PAC76, SHO67, PAS52, DRI63, DEF28, PHY72)
       {name:"レイナース",en_name:"Rayners",long_name:"イクラーム・レイナース",positions:["CF"],params:[72,72,76,78,69,70,59,59,69,52,48,63,65,65,48,50,57,63,24,29,24,24,29,50,50,70,64,64,75]},
-      // Sub LW: Themba Zwane (~OVR66, PAC68, SHO64, PAS66, DRI70, DEF35, PHY56)
-      {name:"ズワネ",en_name:"Zwane",long_name:"テンバ・ズワネ",positions:["左WG","OMF","右WG"],params:[56,55,68,70,67,52,67,67,69,66,61,60,62,62,46,47,65,61,31,36,31,31,36,50,50,48,63,63,75]},
+      // Sub CAM: Relebohile Mofokeng (FC26 OVR65, ~PAC82, SHO62, PAS62, DRI72, DEF28, PHY54)
+      {name:"モフォケン",en_name:"Mofokeng",long_name:"レレボヒレ・モフォケン",positions:["左WG","OMF","右WG"],params:[54,54,82,84,75,50,70,70,77,62,57,58,60,60,45,46,68,59,24,29,24,24,29,50,50,46,62,62,75]},
       // Sub RW: Thapelo Maseko (~OVR63, PAC78, SHO60, PAS58, DRI67, DEF28, PHY54)
       {name:"マセコ",en_name:"Maseko",long_name:"タパロ・マセコ",positions:["右WG","右SMF"],params:[54,54,78,80,71,50,65,65,73,58,53,56,58,58,43,44,63,57,24,29,24,24,29,50,50,46,60,60,75]},
       // Sub CDM: Sphephelo Sithole (FC26 OVR65, PAC64, SHO53, PAS59, DRI61, DEF64, PHY74)
