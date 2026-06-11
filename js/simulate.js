@@ -795,6 +795,7 @@ function showScreen(name) {
       {data: TEAM_DATA.paraguay2026,          key: 'paraguay2026'},
       {data: TEAM_DATA.algeria2026,           key: 'algeria2026'},
       {data: TEAM_DATA.bosnia2026,            key: 'bosnia2026'},
+      {data: TEAM_DATA.southafrica2026,       key: 'southafrica2026'},
     ]);
     document.getElementById('players2018-body').dataset.built = '1';
   }
@@ -843,6 +844,7 @@ const SINGLE_TEAMS = [
   {key:'paraguay2026',       label:'パラグアイ', flag:'🇵🇾'},
   {key:'algeria2026',        label:'アルジェリア', flag:'🇩🇿'},
   {key:'bosnia2026',         label:'ボスニア・ヘルツェゴビナ', flag:'🇧🇦'},
+  {key:'southafrica2026',    label:'南アフリカ', flag:'🇿🇦'},
 ];
 
 let _singleTeam1Key = null;

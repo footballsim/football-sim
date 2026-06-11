@@ -1389,7 +1389,33 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ハジカドゥニッチ": {"profile": "守備の安定感とビルドアップ能力を兼備するCB。戦術的な理解と確実なカバーリングでバックラインを補強する欧州で磨かれた万能型DF。", "profile_en": "A CB combining defensive stability with build-up ability. A versatile defender who reinforces the backline with tactical understanding and reliable covering, refined across a European career.", "height": 186, "weight": 80},
 "ラデリッチ": {"profile": "スピードと堅実な守備でボスニアの左サイドを担う控えSB。精力的な走りとポジショニングで側面を安定させ、代表のサイドバック層を厚くする。", "profile_en": "A backup full-back who covers Bosnia's left side with pace and solid defending. He stabilises the flank with energetic running and positioning, adding depth to the national team's full-back options.", "height": 180, "weight": 75},
 "ズロミスリッチ": {"profile": "クロアチアリーグで経験を積む控えGK。安定したセービングとポジショニングでチームを支え、代表GK候補として着実に成長している2番手守護神。", "profile_en": "A backup goalkeeper gaining experience in the Croatian league. Supporting the team with composed shot-stopping and positioning, a second-choice goalkeeper steadily developing as a national team candidate.", "height": 186, "weight": 81},
-"ハジキッチ": {"profile": "代表第3GKとしてスクワッドに名を連ねるバックアップ守護神。冷静なセービングと判断力でゴールを守り、いざという時の備えとして代表のGK層を支える。", "profile_en": "A backup goalkeeper listed in the squad as the national team's third GK. Guarding the goal with composed shot-stopping and decision-making, supporting the national team's goalkeeping depth as a reliable emergency option.", "height": 185, "weight": 80}
+"ハジキッチ": {"profile": "代表第3GKとしてスクワッドに名を連ねるバックアップ守護神。冷静なセービングと判断力でゴールを守り、いざという時の備えとして代表のGK層を支える。", "profile_en": "A backup goalkeeper listed in the squad as the national team's third GK. Guarding the goal with composed shot-stopping and decision-making, supporting the national team's goalkeeping depth as a reliable emergency option.", "height": 185, "weight": 80},
+"ウィリアムズ": {"profile": "ハイボール処理と正確なリフレクスを武器にアフリカを代表する守護神。巧みなポジショニングと統率力でバファナのゴールを守り、チームキャプテンとして精神的支柱となる。", "profile_en": "A goalkeeper representing the best in Africa with commanding aerial presence and precise reflexes. His astute positioning and leadership protect Bafana's goal, serving as the team's captain and spiritual pillar.", "height": 184, "weight": 81},
+"ムダウ": {"profile": "高い運動量と攻撃参加を武器にする右SB。鋭い上下動でサイドを制圧し、危機察知能力の高い守備と積極的なオーバーラップで南アフリカの右翼を活性化させる。", "profile_en": "A right back who weaponises high work rate and attacking forays. Dominating the flank with sharp up-and-down movement, his alertness in defence combined with proactive overlapping runs energises South Africa's right flank.", "height": 175, "weight": 70},
+"オコン": {"profile": "スピードと強靭なフィジカルを持ち合わせるCB。空中戦の強さと対人守備の安定感でバファナのバックラインを支え、ハイラインを維持する際の信頼性が高い守備者。", "profile_en": "A centre-back combining pace with physical robustness. Supporting Bafana's backline with aerial strength and composed one-on-one defending, a reliable figure when the team needs to hold a high defensive line.", "height": 187, "weight": 80},
+"ムボカジ": {"profile": "オーランド・パイレーツで鍛えられた国内リーグ屈指のCB。競り合いの強さと勝負強さでバファナの守備を引き締め、代表に欠かせないコンビを形成する大柄な守備の要。", "profile_en": "One of the domestic league's standout centre-backs, honed at Orlando Pirates. Tightening Bafana's defence with aerial dominance and fighting spirit, a big-framed defensive lynchpin who forms an indispensable partnership in the national team.", "height": 188, "weight": 82},
+"モジバ": {"profile": "左サイドを果敢に駆け上がる攻守両面で貢献するLB。スプリント力と積極的な前線参加でチームの幅を広げ、国内リーグで培った守備のタフさも代表で発揮する。", "profile_en": "A left back who boldly charges up the left side, contributing both in defence and attack. His sprinting ability and proactive forward runs broaden the team's width, while the defensive toughness developed in the domestic league shines through for the national team.", "height": 178, "weight": 72},
+"モコエナ": {"profile": "司令塔的役割を担うダイナミックなDMF。セットプレーからのゴールも持ち味であり、豊富な運動量と正確なパスワークでバファナ中盤の心臓として機能する国内屈指のMF。", "profile_en": "A dynamic defensive midfielder who plays the role of a conductor. A threat from set-pieces, his boundless energy and accurate passing make him the heart of Bafana's midfield — among the finest midfielders in the domestic league.", "height": 176, "weight": 72},
+"ムバタ": {"profile": "中盤の守備的エリアをカバーしながらビルドアップにも加わるCMF。スペースを塞ぐインターセプトとシンプルな繋ぎでチームのリズムを維持し、モコエナを支える欠かせないパートナー。", "profile_en": "A central midfielder who covers the defensive midfield area while also contributing to build-up play. Maintaining the team's rhythm with interceptions and simple passing, an indispensable partner supporting Mokoena.", "height": 180, "weight": 74},
+"アポリス": {"profile": "爆発的なスピードと鋭いドリブルで相手守備を切り裂くRW。国内リーグ屈指の突破力を誇り、南アフリカ最大の攻撃兵器として対戦相手の脅威となるウィンガー。", "profile_en": "A right winger who tears apart opposing defences with explosive pace and sharp dribbling. Boasting the most penetrating play in the domestic league, he is South Africa's biggest attacking weapon and a constant threat to opponents.", "height": 180, "weight": 70},
+"モフォケン": {"profile": "俊足と予測不能なドリブルでDFを翻弄する若き左WG。その直接的なプレーは見る者を魅了し、若さゆえの大胆さとセンスで南アフリカ攻撃に新たな創造性をもたらす。", "profile_en": "A young left winger who bewilders defenders with blistering pace and unpredictable dribbling. His direct style is a joy to watch, and the boldness and flair of youth bring fresh creativity to South Africa's attack.", "height": 175, "weight": 65},
+"モレミ": {"profile": "攻撃的なポジションをこなす多才なアタッカー。左サイドを中心に縦への推進力とフィニッシュを見せ、南アフリカの攻撃に幅と深みを与えるマルチロールプレーヤー。", "profile_en": "A versatile attacker who handles multiple offensive roles. Showing forward drive and finishing ability mainly from the left side, a multi-role player who gives width and depth to South Africa's attack.", "height": 174, "weight": 68},
+"フォスター": {"profile": "欧州でプレーする南アフリカの顔となるストライカー。フィジカルの強さとスプリント力を活かした裏への抜け出しと、確実なフィニッシュでゴールを量産するエースFW。", "profile_en": "South Africa's flagship striker playing in Europe. Producing goals with aggressive runs in behind exploiting his physicality and sprint speed, and confident finishing — the national team's ace forward.", "height": 185, "weight": 70},
+"マクゴパ": {"profile": "強さと速さを兼備するオーランド・パイレーツのエースストライカー。プレッシャー下でも冷静さを失わないゴール前での落ち着きと、高い決定力で代表の得点源として活躍する。", "profile_en": "Orlando Pirates' ace striker who combines strength and speed. Staying composed in front of goal even under pressure, and with high finishing quality, a key source of goals for the national team.", "height": 183, "weight": 78},
+"レイナース": {"profile": "ペナルティエリア内での嗅覚と力強いシュートを武器とするCF。素早い動き出しと巧みなポジショニングで相手CBの死角に入り込み、チャンスをゴールに変える決定力を持つ。", "profile_en": "A centre-forward whose weapons are penalty-area instinct and powerful shooting. Sneaking into blind spots behind centre-backs with quick movement and clever positioning, possessing the clinical finishing to convert chances.", "height": 181, "weight": 77},
+"ズワネ": {"profile": "高い技術と巧みなキープ力で長年代表の攻撃を牽引してきたベテランOMF。経験豊富なゲームメイクとファイナルサードでの閃きが際立ち、南アフリカ代表を象徴する存在。", "profile_en": "A veteran offensive midfielder who has led the national team's attack for years with high technique and clever ball retention. His experienced game-reading and flashes of brilliance in the final third are outstanding — a symbol of the South Africa national team.", "height": 172, "weight": 67},
+"マセコ": {"profile": "縦への推進力と積極的なシュートが持ち味の右WG。サイドを深く抉ってクロスを上げる能力と、自らゴールを奪う得点感覚を兼備した攻撃的なウィンガー。", "profile_en": "A right winger whose strengths are forward drive and aggressive shooting. An attack-minded winger who can both drive deep to deliver crosses and finish with goal-scoring instinct of his own.", "height": 173, "weight": 67},
+"シトール": {"profile": "豊富なスタミナと激しいプレスで相手中盤を制圧するDMF。インターセプトの技術と運動量でチームの守備的バランスを確保し、モコエナと共にバファナのMFラインを安定させる。", "profile_en": "A defensive midfielder who suppresses the opposing midfield with boundless stamina and intense pressing. Securing the team's defensive balance with interception technique and work rate, stabilising Bafana's midfield line alongside Mokoena.", "height": 179, "weight": 76},
+"J・アダムス": {"profile": "技術と献身を兼備するCMF。ダイナミックな走り込みとスマートなポジショニングで中盤を活性化させ、攻守の切り替えが速い南アフリカ代表に欠かせないエンジン役。", "profile_en": "A central midfielder combining technique and dedication. Energising the midfield with dynamic runs and smart positioning, an essential engine for a South Africa side that transitions quickly between attack and defence.", "height": 177, "weight": 70},
+"カビニ": {"profile": "献身的な守備と安定した守備ラインの維持を得意とする左SB。速さを活かした守備と堅実なポジショニングでチームのサイドを守り、出番があれば確実に職責を果たす控えSB。", "profile_en": "A left back specialising in committed defending and maintaining a stable defensive line. Protecting the team's flank with pace-based defending and solid positioning, a dependable backup full-back who performs his role reliably when called upon.", "height": 176, "weight": 68},
+"マカニャ": {"profile": "俊足を持ちながら守備面での成長が求められる若いCB。スピードを活かしてラインを統制し、代表での出場経験を積み重ねながら着実に成長を見せているディフェンダー。", "profile_en": "A young centre-back possessing pace who is developing on the defensive side. Controlling the line using his speed, a defender steadily growing while accumulating international experience.", "height": 183, "weight": 75},
+"シビシ": {"profile": "空中戦と対人守備に優れるオーランド・パイレーツ出身のCB。リーダーシップと経験でバファナのディフェンスラインを引き締め、ムボカジとの連携でゴールを守る頼れる守備者。", "profile_en": "A centre-back from Orlando Pirates excelling in aerial duels and one-on-one defending. Tightening Bafana's defensive line with leadership and experience, a reliable defender protecting the goal in combination with Mbokazi.", "height": 186, "weight": 81},
+"ンダマネ": {"profile": "フィジカルを活かした守備と競り合いの強さでCBポジションをこなすバックアップ守備者。しっかりとしたディフェンスとチームへの貢献で代表スクワッドの守備的厚みを加える。", "profile_en": "A backup defender who handles the centre-back role using physicality and strength in duels. Adding defensive depth to the national team squad with solid defending and team contribution.", "height": 184, "weight": 78},
+"B・クロス": {"profile": "代表でのキャリアをスタートさせたばかりの新鋭CB。力強い1対1と高さを武器に代表の守備ラインに加わり、将来への期待が高いアタリに新世代ディフェンダー。", "profile_en": "A emerging centre-back who has just started his international career. Joining the national defensive line with strong one-on-one ability and aerial presence, a next-generation defender of high future potential.", "height": 182, "weight": 76},
+"マトゥルディ": {"profile": "右サイドも左サイドもこなせる器用なバックアップSB。スピードを武器に両翼をカバーし、代表でのサイドバック層の厚みに貢献するユーティリティプレーヤー。", "profile_en": "A versatile backup full-back who can handle both right and left sides. Covering both flanks with pace as his weapon, a utility player who contributes to the depth of the national team's full-back options.", "height": 176, "weight": 70},
+"セベレベレ": {"profile": "代表スクワッドに名を連ねる守備的多目的プレーヤー。守備の安定性と献身的な走りでチームをサポートし、出番が来た時に確実に役割を果たすことを目指すSBの控え要員。", "profile_en": "A defensive utility player who has earned a place in the national squad. Supporting the team with defensive stability and dedicated running, a full-back backup aiming to fulfil his role reliably when his opportunity comes.", "height": 175, "weight": 70},
+"チャイニ": {"profile": "代表正GKの後釜を務める安定したバックアップ守護神。高い集中力とハンドリングでゴールを守り、ウィリアムズに次ぐGK層の柱として代表の守護神争いを活性化させる。", "profile_en": "A stable backup goalkeeper who stands as heir to the national team's number one. Protecting the goal with high concentration and solid handling, a key pillar of the goalkeeping depth behind Williams, keeping the competition for the national team's number one spot lively.", "height": 186, "weight": 80},
+"ゴス": {"profile": "代表第3GKとして貴重なバックアップを務める守護神。落ち着いたセービングと的確な判断力でチームに安心感を与え、突発的な状況に備えるGK陣の最後の砦。", "profile_en": "A goalkeeper serving as a valuable backup as the national team's third choice. Giving the team reassurance with composed shot-stopping and sound decision-making, the last line of defence in the goalkeeping group prepared for any emergency.", "height": 187, "weight": 84}
 };
 
 const PARAM_NAMES = [
@@ -4079,6 +4105,66 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ズロミスリッチ",en_name:"Zlomislic",long_name:"マルティン・ズロミスリッチ",positions:["GK"],params:[50,50,50,50,62,58,50,50,50,50,56,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,62,60,75]},
       // Sub GK: Osman Hadžikić (~OVR58, DIV58, HAN56, KIC52, REF58, SPD55, POS58)
       {name:"ハジキッチ",en_name:"Hadzikic",long_name:"オスマン・ハジキッチ",positions:["GK"],params:[50,50,50,50,58,55,50,50,50,50,52,50,50,50,50,50,50,50,50,50,50,50,50,58,56,50,58,57,75]}
+    ]
+  },
+  southafrica2026: {
+    name:"南アフリカ",en_name:"South Africa",team_color:"#007A4D",flag:"🇿🇦",
+    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:10,default_marked_player:7,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Ronwen Williams (FC26 OVR74, REF76, SPD72, KIC68, DIV74, HAN73, POS75)
+      {name:"ウィリアムズ",en_name:"Williams",long_name:"ロンウェン・ウィリアムズ",positions:["GK"],params:[50,50,50,50,76,72,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,74,73,50,75,74,75]},
+      // RB: Khuliso Mudau (~OVR65, PAC75, SHO40, PAS58, DRI62, DEF65, PHY66)
+      {name:"ムダウ",en_name:"Mudau",long_name:"クリソ・ムダウ",positions:["右SB","CB"],params:[66,66,75,77,63,64,58,58,68,58,52,36,38,38,27,28,56,24,63,65,63,65,63,50,50,62,62,62,75]},
+      // CB: Ime Okon (FC26 OVR67, PAC77, SHO30, PAS44, DRI59, DEF68, PHY70)
+      {name:"オコン",en_name:"Okon",long_name:"イム・オコン",positions:["CB","右SB"],params:[70,68,77,78,69,68,54,54,68,44,40,26,28,28,20,20,53,18,66,68,66,68,66,50,50,68,61,64,75]},
+      // CB: Mbekezeli Mbokazi (~OVR63, PAC66, SHO32, PAS46, DRI52, DEF65, PHY74)
+      {name:"ムボカジ",en_name:"Mbokazi",long_name:"ムベケゼリ・ムボカジ",positions:["CB"],params:[74,72,66,67,65,72,47,47,59,46,42,28,30,30,21,22,46,19,63,65,63,65,63,50,50,72,58,60,75]},
+      // LB: Aubrey Modiba (~OVR63, PAC74, SHO38, PAS56, DRI62, DEF60, PHY62)
+      {name:"モジバ",en_name:"Modiba",long_name:"オーブリー・モジバ",positions:["左SB","右SB"],params:[62,62,74,76,61,60,58,58,68,56,50,34,36,36,26,27,56,23,58,60,58,60,58,50,50,58,59,60,75]},
+      // CDM: Teboho Mokoena (FC26 OVR72, PAC76, SHO62, PAS73, DRI71, DEF66, PHY68)
+      {name:"モコエナ",en_name:"Mokoena",long_name:"テボホ・モコエナ",positions:["DMF","CMF"],params:[68,70,76,78,73,66,67,67,73,73,68,58,60,60,43,45,65,57,64,66,64,66,64,50,50,64,62,68,75]},
+      // CMF: Thalente Mbatha (~OVR66, PAC70, SHO54, PAS68, DRI65, DEF62, PHY66)
+      {name:"ムバタ",en_name:"Mbatha",long_name:"タランテ・ムバタ",positions:["CMF","DMF"],params:[66,68,70,72,65,64,61,61,67,68,63,50,52,52,38,39,59,49,60,62,60,62,60,50,50,60,57,63,75]},
+      // RW: Oswin Appollis (FC26 OVR75, ~PAC88, SHO66, PAS67, DRI78, DEF30, PHY60)
+      {name:"アポリス",en_name:"Appollis",long_name:"オスウィン・アポリス",positions:["右WG","右SMF"],params:[60,60,88,90,82,56,76,76,83,67,62,62,64,64,48,49,74,62,28,32,28,28,32,50,50,52,71,71,75]},
+      // CAM: Relebohile Mofokeng (FC26 OVR65, ~PAC82, SHO62, PAS62, DRI72, DEF28, PHY54)
+      {name:"モフォケン",en_name:"Mofokeng",long_name:"レレボヒレ・モフォケン",positions:["左WG","OMF","右WG"],params:[54,54,82,84,75,50,70,70,77,62,57,58,60,60,45,46,68,59,24,29,24,24,29,50,50,46,62,62,75]},
+      // LAM: Tshepang Moremi (~OVR63, PAC75, SHO57, PAS61, DRI67, DEF29, PHY58)
+      {name:"モレミ",en_name:"Moremi",long_name:"チェパン・モレミ",positions:["左WG","OMF"],params:[58,58,75,77,69,54,65,65,71,61,56,53,55,55,41,42,63,54,25,30,25,25,30,50,50,50,60,60,75]},
+      // CF: Lyle Foster (FC26 OVR72, PAC81, SHO72, PAS61, DRI69, DEF36, PHY73)
+      {name:"フォスター",en_name:"Foster",long_name:"ライル・フォスター",positions:["CF"],params:[73,74,81,83,75,70,65,65,75,61,57,68,70,70,52,53,63,68,32,37,32,32,37,50,50,70,69,68,75]},
+      // Sub CF: Evidence Makgopa (~OVR68, PAC72, SHO68, PAS52, DRI64, DEF30, PHY74)
+      {name:"マクゴパ",en_name:"Makgopa",long_name:"エビデンス・マクゴパ",positions:["CF"],params:[74,74,72,74,68,72,60,60,68,52,48,64,66,66,49,50,58,64,26,31,26,26,31,50,50,72,65,65,75]},
+      // Sub CF: Iqraam Rayners (~OVR67, PAC76, SHO67, PAS52, DRI63, DEF28, PHY72)
+      {name:"レイナース",en_name:"Rayners",long_name:"イクラーム・レイナース",positions:["CF"],params:[72,72,76,78,69,70,59,59,69,52,48,63,65,65,48,50,57,63,24,29,24,24,29,50,50,70,64,64,75]},
+      // Sub LW: Themba Zwane (~OVR66, PAC68, SHO64, PAS66, DRI70, DEF35, PHY56)
+      {name:"ズワネ",en_name:"Zwane",long_name:"テンバ・ズワネ",positions:["左WG","OMF","右WG"],params:[56,55,68,70,67,52,67,67,69,66,61,60,62,62,46,47,65,61,31,36,31,31,36,50,50,48,63,63,75]},
+      // Sub RW: Thapelo Maseko (~OVR63, PAC78, SHO60, PAS58, DRI67, DEF28, PHY54)
+      {name:"マセコ",en_name:"Maseko",long_name:"タパロ・マセコ",positions:["右WG","右SMF"],params:[54,54,78,80,71,50,65,65,73,58,53,56,58,58,43,44,63,57,24,29,24,24,29,50,50,46,60,60,75]},
+      // Sub CDM: Sphephelo Sithole (FC26 OVR65, PAC64, SHO53, PAS59, DRI61, DEF64, PHY74)
+      {name:"シトール",en_name:"Sithole",long_name:"スフェフェロ・シトール",positions:["DMF","CMF"],params:[74,76,64,66,60,72,57,57,62,59,55,49,51,51,37,38,55,48,62,64,62,64,62,50,50,68,55,62,75]},
+      // Sub CMF: Jayden Adams (~OVR64, PAC72, SHO52, PAS66, DRI64, DEF58, PHY62)
+      {name:"J・アダムス",en_name:"J.Adams",long_name:"ジェイデン・アダムス",positions:["CMF","DMF"],params:[62,64,72,74,66,60,60,60,68,66,61,48,50,50,36,37,58,47,56,58,56,58,56,50,50,58,55,61,75]},
+      // Sub LB: Samukele Kabini (FC26 OVR63, PAC71, SHO29, PAS54, DRI60, DEF59, PHY60)
+      {name:"カビニ",en_name:"Kabini",long_name:"サムケレ・カビニ",positions:["左SB"],params:[60,60,71,73,61,58,56,56,65,54,50,25,27,27,20,20,54,17,57,59,57,59,57,50,50,56,57,60,75]},
+      // Sub CB: Olwethu Makhanya (FC26 OVR57, PAC74, SHO32, PAS42, DRI44, DEF56, PHY64)
+      {name:"マカニャ",en_name:"Makhanya",long_name:"オルウェツ・マカニャ",positions:["CB"],params:[64,62,74,75,59,62,39,39,59,42,38,28,30,30,21,22,38,19,54,56,54,56,54,50,50,62,50,54,75]},
+      // Sub CB: Nkosinathi Sibisi (~OVR64, PAC64, SHO30, PAS46, DRI52, DEF66, PHY76)
+      {name:"シビシ",en_name:"Sibisi",long_name:"ニコシナティ・シビシ",positions:["CB"],params:[76,74,64,65,66,74,47,47,58,46,42,26,28,28,20,20,46,18,64,66,64,66,64,50,50,74,59,61,75]},
+      // Sub CB: Khulumani Ndamane (~OVR60, PAC64, SHO28, PAS44, DRI50, DEF62, PHY72)
+      {name:"ンダマネ",en_name:"Ndamane",long_name:"クルマニ・ンダマネ",positions:["CB"],params:[72,70,64,65,62,70,45,45,57,44,40,24,26,26,18,19,44,17,60,62,60,62,60,50,50,70,56,57,75]},
+      // Sub CB: Bradley Cross (~OVR60, PAC62, SHO28, PAS44, DRI48, DEF61, PHY70)
+      {name:"B・クロス",en_name:"B.Cross",long_name:"ブラッドレー・クロス",positions:["CB"],params:[70,68,62,63,61,68,43,43,55,44,40,24,26,26,18,19,42,17,59,61,59,61,59,50,50,68,55,57,75]},
+      // Sub SB: Thabang Matuludi (~OVR61, PAC72, SHO36, PAS52, DRI56, DEF60, PHY63)
+      {name:"マトゥルディ",en_name:"Matuludi",long_name:"タバン・マトゥルディ",positions:["右SB","左SB"],params:[63,63,72,74,58,61,52,52,64,52,47,32,34,34,24,25,50,22,58,60,58,60,58,50,50,59,49,58,75]},
+      // Sub SB: Kamogelo Sebelebele (~OVR59, PAC70, SHO33, PAS50, DRI54, DEF58, PHY62)
+      {name:"セベレベレ",en_name:"Sebelebele",long_name:"カモゲロ・セベレベレ",positions:["右SB","左SB"],params:[62,62,70,72,56,60,50,50,62,50,46,29,31,31,23,24,48,20,56,58,56,58,56,50,50,58,48,56,75]},
+      // Sub GK: Sipho Chaine (~OVR65, REF64, SPD62, KIC62, DIV64, HAN62, POS64)
+      {name:"チャイニ",en_name:"Chaine",long_name:"シポ・チャイニ",positions:["GK"],params:[50,50,50,50,64,62,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,64,62,50,64,63,75]},
+      // Sub GK: Ricardo Goss (~OVR60, REF60, SPD58, KIC58, DIV60, HAN58, POS60)
+      {name:"ゴス",en_name:"Goss",long_name:"リカルド・ゴス",positions:["GK"],params:[50,50,50,50,60,58,50,50,50,50,58,50,50,50,50,50,50,50,50,50,50,50,50,60,58,50,60,59,75]}
     ]
   },
 };
