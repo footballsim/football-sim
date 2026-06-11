@@ -4285,25 +4285,25 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     default_keyplayer:10,default_marked_player:10,
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
     players:[
-      // GK: Matthieu Epolo (OVR73, REF73, SPD28, KIC66, DIV76, HAN70, POS70)
-      {name:"エポロ",en_name:"Epolo",long_name:"マテュー・エポロ",positions:["GK"],params:[50,50,50,50,73,28,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,76,70,50,70,72,75]},
+      // GK: Lionel Mpasi (OVR67, DIV67, HAN66, KIC66, REF65, SPD45, POS66)
+      {name:"ムパシ",en_name:"Mpasi",long_name:"リオネル・ムパシ",positions:["GK"],params:[50,50,50,50,65,45,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,67,66,50,66,66,75]},
       // RB: Aaron Wan-Bissaka (OVR80, PAC80, SHO51, PAS69, DRI77, DEF78, PHY73)
       {name:"ワンビサカ",en_name:"Wan-Bissaka",long_name:"アーロン・ワン=ビサカ",positions:["右SB"],params:[73,73,80,82,78,71,77,77,79,69,64,49,51,51,37,38,73,51,78,80,78,78,80,50,50,69,73,77,75]},
       // CB: Chancel Mbemba (est OVR75, PAC72, SHO38, PAS64, DRI68, DEF74, PHY80) - Captain
       {name:"ムベンバ",en_name:"Mbemba",long_name:"シャンセル・ムベンバ",positions:["CB","左SB"],params:[80,80,72,74,74,78,68,68,70,64,60,37,38,38,27,28,65,43,74,76,74,74,76,50,50,78,67,72,75]},
-      // CB: Dylan Batubinsika (OVR71, PAC69, SHO28, PAS52, DRI55, DEF69, PHY79)
-      {name:"バトゥビンシカ",en_name:"Batubinsika",long_name:"ダイラン・バトゥビンシカ",positions:["CB"],params:[79,79,69,71,69,77,55,55,62,52,48,27,28,28,20,21,52,34,69,71,69,69,71,50,50,77,63,68,75]},
+      // CB: Axel Tuanzebe (OVR73, PAC76, SHO36, PAS64, DRI68, DEF73, PHY75)
+      {name:"トゥアンゼベ",en_name:"Tuanzebe",long_name:"アクセル・トゥアンゼベ",positions:["CB","右SB"],params:[75,75,76,78,71,73,68,68,72,64,60,35,36,36,26,27,65,43,73,75,73,73,75,50,50,71,69,70,75]},
       // LB: Arthur Masuaku (OVR75, PAC79, SHO62, PAS74, DRI78, DEF68, PHY79)
       {name:"マスアク",en_name:"Masuaku",long_name:"アルトゥール・マスアク",positions:["左SB","左WG"],params:[79,79,79,81,73,77,78,78,79,74,69,60,62,62,45,46,74,58,68,70,68,68,70,50,50,75,68,72,75]},
-      // CDM: Ngal'ayel Mukau (OVR74, PAC69, SHO57, PAS65, DRI71, DEF70, PHY75)
+      // LDM: Samuel Moutoussamy (est OVR66, PAC70, SHO57, PAS64, DRI66, DEF62, PHY68)
+      {name:"ムトゥサミ",en_name:"Moutoussamy",long_name:"サミュエル・ムトゥサミ",positions:["DMF","CMF"],params:[68,70,70,72,66,66,66,66,68,64,60,55,57,57,41,42,63,51,62,64,62,62,64,50,50,64,59,63,75]},
+      // RDM: Ngal'ayel Mukau (OVR74, PAC69, SHO57, PAS65, DRI71, DEF70, PHY75)
       {name:"ムカウ",en_name:"Mukau",long_name:"ンガレイ・ムカウ",positions:["DMF","CMF"],params:[75,77,69,71,68,73,71,71,70,65,60,55,57,57,41,42,67,52,70,72,70,70,72,50,50,71,63,71,75]},
-      // CM: Noah Sadiki (OVR74, PAC77, SHO65, PAS68, DRI76, DEF68, PHY76)
-      {name:"サディキ",en_name:"Sadiki",long_name:"ノア・サディキ",positions:["CMF","DMF"],params:[76,76,77,79,75,74,76,76,77,68,63,63,65,65,47,48,72,57,68,70,68,68,70,50,50,70,63,71,75]},
-      // RW: Meschack Elia (OVR70, PAC82, SHO68, PAS67, DRI75, DEF26, PHY70)
-      {name:"エリア",en_name:"Elia",long_name:"メシャク・エリア",positions:["右WG","右SMF"],params:[70,70,82,84,77,66,75,75,79,67,62,66,68,68,49,50,71,65,26,28,26,26,28,50,50,50,72,67,75]},
-      // OMF: Gaël Kakuta (est OVR67, PAC66, SHO63, PAS68, DRI70, DEF42, PHY62)
-      {name:"カクタ",en_name:"Kakuta",long_name:"ガエル・カクタ",positions:["OMF","CMF"],params:[62,62,66,68,66,58,70,70,68,68,63,61,63,63,45,47,67,60,42,44,42,42,44,50,50,45,51,64,75]},
-      // LW: Nathanaël Mbuku (OVR70, PAC73, SHO63, PAS68, DRI74, DEF35, PHY53)
+      // RM: Théo Bongonda (est OVR70, PAC79, SHO65, PAS66, DRI74, DEF30, PHY62)
+      {name:"ボンゴンダ",en_name:"Bongonda",long_name:"テオ・ボンゴンダ",positions:["右WG","右SMF","左WG"],params:[62,62,79,81,75,58,74,74,77,66,61,63,65,65,47,48,70,62,30,32,30,30,32,50,50,45,69,67,75]},
+      // OMF: Noah Sadiki (OVR74, PAC77, SHO65, PAS68, DRI76, DEF68, PHY76)
+      {name:"サディキ",en_name:"Sadiki",long_name:"ノア・サディキ",positions:["OMF","CMF","DMF"],params:[76,76,77,79,75,74,76,76,77,68,63,63,65,65,47,48,72,57,68,70,68,68,70,50,50,70,63,71,75]},
+      // LM: Nathanaël Mbuku (OVR70, PAC73, SHO63, PAS68, DRI74, DEF35, PHY53)
       {name:"ムブク",en_name:"Mbuku",long_name:"ナタナエル・ムブク",positions:["左WG","左SMF"],params:[53,53,73,75,72,49,74,74,74,68,63,61,63,63,45,47,70,60,35,37,35,35,37,50,50,38,65,67,75]},
       // CF: Yoane Wissa (OVR82, PAC85, SHO82, PAS70, DRI80, DEF31, PHY71)
       {name:"ウィサ",en_name:"Wissa",long_name:"ヨアネ・ウィサ",positions:["CF","左WG"],params:[71,71,85,87,81,68,80,80,83,70,65,80,82,82,59,61,76,78,31,33,31,31,33,50,50,51,80,79,75]},
@@ -4311,32 +4311,32 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"バンザ",en_name:"Banza",long_name:"シモン・バンザ",positions:["CF"],params:[79,79,79,81,76,76,77,77,78,62,58,79,81,81,58,60,73,77,36,38,36,36,38,50,50,57,77,78,75]},
       // Sub ST: Cédric Bakambu (OVR77, PAC78, SHO78, PAS68, DRI72, DEF40, PHY68)
       {name:"バカンブ",en_name:"Bakambu",long_name:"セドリック・バカンブ",positions:["CF"],params:[68,68,78,80,73,65,72,72,75,68,63,76,78,78,56,58,68,74,40,42,40,40,42,50,50,49,75,74,75]},
-      // Sub LW: Théo Bongonda (est OVR70, PAC79, SHO65, PAS66, DRI74, DEF30, PHY62)
-      {name:"ボンゴンダ",en_name:"Bongonda",long_name:"テオ・ボンゴンダ",positions:["左WG","右WG"],params:[62,62,79,81,75,58,74,74,77,66,61,63,65,65,47,48,70,62,30,32,30,30,32,50,50,45,69,67,75]},
       // Sub ST: Fiston Mayele (est OVR68, PAC76, SHO67, PAS52, DRI68, DEF28, PHY70)
       {name:"マエル",en_name:"Mayele",long_name:"フィストン・マエル",positions:["CF"],params:[70,70,76,78,70,67,68,68,72,52,48,65,67,67,48,50,65,64,28,30,28,28,30,50,50,50,69,65,75]},
+      // Sub RW: Meschack Elia (OVR70, PAC82, SHO68, PAS67, DRI75, DEF26, PHY70)
+      {name:"エリア",en_name:"Elia",long_name:"メシャク・エリア",positions:["右WG","右SMF"],params:[70,70,82,84,77,66,75,75,79,67,62,66,68,68,49,50,71,65,26,28,26,26,28,50,50,50,72,67,75]},
+      // Sub CM: Edo Kayembe (OVR71, PAC72, SHO66, PAS69, DRI70, DEF67, PHY78)
+      {name:"E・カエンベ",en_name:"E.Kayembe",long_name:"エド・カエンベ",positions:["OMF","CMF","DMF"],params:[78,78,72,74,69,76,70,70,71,69,64,64,66,66,48,49,67,57,67,69,67,67,69,50,50,72,63,68,75]},
+      // Sub OMF: Gaël Kakuta (est OVR67, PAC66, SHO63, PAS68, DRI70, DEF42, PHY62)
+      {name:"カクタ",en_name:"Kakuta",long_name:"ガエル・カクタ",positions:["OMF","CMF"],params:[62,62,66,68,66,58,70,70,68,68,63,61,63,63,45,47,67,60,42,44,42,42,44,50,50,45,51,64,75]},
       // Sub CB: Steve Kapuadi (OVR71, PAC65, SHO33, PAS45, DRI50, DEF70, PHY83)
       {name:"カパウディ",en_name:"Kapuadi",long_name:"スティーヴ・カパウディ",positions:["CB"],params:[83,83,65,67,69,81,50,50,58,45,42,32,33,33,24,24,48,33,70,72,70,70,72,50,50,81,62,68,75]},
       // Sub LB: Joris Kayembe (OVR74, PAC79, SHO60, PAS71, DRI74, DEF66, PHY74)
       {name:"J・カエンベ",en_name:"J.Kayembe",long_name:"ジョリス・カエンベ",positions:["左SB","CB"],params:[74,74,79,81,70,72,74,74,77,71,66,58,60,60,43,44,70,56,66,68,66,66,68,50,50,70,67,71,75]},
-      // Sub CM: Edo Kayembe (OVR71, PAC72, SHO66, PAS69, DRI70, DEF67, PHY78)
-      {name:"E・カエンベ",en_name:"E.Kayembe",long_name:"エド・カエンベ",positions:["CMF","DMF"],params:[78,78,72,74,69,76,70,70,71,69,64,64,66,66,48,49,67,57,67,69,67,67,69,50,50,72,63,68,75]},
+      // Sub CB: Dylan Batubinsika (OVR71, PAC69, SHO28, PAS52, DRI55, DEF69, PHY79)
+      {name:"バトゥビンシカ",en_name:"Batubinsika",long_name:"ダイラン・バトゥビンシカ",positions:["CB"],params:[79,79,69,71,69,77,55,55,62,52,48,27,28,28,20,21,52,34,69,71,69,69,71,50,50,77,63,68,75]},
       // Sub CM: Charles Pickel (OVR71, PAC63, SHO63, PAS68, DRI69, DEF67, PHY80)
       {name:"ピッケル",en_name:"Pickel",long_name:"シャルル・ピッケル",positions:["CMF","DMF"],params:[80,80,63,65,64,78,69,69,66,68,63,61,63,63,45,47,66,56,67,69,67,67,69,50,50,74,63,68,75]},
-      // Sub CDM: Samuel Moutoussamy (est OVR66, PAC70, SHO57, PAS64, DRI66, DEF62, PHY68)
-      {name:"ムトゥサミ",en_name:"Moutoussamy",long_name:"サミュエル・ムトゥサミ",positions:["DMF","CMF"],params:[68,70,70,72,66,66,66,66,68,64,60,55,57,57,41,42,63,51,62,64,62,62,64,50,50,64,59,63,75]},
-      // Sub DF: Gédéon Kalulu (est OVR66, PAC70, SHO32, PAS52, DRI58, DEF64, PHY70)
-      {name:"カルル",en_name:"Kalulu",long_name:"ゲデオン・カルル",positions:["右SB","CB","左SB"],params:[70,70,70,72,61,68,58,58,64,52,48,31,32,32,23,24,55,36,64,66,64,64,66,50,50,66,62,63,75]},
-      // Sub RB/CB: Axel Tuanzebe (OVR73, PAC76, SHO36, PAS64, DRI68, DEF73, PHY75)
-      {name:"トゥアンゼベ",en_name:"Tuanzebe",long_name:"アクセル・トゥアンゼベ",positions:["右SB","CB"],params:[75,75,76,78,71,73,68,68,72,64,60,35,36,36,26,27,65,43,73,75,73,73,75,50,50,71,69,70,75]},
       // Sub CMF: Aaron Tshibola (est OVR63, PAC68, SHO53, PAS62, DRI64, DEF60, PHY68)
       {name:"ツィボラ",en_name:"Tshibola",long_name:"アーロン・ツィボラ",positions:["CMF","DMF"],params:[68,68,68,70,64,66,64,64,66,62,58,51,53,53,38,39,61,49,60,62,60,60,62,50,50,62,57,60,75]},
       // Sub LM: Brian Cipenga (OVR66, PAC81, SHO58, PAS59, DRI66, DEF33, PHY63)
       {name:"シペンガ",en_name:"Cipenga",long_name:"ブライアン・シペンガ",positions:["左WG","左SMF"],params:[63,63,81,83,72,59,66,66,74,59,55,56,58,58,42,43,63,55,33,35,33,33,35,50,50,45,67,63,75]},
+      // Sub DF: Gédéon Kalulu (est OVR66, PAC70, SHO32, PAS52, DRI58, DEF64, PHY70)
+      {name:"カルル",en_name:"Kalulu",long_name:"ゲデオン・カルル",positions:["右SB","CB","左SB"],params:[70,70,70,72,61,68,58,58,64,52,48,31,32,32,23,24,55,36,64,66,64,64,66,50,50,66,62,63,75]},
+      // Sub GK: Matthieu Epolo (OVR73, REF73, SPD28, KIC66, DIV76, HAN70, POS70)
+      {name:"エポロ",en_name:"Epolo",long_name:"マテュー・エポロ",positions:["GK"],params:[50,50,50,50,73,28,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,76,70,50,70,72,75]},
       // Sub GK: Timothy Fayulu (est OVR62, REF62, SPD58, KIC58, DIV62, HAN60, POS62)
-      {name:"ファユル",en_name:"Fayulu",long_name:"ティモシー・ファユル",positions:["GK"],params:[50,50,50,50,62,58,50,50,50,50,58,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,62,62,75]},
-      // Sub GK: Lionel Mpasi (OVR67, DIV67, HAN66, KIC66, REF65, SPD45, POS66)
-      {name:"ムパシ",en_name:"Mpasi",long_name:"リオネル・ムパシ",positions:["GK"],params:[50,50,50,50,65,45,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,67,66,50,66,66,75]}
+      {name:"ファユル",en_name:"Fayulu",long_name:"ティモシー・ファユル",positions:["GK"],params:[50,50,50,50,62,58,50,50,50,50,58,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,62,62,75]}
     ]
   },
 };
