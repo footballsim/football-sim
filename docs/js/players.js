@@ -4101,61 +4101,61 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   bosnia2026: {
     name:"ボスニア・ヘルツェゴビナ",en_name:"Bosnia & Herzegovina",team_color:"#002868",flag:"🇧🇦",
-    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
     default_keyplayer:10,default_marked_player:10,
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
     players:[
       // GK: Nikola Vasilj (FC26 OVR77, DIV77, HAN72, KIC65, REF79, SPD77, POS77)
       {name:"バシリ",en_name:"Vasilj",long_name:"ニコラ・バシリ",positions:["GK"],params:[50,50,50,50,79,77,50,50,50,50,65,50,50,50,50,50,50,50,50,50,50,50,50,77,72,50,77,74,75]},
-      // RB: Amar Dedić (FC26 OVR73, PAC83, SHO58, PAS68, DRI74, DEF66, PHY74)
+      // 右SB: Amar Dedić (FC26 OVR73)
       {name:"デディッチ",en_name:"Dedic",long_name:"アマル・デディッチ",positions:["右SB","右SMF"],params:[74,76,83,84,72,70,72,72,73,68,63,50,52,54,42,44,68,52,64,66,64,64,68,50,50,68,68,70,75]},
-      // CB: Tarik Muharemović (FC26 OVR74, PAC62, SHO23, PAS53, DRI60, DEF76, PHY74)
-      {name:"ムハレモヴィッチ",en_name:"Muharemovic",long_name:"タリク・ムハレモヴィッチ",positions:["CB"],params:[74,72,62,63,72,78,56,56,56,53,48,20,22,24,22,22,52,24,74,76,74,76,74,50,50,80,70,72,75]},
-      // CB: Nikola Katić (FC26 OVR72, PAC58, SHO35, PAS46, DRI53, DEF70, PHY86)
+      // 右CB: Nikola Katić (FC26 OVR72)
       {name:"カティッチ",en_name:"Katic",long_name:"ニコラ・カティッチ",positions:["CB"],params:[86,80,58,59,68,88,48,48,48,46,42,32,34,36,26,26,46,22,68,72,70,70,68,50,50,84,66,68,75]},
-      // CB/LB: Sead Kolašinac (FC26 OVR79, PAC61, SHO63, PAS68, DRI69, DEF79, PHY82)
-      {name:"コラシナツ",en_name:"Kolasinac",long_name:"セアド・コラシナツ",positions:["CB","左SB"],params:[82,80,61,62,75,80,64,64,65,68,62,55,57,59,46,48,62,30,77,79,77,79,77,50,50,80,74,76,75]},
-      // CDM: Amir Hadžiahmetović (FC26 OVR71, PAC52, SHO60, PAS72, DRI68, DEF68, PHY70)
-      {name:"ハジアフメトヴィッチ",en_name:"Hadziahmetovic",long_name:"アミル・ハジアフメトヴィッチ",positions:["DMF","CMF"],params:[70,72,52,53,64,68,64,64,65,72,67,52,54,56,42,44,62,58,68,70,68,68,66,50,50,68,64,66,75]},
-      // CDM: Benjamin Tahirović (FC26 OVR66, PAC51, SHO50, PAS62, DRI65, DEF61, PHY70)
-      {name:"タヒロヴィッチ",en_name:"Tahirovic",long_name:"ベンジャミン・タヒロヴィッチ",positions:["DMF","CMF"],params:[68,70,51,52,61,66,60,60,61,62,57,44,46,48,36,38,58,50,60,63,60,60,59,50,50,66,58,60,75]},
-      // RMF: Amar Memić (FC26 OVR75, PAC89, SHO69, PAS71, DRI73, DEF62, PHY68)
-      {name:"メミッチ",en_name:"Memic",long_name:"アマル・メミッチ",positions:["右WG","右SMF"],params:[66,68,89,91,70,62,70,70,71,71,65,63,65,67,50,54,68,66,60,62,60,60,62,50,50,62,66,68,75]},
-      // RW/OMF: Esmir Bajraktarević (FC26 OVR72, PAC77, SHO61, PAS67, DRI79, DEF44, PHY61)
-      {name:"バイラクタレヴィッチ",en_name:"Bajraktarevic",long_name:"エスミル・バイラクタレヴィッチ",positions:["右WG","OMF","右SMF"],params:[58,60,77,79,76,56,76,76,77,67,61,55,57,59,44,48,74,64,42,44,42,42,46,50,50,54,68,66,75]},
-      // LMF: Kerim Alajbegović (FC26 OVR68, PAC70, SHO70, PAS66, DRI71, DEF39, PHY58)
-      {name:"アライベゴヴィッチ",en_name:"Alajbegovic",long_name:"ケリム・アライベゴヴィッチ",positions:["左WG","左SMF","OMF"],params:[56,58,70,72,68,54,68,68,69,66,61,65,67,68,48,50,66,64,37,41,39,39,41,50,50,52,62,60,75]},
-      // CF: Ermedin Demirović (FC26 OVR80, PAC72, SHO81, PAS73, DRI78, DEF42, PHY78)
-      {name:"デミロヴィッチ",en_name:"Demirovic",long_name:"エルメディン・デミロヴィッチ",positions:["CF","OMF"],params:[78,80,72,74,74,76,74,74,75,73,67,77,79,78,58,60,72,76,40,44,40,40,44,50,50,74,76,76,75]},
-      // Sub CF: Edin Džeko (FC26 OVR81, PAC55, SHO82, PAS74, DRI77, DEF40, PHY72)
-      {name:"ジェコ",en_name:"Dzeko",long_name:"エディン・ジェコ",positions:["CF","OMF"],params:[72,66,55,56,73,76,71,71,73,74,68,78,80,79,62,62,71,76,38,42,38,38,44,50,50,80,78,80,75]},
-      // Sub ST: Haris Tabaković (FC26 OVR75, PAC60, SHO74, PAS52, DRI67, DEF33, PHY80)
-      {name:"タバコヴィッチ",en_name:"Tabakovic",long_name:"ハリス・タバコヴィッチ",positions:["CF"],params:[80,74,60,61,63,84,61,61,63,52,48,68,70,71,48,50,60,72,32,35,32,32,37,50,50,84,68,70,75]},
-      // Sub ST: Samed Baždar (FC26 OVR67, PAC61, SHO65, PAS69, DRI73, DEF40, PHY59)
-      {name:"バジュダル",en_name:"Bazdar",long_name:"サメド・バジュダル",positions:["CF","左WG","OMF"],params:[58,60,61,63,68,54,68,68,69,69,64,60,62,63,46,48,66,62,38,42,38,38,42,50,50,52,58,60,75]},
-      // Sub ST: Jovo Lukić (FC26 OVR70, PAC67, SHO69, PAS59, DRI64, DEF29, PHY76)
-      {name:"J・ルキッチ",en_name:"Lukic",long_name:"ヨヴォ・ルキッチ",positions:["CF"],params:[76,72,67,68,60,78,60,60,61,59,54,63,65,66,44,46,57,66,28,31,28,28,33,50,50,72,62,64,75]},
-      // Sub CMF: Armin Gigović (FC26 OVR71, PAC65, SHO60, PAS70, DRI74, DEF63, PHY75)
-      {name:"ギゴヴィッチ",en_name:"Gigovic",long_name:"アルミン・ギゴヴィッチ",positions:["CMF","DMF","右SMF"],params:[74,76,65,66,70,72,70,70,71,70,65,54,56,58,42,44,68,60,62,65,62,62,61,50,50,72,64,66,75]},
-      // Sub CMF: Denis Burnić (FC26 OVR69, PAC76, SHO59, PAS66, DRI71, DEF64, PHY68)
-      {name:"ブルニッチ",en_name:"Burnic",long_name:"デニス・ブルニッチ",positions:["CMF","右SMF","DMF"],params:[68,70,76,78,67,64,67,67,69,66,61,52,54,56,40,42,65,58,62,66,62,62,64,50,50,64,62,64,75]},
-      // Sub DMF: Ivan Šunjić (~OVR66, PAC55, SHO42, PAS60, DRI56, DEF65, PHY68)
-      {name:"シュニッチ",en_name:"Sunjic",long_name:"イヴァン・シュニッチ",positions:["DMF","CMF"],params:[70,70,55,56,58,68,58,58,60,65,60,38,40,42,32,34,55,50,64,68,64,64,64,50,50,66,60,62,75]},
-      // Sub MF: Ivan Bašić (~OVR65, PAC62, SHO52, PAS64, DRI62, DEF59, PHY60)
+      // 左CB: Tarik Muharemović (FC26 OVR74)
+      {name:"ムハレモヴィッチ",en_name:"Muharemovic",long_name:"タリク・ムハレモヴィッチ",positions:["CB"],params:[74,72,62,63,72,78,56,56,56,53,48,20,22,24,22,22,52,24,74,76,74,76,74,50,50,80,70,72,75]},
+      // 左SB: Sead Kolašinac (FC26 OVR79)
+      {name:"コラシナツ",en_name:"Kolasinac",long_name:"セアド・コラシナツ",positions:["左SB","CB"],params:[82,80,61,62,75,80,64,64,65,68,62,55,57,59,46,48,62,30,77,79,77,79,77,50,50,80,74,76,75]},
+      // 右DMF(RCM): Ivan Bašić (~OVR65)
       {name:"バシッチ",en_name:"Basic",long_name:"イヴァン・バシッチ",positions:["CMF","DMF"],params:[62,64,68,69,62,60,62,62,63,64,59,51,53,55,38,40,60,55,56,60,56,56,58,50,50,58,58,60,75]},
-      // Sub MF: Ermin Mahmić (~OVR63, PAC66, SHO50, PAS60, DRI60, DEF55, PHY56)
+      // 左DMF(LCM): Ivan Šunjić (~OVR66)
+      {name:"シュニッチ",en_name:"Sunjic",long_name:"イヴァン・シュニッチ",positions:["DMF","CMF"],params:[70,70,55,56,58,68,58,58,60,65,60,38,40,42,32,34,55,50,64,68,64,64,64,50,50,66,60,62,75]},
+      // 右SMF(RM): Esmir Bajraktarević (FC26 OVR72)
+      {name:"バイラクタレヴィッチ",en_name:"Bajraktarevic",long_name:"エスミル・バイラクタレヴィッチ",positions:["右WG","右SMF","OMF"],params:[58,60,77,79,76,56,76,76,77,67,61,55,57,59,44,48,74,64,42,44,42,42,46,50,50,54,68,66,75]},
+      // 左SMF(LM): Amar Memić (FC26 OVR75)
+      {name:"メミッチ",en_name:"Memic",long_name:"アマル・メミッチ",positions:["左SMF","左WG","右SMF","右WG"],params:[66,68,89,91,70,62,70,70,71,71,65,63,65,67,50,54,68,66,60,62,60,60,62,50,50,62,66,68,75]},
+      // 右CF(RS): Ermedin Demirović (FC26 OVR80)
+      {name:"デミロヴィッチ",en_name:"Demirovic",long_name:"エルメディン・デミロヴィッチ",positions:["CF","OMF"],params:[78,80,72,74,74,76,74,74,75,73,67,77,79,78,58,60,72,76,40,44,40,40,44,50,50,74,76,76,75]},
+      // 左CF(LS): Edin Džeko (FC26 OVR81)
+      {name:"ジェコ",en_name:"Dzeko",long_name:"エディン・ジェコ",positions:["CF","OMF"],params:[72,66,55,56,73,76,71,71,73,74,68,78,80,79,62,62,71,76,38,42,38,38,44,50,50,80,78,80,75]},
+      // Sub ST: Haris Tabaković (FC26 OVR75)
+      {name:"タバコヴィッチ",en_name:"Tabakovic",long_name:"ハリス・タバコヴィッチ",positions:["CF"],params:[80,74,60,61,63,84,61,61,63,52,48,68,70,71,48,50,60,72,32,35,32,32,37,50,50,84,68,70,75]},
+      // Sub CDM: Amir Hadžiahmetović (FC26 OVR71)
+      {name:"ハジアフメトヴィッチ",en_name:"Hadziahmetovic",long_name:"アミル・ハジアフメトヴィッチ",positions:["DMF","CMF"],params:[70,72,52,53,64,68,64,64,65,72,67,52,54,56,42,44,62,58,68,70,68,68,66,50,50,68,64,66,75]},
+      // Sub CDM: Benjamin Tahirović (FC26 OVR66)
+      {name:"タヒロヴィッチ",en_name:"Tahirovic",long_name:"ベンジャミン・タヒロヴィッチ",positions:["DMF","CMF"],params:[68,70,51,52,61,66,60,60,61,62,57,44,46,48,36,38,58,50,60,63,60,60,59,50,50,66,58,60,75]},
+      // Sub LW: Kerim Alajbegović (FC26 OVR68)
+      {name:"アライベゴヴィッチ",en_name:"Alajbegovic",long_name:"ケリム・アライベゴヴィッチ",positions:["左WG","左SMF","OMF"],params:[56,58,70,72,68,54,68,68,69,66,61,65,67,68,48,50,66,64,37,41,39,39,41,50,50,52,62,60,75]},
+      // Sub CMF: Armin Gigović (FC26 OVR71)
+      {name:"ギゴヴィッチ",en_name:"Gigovic",long_name:"アルミン・ギゴヴィッチ",positions:["CMF","DMF","右SMF"],params:[74,76,65,66,70,72,70,70,71,70,65,54,56,58,42,44,68,60,62,65,62,62,61,50,50,72,64,66,75]},
+      // Sub CMF: Denis Burnić (FC26 OVR69)
+      {name:"ブルニッチ",en_name:"Burnic",long_name:"デニス・ブルニッチ",positions:["CMF","右SMF","DMF"],params:[68,70,76,78,67,64,67,67,69,66,61,52,54,56,40,42,65,58,62,66,62,62,64,50,50,64,62,64,75]},
+      // Sub ST: Samed Baždar (FC26 OVR67)
+      {name:"バジュダル",en_name:"Bazdar",long_name:"サメド・バジュダル",positions:["CF","左WG","OMF"],params:[58,60,61,63,68,54,68,68,69,69,64,60,62,63,46,48,66,62,38,42,38,38,42,50,50,52,58,60,75]},
+      // Sub ST: Jovo Lukić (FC26 OVR70)
+      {name:"J・ルキッチ",en_name:"Lukic",long_name:"ヨヴォ・ルキッチ",positions:["CF"],params:[76,72,67,68,60,78,60,60,61,59,54,63,65,66,44,46,57,66,28,31,28,28,33,50,50,72,62,64,75]},
+      // Sub MF: Ermin Mahmić (~OVR63)
       {name:"マフミッチ",en_name:"Mahmic",long_name:"エルミン・マフミッチ",positions:["CMF","左SMF"],params:[60,62,70,72,60,56,60,60,61,60,55,48,50,52,36,38,58,52,54,58,54,54,56,50,50,56,54,56,75]},
-      // Sub CB: Nidal Čelik (FC26 OVR69, PAC60, SHO35, PAS52, DRI53, DEF67, PHY72)
+      // Sub CB: Nidal Čelik (FC26 OVR69)
       {name:"チェリク",en_name:"Celik",long_name:"ニダル・チェリク",positions:["CB"],params:[72,70,60,61,63,76,49,49,50,52,47,32,34,36,24,24,46,24,65,67,65,65,65,50,50,76,62,64,75]},
-      // Sub CB: Nihad Mujakić (FC26 OVR67, PAC71, SHO28, PAS50, DRI55, DEF66, PHY77)
+      // Sub CB: Nihad Mujakić (FC26 OVR67)
       {name:"ムヤキッチ",en_name:"Mujakic",long_name:"ニハド・ムヤキッチ",positions:["CB","右SB"],params:[76,72,71,72,64,81,51,51,52,50,45,26,28,30,22,22,48,22,64,66,64,64,64,50,50,79,60,62,75]},
-      // Sub CB: Denis Hadžikadunić (FC26 OVR69, PAC64, SHO32, PAS52, DRI53, DEF67, PHY74)
+      // Sub CB: Denis Hadžikadunić (FC26 OVR69)
       {name:"ハジカドゥニッチ",en_name:"Hadzikadunic",long_name:"デニス・ハジカドゥニッチ",positions:["CB","左SB"],params:[72,70,64,65,64,74,52,52,53,52,47,32,34,36,24,24,49,24,66,68,66,66,66,50,50,76,62,64,75]},
-      // Sub LB: Stjepan Radeljić (~OVR65, PAC72, SHO40, PAS58, DRI55, DEF62, PHY62)
+      // Sub LB: Stjepan Radeljić (~OVR65)
       {name:"ラデリッチ",en_name:"Radeljic",long_name:"ステパン・ラデリッチ",positions:["左SB","右SB"],params:[64,66,72,73,60,62,58,58,59,58,53,37,39,41,28,30,55,36,60,64,60,60,62,50,50,62,56,58,75]},
-      // Sub GK: Martin Zlomislić (~OVR61, DIV62, HAN60, KIC56, REF62, SPD58, POS62)
+      // Sub GK: Martin Zlomislić (~OVR61)
       {name:"ズロミスリッチ",en_name:"Zlomislic",long_name:"マルティン・ズロミスリッチ",positions:["GK"],params:[50,50,50,50,62,58,50,50,50,50,56,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,62,60,75]},
-      // Sub GK: Osman Hadžikić (~OVR58, DIV58, HAN56, KIC52, REF58, SPD55, POS58)
+      // Sub GK: Osman Hadžikić (~OVR58)
       {name:"ハジキッチ",en_name:"Hadzikic",long_name:"オスマン・ハジキッチ",positions:["GK"],params:[50,50,50,50,58,55,50,50,50,50,52,50,50,50,50,50,50,50,50,50,50,50,50,58,56,50,58,57,75]}
     ]
   },
