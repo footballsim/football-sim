@@ -1441,7 +1441,33 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "S・カブラル": {"profile": "ポルトガルの名門クラブの育成組織で磨かれた左SB。72のスプリントとオーバーラップを武器に攻撃参加し、若さとポテンシャルを秘めたサイドバック。", "profile_en": "A left-back polished in the academy of a prestigious Portuguese club. Using a sprint of 72 and overlapping runs to join attacks, a full-back with youth and considerable potential.", "height": 179, "weight": 72},
 "ディニー": {"profile": "中東リーグでプレーするSB。守備の安定性と体力を武器に両サイドをカバーし、代表スクワッドのバックラインを支えるユーティリティ性の高いディフェンダー。", "profile_en": "A full-back playing in the Middle Eastern league. A versatile defender who covers both flanks using defensive stability and stamina, supporting the national team's defensive reserves.", "height": 180, "weight": 76},
 "マルシオ": {"profile": "第2GKとして代表スクワッドに貢献するバックアップ守護神。確実なセービングと落ち着いたポジショニングでゴールを守り、正GK不在の緊急時に備える頼れるGK。", "profile_en": "A backup goalkeeper contributing to the national squad as second choice. A reliable keeper who guards the goal with sound shot-stopping and calm positioning, ready for emergencies in the number one's absence.", "height": 186, "weight": 83},
-"CJ": {"profile": "MLSで経験を積む若手GK。反応の良さとフィジカルを武器に、将来的な正GK候補として将来性を示す第3GK。代表での出場機会を虎視眈々と狙う期待の守護神。", "profile_en": "A young goalkeeper gaining experience in MLS. The third-choice keeper who demonstrates future promise as a potential number one, showing sharp reflexes and physical attributes.", "height": 185, "weight": 80}
+"CJ": {"profile": "MLSで経験を積む若手GK。反応の良さとフィジカルを武器に、将来的な正GK候補として将来性を示す第3GK。代表での出場機会を虎視眈々と狙う期待の守護神。", "profile_en": "A young goalkeeper gaining experience in MLS. The third-choice keeper who demonstrates future promise as a potential number one, showing sharp reflexes and physical attributes.", "height": 185, "weight": 80},
+"エポロ": {"profile": "ベルギーリーグで磨かれた若き実力派GK。76のDIVと73のリフレクスを誇り、コンゴ民主共和国代表の正GKの座を射止めた将来有望な守護神。安定したセービングと冷静な判断力でゴールを守る。", "profile_en": "A talented young GK forged in the Belgian league. A promising goalkeeper who has claimed the starting position with a diving attribute of 76 and reflexes of 73, guarding the goal with reliable shot-stopping and composure.", "height": 187, "weight": 83},
+"ワンビサカ": {"profile": "プレミアリーグで鍛えられた右SB。80のスプリントと圧倒的な対人守備を武器に右サイドを完全制圧する。守備能力78と高い身体能力でコンゴ民主共和国の守備陣を支えるワールドクラスのサイドバック。", "profile_en": "A right-back honed in the Premier League. Dominating the right flank with a sprint of 80 and outstanding man-to-man defence. A world-class full-back who anchors the DR Congo defence with defensive ability of 78 and exceptional athleticism.", "height": 188, "weight": 82},
+"ムベンバ": {"profile": "コンゴ民主共和国代表キャプテンとして長年守備ラインを牽引してきたCB。74の守備能力と80のフィジカルで圧倒的な空中制覇力を誇り、欧州リーグで培った豊富な経験でチームをまとめるリーダー。", "profile_en": "The captain who has led DR Congo's defensive line for many years. An authoritative leader who unifies the team with vast experience in European leagues, boasting dominant aerial presence with defensive ability of 74 and physical strength of 80.", "height": 185, "weight": 83},
+"バトゥビンシカ": {"profile": "フィジカルの強さと安定したポジショニングを誇るCB。79のフィジカルと69の守備能力でゴール前を封鎖し、チームのセンターバックとして確実に機能する守備の要。", "profile_en": "A centre-back boasting physical strength and reliable positioning. A defensive cornerstone who seals off the goal with physical strength of 79 and defensive ability of 69, functioning solidly in the heart of defence.", "height": 185, "weight": 80},
+"マスアク": {"profile": "攻守に圧倒的な存在感を発揮するLB。79のスプリントと78の敏捷性でオーバーラップし、74のパス精度でゲームメークにも貢献するアグレッシブなサイドバック。フランスリーグでの経験を誇る。", "profile_en": "A left-back with overwhelming presence in both attack and defence. An aggressive full-back who overlaps with a sprint of 79 and agility of 78, also contributing in build-up play with passing accuracy of 74.", "height": 181, "weight": 77},
+"ムカウ": {"profile": "フランスのトップクラブで輝きを放つ若手DMF。70の守備能力と71のドリブルで中盤を支配し、インターセプトとプレスで相手の攻撃を次々に封じるコンゴ民主共和国中盤の盾。", "profile_en": "A young DMF shining at a top French club. Dominating the midfield with defensive ability of 70 and dribbling of 71, DR Congo's midfield shield who consistently shuts down opposition attacks with interceptions and pressing.", "height": 182, "weight": 77},
+"サディキ": {"profile": "英国リーグで活躍する若手CMF。77のスプリントと76の敏捷性で中盤を縦横無尽に駆け回り、攻守両面で貢献できる将来有望なオールラウンドミッドフィルダー。", "profile_en": "A young central midfielder thriving in an English league. A promising all-round midfielder who covers the midfield in all directions with a sprint of 77 and agility of 76, contributing on both sides of the game.", "height": 182, "weight": 76},
+"エリア": {"profile": "82のトップスピードを武器にする右WG。縦への突破力と鋭いカットインでゴールに直結するプレーを得意とし、コンゴ民主共和国の右サイドに脅威をもたらす快速アタッカー。", "profile_en": "A right winger armed with a top speed of 82. An explosive attacker bringing threat to DR Congo's right flank, excelling at direct runs and incisive cuts inside that lead directly to goal.", "height": 175, "weight": 68},
+"カクタ": {"profile": "英国の名門クラブの下部組織でキャリアをスタートさせたベテランOMF。34歳を迎えてもなお豊富な経験と巧みなゲームメークでコンゴ民主共和国の中盤をコントロールする老練なプレーメーカー。", "profile_en": "A veteran attacking midfielder who started his career in a prestigious English club's academy. A seasoned playmaker who still directs DR Congo's midfield at 34, combining vast experience with clever game management.", "height": 172, "weight": 68},
+"ムブク": {"profile": "フランスリーグで活躍する快速LW。73のスプリントと74の敏捷性を持ち、左サイドからの鋭い突破でチャンスを演出する若手アタッカー。将来性豊かな左ウインガーとして代表の攻撃を活性化させる。", "profile_en": "A quick left winger active in the French league. A young attacker creating opportunities with sharp runs down the left, equipped with a sprint of 73 and agility of 74, energising the national team attack as a promising left winger.", "height": 174, "weight": 70},
+"ウィサ": {"profile": "コンゴ民主共和国最大の武器となるCF。85のトップスピードと82のシュート精度でゴールを量産し、プレミアリーグでの豊富な得点経験でエースストライカーとしてチームを牽引する絶対的フィニッシャー。", "profile_en": "DR Congo's most dangerous weapon. An absolute finisher who leads the team as ace striker, scoring freely with top speed of 85 and shooting accuracy of 82, drawing on a prolific scoring record in the Premier League.", "height": 181, "weight": 76},
+"バンザ": {"profile": "中東リーグで磨かれた決定力を誇るCF。79のスプリントと81のシュートセンスでゴールを狙い続け、フィジカルも79と強靭なボディを持つパワーフォワード。ウィサと並ぶコンゴ民主共和国の強力2トップ候補。", "profile_en": "A striker with finishing ability honed in a Middle Eastern league. A powerful forward who continuously threatens goal with a sprint of 79 and shooting sense of 81, combining a physical strength of 79 — a two-striker option alongside Wissa.", "height": 185, "weight": 83},
+"バカンブ": {"profile": "コンゴ民主共和国を長年引っ張ってきたベテランCF。78のスプリントと78のシュート精度を誇り、スペインリーグで磨いた豊富な経験でエースとしてチームを導くレジェンド級のストライカー。", "profile_en": "A veteran striker who has led DR Congo for many years. A legendary-level forward who guides the team as ace striker with experience refined in the Spanish league, boasting a sprint of 78 and shooting accuracy of 78.", "height": 183, "weight": 79},
+"ボンゴンダ": {"profile": "ベルギー出身のLWで、ロシアリーグで活躍。79のスプリントと74の敏捷性でサイドを疾走し、個人技での突破とクロスでチャンスを演出するウインガー。", "profile_en": "A Belgian-born left winger active in the Russian league. A winger who creates chances with individual skill and crossing, racing down the flank with a sprint of 79 and agility of 74.", "height": 174, "weight": 70},
+"マエル": {"profile": "中東リーグで活躍するCF。76のスプリントと67のシュートでゴールを狙い続け、代表でのキャリアを積み上げた経験豊富なストライカー。", "profile_en": "A striker active in a Middle Eastern league. An experienced forward who continuously targets goal with a sprint of 76 and shooting of 67, having built up an established national team career.", "height": 184, "weight": 82},
+"カパウディ": {"profile": "ポーランドリーグで実績を積んだCB。83のフィジカルと70の守備能力でゴール前に立ちはだかり、セットプレーで圧倒的な空中支配力を誇るパワー系センターバック。", "profile_en": "A centre-back with a proven record in the Polish league. A powerful defender who stands firm in front of goal with physical strength of 83 and defensive ability of 70, with overwhelming aerial dominance at set pieces.", "height": 188, "weight": 90},
+"J・カエンベ": {"profile": "ベルギーリーグで活躍するLB。79のスプリントで積極的にオーバーラップし、74の敏捷性でドリブルからクロスを供給するアタッキングフルバック。", "profile_en": "A left-back active in the Belgian league. An attacking full-back who overlaps aggressively with a sprint of 79, delivering crosses from dribbles with agility of 74.", "height": 183, "weight": 78},
+"E・カエンベ": {"profile": "イングランドリーグで活躍するCMF。72のスプリントと69のパス精度でゲームを組み立て、高いフィジカル（78）と守備意識でチームに貢献するオールラウンドなミッドフィルダー。", "profile_en": "A central midfielder active in an English league. An all-round midfielder who builds play with a sprint of 72 and passing accuracy of 69, contributing to the team with physical strength of 78 and defensive awareness.", "height": 179, "weight": 76},
+"ピッケル": {"profile": "スペインリーグで活躍するCMF。ボックス・トゥ・ボックスの運動量と80の強靭なフィジカルを武器に、中盤の守備と組み立ての両方をこなすユーティリティMF。", "profile_en": "A central midfielder active in the Spanish league. A utility midfielder handling both defensive duties and build-up with box-to-box work rate and a powerful physical strength of 80.", "height": 182, "weight": 78},
+"ムトゥサミ": {"profile": "ギリシャリーグで活躍するDMF。70のスプリントと62の守備能力でボール奪取に優れ、チームの中盤を引き締めるハードワーカーな守備型MF。", "profile_en": "A defensive midfielder active in the Greek league. A hard-working defensive player who excels at ball-winning with a sprint of 70 and defensive ability of 62, tightening the team's midfield.", "height": 177, "weight": 74},
+"カルル": {"profile": "キプロスリーグで活躍するDF。攻守のバランスに優れたユーティリティディフェンダーで、サイドバックとCBを兼務できる器用さが代表でのアピールポイント。", "profile_en": "A defender active in the Cypriot league. A versatile utility defender with a well-balanced game, whose ability to play both full-back and centre-back is his key selling point for the national team.", "height": 182, "weight": 77},
+"トゥアンゼベ": {"profile": "イングランドリーグで経験を積んだ右SB/CB。76のスプリントと73の守備能力を誇り、サイドバックとセンターバックの両方をこなせるユーティリティ守備選手。", "profile_en": "A right-back and centre-back with experience in an English league. A versatile defender capable of playing both full-back and centre-back, boasting a sprint of 76 and defensive ability of 73.", "height": 184, "weight": 80},
+"ツィボラ": {"profile": "スコットランドリーグで活躍するCMF。豊富な運動量と経験を武器に中盤をカバーし、代表スクワッドの中盤の選択肢として重要なバックアップを務める。", "profile_en": "A central midfielder active in the Scottish league. Serving as an important midfield backup in the squad, covering the midfield with high work rate and experience.", "height": 183, "weight": 78},
+"シペンガ": {"profile": "スペイン下部リーグで活躍するLW。81の爆発的なスプリントで左サイドを疾走し、縦への突破とカットインからゴールを狙う快速ウインガー。", "profile_en": "A left winger active in a lower Spanish division. An explosive winger who races down the left with a sprint of 81, targeting goal with direct runs and cutting inside.", "height": 175, "weight": 70},
+"ファユル": {"profile": "アルメニアリーグでプレーする若手GK。将来的な正GK候補として代表スクワッドに名を連ね、堅実なセービングと高い成長可能性を秘めた守護神。", "profile_en": "A young goalkeeper playing in the Armenian league. A keeper who has earned a national team place as a future number-one candidate, possessing sound shot-stopping and considerable growth potential.", "height": 185, "weight": 80},
+"ムパシ": {"profile": "フランスリーグで活躍するGK。65の反応速度と安定したキッキングを武器に、代表キャリアを長年積んできた経験豊富な守護神。", "profile_en": "A goalkeeper active in the French league. An experienced keeper who has accumulated a long national team career, using reflexes of 65 and stable kicking as his weapons.", "height": 186, "weight": 82}
 };
 
 const PARAM_NAMES = [
@@ -4251,6 +4277,66 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"マルシオ",en_name:"Marcio",long_name:"マルシオ・ロサ",positions:["GK"],params:[50,50,50,50,62,60,50,50,50,50,60,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,62,62,75]},
       // Sub GK: CJ dos Santos (~OVR60, REF61, SPD60, KIC58, DIV60, HAN59, POS61)
       {name:"CJ",en_name:"CJ",long_name:"CJ・ドスサントス",positions:["GK"],params:[50,50,50,50,61,60,50,50,50,50,58,50,50,50,50,50,50,50,50,50,50,50,50,60,59,50,61,61,75]}
+    ]
+  },
+  drcongo2026: {
+    name:"コンゴ民主共和国",en_name:"DR Congo",team_color:"#007FFF",flag:"🇨🇩",
+    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:10,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Matthieu Epolo (OVR73, REF73, SPD28, KIC66, DIV76, HAN70, POS70)
+      {name:"エポロ",en_name:"Epolo",long_name:"マテュー・エポロ",positions:["GK"],params:[50,50,50,50,73,28,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,76,70,50,70,72,75]},
+      // RB: Aaron Wan-Bissaka (OVR80, PAC80, SHO51, PAS69, DRI77, DEF78, PHY73)
+      {name:"ワンビサカ",en_name:"Wan-Bissaka",long_name:"アーロン・ワン=ビサカ",positions:["右SB"],params:[73,73,80,82,78,71,77,77,79,69,64,49,51,51,37,38,73,51,78,80,78,78,80,50,50,69,73,77,75]},
+      // CB: Chancel Mbemba (est OVR75, PAC72, SHO38, PAS64, DRI68, DEF74, PHY80) - Captain
+      {name:"ムベンバ",en_name:"Mbemba",long_name:"シャンセル・ムベンバ",positions:["CB","左SB"],params:[80,80,72,74,74,78,68,68,70,64,60,37,38,38,27,28,65,43,74,76,74,74,76,50,50,78,67,72,75]},
+      // CB: Dylan Batubinsika (OVR71, PAC69, SHO28, PAS52, DRI55, DEF69, PHY79)
+      {name:"バトゥビンシカ",en_name:"Batubinsika",long_name:"ダイラン・バトゥビンシカ",positions:["CB"],params:[79,79,69,71,69,77,55,55,62,52,48,27,28,28,20,21,52,34,69,71,69,69,71,50,50,77,63,68,75]},
+      // LB: Arthur Masuaku (OVR75, PAC79, SHO62, PAS74, DRI78, DEF68, PHY79)
+      {name:"マスアク",en_name:"Masuaku",long_name:"アルトゥール・マスアク",positions:["左SB","左WG"],params:[79,79,79,81,73,77,78,78,79,74,69,60,62,62,45,46,74,58,68,70,68,68,70,50,50,75,68,72,75]},
+      // CDM: Ngal'ayel Mukau (OVR74, PAC69, SHO57, PAS65, DRI71, DEF70, PHY75)
+      {name:"ムカウ",en_name:"Mukau",long_name:"ンガレイ・ムカウ",positions:["DMF","CMF"],params:[75,77,69,71,68,73,71,71,70,65,60,55,57,57,41,42,67,52,70,72,70,70,72,50,50,71,63,71,75]},
+      // CM: Noah Sadiki (OVR74, PAC77, SHO65, PAS68, DRI76, DEF68, PHY76)
+      {name:"サディキ",en_name:"Sadiki",long_name:"ノア・サディキ",positions:["CMF","DMF"],params:[76,76,77,79,75,74,76,76,77,68,63,63,65,65,47,48,72,57,68,70,68,68,70,50,50,70,63,71,75]},
+      // RW: Meschack Elia (OVR70, PAC82, SHO68, PAS67, DRI75, DEF26, PHY70)
+      {name:"エリア",en_name:"Elia",long_name:"メシャク・エリア",positions:["右WG","右SMF"],params:[70,70,82,84,77,66,75,75,79,67,62,66,68,68,49,50,71,65,26,28,26,26,28,50,50,50,72,67,75]},
+      // OMF: Gaël Kakuta (est OVR67, PAC66, SHO63, PAS68, DRI70, DEF42, PHY62)
+      {name:"カクタ",en_name:"Kakuta",long_name:"ガエル・カクタ",positions:["OMF","CMF"],params:[62,62,66,68,66,58,70,70,68,68,63,61,63,63,45,47,67,60,42,44,42,42,44,50,50,45,51,64,75]},
+      // LW: Nathanaël Mbuku (OVR70, PAC73, SHO63, PAS68, DRI74, DEF35, PHY53)
+      {name:"ムブク",en_name:"Mbuku",long_name:"ナタナエル・ムブク",positions:["左WG","左SMF"],params:[53,53,73,75,72,49,74,74,74,68,63,61,63,63,45,47,70,60,35,37,35,35,37,50,50,38,65,67,75]},
+      // CF: Yoane Wissa (OVR82, PAC85, SHO82, PAS70, DRI80, DEF31, PHY71)
+      {name:"ウィサ",en_name:"Wissa",long_name:"ヨアネ・ウィサ",positions:["CF","左WG"],params:[71,71,85,87,81,68,80,80,83,70,65,80,82,82,59,61,76,78,31,33,31,31,33,50,50,51,80,79,75]},
+      // Sub ST: Simon Banza (OVR81, PAC79, SHO81, PAS62, DRI77, DEF36, PHY79)
+      {name:"バンザ",en_name:"Banza",long_name:"シモン・バンザ",positions:["CF"],params:[79,79,79,81,76,76,77,77,78,62,58,79,81,81,58,60,73,77,36,38,36,36,38,50,50,57,77,78,75]},
+      // Sub ST: Cédric Bakambu (OVR77, PAC78, SHO78, PAS68, DRI72, DEF40, PHY68)
+      {name:"バカンブ",en_name:"Bakambu",long_name:"セドリック・バカンブ",positions:["CF"],params:[68,68,78,80,73,65,72,72,75,68,63,76,78,78,56,58,68,74,40,42,40,40,42,50,50,49,75,74,75]},
+      // Sub LW: Théo Bongonda (est OVR70, PAC79, SHO65, PAS66, DRI74, DEF30, PHY62)
+      {name:"ボンゴンダ",en_name:"Bongonda",long_name:"テオ・ボンゴンダ",positions:["左WG","右WG"],params:[62,62,79,81,75,58,74,74,77,66,61,63,65,65,47,48,70,62,30,32,30,30,32,50,50,45,69,67,75]},
+      // Sub ST: Fiston Mayele (est OVR68, PAC76, SHO67, PAS52, DRI68, DEF28, PHY70)
+      {name:"マエル",en_name:"Mayele",long_name:"フィストン・マエル",positions:["CF"],params:[70,70,76,78,70,67,68,68,72,52,48,65,67,67,48,50,65,64,28,30,28,28,30,50,50,50,69,65,75]},
+      // Sub CB: Steve Kapuadi (OVR71, PAC65, SHO33, PAS45, DRI50, DEF70, PHY83)
+      {name:"カパウディ",en_name:"Kapuadi",long_name:"スティーヴ・カパウディ",positions:["CB"],params:[83,83,65,67,69,81,50,50,58,45,42,32,33,33,24,24,48,33,70,72,70,70,72,50,50,81,62,68,75]},
+      // Sub LB: Joris Kayembe (OVR74, PAC79, SHO60, PAS71, DRI74, DEF66, PHY74)
+      {name:"J・カエンベ",en_name:"J.Kayembe",long_name:"ジョリス・カエンベ",positions:["左SB","CB"],params:[74,74,79,81,70,72,74,74,77,71,66,58,60,60,43,44,70,56,66,68,66,66,68,50,50,70,67,71,75]},
+      // Sub CM: Edo Kayembe (OVR71, PAC72, SHO66, PAS69, DRI70, DEF67, PHY78)
+      {name:"E・カエンベ",en_name:"E.Kayembe",long_name:"エド・カエンベ",positions:["CMF","DMF"],params:[78,78,72,74,69,76,70,70,71,69,64,64,66,66,48,49,67,57,67,69,67,67,69,50,50,72,63,68,75]},
+      // Sub CM: Charles Pickel (OVR71, PAC63, SHO63, PAS68, DRI69, DEF67, PHY80)
+      {name:"ピッケル",en_name:"Pickel",long_name:"シャルル・ピッケル",positions:["CMF","DMF"],params:[80,80,63,65,64,78,69,69,66,68,63,61,63,63,45,47,66,56,67,69,67,67,69,50,50,74,63,68,75]},
+      // Sub CDM: Samuel Moutoussamy (est OVR66, PAC70, SHO57, PAS64, DRI66, DEF62, PHY68)
+      {name:"ムトゥサミ",en_name:"Moutoussamy",long_name:"サミュエル・ムトゥサミ",positions:["DMF","CMF"],params:[68,70,70,72,66,66,66,66,68,64,60,55,57,57,41,42,63,51,62,64,62,62,64,50,50,64,59,63,75]},
+      // Sub DF: Gédéon Kalulu (est OVR66, PAC70, SHO32, PAS52, DRI58, DEF64, PHY70)
+      {name:"カルル",en_name:"Kalulu",long_name:"ゲデオン・カルル",positions:["右SB","CB","左SB"],params:[70,70,70,72,61,68,58,58,64,52,48,31,32,32,23,24,55,36,64,66,64,64,66,50,50,66,62,63,75]},
+      // Sub RB/CB: Axel Tuanzebe (OVR73, PAC76, SHO36, PAS64, DRI68, DEF73, PHY75)
+      {name:"トゥアンゼベ",en_name:"Tuanzebe",long_name:"アクセル・トゥアンゼベ",positions:["右SB","CB"],params:[75,75,76,78,71,73,68,68,72,64,60,35,36,36,26,27,65,43,73,75,73,73,75,50,50,71,69,70,75]},
+      // Sub CMF: Aaron Tshibola (est OVR63, PAC68, SHO53, PAS62, DRI64, DEF60, PHY68)
+      {name:"ツィボラ",en_name:"Tshibola",long_name:"アーロン・ツィボラ",positions:["CMF","DMF"],params:[68,68,68,70,64,66,64,64,66,62,58,51,53,53,38,39,61,49,60,62,60,60,62,50,50,62,57,60,75]},
+      // Sub LM: Brian Cipenga (OVR66, PAC81, SHO58, PAS59, DRI66, DEF33, PHY63)
+      {name:"シペンガ",en_name:"Cipenga",long_name:"ブライアン・シペンガ",positions:["左WG","左SMF"],params:[63,63,81,83,72,59,66,66,74,59,55,56,58,58,42,43,63,55,33,35,33,33,35,50,50,45,67,63,75]},
+      // Sub GK: Timothy Fayulu (est OVR62, REF62, SPD58, KIC58, DIV62, HAN60, POS62)
+      {name:"ファユル",en_name:"Fayulu",long_name:"ティモシー・ファユル",positions:["GK"],params:[50,50,50,50,62,58,50,50,50,50,58,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,62,62,75]},
+      // Sub GK: Lionel Mpasi (OVR67, DIV67, HAN66, KIC66, REF65, SPD45, POS66)
+      {name:"ムパシ",en_name:"Mpasi",long_name:"リオネル・ムパシ",positions:["GK"],params:[50,50,50,50,65,45,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,67,66,50,66,66,75]}
     ]
   },
 };

@@ -797,6 +797,7 @@ function showScreen(name) {
       {data: TEAM_DATA.bosnia2026,            key: 'bosnia2026'},
       {data: TEAM_DATA.southafrica2026,       key: 'southafrica2026'},
       {data: TEAM_DATA.capeverde2026,         key: 'capeverde2026'},
+      {data: TEAM_DATA.drcongo2026,           key: 'drcongo2026'},
     ]);
     document.getElementById('players2018-body').dataset.built = '1';
   }
@@ -847,6 +848,7 @@ const SINGLE_TEAMS = [
   {key:'bosnia2026',         label:'ボスニア・ヘルツェゴビナ', flag:'🇧🇦'},
   {key:'southafrica2026',    label:'南アフリカ', flag:'🇿🇦'},
   {key:'capeverde2026',      label:'カーボベルデ', flag:'🇨🇻'},
+  {key:'drcongo2026',        label:'コンゴ民主共和国', flag:'🇨🇩'},
 ];
 
 let _singleTeam1Key = null;
