@@ -4241,10 +4241,10 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ケビン・レニ",en_name:"K.Lenini",long_name:"ケビン・レニ",positions:["DMF","CMF"],params:[74,76,68,70,66,72,67,67,68,68,63,53,55,55,40,41,64,52,66,68,66,66,68,50,50,70,62,64,75]},
       // RM: Ryan Mendes (OVR71, PAC74, SHO67, PAS69, DRI74, DEF28, PHY54) - captain
       {name:"R・メンデス",en_name:"R.Mendes",long_name:"ライアン・メンデス",positions:["右SMF","右WG","左WG","左SMF"],params:[54,54,74,76,72,50,74,74,74,69,64,65,67,67,48,50,70,64,28,30,28,28,30,50,50,39,68,68,75]},
-      // OMF: Telmo Arcanjo (OVR71, PAC74, SHO61, PAS68, DRI71, DEF38, PHY60)
-      {name:"アルカンジョ",en_name:"Arcanjo",long_name:"テルモ・アルカンジョ",positions:["OMF","右WG","左WG"],params:[60,60,74,76,71,56,71,71,73,68,63,59,61,61,44,45,67,58,38,40,38,38,40,50,50,43,49,68,75]},
-      // LM: Willy Semedo (~OVR65, PAC74, SHO64, PAS58, DRI67, DEF28, PHY60)
-      {name:"W・セメド",en_name:"W.Semedo",long_name:"ウィリー・セメド",positions:["左WG","左SMF","右WG","CF"],params:[60,60,74,76,69,56,67,67,71,58,54,62,64,64,46,47,64,61,28,30,28,28,30,50,50,43,66,62,75]},
+      // OMF: Willy Semedo (~OVR65, PAC74, SHO64, PAS58, DRI67, DEF28, PHY60)
+      {name:"W・セメド",en_name:"W.Semedo",long_name:"ウィリー・セメド",positions:["OMF","左WG","左SMF","右WG","CF"],params:[60,60,74,76,69,56,67,67,71,58,54,62,64,64,46,47,64,61,28,30,28,28,30,50,50,43,66,62,75]},
+      // LM: Telmo Arcanjo (OVR71, PAC74, SHO61, PAS68, DRI71, DEF38, PHY60)
+      {name:"アルカンジョ",en_name:"Arcanjo",long_name:"テルモ・アルカンジョ",positions:["左SMF","OMF","右WG","左WG"],params:[60,60,74,76,71,56,71,71,73,68,63,59,61,61,44,45,67,58,38,40,38,38,40,50,50,43,49,68,75]},
       // CF: Dailon Livramento (OVR70, PAC82, SHO71, PAS56, DRI68, DEF34, PHY64)
       {name:"D・リヴラメント",en_name:"D.Livramento",long_name:"ダイロン・リヴラメント",positions:["CF","左WG"],params:[64,64,82,84,75,61,68,68,75,56,52,69,71,71,51,53,65,67,34,36,34,34,36,50,50,61,73,67,75]},
       // Sub LW: Jovane Cabral (OVR70, PAC77, SHO71, PAS68, DRI72, DEF38, PHY68)
