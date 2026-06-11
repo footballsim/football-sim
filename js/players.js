@@ -1043,6 +1043,9 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ポールセン": {"profile": "ゴール前での嗅覚と高いフィジカルを持つCF。勤勉なプレスバックと前線でのポストプレーでチームに貢献するオールラウンドなストライカー。", "profile_en": "A CF with a keen goal instinct and strong physical presence. His tireless pressing and hold-up play up front make him a well-rounded contributor.", "height": 189, "weight": 85},
 "ドルベルグ": {"profile": "冷静な決定力と技術的なフィニッシュを持つCF。スペースへの賢い動き出しとシュート技術でデンマークの攻撃に得点オプションを提供する。", "profile_en": "A CF with composed finishing and technical quality in front of goal. His intelligent movement into space and finishing technique give Denmark an additional scoring option.", "height": 186, "weight": 83},
 "アディングラ": {"profile": "驚異的な加速力と突破力を誇る若き左WG。ドリブルと裏への飛び出しでサイドから相手守備を切り裂き、デンマーク攻撃に爆発的なスピードと幅をもたらす。", "profile_en": "A young left winger with astonishing acceleration and directness. His dribbling and runs in behind slice through defences from wide, bringing explosive pace and width to Denmark's attack.", "height": 178, "weight": 72},
+"V・クリスティアンセン": {"profile": "スピードと積極的なオーバーラップでデンマークの左サイドを担う若い左SB。高い身体能力と守備の堅実さを兼備し、デンマーク代表の左サイドに活力をもたらす。", "profile_en": "A young left-back who covers Denmark's left side with pace and proactive overlapping. Combining high athleticism with solid defending, he brings energy to Denmark's left flank.", "height": 181, "weight": 76},
+"O・アビルゴー": {"profile": "豊富なスタミナと守備貢献でデンマーク中盤を支えるCMF。正確なパスと高い位置取りでチームのバランスを維持するインテリジェントなMF。", "profile_en": "A CMF who supports Denmark's midfield with high stamina and defensive contribution. Intelligent positioning and precise passing maintain the team's balance.", "height": 183, "weight": 77},
+"G・イサクセン": {"profile": "爆発的な加速力とテクニックでデンマークのサイドを活性化するウィンガー。鋭いドリブルと積極的な仕掛けで相手守備を脅かし、デンマーク代表の攻撃に幅をもたらす。", "profile_en": "A winger who energises Denmark's flanks with explosive acceleration and technique. Sharp dribbling and direct running threaten opposing defences and add width to Denmark's attack.", "height": 182, "weight": 73},
 "ペンツ": {"profile": "安定したセービングとコーチングでオーストリアのゴールを守るGK。1対1の強さと高い集中力でゴールラインに立ちはだかる信頼性の高い守護神。", "profile_en": "Austria's reliable goalkeeper who guards the goal with consistent shot-stopping and vocal command. His one-on-one strength and high concentration make him a dependable last line of defence.", "height": 193, "weight": 84},
 "ポッシュ": {"profile": "スピードとタフな守備を武器にオーストリアの右サイドを担う右SB。積極的なオーバーラップと正確なクロスでオーストリアの攻撃に幅と推進力をもたらす。", "profile_en": "A right-back who covers Austria's right flank with pace and tough defending. His overlapping runs and precise crossing add width and drive to Austria's attack.", "height": 188, "weight": 78},
 "ダンソ": {"profile": "爆発的なスピードと強靭なフィジカルを兼備するフランス出身のCB。オーストリア代表として頭角を現した長身CB で、デュエルの強さとカバーリング能力は世界トップクラス。", "profile_en": "A CB of Franco-Austrian roots with explosive pace and powerful physicality. An imposing centre-back who established himself with Austria, his aerial duels and covering ability are world-class.", "height": 191, "weight": 86},
@@ -1180,6 +1183,13 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ラドニッチ": {"profile": "スピードと豊富な運動量でセルビアのサイドを活性化するウィンガー。積極的な仕掛けと高い突破力で相手守備を脅かすダイナミックなアタッカー。", "profile_en": "A winger who activates Serbia's flanks with pace and abundant energy. His direct running and penetrating ability threaten opposing defences dynamically.", "height": 182, "weight": 75},
 "L・ヨヴィッチ": {"profile": "テクニックと嗅覚の鋭さで前線に危険をもたらすCF。狭いスペースでの創造性とシュートの多様性でセルビアの前線に得点オプションを加える。", "profile_en": "A CF who creates danger up front with technique and sharp instinct. His creativity in tight spaces and varied shooting add a scoring option to Serbia's forward line.", "height": 181, "weight": 80},
 "A・ミトロヴィッチ": {"profile": "比類ない得点力と圧倒的なフィジカルでセルビアの前線に君臨するストライカー。ヘディングシュートとポストプレーの強さは世界屈指で、セルビア代表最多得点記録を持つスーパースター。", "profile_en": "A striker who reigns over Serbia's forward line with unmatched goal-scoring and imposing physique. His aerial finishing and hold-up play rank among the world's best, and he is a superstar holding the all-time Serbia scoring record.", "height": 191, "weight": 88},
+"I・イリッチ": {"profile": "正確なパスと広い守備範囲でセルビア中盤に安定感をもたらすCMF。ヨーロッパで評価を高めた若手MFとして、セルビア代表の中盤に新世代のエネルギーをもたらす。", "profile_en": "A CMF who brings stability to Serbia's midfield with precise passing and wide defensive coverage. A young MF who has earned recognition in Europe, bringing new-generation energy to Serbia's midfield.", "height": 182, "weight": 74},
+"M・リスティッチ": {"profile": "スピードと安定した守備でセルビアの左サイドを支える左SB。豊富な運動量と積極的な攻撃参加でチームのサイドに推進力をもたらす。", "profile_en": "A left-back who supports Serbia's left side with pace and reliable defending. His high energy and proactive forward runs bring drive to the team's flank.", "height": 177, "weight": 72},
+"スパイッチ": {"profile": "強靭なフィジカルとインテリジェントなポジショニングでセルビア守備を補強するCB。欧州トップリーグで磨いた守備力でセルビア代表に頼もしい守備オプションを提供する。", "profile_en": "A CB who reinforces Serbia's defence with powerful physique and intelligent positioning. Defensive quality honed in Europe's top league gives Serbia a reliable defensive option.", "height": 193, "weight": 87},
+"ジュリッチ": {"profile": "テクニックと創造性でセルビア攻撃に彩りを加えるOMF。正確なパスと多様な動きで相手守備を翻弄し、セルビア代表の攻撃バリエーションを増やすアタッカー。", "profile_en": "An OMF who adds colour to Serbia's attack with technique and creativity. Precise passing and varied movement bamboozle opposing defences and expand Serbia's attacking options.", "height": 180, "weight": 74},
+"ラザロヴィッチ": {"profile": "スピードと積極的な仕掛けでセルビアのサイドに脅威をもたらすウィンガー。ドリブルの切れ味と豊富なスタミナでチームの攻撃に幅をもたらすアタッカー。", "profile_en": "A winger who threatens Serbia's flanks with pace and direct running. Sharp dribbling and high stamina add width to the team's attack.", "height": 181, "weight": 72},
+"ガイッチ": {"profile": "安定した守備と積極的なオーバーラップでセルビアの右サイドをカバーする右SB。豊富なスタミナとポジショニングの良さでチームのサイドに貢献するDF。", "profile_en": "A right-back who covers Serbia's right side with solid defending and proactive overlapping. High stamina and good positioning contribute to the team's flank.", "height": 179, "weight": 73},
+"N・ニコリッチ": {"profile": "得点力と機動力でセルビア前線にオプションをもたらすCF。ゴール前での嗅覚とスペースへの巧みな動きでチームに得点能力を提供する。", "profile_en": "A CF who provides options for Serbia's forward line with goalscoring ability and mobility. A nose for goal and clever movement into space give the team a scoring capability.", "height": 184, "weight": 76},
 "スコルプスキ": {"profile": "安定したセービングとフットワークでポーランドのゴールを守るGK。ボローニャで評価を高め、代表の正GKとして確かな地位を築いた守護神。", "profile_en": "Poland's goalkeeper who guards the goal with reliable shot-stopping and good footwork. Having gained recognition at Bologna, he has established a firm position as the national team's first choice.", "height": 194, "weight": 87},
 "キャッシュ": {"profile": "精力的なオーバーラップと安定した守備でポーランドの右サイドを担うSB。イングランドのトップリーグで培ったフィジカルと技術で代表の右サイドを安定させる。", "profile_en": "A right-back who covers Poland's flank with energetic overlaps and solid defending. Physicality and technique refined in England's top flight stabilise the national team's right side.", "height": 181, "weight": 76},
 "ベドナレク": {"profile": "安定したポジショニングと読みの鋭さでポーランド守備の要を担うCB。プレミアリーグで長年磨いた高い守備能力でチームに頼もしい選択肢を提供するベテランDF。", "profile_en": "A veteran CB who is the mainstay of Poland's defence with reliable positioning and sharp reading. Defensive quality honed in the Premier League for many years makes him a dependable option.", "height": 188, "weight": 85},
@@ -1201,6 +1211,11 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "J・カミンスキ": {"profile": "スピードと積極的な仕掛けでポーランドの左サイドを活性化する若手ウィンガー。高い突破力と得点意欲でポーランドの攻撃に迫力をもたらすダイナミックなアタッカー。", "profile_en": "A young winger who energises Poland's left side with pace and direct attacking play. His penetrating runs and desire to score bring dynamism to Poland's attack.", "height": 183, "weight": 74},
 "シフデルスキ": {"profile": "ヨーロッパで磨いた得点力とスピードを武器とするCF。裏への抜け出しと的確なフィニッシュでポーランドの前線に活力と得点オプションを加える。", "profile_en": "A CF armed with the goalscoring ability and pace developed in Europe. His runs in behind and accurate finishing add energy and a scoring option to Poland's forward line.", "height": 185, "weight": 77},
 "ミリク": {"profile": "高い決定力と多彩なシュートパターンでポーランド前線に迫力をもたらすCF。ヨーロッパのトップリーグで長年活躍するベテランストライカー。", "profile_en": "A CF who brings menace to Poland's forward line with high finishing quality and varied shooting. A veteran striker who has long been active in Europe's top leagues.", "height": 188, "weight": 82},
+"ジュルコフスキ": {"profile": "豊富な運動量と高い守備意識でポーランド中盤を支えるCMF。攻守両面への積極的な貢献でチームのバランスを維持するハードワーカー。", "profile_en": "A CMF who supports Poland's midfield with high energy and strong defensive awareness. A hard worker who maintains the team's balance with active contribution in both phases.", "height": 183, "weight": 76},
+"グリク": {"profile": "長年のキャリアで培った豊富な経験と高い守備意識でポーランド守備を支えるベテランCB。フィジカルの強さとインテリジェントな読みでチームの守備ラインを締める。", "profile_en": "A veteran CB who supports Poland's defence with extensive career experience and strong defensive awareness. Physical strength and intelligent reading tighten the team's defensive line.", "height": 191, "weight": 84},
+"ピアテク": {"profile": "鋭いゴールへの嗅覚と多彩なシュートでポーランド前線に迫力をもたらすCF。ヨーロッパで培った高い決定力でポーランド代表の得点オプションを広げる。", "profile_en": "A CF who brings power to Poland's forward line with a sharp nose for goal and varied shooting. High finishing quality developed in Europe expands Poland's scoring options.", "height": 184, "weight": 74},
+"プワシェタ": {"profile": "爆発的な加速力とドリブルでポーランドのサイドに迫力をもたらすウィンガー。積極的な仕掛けとゴールへの意欲でチームの攻撃バリエーションを豊かにするアタッカー。", "profile_en": "A winger who brings power to Poland's flanks with explosive acceleration and dribbling. His direct running and desire for goal enrich the team's attacking variety.", "height": 181, "weight": 73},
+"スコラシュ": {"profile": "スピードと積極的なプレーでポーランドのサイドに活力をもたらす若いウィンガー。鋭い突破と高い得点意識でチームの攻撃にオプションを加える。", "profile_en": "A young winger who brings vitality to Poland's flanks with pace and proactive play. Sharp penetrating runs and goalscoring awareness add options to the team's attack.", "height": 178, "weight": 70},
 "ルニン": {"profile": "守備範囲の広さと卓越した反射神経でウクライナゴールを守るGK。ビッグクラブで磨いた高い技術と集中力でウクライナ代表のゴールに立ちはだかる守護神。", "profile_en": "A GK who protects Ukraine's goal with wide coverage and exceptional reflexes. Honed at a top club, his technique and concentration make him a formidable guardian of the national team's net.", "height": 191, "weight": 83},
 "コノプリャ": {"profile": "豊富なスタミナと積極的なオーバーラップでウクライナの右サイドを担うSB。安定した守備と前線への参加でウクライナの右サイドを活性化するダイナミックなDF。", "profile_en": "A right-back who covers Ukraine's flank with high stamina and proactive overlapping runs. Solid defending and forward involvement energise Ukraine's right side dynamically.", "height": 179, "weight": 72},
 "ザバルニ": {"profile": "高いフィジカルとインテリジェントなポジショニングでウクライナ守備を支えるCB。プレミアリーグで経験を積んだ若手DF。", "profile_en": "A CB who supports Ukraine's defence with physicality and intelligent positioning. A young defender who has built experience in the Premier League.", "height": 193, "weight": 86},
@@ -1217,6 +1232,13 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ミコレンコ": {"profile": "スピードと積極的な攻撃参加でウクライナ左サイドを担う左SB。攻守両面にわたる豊富な運動量でウクライナのサイドに活力をもたらす。", "profile_en": "A left-back who covers Ukraine's left side with pace and proactive forward runs. His high energy in both defence and attack brings vitality to Ukraine's flank.", "height": 179, "weight": 73},
 "ポポフ": {"profile": "安定したポジショニングと広いカバー範囲でウクライナ守備ラインの安定性を高めるCB。シンプルで確実な守備でチームに頼もしい選択肢を提供する。", "profile_en": "A CB who enhances Ukraine's defensive stability with reliable positioning and wide coverage. Simple and dependable defending gives the team a solid option.", "height": 188, "weight": 81},
 "ヤレムチュク": {"profile": "スピードと得点力を兼備するウクライナ代表のCF。ゴール前での決定力とダイナミックな動きでウクライナ前線に得点オプションをもたらす。", "profile_en": "A Ukrainian CF combining pace with goalscoring ability. His finishing in front of goal and dynamic movement add a scoring option to Ukraine's forward line.", "height": 186, "weight": 80},
+"マリノフスキ": {"profile": "卓越したテクニックと高いパスセンスでウクライナ攻撃を活性化するCMF。ヨーロッパのトップリーグで高い評価を確立し、ウクライナ代表の攻撃的なオプションを広げる。", "profile_en": "A CMF who energises Ukraine's attack with outstanding technique and high passing sense. Having established strong standing in Europe's top league, he expands Ukraine's attacking options.", "height": 182, "weight": 75},
+"クリフツォフ": {"profile": "フィジカルの強さとインテリジェントな守備でウクライナ守備ラインを支えるCB。高い守備意識とカバーリング能力でチームの守備に貢献するベテランDF。", "profile_en": "A veteran CB who supports Ukraine's defensive line with physical strength and intelligent defending. Strong defensive awareness and covering ability contribute to the team's defence.", "height": 190, "weight": 84},
+"B・ミハイリチェンコ": {"profile": "スピードと積極的な仕掛けでウクライナのサイドを活性化するウィンガー。鋭いドリブルと豊富なスタミナでチームの攻撃に幅をもたらす。", "profile_en": "A winger who energises Ukraine's flanks with pace and direct running. Sharp dribbling and high stamina add width to the team's attack.", "height": 177, "weight": 70},
+"ベセジン": {"profile": "スピードと得点力でウクライナ前線にオプションをもたらすCF。積極的な動きとゴールへの意欲でチームの攻撃に多様性を加えるアタッカー。", "profile_en": "A CF who provides options for Ukraine's forward line with pace and goalscoring ability. Active movement and desire for goal add variety to the team's attack.", "height": 183, "weight": 76},
+"ブラシコ": {"profile": "豊富なスタミナと守備意識でウクライナ中盤を支えるCMF。ボール奪取能力とインテリジェントなプレーでゲームのリズムを整えるハードワーカー。", "profile_en": "A CMF who supports Ukraine's midfield with high stamina and defensive awareness. A hard worker who regulates the game's rhythm with ball-winning ability and intelligent play.", "height": 180, "weight": 72},
+"ズブコフ": {"profile": "スピードと積極的な仕掛けでウクライナのサイドを活性化するウィンガー。縦への突破とゴールへの積極性でチームの攻撃に躍動感をもたらす。", "profile_en": "A winger who activates Ukraine's flanks with pace and direct running. Vertical drives and attacking eagerness bring dynamism to the team's attack.", "height": 176, "weight": 68},
+"ティムチュク": {"profile": "安定した守備と豊富なスタミナでウクライナのサイドを支えるDF。複数ポジションをこなす柔軟性でチームに戦術的な選択肢を与える。", "profile_en": "A defender who supports Ukraine's flanks with reliable defending and high stamina. Versatility across multiple positions gives the team tactical options.", "height": 179, "weight": 73},
 "スタネク": {"profile": "鋭い反射神経とポジショニングの正確さでチェコのゴールを守るGK。欧州の名門クラブで経験を積み、チェコ代表のゴールマウスに安定感をもたらす守護神。", "profile_en": "A GK who protects Czech Republic's goal with sharp reflexes and precise positioning. Having gained experience at a top European club, he brings stability to the national team's goalmouth.", "height": 195, "weight": 88},
 "コウファル": {"profile": "豊富なスタミナと積極的なオーバーラップでチェコの右サイドを活性化するSB。プレミアリーグで磨いたフィジカルと技術でチェコ代表の右サイドを強固にする。", "profile_en": "A right-back who energises Czech Republic's right side with high stamina and proactive overlaps. Physicality and technique refined in the Premier League make Czech Republic's right side robust.", "height": 181, "weight": 76},
 "T・ホレシュ": {"profile": "安定したポジショニングと高いカバーリングでチェコ守備を支えるCB。インテリジェントな読みと安定したパスワークでチームの守備組織を整えるDF。", "profile_en": "A CB who supports Czech Republic's defence with reliable positioning and wide coverage. Intelligent reading and stable passing organise the team's defensive structure.", "height": 185, "weight": 79},
@@ -1239,6 +1261,21 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "チュクウェゼ": {"profile": "超人的な加速力と積極的な仕掛けでナイジェリアのサイドに脅威をもたらすウィンガー。相手守備を切り裂くスピードとドリブルで代表の攻撃に迫力を加える。", "profile_en": "A winger who threatens Nigeria's flank with superhuman acceleration and direct running. His pace and dribbling that cut through opposing defences add power to the national team's attack.", "height": 170, "weight": 67},
 "エゼ": {"profile": "卓越したテクニックと創造性でナイジェリア攻撃の核を担うOMF。ドリブルとパスの多様性でゲームを操り、ナイジェリア代表の攻撃に知性をもたらす天才的プレーメイカー。", "profile_en": "A genius OMF who commands the core of Nigeria's attack with outstanding technique and creativity. He controls the game through dribbling and passing variety, bringing intelligence to Nigeria's attack.", "height": 179, "weight": 71},
 "オシムヘン": {"profile": "恐怖の決定力と爆発的なスピードでナイジェリア前線に君臨するCF。ゴールへの嗅覚と圧倒的な存在感はアフリカ屈指の水準で、ナイジェリア代表の全攻撃が集約される絶対的エース。", "profile_en": "A CF who reigns over Nigeria's forward line with terrifying finishing and explosive pace. His nose for goal and overwhelming presence rank among Africa's best — the undisputed ace around whom all of Nigeria's attack revolves.", "height": 185, "weight": 78},
+"オコイェ": {"profile": "安定したセービングと素早い反応でナイジェリアのゴールを守るGK。代表のGK陣に厚みをもたらすバックアップ守護神。", "profile_en": "A GK who guards Nigeria's goal with reliable shot-stopping and quick reactions. A backup guardian who adds depth to the national team's goalkeeping.", "height": 193, "weight": 88},
+"フランシス": {"profile": "豊富な経験と安定したプレーでナイジェリアGK陣を支えるGK。ベテランの落ち着きでチームの守護神陣にバランスをもたらす。", "profile_en": "A GK who supports Nigeria's goalkeeping group with extensive experience and reliable play. Veteran composure brings balance to the team's goalkeeping options.", "height": 188, "weight": 82},
+"タイウォ": {"profile": "スピードと豊富なスタミナでナイジェリアのサイドをカバーするSB。積極的な攻撃参加と安定した守備でチームのサイドに貢献するDF。", "profile_en": "A full-back who covers Nigeria's flanks with pace and high stamina. Proactive forward runs and reliable defending contribute to the team's flank.", "height": 176, "weight": 72},
+"エクワ": {"profile": "インテリジェントなポジショニングと守備の強度でナイジェリア守備を補強するCB。複数ポジションをこなす柔軟性でチームに戦術的な幅をもたらす。", "profile_en": "A CB who reinforces Nigeria's defence with intelligent positioning and defensive intensity. Versatility across multiple positions adds tactical breadth to the team.", "height": 183, "weight": 77},
+"イウォビ": {"profile": "多才なプレースタイルとテクニックでナイジェリア中盤に多様性をもたらすMF。プレミアリーグで評価を高め、複数ポジションで貢献するオールラウンドなMF。", "profile_en": "A versatile MF who brings variety to Nigeria's midfield with a multifaceted style and technique. Having gained recognition in the Premier League, he is an all-round MF who contributes across multiple positions.", "height": 181, "weight": 74},
+"オニェカ": {"profile": "豊富なスタミナと守備意識でナイジェリア中盤を支えるDMF。積極的なプレスとボール奪取でチームの守備バランスを保つハードワーカー。", "profile_en": "A DMF who supports Nigeria's midfield with high stamina and defensive awareness. A hard worker who maintains the team's defensive balance with proactive pressing and ball-winning.", "height": 186, "weight": 80},
+"モーゼス": {"profile": "爆発的なスピードとドリブルでナイジェリアのサイドに脅威をもたらすウィンガー。積極的な仕掛けと高いスタミナでサイドを支配し、ナイジェリア代表の攻撃に幅をもたらす。", "profile_en": "A winger who threatens Nigeria's flanks with explosive pace and dribbling. Proactive running and high stamina dominate the flank and add width to Nigeria's attack.", "height": 170, "weight": 65},
+"モフィ": {"profile": "爆発的な加速力とゴールへの嗅覚でナイジェリア前線にオプションをもたらすCF。スピードと積極的な動きでチームの攻撃に躍動感を加える。", "profile_en": "A CF who provides options for Nigeria's forward line with explosive acceleration and a nose for goal. Pace and proactive movement add dynamism to the team's attack.", "height": 185, "weight": 77},
+"オヌアチュ": {"profile": "圧倒的なフィジカルと高い決定力でナイジェリア前線に迫力をもたらすCF。強靭な体躯と空中戦の強さでゴール前に存在感を発揮するストライカー。", "profile_en": "A CF who brings power to Nigeria's forward line with overwhelming physicality and high finishing ability. A striker with a powerful build and aerial strength who makes his presence felt in front of goal.", "height": 201, "weight": 95},
+"イヘアナチョ": {"profile": "テクニックと得点嗅覚でナイジェリア前線に多様性をもたらすCF。ゴール前での柔らかいタッチとインテリジェントな動きでチームに得点オプションを提供する。", "profile_en": "A CF who brings variety to Nigeria's forward line with technique and goalscoring instinct. A soft touch in front of goal and intelligent movement provide the team with a scoring option.", "height": 185, "weight": 74},
+"E・デニス": {"profile": "スピードと積極的な仕掛けでナイジェリアのサイドと前線を活性化するアタッカー。高い得点力と強靭なフィジカルでチームの攻撃に迫力をもたらす。", "profile_en": "An attacker who energises Nigeria's flank and forward line with pace and direct running. High goalscoring ability and powerful physique add power to the team's attack.", "height": 186, "weight": 79},
+"D・バシル": {"profile": "豊富な運動量とテクニックでナイジェリア中盤に創造性をもたらすMF。攻守両面への積極的な貢献でチームのバランスを維持するオールラウンドなMF。", "profile_en": "An MF who brings creativity to Nigeria's midfield with high energy and technique. An all-round MF who maintains the team's balance with active contribution in both phases.", "height": 182, "weight": 74},
+"エビュエヒ": {"profile": "スピードと安定した守備でナイジェリアのサイドをカバーする右SB。積極的なオーバーラップと守備の確実性でチームのサイドに推進力をもたらすDF。", "profile_en": "A right-back who covers Nigeria's flank with pace and reliable defending. Proactive overlapping and defensive reliability bring drive to the team's flank.", "height": 177, "weight": 73},
+"オニェクル": {"profile": "驚異的なスピードと積極的な仕掛けでナイジェリアのサイドを活性化するウィンガー。ドリブルの切れ味と高い突破力でチームの攻撃に幅をもたらすアタッカー。", "profile_en": "A winger who activates Nigeria's flanks with remarkable pace and direct running. Sharp dribbling and strong penetrating ability add width to the team's attack.", "height": 170, "weight": 66},
+"S・エゼ": {"profile": "安定したポジショニングと守備の強度でナイジェリア守備ラインを支えるCB。確実なプレーとカバーリングでチームの守備に信頼性をもたらすDF。", "profile_en": "A CB who supports Nigeria's defensive line with reliable positioning and defensive intensity. Dependable play and covering bring reliability to the team's defence.", "height": 191, "weight": 85},
 "フォファナ": {"profile": "高い反射神経と正確なポジショニングでコートジボワールのゴールを守るGK。欧州リーグで磨いたセービング技術と冷静さで代表守護神の座を掴んだ実力派。", "profile_en": "A GK who protects Ivory Coast's goal with sharp reflexes and precise positioning. Honed in European football, his shot-stopping technique and composure made him the national team's first choice.", "height": 191, "weight": 86},
 "シンゴ": {"profile": "スピードと強さを兼備するコートジボワールの右SB。積極的な攻撃参加と安定した守備で代表の右サイドを支配し、国際舞台でも実力を発揮する万能DF。", "profile_en": "Ivory Coast's right-back combining pace and strength. Dominating the national team's right side with proactive forward runs and sound defending, he proves himself on the international stage.", "height": 184, "weight": 78},
 "E・バイリー": {"profile": "屈強なフィジカルと正確な読みでコートジボワール守備を支えるCB。激しいデュエルと広いカバー範囲でチームの守備ラインを安定させるベテランDF。", "profile_en": "A veteran CB who supports Ivory Coast's defence with powerful physique and precise reading. His fierce duelling and wide coverage stabilise the team's defensive line.", "height": 187, "weight": 85},
@@ -1272,6 +1309,21 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ンガマルー": {"profile": "テクニックと創造性でカメルーン攻撃に彩りを加えるOMF。正確なパスと積極的な動きでチームのアタッキングサードでゲームを組み立てる。", "profile_en": "An OMF who adds colour to Cameroon's attack with technique and creativity. His precise passing and proactive movement build the game in the attacking third.", "height": 176, "weight": 70},
 "バッソゴグ": {"profile": "爆発的なスピードと鋭いドリブルでカメルーンのサイドに迫力をもたらすウィンガー。強烈な突破力で相手守備を脅かし、カメルーン代表の攻撃に幅をもたらす。", "profile_en": "A winger who brings power to Cameroon's flank with explosive pace and sharp dribbling. His fierce penetrating ability threatens defences and adds width to Cameroon's attack.", "height": 177, "weight": 72},
 "ムベウモ": {"profile": "爆発的なスピードと高い決定力でカメルーン前線に君臨するアタッカー。プレミアリーグで一流ストライカーとして台頭し、カメルーン代表の攻撃の最前線を担う若き絶対的エース。", "profile_en": "An attacker who reigns over Cameroon's forward line with explosive pace and high finishing. Having emerged as a top striker in the Premier League, he is Cameroon's young and undisputed ace at the tip of the attack.", "height": 175, "weight": 73},
+"エパシー": {"profile": "反射神経と安定したセービングでカメルーンのゴールを守るGK。代表GK陣に深みをもたらすバックアップ守護神。", "profile_en": "A GK who guards Cameroon's goal with sharp reflexes and reliable shot-stopping. A backup guardian who adds depth to the national team's goalkeeping.", "height": 190, "weight": 85},
+"F・エニョング": {"profile": "豊富な経験でカメルーンGK陣を支えるGK。落ち着きのあるセービングとリーダーシップでチームに安定感をもたらす守護神。", "profile_en": "A GK who supports Cameroon's goalkeeping group with extensive experience. Composed shot-stopping and leadership bring stability to the team.", "height": 188, "weight": 82},
+"ンゴム・ムベケリ": {"profile": "スピードと積極的なオーバーラップでカメルーンのサイドをカバーするDF。攻守両面への貢献でチームのサイドに活力をもたらす。", "profile_en": "A defender who covers Cameroon's flanks with pace and proactive overlapping. Active contribution in both phases brings energy to the team's flank.", "height": 180, "weight": 74},
+"ヌクル": {"profile": "豊富な経験と高いポジショニングでカメルーン守備に安定感をもたらすベテランCB。インテリジェントな守備でチームのバックラインを統率する。", "profile_en": "A veteran CB who brings stability to Cameroon's defence with extensive experience and excellent positioning. Intelligent defending organises the team's backline.", "height": 185, "weight": 80},
+"クンデ": {"profile": "豊富な運動量と守備貢献でカメルーン中盤を支えるDMF。インテリジェントなポジショニングとボール奪取でチームの守備バランスを保つ。", "profile_en": "A DMF who supports Cameroon's midfield with high energy and defensive contribution. Intelligent positioning and ball-winning maintain the team's defensive balance.", "height": 178, "weight": 73},
+"ンジェ": {"profile": "スピードと積極的な仕掛けでカメルーンのサイドを活性化するウィンガー。ドリブルと縦への突破でチームの攻撃に変化をもたらすアタッカー。", "profile_en": "A winger who activates Cameroon's flanks with pace and direct running. Dribbling and vertical drives bring variety to the team's attack.", "height": 172, "weight": 68},
+"チュポ＝モティング": {"profile": "経験豊富なポストプレーとテクニックでカメルーン前線を支えるCF。ヨーロッパでの豊富なキャリアを持つベテランストライカーとして、重要な場面でチームに得点能力を提供する。", "profile_en": "A veteran CF who supports Cameroon's forward line with experienced hold-up play and technique. With an extensive European career, he provides goalscoring ability when the team needs it most.", "height": 191, "weight": 88},
+"H・ムクディ": {"profile": "強靭なフィジカルとカバーリングでカメルーン守備を補強するCB。高い守備意識とポジショニングでチームの守備ラインを強固にするDF。", "profile_en": "A CB who reinforces Cameroon's defence with powerful physique and covering. Strong defensive awareness and positioning strengthen the team's defensive line.", "height": 186, "weight": 83},
+"グエ": {"profile": "豊富なスタミナと守備貢献でカメルーン中盤に安定感をもたらすCMF。インテリジェントなプレーとボール奪取能力でチームの守備バランスを維持する。", "profile_en": "A CMF who brings stability to Cameroon's midfield with high stamina and defensive contribution. Intelligent play and ball-winning ability maintain the team's defensive balance.", "height": 181, "weight": 75},
+"オンドゥア": {"profile": "豊富な運動量と積極的なプレーでカメルーン中盤を支えるDMF。高いスタミナとボール奪取でゲームの両局面に貢献するハードワーカー。", "profile_en": "A DMF who supports Cameroon's midfield with high energy and proactive play. High stamina and ball-winning contribute to both phases of the game as a hard worker.", "height": 180, "weight": 74},
+"ベラ": {"profile": "スピードとテクニックでカメルーンのサイドを活性化するウィンガー。鋭いドリブルと積極的な仕掛けでチームの攻撃に幅をもたらす。", "profile_en": "A winger who activates Cameroon's flanks with pace and technique. Sharp dribbling and direct running add width to the team's attack.", "height": 176, "weight": 72},
+"バオケン": {"profile": "得点力とフィジカルでカメルーン前線に厚みをもたらすCF。ゴール前での存在感と積極的なプレーでチームの攻撃オプションを広げる。", "profile_en": "A CF who adds depth to Cameroon's forward line with goalscoring ability and physicality. His presence in front of goal and proactive play expand the team's attacking options.", "height": 184, "weight": 78},
+"タワンバ": {"profile": "得点力と機動力でカメルーン前線にオプションをもたらすCF。スペースへの積極的な動きとゴールへの嗅覚でチームの攻撃を活性化するアタッカー。", "profile_en": "A CF who provides options for Cameroon's forward line with goalscoring ability and mobility. Proactive movement into space and a nose for goal energise the team's attack.", "height": 183, "weight": 76},
+"L・エソンバ": {"profile": "スピードと安定した守備でカメルーンのサイドをカバーするDF。積極的な攻撃参加と守備の確実性でチームのサイドに貢献する。", "profile_en": "A defender who covers Cameroon's flanks with pace and reliable defending. Proactive forward runs and defensive reliability contribute to the team's flank.", "height": 177, "weight": 72},
+"A・マルタン": {"profile": "豊富な運動量とテクニックでカメルーン中盤に活力をもたらすMF。積極的なプレーとパスセンスでチームの攻撃的な選択肢を増やす。", "profile_en": "An MF who brings energy to Cameroon's midfield with high stamina and technique. Proactive play and passing sense increase the team's attacking options.", "height": 175, "weight": 70},
 "ベイランバンド": {"profile": "圧倒的な反射神経と1対1の強さで知られるイラン代表GK。PKストップの名手として名高く、大舞台での安定感でイランのゴールマウスに信頼感をもたらす守護神。", "profile_en": "Iran's GK known for extraordinary reflexes and strong one-on-one stopping. Renowned as a penalty-saving specialist, his composure on the big stage brings confidence to Iran's goal.", "height": 195, "weight": 92},
 "モハラミ": {"profile": "安定した守備と豊富なスタミナでイランの右サイドを担うSB。積極的なオーバーラップと攻守のバランスでイラン代表の右サイドを支えるDF。", "profile_en": "A right-back who covers Iran's flank with reliable defending and high stamina. Proactive overlapping and balanced play support the national team's right side.", "height": 177, "weight": 72},
 "プラリガンジ": {"profile": "高いポジショニングと安定した守備でイランのDFラインを統率するCB。インテリジェントな読みとカバーリングでイラン代表守備の核を担うリーダーDF。", "profile_en": "A CB who commands Iran's defensive line with excellent positioning and stable defending. Intelligent reading and covering make him the centrepiece of Iran's national team defence.", "height": 185, "weight": 82},
@@ -1316,6 +1368,21 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ミハイラ": {"profile": "テクニックと創造性でルーマニアのサイド攻撃を彩るウィンガー。積極的な仕掛けと鋭い動きでチームの攻撃に変化をもたらすアタッカー。", "profile_en": "A winger who colours Romania's flank attack with technique and creativity. His direct running and sharp movement bring variety to the team's attack.", "height": 177, "weight": 72},
 "スタンチウ": {"profile": "卓越したテクニックと創造性でルーマニア攻撃を牽引するOMF。長年にわたりルーマニア代表の中心として活躍し、正確なパスと鋭い動きでチームのゲームを操る経験豊富なプレーメイカー。", "profile_en": "An experienced playmaker who leads Romania's attack with outstanding technique and creativity. Having long been central to the national team, his precise passing and sharp movement control the team's game.", "height": 179, "weight": 76},
 "プシュカシュ": {"profile": "得点力とポストプレーでルーマニア前線に貢献するCF。スピードとフィジカルを活かした積極的なプレーでルーマニア代表の前線を支える。", "profile_en": "A CF who contributes to Romania's forward line with goalscoring and hold-up play. Active play utilising pace and physique supports Romania's national team attack.", "height": 181, "weight": 82},
+"タルノヴァヌ": {"profile": "安定したセービングと素早い反応でルーマニアのゴールを守るGK。代表GK陣に深みをもたらすバックアップ守護神として信頼されている。", "profile_en": "A GK who guards Romania's goal with reliable shot-stopping and quick reactions. Trusted as a backup guardian who adds depth to the national team's goalkeeping.", "height": 193, "weight": 87},
+"ルング": {"profile": "豊富な経験でルーマニアGK陣を支えるベテランGK。落ち着きのあるプレーとリーダーシップでチームに安定感をもたらす守護神。", "profile_en": "A veteran GK who supports Romania's goalkeeping group with extensive experience. Composed play and leadership bring stability to the team.", "height": 190, "weight": 85},
+"ブルカ": {"profile": "フィジカルの強さとインテリジェントなポジショニングでルーマニア守備を補強するCB。高い守備意識でチームのバックラインに安定感をもたらすDF。", "profile_en": "A CB who reinforces Romania's defence with physical strength and intelligent positioning. Strong defensive awareness brings stability to the team's backline.", "height": 186, "weight": 81},
+"モルドバン": {"profile": "スピードと豊富なスタミナでルーマニアのサイドをカバーするDF。積極的な攻撃参加と守備の確実性でチームのサイドに貢献するDF。", "profile_en": "A defender who covers Romania's flanks with pace and high stamina. Proactive forward runs and defensive reliability contribute to the team's flank.", "height": 178, "weight": 72},
+"I・ハジ": {"profile": "卓越したテクニックと創造性でルーマニア攻撃に多様性をもたらすOMF。正確なパスと多才なプレーでチームの攻撃にインテリジェンスを加える。", "profile_en": "An OMF who adds variety to Romania's attack with outstanding technique and creativity. Precise passing and versatile play add intelligence to the team's attack.", "height": 177, "weight": 70},
+"チカルダウ": {"profile": "豊富な運動量とパスセンスでルーマニア中盤を支えるCMF。インテリジェントなポジショニングと創造性でチームの攻撃的バランスを高める。", "profile_en": "A CMF who supports Romania's midfield with high energy and passing sense. Intelligent positioning and creativity enhance the team's attacking balance.", "height": 181, "weight": 75},
+"ドラグシュ": {"profile": "スピードと積極的なプレーでルーマニアの攻撃に活力をもたらすアタッカー。ゴールへの意欲とフィジカルの強さでチームの前線に多様性を加える。", "profile_en": "An attacker who brings vitality to Romania's attack with pace and proactive play. Desire for goal and physical strength add variety to the team's forward line.", "height": 184, "weight": 79},
+"D・オラル": {"profile": "高いテクニックと創造性でルーマニア中盤を活性化するCMF。正確なパスと積極的な動きでゲームを動かし、ルーマニア代表の攻撃に知性をもたらす。", "profile_en": "A CMF who energises Romania's midfield with high technique and creativity. Precise passing and proactive movement drive the game and bring intelligence to Romania's attack.", "height": 183, "weight": 74},
+"F・コマン": {"profile": "爆発的なスピードとドリブルでルーマニアのサイドを活性化するウィンガー。積極的な仕掛けと鋭い動きでチームの攻撃に幅と迫力をもたらす。", "profile_en": "A winger who energises Romania's flanks with explosive pace and dribbling. Direct running and sharp movement add width and power to the team's attack.", "height": 176, "weight": 68},
+"F・タナセ": {"profile": "テクニックと得点力でルーマニア攻撃を豊かにするOMF。正確なパスとシュート技術でゲームを動かし、ルーマニア代表の攻撃にバリエーションをもたらす。", "profile_en": "An OMF who enriches Romania's attack with technique and goalscoring ability. Precise passing and shooting skills drive the game and bring variety to Romania's attack.", "height": 181, "weight": 73},
+"キリケシュ": {"profile": "高い守備意識とリーダーシップでルーマニア守備を支えるCB。豊富な国際経験と冷静なプレーでチームの守備ラインに信頼性をもたらすベテランDF。", "profile_en": "A veteran CB who supports Romania's defence with strong defensive awareness and leadership. Extensive international experience and composed play bring reliability to the team's defensive line.", "height": 185, "weight": 77},
+"ネデルク": {"profile": "豊富なスタミナと守備貢献でルーマニア中盤を支えるDMF。ボール奪取能力とインテリジェントなポジショニングでチームの守備バランスを保つ。", "profile_en": "A DMF who supports Romania's midfield with high stamina and defensive contribution. Ball-winning ability and intelligent positioning maintain the team's defensive balance.", "height": 181, "weight": 74},
+"O・ポペスク": {"profile": "スピードとテクニックでルーマニアのサイドを活性化する若いウィンガー。積極的な突破と高い技術でチームの攻撃に推進力をもたらす。", "profile_en": "A young winger who activates Romania's flanks with pace and technique. Direct runs and high technical quality bring drive to the team's attack.", "height": 176, "weight": 68},
+"D・アリベク": {"profile": "得点力とフィジカルでルーマニア前線に厚みをもたらすCF。ゴール前での存在感とポストプレーでチームの攻撃オプションを広げる。", "profile_en": "A CF who adds depth to Romania's forward line with goalscoring ability and physicality. Presence in front of goal and hold-up play expand the team's attacking options.", "height": 183, "weight": 79},
+"A・イオニタ": {"profile": "豊富な運動量とパスセンスでルーマニア中盤に活力をもたらすCMF。インテリジェントなポジショニングと攻守への積極的な貢献でチームをサポートする。", "profile_en": "A CMF who brings energy to Romania's midfield with high stamina and passing sense. Intelligent positioning and active contribution in both phases support the team.", "height": 179, "weight": 73},
 "ファリネス": {"profile": "鋭い反射神経と安定したセービングでベネズエラのゴールを守るGK。国際舞台での豊富な経験とリーダーシップでベネズエラ代表の守護神としての地位を確立した実力者。", "profile_en": "A GK who guards Venezuela's goal with sharp reflexes and reliable shot-stopping. Extensive international experience and leadership have established him as Venezuela's national team guardian.", "height": 185, "weight": 80},
 "R・エルナンデス": {"profile": "スピードと機動力でベネズエラの右サイドを担うSB。積極的なオーバーラップと安定した守備でチームのサイドに活力をもたらす。", "profile_en": "A right-back who covers Venezuela's flank with pace and mobility. Proactive overlapping and reliable defending bring energy to the team's flank.", "height": 181, "weight": 74},
 "W・アンヘル": {"profile": "安定したポジショニングとフィジカルの強さでベネズエラ守備を支えるCB。豊富な国際経験と守備の強度でベネズエラ代表のDFラインを統率するベテランDF。", "profile_en": "A veteran CB who supports Venezuela's defence with reliable positioning and physical strength. Extensive international experience and defensive intensity organise Venezuela's national team defensive line.", "height": 184, "weight": 80},
@@ -1326,6 +1393,21 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ペニャランダ": {"profile": "スピードとテクニックでベネズエラの右サイドを活性化するウィンガー。積極的な仕掛けとゴールへの意欲でチームの攻撃に迫力をもたらすアタッカー。", "profile_en": "A winger who energises Venezuela's right side with pace and technique. His direct running and desire for goal add power to the team's attack.", "height": 182, "weight": 78},
 "マチス": {"profile": "スピードと積極的な仕掛けでベネズエラの左サイドを活性化するウィンガー。鋭いドリブルとドライブで相手守備を脅かし、ベネズエラ代表の攻撃に幅をもたらす。", "profile_en": "A winger who activates Venezuela's left side with pace and direct running. Sharp dribbling and driving runs threaten defences and add width to Venezuela's attack.", "height": 171, "weight": 68},
 "J・ドゥラン": {"profile": "爆発的なスピードと高い決定力でベネズエラ前線に革命をもたらす若きエース。欧州の最高峰クラブで急成長を遂げ、ベネズエラ代表の攻撃を牽引する新時代のスーパースター。", "profile_en": "A young ace who brings revolution to Venezuela's forward line with explosive pace and high finishing ability. Having grown rapidly at Europe's top clubs, he is the new-generation superstar leading Venezuela's attack.", "height": 186, "weight": 84},
+"グラテロル": {"profile": "反射神経と安定したセービングでベネズエラのゴールを守るGK。代表GK陣に深みをもたらすバックアップ守護神。", "profile_en": "A GK who guards Venezuela's goal with sharp reflexes and stable shot-stopping. A backup guardian who adds depth to the national team's goalkeeping.", "height": 184, "weight": 79},
+"コントレラス": {"profile": "豊富な経験でベネズエラGK陣を支えるGK。冷静なプレーとポジショニングでチームに安定感をもたらす守護神。", "profile_en": "A GK who supports Venezuela's goalkeeping group with extensive experience. Composed play and positioning bring stability to the team.", "height": 185, "weight": 81},
+"マゴ": {"profile": "スピードと積極的なオーバーラップでベネズエラのサイドをカバーするDF。守備の確実性と前線への積極的な参加でチームのサイドに貢献する。", "profile_en": "A defender who covers Venezuela's flanks with pace and proactive overlapping. Defensive reliability and forward involvement contribute to the team's flank.", "height": 178, "weight": 72},
+"オソリオ": {"profile": "フィジカルの強さとインテリジェントなポジショニングでベネズエラ守備を補強するCB。高い守備意識とカバーリングでチームの守備ラインに安定感をもたらすDF。", "profile_en": "A CB who reinforces Venezuela's defence with physical strength and intelligent positioning. Strong defensive awareness and covering bring stability to the team's defensive line.", "height": 182, "weight": 78},
+"G・マルティネス": {"profile": "豊富なスタミナと守備意識でベネズエラ中盤のバランスを保つCMF。インテリジェントなポジショニングとパスセンスでチームを支えるMF。", "profile_en": "A CMF who maintains Venezuela's midfield balance with high stamina and defensive awareness. Intelligent positioning and passing sense support the team.", "height": 179, "weight": 74},
+"フルタド": {"profile": "スピードと積極的な仕掛けでベネズエラのサイドや前線を活性化するアタッカー。ゴールへの意欲とダイナミックな動きでチームの攻撃に多様性をもたらす。", "profile_en": "An attacker who energises Venezuela's flanks and forward line with pace and direct running. Desire for goal and dynamic movement bring variety to the team's attack.", "height": 171, "weight": 66},
+"J・マルティネス": {"profile": "ゴールへの嗅覚と機動力でベネズエラ前線にオプションをもたらすCF。積極的な動きとフィジカルの強さでゴール前に存在感を発揮するストライカー。", "profile_en": "A CF who provides options for Venezuela's forward line with a nose for goal and mobility. Proactive movement and physical strength make his presence felt in front of goal.", "height": 183, "weight": 78},
+"S・ロンドン": {"profile": "経験豊富な得点力と強靭なフィジカルでベネズエラ前線を牽引するベテランCF。長年にわたりベネズエラ代表を代表する象徴的なストライカー。", "profile_en": "A veteran CF who leads Venezuela's forward line with experienced goalscoring ability and powerful physique. An iconic striker who has represented Venezuela for many years.", "height": 191, "weight": 89},
+"T・リンコン": {"profile": "豊富な国際経験と高い守備意識でベネズエラ中盤を支えるDMF。強靭なフィジカルとインテリジェントなポジショニングでチームの守備バランスを整えるベテランMF。", "profile_en": "A veteran DMF who supports Venezuela's midfield with extensive international experience and strong defensive awareness. Powerful physique and intelligent positioning balance the team's defence.", "height": 182, "weight": 76},
+"R・オテロ": {"profile": "テクニックと創造性でベネズエラ攻撃に彩りを加えるOMF。正確なパスと多才なプレーで相手守備を翻弄し、チームの攻撃に多様性をもたらすアタッカー。", "profile_en": "An OMF who colours Venezuela's attack with technique and creativity. Precise passing and versatile play bamboozle opposing defences and add variety to the team's attack.", "height": 177, "weight": 71},
+"E・ラミレス": {"profile": "スピードとドリブルでベネズエラのサイドを活性化するウィンガー。積極的な仕掛けと高いスタミナでチームの攻撃に推進力をもたらすアタッカー。", "profile_en": "A winger who activates Venezuela's flanks with pace and dribbling. Proactive running and high stamina bring drive to the team's attack.", "height": 180, "weight": 73},
+"J・エルナンデス": {"profile": "安定したポジショニングと守備の強度でベネズエラ守備を支えるDF。複数ポジションをこなす柔軟性でチームに戦術的な幅をもたらす。", "profile_en": "A defender who supports Venezuela's defence with reliable positioning and defensive intensity. Versatility across multiple positions adds tactical breadth to the team.", "height": 181, "weight": 74},
+"アリステギエタ": {"profile": "得点力と機動力でベネズエラ前線に多様性をもたらすCF。ゴール前での積極性とフィジカルの強さでチームの攻撃オプションを広げる。", "profile_en": "A CF who brings variety to Venezuela's forward line with goalscoring ability and mobility. Proactive presence and physical strength in front of goal expand the team's attacking options.", "height": 179, "weight": 75},
+"S・ソサ": {"profile": "豊富なスタミナと守備貢献でベネズエラ中盤を支えるCMF。インテリジェントなプレーとパスセンスでチームのバランスを維持するMF。", "profile_en": "A CMF who supports Venezuela's midfield with high stamina and defensive contribution. Intelligent play and passing sense maintain the team's balance.", "height": 177, "weight": 72},
+"ハシント": {"profile": "スピードと積極的なオーバーラップでベネズエラのサイドをカバーするDF。守備の確実性とダイナミックな攻撃参加でチームのサイドに活力をもたらす。", "profile_en": "A defender who covers Venezuela's flanks with pace and proactive overlapping. Defensive reliability and dynamic forward runs bring energy to the team's flank.", "height": 175, "weight": 70},
 "コロネル": {"profile": "安定したセービングと落ち着きでパラグアイのゴールを守るGK。北米リーグで頭角を現し、パラグアイ代表の守護神として代表キャリアを積む。", "profile_en": "A GK who guards Paraguay's goal with reliable shot-stopping and composure. Having made his mark in North America, he builds his national team career as Paraguay's guardian.", "height": 187, "weight": 83},
 "R・ロハス": {"profile": "安定した守備と積極的なオーバーラップでパラグアイの右サイドを担うSB。フィジカルと技術のバランスに優れ、パラグアイ代表の右サイドを支える。", "profile_en": "A right-back who covers Paraguay's flank with solid defending and proactive overlapping. Balanced in physicality and technique, he supports the national team's right side.", "height": 182, "weight": 75},
 "G・ゴメス": {"profile": "経験豊富なフィジカルと高い読みでパラグアイ守備を統率するCB。ブラジルのトップリーグで長年活躍する国際経験豊富な守備のリーダー。", "profile_en": "An experienced CB who commands Paraguay's defence with physicality and sharp reading. An internationally experienced defensive leader with a long career in Brazil's top league.", "height": 189, "weight": 83},
@@ -3107,7 +3189,13 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub LW: Damsgaard (FC26 OVR79, PAC80, SHO76, PAS78, DRI82, DEF46, PHY68)
       {name:"ダムスゴー",en_name:"Damsgaard",long_name:"ミケル・ダムスゴー",positions:["左WG","OMF"],params:[66,68,80,82,79,64,80,82,79,78,72,72,72,74,64,68,82,76,42,44,42,42,44,50,50,62,74,74,75]},
       // Sub LW: Adingra (FC26 OVR76, PAC92, SHO72, PAS68, DRI80, DEF40, PHY66)
-      {name:"アディングラ",en_name:"Adingra",long_name:"シモン・アディングラ",positions:["左WG","右WG"],params:[64,66,92,94,82,60,78,80,82,68,62,68,68,70,52,54,80,72,36,38,36,36,38,50,50,58,72,72,75]}
+      {name:"アディングラ",en_name:"Adingra",long_name:"シモン・アディングラ",positions:["左WG","右WG"],params:[64,66,92,94,82,60,78,80,82,68,62,68,68,70,52,54,80,72,36,38,36,36,38,50,50,58,72,72,75]},
+      // Sub LSB: V.Kristiansen (FC26 OVR75, PAC84, SHO52, PAS68, DRI70, DEF74, PHY70)
+      {name:"V・クリスティアンセン",en_name:"V.Kristiansen",long_name:"ヴィクトル・クリスティアンセン",positions:["左SB"],params:[70,70,84,85,75,70,68,68,75,68,62,44,46,48,42,44,68,52,72,74,72,72,70,50,50,68,68,68,75]},
+      // Sub CMF: O.Abildgaard (FC26 OVR76, PAC72, SHO62, PAS76, DRI72, DEF74, PHY74)
+      {name:"O・アビルゴー",en_name:"O.Abildgaard",long_name:"オリバー・アビルゴー",positions:["CMF","DMF"],params:[74,76,72,74,73,74,68,70,73,76,70,56,58,60,46,48,70,62,72,74,72,72,70,50,50,70,72,72,75]},
+      // Sub RW: G.Isaksen (FC26 OVR77, PAC88, SHO70, PAS74, DRI80, DEF46, PHY68)
+      {name:"G・イサクセン",en_name:"G.Isaksen",long_name:"グスタフ・イサクセン",positions:["右WG","左WG"],params:[64,66,88,90,82,60,78,80,82,74,68,66,64,68,56,60,80,70,42,44,42,42,44,50,50,58,72,72,75]}
     ]
   },
 
@@ -3444,7 +3532,21 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CF: L.Jović (FC26 OVR78, PAC78, SHO80, PAS68, DRI78, DEF38, PHY74)
       {name:"L・ヨヴィッチ",en_name:"L.Jovic",long_name:"ルカ・ヨヴィッチ",positions:["CF"],params:[74,74,78,79,78,70,76,78,78,68,62,78,76,80,54,58,76,74,34,36,34,34,36,50,50,70,70,70,75]},
       // Sub CF: A.Mitrović (FC26 OVR84, PAC74, SHO87, PAS62, DRI76, DEF40, PHY88)
-      {name:"A・ミトロヴィッチ",en_name:"A.Mitrovic",long_name:"アレクサンダル・ミトロヴィッチ",positions:["CF"],params:[88,86,74,75,83,88,74,76,83,62,56,84,82,88,54,58,74,84,36,38,36,36,38,50,50,90,74,72,75]}
+      {name:"A・ミトロヴィッチ",en_name:"A.Mitrovic",long_name:"アレクサンダル・ミトロヴィッチ",positions:["CF"],params:[88,86,74,75,83,88,74,76,83,62,56,84,82,88,54,58,74,84,36,38,36,36,38,50,50,90,74,72,75]},
+      // Sub CMF: I.Ilić (FC26 OVR77, PAC76, SHO68, PAS80, DRI76, DEF70, PHY74)
+      {name:"I・イリッチ",en_name:"I.Ilic",long_name:"イバン・イリッチ",positions:["CMF","DMF"],params:[74,76,76,77,75,72,74,74,75,80,74,62,64,66,54,60,74,66,68,70,68,68,66,50,50,70,72,72,75]},
+      // Sub LSB: M.Ristić (FC26 OVR73, PAC78, SHO48, PAS64, DRI66, DEF70, PHY70)
+      {name:"M・リスティッチ",en_name:"M.Ristic",long_name:"ミハイロ・リスティッチ",positions:["左SB"],params:[70,70,78,79,70,70,62,62,70,64,58,38,36,44,28,30,62,30,70,72,70,70,68,50,50,68,66,64,75]},
+      // Sub CB: U.Spajić (FC26 OVR76, PAC82, SHO44, PAS64, DRI64, DEF78, PHY80)
+      {name:"スパイッチ",en_name:"U.Spajic",long_name:"ウロシュ・スパイッチ",positions:["CB"],params:[80,80,82,83,73,80,62,62,73,64,58,36,34,42,28,30,62,32,78,80,78,78,76,50,50,80,74,72,75]},
+      // Sub OMF: F.Đuričić (FC26 OVR75, PAC74, SHO68, PAS76, DRI78, DEF52, PHY66)
+      {name:"ジュリッチ",en_name:"F.Djuricic",long_name:"フィリップ・ジュリッチ",positions:["OMF","左WG"],params:[62,64,74,75,76,62,76,78,76,76,72,64,64,66,56,60,78,68,42,44,42,42,44,50,50,56,70,70,75]},
+      // Sub LW: D.Lazović (FC26 OVR74, PAC84, SHO64, PAS64, DRI72, DEF42, PHY66)
+      {name:"ラザロヴィッチ",en_name:"D.Lazovic",long_name:"ダルコ・ラザロヴィッチ",positions:["左WG","右WG"],params:[64,66,84,86,72,60,70,72,72,64,58,60,58,62,46,50,70,62,38,40,38,38,40,50,50,56,62,62,75]},
+      // Sub RB: M.Gajić (FC26 OVR72, PAC76, SHO48, PAS60, DRI62, DEF68, PHY70)
+      {name:"ガイッチ",en_name:"M.Gajic",long_name:"ミラン・ガイッチ",positions:["右SB"],params:[68,68,76,77,68,66,60,60,68,60,54,38,38,42,30,32,60,40,66,68,66,66,64,50,50,62,62,60,75]},
+      // Sub CF: N.Nikolić (FC26 OVR72, PAC72, SHO72, PAS62, DRI68, DEF36, PHY72)
+      {name:"N・ニコリッチ",en_name:"N.Nikolic",long_name:"ネマニャ・ニコリッチ",positions:["CF"],params:[68,68,72,73,70,64,66,68,70,62,56,70,68,72,46,50,66,66,30,32,30,30,32,50,50,64,62,60,75]}
     ]
   },
 
@@ -3495,7 +3597,17 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CF: K.Świderski (FC26 OVR76, PAC82, SHO76, PAS64, DRI72, DEF38, PHY78)
       {name:"シフデルスキ",en_name:"Swiderski",long_name:"カロル・シフデルスキ",positions:["CF","右WG"],params:[78,78,82,83,78,74,70,70,78,64,58,74,72,74,52,54,70,70,34,34,32,32,36,50,50,76,68,68,75]},
       // Sub CF: A.Milik (FC26 OVR80, PAC72, SHO84, PAS64, DRI74, DEF36, PHY80)
-      {name:"ミリク",en_name:"Milik",long_name:"アルカジウシュ・ミリク",positions:["CF"],params:[80,80,72,73,78,78,72,74,78,64,58,82,80,84,58,62,72,78,32,32,30,30,34,50,50,80,72,70,75]}
+      {name:"ミリク",en_name:"Milik",long_name:"アルカジウシュ・ミリク",positions:["CF"],params:[80,80,72,73,78,78,72,74,78,64,58,82,80,84,58,62,72,78,32,32,30,30,34,50,50,80,72,70,75]},
+      // Sub CMF: S.Żurkowski (FC26 OVR76, PAC74, SHO64, PAS76, DRI74, DEF70, PHY74)
+      {name:"ジュルコフスキ",en_name:"S.Zurkowski",long_name:"シモン・ジュルコフスキ",positions:["CMF","DMF"],params:[72,74,74,75,73,70,72,74,73,76,70,58,60,62,50,52,74,66,68,70,68,68,66,50,50,68,72,72,75]},
+      // Sub CB: K.Glik (FC26 OVR73, PAC66, SHO42, PAS60, DRI58, DEF76, PHY78)
+      {name:"グリク",en_name:"K.Glik",long_name:"カミル・グリク",positions:["CB"],params:[76,76,66,67,66,76,56,56,66,60,54,34,32,40,26,28,56,28,74,76,74,74,72,50,50,76,68,66,75]},
+      // Sub CF: K.Piątek (FC26 OVR77, PAC78, SHO82, PAS62, DRI74, DEF38, PHY76)
+      {name:"ピアテク",en_name:"K.Piatek",long_name:"クシシュトフ・ピアテク",positions:["CF"],params:[76,76,78,79,76,72,72,72,76,62,56,78,76,82,50,52,72,68,32,32,30,30,34,50,50,74,70,70,75]},
+      // Sub LW: P.Płacheta (FC26 OVR73, PAC88, SHO64, PAS64, DRI72, DEF40, PHY64)
+      {name:"プワシェタ",en_name:"P.Placheta",long_name:"プシェミスワフ・プワシェタ",positions:["左WG","右WG"],params:[62,62,88,90,74,58,70,72,74,64,58,60,60,62,44,48,70,62,36,38,36,36,38,50,50,54,62,62,75]},
+      // Sub RW: M.Skóraś (FC26 OVR72, PAC84, SHO62, PAS62, DRI70, DEF38, PHY62)
+      {name:"スコラシュ",en_name:"M.Skoras",long_name:"ミハウ・スコラシュ",positions:["右WG","左WG"],params:[60,60,84,86,72,56,68,70,72,62,56,58,58,60,40,44,68,58,34,36,34,34,36,50,50,52,60,60,75]}
     ]
   },
 
@@ -3542,7 +3654,21 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub OMF: Buyalskyi (FC26 OVR74, PAC74, SHO66, PAS72, DRI72, DEF56, PHY68)
       {name:"ブヤルスキ",en_name:"Buyalskyi",long_name:"ヴィタリー・ブヤルスキー",positions:["CMF","OMF"],params:[66,68,74,75,72,64,70,72,72,72,66,60,62,64,50,52,70,62,54,56,54,54,52,50,50,62,66,66,75]},
       // Sub CF: Yaremchuk (FC26 OVR78, PAC82, SHO78, PAS64, DRI74, DEF40, PHY76)
-      {name:"ヤレムチュク",en_name:"Yaremchuk",long_name:"ロマン・ヤレムチュク",positions:["CF"],params:[76,76,82,83,78,72,72,74,78,64,58,76,74,76,50,54,72,72,36,38,36,36,38,50,50,72,68,68,75]}
+      {name:"ヤレムチュク",en_name:"Yaremchuk",long_name:"ロマン・ヤレムチュク",positions:["CF"],params:[76,76,82,83,78,72,72,74,78,64,58,76,74,76,50,54,72,72,36,38,36,36,38,50,50,72,68,68,75]},
+      // Sub CMF/OMF: R.Malinovskyi (FC26 OVR79, PAC78, SHO72, PAS82, DRI80, DEF60, PHY70)
+      {name:"マリノフスキ",en_name:"Malinovskyi",long_name:"ルスラン・マリノフスキ",positions:["CMF","OMF"],params:[68,70,78,79,78,64,78,80,78,82,76,68,68,72,62,66,80,70,56,58,56,56,58,50,50,62,74,74,75]},
+      // Sub CB: S.Kryvtsov (FC26 OVR73, PAC72, SHO40, PAS62, DRI60, DEF74, PHY76)
+      {name:"クリフツォフ",en_name:"S.Kryvtsov",long_name:"セルヒー・クリフツォフ",positions:["CB"],params:[76,74,72,73,68,74,58,58,68,62,56,32,30,38,24,26,58,28,74,76,74,74,72,50,50,74,68,66,75]},
+      // Sub LW: B.Mykhaylichenko (FC26 OVR74, PAC86, SHO68, PAS68, DRI74, DEF42, PHY66)
+      {name:"B・ミハイリチェンコ",en_name:"B.Mykhaylichenko",long_name:"ボフダン・ミハイリチェンコ",positions:["左WG","右WG"],params:[64,66,86,88,76,60,72,74,74,68,62,64,64,66,50,54,72,62,38,40,38,38,40,50,50,56,64,64,75]},
+      // Sub CF: A.Besedin (FC26 OVR73, PAC78, SHO72, PAS58, DRI68, DEF36, PHY72)
+      {name:"ベセジン",en_name:"A.Besedin",long_name:"アルテム・ベセジン",positions:["CF"],params:[70,70,78,79,72,68,66,66,72,58,52,68,66,70,42,46,66,64,32,34,32,32,34,50,50,64,62,60,75]},
+      // Sub CMF: V.Brazhko (FC26 OVR74, PAC72, SHO62, PAS72, DRI70, DEF68, PHY70)
+      {name:"ブラシコ",en_name:"V.Brazhko",long_name:"ヴォロディミル・ブラシコ",positions:["CMF","DMF"],params:[68,68,72,73,70,64,68,68,70,72,66,56,58,60,48,50,68,60,62,64,62,62,60,50,50,62,66,66,75]},
+      // Sub RW: M.Zubkov (FC26 OVR73, PAC82, SHO66, PAS62, DRI72, DEF40, PHY66)
+      {name:"ズブコフ",en_name:"M.Zubkov",long_name:"ミコラ・ズブコフ",positions:["右WG","左WG"],params:[64,64,82,83,72,60,70,72,72,62,56,62,62,64,48,52,70,62,36,38,36,36,38,50,50,56,62,62,75]},
+      // Sub CB/RB: O.Tymchyk (FC26 OVR72, PAC76, SHO44, PAS60, DRI60, DEF72, PHY72)
+      {name:"ティムチュク",en_name:"O.Tymchyk",long_name:"オレクサンドル・ティムチュク",positions:["右SB","CB"],params:[72,72,76,77,68,70,58,58,68,60,54,36,34,42,26,28,58,44,70,72,70,70,68,50,50,68,66,64,75]}
     ]
   },
 
@@ -3638,7 +3764,19 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CF: Terem Moffi (FC26 OVR75, PAC86, SHO74, PAS60, DRI74, DEF36, PHY72)
       {name:"モフィ",en_name:"Moffi",long_name:"テレム・モフィ",positions:["CF","右WG"],params:[72,72,86,88,76,68,72,74,76,60,54,72,70,74,50,52,72,68,32,32,30,30,34,50,50,68,64,64,75]},
       // Sub CF: Onuachu P (FC26 OVR76, PAC68, SHO76, PAS60, DRI66, DEF36, PHY82)
-      {name:"オヌアチュ",en_name:"Onuachu",long_name:"ポール・オヌアチュ",positions:["CF"],params:[82,80,68,69,76,80,64,64,76,60,54,74,72,76,46,50,64,78,32,32,30,30,34,50,50,82,64,62,75]}
+      {name:"オヌアチュ",en_name:"Onuachu",long_name:"ポール・オヌアチュ",positions:["CF"],params:[82,80,68,69,76,80,64,64,76,60,54,74,72,76,46,50,64,78,32,32,30,30,34,50,50,82,64,62,75]},
+      // Sub CF/OMF: K.Iheanacho (FC26 OVR74, PAC78, SHO74, PAS70, DRI72, DEF44, PHY72)
+      {name:"イヘアナチョ",en_name:"Iheanacho",long_name:"ケレチ・イヘアナチョ",positions:["CF","OMF"],params:[70,70,78,79,72,66,70,70,72,70,64,72,70,74,48,50,70,66,38,40,38,38,40,50,50,64,64,64,75]},
+      // Sub CF/RW: E.Dennis (FC26 OVR75, PAC84, SHO72, PAS64, DRI76, DEF40, PHY70)
+      {name:"E・デニス",en_name:"E.Dennis",long_name:"エマニュエル・デニス",positions:["CF","右WG"],params:[70,70,84,85,74,66,74,76,74,64,58,70,68,72,46,50,74,66,34,36,34,34,36,50,50,62,66,66,75]},
+      // Sub CMF/OMF: F.Dele-Bashiru (FC26 OVR75, PAC76, SHO66, PAS74, DRI76, DEF64, PHY72)
+      {name:"D・バシル",en_name:"F.Dele-Bashiru",long_name:"フィサヨ・デレ＝バシル",positions:["CMF","OMF"],params:[72,74,76,77,74,68,74,76,74,74,68,60,62,64,50,52,74,62,64,66,64,64,62,50,50,66,68,68,75]},
+      // Sub RB: T.Ebuehi (FC26 OVR74, PAC84, SHO52, PAS66, DRI70, DEF72, PHY70)
+      {name:"エビュエヒ",en_name:"T.Ebuehi",long_name:"タイロン・エビュエヒ",positions:["右SB"],params:[70,70,84,85,72,68,68,70,72,66,60,44,46,48,38,40,68,48,70,72,70,70,68,50,50,64,66,66,75]},
+      // Sub CF: H.Onyekuru (FC26 OVR76, PAC88, SHO72, PAS66, DRI78, DEF44, PHY68)
+      {name:"オニェクル",en_name:"H.Onyekuru",long_name:"ヘンリー・オニェクル",positions:["左WG","右WG"],params:[66,68,88,90,78,62,76,78,78,66,60,68,68,70,52,56,76,66,38,40,38,38,40,50,50,58,68,68,75]},
+      // Sub CB: S.Eze (FC26 OVR72, PAC68, SHO40, PAS58, DRI56, DEF74, PHY76)
+      {name:"S・エゼ",en_name:"S.Eze",long_name:"スティーブン・エゼ",positions:["CB"],params:[76,74,68,69,66,72,54,54,66,58,52,32,30,38,22,24,54,26,74,76,74,74,72,50,50,74,66,64,75]}
     ]
   },
 
@@ -3773,7 +3911,23 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub LW: Njie C (FC26 OVR73, PAC80, SHO64, PAS60, DRI70, DEF42, PHY64)
       {name:"ンジェ",en_name:"Njie",long_name:"クリントン・ンジェ",positions:["左WG","右WG"],params:[62,62,80,81,72,58,68,70,72,60,54,60,60,62,46,50,68,60,38,40,38,38,40,50,50,56,60,60,75]},
       // Sub CF: Choupo-Moting (FC26 OVR77, PAC74, SHO78, PAS68, DRI72, DEF40, PHY76)
-      {name:"チュポ＝モティング",en_name:"Choupo-Moting",long_name:"エリック・マキシム・チュポ＝モティング",positions:["CF","OMF"],params:[76,76,74,75,76,72,70,72,76,68,62,76,74,78,50,54,70,72,36,38,36,36,38,50,50,72,68,68,75]}
+      {name:"チュポ＝モティング",en_name:"Choupo-Moting",long_name:"エリック・マキシム・チュポ＝モティング",positions:["CF","OMF"],params:[76,76,74,75,76,72,70,72,76,68,62,76,74,78,50,54,70,72,36,38,36,36,38,50,50,72,68,68,75]},
+      // Sub CB: H.Moukoudi (FC26 OVR73, PAC72, SHO42, PAS60, DRI60, DEF74, PHY80)
+      {name:"H・ムクディ",en_name:"H.Moukoudi",long_name:"ハロルド・ムクディ",positions:["CB"],params:[78,76,72,73,68,76,58,58,68,60,54,34,32,40,26,28,58,28,74,76,74,74,72,50,50,76,68,66,75]},
+      // Sub CMF/DMF: S.Gouet (FC26 OVR75, PAC74, SHO60, PAS72, DRI72, DEF76, PHY76)
+      {name:"グエ",en_name:"S.Gouet",long_name:"サミュエル・グエ",positions:["CMF","DMF"],params:[76,76,74,75,72,74,70,70,72,72,66,54,56,58,46,48,70,58,74,76,74,74,72,50,50,74,68,66,75]},
+      // Sub CMF/DMF: G.Ondoua (FC26 OVR73, PAC70, SHO56, PAS68, DRI68, DEF72, PHY74)
+      {name:"オンドゥア",en_name:"G.Ondoua",long_name:"ガエル・オンドゥア",positions:["CMF","DMF"],params:[72,72,70,71,68,70,66,66,68,68,62,50,52,54,42,44,66,54,70,72,70,70,68,50,50,68,64,62,75]},
+      // Sub LW: J.Bela (FC26 OVR74, PAC82, SHO66, PAS68, DRI74, DEF44, PHY66)
+      {name:"ベラ",en_name:"J.Bela",long_name:"ジェレミー・ベラ",positions:["左WG","右WG"],params:[64,64,82,83,74,60,72,74,74,68,62,62,62,64,48,52,72,62,40,42,40,40,42,50,50,58,62,62,75]},
+      // Sub CF: S.Bahoken (FC26 OVR73, PAC76, SHO72, PAS62, DRI68, DEF38, PHY74)
+      {name:"バオケン",en_name:"S.Bahoken",long_name:"ステファン・バオケン",positions:["CF"],params:[72,72,76,77,72,68,66,68,72,62,56,68,66,70,44,48,66,66,32,34,32,32,34,50,50,66,62,60,75]},
+      // Sub CF: L.Tawamba (FC26 OVR72, PAC76, SHO72, PAS58, DRI66, DEF36, PHY70)
+      {name:"タワンバ",en_name:"L.Tawamba",long_name:"レアンドル・タワンバ",positions:["CF"],params:[70,70,76,77,70,66,64,64,70,58,52,68,66,70,42,46,64,62,32,32,30,30,34,50,50,64,60,58,75]},
+      // Sub RB: L.Essomba (FC26 OVR72, PAC78, SHO46, PAS58, DRI60, DEF68, PHY70)
+      {name:"L・エソンバ",en_name:"L.Essomba",long_name:"ルカス・エソンバ",positions:["右SB","左SB"],params:[68,68,78,79,66,64,58,58,66,58,52,38,38,42,28,30,58,42,66,68,66,66,64,50,50,62,58,56,75]},
+      // Sub CMF/OMF: A.Martin (FC26 OVR71, PAC72, SHO62, PAS66, DRI66, DEF46, PHY64)
+      {name:"A・マルタン",en_name:"A.Martin",long_name:"アルノー・マルタン",positions:["CMF","OMF"],params:[62,62,70,71,66,60,62,62,66,64,58,50,50,52,38,40,62,54,56,58,56,56,54,50,50,54,58,58,75]}
     ]
   },
 
@@ -3955,7 +4109,23 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub LW: Cicâldău A (FC26 OVR73, PAC70, SHO66, PAS72, DRI72, DEF52, PHY66)
       {name:"チカルダウ",en_name:"Cicaldau",long_name:"アレクサンドル・チカルダウ",positions:["CMF","OMF"],params:[64,66,70,71,70,62,70,70,70,72,66,60,62,64,50,52,70,58,50,52,50,50,52,50,50,58,64,64,75]},
       // Sub CF: G.Drăguș (FC26 OVR74, PAC78, SHO72, PAS60, DRI68, DEF38, PHY74)
-      {name:"ドラグシュ",en_name:"Dragus",long_name:"ゲオルゲ・ドラグシュ",positions:["CF","右WG"],params:[74,74,78,79,72,70,66,68,72,60,54,70,68,72,46,50,66,66,34,34,32,32,36,50,50,70,62,60,75]}
+      {name:"ドラグシュ",en_name:"Dragus",long_name:"ゲオルゲ・ドラグシュ",positions:["CF","右WG"],params:[74,74,78,79,72,70,66,68,72,60,54,70,68,72,46,50,66,66,34,34,32,32,36,50,50,70,62,60,75]},
+      // Sub CMF/OMF: D.Olaru (FC26 OVR78, PAC74, SHO68, PAS82, DRI78, DEF58, PHY70)
+      {name:"D・オラル",en_name:"D.Olaru",long_name:"ダリウス・オラル",positions:["CMF","OMF"],params:[66,68,74,75,76,64,76,78,76,82,76,64,64,68,58,62,78,66,50,52,50,50,52,50,50,60,72,72,75]},
+      // Sub RW: F.Coman (FC26 OVR76, PAC84, SHO68, PAS68, DRI76, DEF46, PHY66)
+      {name:"F・コマン",en_name:"F.Coman",long_name:"フロリネル・コマン",positions:["右WG","左WG"],params:[64,64,84,86,76,62,74,76,76,68,62,64,64,66,50,54,74,60,40,42,40,40,42,50,50,56,64,64,75]},
+      // Sub OMF/RW: F.Tănase (FC26 OVR76, PAC74, SHO72, PAS78, DRI76, DEF54, PHY66)
+      {name:"F・タナセ",en_name:"F.Tanase",long_name:"フロリン・タナセ",positions:["OMF","右WG"],params:[66,68,74,75,72,64,74,76,72,78,72,66,68,70,54,58,76,62,52,54,52,52,54,50,50,60,68,68,75]},
+      // Sub CB: V.Chiricheș (FC26 OVR74, PAC72, SHO42, PAS64, DRI62, DEF76, PHY74)
+      {name:"キリケシュ",en_name:"V.Chirichesh",long_name:"ブラド・キリケシュ",positions:["CB"],params:[74,74,72,73,70,76,58,58,70,64,58,34,32,40,26,28,58,28,74,76,74,74,72,50,50,74,68,66,75]},
+      // Sub DMF: D.Nedelcu (FC26 OVR74, PAC72, SHO58, PAS70, DRI68, DEF76, PHY72)
+      {name:"ネデルク",en_name:"D.Nedelcu",long_name:"ドラゴシュ・ネデルク",positions:["DMF","CMF"],params:[72,72,72,73,68,68,66,66,68,70,64,52,54,56,44,46,66,54,72,74,72,72,70,50,50,66,66,64,75]},
+      // Sub RW: O.Popescu (FC26 OVR75, PAC82, SHO68, PAS68, DRI76, DEF46, PHY66)
+      {name:"O・ポペスク",en_name:"O.Popescu",long_name:"オクタビアン・ポペスク",positions:["右WG","OMF"],params:[64,64,82,84,74,62,74,76,74,68,62,64,64,66,50,54,74,60,40,42,40,40,42,50,50,56,64,64,75]},
+      // Sub CF: D.Alibec (FC26 OVR74, PAC76, SHO72, PAS62, DRI68, DEF38, PHY72)
+      {name:"D・アリベク",en_name:"D.Alibec",long_name:"デニス・アリベク",positions:["CF"],params:[72,72,76,77,70,68,64,66,70,62,56,70,68,72,44,48,64,64,32,32,30,30,34,50,50,66,60,58,75]},
+      // Sub CMF/OMF: A.Ioniță (FC26 OVR73, PAC70, SHO64, PAS72, DRI70, DEF50, PHY68)
+      {name:"A・イオニタ",en_name:"A.Ionita",long_name:"アレクサンドル・イオニタ",positions:["CMF","OMF"],params:[64,64,70,71,68,60,68,68,68,72,66,58,60,62,48,50,68,58,46,48,46,46,48,50,50,54,62,62,75]}
     ]
   },
 
@@ -4000,7 +4170,23 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub RW: Hurtado J (FC26 OVR72, PAC80, SHO64, PAS56, DRI68, DEF36, PHY66)
       {name:"フルタド",en_name:"Hurtado",long_name:"ジャン・フルタド",positions:["CF","右WG"],params:[64,64,80,81,70,60,66,66,70,56,50,62,60,64,44,48,64,58,32,32,30,30,34,50,50,58,58,56,75]},
       // Sub CF: J.Martinez (FC26 OVR74, PAC80, SHO72, PAS56, DRI68, DEF36, PHY68)
-      {name:"J・マルティネス",en_name:"J.Martinez",long_name:"ジョセフ・マルティネス",positions:["CF"],params:[68,68,80,81,72,64,66,68,72,56,50,70,68,72,46,50,66,62,32,32,30,30,34,50,50,64,62,60,75]}
+      {name:"J・マルティネス",en_name:"J.Martinez",long_name:"ジョセフ・マルティネス",positions:["CF"],params:[68,68,80,81,72,64,66,68,72,56,50,70,68,72,46,50,66,62,32,32,30,30,34,50,50,64,62,60,75]},
+      // Sub CF: S.Rondón (FC26 OVR77, PAC74, SHO76, PAS64, DRI72, DEF40, PHY80)
+      {name:"S・ロンドン",en_name:"S.Rondon",long_name:"サロモン・ロンドン",positions:["CF"],params:[76,76,74,75,74,72,70,72,74,64,58,74,72,76,48,52,70,72,36,38,36,36,38,50,50,76,66,66,75]},
+      // Sub DMF/CMF: T.Rincón (FC26 OVR74, PAC68, SHO58, PAS70, DRI66, DEF72, PHY76)
+      {name:"T・リンコン",en_name:"T.Rincon",long_name:"トマス・リンコン",positions:["DMF","CMF"],params:[74,74,68,69,68,70,64,64,68,70,64,52,54,56,44,46,64,58,70,72,70,70,68,50,50,70,64,62,75]},
+      // Sub OMF/RW: R.Otero (FC26 OVR73, PAC76, SHO66, PAS72, DRI74, DEF44, PHY64)
+      {name:"R・オテロ",en_name:"R.Otero",long_name:"ロムロ・オテロ",positions:["OMF","右WG"],params:[60,60,76,77,70,58,72,74,70,72,66,62,62,64,48,52,72,60,40,42,40,40,42,50,50,54,62,62,75]},
+      // Sub LW: E.Ramírez (FC26 OVR74, PAC84, SHO66, PAS62, DRI74, DEF40, PHY68)
+      {name:"E・ラミレス",en_name:"E.Ramirez",long_name:"エリック・ラミレス",positions:["左WG","右WG"],params:[62,64,84,85,74,58,72,74,74,62,56,62,62,64,46,50,72,62,38,40,38,38,40,50,50,56,62,62,75]},
+      // Sub CB/LB: J.Hernández (FC26 OVR72, PAC70, SHO40, PAS58, DRI56, DEF72, PHY70)
+      {name:"J・エルナンデス",en_name:"J.Hernandez",long_name:"ホセ・エルナンデス",positions:["CB","左SB"],params:[72,72,70,71,64,72,54,54,64,58,52,32,30,38,24,26,54,26,70,72,70,70,68,50,50,70,64,62,75]},
+      // Sub CF: F.Aristeguieta (FC26 OVR73, PAC74, SHO72, PAS58, DRI66, DEF36, PHY72)
+      {name:"アリステギエタ",en_name:"F.Aristeguieta",long_name:"フェルナンド・アリステギエタ",positions:["CF"],params:[68,68,74,75,68,62,64,66,68,58,52,70,68,72,42,46,64,64,30,32,30,30,32,50,50,66,60,58,75]},
+      // Sub CMF: S.Sosa (FC26 OVR72, PAC68, SHO56, PAS66, DRI64, DEF62, PHY70)
+      {name:"S・ソサ",en_name:"S.Sosa",long_name:"サムエル・ソサ",positions:["CMF","DMF"],params:[68,68,68,69,66,62,62,62,66,66,60,50,50,52,40,42,62,58,60,62,60,60,58,50,50,62,58,56,75]},
+      // Sub RB/LB: Y.Jacinto (FC26 OVR71, PAC74, SHO44, PAS56, DRI58, DEF66, PHY66)
+      {name:"ハシント",en_name:"Y.Jacinto",long_name:"ヤダイラ・ハシント",positions:["右SB","左SB"],params:[66,66,74,75,66,62,56,56,66,56,50,36,36,40,28,30,56,46,62,64,62,62,60,50,50,60,56,54,75]}
     ]
   },
 
