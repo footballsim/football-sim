@@ -4301,10 +4301,10 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ムカウ",en_name:"Mukau",long_name:"ンガレイ・ムカウ",positions:["DMF","CMF"],params:[75,77,69,71,68,73,71,71,70,65,60,55,57,57,41,42,67,52,70,72,70,70,72,50,50,71,63,71,75]},
       // RM: Théo Bongonda (est OVR70, PAC79, SHO65, PAS66, DRI74, DEF30, PHY62)
       {name:"ボンゴンダ",en_name:"Bongonda",long_name:"テオ・ボンゴンダ",positions:["右WG","右SMF","左WG"],params:[62,62,79,81,75,58,74,74,77,66,61,63,65,65,47,48,70,62,30,32,30,30,32,50,50,45,69,67,75]},
-      // OMF: Noah Sadiki (OVR74, PAC77, SHO65, PAS68, DRI76, DEF68, PHY76)
-      {name:"サディキ",en_name:"Sadiki",long_name:"ノア・サディキ",positions:["OMF","CMF","DMF"],params:[76,76,77,79,75,74,76,76,77,68,63,63,65,65,47,48,72,57,68,70,68,68,70,50,50,70,63,71,75]},
-      // LM: Nathanaël Mbuku (OVR70, PAC73, SHO63, PAS68, DRI74, DEF35, PHY53)
-      {name:"ムブク",en_name:"Mbuku",long_name:"ナタナエル・ムブク",positions:["左WG","左SMF"],params:[53,53,73,75,72,49,74,74,74,68,63,61,63,63,45,47,70,60,35,37,35,35,37,50,50,38,65,67,75]},
+      // OMF: Nathanaël Mbuku (OVR70, PAC73, SHO63, PAS68, DRI74, DEF35, PHY53)
+      {name:"ムブク",en_name:"Mbuku",long_name:"ナタナエル・ムブク",positions:["OMF","左WG","左SMF"],params:[53,53,73,75,72,49,74,74,74,68,63,61,63,63,45,47,70,60,35,37,35,35,37,50,50,38,65,67,75]},
+      // LM: Noah Sadiki (OVR74, PAC77, SHO65, PAS68, DRI76, DEF68, PHY76)
+      {name:"サディキ",en_name:"Sadiki",long_name:"ノア・サディキ",positions:["左SMF","OMF","CMF","DMF"],params:[76,76,77,79,75,74,76,76,77,68,63,63,65,65,47,48,72,57,68,70,68,68,70,50,50,70,63,71,75]},
       // CF: Yoane Wissa (OVR82, PAC85, SHO82, PAS70, DRI80, DEF31, PHY71)
       {name:"ウィサ",en_name:"Wissa",long_name:"ヨアネ・ウィサ",positions:["CF","左WG"],params:[71,71,85,87,81,68,80,80,83,70,65,80,82,82,59,61,76,78,31,33,31,31,33,50,50,51,80,79,75]},
       // Sub ST: Simon Banza (OVR81, PAC79, SHO81, PAS62, DRI77, DEF36, PHY79)
