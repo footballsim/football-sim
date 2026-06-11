@@ -1417,15 +1417,15 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "チャイニ": {"profile": "代表正GKの後釜を務める安定したバックアップ守護神。高い集中力とハンドリングでゴールを守り、ウィリアムズに次ぐGK層の柱として代表の守護神争いを活性化させる。", "profile_en": "A stable backup goalkeeper who stands as heir to the national team's number one. Protecting the goal with high concentration and solid handling, a key pillar of the goalkeeping depth behind Williams, keeping the competition for the national team's number one spot lively.", "height": 186, "weight": 80},
 "ゴス": {"profile": "代表第3GKとして貴重なバックアップを務める守護神。落ち着いたセービングと的確な判断力でチームに安心感を与え、突発的な状況に備えるGK陣の最後の砦。", "profile_en": "A goalkeeper serving as a valuable backup as the national team's third choice. Giving the team reassurance with composed shot-stopping and sound decision-making, the last line of defence in the goalkeeping group prepared for any emergency.", "height": 187, "weight": 84},
 "ヴォジーニャ": {"profile": "カーボベルデ代表の守護神として長年チームを支えるベテランGK。高いリフレクスと安定したハンドリングでゴールを死守し、40歳を超えてもなお正GKの座を維持する経験豊富なリーダー。", "profile_en": "A veteran goalkeeper who has long been the backbone of the Cape Verde national team. A leader who continues to hold down the number-one spot with sharp reflexes and reliable handling.", "height": 188, "weight": 88},
-"ピレス": {"profile": "右SBとして守備に奔走するサイドバック。スピードある対応と高い運動量で右サイドを制圧し、チームの守備ブロックを支える重要な右翼の護り手。", "profile_en": "A right-back who works tirelessly in defence. Covering the right flank with speed and high work rate, an important anchor of the defensive block.", "height": 178, "weight": 72},
 "L・コスタ": {"profile": "カーボベルデ代表の最強守備の要として君臨するCB。空中戦の強さと正確な読みでゴール前に立ちはだかり、欧州トップレベルのリーグで培った対人守備技術でチームを支える主将格のストッパー。", "profile_en": "The cornerstone of Cape Verde's defence, a CB who dominates aerially and reads the game superbly. Forged in top-flight European football, his man-marking and composure anchor the team's backline.", "height": 186, "weight": 80},
 "S・モレイラ": {"profile": "攻守にバランスのとれた右CB。技術の高いビルドアップ能力とスプリント力でチームの守備ラインを牽引し、組み立てにも積極参加する現代的なセンターバック。", "profile_en": "A right-sided CB with a balanced game. Leading the defensive line with technical composure and sprint ability, a modern centre-back who contributes actively in build-up play.", "height": 185, "weight": 81},
 "ストピーラ": {"profile": "長年カーボベルデ代表を守り続けるベテランLB。豊富な経験と冷静な状況判断でチームをリードし、若い選手が多い守備ラインに貫禄をもたらす不動の左サイドバック。", "profile_en": "A veteran left-back who has protected the Cape Verde backline for many years. A composed, experienced presence who brings authority to a relatively young defensive line.", "height": 183, "weight": 77},
 "L・ドゥアルテ": {"profile": "中盤の底で守備を担うDMF。的確なインターセプトとダイナミックな運動量でチームのバランスを保ち、攻守の切り替えを速める重要なリンクマン。", "profile_en": "A DMF who anchors the midfield. Keeping the team balanced with precise interceptions and dynamic work rate, a vital link who accelerates transitions.", "height": 180, "weight": 74},
 "Y・セメド": {"profile": "守備的MFとして中盤を引き締めるボランチ。豊富な運動量と素早いプレッシャーでボール奪取に優れ、チームのファーストプレスとして攻撃の起点を潰す守備型ミッドフィルダー。", "profile_en": "A defensive midfielder who tightens the midfield. Excellent at winning the ball with high work rate and quick pressing, a defensive-minded player who shuts down opponents' attacking outlets.", "height": 179, "weight": 73},
-"W・ピナ": {"profile": "爆発的なスプリントを武器にする右WG。80を超えるトップスピードと巧みなドリブルでサイドを切り裂き、カーボベルデの攻撃に幅とスピードをもたらすアタッカー。", "profile_en": "A right winger with explosive sprint pace. Tearing open the flank with top speed exceeding 80 and clever dribbling, an attacker who adds width and velocity to Cape Verde's attack.", "height": 181, "weight": 73},
+"ケビン・レニ": {"profile": "中盤の底で攻守を繋ぐDMF。的確なインターセプトと素早いプレスでボールを奪い取り、コンパクトな守備ブロックを形成するカーボベルデ中盤の重要なリンクマン。", "profile_en": "A DMF who links defence and attack in the midfield base. A key link in Cape Verde's midfield who wins the ball with precise interceptions and quick pressing to form a compact defensive block.", "height": 178, "weight": 73},
+"W・ピナ": {"profile": "右サイドで守備と攻撃を高水準でこなすサイドバック兼ウインガー。81のスプリントで右サイドを制圧し、攻守両面での高い貢献度でカーボベルデの右翼を担う万能プレーヤー。", "profile_en": "A versatile player who performs at a high level both defensively and offensively on the right flank. A right-side all-rounder who dominates with a sprint of 81 and makes high contributions in both phases for Cape Verde.", "height": 181, "weight": 73},
 "アルカンジョ": {"profile": "技術と創造性を兼備するOMF。74のスプリントと高い敏捷性でプレスをかいくぐり、チャンスメイクに長けた攻撃的ミッドフィルダー。右サイドからの仕掛けと中央での崩しを使い分けるユーティリティ性も持つ。", "profile_en": "An attacking midfielder combining technical skill and creativity. Evading the press with a sprint of 74 and sharp agility, an attacker who excels at chance creation from both flank and central positions.", "height": 178, "weight": 72},
-"R・メンデス": {"profile": "長年代表を引っ張り続けるベテランLW。豊富な経験とテクニックで左サイドを支配し、74のスプリントと67のシュートセンスでゴールとアシストの両方を狙う攻撃の牽引役。", "profile_en": "A veteran left winger who has long led the national team. Dominating the left flank with vast experience and technique, a driving force who threatens both goal and assist with a sprint of 74 and shooting sense of 67.", "height": 175, "weight": 69},
+"R・メンデス": {"profile": "長年代表を牽引するベテランアタッカー。豊富な経験とテクニックでサイドを支配し、74のスプリントと67のシュートセンスでゴールとアシストの両方を狙う攻撃の核。", "profile_en": "A veteran attacker who has long driven the national team. Dominating the flank with vast experience and technique, a key offensive force who threatens both goal and assist with a sprint of 74 and shooting sense of 67.", "height": 175, "weight": 69},
 "N・コスタ": {"profile": "カーボベルデ最大の脅威となるCF。82のトップスピードと73のシュート精度でゴールを量産し、トルコなどの欧州リーグで磨かれた決定力でチームを牽引するエースストライカー。", "profile_en": "The biggest threat in Cape Verde's attack, a CF who prolongs goals with top speed of 82 and shooting accuracy of 73. An ace striker honed in European leagues including Turkey.", "height": 183, "weight": 77},
 "カブラル": {"profile": "速さとシュート力を兼備するLW/CF。77のスプリントと71のシュートセンスでゴール前に迫り、個人技でもチームプレーでも貢献できるオールラウンドなアタッカー。", "profile_en": "A left winger and forward combining pace with finishing. Bearing down on goal with a sprint of 77 and shot sense of 71, an all-round attacker who contributes with individual skill and team play alike.", "height": 182, "weight": 76},
 "D・リヴラメント": {"profile": "爆発的なスプリントと力強いシュートを武器にするCF。82のトップスピードで裏抜けを得意とし、71のシュートセンスでゴールを狙うフィニッシャー型のストライカー。", "profile_en": "A striker using explosive sprint and powerful finishing. An incisive runner with top speed of 82 who threatens with a shooting sense of 71.", "height": 180, "weight": 75},
@@ -4222,55 +4222,55 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   capeverde2026: {
     name:"カーボベルデ",en_name:"Cape Verde",team_color:"#003893",flag:"🇨🇻",
     default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:10,default_marked_player:10,
+    default_keyplayer:7,default_marked_player:7,
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
     players:[
       // GK: Vozinha (~OVR66, REF68, SPD62, KIC64, DIV66, HAN65, POS68)
       {name:"ヴォジーニャ",en_name:"Vozinha",long_name:"ヴォジーニャ",positions:["GK"],params:[50,50,50,50,68,62,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,66,65,50,68,68,75]},
-      // RB: Kelvin Pires (~OVR62, PAC71, SHO33, PAS52, DRI55, DEF61, PHY62)
-      {name:"ピレス",en_name:"Pires",long_name:"ケルヴィン・ピレス",positions:["右SB","CB"],params:[62,62,71,73,58,60,55,55,63,52,48,32,33,33,24,24,52,36,61,63,61,61,63,50,50,58,61,60,75]},
-      // CB: Logan Costa (OVR77, PAC60, SHO40, PAS59, DRI67, DEF77, PHY78)
+      // RB: Wagner Pina (OVR71, PAC81, SHO51, PAS64, DRI70, DEF64, PHY65)
+      {name:"W・ピナ",en_name:"W.Pina",long_name:"ワグネル・ピナ",positions:["右SB","右WG","右SMF"],params:[65,65,81,83,74,61,70,70,76,64,60,49,51,51,37,38,67,48,64,66,64,64,66,50,50,47,63,68,75]},
+      // RCB: Logan Costa (OVR77, PAC60, SHO40, PAS59, DRI67, DEF77, PHY78)
       {name:"L・コスタ",en_name:"L.Costa",long_name:"ローガン・コスタ",positions:["CB"],params:[78,78,60,62,74,76,67,67,64,59,55,39,40,40,29,30,64,42,77,79,77,77,79,50,50,76,63,74,75]},
-      // CB: Steven Moreira (OVR72, PAC73, SHO33, PAS67, DRI71, DEF72, PHY74)
-      {name:"S・モレイラ",en_name:"S.Moreira",long_name:"スティーヴン・モレイラ",positions:["CB","右SB"],params:[74,74,73,75,72,72,71,71,72,67,62,32,33,33,24,24,67,43,72,74,72,72,74,50,50,72,67,69,75]},
-      // LB: Stopira (~OVR63, PAC58, SHO30, PAS52, DRI56, DEF63, PHY68)
-      {name:"ストピーラ",en_name:"Stopira",long_name:"ストピーラ",positions:["左SB","CB"],params:[68,68,58,60,60,66,56,56,57,52,48,29,30,30,22,22,53,35,63,65,63,63,65,50,50,64,56,60,75]},
-      // CDM: Laros Duarte (~OVR67, PAC70, SHO55, PAS66, DRI66, DEF64, PHY67)
-      {name:"L・ドゥアルテ",en_name:"L.Duarte",long_name:"ラロス・ドゥアルテ",positions:["DMF","CMF"],params:[67,69,70,72,66,65,66,66,68,66,61,53,55,55,40,41,63,51,64,66,64,64,66,50,50,63,60,64,75]},
-      // CDM: Yannick Semedo (~OVR64, PAC67, SHO52, PAS64, DRI63, DEF62, PHY65)
-      {name:"Y・セメド",en_name:"Y.Semedo",long_name:"ヤニック・セメド",positions:["DMF","CMF"],params:[65,67,67,69,63,63,63,63,65,64,60,50,52,52,37,38,60,49,62,64,62,62,64,50,50,61,59,61,75]},
-      // RM: Wagner Pina (OVR71, PAC81, SHO51, PAS64, DRI70, DEF64, PHY65)
-      {name:"W・ピナ",en_name:"W.Pina",long_name:"ワグネル・ピナ",positions:["右WG","右SMF"],params:[65,65,81,83,74,61,70,70,76,64,60,49,51,51,37,38,67,48,64,66,64,64,66,50,50,47,63,68,75]},
+      // LCB: Roberto Lopes/Pico (OVR66, PAC45, SHO29, PAS46, DRI51, DEF64, PHY77)
+      {name:"ピコ",en_name:"Pico",long_name:"ロベルト・ロペス",positions:["CB"],params:[77,77,45,47,61,75,51,51,48,46,43,28,29,29,21,21,48,32,64,66,64,64,66,50,50,75,50,63,75]},
+      // LB: Sidny Lopes Cabral (~OVR65, PAC72, SHO32, PAS54, DRI58, DEF63, PHY66)
+      {name:"S・カブラル",en_name:"S.Cabral",long_name:"シドニー・ロペス・カブラル",positions:["左SB","CB"],params:[66,66,72,74,61,64,58,58,65,54,50,31,32,32,23,24,55,37,63,65,63,63,65,50,50,62,62,62,75]},
+      // LDM: Deroy Duarte (~OVR66, PAC70, SHO56, PAS65, DRI66, DEF62, PHY65)
+      {name:"D・ドゥアルテ",en_name:"D.Duarte",long_name:"デロイ・ドゥアルテ",positions:["DMF","CMF"],params:[65,65,70,72,66,63,66,66,68,65,60,54,56,56,40,41,63,51,62,64,62,62,64,50,50,59,59,63,75]},
+      // RDM: Kevin Lenini (~OVR67, PAC68, SHO55, PAS68, DRI67, DEF66, PHY74)
+      {name:"ケビン・レニ",en_name:"K.Lenini",long_name:"ケビン・レニ",positions:["DMF","CMF"],params:[74,76,68,70,66,72,67,67,68,68,63,53,55,55,40,41,64,52,66,68,66,66,68,50,50,70,62,64,75]},
+      // RM: Ryan Mendes (OVR71, PAC74, SHO67, PAS69, DRI74, DEF28, PHY54) - captain
+      {name:"R・メンデス",en_name:"R.Mendes",long_name:"ライアン・メンデス",positions:["右SMF","右WG","左WG","左SMF"],params:[54,54,74,76,72,50,74,74,74,69,64,65,67,67,48,50,70,64,28,30,28,28,30,50,50,39,68,68,75]},
       // OMF: Telmo Arcanjo (OVR71, PAC74, SHO61, PAS68, DRI71, DEF38, PHY60)
       {name:"アルカンジョ",en_name:"Arcanjo",long_name:"テルモ・アルカンジョ",positions:["OMF","右WG","左WG"],params:[60,60,74,76,71,56,71,71,73,68,63,59,61,61,44,45,67,58,38,40,38,38,40,50,50,43,49,68,75]},
-      // LM: Ryan Mendes (OVR71, PAC74, SHO67, PAS69, DRI74, DEF28, PHY54) - captain
-      {name:"R・メンデス",en_name:"R.Mendes",long_name:"ライアン・メンデス",positions:["左WG","左SMF"],params:[54,54,74,76,72,50,74,74,74,69,64,65,67,67,48,50,70,64,28,30,28,28,30,50,50,39,68,68,75]},
-      // CF: Nuno da Costa (OVR74, PAC82, SHO73, PAS63, DRI73, DEF27, PHY65)
-      {name:"N・コスタ",en_name:"N.Costa",long_name:"ヌーノ・ダ・コスタ",positions:["CF"],params:[65,65,82,84,78,62,73,73,78,63,59,71,73,73,53,54,69,69,27,29,27,27,29,50,50,62,74,71,75]},
+      // LM: Willy Semedo (~OVR65, PAC74, SHO64, PAS58, DRI67, DEF28, PHY60)
+      {name:"W・セメド",en_name:"W.Semedo",long_name:"ウィリー・セメド",positions:["左WG","左SMF","右WG","CF"],params:[60,60,74,76,69,56,67,67,71,58,54,62,64,64,46,47,64,61,28,30,28,28,30,50,50,43,66,62,75]},
+      // CF: Dailon Livramento (OVR70, PAC82, SHO71, PAS56, DRI68, DEF34, PHY64)
+      {name:"D・リヴラメント",en_name:"D.Livramento",long_name:"ダイロン・リヴラメント",positions:["CF","左WG"],params:[64,64,82,84,75,61,68,68,75,56,52,69,71,71,51,53,65,67,34,36,34,34,36,50,50,61,73,67,75]},
       // Sub LW: Jovane Cabral (OVR70, PAC77, SHO71, PAS68, DRI72, DEF38, PHY68)
       {name:"カブラル",en_name:"Cabral",long_name:"ジョヴァーニ・カブラル",positions:["左WG","CF","右WG"],params:[68,68,77,79,73,64,72,72,75,68,63,69,71,71,51,53,68,67,38,40,38,38,40,50,50,49,71,67,75]},
-      // Sub CF: Dailon Livramento (OVR70, PAC82, SHO71, PAS56, DRI68, DEF34, PHY64)
-      {name:"D・リヴラメント",en_name:"D.Livramento",long_name:"ダイロン・リヴラメント",positions:["CF","左WG"],params:[64,64,82,84,75,61,68,68,75,56,52,69,71,71,51,53,65,67,34,36,34,34,36,50,50,61,73,67,75]},
+      // Sub CF: Nuno da Costa (OVR74, PAC82, SHO73, PAS63, DRI73, DEF27, PHY65)
+      {name:"N・コスタ",en_name:"N.Costa",long_name:"ヌーノ・ダ・コスタ",positions:["CF"],params:[65,65,82,84,78,62,73,73,78,63,59,71,73,73,53,54,69,69,27,29,27,27,29,50,50,62,74,71,75]},
       // Sub RW: Garry Rodrigues (~OVR68, PAC78, SHO67, PAS65, DRI72, DEF32, PHY62)
       {name:"G・ロドリゲス",en_name:"G.Rodrigues",long_name:"ガリー・ロドリゲス",positions:["右WG","左WG"],params:[62,62,78,80,73,58,72,72,75,65,60,65,67,67,48,50,68,64,32,34,32,32,34,50,50,45,70,65,75]},
-      // Sub FW: Willy Semedo (~OVR65, PAC74, SHO64, PAS58, DRI67, DEF28, PHY60)
-      {name:"W・セメド",en_name:"W.Semedo",long_name:"ウィリー・セメド",positions:["右WG","CF"],params:[60,60,74,76,69,56,67,67,71,58,54,62,64,64,46,47,64,61,28,30,28,28,30,50,50,43,66,62,75]},
       // Sub FW: Helio Varela (~OVR64, PAC72, SHO63, PAS60, DRI66, DEF30, PHY62)
       {name:"エリオ",en_name:"Helio",long_name:"エリオ・ヴァレラ",positions:["CF","左WG"],params:[62,62,72,74,69,59,66,66,69,60,56,61,63,63,45,47,63,60,30,32,30,30,32,50,50,59,65,61,75]},
       // Sub FW: Gilson Benchimol (~OVR63, PAC70, SHO62, PAS57, DRI64, DEF28, PHY60)
       {name:"ベンシモル",en_name:"Benchimol",long_name:"ジルソン・ベンシモル",positions:["CF","右WG"],params:[60,60,70,72,67,57,64,64,67,57,53,60,62,62,45,46,61,59,28,30,28,28,30,50,50,57,63,60,75]},
       // Sub OMF: Jamiro Monteiro (OVR69, PAC72, SHO59, PAS70, DRI72, DEF54, PHY68)
       {name:"モンテイロ",en_name:"Monteiro",long_name:"ジャミロ・モンテイロ",positions:["OMF","CMF"],params:[68,68,72,74,70,64,72,72,72,70,65,57,59,59,42,44,68,56,54,56,54,54,56,50,50,49,58,66,75]},
-      // Sub CMF: Deroy Duarte (~OVR66, PAC70, SHO56, PAS65, DRI66, DEF62, PHY65)
-      {name:"D・ドゥアルテ",en_name:"D.Duarte",long_name:"デロイ・ドゥアルテ",positions:["CMF","DMF"],params:[65,65,70,72,66,63,66,66,68,65,60,54,56,56,40,41,63,51,62,64,62,62,64,50,50,59,59,63,75]},
+      // Sub DMF: Laros Duarte (~OVR67, PAC70, SHO55, PAS66, DRI66, DEF64, PHY67)
+      {name:"L・ドゥアルテ",en_name:"L.Duarte",long_name:"ラロス・ドゥアルテ",positions:["DMF","CMF"],params:[67,69,70,72,66,65,66,66,68,66,61,53,55,55,40,41,63,51,64,66,64,64,66,50,50,63,60,64,75]},
+      // Sub DMF: Yannick Semedo (~OVR64, PAC67, SHO52, PAS64, DRI63, DEF62, PHY65)
+      {name:"Y・セメド",en_name:"Y.Semedo",long_name:"ヤニック・セメド",positions:["DMF","CMF"],params:[65,67,67,69,63,63,63,63,65,64,60,50,52,52,37,38,60,49,62,64,62,62,64,50,50,61,59,61,75]},
       // Sub CMF: Kevin Pina (~OVR65, PAC69, SHO55, PAS65, DRI65, DEF61, PHY64)
       {name:"K・ピナ",en_name:"K.Pina",long_name:"ケヴィン・ピナ",positions:["CMF","DMF"],params:[64,64,69,71,65,62,65,65,67,65,60,53,55,55,40,41,62,51,61,63,61,61,63,50,50,58,59,62,75]},
-      // Sub CB: Pico/Roberto Lopes (OVR66, PAC45, SHO29, PAS46, DRI51, DEF64, PHY77)
-      {name:"ピコ",en_name:"Pico",long_name:"ロベルト・ロペス",positions:["CB"],params:[77,77,45,47,61,75,51,51,48,46,43,28,29,29,21,21,48,32,64,66,64,64,66,50,50,75,50,63,75]},
       // Sub CB: Joao Paulo (~OVR65, PAC64, SHO30, PAS48, DRI53, DEF64, PHY72)
       {name:"J・パウロ",en_name:"J.Paulo",long_name:"ジョアン・パウロ",positions:["CB","左SB"],params:[72,72,64,66,64,70,53,53,59,48,45,29,30,30,22,22,50,33,64,66,64,64,66,50,50,70,59,62,75]},
-      // Sub CB/LB: Sidny Lopes Cabral (~OVR65, PAC72, SHO32, PAS54, DRI58, DEF63, PHY66)
-      {name:"S・カブラル",en_name:"S.Cabral",long_name:"シドニー・ロペス・カブラル",positions:["左SB","CB"],params:[66,66,72,74,61,64,58,58,65,54,50,31,32,32,23,24,55,37,63,65,63,63,65,50,50,62,62,62,75]},
+      // Sub CB: Steven Moreira (OVR72, PAC73, SHO33, PAS67, DRI71, DEF72, PHY74)
+      {name:"S・モレイラ",en_name:"S.Moreira",long_name:"スティーヴン・モレイラ",positions:["CB","右SB"],params:[74,74,73,75,72,72,71,71,72,67,62,32,33,33,24,24,67,43,72,74,72,72,74,50,50,72,67,69,75]},
+      // Sub LB: Stopira (~OVR63, PAC58, SHO30, PAS52, DRI56, DEF63, PHY68)
+      {name:"ストピーラ",en_name:"Stopira",long_name:"ストピーラ",positions:["左SB","CB"],params:[68,68,58,60,60,66,56,56,57,52,48,29,30,30,22,22,53,35,63,65,63,63,65,50,50,64,56,60,75]},
       // Sub DF: Diney (~OVR60, PAC66, SHO28, PAS46, DRI50, DEF60, PHY68)
       {name:"ディニー",en_name:"Diney",long_name:"ディニー",positions:["右SB","左SB"],params:[68,68,66,68,55,66,50,50,58,46,43,27,28,28,20,21,48,31,60,62,60,60,62,50,50,64,58,58,75]},
       // Sub GK: Marcio Rosa (~OVR62, REF62, SPD60, KIC60, DIV62, HAN60, POS62)
