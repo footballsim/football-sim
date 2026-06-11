@@ -1559,7 +1559,215 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ツィボラ": {"profile": "スコットランドリーグで活躍するCMF。豊富な運動量と経験を武器に中盤をカバーし、代表スクワッドの中盤の選択肢として重要なバックアップを務める。", "profile_en": "A central midfielder active in the Scottish league. Serving as an important midfield backup in the squad, covering the midfield with high work rate and experience.", "height": 183, "weight": 78},
 "シペンガ": {"profile": "スペイン下部リーグで活躍するLW。81の爆発的なスプリントで左サイドを疾走し、縦への突破とカットインからゴールを狙う快速ウインガー。", "profile_en": "A left winger active in a lower Spanish division. An explosive winger who races down the left with a sprint of 81, targeting goal with direct runs and cutting inside.", "height": 175, "weight": 70},
 "ファユル": {"profile": "アルメニアリーグでプレーする若手GK。将来的な正GK候補として代表スクワッドに名を連ね、堅実なセービングと高い成長可能性を秘めた守護神。", "profile_en": "A young goalkeeper playing in the Armenian league. A keeper who has earned a national team place as a future number-one candidate, possessing sound shot-stopping and considerable growth potential.", "height": 185, "weight": 80},
-"ムパシ": {"profile": "フランスリーグで活躍するGK。65の反応速度と安定したキッキングを武器に、代表キャリアを長年積んできた経験豊富な守護神。", "profile_en": "A goalkeeper active in the French league. An experienced keeper who has accumulated a long national team career, using reflexes of 65 and stable kicking as his weapons.", "height": 186, "weight": 82}
+"ムパシ": {"profile": "フランスリーグで活躍するGK。65の反応速度と安定したキッキングを武器に、代表キャリアを長年積んできた経験豊富な守護神。", "profile_en": "A goalkeeper active in the French league. An experienced keeper who has accumulated a long national team career, using reflexes of 65 and stable kicking as his weapons.", "height": 186, "weight": 82},
+"メヒア": {"profile": "中米リーグで活躍するパナマの守護神。反応速度76の安定したセービングと冷静な判断力でゴールを守る正GK。", "profile_en": "Panama's starting goalkeeper active in the Central American league. Guards the goal with reliable reflexes (76) and composed decision-making.", "height": 187, "weight": 83},
+"R・ミラー": {"profile": "右サイドバックとして代表に欠かせない守備的プレイヤー。76のスプリントを活かした積極的なオーバーラップでチームの攻撃に厚みをもたらす。", "profile_en": "An indispensable right-back for Panama. Uses his sprint of 76 to make overlapping runs and add width to the attack.", "height": 180, "weight": 76},
+"カミングス": {"profile": "パナマ守備の要として国際舞台で経験を重ねたCB。82の高さと空中戦の強さで相手FWを封じ込める。", "profile_en": "The cornerstone of Panama's defense, a CB forged through international experience. Shuts down opposing forwards with his aerial ability and strength (82).", "height": 186, "weight": 83},
+"F・エスコバル": {"profile": "南米リーグで長年培った守備経験を代表に還元するベテランCB。80のフィジカルと統率力でラインをコントロールする。", "profile_en": "A veteran centre-back who brings years of South American league experience to the national team. Controls the defensive line with his physicality (80) and leadership.", "height": 184, "weight": 82},
+"E・デイビス": {"profile": "左SBとCBをこなすユーティリティDF。豊富な運動量と読みの良さでサイドを支える代表の常連。", "profile_en": "A utility defender capable of playing left-back and centre-back. A regular in the squad who supports the flank with high work rate and smart positioning.", "height": 181, "weight": 78},
+"ゴドイ": {"profile": "キャプテンシーと豊富な経験でパナマ中盤を引き締めるベテランDMF。守備意識80を誇り、ボール奪取でチームを助ける。", "profile_en": "A veteran defensive midfielder who anchors Panama's midfield with captaincy and vast experience. Excels at ball-winning with a defensive awareness of 80.", "height": 180, "weight": 78},
+"カラスキジャ": {"profile": "ヨーロッパで活躍するパナマ攻撃の中心。ショートパス精度80のゲームメイク力と創造性でチャンスを量産するキーマン。", "profile_en": "The creative hub of Panama's attack who plays in Europe. A key man who creates chances with a short-pass accuracy of 80 and natural creativity.", "height": 176, "weight": 73},
+"バルセナス": {"profile": "82の爆発的なスプリントで右サイドを制圧するウインガー。縦への突破からのクロスとカットインシュートが武器。", "profile_en": "A winger who dominates the right flank with an explosive sprint of 82. Threatens with direct runs to deliver crosses or cut inside for shots.", "height": 173, "weight": 68},
+"キンテロ": {"profile": "豊富な代表経験を誇るベテランOMF。72の技術と経験値で中盤から攻撃をオーガナイズし、FKも高い精度を誇る。", "profile_en": "A veteran attacking midfielder with extensive national team experience. Organises the attack from midfield with his technical quality (72) and set-piece expertise.", "height": 170, "weight": 66},
+"アロヨ": {"profile": "82のスプリントで左サイドを席巻する快速ウインガー。縦突破の速さとドリブル技術でDFを翻弄する。", "profile_en": "A pacey winger who sweeps down the left with a sprint of 82. Beats defenders with direct running and dribbling skill.", "height": 171, "weight": 66},
+"I・ディアス": {"profile": "ヨーロッパリーグで得点力を証明した強力なストライカー。80のスプリントと強靭なフィジカルを活かした突破からゴールを狙う。", "profile_en": "A powerful striker who has proven his goal-scoring ability in European competition. Attacks goal with a sprint of 80 and strong physical presence.", "height": 183, "weight": 82},
+"モスケラ": {"profile": "中米リーグで活躍するパナマの第2GK。安定したセービングと冷静な判断力でバックアップとしての役割を担う。", "profile_en": "Panama's second-choice goalkeeper active in the Central American league. Provides reliable backup with stable shot-stopping and composed judgement.", "height": 185, "weight": 80},
+"A・カルデロン": {"profile": "第3GKとして代表スクワッドに名を連ねる若手守護神。経験を積みながら将来の正GK候補として成長を続ける。", "profile_en": "A young keeper listed as the third goalkeeper in the squad. Continues to develop as a future number-one candidate while gaining experience.", "height": 184, "weight": 79},
+"A・アンドラーデ": {"profile": "CBとして代表でバックアップを担うフィジカル系DF。76の体格と対人守備の強さでスタメンCBを支える。", "profile_en": "A physically imposing centre-back providing backup in the squad. Supports the starting CBs with his build (76) and strong man-marking.", "height": 183, "weight": 80},
+"ブラックマン": {"profile": "CBと右SBをこなせるユーティリティDF。右サイドの守備的オプションとして代表での存在感を示す。", "profile_en": "A utility defender capable of playing both centre-back and right-back. Makes his presence felt in the squad as a defensive option on the right side.", "height": 182, "weight": 79},
+"M・ムリジョ": {"profile": "右SBとして攻守のバランスが高く評価されるプレイヤー。78の高い走力を活かしてサイドの守備と攻撃参加を両立させる。", "profile_en": "A right-back highly regarded for his balance between attack and defence. Uses his pace (78) to contribute to both flank defence and attacking runs.", "height": 179, "weight": 74},
+"ゴンドラ": {"profile": "左SBのバックアップとしてコンスタントな守備貢献を見せる選手。堅実なポジショニングとスタミナを武器とする。", "profile_en": "Provides consistent defensive contribution as backup left-back. Relies on solid positioning and stamina as his main weapons.", "height": 178, "weight": 73},
+"G・エルナンデス": {"profile": "DMFとCMFをこなせる中盤のユーティリティプレイヤー。ボール奪取と豊富な運動量で中盤を支える。", "profile_en": "A midfield utility player capable of DMF and CMF. Supports the midfield with ball-winning ability and high work rate.", "height": 179, "weight": 76},
+"R・コルドバ": {"profile": "CMFとして中盤の組み立てに貢献するプレイヤー。72の高いパス精度とバランスの良い守備力を持つ。", "profile_en": "A central midfielder who contributes to build-up play. Possesses a high pass accuracy (72) and well-rounded defensive capability.", "height": 177, "weight": 73},
+"I・アンダーソン": {"profile": "80の爆発的な走力でサイドを突破する快速ウインガー。右サイドからの仕掛けと縦への突破でチームに推進力をもたらす。", "profile_en": "An explosive winger who breaks down the flank with a sprint of 80. Brings forward drive with direct running and dribbling from the right.", "height": 174, "weight": 70},
+"ブラックバーン": {"profile": "OMFとCFをこなせるマルチアタッカー。機動力を活かしたオフザボールの動きとゴール前の嗅覚が光る。", "profile_en": "A multi-purpose attacker who can play OMF and CF. Excels with intelligent off-the-ball movement and goal-scoring instinct in front of goal.", "height": 182, "weight": 79},
+"ウォーターマン": {"profile": "MLS経験を持つフィジカル自慢のストライカー。76の強靭なフィジカルでポストプレーをこなしながらゴールも狙う。", "profile_en": "A powerful striker with MLS experience. Uses his strong physique (76) to play as a target man while also threatening goal.", "height": 187, "weight": 86},
+"G・トレス": {"profile": "ベテランCFとして代表での豊富な経験を誇る。体を張ったポストプレーとゴール前の嗅覚で代表をサポートする。", "profile_en": "A veteran centre-forward with extensive national team experience. Supports the squad with physical hold-up play and a sharp nose for goal.", "height": 185, "weight": 82},
+"E・アビラ": {"profile": "CMFとOMFをこなせるオールラウンダー。70のパス精度と運動量で中盤をカバーするバランス型プレイヤー。", "profile_en": "An all-round player capable of CMF and OMF. A balanced player who covers the midfield with a pass accuracy of 70 and high work rate.", "height": 175, "weight": 71},
+"ナルド": {"profile": "左ウイングのバックアップとして代表スクワッドに名を連ねる快速アタッカー。76の走力でサイドを突破する。", "profile_en": "A pacey attacker in the squad as backup left winger. Breaks down the flank with a sprint of 76.", "height": 172, "weight": 69},
+"ベコス": {"profile": "CBとして安定した守備を見せるパナマのバックアップDF。経験豊富な守備的マインドでチームに貢献する。", "profile_en": "A Panama backup centre-back who displays stable defensive work. Contributes to the team with an experienced defensive mindset.", "height": 183, "weight": 80},
+"O・セイル": {"profile": "欧州リーグで経験を積んできたニュージーランドの守護神。67の反応速度と安定したゴールキーピングで正GKの地位を確立。", "profile_en": "New Zealand's starting goalkeeper with experience in European football. Has established himself as first choice with reflexes of 67 and reliable goalkeeping.", "height": 192, "weight": 87},
+"T・スミス": {"profile": "CBと右SBをこなせる堅実なDF。長年にわたる代表経験と高い判断力でニュージーランドの守備を支える。", "profile_en": "A reliable defender capable of centre-back and right-back. Supports New Zealand's defence with years of international experience and sharp decision-making.", "height": 184, "weight": 79},
+"カーワン": {"profile": "スコットランドリーグで活躍するCB。78の高いフィジカルと制空権の強さでニュージーランドの守備の中核を担う。", "profile_en": "A centre-back active in Scottish football. The linchpin of New Zealand's defence, dominant in the air and physically imposing (78).", "height": 186, "weight": 81},
+"T・ペイン": {"profile": "ドイツリーグで経験を積んだCB。78の強靭なフィジカルと高い守備意識でゴール前を守る。", "profile_en": "A centre-back with experience in German football. Guards the goal with a strong physique (78) and high defensive awareness.", "height": 188, "weight": 83},
+"カカチェ": {"profile": "イタリアリーグで活躍するニュージーランドの左SB。80のスプリントを活かした積極的なオーバーラップが武器。左ウイングもこなせるアタック志向のSB。", "profile_en": "New Zealand's left-back active in Italian football. An attack-minded full-back whose sprint of 80 powers overlapping runs. Can also play left wing.", "height": 175, "weight": 69},
+"J・ベル": {"profile": "米国リーグで活躍するDMF。70のスプリントと74の守備力で中盤の守備を支えるハードワーカー。", "profile_en": "A defensive midfielder active in US football. A hard worker who underpins midfield defence with a sprint of 70 and defensive ability of 74.", "height": 181, "weight": 76},
+"C・ルイス": {"profile": "ベルギーリーグで活躍するCMF。74の高いパス精度と安定した中盤貢献で攻守のバランスを取るゲームコントローラー。", "profile_en": "A central midfielder active in Belgian football. A game controller who balances attack and defence with a pass accuracy of 74 and reliable midfield contribution.", "height": 179, "weight": 74},
+"M・ロハス": {"profile": "ベテランのニュージーランド代表ウインガー。長年の経験と78のスプリントでサイドアタックをけん引する。", "profile_en": "A veteran New Zealand winger. Leads flank attacks with years of experience and a sprint of 78.", "height": 175, "weight": 69},
+"R・トーマス": {"profile": "オランダリーグで経験を積んだOMF/CMF。バランスの良いパフォーマンスで中盤のリンクマンとして機能する。", "profile_en": "An attacking/central midfielder with experience in Dutch football. Functions as a midfield link player with a well-rounded performance.", "height": 177, "weight": 72},
+"グリーヴ": {"profile": "スコットランドリーグで活躍する快速左ウインガー。80のスプリントとカットインからのシュートでゴールに絡む。", "profile_en": "A pacey left winger active in Scottish football. Gets involved in goals with a sprint of 80 and cutting inside to shoot.", "height": 173, "weight": 68},
+"C・ウッド": {"profile": "プレミアリーグで長年にわたってゴールを量産するニュージーランドの絶対的エース。84の強靭なフィジカルと優れたポストプレーを誇る空中戦の強いストライカー。", "profile_en": "New Zealand's undisputed ace who has scored consistently in the Premier League for years. A physically dominant striker (84) with excellent hold-up play and aerial ability.", "height": 188, "weight": 80},
+"マリノビッチ": {"profile": "欧州でキャリアを積んできたニュージーランドの経験豊富な第2GK。安定したセービングでバックアップを務める。", "profile_en": "New Zealand's experienced second-choice goalkeeper who has built a career in Europe. Provides reliable backup with stable shot-stopping.", "height": 194, "weight": 89},
+"M・ウード": {"profile": "ニュージーランド第3GK。若い世代のゴールキーパーとして将来の正GK候補の一人。", "profile_en": "New Zealand's third-choice goalkeeper. One of the young generation of keepers and a future first-choice candidate.", "height": 190, "weight": 86},
+"ボクソール": {"profile": "米国リーグで活躍するベテランCB。豊富な代表経験と70の守備力でバックアップとして貢献する。", "profile_en": "A veteran centre-back active in US football. Contributes as backup with extensive international experience and defensive ability of 70.", "height": 188, "weight": 83},
+"M・ビーヴァン": {"profile": "右SBとCBをこなせるユーティリティDF。バランスの良い守備と安定したプレーでスクワッドに貢献。", "profile_en": "A utility defender capable of right-back and centre-back. Contributes to the squad with well-rounded defence and stable play.", "height": 182, "weight": 77},
+"イングハム": {"profile": "右SBのバックアップとして代表スクワッドに名を連ねる。堅実な守備と豊富な運動量を武器とする。", "profile_en": "Listed as backup right-back in the national squad. Relies on solid defence and high work rate.", "height": 180, "weight": 75},
+"フェントン": {"profile": "左SBのバックアップとして代表経験を積むDF。安定した守備で代表に貢献するユーティリティプレイヤー。", "profile_en": "A defender gaining international experience as backup left-back. A utility player who contributes to the national team with solid defending.", "height": 178, "weight": 73},
+"M・ガーベット": {"profile": "CMFとOMFをこなせるオールラウンドMF。70の技術と運動量で中盤を活性化するクリエイティブな選手。", "profile_en": "An all-round midfielder capable of CMF and OMF. Activates the midfield with technical ability (70) and high work rate.", "height": 178, "weight": 74},
+"M・スタメニッチ": {"profile": "カンタベリー出身のニュージーランド代表CMF。堅実な中盤での貢献とボール奪取でチームを支える守備型MF。", "profile_en": "A New Zealand central midfielder from Canterbury. A defensive-minded MF who supports the team with solid midfield contribution and ball-winning.", "height": 180, "weight": 76},
+"マッコワット": {"profile": "右ウイングとOMFをこなせるアタッカー。76のスプリントと技術で攻撃にアクセントをつける選手。", "profile_en": "An attacker capable of right wing and OMF. Adds creative flair to the attack with a sprint of 76 and technical quality.", "height": 174, "weight": 70},
+"B・オールド": {"profile": "左ウイングとOMFをこなせるテクニカルな選手。74の走力と創造性でサイドアタックを活性化する。", "profile_en": "A technical player capable of left wing and OMF. Activates flank attacks with a sprint of 74 and natural creativity.", "height": 172, "weight": 68},
+"S・シン": {"profile": "ニュージーランドのインド系選手。OMFとして技術的なプレーと創造性でチームの攻撃に貢献する。", "profile_en": "A player of Indian descent representing New Zealand. Contributes to the team's attack as an OMF with technical play and creativity.", "height": 173, "weight": 69},
+"C・バンス": {"profile": "ドイツリーグで活躍するCF。フィジカルとポストプレーを活かしてゴールを狙う若いストライカー。", "profile_en": "A centre-forward active in German football. A young striker who targets goal with physical play and strong hold-up work.", "height": 185, "weight": 80},
+"ビリングスリー": {"profile": "若手CBとしてニュージーランドのディフェンスラインを支えるバックアップDF。将来の代表の主力として期待される選手。", "profile_en": "A backup centre-back supporting New Zealand's defensive line as a young talent. A player expected to become a future pillar of the national team.", "height": 183, "weight": 79},
+"B・トゥイラギ": {"profile": "ポリネシア系の強靭なフィジカルを活かした右ウイングとCF。72の強さでポスト的な役割もこなせる万能アタッカー。", "profile_en": "A right winger and CF who uses his powerful Polynesian physique. A versatile attacker (72 strength) who can also play a hold-up role.", "height": 182, "weight": 84},
+"バルシャム": {"profile": "カタールの正GK。77の反応速度と安定したセービングでアジアトップレベルの守護神として評価されている。", "profile_en": "Qatar's starting goalkeeper. Rated as one of Asia's top goalkeepers with reflexes of 77 and reliable shot-stopping.", "height": 191, "weight": 85},
+"ペドロ・ミゲル": {"profile": "ポルトガル出身のカタール代表右SB。76のスプリントと攻守のバランスに優れ、両サイドバックをこなせるユーティリティDF。", "profile_en": "A Portuguese-born right-back representing Qatar. A versatile full-back with a sprint of 76 and excellent attacking and defensive balance, capable of playing either side.", "height": 179, "weight": 74},
+"タレク・サルマン": {"profile": "カタールのCBとして守備ラインを支えるプレイヤー。76のフィジカルと高い制空権でゴール前を固める。", "profile_en": "A centre-back who underpins Qatar's defensive line. Secures the goal area with his physique (76) and aerial dominance.", "height": 184, "weight": 80},
+"ラーウィー": {"profile": "カタールの主力CBとして活躍するアルジェリア出身のDF。78のフィジカルと対人守備の強さで安定した守備を提供する。", "profile_en": "An Algerian-born centre-back who is a key defender for Qatar. Provides solid defence with physicality (78) and strong man-marking.", "height": 186, "weight": 83},
+"A・ハッサン": {"profile": "カタールの左SBとして攻守に活躍。78の高い走力でサイドを制圧し、的確なタックルとクロスでチームに貢献する。", "profile_en": "Qatar's left-back who contributes at both ends of the pitch. Dominates the flank with a sprint of 78, contributing with precise tackling and crosses.", "height": 177, "weight": 73},
+"ブーディアフ": {"profile": "フランス出身のカタール代表DMF。74の高い守備意識でボール奪取に秀で、中盤のスクリーナーとして機能する。", "profile_en": "A French-born defensive midfielder for Qatar. Excels at ball-winning with defensive awareness of 74 and functions as a midfield screener.", "height": 181, "weight": 78},
+"ハテム": {"profile": "カタール中盤の司令塔。74の高いパス精度でゲームをコントロールし、攻守にわたる充実した貢献が評価される。", "profile_en": "Qatar's midfield playmaker. Controls the game with a pass accuracy of 74 and is valued for his all-round contribution in attack and defence.", "height": 178, "weight": 73},
+"A・アフィフ": {"profile": "カタールが誇るスーパースター。86の爆発的なスプリントと82の圧倒的なドリブル技術でアジア屈指のウインガーとして世界的な評価を得る。", "profile_en": "Qatar's superstar. One of Asia's premier wingers with worldwide recognition, combining an explosive sprint of 86 with outstanding dribbling (82).", "height": 172, "weight": 67},
+"ハイドス": {"profile": "カタールのベテランOMF。長年にわたってカタール代表を牽引してきたキャプテン経験者で、76のドリブルと豊富な経験が武器。", "profile_en": "Qatar's veteran attacking midfielder. A former captain who has led Qatar for years, using dribbling (76) and vast experience as his weapons.", "height": 172, "weight": 67},
+"I・モハメッド": {"profile": "左ウイングとして速さを活かしたサイドアタックを得意とする選手。76のスプリントで縦に突破し、クロスとカットインを使い分ける。", "profile_en": "A left winger who specialises in pace-driven flank attacks. Uses a sprint of 76 to beat defenders directly, then switches between crossing and cutting inside.", "height": 174, "weight": 70},
+"アルモエズ・アリ": {"profile": "カタール代表のストライカーとして数多くの国際大会でゴールを量産したエースFW。80のスプリントと強靭なフィジカルを持つパワーフォワード。", "profile_en": "Qatar's ace striker who has scored prolifically in numerous international tournaments. A powerful forward combining a sprint of 80 with strong physicality.", "height": 181, "weight": 76},
+"S・アルシーブ": {"profile": "カタール代表の経験豊富な第2GK。74の反応速度と安定したセービングで長年守護神のバックアップを担う。", "profile_en": "Qatar's experienced second-choice goalkeeper. Has long served as backup to the number one with reflexes of 74 and reliable shot-stopping.", "height": 187, "weight": 83},
+"Y・ハッサン": {"profile": "カタールの第3GK。ドメスティックリーグで安定したパフォーマンスを見せ、代表に招集され経験を積む。", "profile_en": "Qatar's third-choice goalkeeper. Shows stable performances in the domestic league and gains experience through national team call-ups.", "height": 185, "weight": 81},
+"ホマム": {"profile": "CBとして代表のバックアップを担う守備的プレイヤー。74のフィジカルと堅実な守備で控えとして存在感を示す。", "profile_en": "A defensive player serving as backup centre-back in the squad. Makes his presence felt as a substitute with physicality (74) and solid defending.", "height": 185, "weight": 82},
+"ワアド": {"profile": "カタールのCBバックアップ。70のフィジカルと安定した対人守備でチームに貢献する。", "profile_en": "A backup centre-back for Qatar. Contributes to the team with physicality (70) and reliable man-marking.", "height": 183, "weight": 80},
+"アルハジュリー": {"profile": "両サイドバックをこなせるユーティリティDF。カタール国内リーグでの高いパフォーマンスが代表招集につながった。", "profile_en": "A utility defender capable of playing either full-back position. High performance in the Qatari domestic league earned him national team selection.", "height": 178, "weight": 74},
+"マディボ": {"profile": "フランス出身のカタール代表DF。左SBとCBをこなせる守備的なユーティリティプレイヤー。", "profile_en": "A French-born defender representing Qatar. A defensive utility player capable of left-back and centre-back.", "height": 182, "weight": 79},
+"フーキー": {"profile": "カタールのベテランCMF。豊富な代表経験と70のパス精度でゲームメイクに貢献するカタール中盤のベテラン。", "profile_en": "A veteran central midfielder for Qatar. Contributes to build-up play with extensive international experience and a pass accuracy of 70.", "height": 183, "weight": 80},
+"ファテヒ": {"profile": "DMFとCMFをこなすボール奪取型MF。カタール国内リーグでの活躍が代表招集につながった守備的中盤。", "profile_en": "A ball-winning midfielder capable of DMF and CMF. Active in the Qatari domestic league and earned his national team place through strong performances.", "height": 180, "weight": 76},
+"アラエルディン": {"profile": "OMFと右ウイングをこなすアタッカー。カタール国内リーグで培った技術力とポジションの多様性が武器。", "profile_en": "An attacker capable of OMF and right wing. Technical quality developed in the Qatari domestic league and positional versatility are his strengths.", "height": 176, "weight": 72},
+"ムンタリ": {"profile": "ガーナ出身のカタール帰化選手。強靭なフィジカルと78のスプリントを活かした迫力あるプレーが持ち味のパワーストライカー。", "profile_en": "A Ghanaian-born naturalised Qatari striker. A powerful striker whose strengths are his imposing physique and sprint of 78.", "height": 188, "weight": 85},
+"ムニール": {"profile": "左ウイングとOMFをこなすアタッカー。カタール国内で安定したパフォーマンスを見せるサイドプレイヤー。", "profile_en": "An attacker capable of left wing and OMF. A wide player who consistently performs in the Qatari domestic league.", "height": 174, "weight": 70},
+"Y・アイメン": {"profile": "若手CFとして代表スクワッドに名を連ねるストライカー。将来のエース候補として期待を集める若者。", "profile_en": "A young centre-forward listed in the national squad. A youngster expected to become a future ace for Qatar.", "height": 182, "weight": 79},
+"K・アフマド": {"profile": "CMFとして代表のバックアップを担う選手。国内リーグでの安定した守備貢献が評価されている。", "profile_en": "A central midfielder who provides backup in the national squad. Valued for consistent defensive contribution in the domestic league.", "height": 179, "weight": 75},
+"A・ムサ": {"profile": "右SBのバックアップとして代表に招集される守備的プレイヤー。堅実な守備と豊富な運動量で代表に貢献する。", "profile_en": "A defensive player called up as backup right-back for the national team. Contributes with solid defending and high work rate.", "height": 178, "weight": 74},
+"アブライラ": {"profile": "ヨルダン代表の守護神。70の反応速度と安定したセービングで長年代表ゴールを守り続けるベテランGK。", "profile_en": "The guardian of Jordan's goal. A veteran goalkeeper who has long protected the national team's net with reflexes of 70 and reliable shot-stopping.", "height": 186, "weight": 82},
+"Y・ナイマット": {"profile": "右SBとして攻守に貢献するヨルダン代表の右サイドプレイヤー。74のスプリントを活かした攻撃参加でチームを助ける。", "profile_en": "A right-sided player contributing in both attack and defence for Jordan. Helps the team with overlapping runs using a sprint of 74.", "height": 180, "weight": 76},
+"ナシブ": {"profile": "ヨルダン守備の柱となるCB。78のフィジカルと対人守備の強さでゴール前を守るチームの頼れるDF。", "profile_en": "A pillar of Jordan's defence as centre-back. Jordan's dependable defender who guards the goal with physicality (78) and strong man-marking.", "height": 185, "weight": 82},
+"サロウル": {"profile": "ヨルダンのCBとして守備ラインを支える。76のフィジカルと安定した守備貢献でスクワッドに欠かせない存在。", "profile_en": "Supports Jordan's defensive line as centre-back. An indispensable squad member with physicality (76) and consistent defensive contribution.", "height": 184, "weight": 81},
+"ベンズイエン": {"profile": "チュニジア出身のヨルダン代表左SB。攻守のバランスに優れ、両SBとCBをこなせるユーティリティDF。", "profile_en": "A Tunisian-born left-back representing Jordan. A versatile defender with excellent balance between attack and defence, capable of playing both full-back positions and centre-back.", "height": 181, "weight": 77},
+"ラワブデ": {"profile": "ヨルダン中盤の守備的な要。74の守備意識とタックル力でボール奪取に秀でるDMF。攻撃の起点としても機能する。", "profile_en": "The defensive cornerstone of Jordan's midfield. A DMF who excels at ball-winning with defensive awareness (74) and strong tackling. Also functions as a starting point for attacks.", "height": 180, "weight": 76},
+"マルディ": {"profile": "ヨルダン中盤のゲームメイカー。74の高いパス精度でゲームをコントロールし、攻撃の展開に不可欠な存在。", "profile_en": "Jordan's midfield game-maker. Controls the game with pass accuracy of 74 and is essential to the team's attacking build-up.", "height": 177, "weight": 73},
+"M・タアマリ": {"profile": "ヨルダン代表のスター選手。82の爆発的なスプリントと78のドリブル技術でサイドを制圧するエースウインガー。両翼をこなせる万能型アタッカー。", "profile_en": "Jordan's star player. Dominates the flanks as the team's ace winger with an explosive sprint of 82 and dribbling ability of 78. A versatile attacker capable of playing either wing.", "height": 174, "weight": 69},
+"アラブ": {"profile": "OMFとして攻撃の司令塔を務めるテクニカルプレイヤー。72の高いパス精度と技術力でチャンスを演出する。", "profile_en": "A technical player who serves as the attacking playmaker at OMF. Creates chances with a pass accuracy of 72 and skilled technique.", "height": 175, "weight": 71},
+"ハブブ": {"profile": "78のスプリントを武器に左右のウイングをこなす快足アタッカー。縦への突破から決定機を演出するサイドアタッカー。", "profile_en": "A pacey attacker who can play either wing using a sprint of 78. A wide attacker who creates scoring opportunities with direct running.", "height": 173, "weight": 69},
+"ファイサル": {"profile": "ヨルダン代表のセンターFW。72のフィジカルと74のシュートセンスでゴールを狙う攻撃の軸となるストライカー。", "profile_en": "Jordan's centre-forward. A striker who is the focal point of the attack, targeting goal with physicality (72) and a shooting sense of 74.", "height": 184, "weight": 80},
+"シャーフィー": {"profile": "ヨルダンの第2GK。68の反応速度と安定したセービングでベテランのバックアップとして代表を支える。", "profile_en": "Jordan's second-choice goalkeeper. Supports the national team as an experienced backup with reflexes of 68 and stable shot-stopping.", "height": 185, "weight": 81},
+"アラグバリ": {"profile": "ヨルダンの第3GK。国内リーグでの活躍が代表招集につながった若い守護神。", "profile_en": "Jordan's third-choice goalkeeper. A young keeper whose performances in the domestic league earned him a national team call-up.", "height": 184, "weight": 80},
+"H・マフムード": {"profile": "CBと右SBをこなせるユーティリティDF。代表でのバックアップとして豊富な守備経験を発揮する。", "profile_en": "A utility defender capable of centre-back and right-back. Brings extensive defensive experience to the squad as backup.", "height": 182, "weight": 78},
+"B・ナイマット": {"profile": "右SBとCBをこなせる若手DF。代表でのバックアップとして経験を積みながら成長を続ける選手。", "profile_en": "A young defender capable of right-back and centre-back. Continues to develop while gaining experience as a backup in the national squad.", "height": 180, "weight": 76},
+"カタナーニ": {"profile": "左SBのバックアップとして代表に選出されるDF。堅実な守備でポジションの安定感を示す。", "profile_en": "A defender selected as backup left-back. Shows positional stability with reliable defending.", "height": 178, "weight": 74},
+"スマーディー": {"profile": "DMFとCMFをこなすボール奪取型MF。ヨルダン国内リーグでの活躍が代表招集につながった。", "profile_en": "A ball-winning midfielder capable of DMF and CMF. Strong performances in the Jordanian domestic league earned him a national team call-up.", "height": 179, "weight": 75},
+"S・タアマリ": {"profile": "CMFとOMFをこなせるMFでムーサ・タアマリの弟。パスセンスと技術力でチームに新しいオプションをもたらす。", "profile_en": "A midfielder capable of CMF and OMF, and the younger brother of Musa Al-Taamari. Brings a new option to the team with his passing sense and technical ability.", "height": 173, "weight": 69},
+"ハイル": {"profile": "右ウイングとOMFをこなすアタッカー。チームに攻撃的なオプションをもたらす機動力の高い選手。", "profile_en": "An attacker capable of right wing and OMF. A mobile player who provides an attacking option for the team.", "height": 174, "weight": 70},
+"イフサン": {"profile": "左ウイングとOMFをこなすアタッカー。74のスプリントで左サイドから攻撃を活性化するバックアップウインガー。", "profile_en": "An attacker capable of left wing and OMF. A backup winger who activates the left flank with a sprint of 74.", "height": 172, "weight": 68},
+"ハダッド": {"profile": "OMFとCMFをこなせるオフェンシブなMF。技術力とポジショニングでチームの攻撃を助けるミッドフィールダー。", "profile_en": "An offensive midfielder capable of OMF and CMF. A midfielder who supports the team's attack with technical ability and positioning.", "height": 175, "weight": 71},
+"A・イスマイル": {"profile": "CFとして代表のバックアップを担うストライカー。フィジカルを活かしたポストプレーと得点嗅覚が武器。", "profile_en": "A striker providing backup at centre-forward for the national team. Physical hold-up play and a nose for goal are his main weapons.", "height": 183, "weight": 80},
+"バニ・アティエ": {"profile": "CFのバックアップとして代表スクワッドに名を連ねる。体を張ったプレーとゴール前の動き出しが評価される。", "profile_en": "Listed as backup centre-forward in the national squad. Valued for physical play and intelligent movement in front of goal.", "height": 182, "weight": 79},
+"O・ラシード": {"profile": "CBのバックアップとして代表に招集されるDF。堅実な守備と経験でチームに貢献する。", "profile_en": "A defender called up as backup centre-back. Contributes to the team with reliable defending and experience.", "height": 183, "weight": 79},
+"ショディエフ": {"profile": "ウズベキスタン代表の守護神。66の反応速度と安定したセービングでゴールを守る正GK。", "profile_en": "Uzbekistan's starting goalkeeper. Guards the goal with reflexes of 66 and reliable shot-stopping.", "height": 188, "weight": 84},
+"ヤフシボエフ": {"profile": "右SBとして代表に貢献するウズベキスタンのサイドプレイヤー。74のスプリントと攻守のバランスが高く評価される。", "profile_en": "A Uzbekistani wide player who contributes as right-back for the national team. Highly valued for his sprint (74) and balance between attack and defence.", "height": 179, "weight": 74},
+"トゥルスノフ": {"profile": "ウズベキスタン守備の柱となるCB。78のフィジカルと高い守備意識でゴール前を固める主力DF。", "profile_en": "A pillar of Uzbekistan's defence as centre-back. A key defender who secures the goal area with physicality (78) and high defensive awareness.", "height": 186, "weight": 83},
+"マフムドフ": {"profile": "CBとして守備ラインを支えるウズベキスタンのDF。76のフィジカルと安定したポジショニングで代表に貢献する。", "profile_en": "A Uzbekistani centre-back who underpins the defensive line. Contributes to the national team with physicality (76) and solid positioning.", "height": 184, "weight": 80},
+"コミロフ": {"profile": "左SBとして代表に欠かせないウズベキスタンのサイドバック。70のスプリントを活かした守備的な貢献が評価される。", "profile_en": "An indispensable left-back for Uzbekistan's national team. Valued for defensive contribution using his sprint of 70.", "height": 177, "weight": 73},
+"シュクロフ": {"profile": "DMFとしてウズベキスタン中盤の守備的基盤を形成するMF。74の守備意識とボール奪取力でチームを支える。", "profile_en": "A midfielder who forms the defensive foundation of Uzbekistan's midfield as DMF. Supports the team with defensive awareness (74) and ball-winning ability.", "height": 180, "weight": 76},
+"マシャリポフ": {"profile": "CMFとOMFをこなすテクニカルなプレイヤー。74の高いパス精度と創造性でウズベキスタンの攻撃を組み立てる中核MF。", "profile_en": "A technical player capable of CMF and OMF. The central MF who builds Uzbekistan's attacks with a pass accuracy of 74 and natural creativity.", "height": 176, "weight": 72},
+"ファイズラエフ": {"profile": "ウズベキスタンの攻撃的エース。82の爆発的なスプリントと76のドリブル技術で両サイドを制圧するワールドクラスのポテンシャルを持つウインガー。", "profile_en": "Uzbekistan's attacking ace. A winger with world-class potential who dominates both flanks with an explosive sprint of 82 and dribbling ability of 76.", "height": 175, "weight": 68},
+"ハムダモフ": {"profile": "OMFとCMFをこなすテクニシャン。72の高いパス精度と技術力でゲームを展開するクリエイティブなMF。", "profile_en": "A technician capable of OMF and CMF. A creative midfielder who builds the game with a pass accuracy of 72 and technical skill.", "height": 175, "weight": 70},
+"ニショノフ": {"profile": "左右のウイングをこなす快速アタッカー。78のスプリントでサイドを制圧し、縦への突破でチームに推進力をもたらす。", "profile_en": "A pacey attacker capable of either wing. Brings forward drive to the team by dominating the flank with a sprint of 78 and direct running.", "height": 174, "weight": 69},
+"ショムロドフ": {"profile": "イタリアでの長期活躍で国際的な評価を確立したウズベキスタンの絶対的エース。80のスプリントと82の強靭なフィジカルを兼ね備えた強力なストライカー。", "profile_en": "Uzbekistan's undisputed ace who has established international recognition through long-term success in Italy. A powerful striker combining a sprint of 80 with strong physicality (82).", "height": 189, "weight": 85},
+"ショコジロフ": {"profile": "ウズベキスタンの第2GK。国内リーグで安定したパフォーマンスを見せ、代表のバックアップGKとして役割を担う。", "profile_en": "Uzbekistan's second-choice goalkeeper. Shows stable performances in the domestic league and serves as the national team's backup keeper.", "height": 187, "weight": 83},
+"A・トゥルスノフ": {"profile": "ウズベキスタンの第3GK。若手守護神として将来のレギュラーGKを目指して成長を続ける。", "profile_en": "Uzbekistan's third-choice goalkeeper. A young keeper who continues to develop with the aim of becoming a future regular number one.", "height": 186, "weight": 82},
+"ジャロロフ": {"profile": "CBとして代表のバックアップを担う守備的プレイヤー。74のフィジカルと堅実な守備で控えとして貢献する。", "profile_en": "A defensive player who provides backup at centre-back. Contributes as a substitute with physicality (74) and solid defending.", "height": 184, "weight": 80},
+"アブドサロモフ": {"profile": "CBのバックアップとして代表スクワッドに名を連ねる守備的プレイヤー。安定した守備でポジションを確保する。", "profile_en": "A defensive player listed as backup centre-back in the national squad. Secures his position with stable defending.", "height": 183, "weight": 79},
+"ナスルラエフ": {"profile": "両サイドバックをこなせるユーティリティDF。豊富な運動量と攻守のバランスで代表の選択肢を広げる。", "profile_en": "A utility defender capable of either full-back position. Expands the squad's options with high work rate and balance between attack and defence.", "height": 179, "weight": 75},
+"D・コミロフ": {"profile": "左SBのバックアップとして代表に貢献するDF。堅実な守備と安定したポジショニングが武器。", "profile_en": "A defender contributing as backup left-back. Relies on solid defending and stable positioning.", "height": 177, "weight": 72},
+"アシュルマトフ": {"profile": "DMFとCBをこなせるハードワーカー。ウズベキスタンの中盤・守備のユーティリティプレイヤーとして代表スクワッドに貢献する。", "profile_en": "A hard worker capable of DMF and centre-back. Contributes to the national squad as a midfield and defensive utility player.", "height": 181, "weight": 78},
+"アブディホリコフ": {"profile": "CMFとDMFをこなす守備的MF。ボール奪取と豊富な運動量で中盤を支えるウズベキスタンのバックアップMF。", "profile_en": "A defensive midfielder capable of CMF and DMF. A Uzbekistani backup midfielder who supports the midfield with ball-winning and high work rate.", "height": 179, "weight": 75},
+"ホルマトフ": {"profile": "右ウイングとOMFをこなすアタッカー。74のスプリントでサイドアタックを活性化するウズベキスタンの攻撃的オプション。", "profile_en": "An attacker capable of right wing and OMF. An attacking option for Uzbekistan who activates flank attacks with a sprint of 74.", "height": 173, "weight": 69},
+"エシュムロドフ": {"profile": "左右のウイングをこなす機動力のあるアタッカー。72のスプリントでサイドを突破するバックアップウインガー。", "profile_en": "A mobile attacker capable of either wing. A backup winger who breaks down the flank with a sprint of 72.", "height": 172, "weight": 68},
+"アリジョノフ": {"profile": "OMFとCMFをこなすクリエイティブな選手。テクニックとパスセンスでウズベキスタンの攻撃に多様性をもたらす。", "profile_en": "A creative player capable of OMF and CMF. Adds variety to Uzbekistan's attack with technique and passing sense.", "height": 174, "weight": 70},
+"トゥクタシノフ": {"profile": "CFのバックアップとして代表スクワッドに名を連ねる若手ストライカー。フィジカルを活かしたプレーと得点意識が評価される。", "profile_en": "A young striker listed as backup centre-forward in the national squad. Valued for physical play and scoring instinct.", "height": 183, "weight": 79},
+"アブドゥラフモノフ": {"profile": "CFとして代表に招集される選手。ゴール前の動き出しとフィジカルプレーでストライカーとしての資質を発揮する。", "profile_en": "A player called up as centre-forward for the national team. Demonstrates striker quality with intelligent movement in front of goal and physical play.", "height": 181, "weight": 77},
+"J・ハッサン": {"profile": "イラク代表の守護神。70の反応速度と安定したセービングで長年イラクのゴールを守る経験豊富なGK。", "profile_en": "Iraq's starting goalkeeper. A seasoned keeper who has long protected Iraq's goal with reflexes of 70 and reliable shot-stopping.", "height": 188, "weight": 84},
+"スラカ": {"profile": "クルド系のイラク代表右SB。72のスプリントとバランスの良い守備でサイドを安定させるDF。", "profile_en": "A Kurdish Iraqi right-back. A defender who stabilises the flank with a sprint of 72 and well-rounded defending.", "height": 179, "weight": 74},
+"アトワン": {"profile": "イラク守備の要となるCB。78のフィジカルと高い守備意識でゴール前を固める代表の主力DF。", "profile_en": "A key centre-back for Iraq's defence. A key national defender who secures the goal area with physicality (78) and high defensive awareness.", "height": 185, "weight": 82},
+"M・ハミド": {"profile": "CBとして守備ラインを支えるイラクのDF。76のフィジカルと安定した対人守備でゴール前を守る。", "profile_en": "An Iraqi centre-back who underpins the defensive line. Guards the goal with physicality (76) and solid man-marking.", "height": 184, "weight": 81},
+"アリ・アドナン": {"profile": "欧州・米国のリーグで高評価を得たイラクの左SB。78のスプリントとテクニカルなプレーでサイドを制圧するエース守備選手。", "profile_en": "Iraq's ace left-back, highly regarded in European and US leagues. Dominates the flank with a sprint of 78 and technical play.", "height": 177, "weight": 72},
+"アルダーリー": {"profile": "DMFとしてイラク中盤の守備的な基盤を担う。74の守備意識とボール奪取力でチームを引き締めるハードワーカー。", "profile_en": "Provides the defensive foundation of Iraq's midfield as DMF. A hard worker who tightens the team with defensive awareness (74) and ball-winning ability.", "height": 180, "weight": 76},
+"バイエシュ": {"profile": "CMFとDMFをこなすバランス型MF。72のパス精度と守備貢献のバランスで中盤の安定に寄与する。", "profile_en": "A balanced midfielder capable of CMF and DMF. Contributes to midfield stability with a pass accuracy of 72 and defensive work.", "height": 179, "weight": 75},
+"アイメン・フセイン": {"profile": "イラク代表の主力アタッカー。80の爆発的なスプリントで右サイドから攻撃を牽引し、CFとしてもゴールを狙える万能型フォワード。", "profile_en": "A key attacker for Iraq. A versatile forward who leads the attack from the right with an explosive sprint of 80 and can also threaten as centre-forward.", "height": 178, "weight": 73},
+"バシャール・レサン": {"profile": "イラクのOMFとして攻撃を組み立てるクリエイティブなMF。74の高いパス精度と70のドリブルで中盤からゲームを演出する。", "profile_en": "A creative midfielder who builds Iraq's attack from OMF. Orchestrates the game from midfield with pass accuracy of 74 and dribbling of 70.", "height": 176, "weight": 72},
+"H・モハメッド": {"profile": "左右のウイングをこなす快速アタッカー。76のスプリントでサイドを突破し、縦突破とカットインを使い分けてゴールに絡む。", "profile_en": "A pacey attacker capable of either wing. Gets involved in goals with a sprint of 76, mixing direct running with cutting inside.", "height": 174, "weight": 70},
+"モハナド・アリ": {"profile": "イラクの主力CF。76のスプリントと74のシュートセンスでゴールを量産するイラク代表のエースストライカー。", "profile_en": "Iraq's key centre-forward. Iraq's ace striker who scores goals with a sprint of 76 and a shooting sense of 74.", "height": 183, "weight": 79},
+"タリブ": {"profile": "イラクの第2GK。68の反応速度と安定したプレーでバックアップGKとして代表をサポートする。", "profile_en": "Iraq's second-choice goalkeeper. Supports the national team as backup keeper with reflexes of 68 and stable play.", "height": 186, "weight": 82},
+"アブドゥルバリ": {"profile": "イラクの第3GK。国内での安定したパフォーマンスが代表招集につながった若い守護神。", "profile_en": "Iraq's third-choice goalkeeper. A young keeper whose stable domestic performances earned him a national team call-up.", "height": 185, "weight": 81},
+"A・ハサン": {"profile": "CBとして代表のバックアップを担うDF。74のフィジカルと守備経験でチームに安定感をもたらす。", "profile_en": "A defender providing backup at centre-back. Brings stability to the team with physicality (74) and defensive experience.", "height": 184, "weight": 81},
+"ナイーム": {"profile": "CBのバックアップとして代表スクワッドに名を連ねる守備的プレイヤー。クルド系イラク人として代表への貢献を続ける。", "profile_en": "A defensive player listed as backup centre-back in the national squad. Continues to contribute to the national team as a Kurdish Iraqi.", "height": 183, "weight": 79},
+"D・マフムード": {"profile": "両サイドバックをこなせるユーティリティDF。国内での安定したパフォーマンスが代表招集につながった。", "profile_en": "A utility defender capable of either full-back position. Stable domestic performances earned him his national team call-up.", "height": 179, "weight": 75},
+"A・イブラヒム": {"profile": "左SBのバックアップとして代表に貢献するDF。堅実な守備で代表スクワッドの選択肢を広げる。", "profile_en": "A defender contributing as backup left-back. Expands the national squad's options with solid defending.", "height": 177, "weight": 73},
+"アブドゥル・アミール": {"profile": "DMFとCMFをこなすボール奪取型MF。70の守備力でボールを奪いチームの中盤を支えるハードワーカー。", "profile_en": "A ball-winning midfielder capable of DMF and CMF. A hard worker who supports the team's midfield by winning the ball with defensive ability of 70.", "height": 180, "weight": 76},
+"ナジム": {"profile": "CMFとOMFをこなすオールラウンドMF。技術力と運動量でイラク中盤に活力をもたらすバックアップMF。", "profile_en": "An all-round midfielder capable of CMF and OMF. A backup midfielder who brings vitality to Iraq's midfield with technical ability and work rate.", "height": 178, "weight": 74},
+"ヤシン": {"profile": "右ウイングとOMFをこなすアタッカー。74のスプリントでサイドから攻撃を展開するバックアップウインガー。", "profile_en": "An attacker capable of right wing and OMF. A backup winger who builds attacks from the flank with a sprint of 74.", "height": 173, "weight": 69},
+"ジャシム": {"profile": "左右のウイングをこなす機動力のあるアタッカー。72のスプリントでサイドを突破するバックアップウインガー。", "profile_en": "A mobile attacker capable of either wing. A backup winger who breaks down the flank with a sprint of 72.", "height": 172, "weight": 68},
+"ラアード": {"profile": "OMFとCMFをこなすクリエイティブなMF。パスセンスと技術力でイラクの攻撃に多様性をもたらすバックアップ選手。", "profile_en": "A creative midfielder capable of OMF and CMF. A backup player who adds variety to Iraq's attack with passing sense and technical ability.", "height": 175, "weight": 71},
+"アラー・アッバス": {"profile": "CFとして代表のバックアップを担うストライカー。70のフィジカルと得点意識でゴール前に存在感を示す。", "profile_en": "A striker providing backup at centre-forward for the national team. Makes his presence felt in front of goal with physicality (70) and scoring instinct.", "height": 182, "weight": 78},
+"O・サリム": {"profile": "CFのバックアップとして代表スクワッドに名を連ねる若手ストライカー。国内での活躍で代表の門を叩いた新顔。", "profile_en": "A young striker listed as backup centre-forward in the national squad. A newcomer who knocked on the national team's door through domestic performances.", "height": 181, "weight": 77},
+"ピエロ": {"profile": "ハイチの守護神。67の反応速度と安定したセービングでゴールを守るハイチ代表の正GK。", "profile_en": "Haiti's guardian. The starting goalkeeper who protects the goal with reflexes of 67 and reliable shot-stopping.", "height": 185, "weight": 81},
+"フロルビル": {"profile": "右SBとして代表の守備を支えるハイチのDF。72のスプリントで攻守にバランスよく貢献するサイドプレイヤー。", "profile_en": "A Haitian defender supporting the backline as right-back. A wide player who contributes well in both directions with a sprint of 72.", "height": 179, "weight": 74},
+"ジェローム": {"profile": "ハイチ守備の核となるCB。78のフィジカルと対人守備の強さでゴール前を支配する守備の要。", "profile_en": "The core of Haiti's defence as centre-back. The defensive lynchpin who dominates the goal area with physicality (78) and strong man-marking.", "height": 185, "weight": 82},
+"ジャン＝バティスト": {"profile": "経験豊富なCBとしてハイチ代表を長年支える守備のベテラン。76のフィジカルと高い位置取りで安定した守備を提供する。", "profile_en": "A veteran defender who has long supported Haiti as an experienced centre-back. Provides stable defence with physicality (76) and intelligent positioning.", "height": 184, "weight": 80},
+"ドレ": {"profile": "左SBとCBをこなせるユーティリティDF。70のスプリントと守備の安定感でハイチの守備オプションを広げる。", "profile_en": "A utility defender capable of left-back and centre-back. Expands Haiti's defensive options with a sprint of 70 and defensive stability.", "height": 180, "weight": 76},
+"J・レオン": {"profile": "DMFとしてハイチ中盤の守備的基盤を担う。72の守備意識とボール奪取力でチームを支えるハードワーカー。", "profile_en": "Provides the defensive foundation of Haiti's midfield as DMF. A hard worker who supports the team with defensive awareness (72) and ball-winning ability.", "height": 179, "weight": 75},
+"マティアス・パイアン": {"profile": "欧州でキャリアを積んだハイチのCMF。72のパス精度と技術力でゲームを組み立てるゲームメイカー。", "profile_en": "A Haitian central midfielder with a career built in Europe. A game-maker who builds play with a pass accuracy of 72 and technical skill.", "height": 177, "weight": 73},
+"ナゾン": {"profile": "米国リーグで活躍するハイチ代表のエースウインガー。84の爆発的なスプリントでサイドを制圧し、CFもこなせる万能型アタッカー。", "profile_en": "Haiti's ace winger active in US football. A versatile attacker who dominates the flank with an explosive sprint of 84 and can also play centre-forward.", "height": 175, "weight": 70},
+"バジル": {"profile": "OMFとCMFをこなすテクニカルなハイチのMF。72のパス精度と技術力でゲームをコントロールする攻撃的MF。", "profile_en": "A technical Haitian midfielder capable of OMF and CMF. An attacking midfielder who controls the game with pass accuracy of 72 and technical quality.", "height": 176, "weight": 72},
+"ゲリエ": {"profile": "ハイチの快速左ウインガー。80のスプリントでサイドを疾走し、縦突破からゴールに絡むサイドアタッカー。", "profile_en": "Haiti's pacey left winger. A wide attacker who races down the flank with a sprint of 80 and gets involved in goals with direct running.", "height": 173, "weight": 68},
+"R・ダムス": {"profile": "米国リーグで活躍するハイチのストライカー。76のスプリントと72のシュートセンスでゴールを狙う代表の主力CF。", "profile_en": "A Haitian striker active in US football. Haiti's key centre-forward who targets goal with a sprint of 76 and shooting sense of 72.", "height": 184, "weight": 80},
+"コールズ": {"profile": "ハイチの第2GK。64の反応速度と安定したプレーでバックアップGKとして代表をサポートする。", "profile_en": "Haiti's second-choice goalkeeper. Supports the national team as backup keeper with reflexes of 64 and stable play.", "height": 184, "weight": 80},
+"ジニャック": {"profile": "ハイチの第3GK。代表スクワッドに名を連ねる若手守護神で将来への期待が高い。", "profile_en": "Haiti's third-choice goalkeeper. A young keeper listed in the national squad with high expectations for the future.", "height": 183, "weight": 79},
+"デジレ": {"profile": "CBとして代表のバックアップを担うハイチのDF。74のフィジカルと守備経験でチームに安定感をもたらす。", "profile_en": "A Haitian defender providing backup at centre-back. Brings stability to the team with physicality (74) and defensive experience.", "height": 183, "weight": 80},
+"アルキュス": {"profile": "CBのバックアップとして代表スクワッドに名を連ねるDF。堅実な守備で代表の守備オプションを広げる。", "profile_en": "A defender listed as backup centre-back in the national squad. Expands the team's defensive options with solid defending.", "height": 182, "weight": 78},
+"デリック・エティエン": {"profile": "右SBと右ウイングをこなすハイチのユーティリティプレイヤー。78のスプリントとエネルギッシュなプレーで貢献する。", "profile_en": "A Haitian utility player capable of right-back and right wing. Contributes with a sprint of 78 and energetic play.", "height": 177, "weight": 73},
+"F・ピエロ": {"profile": "左SBのバックアップとして代表に名を連ねる守備的プレイヤー。堅実なポジショニングと守備貢献が評価される。", "profile_en": "A defensive player listed as backup left-back in the national team. Valued for solid positioning and defensive contribution.", "height": 178, "weight": 74},
+"カブラル": {"profile": "DMFとCMFをこなす守備的MF。ハイチ中盤のバックアップとして豊富な運動量でチームを助ける。", "profile_en": "A defensive midfielder capable of DMF and CMF. Helps the team as midfield backup with high work rate.", "height": 179, "weight": 75},
+"レア・シリキ": {"profile": "フランス出身のハイチ系CMF。72のパス精度と機動力で中盤に活力をもたらすオールラウンドMF。", "profile_en": "A French-born Haitian central midfielder. An all-round midfielder who brings vitality to the midfield with pass accuracy of 72 and mobility.", "height": 177, "weight": 73},
+"フォルトー": {"profile": "右ウイングとOMFをこなすアタッカー。74のスプリントでサイドアタックを活性化するバックアップ選手。", "profile_en": "An attacker capable of right wing and OMF. A backup player who activates flank attacks with a sprint of 74.", "height": 174, "weight": 70},
+"N・アレクシス": {"profile": "左ウイングとCFをこなすアタッカー。72のスプリントでゴールに絡むオフェンシブなバックアップ選手。", "profile_en": "An attacker capable of left wing and centre-forward. An offensive backup player who gets involved in goals with a sprint of 72.", "height": 173, "weight": 69},
+"サバ": {"profile": "CFとして代表のバックアップを担う若手ストライカー。フィジカルと得点本能でゴールを狙う。", "profile_en": "A young striker providing backup at centre-forward for the national team. Targets goal with physicality and scoring instinct.", "height": 182, "weight": 78},
+"アデ": {"profile": "OMFと左ウイングをこなすクリエイティブな選手。技術力とパスセンスでハイチの攻撃に多様性をもたらす。", "profile_en": "A creative player capable of OMF and left wing. Adds variety to Haiti's attack with technical ability and passing sense.", "height": 174, "weight": 70},
+"E・ルーム": {"profile": "米国リーグで活躍するキュラソーの守護神。73の反応速度と安定したセービングでキュラソー代表のゴールを守るトップクラスのGK。", "profile_en": "Curaçao's goalkeeper active in US football. A top-class keeper who protects Curaçao's goal with reflexes of 73 and reliable shot-stopping.", "height": 191, "weight": 88},
+"C・マルティナ": {"profile": "欧州でキャリアを築いたキュラソーのベテランDF。両サイドバックをこなせるユーティリティプレイヤーとして代表に長年貢献。", "profile_en": "A veteran Curaçao defender with a career built in Europe. A utility player capable of either full-back position who has long contributed to the national team.", "height": 180, "weight": 77},
+"メデル": {"profile": "キュラソーのCBとして守備ラインを支える。74のフィジカルと安定したポジショニングでゴール前を固める。", "profile_en": "Supports Curaçao's defensive line as centre-back. Secures the goal area with physicality (74) and solid positioning.", "height": 184, "weight": 80},
+"ファン・デン・ベルフ": {"profile": "CBとして守備の安定をもたらすキュラソーのDF。72のフィジカルと守備意識の高さで代表の守備を支える。", "profile_en": "A Curaçao defender who brings defensive stability as centre-back. Supports the national defence with physicality (72) and high defensive awareness.", "height": 183, "weight": 79},
+"エルソン・ホーイ": {"profile": "左SBと左ウイングをこなせるキュラソーのユーティリティプレイヤー。74のスプリントで攻守のバランスを保つサイドプレイヤー。", "profile_en": "A Curaçao utility player capable of left-back and left wing. A wide player who maintains balance between attack and defence with a sprint of 74.", "height": 175, "weight": 70},
+"L・バクナ": {"profile": "キュラソー代表のキャプテンを長年務めるエース。欧州リーグで高い評価を受け、74のパス精度と総合力でチームをけん引するリーダー。", "profile_en": "A long-standing captain and ace of Curaçao. Highly regarded in European football, leading the team with pass accuracy of 74 and all-round ability.", "height": 178, "weight": 74},
+"J・バクナ": {"profile": "レアンドロ・バクナの弟で、CMFとOMFをこなせるテクニカルプレイヤー。73の技術力でキュラソーの攻撃をサポートする。", "profile_en": "The younger brother of Leandro Bacuna, a technical player capable of CMF and OMF. Supports Curaçao's attack with technical quality of 73.", "height": 177, "weight": 73},
+"ネポムセノ": {"profile": "オランダリーグで活躍するキュラソーのウインガー。80の爆発的なスプリントで両サイドを制圧し、縦突破からゴールに絡む。", "profile_en": "A Curaçao winger active in Dutch football. Dominates both flanks with an explosive sprint of 80 and gets involved in goals with direct running.", "height": 173, "weight": 68},
+"G・ウェイナルドゥム": {"profile": "ジョルジニオ・ウェイナルドゥムの近縁で、キュラソー代表として活躍するOMF。72の技術力と機動力でキュラソーの攻撃に欠かせない存在。", "profile_en": "A relative of Georginio Wijnaldum who represents Curaçao. An OMF indispensable to Curaçao's attack with technical quality of 72 and mobility.", "height": 175, "weight": 71},
+"ジャンガ": {"profile": "左ウイングとCFをこなせるキュラソーの快速アタッカー。80のスプリントでサイドを疾走し、得点にも絡める万能型フォワード。", "profile_en": "A pacey Curaçao attacker capable of left wing and centre-forward. A versatile forward who races down the flank with a sprint of 80 and can also contribute with goals.", "height": 174, "weight": 70},
+"チュロー": {"profile": "フランス出身のキュラソー代表CF。74のフィジカルと70のシュートセンスでゴールを狙うターゲット型ストライカー。", "profile_en": "A French-born centre-forward representing Curaçao. A target-man striker who aims for goal with physicality (74) and a shooting sense of 70.", "height": 184, "weight": 80},
+"ピーターズ": {"profile": "キュラソーの第2GK。66の反応速度でバックアップGKとして代表をサポートする。", "profile_en": "Curaçao's second-choice goalkeeper. Supports the national team as backup keeper with reflexes of 66.", "height": 187, "weight": 83},
+"スマール": {"profile": "キュラソーの第3GK。代表スクワッドに名を連ねる若い守護神。", "profile_en": "Curaçao's third-choice goalkeeper. A young keeper listed in the national squad.", "height": 184, "weight": 80},
+"ヘルデル": {"profile": "CBのバックアップとして代表スクワッドに名を連ねる。安定した守備と経験でチームをサポートする守備的プレイヤー。", "profile_en": "Listed as backup centre-back in the national squad. A defensive player who supports the team with solid defending and experience.", "height": 183, "weight": 79},
+"コールウェイク": {"profile": "CBと右SBをこなせるユーティリティDF。守備の多様性でキュラソー代表に貢献するバックアップ選手。", "profile_en": "A utility defender capable of centre-back and right-back. A backup player who contributes to Curaçao with defensive versatility.", "height": 182, "weight": 78},
+"ペンダース": {"profile": "右SBとCBをこなせるキュラソーのDF。70のフィジカルと守備経験でスクワッドに貢献する。", "profile_en": "A Curaçao defender capable of right-back and centre-back. Contributes to the squad with physicality (70) and defensive experience.", "height": 181, "weight": 77},
+"エブエヒ": {"profile": "両サイドバックをこなせるユーティリティDF。72のスプリントで攻撃参加もこなすアクティブなSB。", "profile_en": "A utility defender capable of playing either full-back position. An active full-back who can also make overlapping runs with a sprint of 72.", "height": 179, "weight": 75},
+"スピアリングス": {"profile": "CMFとDMFをこなすオランダ出身のキュラソー代表MF。70の守備力とバランスの良い中盤貢献で代表を支える。", "profile_en": "A Dutch-born Curaçao midfielder capable of CMF and DMF. Supports the national team with defensive ability (70) and well-rounded midfield contribution.", "height": 181, "weight": 76},
+"バゾール": {"profile": "CMFとDMFをこなす守備的MF。ボール奪取と豊富な運動量でキュラソー中盤のバックアップを担う。", "profile_en": "A defensive midfielder capable of CMF and DMF. Provides midfield backup for Curaçao with ball-winning and high work rate.", "height": 179, "weight": 75},
+"マーツェン": {"profile": "右ウイングとOMFをこなすアタッカー。74のスプリントでサイドアタックを活性化するバックアップウインガー。", "profile_en": "An attacker capable of right wing and OMF. A backup winger who activates flank attacks with a sprint of 74.", "height": 173, "weight": 69},
+"バーフゾルフ": {"profile": "84の爆発的なスプリントを誇るキュラソーの快速ウインガー。両翼をこなせる速さが武器のアタッカーで、カットインからのシュートも得意。", "profile_en": "Curaçao's explosive winger with a sprint of 84. An attacker whose weapon is pace on either wing, also adept at cutting inside to shoot.", "height": 174, "weight": 70},
+"ボアドゥ": {"profile": "オランダリーグで経験を積んだキュラソーのCF。76のスプリントと72のシュートセンスでゴールを狙うアタッカー。", "profile_en": "A Curaçao centre-forward with experience in Dutch football. An attacker who targets goal with a sprint of 76 and shooting sense of 72.", "height": 182, "weight": 80},
+"デ・サ": {"profile": "CFのバックアップとして代表スクワッドに名を連ねる選手。フィジカルを活かしたポストプレーと得点嗅覚が武器。", "profile_en": "A player listed as backup centre-forward in the national squad. Physical hold-up play and a nose for goal are his main weapons.", "height": 183, "weight": 79},
+"E・ジャスト": {"profile": "ニュージーランドの左SBバックアップ。豊富な運動量と堅実な守備でチームを支える若手DF。", "profile_en": "New Zealand's backup left-back. A young defender who supports the team with high work rate and solid defending.", "height": 177, "weight": 72},
+"アルシャンマリー": {"profile": "カタールのCFバックアップ。フィジカルを活かしたプレーと得点嗅覚で代表スクワッドに貢献する。", "profile_en": "Qatar's backup centre-forward. Contributes to the national squad with physical play and a nose for goal.", "height": 182, "weight": 79},
+"アルサウド": {"profile": "ヨルダンのCMFバックアップ。安定した守備とパスセンスで中盤に貢献するユーティリティプレイヤー。", "profile_en": "Jordan's backup central midfielder. A utility player who contributes to the midfield with stable defending and passing sense.", "height": 179, "weight": 75},
+"A・アルオマル": {"profile": "ヨルダンの左ウイングバックアップ。68のスプリントで左サイドから攻撃に絡む。", "profile_en": "Jordan's backup left winger. Gets involved in attacks from the left with a sprint of 68.", "height": 172, "weight": 68},
+"ジュマエフ": {"profile": "ウズベキスタンの右SBバックアップ。堅実な守備と豊富な運動量で代表のサイドを守る。", "profile_en": "Uzbekistan's backup right-back. Guards the team's flank with solid defending and high work rate.", "height": 179, "weight": 74},
+"ミルザエフ": {"profile": "ウズベキスタンの左ウイングバックアップ。68のスプリントでサイドを突破するアタッカー。", "profile_en": "Uzbekistan's backup left winger. An attacker who breaks down the flank with a sprint of 68.", "height": 172, "weight": 68},
+"M・タヒル": {"profile": "イラクのDMF/CMFバックアップ。中盤の守備的な貢献で代表スクワッドに名を連ねるMF。", "profile_en": "Iraq's backup DMF/CMF. A midfielder listed in the squad for his defensive midfield contribution.", "height": 179, "weight": 75},
+"H・ムサ": {"profile": "イラクの右SBバックアップ。堅実な守備と機動力でサイドを守る経験あるDF。", "profile_en": "Iraq's backup right-back. An experienced defender who guards the flank with solid defending and mobility.", "height": 179, "weight": 75},
+"ベダール": {"profile": "ハイチの右ウイング/CFバックアップ。70のスプリントでサイドから攻撃を活性化する。", "profile_en": "Haiti's backup right winger and centre-forward. Activates flank attacks with a sprint of 70.", "height": 174, "weight": 70},
+"ジャン": {"profile": "ハイチの左SBバックアップ。代表スクワッドで守備の選択肢を広げる若手DF。", "profile_en": "Haiti's backup left-back. A young defender who expands the squad's defensive options.", "height": 178, "weight": 74},
+"シャルル": {"profile": "ハイチのCBバックアップ。安定した守備でスクワッドに貢献する守備的プレイヤー。", "profile_en": "Haiti's backup centre-back. A defensive player who contributes to the squad with stable defending.", "height": 183, "weight": 79},
+"ティリオン": {"profile": "キュラソーの右SBバックアップ。堅実な守備と機動力でサイドを守るDF。", "profile_en": "Curaçao's backup right-back. A defender who guards the flank with solid defending and mobility.", "height": 180, "weight": 76},
+"スマルシル": {"profile": "キュラソーのDMFバックアップ。守備的貢献と安定したポジショニングで代表を支える。", "profile_en": "Curaçao's backup DMF. Supports the national team with defensive contribution and stable positioning.", "height": 180, "weight": 76},
+"D・コールス": {"profile": "CBと右SBをこなせるキュラソーのユーティリティDF。守備の多様性でスクワッドに貢献する。", "profile_en": "A Curaçao utility defender capable of centre-back and right-back. Contributes to the squad with defensive versatility.", "height": 183, "weight": 79}
 };
 
 const PARAM_NAMES = [
@@ -2023,28 +2231,6 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"長友",en_name:"Nagatomo",long_name:"長友佑都",positions:["左SB","左SMF"],params:[66,86,68,66,70,68,72,64,66,68,64,58,58,54,52,52,62,62,76,70,68,70,66,51,51,60,68,80,78]}
     ]
   },
-  england2026: {
-    name:"イングランド",en_name:"England",team_color:"#CC0000", flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-    default_system:"4-2-3-1", default_tactics:TACTICS_FREE, default_keyplayer:8, default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,9,8,10],
-    players:[
-      {name:"ピックフォード",en_name:"Pickford",long_name:"ジョーダン・ピックフォード",positions:["GK"],params:[50,50,50,50,82,75,50,50,50,50,88,50,50,50,50,50,50,50,50,50,50,50,50,83,77,50,79,72,75]},
-      {name:"ジェームズ",en_name:"R.James",long_name:"リース・ジェームズ",positions:["右SB","DMF","右SMF"],params:[87,68,76,75,84,88,66,78,77,83,82,67,70,75,83,83,82,74,85,84,84,84,83,50,50,77,78,82,75]},
-      {name:"コンサ",en_name:"Konsa",long_name:"エズリ・コンサ",positions:["CB","右SB"],params:[80,79,78,72,85,87,67,74,76,80,73,55,32,67,38,64,78,50,84,87,86,85,86,50,50,81,75,82,75]},
-      {name:"グエヒ",en_name:"Guehi",long_name:"マルク・グエヒ",positions:["CB"],params:[80,80,72,69,85,92,61,72,72,80,78,44,29,61,32,67,77,40,85,85,86,86,86,50,50,82,66,80,75]},
-      {name:"オライリー",en_name:"O'Reilly",long_name:"ニコ・オライリー",positions:["左SB","OMF","CMF"],params:[80,78,86,79,79,91,75,82,84,81,76,67,68,74,59,75,80,75,79,79,78,78,77,50,50,82,77,81,75]},
-      {name:"ライス",en_name:"Rice",long_name:"デクラン・ライス",positions:["CMF","DMF"],params:[79,94,73,71,89,84,63,82,78,87,86,64,83,75,75,87,85,77,86,86,83,84,81,50,50,79,83,86,75]},
-      {name:"アンダーソン",en_name:"Anderson",long_name:"エリオット・アンダーソン",positions:["CMF","OMF","DMF"],params:[75,88,68,75,83,84,76,82,75,83,82,66,64,74,67,81,81,76,80,83,78,79,78,50,50,76,81,82,75]},
-      {name:"サカ",en_name:"Saka",long_name:"ブカヨ・サカ",positions:["右WG","右SMF","左WG","左SMF"],params:[74,86,81,85,88,74,85,86,84,85,77,82,81,85,74,88,88,86,62,62,60,61,60,50,50,49,86,82,75]},
-      {name:"ベリンガム",en_name:"Bellingham",long_name:"ジュード・ベリンガム",positions:["OMF","CMF","左SMF"],params:[80,94,80,81,91,85,83,90,85,89,87,86,87,89,68,75,91,89,80,80,80,79,77,50,50,75,88,90,75]},
-      {name:"ゴードン",en_name:"Gordon",long_name:"アンソニー・ゴードン",positions:["左WG","左SMF","右WG","右SMF","CF"],params:[61,87,92,89,82,75,78,84,88,78,66,78,76,80,66,82,82,80,40,56,49,45,49,50,50,59,79,80,75]},
-      {name:"ケイン",en_name:"Kane",long_name:"ハリー・ケイン",positions:["CF","OMF"],params:[87,76,65,63,94,87,67,80,73,86,82,96,90,92,69,82,87,95,42,44,44,44,46,50,50,90,86,92,75]},
-      {name:"パーマー",en_name:"Palmer",long_name:"コール・パーマー",positions:["OMF","右WG","右SMF","CF"],params:[67,79,78,80,89,73,83,89,77,90,88,83,80,84,82,88,89,88,67,65,57,66,70,50,50,65,90,79,75]},
-      {name:"フォーデン",en_name:"Foden",long_name:"フィル・フォーデン",positions:["OMF","左WG","左SMF","右WG","右SMF"],params:[70,83,79,82,90,65,93,90,82,91,89,82,83,83,78,78,90,85,56,52,45,62,67,50,50,61,92,80,75]},
-      {name:"メイヌー",en_name:"Mainoo",long_name:"コビー・メイヌー",positions:["DMF","CMF","OMF"],params:[72,82,80,76,86,78,84,83,74,79,78,75,71,71,64,69,80,71,75,79,71,73,75,50,50,70,86,76,75]},
-      {name:"ロジャーズ",en_name:"Rogers",long_name:"モーガン・ロジャーズ",positions:["OMF","右WG","右SMF","左WG","左SMF"],params:[80,85,80,77,89,80,79,86,79,83,78,79,75,76,72,72,85,86,68,74,58,68,68,50,50,67,89,77,75]}
-    ]
-  },
   japan2026: {
     name:"日本",en_name:"Japan",team_color:"#003087",flag:"🇯🇵",
     default_system:"3-4-2-1", default_tactics:4, default_keyplayer:9, default_marked_player:8,
@@ -2073,7 +2259,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"佐野海",en_name:"Sano K2.",long_name:"佐野海舟",positions:["DMF","CMF"],params:[68,93,82,78,84,82,80,84,83,79,76,50,56,68,50,52,82,67,90,82,79,87,84,50,50,77,71,80,75]},
       {name:"町野",en_name:"Machino",long_name:"町野修斗",positions:["CF","OMF","左WG","左SMF"],params:[78,78,74,72,76,78,72,68,68,68,64,76,74,66,58,58,66,78,58,54,48,52,64,51,51,76,76,74,75]},
       {name:"上田",en_name:"Ueda",long_name:"上田綺世",positions:["CF"],params:[79,80,76,77,81,96,78,73,75,74,54,83,76,81,67,68,78,84,36,38,36,36,35,51,51,90,72,84,75]},
-      {name:"塩貝",en_name:"Shiokkai",long_name:"塩貝健人",positions:["CF","WG"],params:[68,68,86,88,72,76,68,78,84,66,56,74,68,73,66,74,72,74,48,50,48,44,48,51,51,66,70,76,75]}
+      {name:"塩貝",en_name:"Shiokkai",long_name:"塩貝健人",positions:["CF","WG"],params:[68,68,86,88,72,76,68,78,84,66,56,74,68,73,66,74,72,74,48,50,48,44,48,51,51,66,70,76,75]},
+      {name:"冨安",en_name:"Tomiyasu",long_name:"冨安健洋",positions:["右CB","CB","右SB","左SB"],params:[82,72,74,73,82,85,66,80,74,82,78,55,50,70,62,60,80,70,82,84,84,84,82,51,51,82,76,80,75]},
+      {name:"遠藤航",en_name:"Endo W.",long_name:"遠藤航",positions:["DMF","CMF","CB","右SB"],params:[67,77,52,66,77,85,72,76,64,79,78,67,73,73,49,45,78,68,78,79,77,79,80,50,50,79,75,79,75]}
     ]
   },
   scotland2026: {
@@ -2160,57 +2348,6 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"長友",en_name:"Nagatomo",long_name:"長友佑都",positions:["左SB","左SMF"],params:[66,86,68,66,70,68,72,64,66,68,64,58,58,54,52,52,62,62,76,70,68,70,66,51,51,60,68,80,78]}
     ]
   },
-  tunisia2026: {
-    name:"チュニジア",en_name:"Tunisia",team_color:"#CC0000",flag:"🇹🇳",
-    default_system:"4-2-3-1", default_tactics:TACTICS_COUNTER, default_keyplayer:7, default_marked_player:3,
-    default_lineup:[11,13,2,3,4,5,16,6,9,17,8,11],
-    players:[
-      {name:"ダメン",en_name:"Dahmen",long_name:"アイメン・ダメン",positions:["GK"],params:[50,50,50,50,82,76,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,82,80,50,74,78,75]},
-      {name:"ザアルーニ",en_name:"Zaalouni",long_name:"ザアルーニ",positions:["右SB"],params:[74,80,76,74,78,76,74,70,68,74,72,68,66,62,58,58,68,66,84,78,72,74,74,51,51,66,72,72,75]},
-      {name:"タルビ",en_name:"Talbi",long_name:"モンタサル・タルビ",positions:["CB"],params:[78,76,72,70,80,82,72,64,64,74,74,60,60,58,56,58,66,62,88,84,82,82,72,51,51,78,72,76,75]},
-      {name:"ブロン",en_name:"Bronn",long_name:"ディラン・ブロン",positions:["CB","左CB"],params:[76,76,72,70,78,80,70,64,64,72,72,60,60,58,56,58,64,62,86,82,80,80,70,51,51,76,70,74,75]},
-      {name:"エル・アブディ",en_name:"El Abdi",long_name:"アリ・エル・アブディ",positions:["左SB","左SMF"],params:[72,80,76,74,76,74,76,72,70,76,74,70,68,62,60,60,70,68,82,76,70,72,74,51,51,64,70,70,75]},
-      {name:"スキリ",en_name:"Skhiri",long_name:"エリエス・スキリ",positions:["DMF","CMF"],params:[76,86,76,74,84,76,76,78,76,90,84,74,72,68,64,64,78,78,92,84,80,80,82,50,50,66,76,74,75]},
-      {name:"ハニバル",en_name:"Hannibal",long_name:"ハニバル・メジュブリ",positions:["OMF","CMF","右SMF"],params:[74,80,78,78,82,70,80,92,84,90,86,86,88,76,74,74,88,86,80,70,64,66,74,50,50,66,80,76,75]},
-      {name:"ベン・スリマネ",en_name:"Ben Slimane",long_name:"ベン・スリマネ",positions:["CMF","左SMF","OMF"],params:[72,78,76,76,80,68,78,88,80,90,82,82,78,72,70,70,82,78,76,66,60,62,70,50,50,62,74,72,75]},
-      {name:"マストゥーリ",en_name:"Mastouri",long_name:"ハゼム・マストゥーリ",positions:["CF","左WG","左SMF"],params:[75,77,79,81,79,71,78,80,80,74,70,81,85,77,62,62,72,78,62,58,58,64,65,50,50,72,74,73,75]},
-      {name:"サアド",en_name:"Saad",long_name:"エリアス・サアド",positions:["左WG","左SMF","右WG","右SMF","OMF"],params:[73,77,78,78,77,68,79,79,79,73,68,81,71,76,60,60,70,76,62,58,58,64,65,50,50,68,72,71,75]},
-      {name:"ムサクニ",en_name:"Msakni",long_name:"ユセフ・ムサクニ",positions:["左WG","左SMF","OMF"],params:[72,74,76,76,76,68,76,90,84,84,78,84,84,72,68,70,82,84,66,56,50,54,64,51,51,70,72,70,75]},
-      {name:"ファルハティ",en_name:"Farhati",long_name:"ヌールッディーン・ファルハティ",positions:["GK"],params:[50,50,50,50,79,74,50,50,50,50,60,50,50,50,50,50,50,50,50,50,50,50,50,77,72,50,70,74,75]},
-      {name:"メリア",en_name:"Meriah",long_name:"ヤシン・メリア",positions:["CB","DMF","右SB"],params:[76,74,70,68,78,80,70,56,56,66,64,52,52,50,50,50,58,54,80,82,80,80,70,51,51,76,70,74,75]},
-      {name:"ヴァレリー",en_name:"Valery",long_name:"ヤン・ヴァレリー",positions:["右SB","右SMF","CB"],params:[73,81,79,77,76,72,75,67,73,69,66,62,60,62,52,52,62,62,73,74,70,72,71,50,50,62,70,69,75]},
-      {name:"ラフィア",en_name:"Rafia",long_name:"ハムザ・ラフィア",positions:["CMF","OMF","右WG","右SMF"],params:[72,78,76,76,80,68,78,76,72,78,74,70,68,64,62,62,76,70,70,66,60,62,68,50,50,62,72,70,75]},
-      {name:"スリマネ",en_name:"Slimane",long_name:"アニス・スリマネ",positions:["OMF","左SMF"],params:[70,76,78,78,78,66,78,74,70,74,70,68,66,62,60,60,70,68,64,60,52,58,64,51,51,60,70,68,75]},
-      {name:"ケディラ",en_name:"Khedira",long_name:"ラニ・ケディラ",positions:["DMF","CMF","CB"],params:[71,81,72,70,77,73,71,67,70,73,70,62,60,64,54,54,66,62,79,78,73,76,73,50,50,60,71,68,75]},
-      {name:"アヤリ",en_name:"Ayari",long_name:"ハリル・アヤリ",positions:["右WG","右SMF","左WG","左SMF","OMF"],params:[71,75,81,79,77,66,81,77,79,73,68,70,68,70,58,60,70,70,60,56,57,62,63,50,50,64,70,69,75]},
-      {name:"ベン・サイード",en_name:"Ben Said",long_name:"ベシル・ベン・サイード",positions:["GK"],params:[50,50,50,50,78,72,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,68,72,75]},
-      {name:"ガリ",en_name:"Ghari",long_name:"ガリ",positions:["右SB","CB"],params:[70,76,72,70,74,72,72,60,58,64,62,58,56,52,50,50,58,56,74,74,68,68,70,51,51,60,68,66,75]},
-      {name:"ベン・ユセフ",en_name:"Ben Youssef",long_name:"ファクフルッディーン・ベン・ユセフ",positions:["CF","右SMF"],params:[72,74,76,76,74,70,74,72,70,68,64,72,70,64,58,58,68,70,58,54,48,52,62,51,51,68,70,68,75]}
-    ]
-  },
-  sweden2026: {
-    name:"スウェーデン",en_name:"Sweden",team_color:"#006AA7",flag:"🇸🇪",
-    default_system:"3-4-2-1", default_tactics:TACTICS_COUNTER, default_keyplayer:10, default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
-    players:[
-      {name:"ノルドフェルト",en_name:"Nordfeldt",long_name:"ヤコブ・ノルドフェルト",positions:["GK"],params:[50,50,50,50,74,69,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,70,69,50,69,74,75]},
-      {name:"ラゲルビエルケ",en_name:"Lagerbielke",long_name:"グスタフ・ラゲルビエルケ",positions:["CB"],params:[80,66,61,41,70,79,44,60,61,74,75,35,22,51,28,33,67,31,71,75,71,72,73,50,50,76,62,69,75]},
-      {name:"スタルフェルト",en_name:"Starfelt",long_name:"カール・スタルフェルト",positions:["CB"],params:[81,76,80,67,77,85,67,69,75,77,66,25,23,48,24,33,71,32,79,80,78,79,78,50,50,79,56,67,75]},
-      {name:"リンデレフ",en_name:"Lindelof",long_name:"ヴィクトル・リンデレフ",positions:["CB","右SB","左SB"],params:[78,50,52,50,77,75,56,66,59,78,78,42,52,57,53,67,72,51,78,77,77,78,77,50,50,75,72,79,75]},
-      {name:"カールストレム",en_name:"Karlstrom",long_name:"ミカエル・カールストレム",positions:["DMF","CMF","OMF"],params:[75,82,64,65,71,75,66,70,67,76,74,58,60,66,59,66,74,60,73,73,70,72,70,50,50,62,75,75,75]},
-      {name:"アヤリ",en_name:"Ayari",long_name:"ヤシン・アヤリ",positions:["CMF","DMF","OMF"],params:[53,80,71,68,79,58,78,81,76,80,79,70,81,75,59,75,80,74,78,78,77,77,76,50,50,46,79,79,75]},
-      {name:"スヴェンソン",en_name:"Svensson",long_name:"アレクサンデル・スヴェンソン",positions:["右SMF","右WG"],params:[70,93,78,79,79,76,78,76,77,78,77,56,63,67,65,71,77,71,73,75,78,75,77,50,50,64,75,76,75]},
-      {name:"グドムンドソン",en_name:"Gudmundsson",long_name:"ガブリエル・グドムンドソン",positions:["左SB","左SMF","左WG"],params:[74,84,87,87,74,77,76,78,83,75,69,59,67,67,50,66,75,68,73,74,72,72,70,50,50,51,68,73,75]},
-      {name:"ニーグレン",en_name:"Nygren",long_name:"リヌス・ニーグレン",positions:["OMF","右SMF"],params:[70,85,73,75,71,78,76,74,74,76,75,77,71,75,70,73,73,79,56,65,60,59,62,50,50,69,77,75,75]},
-      {name:"エランガ",en_name:"Elanga",long_name:"アンソニー・エランガ",positions:["右WG","右SMF","左WG","左SMF","CF","OMF"],params:[74,76,90,94,78,83,86,80,85,75,64,72,65,75,66,80,78,78,31,38,36,35,38,50,50,67,76,77,75]},
-      {name:"ギェケレシュ",en_name:"Gyokeres",long_name:"ヴィクトル・ギェケレシュ",positions:["CF"],params:[90,90,89,82,88,87,68,80,85,77,58,87,82,84,71,72,80,87,41,42,37,41,40,50,50,82,76,85,75]},
-      {name:"ムスタフ",en_name:"Mustapha",long_name:"ヤシン・ムスタフ",positions:["GK"],params:[50,50,50,50,72,67,50,50,50,50,55,50,50,50,50,50,50,50,50,50,50,50,50,68,67,50,67,65,75]},
-      {name:"ヒエン",en_name:"Hien",long_name:"イサク・ヒエン",positions:["CB"],params:[86,80,72,68,80,86,66,60,66,70,67,30,26,54,24,34,64,36,86,86,84,85,85,50,50,84,62,76,75]},
-      {name:"ホルム",en_name:"Holm",long_name:"エミル・ホルム",positions:["右SB","右SMF","左SB"],params:[72,88,82,80,78,76,78,70,76,74,70,60,58,62,56,58,68,72,76,76,72,74,74,50,50,64,72,70,75]},
-      {name:"ベルグヴァル",en_name:"Bergvall",long_name:"ルーカス・ベルグヴァル",positions:["CMF","OMF","DMF"],params:[68,80,76,78,82,66,80,80,78,82,78,74,72,68,62,66,80,74,66,62,58,64,68,50,50,60,78,72,75]},
-      {name:"クルセフスキ",en_name:"Kulusevski",long_name:"デヤン・クルセフスキ",positions:["OMF","右WG","右SMF","CMF"],params:[78,80,82,82,82,74,82,84,83,84,80,80,78,80,70,70,80,80,68,64,56,62,70,50,50,70,80,74,75]}
-    ]
-  },
   japan2026vsSweden: {
     name:"日本",en_name:"Japan",team_color:"#003087",flag:"🇯🇵",
     default_system:"3-4-2-1", default_tactics:4, default_keyplayer:9, default_marked_player:1,
@@ -2242,57 +2379,6 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"塩貝",en_name:"Shiokkai",long_name:"塩貝健人",positions:["CF","WG"],params:[68,68,86,88,72,76,68,78,84,66,56,74,68,73,66,74,72,74,48,50,48,44,48,51,51,66,70,76,75]},
       {name:"小川",en_name:"Ogawa K.",long_name:"小川航基",positions:["CF"],params:[76,74,62,62,72,75,70,72,65,68,55,78,70,76,48,66,74,82,42,52,46,44,50,51,51,82,68,76,75]},
       {name:"長友",en_name:"Nagatomo",long_name:"長友佑都",positions:["左SB","左SMF"],params:[66,86,68,66,70,68,72,64,66,68,64,58,58,54,52,52,62,62,76,70,68,70,66,51,51,60,68,80,78]}
-    ]
-  },
-  tunisia2026: {
-    name:"チュニジア",en_name:"Tunisia",team_color:"#CC0000",flag:"🇹🇳",
-    default_system:"4-2-3-1", default_tactics:TACTICS_COUNTER, default_keyplayer:7, default_marked_player:3,
-    default_lineup:[11,13,2,3,4,5,16,6,9,17,8,11],
-    players:[
-      {name:"ダメン",en_name:"Dahmen",long_name:"アイメン・ダメン",positions:["GK"],params:[50,50,50,50,82,76,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,82,80,50,74,78,75]},
-      {name:"ザアルーニ",en_name:"Zaalouni",long_name:"ザアルーニ",positions:["右SB"],params:[74,80,76,74,78,76,74,64,62,68,66,62,60,56,52,52,62,60,78,78,72,74,74,51,51,66,72,72,75]},
-      {name:"タルビ",en_name:"Talbi",long_name:"モンタサル・タルビ",positions:["CB"],params:[79,75,73,71,81,83,72,58,66,68,68,54,54,57,50,52,60,56,83,83,77,78,73,50,50,78,72,76,75]},
-      {name:"ブロン",en_name:"Bronn",long_name:"ディラン・ブロン",positions:["CB","右SB"],params:[77,76,72,70,79,79,71,59,66,67,66,54,54,56,50,52,58,56,79,81,76,75,71,50,50,76,70,75,75]},
-      {name:"エル・アブディ",en_name:"El Abdi",long_name:"アリ・エル・アブディ",positions:["左SB","左SMF"],params:[71,81,77,75,76,73,77,66,72,71,68,64,62,64,54,54,64,62,75,76,73,75,75,50,50,64,70,71,75]},
-      {name:"スキリ",en_name:"Skhiri",long_name:"エリエス・スキリ",positions:["DMF","CMF"],params:[70,82,65,66,79,77,74,76,71,77,75,74,72,74,55,72,74,73,80,77,75,78,76,50,50,75,71,78,75]},
-      {name:"ハニバル",en_name:"Hannibal",long_name:"ハニバル・メジュブリ",positions:["OMF","CMF","右SMF"],params:[75,81,79,79,82,71,80,85,82,83,80,80,81,81,68,68,82,80,74,70,69,74,73,50,50,66,80,77,75]},
-      {name:"ベン・スリマネ",en_name:"Ben Slimane",long_name:"ベン・スリマネ",positions:["CMF","左SMF","OMF"],params:[72,78,76,76,80,68,78,82,74,84,76,76,72,66,64,64,76,72,70,66,60,62,70,50,50,62,74,72,75]},
-      {name:"マストゥーリ",en_name:"Mastouri",long_name:"ハゼム・マストゥーリ",positions:["CF","左WG","左SMF"],params:[75,77,79,81,79,71,78,80,80,74,70,81,85,77,62,62,72,78,62,58,58,64,65,50,50,72,74,73,75]},
-      {name:"サアド",en_name:"Saad",long_name:"エリアス・サアド",positions:["左WG","左SMF","右WG","右SMF","OMF"],params:[73,77,78,78,77,68,79,79,79,73,68,81,71,76,60,60,70,76,62,58,58,64,65,50,50,68,72,71,75]},
-      {name:"ムサクニ",en_name:"Msakni",long_name:"ユセフ・ムサクニ",positions:["左WG","左SMF","OMF"],params:[72,74,76,76,76,68,76,84,78,78,72,78,78,66,62,64,76,78,60,56,50,54,64,51,51,70,72,70,75]},
-      {name:"ファルハティ",en_name:"Farhati",long_name:"ヌールッディーン・ファルハティ",positions:["GK"],params:[50,50,50,50,79,74,50,50,50,50,60,50,50,50,50,50,50,50,50,50,50,50,50,77,72,50,70,74,75]},
-      {name:"メリア",en_name:"Meriah",long_name:"ヤシン・メリア",positions:["CB","DMF","右SB"],params:[76,74,70,68,78,80,70,56,56,66,64,52,52,50,50,50,58,54,80,82,80,80,70,51,51,76,70,74,75]},
-      {name:"ヴァレリー",en_name:"Valery",long_name:"ヤン・ヴァレリー",positions:["右SB","右SMF","CB"],params:[73,81,79,77,76,72,75,67,73,69,66,62,60,62,52,52,62,62,73,74,70,72,71,50,50,62,70,69,75]},
-      {name:"ラフィア",en_name:"Rafia",long_name:"ハムザ・ラフィア",positions:["CMF","OMF","右WG","右SMF"],params:[72,78,76,76,80,68,78,76,72,78,74,70,68,64,62,62,76,70,70,66,60,62,68,50,50,62,72,70,75]},
-      {name:"スリマネ",en_name:"Slimane",long_name:"アニス・スリマネ",positions:["OMF","左SMF"],params:[70,76,78,78,78,66,78,74,70,74,70,68,66,62,60,60,70,68,64,60,52,58,64,51,51,60,70,68,75]},
-      {name:"ケディラ",en_name:"Khedira",long_name:"ラニ・ケディラ",positions:["DMF","CMF","CB"],params:[71,81,72,70,77,73,71,67,70,73,70,62,60,64,54,54,66,62,79,78,73,76,73,50,50,60,71,68,75]},
-      {name:"アヤリ",en_name:"Ayari",long_name:"ハリル・アヤリ",positions:["右WG","右SMF","左WG","左SMF","OMF"],params:[71,75,81,79,77,66,81,77,79,73,68,70,68,70,58,60,70,70,60,56,57,62,63,50,50,64,70,69,75]},
-      {name:"ベン・サイード",en_name:"Ben Said",long_name:"ベシル・ベン・サイード",positions:["GK"],params:[50,50,50,50,78,72,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,68,72,75]},
-      {name:"ガリ",en_name:"Ghari",long_name:"ガリ",positions:["右SB","CB"],params:[70,76,72,70,74,72,72,60,58,64,62,58,56,52,50,50,58,56,74,74,68,68,70,51,51,60,68,66,75]},
-      {name:"ベン・ユセフ",en_name:"Ben Youssef",long_name:"ファクフルッディーン・ベン・ユセフ",positions:["CF","右SMF"],params:[72,74,76,76,74,70,74,72,70,68,64,72,70,64,58,58,68,70,58,54,48,52,62,51,51,68,70,68,75]}
-    ]
-  },
-  sweden2026: {
-    name:"スウェーデン",en_name:"Sweden",team_color:"#006AA7",flag:"🇸🇪",
-    default_system:"3-4-2-1", default_tactics:TACTICS_COUNTER, default_keyplayer:10, default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
-    players:[
-      {name:"ノルドフェルト",en_name:"Nordfeldt",long_name:"ヤコブ・ノルドフェルト",positions:["GK"],params:[50,50,50,50,74,69,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,70,69,50,69,74,75]},
-      {name:"ラゲルビエルケ",en_name:"Lagerbielke",long_name:"グスタフ・ラゲルビエルケ",positions:["CB"],params:[80,66,61,41,70,79,44,60,61,74,75,35,22,51,28,33,67,31,71,75,71,72,73,50,50,76,62,69,75]},
-      {name:"スタルフェルト",en_name:"Starfelt",long_name:"カール・スタルフェルト",positions:["CB"],params:[81,76,80,67,77,85,67,69,75,77,66,25,23,48,24,33,71,32,79,80,78,79,78,50,50,79,56,67,75]},
-      {name:"リンデレフ",en_name:"Lindelof",long_name:"ヴィクトル・リンデレフ",positions:["CB","右SB","左SB"],params:[78,50,52,50,77,75,56,66,59,78,78,42,52,57,53,67,72,51,78,77,77,78,77,50,50,75,72,79,75]},
-      {name:"カールストレム",en_name:"Karlstrom",long_name:"ミカエル・カールストレム",positions:["DMF","CMF","OMF"],params:[75,82,64,65,71,75,66,70,67,76,74,58,60,66,59,66,74,60,73,73,70,72,70,50,50,62,75,75,75]},
-      {name:"アヤリ",en_name:"Ayari",long_name:"ヤシン・アヤリ",positions:["CMF","DMF","OMF"],params:[53,80,71,68,79,58,78,81,76,80,79,70,81,75,59,75,80,74,78,78,77,77,76,50,50,46,79,79,75]},
-      {name:"スヴェンソン",en_name:"Svensson",long_name:"アレクサンデル・スヴェンソン",positions:["右SMF","右WG"],params:[70,93,78,79,79,76,78,76,77,78,77,56,63,67,65,71,77,71,73,75,78,75,77,50,50,64,75,76,75]},
-      {name:"グドムンドソン",en_name:"Gudmundsson",long_name:"ガブリエル・グドムンドソン",positions:["左SB","左SMF","左WG"],params:[74,84,87,87,74,77,76,78,83,75,69,59,67,67,50,66,75,68,73,74,72,72,70,50,50,51,68,73,75]},
-      {name:"ニーグレン",en_name:"Nygren",long_name:"リヌス・ニーグレン",positions:["OMF","右SMF"],params:[70,85,73,75,71,78,76,74,74,76,75,77,71,75,70,73,73,79,56,65,60,59,62,50,50,69,77,75,75]},
-      {name:"エランガ",en_name:"Elanga",long_name:"アンソニー・エランガ",positions:["右WG","右SMF","左WG","左SMF","CF","OMF"],params:[74,76,90,94,78,83,86,80,85,75,64,72,65,75,66,80,78,78,31,38,36,35,38,50,50,67,76,77,75]},
-      {name:"ギェケレシュ",en_name:"Gyokeres",long_name:"ヴィクトル・ギェケレシュ",positions:["CF"],params:[90,90,89,82,88,87,68,80,85,77,58,87,82,84,71,72,80,87,41,42,37,41,40,50,50,82,76,85,75]},
-      {name:"ムスタフ",en_name:"Mustapha",long_name:"ヤシン・ムスタフ",positions:["GK"],params:[50,50,50,50,72,67,50,50,50,50,55,50,50,50,50,50,50,50,50,50,50,50,50,68,67,50,67,65,75]},
-      {name:"ヒエン",en_name:"Hien",long_name:"イサク・ヒエン",positions:["CB"],params:[86,80,72,68,80,86,66,60,66,70,67,30,26,54,24,34,64,36,86,86,84,85,85,50,50,84,62,76,75]},
-      {name:"ホルム",en_name:"Holm",long_name:"エミル・ホルム",positions:["右SB","右SMF","左SB"],params:[72,88,82,80,78,76,78,70,76,74,70,60,58,62,56,58,68,72,76,76,72,74,74,50,50,64,72,70,75]},
-      {name:"ベルグヴァル",en_name:"Bergvall",long_name:"ルーカス・ベルグヴァル",positions:["CMF","OMF","DMF"],params:[68,80,76,78,82,66,80,80,78,82,78,74,72,68,62,66,80,74,66,62,58,64,68,50,50,60,78,72,75]},
-      {name:"クルセフスキ",en_name:"Kulusevski",long_name:"デヤン・クルセフスキ",positions:["OMF","右WG","右SMF","CMF"],params:[78,80,82,82,82,74,82,84,83,84,80,80,78,80,70,70,80,80,68,64,56,62,70,50,50,70,80,74,75]}
     ]
   },
   tunisia2026: {
@@ -4483,6 +4569,486 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"マルシオ",en_name:"Marcio",long_name:"マルシオ・ロサ",positions:["GK"],params:[50,50,50,50,62,60,50,50,50,50,60,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,62,62,75]},
       // Sub GK: CJ dos Santos (~OVR60, REF61, SPD60, KIC58, DIV60, HAN59, POS61)
       {name:"CJ",en_name:"CJ",long_name:"CJ・ドスサントス",positions:["GK"],params:[50,50,50,50,61,60,50,50,50,50,58,50,50,50,50,50,50,50,50,50,50,50,50,60,59,50,61,61,75]}
+    ]
+  },
+  panama2026: {
+    name:"パナマ",en_name:"Panama",team_color:"#CC0000",flag:"🇵🇦",
+    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:10,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Luis Mejia (OVR76, DIV74, HAN72, KIC68, REF76, SPD62, POS74)
+      {name:"メヒア",en_name:"Mejia",long_name:"ルイス・メヒア",positions:["GK"],params:[50,50,50,50,76,62,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,74,72,50,74,68,75]},
+      // RB: Roderick Miller (OVR73, PAC76, SHO52, PAS68, DRI70, DEF72, PHY74)
+      {name:"R・ミラー",en_name:"R.Miller",long_name:"ロデリック・ミラー",positions:["右SB"],params:[74,76,76,76,73,72,68,68,73,68,64,44,46,50,38,42,68,50,70,72,70,70,70,50,50,68,68,70,75]},
+      // CB: Harold Cummings (OVR77, PAC74, SHO48, PAS70, DRI68, DEF78, PHY82)
+      {name:"カミングス",en_name:"Cummings",long_name:"ハロルド・カミングス",positions:["CB"],params:[82,78,74,72,71,82,64,64,71,70,66,40,38,46,36,40,64,40,78,80,78,78,76,50,50,80,68,72,75]},
+      // CB: Fidel Escobar (OVR74, PAC70, SHO44, PAS66, DRI62, DEF76, PHY80)
+      {name:"F・エスコバル",en_name:"F.Escobar",long_name:"フィデル・エスコバル",positions:["CB"],params:[80,76,70,68,66,80,58,58,66,66,62,36,34,42,32,36,58,36,74,76,76,75,74,50,50,78,64,70,75]},
+      // LB: Eric Davis (OVR72, PAC72, SHO50, PAS66, DRI68, DEF72, PHY74)
+      {name:"E・デイビス",en_name:"E.Davis",long_name:"エリック・デイビス",positions:["左SB","CB"],params:[74,76,72,72,70,72,66,66,70,66,62,42,44,46,38,42,66,46,70,72,70,70,68,50,50,66,66,68,75]},
+      // DMF: Anibal Godoy (OVR75, PAC64, SHO58, PAS76, DRI70, DEF78, PHY80)
+      {name:"ゴドイ",en_name:"Godoy",long_name:"アニバル・ゴドイ",positions:["DMF","CMF"],params:[80,82,64,64,67,76,68,68,67,76,72,50,52,56,46,50,70,56,76,78,76,75,74,50,50,72,70,74,75]},
+      // CMF: Adalberto Carrasquilla (OVR78, PAC68, SHO64, PAS80, DRI76, DEF70, PHY72)
+      {name:"カラスキジャ",en_name:"Carrasquilla",long_name:"アダルベルト・カラスキジャ",positions:["CMF","DMF"],params:[72,80,68,68,72,68,74,74,72,80,76,56,58,62,50,54,74,62,70,70,70,69,68,50,50,66,72,74,75]},
+      // RSM: Edgar Barcenas (OVR73, PAC82, SHO68, PAS68, DRI76, DEF42, PHY64)
+      {name:"バルセナス",en_name:"Barcenas",long_name:"エドガル・バルセナス",positions:["右SMF","右WG"],params:[64,70,82,84,79,60,74,74,79,68,64,62,62,66,52,56,74,64,38,40,40,39,38,50,50,56,68,66,75]},
+      // OMF: Alberto Quintero (OVR72, PAC72, SHO66, PAS72, DRI74, DEF46, PHY64)
+      {name:"キンテロ",en_name:"Quintero",long_name:"アルベルト・キンテロ",positions:["OMF","左SMF"],params:[64,72,72,74,73,58,72,72,73,72,68,60,60,64,52,56,72,62,42,44,44,43,42,50,50,56,66,64,75]},
+      // LSM: Abdiel Arroyo (OVR73, PAC82, SHO68, PAS68, DRI76, DEF44, PHY66)
+      {name:"アロヨ",en_name:"Arroyo",long_name:"アブディエル・アロヨ",positions:["左SMF","左WG"],params:[66,72,82,84,79,62,74,74,79,68,64,62,62,66,52,56,74,64,40,42,42,41,40,50,50,58,68,68,75]},
+      // CF: Ismael Diaz (OVR75, PAC80, SHO76, PAS68, DRI76, DEF38, PHY76)
+      {name:"I・ディアス",en_name:"I.Diaz",long_name:"イスマエル・ディアス",positions:["CF"],params:[76,74,80,78,78,76,74,74,78,68,62,72,72,74,54,58,74,74,34,36,36,35,34,50,50,74,68,70,75]},
+      // Sub GK: Orlando Mosquera (OVR70)
+      {name:"モスケラ",en_name:"Mosquera",long_name:"オルランド・モスケラ",positions:["GK"],params:[50,50,50,50,70,60,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,72,68,50,68,66,75]},
+      // Sub GK: Alvaro Calderon (OVR67)
+      {name:"A・カルデロン",en_name:"A.Calderon",long_name:"アルバロ・カルデロン",positions:["GK"],params:[50,50,50,50,67,56,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,68,64,50,65,62,75]},
+      // Sub CB: Andres Andrade (OVR71)
+      {name:"A・アンドラーデ",en_name:"A.Andrade",long_name:"アンドレス・アンドラーデ",positions:["CB"],params:[76,74,72,70,65,76,58,58,65,64,60,34,32,40,30,34,58,34,70,72,72,71,70,50,50,74,60,66,75]},
+      // Sub CB: Cesar Blackman (OVR69)
+      {name:"ブラックマン",en_name:"Blackman",long_name:"セサル・ブラックマン",positions:["CB","右SB"],params:[74,72,70,68,63,74,56,56,63,62,58,32,30,38,28,32,56,32,68,70,70,69,68,50,50,72,58,64,75]},
+      // Sub RB: Michael Murillo (OVR72)
+      {name:"M・ムリジョ",en_name:"M.Murillo",long_name:"マイケル・ムリジョ",positions:["右SB"],params:[72,74,78,78,73,70,68,68,73,64,60,40,42,44,34,38,68,46,68,70,70,69,68,50,50,66,66,68,75]},
+      // Sub LB: Freddy Gondola (OVR70)
+      {name:"ゴンドラ",en_name:"Gondola",long_name:"フレディ・ゴンドラ",positions:["左SB"],params:[70,72,72,72,67,66,62,62,67,62,58,38,40,42,32,36,62,42,66,68,68,67,66,50,50,62,60,62,75]},
+      // Sub DMF: Gilberto Hernandez (OVR70)
+      {name:"G・エルナンデス",en_name:"G.Hernandez",long_name:"ヒルベルト・エルナンデス",positions:["DMF","CMF"],params:[72,76,66,66,67,68,66,66,67,72,68,48,50,54,42,46,66,52,68,70,70,69,68,50,50,64,64,68,75]},
+      // Sub CMF: Ronaldo Cordoba (OVR71)
+      {name:"R・コルドバ",en_name:"R.Cordoba",long_name:"ロナルド・コルドバ",positions:["CMF","OMF"],params:[70,76,70,70,70,66,68,68,70,72,68,52,54,56,44,48,68,56,66,68,68,67,66,50,50,64,66,68,75]},
+      // Sub RW: Ivan Anderson (OVR71)
+      {name:"I・アンダーソン",en_name:"I.Anderson",long_name:"イバン・アンダーソン",positions:["右WG","右SMF"],params:[68,72,80,82,76,64,70,70,76,64,60,60,60,64,48,54,70,62,36,38,38,37,36,50,50,60,64,64,75]},
+      // Sub OMF: Rolando Blackburn (OVR70)
+      {name:"ブラックバーン",en_name:"Blackburn",long_name:"ローランド・ブラックバーン",positions:["OMF","CF"],params:[72,72,76,76,74,68,70,70,74,66,62,62,62,66,50,54,70,66,36,38,38,37,36,50,50,68,68,66,75]},
+      // Sub CF: Cecilio Waterman (OVR72)
+      {name:"ウォーターマン",en_name:"Waterman",long_name:"セシリオ・ウォーターマン",positions:["CF"],params:[76,74,78,76,74,74,68,68,74,62,58,68,68,70,50,54,68,68,32,34,34,33,32,50,50,74,66,68,75]},
+      // Sub CF: Gabriel Torres (OVR69)
+      {name:"G・トレス",en_name:"G.Torres",long_name:"ガブリエル・トレス",positions:["CF"],params:[72,72,74,74,71,70,66,66,71,60,56,66,66,68,48,52,66,66,30,32,32,31,30,50,50,70,64,66,75]},
+      // Sub CMF: Eric Avila (OVR68)
+      {name:"E・アビラ",en_name:"E.Avila",long_name:"エリック・アビラ",positions:["CMF","OMF"],params:[68,72,68,68,68,64,66,66,68,70,66,52,52,54,44,48,66,54,62,62,62,61,60,50,50,60,62,64,75]},
+      // Sub LW: Naldo (OVR68)
+      {name:"ナルド",en_name:"Naldo",long_name:"ナルド",positions:["左WG","左SMF"],params:[64,68,76,78,72,60,66,66,72,60,56,56,56,60,44,50,66,58,34,36,36,35,34,50,50,54,60,60,75]},
+      // Sub CB: Edgar Becos (OVR68)
+      {name:"ベコス",en_name:"Becos",long_name:"エドガル・ベコス",positions:["CB"],params:[74,72,66,64,62,74,54,54,62,60,56,30,28,36,26,30,54,30,68,70,70,69,68,50,50,72,56,62,75]}
+    ]
+  },
+  newzealand2026: {
+    name:"ニュージーランド",en_name:"New Zealand",team_color:"#1A1A1A",flag:"🇳🇿",
+    default_system:"4-3-3",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:10,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Oliver Sail (OVR67, DIV68, HAN66, KIC64, REF67, SPD64, POS64)
+      {name:"O・セイル",en_name:"O.Sail",long_name:"オリバー・セイル",positions:["GK"],params:[50,50,50,50,67,64,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,68,66,50,64,64,75]},
+      // RB: Tommy Smith (OVR72, PAC74, SHO50, PAS68, DRI70, DEF74, PHY76)
+      {name:"T・スミス",en_name:"T.Smith",long_name:"トミー・スミス",positions:["右SB","CB"],params:[76,76,74,74,72,74,68,68,72,68,64,42,44,48,36,40,66,48,72,74,72,72,70,50,50,70,68,70,75]},
+      // CB: Niko Kirwan (OVR72, PAC70, SHO44, PAS66, DRI64, DEF74, PHY78)
+      {name:"カーワン",en_name:"Kirwan",long_name:"ニコ・カーワン",positions:["CB"],params:[78,76,70,68,66,78,60,60,66,66,62,36,34,42,32,36,60,36,72,74,74,73,72,50,50,76,64,68,75]},
+      // CB: Tim Payne (OVR71, PAC68, SHO42, PAS64, DRI62, DEF73, PHY78)
+      {name:"T・ペイン",en_name:"T.Payne",long_name:"ティム・ペイン",positions:["CB"],params:[78,76,68,66,64,78,58,58,64,64,60,34,32,40,30,34,58,34,71,73,72,72,70,50,50,76,62,66,75]},
+      // LB: Liberato Cacace (OVR74, PAC80, SHO54, PAS72, DRI74, DEF72, PHY70)
+      {name:"カカチェ",en_name:"Cacace",long_name:"リベラート・カカチェ",positions:["左SB","左WG"],params:[70,74,80,82,77,68,74,74,77,72,68,46,48,52,38,42,72,50,70,72,70,70,68,50,50,66,70,70,75]},
+      // DMF: Joe Bell (OVR72, PAC70, SHO58, PAS74, DRI70, DEF74, PHY76)
+      {name:"J・ベル",en_name:"J.Bell",long_name:"ジョー・ベル",positions:["DMF","CMF"],params:[76,80,70,70,70,74,68,68,70,74,70,50,52,56,44,48,68,52,72,74,72,72,70,50,50,70,66,70,75]},
+      // CMF: Clayton Lewis (OVR73, PAC70, SHO60, PAS74, DRI72, DEF72, PHY72)
+      {name:"C・ルイス",en_name:"C.Lewis",long_name:"クレイトン・ルイス",positions:["CMF","DMF"],params:[72,78,70,70,71,70,70,70,71,74,70,52,54,58,46,50,70,56,70,72,70,70,68,50,50,66,68,70,75]},
+      // RW: Marco Rojas (OVR70, PAC78, SHO66, PAS64, DRI72, DEF40, PHY60)
+      {name:"M・ロハス",en_name:"M.Rojas",long_name:"マルコ・ロハス",positions:["右WG","右SMF"],params:[60,68,78,80,75,56,70,70,75,64,60,60,60,64,48,54,68,60,36,38,38,37,36,50,50,48,66,64,75]},
+      // OMF: Ryan Thomas (OVR72, PAC68, SHO62, PAS74, DRI72, DEF68, PHY70)
+      {name:"R・トーマス",en_name:"R.Thomas",long_name:"ライアン・トーマス",positions:["OMF","CMF"],params:[70,76,68,68,70,66,70,70,70,74,70,54,56,60,48,52,70,58,66,68,66,66,64,50,50,62,68,68,75]},
+      // LW: Alex Greive (OVR71, PAC80, SHO66, PAS64, DRI72, DEF38, PHY66)
+      {name:"グリーヴ",en_name:"Greive",long_name:"アレックス・グリーヴ",positions:["左WG","左SMF"],params:[66,70,80,82,76,62,70,70,76,64,60,60,60,64,48,54,68,62,34,36,36,35,34,50,50,58,66,64,75]},
+      // CF: Chris Wood (OVR76, PAC76, SHO78, PAS64, DRI70, DEF42, PHY84)
+      {name:"C・ウッド",en_name:"C.Wood",long_name:"クリス・ウッド",positions:["CF"],params:[84,76,76,74,73,84,68,68,73,64,58,74,72,76,54,58,68,74,38,40,40,39,38,50,50,84,68,72,75]},
+      // Sub GK: Stefan Marinovic (OVR64)
+      {name:"マリノビッチ",en_name:"Marinovic",long_name:"ステファン・マリノビッチ",positions:["GK"],params:[50,50,50,50,64,62,50,50,50,50,60,50,50,50,50,50,50,50,50,50,50,50,50,64,62,50,62,60,75]},
+      // Sub GK: Michael Woud (OVR62)
+      {name:"M・ウード",en_name:"M.Woud",long_name:"マイケル・ウード",positions:["GK"],params:[50,50,50,50,62,58,50,50,50,50,58,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,60,58,75]},
+      // Sub CB: Michael Boxall (OVR70)
+      {name:"ボクソール",en_name:"Boxall",long_name:"マイケル・ボクソール",positions:["CB"],params:[76,74,68,66,66,74,58,58,64,62,58,34,32,40,30,34,56,34,68,70,70,69,68,50,50,72,62,64,75]},
+      // Sub RB/CB: Myer Bevan (OVR68)
+      {name:"M・ビーヴァン",en_name:"M.Bevan",long_name:"マイア・ビーヴァン",positions:["右SB","CB"],params:[72,72,70,70,66,70,60,60,66,62,58,36,34,42,30,34,58,38,66,68,68,67,66,50,50,66,60,62,75]},
+      // Sub RB: Dane Ingham (OVR67)
+      {name:"イングハム",en_name:"Ingham",long_name:"デーン・イングハム",positions:["右SB"],params:[68,70,68,68,64,64,62,62,64,60,56,34,32,38,28,32,60,38,64,66,64,64,62,50,50,60,58,58,75]},
+      // Sub LB: Louis Fenton (OVR67)
+      {name:"フェントン",en_name:"Fenton",long_name:"ルイ・フェントン",positions:["左SB"],params:[68,70,68,68,64,64,62,62,64,60,56,34,32,38,28,32,60,38,64,66,64,64,62,50,50,60,58,58,75]},
+      // Sub CMF: Matthew Garbett (OVR70)
+      {name:"M・ガーベット",en_name:"M.Garbett",long_name:"マシュー・ガーベット",positions:["CMF","OMF"],params:[70,76,68,68,69,66,68,68,69,72,68,52,54,56,44,48,68,54,66,68,68,67,66,50,50,62,64,66,75]},
+      // Sub CMF: Marko Stamenic (OVR69)
+      {name:"M・スタメニッチ",en_name:"M.Stamenic",long_name:"マルコ・スタメニッチ",positions:["CMF","DMF"],params:[70,74,66,66,67,66,66,66,67,70,66,48,50,54,42,46,66,50,66,68,66,66,64,50,50,62,62,64,75]},
+      // Sub RW: Callum McCowatt (OVR70)
+      {name:"マッコワット",en_name:"McCowatt",long_name:"カラム・マッコワット",positions:["右WG","OMF"],params:[62,68,76,78,73,58,68,68,73,62,58,58,58,62,46,52,66,58,36,38,38,37,36,50,50,50,62,62,75]},
+      // Sub LW: Ben Old (OVR68)
+      {name:"B・オールド",en_name:"B.Old",long_name:"ベン・オールド",positions:["左WG","OMF"],params:[62,68,74,76,71,56,66,66,71,62,58,58,58,62,46,52,64,58,34,36,36,35,34,50,50,50,60,60,75]},
+      // Sub OMF: Sarpreet Singh (OVR69)
+      {name:"S・シン",en_name:"S.Singh",long_name:"サルプリート・シン",positions:["OMF","CMF"],params:[64,70,68,68,69,60,68,68,69,70,66,54,54,56,46,50,68,54,58,60,58,58,56,50,50,54,64,62,75]},
+      // Sub CF: Che Bunce (OVR70)
+      {name:"C・バンス",en_name:"C.Bunce",long_name:"チェ・バンス",positions:["CF"],params:[68,68,74,74,71,68,66,66,71,60,56,64,64,66,46,50,64,64,32,34,34,33,32,50,50,62,62,62,75]},
+      // Sub CB: Noah Billingsley (OVR66)
+      {name:"ビリングスリー",en_name:"Billingsley",long_name:"ノア・ビリングスリー",positions:["CB"],params:[68,68,64,62,62,68,54,54,60,56,52,28,26,34,24,28,52,28,64,66,64,64,62,50,50,66,54,58,75]},
+      // Sub RW/CF: Bill Tuilagi (OVR67)
+      {name:"B・トゥイラギ",en_name:"B.Tuilagi",long_name:"ビル・トゥイラギ",positions:["右WG","CF"],params:[72,66,74,76,71,72,64,64,71,58,54,58,58,62,44,48,62,56,32,34,34,33,32,50,50,70,60,60,75]},
+      // Sub LB: Elijah Just (OVR66)
+      {name:"E・ジャスト",en_name:"E.Just",long_name:"イライジャ・ジャスト",positions:["左SB"],params:[66,68,66,66,62,62,58,58,62,58,54,30,28,34,24,28,56,34,62,64,62,62,60,50,50,58,54,54,75]}
+    ]
+  },
+  qatar2026: {
+    name:"カタール",en_name:"Qatar",team_color:"#8D1B3D",flag:"🇶🇦",
+    default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
+    default_keyplayer:7,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Meshaal Barsham (OVR77, DIV78, HAN74, KIC70, REF77, SPD58, POS74)
+      {name:"バルシャム",en_name:"Barsham",long_name:"メシャール・バルシャム",positions:["GK"],params:[50,50,50,50,77,58,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,78,74,50,74,70,75]},
+      // RB: Pedro Miguel (OVR76, PAC76, SHO54, PAS72, DRI74, DEF76, PHY72)
+      {name:"ペドロ・ミゲル",en_name:"Pedro Miguel",long_name:"ペドロ・ミゲル",positions:["右SB","左SB"],params:[72,74,76,76,75,70,74,74,75,72,68,46,48,52,40,44,72,52,74,76,74,74,72,50,50,68,72,72,75]},
+      // CB: Tarek Salman (OVR71, PAC70, SHO42, PAS64, DRI62, DEF72, PHY76)
+      {name:"タレク・サルマン",en_name:"T.Salman",long_name:"タレク・サルマン",positions:["CB"],params:[76,74,70,68,64,76,58,58,64,64,60,34,32,40,30,34,58,34,70,72,72,71,70,50,50,74,62,66,75]},
+      // CB: Bassam Al-Rawi (OVR72, PAC70, SHO44, PAS66, DRI64, DEF74, PHY78)
+      {name:"ラーウィー",en_name:"Al-Rawi",long_name:"バッサム・ラーウィー",positions:["CB"],params:[78,76,70,68,66,78,60,60,66,66,62,36,34,42,32,36,60,36,72,74,74,73,72,50,50,76,64,68,75]},
+      // LB: Abdelkarim Hassan (OVR75, PAC78, SHO52, PAS72, DRI74, DEF74, PHY68)
+      {name:"A・ハッサン",en_name:"A.Hassan",long_name:"アブデルカリム・ハッサン",positions:["左SB"],params:[68,74,78,80,76,64,74,74,76,72,68,44,46,50,38,42,72,50,72,74,72,72,70,50,50,62,70,70,75]},
+      // DMF: Karim Boudiaf (OVR74, PAC68, SHO58, PAS74, DRI70, DEF76, PHY76)
+      {name:"ブーディアフ",en_name:"Boudiaf",long_name:"カリム・ブーディアフ",positions:["DMF","CMF"],params:[76,80,68,68,69,74,68,68,69,74,70,50,52,56,44,48,68,52,74,76,74,73,72,50,50,70,68,72,75]},
+      // CMF: Abdel Aziz Hatem (OVR72, PAC66, SHO60, PAS74, DRI72, DEF70, PHY72)
+      {name:"ハテム",en_name:"Hatem",long_name:"アブデルアジズ・ハテム",positions:["CMF","OMF"],params:[72,76,66,66,69,68,70,70,69,74,70,52,54,58,44,48,70,56,68,70,68,68,66,50,50,66,68,68,75]},
+      // RW: Akram Afif (OVR82, PAC86, SHO78, PAS74, DRI82, DEF42, PHY68) - keyplayer
+      {name:"A・アフィフ",en_name:"A.Afif",long_name:"アクラム・アフィフ",positions:["右WG","左WG","OMF"],params:[68,72,86,88,84,64,82,82,84,74,70,74,76,76,58,62,80,72,38,40,40,39,38,50,50,60,76,78,75]},
+      // OMF: Hassan Al-Haydos (OVR77, PAC72, SHO74, PAS76, DRI78, DEF46, PHY68)
+      {name:"ハイドス",en_name:"Al-Haydos",long_name:"ハッサン・ハイドス",positions:["OMF","右WG","CF"],params:[68,72,72,74,75,64,76,76,73,76,72,70,72,72,56,60,76,68,42,44,44,43,42,50,50,60,72,72,75]},
+      // LW: Ismaeel Mohammad (OVR70, PAC76, SHO62, PAS66, DRI72, DEF40, PHY62)
+      {name:"I・モハメッド",en_name:"I.Mohammad",long_name:"イスマエル・モハメッド",positions:["左WG","左SMF"],params:[62,68,76,78,74,58,70,70,74,66,62,56,58,60,46,52,68,58,36,38,38,37,36,50,50,52,64,64,75]},
+      // CF: Almoez Ali (OVR78, PAC80, SHO78, PAS66, DRI74, DEF38, PHY76)
+      {name:"アルモエズ・アリ",en_name:"Almoez Ali",long_name:"アルモエズ・アリ",positions:["CF"],params:[76,74,80,78,77,74,72,72,77,66,60,74,76,76,56,60,72,74,34,36,36,35,34,50,50,72,70,72,75]},
+      // Sub GK: Saad Al Sheeb (OVR74)
+      {name:"S・アルシーブ",en_name:"S.Al Sheeb",long_name:"サード・アルシーブ",positions:["GK"],params:[50,50,50,50,74,60,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,76,72,50,72,68,75]},
+      // Sub GK: Yousuf Hassan (OVR66)
+      {name:"Y・ハッサン",en_name:"Y.Hassan",long_name:"ユースフ・ハッサン",positions:["GK"],params:[50,50,50,50,66,58,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,66,64,50,64,62,75]},
+      // Sub CB: Homam Ahmed (OVR70)
+      {name:"ホマム",en_name:"Homam",long_name:"ホマム・アフマド",positions:["CB"],params:[74,72,68,66,64,74,56,56,62,62,58,32,30,38,28,32,56,32,68,70,70,69,68,50,50,72,58,62,75]},
+      // Sub CB: Mohammed Waad (OVR68)
+      {name:"ワアド",en_name:"Waad",long_name:"モハメッド・ワアド",positions:["CB"],params:[70,70,66,64,62,70,54,54,60,58,54,28,26,34,24,28,52,28,66,68,68,67,66,50,50,68,56,58,75]},
+      // Sub RB: Salem Al-Hajri (OVR70)
+      {name:"アルハジュリー",en_name:"Al-Hajri",long_name:"サレム・アルハジュリー",positions:["右SB","左SB"],params:[70,72,72,72,67,66,62,62,67,62,58,38,40,42,32,36,62,42,66,68,68,67,66,50,50,60,62,62,75]},
+      // Sub LB: Assim Madibo (OVR68)
+      {name:"マディボ",en_name:"Madibo",long_name:"アシム・マディボ",positions:["左SB","CB"],params:[68,72,70,70,65,66,60,60,65,60,56,34,32,38,28,32,58,36,66,68,68,67,66,50,50,62,58,58,75]},
+      // Sub CMF: Boualem Khoukhi (OVR72)
+      {name:"フーキー",en_name:"Khoukhi",long_name:"ブアレム・フーキー",positions:["CMF","DMF"],params:[72,76,66,66,67,68,66,66,67,70,66,48,50,54,42,46,66,52,66,68,68,67,66,50,50,64,62,66,75]},
+      // Sub DMF: Ahmed Fatehi (OVR70)
+      {name:"ファテヒ",en_name:"Fatehi",long_name:"アフマド・ファテヒ",positions:["DMF","CMF"],params:[70,74,66,66,65,66,64,64,65,68,64,46,48,52,40,44,64,48,68,70,68,68,66,50,50,62,60,62,75]},
+      // Sub OMF: Ahmed Alaaeldin (OVR68)
+      {name:"アラエルディン",en_name:"Alaaeldin",long_name:"アフマド・アラエルディン",positions:["OMF","右WG"],params:[62,66,72,74,69,56,68,68,69,66,62,54,54,58,44,50,66,56,34,36,36,35,34,50,50,50,60,60,75]},
+      // Sub CF: Mohammed Muntari (OVR73, PAC78, SHO72, PAS60, DRI72, DEF36, PHY78)
+      {name:"ムンタリ",en_name:"Muntari",long_name:"モハメッド・ムンタリ",positions:["CF","右WG"],params:[78,72,78,76,74,74,70,70,74,60,56,68,70,72,52,56,68,68,32,34,34,33,32,50,50,76,66,68,75]},
+      // Sub LW: Khalid Muneer (OVR68)
+      {name:"ムニール",en_name:"Muneer",long_name:"ハリド・ムニール",positions:["左WG","OMF"],params:[60,66,72,74,69,54,66,66,69,64,60,54,54,58,44,50,64,56,32,34,34,33,32,50,50,48,58,58,75]},
+      // Sub CF: Yousef Aymen (OVR68)
+      {name:"Y・アイメン",en_name:"Y.Aymen",long_name:"ユーセフ・アイメン",positions:["CF"],params:[68,66,72,70,68,66,64,64,68,58,54,62,64,66,46,50,62,62,28,30,30,29,28,50,50,64,60,60,75]},
+      // Sub CMF: Khalifa Ahmad (OVR66)
+      {name:"K・アフマド",en_name:"K.Ahmad",long_name:"ハリファ・アフマド",positions:["CMF"],params:[66,70,64,64,63,62,62,62,63,66,62,44,46,50,38,42,62,46,62,64,62,62,60,50,50,58,56,60,75]},
+      // Sub RB: Abdelrahman Musa (OVR66)
+      {name:"A・ムサ",en_name:"A.Musa",long_name:"アブデルラフマン・ムサ",positions:["右SB"],params:[66,68,68,68,64,62,60,60,64,58,54,32,30,36,26,30,58,34,64,66,64,64,62,50,50,58,56,56,75]},
+      // Sub CF: Khaled Al-Shammari (OVR66)
+      {name:"アルシャンマリー",en_name:"Al-Shammari",long_name:"ハーレド・アルシャンマリー",positions:["CF"],params:[66,64,68,68,65,64,60,60,65,54,50,58,60,62,42,46,58,58,24,26,26,25,24,50,50,62,54,54,75]}
+    ]
+  },
+  jordan2026: {
+    name:"ヨルダン",en_name:"Jordan",team_color:"#007A3D",flag:"🇯🇴",
+    default_system:"4-3-3",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:7,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Yazeed Abulaila (OVR70, DIV70, HAN68, KIC64, REF70, SPD60, POS68)
+      {name:"アブライラ",en_name:"Abulaila",long_name:"ヤジード・アブライラ",positions:["GK"],params:[50,50,50,50,70,60,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,70,68,50,68,64,75]},
+      // RB: Yazan Al-Naimat (OVR72, PAC74, SHO50, PAS66, DRI68, DEF72, PHY72)
+      {name:"Y・ナイマット",en_name:"Y.Al-Naimat",long_name:"ヤザン・ナイマット",positions:["右SB"],params:[72,74,74,74,71,70,66,66,71,66,62,42,44,46,36,40,66,46,70,72,70,70,68,50,50,66,64,66,75]},
+      // CB: Abdullah Nasib (OVR72, PAC68, SHO44, PAS64, DRI62, DEF74, PHY78)
+      {name:"ナシブ",en_name:"Nasib",long_name:"アブドゥラ・ナシブ",positions:["CB"],params:[78,76,68,66,64,78,58,58,64,64,60,36,34,42,30,34,58,34,72,74,74,73,72,50,50,76,62,66,75]},
+      // CB: Ahmad Al-Sarour (OVR70, PAC66, SHO42, PAS62, DRI60, DEF72, PHY76)
+      {name:"サロウル",en_name:"Al-Sarour",long_name:"アフマド・サロウル",positions:["CB"],params:[76,74,66,64,62,76,56,56,62,62,58,34,32,40,28,32,56,32,70,72,72,71,70,50,50,74,60,64,75]},
+      // LB: Sofian Benzouien (OVR72, PAC72, SHO48, PAS66, DRI68, DEF72, PHY72)
+      {name:"ベンズイエン",en_name:"Benzouien",long_name:"ソフィアン・ベンズイエン",positions:["左SB","CB"],params:[72,74,72,72,70,70,66,66,70,66,62,40,42,44,34,38,66,44,70,72,70,70,68,50,50,66,64,66,75]},
+      // DMF: Nour Al-Rawabdeh (OVR72, PAC66, SHO56, PAS74, DRI68, DEF74, PHY76)
+      {name:"ラワブデ",en_name:"Al-Rawabdeh",long_name:"ヌール・ラワブデ",positions:["DMF","CMF"],params:[76,78,66,66,67,72,66,66,67,74,70,48,50,54,42,46,66,50,72,74,72,72,70,50,50,68,66,68,75]},
+      // CMF: Mahmoud Al-Mardi (OVR72, PAC68, SHO60, PAS74, DRI72, DEF68, PHY70)
+      {name:"マルディ",en_name:"Al-Mardi",long_name:"マフムード・マルディ",positions:["CMF","OMF"],params:[70,74,68,68,70,66,70,70,70,74,70,52,54,58,44,48,70,54,66,68,66,66,64,50,50,62,66,66,75]},
+      // RW: Musa Al-Taamari (OVR76, PAC82, SHO72, PAS72, DRI78, DEF42, PHY66) - keyplayer
+      {name:"M・タアマリ",en_name:"M.Al-Taamari",long_name:"ムーサ・タアマリ",positions:["右WG","左WG","OMF"],params:[66,70,82,84,80,62,78,78,80,72,68,68,70,70,54,58,76,68,38,40,40,39,38,50,50,58,72,70,75]},
+      // OMF: Yazan Al-Arab (OVR72, PAC70, SHO64, PAS72, DRI74, DEF46, PHY66)
+      {name:"アラブ",en_name:"Al-Arab",long_name:"ヤザン・アラブ",positions:["OMF","CMF"],params:[66,70,70,72,72,62,72,72,70,72,68,58,60,62,50,54,72,60,42,44,44,43,42,50,50,58,66,66,75]},
+      // LW: Muhammad Habboub (OVR70, PAC78, SHO64, PAS64, DRI72, DEF40, PHY62)
+      {name:"ハブブ",en_name:"Habboub",long_name:"ムハンマド・ハブブ",positions:["左WG","右WG"],params:[62,68,78,80,75,58,70,70,75,64,60,58,60,62,46,52,68,60,36,38,38,37,36,50,50,52,62,62,75]},
+      // CF: Baha Faisal (OVR72, PAC74, SHO72, PAS62, DRI68, DEF36, PHY72)
+      {name:"ファイサル",en_name:"Faisal",long_name:"バハー・ファイサル",positions:["CF"],params:[72,70,74,74,71,70,66,66,71,62,58,68,68,70,50,54,66,66,32,34,34,33,32,50,50,70,64,66,75]},
+      // Sub GK: Amer Shafi (OVR68)
+      {name:"シャーフィー",en_name:"Shafi",long_name:"アーメル・シャーフィー",positions:["GK"],params:[50,50,50,50,68,58,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,68,66,50,66,62,75]},
+      // Sub GK: Hesham Alaghbari (OVR64)
+      {name:"アラグバリ",en_name:"Alaghbari",long_name:"ヒシャム・アラグバリ",positions:["GK"],params:[50,50,50,50,64,56,50,50,50,50,58,50,50,50,50,50,50,50,50,50,50,50,50,64,62,50,62,58,75]},
+      // Sub CB: Hamza Mahmoud (OVR70)
+      {name:"H・マフムード",en_name:"H.Mahmoud",long_name:"ハムザ・マフムード",positions:["CB","右SB"],params:[74,72,66,64,64,74,56,56,62,60,56,32,30,38,28,32,56,32,68,70,70,69,68,50,50,72,58,62,75]},
+      // Sub RB: Baha Naimat (OVR68)
+      {name:"B・ナイマット",en_name:"B.Naimat",long_name:"バハー・ナイマット",positions:["右SB","CB"],params:[68,70,70,70,65,64,62,62,65,60,56,34,32,38,28,32,60,38,64,66,64,64,62,50,50,60,58,58,75]},
+      // Sub LB: Ahmad Qatanani (OVR68)
+      {name:"カタナーニ",en_name:"Qatanani",long_name:"アフマド・カタナーニ",positions:["左SB"],params:[68,70,68,68,64,64,60,60,64,60,56,32,30,36,26,30,58,36,64,66,64,64,62,50,50,58,56,56,75]},
+      // Sub DMF: Ahmad Smadi (OVR70)
+      {name:"スマーディー",en_name:"Smadi",long_name:"アフマド・スマーディー",positions:["DMF","CMF"],params:[70,74,64,64,63,66,62,62,63,68,64,46,48,52,40,44,62,48,68,70,68,68,66,50,50,62,60,60,75]},
+      // Sub CMF: Salih Al-Taamari (OVR71)
+      {name:"S・タアマリ",en_name:"S.Al-Taamari",long_name:"サーレフ・タアマリ",positions:["CMF","OMF"],params:[68,72,70,70,70,64,70,70,70,70,66,54,54,58,44,48,68,54,62,64,62,62,60,50,50,58,64,64,75]},
+      // Sub RW: Ahmad Hayel (OVR70)
+      {name:"ハイル",en_name:"Hayel",long_name:"アフマド・ハイル",positions:["右WG","OMF"],params:[62,68,74,76,71,58,68,68,71,64,60,56,58,60,46,52,66,58,34,36,36,35,34,50,50,52,60,60,75]},
+      // Sub LW: Mohamad Ihsan (OVR68)
+      {name:"イフサン",en_name:"Ihsan",long_name:"モハマド・イフサン",positions:["左WG","OMF"],params:[60,66,72,74,69,54,66,66,69,62,58,54,54,58,44,50,64,56,32,34,34,33,32,50,50,48,58,58,75]},
+      // Sub OMF: Ehsan Haddad (OVR68)
+      {name:"ハダッド",en_name:"Haddad",long_name:"エフサン・ハダッド",positions:["OMF","CMF"],params:[62,68,66,66,67,58,66,66,67,68,64,52,52,54,42,46,64,52,60,62,60,60,58,50,50,52,60,58,75]},
+      // Sub CF: Ahmad Ismail (OVR69)
+      {name:"A・イスマイル",en_name:"A.Ismail",long_name:"アフマド・イスマイル",positions:["CF"],params:[70,68,72,72,69,68,64,64,69,58,54,62,64,66,46,50,62,62,28,30,30,29,28,50,50,66,60,60,75]},
+      // Sub CF: Khalil Bani-Attiyeh (OVR68)
+      {name:"バニ・アティエ",en_name:"Bani-Attiyeh",long_name:"ハリル・バニ・アティエ",positions:["CF"],params:[68,66,70,70,67,66,62,62,67,56,52,60,62,64,44,48,60,60,26,28,28,27,26,50,50,64,58,58,75]},
+      // Sub CB: Osama Rashid (OVR66)
+      {name:"O・ラシード",en_name:"O.Rashid",long_name:"オサマ・ラシード",positions:["CB"],params:[66,66,62,60,60,66,52,52,58,54,50,26,24,32,22,26,50,26,64,66,64,64,62,50,50,64,52,54,75]},
+      // Sub CMF: Musa Al-Soud (OVR66)
+      {name:"アルサウド",en_name:"Al-Soud",long_name:"ムーサ・アルサウド",positions:["CMF"],params:[64,68,62,62,61,60,60,60,61,64,60,42,44,48,36,40,60,44,60,62,60,60,58,50,50,54,54,56,75]},
+      // Sub LW: Abdelaziz Al-Omar (OVR65)
+      {name:"A・アルオマル",en_name:"A.Al-Omar",long_name:"アブデルアジズ・アルオマル",positions:["左WG","OMF"],params:[58,62,68,70,65,52,62,62,65,60,56,50,50,54,40,44,60,50,28,30,30,29,28,50,50,44,54,52,75]}
+    ]
+  },
+  uzbekistan2026: {
+    name:"ウズベキスタン",en_name:"Uzbekistan",team_color:"#1EB53A",flag:"🇺🇿",
+    default_system:"4-3-3",default_tactics:TACTICS_PRESS,
+    default_keyplayer:10,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Eldor Shodiev (OVR66, DIV66, HAN64, KIC62, REF66, SPD60, POS64)
+      {name:"ショディエフ",en_name:"Shodiev",long_name:"エルドル・ショディエフ",positions:["GK"],params:[50,50,50,50,66,60,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,66,64,50,64,62,75]},
+      // RB: Jasur Yakhshiboev (OVR70, PAC74, SHO48, PAS64, DRI66, DEF70, PHY70)
+      {name:"ヤフシボエフ",en_name:"Yakhshiboev",long_name:"ジャスル・ヤフシボエフ",positions:["右SB"],params:[70,72,74,74,70,68,64,64,70,64,60,40,42,44,34,38,64,44,68,70,68,68,66,50,50,64,62,62,75]},
+      // CB: Sanjar Tursunov (OVR72, PAC70, SHO44, PAS64, DRI62, DEF74, PHY78)
+      {name:"トゥルスノフ",en_name:"Tursunov",long_name:"サンジャル・トゥルスノフ",positions:["CB"],params:[78,76,70,68,65,78,58,58,65,64,60,36,34,42,30,34,58,34,72,74,74,73,72,50,50,76,62,66,75]},
+      // CB: Khurshid Makhmudov (OVR70, PAC68, SHO42, PAS62, DRI60, DEF72, PHY76)
+      {name:"マフムドフ",en_name:"Makhmudov",long_name:"フルシド・マフムドフ",positions:["CB"],params:[76,74,68,66,63,76,56,56,63,62,58,34,32,40,28,32,56,32,70,72,72,71,70,50,50,74,60,64,75]},
+      // LB: Akramjon Komilov (OVR68, PAC70, SHO46, PAS62, DRI64, DEF68, PHY70)
+      {name:"コミロフ",en_name:"Komilov",long_name:"アクラムジョン・コミロフ",positions:["左SB"],params:[70,72,70,70,67,66,62,62,67,62,58,38,40,42,32,36,62,42,66,68,68,67,66,50,50,62,60,62,75]},
+      // DMF: Otabek Shukurov (OVR72, PAC66, SHO58, PAS74, DRI68, DEF74, PHY74)
+      {name:"シュクロフ",en_name:"Shukurov",long_name:"オタベク・シュクロフ",positions:["DMF","CMF"],params:[74,78,66,66,67,70,66,66,67,74,70,50,52,56,44,48,66,50,72,74,72,72,70,50,50,68,66,68,75]},
+      // CMF: Jaloliddin Masharipov (OVR73, PAC68, SHO62, PAS74, DRI74, DEF64, PHY68)
+      {name:"マシャリポフ",en_name:"Masharipov",long_name:"ジャロリッディン・マシャリポフ",positions:["CMF","OMF"],params:[68,74,68,68,71,64,72,72,71,74,70,56,58,60,48,52,72,58,62,64,62,62,60,50,50,60,68,68,75]},
+      // RW: Abbosbek Fayzullayev (OVR75, PAC82, SHO70, PAS70, DRI78, DEF42, PHY66)
+      {name:"ファイズラエフ",en_name:"Fayzullayev",long_name:"アッボスベク・ファイズラエフ",positions:["右WG","左WG","OMF"],params:[66,70,82,84,80,62,76,76,80,70,66,66,68,68,52,56,74,66,38,40,40,39,38,50,50,58,70,68,75]},
+      // OMF: Dostonbek Khamdamov (OVR72, PAC70, SHO64, PAS72, DRI74, DEF48, PHY66)
+      {name:"ハムダモフ",en_name:"Khamdamov",long_name:"ドストンベク・ハムダモフ",positions:["OMF","CMF"],params:[66,70,70,72,72,62,72,72,70,72,68,58,60,62,50,54,72,60,44,46,46,45,44,50,50,58,66,66,75]},
+      // LW: Umid Nishonov (OVR70, PAC78, SHO64, PAS64, DRI72, DEF40, PHY62)
+      {name:"ニショノフ",en_name:"Nishonov",long_name:"ウミド・ニショノフ",positions:["左WG","右WG"],params:[62,68,78,80,75,58,70,70,75,64,60,58,60,62,46,52,68,60,36,38,38,37,36,50,50,52,62,62,75]},
+      // CF: Eldor Shomurodov (OVR78, PAC80, SHO76, PAS64, DRI72, DEF38, PHY82) - keyplayer
+      {name:"ショムロドフ",en_name:"Shomurodov",long_name:"エルドル・ショムロドフ",positions:["CF"],params:[82,76,80,78,76,82,70,70,76,64,58,72,74,76,54,58,70,74,34,36,36,35,34,50,50,82,68,72,75]},
+      // Sub GK: Sarvarbek Shoqozilov (OVR64)
+      {name:"ショコジロフ",en_name:"Shoqozilov",long_name:"サルバルベク・ショコジロフ",positions:["GK"],params:[50,50,50,50,64,58,50,50,50,50,60,50,50,50,50,50,50,50,50,50,50,50,50,64,62,50,62,60,75]},
+      // Sub GK: Akbar Tursunov (OVR62)
+      {name:"A・トゥルスノフ",en_name:"A.Tursunov",long_name:"アクバル・トゥルスノフ",positions:["GK"],params:[50,50,50,50,62,56,50,50,50,50,58,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,60,58,75]},
+      // Sub CB: Temur Jalolov (OVR70)
+      {name:"ジャロロフ",en_name:"Jalolov",long_name:"テムル・ジャロロフ",positions:["CB"],params:[74,72,66,64,63,72,56,56,62,60,56,32,30,38,28,32,54,32,68,70,70,69,68,50,50,70,58,62,75]},
+      // Sub CB: Khasan Abdusalomov (OVR68)
+      {name:"アブドサロモフ",en_name:"Abdusalomov",long_name:"ハサン・アブドサロモフ",positions:["CB"],params:[72,70,64,62,62,70,54,54,60,58,54,28,26,34,24,28,52,28,66,68,68,67,66,50,50,68,56,58,75]},
+      // Sub RB: Sherzod Nasrullayev (OVR70)
+      {name:"ナスルラエフ",en_name:"Nasrullayev",long_name:"シェルゾド・ナスルラエフ",positions:["右SB","左SB"],params:[70,72,72,72,67,66,62,62,67,62,58,38,40,42,32,36,62,42,66,68,68,67,66,50,50,60,60,60,75]},
+      // Sub LB: Dilshod Komilov (OVR68)
+      {name:"D・コミロフ",en_name:"D.Komilov",long_name:"ディルショド・コミロフ",positions:["左SB"],params:[68,70,68,68,64,64,60,60,64,60,56,32,30,36,26,30,58,36,64,66,64,64,62,50,50,58,56,56,75]},
+      // Sub DMF: Rustam Ashurmatov (OVR70)
+      {name:"アシュルマトフ",en_name:"Ashurmatov",long_name:"ルスタム・アシュルマトフ",positions:["DMF","CB"],params:[74,74,64,62,63,70,56,56,62,62,58,32,32,38,28,32,54,32,70,72,70,70,68,50,50,68,58,60,75]},
+      // Sub CMF: Bobur Abdixoliqov (OVR70)
+      {name:"アブディホリコフ",en_name:"Abdixoliqov",long_name:"ボブル・アブディホリコフ",positions:["CMF","DMF"],params:[68,72,66,66,66,64,64,64,66,68,64,48,50,52,40,44,64,50,64,66,64,64,62,50,50,58,60,60,75]},
+      // Sub RW: Shokhruh Xolmatov (OVR70)
+      {name:"ホルマトフ",en_name:"Xolmatov",long_name:"ショフルフ・ホルマトフ",positions:["右WG","OMF"],params:[60,66,74,76,71,56,66,66,71,62,58,56,58,60,44,50,64,56,34,36,36,35,34,50,50,48,60,60,75]},
+      // Sub LW: Jonibek Eshmurodov (OVR69)
+      {name:"エシュムロドフ",en_name:"Eshmurodov",long_name:"ジョニベク・エシュムロドフ",positions:["左WG","右WG"],params:[60,66,72,74,69,54,64,64,69,60,56,54,56,58,42,48,62,56,32,34,34,33,32,50,50,48,58,58,75]},
+      // Sub OMF: Khojiakbar Alijonov (OVR69)
+      {name:"アリジョノフ",en_name:"Alijonov",long_name:"ホジャクバル・アリジョノフ",positions:["OMF","CMF"],params:[64,68,66,66,67,60,66,66,67,68,64,52,54,56,44,48,66,52,56,58,56,56,54,50,50,54,60,58,75]},
+      // Sub CF: Islom Tukhtasinov (OVR68)
+      {name:"トゥクタシノフ",en_name:"Tukhtasinov",long_name:"イスロム・トゥクタシノフ",positions:["CF"],params:[68,66,70,70,67,66,62,62,67,56,52,60,62,64,44,48,60,60,26,28,28,27,26,50,50,64,58,58,75]},
+      // Sub CF: Sherzod Abdurahmonov (OVR67)
+      {name:"アブドゥラフモノフ",en_name:"Abdurahmonov",long_name:"シェルゾド・アブドゥラフモノフ",positions:["CF"],params:[66,64,68,68,65,64,60,60,65,54,50,58,60,62,42,46,58,58,24,26,26,25,24,50,50,62,56,56,75]},
+      // Sub RB: Mansur Jumayev (OVR66)
+      {name:"ジュマエフ",en_name:"Jumayev",long_name:"マンスル・ジュマエフ",positions:["右SB"],params:[66,68,66,66,62,62,58,58,62,58,54,30,28,34,24,28,56,34,62,64,62,62,60,50,50,58,54,54,75]},
+      // Sub LW: Saidakbar Mirzayev (OVR65)
+      {name:"ミルザエフ",en_name:"Mirzayev",long_name:"サイダクバル・ミルザエフ",positions:["左WG"],params:[58,62,68,70,65,52,62,62,65,58,54,50,52,54,40,44,60,50,28,30,30,29,28,50,50,44,54,52,75]}
+    ]
+  },
+  iraq2026: {
+    name:"イラク",en_name:"Iraq",team_color:"#007A3D",flag:"🇮🇶",
+    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:7,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Jalal Hassan (OVR70, DIV70, HAN68, KIC64, REF70, SPD56, POS68)
+      {name:"J・ハッサン",en_name:"J.Hassan",long_name:"ジャラル・ハッサン",positions:["GK"],params:[50,50,50,50,70,56,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,70,68,50,68,64,75]},
+      // RB: Rebin Sulaka (OVR70, PAC72, SHO48, PAS64, DRI66, DEF70, PHY70)
+      {name:"スラカ",en_name:"Sulaka",long_name:"レビン・スラカ",positions:["右SB","CB"],params:[70,72,72,72,69,68,64,64,69,64,60,40,42,44,34,38,64,44,68,70,68,68,66,50,50,64,62,62,75]},
+      // CB: Amjad Attwan (OVR72, PAC68, SHO44, PAS64, DRI62, DEF74, PHY78)
+      {name:"アトワン",en_name:"Attwan",long_name:"アムジャド・アトワン",positions:["CB"],params:[78,76,68,66,64,78,58,58,64,64,60,36,34,42,30,34,58,34,72,74,74,73,72,50,50,76,62,66,75]},
+      // CB: Mohammed Hamid (OVR70, PAC66, SHO42, PAS62, DRI60, DEF72, PHY76)
+      {name:"M・ハミド",en_name:"M.Hamid",long_name:"モハメッド・ハミド",positions:["CB"],params:[76,74,66,64,62,76,56,56,62,62,58,34,32,40,28,32,56,32,70,72,72,71,70,50,50,74,60,64,75]},
+      // LB: Ali Adnan (OVR77, PAC78, SHO54, PAS72, DRI74, DEF74, PHY70) - best defender
+      {name:"アリ・アドナン",en_name:"Ali Adnan",long_name:"アリ・アドナン",positions:["左SB","左WG"],params:[70,74,78,80,76,68,74,74,76,72,68,46,48,52,38,42,72,52,72,74,72,72,70,50,50,64,70,70,75]},
+      // DMF: Ameen Al-Dali (OVR72, PAC66, SHO58, PAS74, DRI68, DEF74, PHY74)
+      {name:"アルダーリー",en_name:"Al-Dali",long_name:"アミン・アルダーリー",positions:["DMF","CMF"],params:[74,78,66,66,67,70,66,66,67,74,70,50,52,56,42,46,66,50,72,74,72,72,70,50,50,68,66,68,75]},
+      // CMF: Ibrahim Bayesh (OVR72, PAC68, SHO60, PAS72, DRI70, DEF68, PHY70)
+      {name:"バイエシュ",en_name:"Bayesh",long_name:"イブラヒム・バイエシュ",positions:["CMF","DMF"],params:[70,74,68,68,69,66,68,68,69,72,68,52,54,56,44,48,68,52,66,68,66,66,64,50,50,62,64,64,75]},
+      // RW: Aymen Hussein (OVR74, PAC80, SHO70, PAS66, DRI74, DEF40, PHY68) - keyplayer
+      {name:"アイメン・フセイン",en_name:"Aymen Hussein",long_name:"アイメン・フセイン",positions:["右WG","CF","右SMF"],params:[68,70,80,82,77,64,72,72,77,66,62,66,68,68,52,56,70,66,36,38,38,37,36,50,50,60,68,68,75]},
+      // OMF: Bashar Resan (OVR74, PAC70, SHO66, PAS74, DRI74, DEF50, PHY68)
+      {name:"バシャール・レサン",en_name:"Bashar Resan",long_name:"バシャール・レサン",positions:["OMF","CMF"],params:[68,72,70,72,72,64,72,72,71,74,70,60,62,64,52,56,72,62,46,48,48,47,46,50,50,60,68,68,75]},
+      // LW: Hisham Mohammed (OVR70, PAC76, SHO62, PAS64, DRI70, DEF40, PHY64)
+      {name:"H・モハメッド",en_name:"H.Mohammed",long_name:"ヒシャム・モハメッド",positions:["左WG","右WG"],params:[64,68,76,78,73,60,68,68,73,64,60,56,58,60,46,52,66,58,36,38,38,37,36,50,50,54,62,62,75]},
+      // CF: Mohanad Ali (OVR73, PAC76, SHO74, PAS62, DRI70, DEF36, PHY74)
+      {name:"モハナド・アリ",en_name:"Mohanad Ali",long_name:"モハナド・アリ",positions:["CF"],params:[74,70,76,74,73,72,68,68,73,62,58,70,72,72,52,56,68,70,32,34,34,33,32,50,50,72,66,66,75]},
+      // Sub GK: Fahad Talib (OVR68)
+      {name:"タリブ",en_name:"Talib",long_name:"ファハド・タリブ",positions:["GK"],params:[50,50,50,50,68,56,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,68,66,50,66,62,75]},
+      // Sub GK: Oday Abdulbari (OVR64)
+      {name:"アブドゥルバリ",en_name:"Abdulbari",long_name:"オダイ・アブドゥルバリ",positions:["GK"],params:[50,50,50,50,64,54,50,50,50,50,58,50,50,50,50,50,50,50,50,50,50,50,50,64,62,50,62,58,75]},
+      // Sub CB: Ali Hassan (OVR70)
+      {name:"A・ハサン",en_name:"A.Hassan",long_name:"アリ・ハサン",positions:["CB"],params:[74,72,66,64,63,72,56,56,62,60,56,32,30,38,28,32,54,32,68,70,70,69,68,50,50,70,58,62,75]},
+      // Sub CB: Saman Naeem (OVR68)
+      {name:"ナイーム",en_name:"Naeem",long_name:"サマン・ナイーム",positions:["CB"],params:[70,70,64,62,62,70,54,54,60,58,54,28,26,34,24,28,52,28,66,68,68,67,66,50,50,68,56,58,75]},
+      // Sub RB: Duhok Mahmoud (OVR68)
+      {name:"D・マフムード",en_name:"D.Mahmoud",long_name:"ドホーク・マフムード",positions:["右SB","左SB"],params:[68,70,70,70,65,64,62,62,65,60,56,34,32,38,28,32,60,38,64,66,64,64,62,50,50,60,58,58,75]},
+      // Sub LB: Ahmed Ibrahim (OVR68)
+      {name:"A・イブラヒム",en_name:"A.Ibrahim",long_name:"アフマド・イブラヒム",positions:["左SB"],params:[68,70,68,68,64,64,60,60,64,60,56,32,30,36,26,30,58,36,64,66,64,64,62,50,50,58,56,56,75]},
+      // Sub DMF: Saad Abdul Ameer (OVR70)
+      {name:"アブドゥル・アミール",en_name:"Abdul Ameer",long_name:"サード・アブドゥル・アミール",positions:["DMF","CMF"],params:[70,74,64,64,63,66,62,62,63,68,64,46,48,52,40,44,62,48,68,70,68,68,66,50,50,62,60,60,75]},
+      // Sub CMF: Mustafa Nadhim (OVR70)
+      {name:"ナジム",en_name:"Nadhim",long_name:"ムスタファ・ナジム",positions:["CMF","OMF"],params:[68,72,66,66,66,64,64,64,66,68,64,52,52,54,42,46,64,52,62,64,62,62,60,50,50,58,60,60,75]},
+      // Sub RW: Ahmad Yasin (OVR70)
+      {name:"ヤシン",en_name:"Yasin",long_name:"アフマド・ヤシン",positions:["右WG","OMF"],params:[62,68,74,76,71,58,68,68,71,64,60,56,58,60,46,52,66,58,34,36,36,35,34,50,50,52,60,60,75]},
+      // Sub LW: Ali Jassim (OVR68)
+      {name:"ジャシム",en_name:"Jassim",long_name:"アリ・ジャシム",positions:["左WG","右WG"],params:[60,66,72,74,69,54,66,66,69,62,58,54,54,58,44,50,64,56,32,34,34,33,32,50,50,48,58,58,75]},
+      // Sub OMF: Ahmed Raad (OVR68)
+      {name:"ラアード",en_name:"Raad",long_name:"アフマド・ラアード",positions:["OMF","CMF"],params:[62,68,66,66,67,58,66,66,67,68,64,52,52,54,42,46,64,52,58,60,58,58,56,50,50,52,60,58,75]},
+      // Sub CF: Alaa Abbas Mahdi (OVR70)
+      {name:"アラー・アッバス",en_name:"Alaa Abbas",long_name:"アラー・アッバス・マフディ",positions:["CF"],params:[70,68,74,72,70,68,64,64,70,58,54,64,66,68,46,50,62,64,28,30,30,29,28,50,50,66,60,62,75]},
+      // Sub CF: Omar Salim (OVR67)
+      {name:"O・サリム",en_name:"O.Salim",long_name:"オマル・サリム",positions:["CF"],params:[68,66,70,70,67,66,62,62,67,56,52,58,60,62,42,46,60,60,24,26,26,25,24,50,50,64,56,56,75]},
+      // Sub DMF: Mahmoud Taher (OVR67)
+      {name:"M・タヒル",en_name:"M.Taher",long_name:"マフムード・タヒル",positions:["DMF","CMF"],params:[68,72,62,62,61,64,60,60,61,64,60,42,44,48,36,40,60,44,62,64,62,62,60,50,50,58,54,56,75]},
+      // Sub RB: Musa Hamza (OVR65)
+      {name:"H・ムサ",en_name:"H.Musa",long_name:"ムサ・ハムザ",positions:["右SB"],params:[64,66,64,64,60,60,56,56,60,56,52,28,26,32,22,26,54,32,60,62,60,60,58,50,50,56,52,52,75]}
+    ]
+  },
+  haiti2026: {
+    name:"ハイチ",en_name:"Haiti",team_color:"#003893",flag:"🇭🇹",
+    default_system:"4-3-3",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:7,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Frantz Pierrot (OVR67, DIV68, HAN64, KIC62, REF67, SPD58, POS64)
+      {name:"ピエロ",en_name:"Pierrot",long_name:"フランツ・ピエロ",positions:["GK"],params:[50,50,50,50,67,58,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,68,64,50,64,62,75]},
+      // RB: Florvil (OVR69, PAC72, SHO48, PAS62, DRI64, DEF70, PHY70)
+      {name:"フロルビル",en_name:"Florvilma",long_name:"カルロス・フロルビル",positions:["右SB","CB"],params:[70,70,72,72,68,66,62,62,68,62,58,40,40,44,32,36,62,42,68,70,68,68,66,50,50,64,60,62,75]},
+      // CB: Mechack Jerome (OVR72, PAC68, SHO42, PAS62, DRI60, DEF74, PHY78)
+      {name:"ジェローム",en_name:"Jerome",long_name:"メシャク・ジェローム",positions:["CB"],params:[78,74,68,66,63,76,56,56,63,62,58,34,32,40,28,32,56,32,72,74,72,72,70,50,50,76,60,64,75]},
+      // CB: Andrew Jean-Baptiste (OVR72, PAC68, SHO44, PAS64, DRI62, DEF74, PHY76)
+      {name:"ジャン＝バティスト",en_name:"Jean-Baptiste",long_name:"アンドルー・ジャン＝バティスト",positions:["CB"],params:[76,74,68,66,64,74,58,58,64,64,60,36,34,42,30,34,58,34,72,74,74,73,72,50,50,74,62,66,75]},
+      // LB: Steeve Dore (OVR70, PAC72, SHO48, PAS64, DRI66, DEF70, PHY70)
+      {name:"ドレ",en_name:"Dore",long_name:"ステーヴ・ドレ",positions:["左SB","CB"],params:[70,72,72,72,69,66,64,64,69,64,60,40,42,44,34,38,64,44,68,70,68,68,66,50,50,64,62,62,75]},
+      // DMF: Jonathan Leon (OVR70, PAC66, SHO56, PAS72, DRI66, DEF72, PHY72)
+      {name:"J・レオン",en_name:"J.Leon",long_name:"ジョナタン・レオン",positions:["DMF","CMF"],params:[72,76,66,66,66,68,64,64,66,72,68,48,50,54,40,44,64,50,70,72,70,70,68,50,50,66,62,64,75]},
+      // CMF: Mathias Payen (OVR72, PAC70, SHO60, PAS72, DRI70, DEF66, PHY68)
+      {name:"マティアス・パイアン",en_name:"M.Payen",long_name:"マティアス・パイアン",positions:["CMF","OMF"],params:[68,72,70,70,70,64,68,68,70,72,68,52,54,58,44,48,68,54,64,66,64,64,62,50,50,60,64,64,75]},
+      // RW: Duckens Nazon (OVR74, PAC84, SHO70, PAS64, DRI74, DEF38, PHY66) - keyplayer
+      {name:"ナゾン",en_name:"Nazon",long_name:"ダックンス・ナゾン",positions:["右WG","左WG","CF"],params:[66,68,84,86,79,62,72,72,79,64,60,66,68,68,52,56,70,66,34,36,36,35,34,50,50,58,68,66,75]},
+      // OMF: Noel Bazile (OVR72, PAC70, SHO64, PAS72, DRI72, DEF48, PHY66)
+      {name:"バジル",en_name:"Bazile",long_name:"ノエル・バジル",positions:["OMF","CMF"],params:[66,70,70,72,71,62,70,70,71,72,68,58,60,62,50,54,70,60,44,46,46,45,44,50,50,58,64,64,75]},
+      // LW: Wilde-Donald Guerrier (OVR71, PAC80, SHO64, PAS62, DRI70, DEF38, PHY62)
+      {name:"ゲリエ",en_name:"Guerrier",long_name:"ワイルド＝ドナルド・ゲリエ",positions:["左WG","右WG"],params:[62,66,80,82,75,58,68,68,75,62,58,58,60,62,46,52,66,58,34,36,36,35,34,50,50,52,62,60,75]},
+      // CF: Ronaldo Damus (OVR72, PAC76, SHO72, PAS60, DRI68, DEF34, PHY74)
+      {name:"R・ダムス",en_name:"R.Damus",long_name:"ロナルド・ダムス",positions:["CF"],params:[74,68,76,74,72,72,66,66,72,60,56,68,70,70,50,54,66,68,30,32,32,31,30,50,50,72,64,66,75]},
+      // Sub GK: Kemar Coles (OVR64)
+      {name:"コールズ",en_name:"Coles",long_name:"ケマル・コールズ",positions:["GK"],params:[50,50,50,50,64,56,50,50,50,50,60,50,50,50,50,50,50,50,50,50,50,50,50,64,62,50,62,60,75]},
+      // Sub GK: Joel Gignac (OVR62)
+      {name:"ジニャック",en_name:"Gignac",long_name:"ジョエル・ジニャック",positions:["GK"],params:[50,50,50,50,62,54,50,50,50,50,58,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,60,58,75]},
+      // Sub CB: Kervens Desire (OVR70)
+      {name:"デジレ",en_name:"Desire",long_name:"ケルヴェン・デジレ",positions:["CB"],params:[74,72,66,64,63,72,56,56,62,60,56,32,30,38,28,32,54,32,68,70,70,69,68,50,50,70,58,62,75]},
+      // Sub CB: Carlens Arcus (OVR68)
+      {name:"アルキュス",en_name:"Arcus",long_name:"カルランス・アルキュス",positions:["CB"],params:[70,70,64,62,62,68,54,54,60,58,54,28,26,34,24,28,52,28,66,68,68,67,66,50,50,66,56,58,75]},
+      // Sub RB: Derrick Etienne (OVR70, PAC78, SHO58, PAS60, DRI68, DEF62, PHY66)
+      {name:"デリック・エティエン",en_name:"D.Etienne",long_name:"デリック・エティエン",positions:["右SB","右WG"],params:[66,68,78,80,74,62,66,66,74,60,56,52,54,56,42,48,64,52,60,62,60,60,58,50,50,58,60,60,75]},
+      // Sub LB: Frantzdy Pierrot (OVR68)
+      {name:"F・ピエロ",en_name:"F.Pierrot",long_name:"フランツジー・ピエロ",positions:["左SB"],params:[68,70,68,68,64,64,60,60,64,60,56,32,30,36,26,30,58,36,64,66,64,64,62,50,50,58,56,56,75]},
+      // Sub DMF: Remy Cabral (OVR68)
+      {name:"カブラル",en_name:"Cabral",long_name:"レミー・カブラル",positions:["DMF","CMF"],params:[68,72,64,64,62,64,62,62,63,66,62,44,46,50,38,42,62,46,66,68,66,66,64,50,50,60,58,58,75]},
+      // Sub CMF: James Léa Siliki (OVR72, PAC72, SHO62, PAS72, DRI72, DEF64, PHY70)
+      {name:"レア・シリキ",en_name:"Lea Siliki",long_name:"ジャメス・レア・シリキ",positions:["CMF","OMF"],params:[70,72,72,74,72,66,70,70,72,72,68,56,58,60,46,50,70,56,62,64,62,62,60,50,50,62,64,64,75]},
+      // Sub RW: Carlens Arcus II - Use Fito Ovallec
+      {name:"フォルトー",en_name:"Fortuna",long_name:"フォルトー・セルジャン",positions:["右WG","OMF"],params:[60,64,74,76,70,56,66,66,70,60,56,54,56,58,42,48,62,56,30,32,32,31,30,50,50,48,58,58,75]},
+      // Sub LW: Nicolas Alexis (OVR68)
+      {name:"N・アレクシス",en_name:"N.Alexis",long_name:"ニコラ・アレクシス",positions:["左WG","CF"],params:[60,64,72,74,69,54,64,64,69,58,54,54,56,58,42,48,62,56,28,30,30,29,28,50,50,48,56,56,75]},
+      // Sub CF: Steeven Saba (OVR69)
+      {name:"サバ",en_name:"Saba",long_name:"スティーヴン・サバ",positions:["CF"],params:[68,64,72,72,68,66,62,62,68,56,52,62,64,66,44,48,60,62,24,26,26,25,24,50,50,64,58,58,75]},
+      // Sub OMF: Ricardo Ade (OVR67)
+      {name:"アデ",en_name:"Ade",long_name:"リカルド・アデ",positions:["OMF","左WG"],params:[60,64,66,66,66,56,64,64,66,66,62,50,50,52,40,44,62,50,52,54,52,52,50,50,50,50,58,56,75]},
+      // Sub RW: Etzer Bedard (OVR66)
+      {name:"ベダール",en_name:"Bedard",long_name:"エッツェル・ベダール",positions:["右WG","CF"],params:[62,64,70,72,67,60,62,62,67,56,52,52,54,56,42,46,60,54,28,30,30,29,28,50,50,52,54,54,75]},
+      // Sub LB: Frantzousky Jean (OVR65)
+      {name:"ジャン",en_name:"Jean",long_name:"フランツォスキー・ジャン",positions:["左SB"],params:[64,66,64,64,60,60,56,56,60,56,52,28,26,32,22,26,54,32,60,62,60,60,58,50,50,54,50,50,75]},
+      // Sub CB: Rockens Charles (OVR65)
+      {name:"シャルル",en_name:"Charles",long_name:"ロッカンス・シャルル",positions:["CB"],params:[64,64,60,58,60,62,50,50,56,52,48,22,20,28,18,22,48,22,60,62,60,60,58,50,50,60,48,48,75]}
+    ]
+  },
+  curacao2026: {
+    name:"キュラソー",en_name:"Curacao",team_color:"#003399",flag:"🇨🇼",
+    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:6,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    players:[
+      // GK: Eloy Room (OVR73, DIV74, HAN70, KIC66, REF73, SPD56, POS70)
+      {name:"E・ルーム",en_name:"E.Room",long_name:"エロイ・ルーム",positions:["GK"],params:[50,50,50,50,73,56,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,74,70,50,70,66,75]},
+      // RB: Cuco Martina (OVR70, PAC72, SHO48, PAS66, DRI68, DEF70, PHY68)
+      {name:"C・マルティナ",en_name:"C.Martina",long_name:"クコ・マルティナ",positions:["右SB","左SB"],params:[68,70,72,72,70,64,66,66,70,66,62,40,42,44,34,38,66,44,68,70,68,68,66,50,50,60,62,62,75]},
+      // CB: Jair Meder (OVR71, PAC68, SHO42, PAS62, DRI60, DEF72, PHY76)
+      {name:"メデル",en_name:"Meder",long_name:"ジャイル・メデル",positions:["CB"],params:[76,74,68,66,63,74,56,56,63,62,58,34,32,40,28,32,56,32,70,72,72,71,70,50,50,72,60,64,75]},
+      // CB: Rangelo Janga (wait, Janga is LW) - use Chederick van den Berg as CB
+      {name:"ファン・デン・ベルフ",en_name:"Van den Berg",long_name:"ケデリック・ファン・デン・ベルフ",positions:["CB"],params:[74,74,68,66,64,72,58,58,64,62,58,36,34,42,30,34,58,34,70,72,72,71,70,50,50,70,62,64,75]},
+      // LB: Elson Hooi (OVR70, PAC74, SHO50, PAS64, DRI68, DEF68, PHY66) - can play LB
+      {name:"エルソン・ホーイ",en_name:"E.Hooi",long_name:"エルソン・ホーイ",positions:["左SB","左WG"],params:[66,70,74,76,71,62,66,66,71,64,60,44,46,48,36,40,66,48,66,68,66,66,64,50,50,58,62,62,75]},
+      // DMF: Leandro Bacuna (OVR74, PAC70, SHO62, PAS74, DRI72, DEF70, PHY74) - captain/keyplayer
+      {name:"L・バクナ",en_name:"L.Bacuna",long_name:"レアンドロ・バクナ",positions:["CMF","DMF","右WG"],params:[74,76,70,70,71,70,70,70,71,74,70,56,58,60,48,52,70,58,68,70,68,68,66,50,50,68,68,68,75]},
+      // CMF: Juninho Bacuna (OVR73, PAC72, SHO62, PAS72, DRI72, DEF66, PHY70)
+      {name:"J・バクナ",en_name:"J.Bacuna",long_name:"ジュニーニョ・バクナ",positions:["CMF","OMF"],params:[70,72,72,72,72,66,70,70,72,72,68,56,58,60,48,52,70,58,64,66,64,64,62,50,50,62,66,66,75]},
+      // RW: Gevaro Nepomuceno (OVR72, PAC80, SHO66, PAS64, DRI72, DEF38, PHY62)
+      {name:"ネポムセノ",en_name:"Nepomuceno",long_name:"ヘバロ・ネポムセノ",positions:["右WG","左WG"],params:[62,66,80,82,76,58,70,70,76,64,60,60,62,64,48,54,68,62,34,36,36,35,34,50,50,52,64,62,75]},
+      // OMF: Giliano Wijnaldum (OVR72, PAC72, SHO64, PAS70, DRI72, DEF48, PHY66)
+      {name:"G・ウェイナルドゥム",en_name:"G.Wijnaldum",long_name:"ヒリアノ・ウェイナルドゥム",positions:["OMF","CMF","右WG"],params:[66,68,72,74,72,62,70,70,72,70,66,60,62,62,50,54,70,60,44,46,46,45,44,50,50,56,66,64,75]},
+      // LW: Rangelo Janga (OVR72, PAC80, SHO66, PAS62, DRI72, DEF36, PHY64)
+      {name:"ジャンガ",en_name:"Janga",long_name:"ランヘロ・ジャンガ",positions:["左WG","CF","右WG"],params:[64,66,80,82,76,60,70,70,76,62,58,62,62,66,48,54,68,64,32,34,34,33,32,50,50,54,64,62,75]},
+      // CF: Quentin Thureau (OVR70, PAC74, SHO70, PAS60, DRI68, DEF34, PHY70)
+      {name:"チュロー",en_name:"Thureau",long_name:"カンタン・チュロー",positions:["CF"],params:[70,66,74,72,71,68,66,66,71,60,56,66,68,68,48,52,64,66,30,32,32,31,30,50,50,68,62,62,75]},
+      // Sub GK: Kaylon Peters (OVR66)
+      {name:"ピーターズ",en_name:"Peters",long_name:"ケイロン・ピーターズ",positions:["GK"],params:[50,50,50,50,66,56,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,66,64,50,64,62,75]},
+      // Sub GK: Tijn Smal (OVR62)
+      {name:"スマール",en_name:"Smal",long_name:"ティン・スマール",positions:["GK"],params:[50,50,50,50,62,54,50,50,50,50,58,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,60,58,75]},
+      // Sub CB: Sheldon Helder (OVR69)
+      {name:"ヘルデル",en_name:"Helder",long_name:"シェルドン・ヘルデル",positions:["CB"],params:[72,70,66,64,62,70,54,54,62,58,54,30,28,36,26,30,54,30,66,68,68,67,66,50,50,68,56,58,75]},
+      // Sub CB: Juriaan Koolwijk (OVR68)
+      {name:"コールウェイク",en_name:"Koolwijk",long_name:"ユリアーン・コールウェイク",positions:["CB","右SB"],params:[70,70,64,62,62,68,54,54,60,58,54,28,26,34,24,28,52,28,66,68,68,67,66,50,50,66,56,58,75]},
+      // Sub RB: Shane Penders (OVR70)
+      {name:"ペンダース",en_name:"Penders",long_name:"シェーン・ペンダース",positions:["右SB","CB"],params:[70,72,70,70,67,64,62,62,67,62,58,38,40,42,32,36,62,42,66,68,66,66,64,50,50,60,60,60,75]},
+      // Sub LB: Tyronne Ebuehi (OVR70)
+      {name:"エブエヒ",en_name:"Ebuehi",long_name:"ティロン・エブエヒ",positions:["左SB","右SB"],params:[68,70,72,72,67,62,62,62,67,62,58,36,38,40,30,34,60,40,66,68,66,66,64,50,50,58,58,58,75]},
+      // Sub CMF: Stijn Spierings (OVR70)
+      {name:"スピアリングス",en_name:"Spierings",long_name:"スティン・スピアリングス",positions:["CMF","DMF"],params:[70,74,66,66,65,66,64,64,65,68,64,48,50,52,40,44,64,48,66,68,66,66,64,50,50,62,60,60,75]},
+      // Sub CMF: Chedric Bazoer (OVR68)
+      {name:"バゾール",en_name:"Bazoer",long_name:"セドリック・バゾール",positions:["CMF","DMF"],params:[68,72,64,64,63,64,62,62,63,66,62,44,46,50,38,42,62,46,64,66,64,64,62,50,50,58,56,58,75]},
+      // Sub RW: Qumariyah Maatsen (OVR70)
+      {name:"マーツェン",en_name:"Maatsen",long_name:"クマーリヤ・マーツェン",positions:["右WG","OMF"],params:[60,64,74,76,70,56,66,66,70,62,58,56,58,60,44,50,64,56,30,32,32,31,30,50,50,48,58,58,75]},
+      // Sub LW: Delano Burgzorg (OVR72, PAC84, SHO68, PAS62, DRI72, DEF34, PHY62)
+      {name:"バーフゾルフ",en_name:"Burgzorg",long_name:"デラーノ・バーフゾルフ",positions:["左WG","右WG"],params:[62,64,84,86,78,58,70,70,78,62,58,62,64,66,48,54,68,62,30,32,32,31,30,50,50,50,64,62,75]},
+      // Sub CF: Myron Boadu (OVR73, PAC76, SHO72, PAS60, DRI70, DEF36, PHY72)
+      {name:"ボアドゥ",en_name:"Boadu",long_name:"ミロン・ボアドゥ",positions:["CF","右WG"],params:[72,66,76,74,73,70,68,68,73,60,56,68,70,72,50,54,66,68,30,32,32,31,30,50,50,70,64,64,75]},
+      // Sub CF: Lesley de Sa
+      {name:"デ・サ",en_name:"De Sa",long_name:"レスリー・デ・サ",positions:["CF"],params:[66,62,70,70,67,66,62,62,67,56,52,60,62,64,44,48,60,60,24,26,26,25,24,50,50,64,56,56,75]},
+      // Sub RB: Etson Thirion (OVR66)
+      {name:"ティリオン",en_name:"Thirion",long_name:"エトソン・ティリオン",positions:["右SB"],params:[64,66,66,66,62,60,58,58,62,58,54,30,28,34,24,28,56,34,62,64,62,62,60,50,50,56,52,52,75]},
+      // Sub DMF: Yael Smarshil (OVR65)
+      {name:"スマルシル",en_name:"Smarshil",long_name:"ヤエル・スマルシル",positions:["DMF"],params:[64,68,62,62,61,62,58,58,61,62,58,38,40,44,32,36,58,40,62,64,62,62,60,50,50,56,52,52,75]},
+      // Sub CB: Dion Cools (OVR66)
+      {name:"D・コールス",en_name:"D.Cools",long_name:"ディオン・コールス",positions:["CB","右SB"],params:[66,68,64,62,62,64,54,54,60,56,52,28,26,34,22,26,52,28,62,64,62,62,60,50,50,60,52,52,75]}
     ]
   },
   drcongo2026: {

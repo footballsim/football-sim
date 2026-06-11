@@ -798,6 +798,14 @@ function showScreen(name) {
       {data: TEAM_DATA.southafrica2026,       key: 'southafrica2026'},
       {data: TEAM_DATA.capeverde2026,         key: 'capeverde2026'},
       {data: TEAM_DATA.drcongo2026,           key: 'drcongo2026'},
+      {data: TEAM_DATA.panama2026,            key: 'panama2026'},
+      {data: TEAM_DATA.newzealand2026,        key: 'newzealand2026'},
+      {data: TEAM_DATA.qatar2026,             key: 'qatar2026'},
+      {data: TEAM_DATA.jordan2026,            key: 'jordan2026'},
+      {data: TEAM_DATA.uzbekistan2026,        key: 'uzbekistan2026'},
+      {data: TEAM_DATA.iraq2026,              key: 'iraq2026'},
+      {data: TEAM_DATA.haiti2026,             key: 'haiti2026'},
+      {data: TEAM_DATA.curacao2026,           key: 'curacao2026'},
     ]);
     document.getElementById('players2018-body').dataset.built = '1';
   }
@@ -858,6 +866,14 @@ const SINGLE_TEAMS = [
   {key:'southafrica2026',    label:'南アフリカ', flag:'🇿🇦'},
   {key:'capeverde2026',      label:'カーボベルデ', flag:'🇨🇻'},
   {key:'drcongo2026',        label:'コンゴ民主共和国', flag:'🇨🇩'},
+  {key:'panama2026',         label:'パナマ', flag:'🇵🇦'},
+  {key:'newzealand2026',     label:'ニュージーランド', flag:'🇳🇿'},
+  {key:'qatar2026',          label:'カタール', flag:'🇶🇦'},
+  {key:'jordan2026',         label:'ヨルダン', flag:'🇯🇴'},
+  {key:'uzbekistan2026',     label:'ウズベキスタン', flag:'🇺🇿'},
+  {key:'iraq2026',           label:'イラク', flag:'🇮🇶'},
+  {key:'haiti2026',          label:'ハイチ', flag:'🇭🇹'},
+  {key:'curacao2026',        label:'キュラソー', flag:'🇨🇼'},
 ];
 
 let _singleTeam1Key = null;
