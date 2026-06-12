@@ -4906,13 +4906,13 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   southafrica2026: {
     name:"南アフリカ",en_name:"South Africa",team_color:"#007A4D",flag:"🇿🇦",
-    default_system:"3-3-2-2",default_tactics:TACTICS_PRESS,
+    default_system:"5-2-1-2",default_tactics:TACTICS_PRESS,
     default_keyplayer:9,default_marked_player:9,
-    default_lineup:[0,6,8,4,2,7,5,1,3,9,10],
+    default_lineup:[0,8,7,4,6,5,1,3,2,9,10],
     players:[
     {name:"ウィリアムズ",en_name:"Williams",long_name:"ロンウェン・ウィリアムズ",positions:["GK"],params:[50,50,50,50,76,72,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,74,73,50,75,74,75]},
     {name:"モコエナ",en_name:"Mokoena",long_name:"テボホ・モコエナ",positions:["DMF","CMF","OMF"],params:[68,70,76,78,73,66,67,67,73,73,68,58,60,60,43,45,65,57,64,66,64,66,64,50,50,64,62,68,75]},
-    {name:"J・アダムス",en_name:"J.Adams",long_name:"ジェイデン・アダムス",positions:["CMF","DMF"],params:[62,64,72,74,66,60,60,60,68,66,61,48,50,50,36,37,58,47,56,58,56,58,56,50,50,58,55,61,75]},
+    {name:"J・アダムス",en_name:"J.Adams",long_name:"ジェイデン・アダムス",positions:["CMF","DMF","OMF"],params:[62,64,72,74,66,60,60,60,68,66,61,48,50,50,36,37,58,47,56,58,56,58,56,50,50,58,55,61,75]},
     {name:"シトール",en_name:"Sithole",long_name:"スフェフェロ・シトール",positions:["DMF","CMF","OMF"],params:[74,76,64,66,60,72,57,57,62,59,55,49,51,51,37,38,55,48,62,64,62,64,62,50,50,68,55,62,75]},
     {name:"シビシ",en_name:"Sibisi",long_name:"ニコシナティ・シビシ",positions:["CB","左SB"],params:[76,74,64,65,66,74,47,47,58,46,42,26,28,28,20,20,46,18,64,66,64,66,64,50,50,74,59,61,75]},
     {name:"モジバ",en_name:"Modiba",long_name:"オーブリー・モジバ",positions:["左SB","左SMF","CMF"],params:[62,62,74,76,61,60,58,58,68,56,50,34,36,36,26,27,56,23,58,60,58,60,58,50,50,58,59,60,75]},
