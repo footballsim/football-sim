@@ -4152,7 +4152,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     name:"チェコ",en_name:"Czech Republic",team_color:"#D7141A",flag:"🇨🇿",
     default_system:"3-4-2-1",default_tactics:TACTICS_PRESS,
     default_keyplayer:5,default_marked_player:10,
-    default_lineup:[0,2,7,3,4,1,5,6,9,8,10],
+    default_lineup:[0,4,3,1,5,2,7,6,9,8,10],
     players:[
       // GK: Kovar (starter)
       {name:"コヴァール",en_name:"Kovar",long_name:"マルティン・コヴァール",positions:["GK"],params:[50,50,50,50,75,56,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,75,73,50,74,68,75]},
@@ -4163,7 +4163,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // CB: Chaloupek
       {name:"チャロウペク",en_name:"Chaloupek",long_name:"マテイ・チャロウペク",positions:["CB"],params:[74,74,70,70,66,74,58,56,66,60,54,32,30,38,26,28,58,28,72,74,72,72,70,51,51,72,64,66,75]},
       // CMF/DMF: T.Krejci
-      {name:"T・クレイチ",en_name:"T.Krejci",long_name:"トマーシュ・クレイチー",positions:["CMF","DMF","OMF"],params:[72,74,72,73,70,72,68,68,70,70,66,52,54,56,46,48,68,54,64,66,64,64,62,50,50,68,68,70,75]},
+      {name:"T・クレイチ",en_name:"T.Krejci",long_name:"トマーシュ・クレイチー",positions:["CMF","DMF","OMF","CB"],params:[72,74,72,73,70,72,68,68,70,70,66,52,54,56,46,48,68,54,64,66,64,64,62,50,50,68,68,70,75]},
       // CMF/DMF: Soucek (keyplayer)
       {name:"スーチェク",en_name:"Soucek",long_name:"トマーシュ・スーチェク",positions:["CMF","DMF"],params:[84,84,72,73,77,82,72,72,77,76,70,70,70,74,54,58,72,68,78,80,78,78,76,50,50,82,76,74,75]},
       // Left SMF/WB: Zeleny
