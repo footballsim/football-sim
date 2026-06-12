@@ -4900,18 +4900,18 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   southafrica2026: {
     name:"南アフリカ",en_name:"South Africa",team_color:"#007A4D",flag:"🇿🇦",
-    default_system:"3-5-2",default_tactics:TACTICS_PRESSING,
-    default_keyplayer:10,default_marked_player:7,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"3-2-3-2",default_tactics:TACTICS_PRESS,
+    default_keyplayer:10,default_marked_player:10,
+    default_lineup:[0,2,1,3,7,6,8,4,5,10,9],
     players:[
     {name:"ウィリアムズ",en_name:"Williams",long_name:"ロンウェン・ウィリアムズ",positions:["GK"],params:[50,50,50,50,76,72,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,74,73,50,75,74,75]},
     {name:"モコエナ",en_name:"Mokoena",long_name:"テボホ・モコエナ",positions:["CB","DMF","CMF"],params:[68,70,76,78,73,66,67,67,73,73,68,58,60,60,43,45,65,57,64,66,64,66,64,50,50,64,62,68,75]},
     {name:"J・アダムス",en_name:"J.Adams",long_name:"ジェイデン・アダムス",positions:["CB","CMF","DMF"],params:[62,64,72,74,66,60,60,60,68,66,61,48,50,50,36,37,58,47,56,58,56,58,56,50,50,58,55,61,75]},
     {name:"シトール",en_name:"Sithole",long_name:"スフェフェロ・シトール",positions:["CB","DMF","CMF"],params:[74,76,64,66,60,72,57,57,62,59,55,49,51,51,37,38,55,48,62,64,62,64,62,50,50,68,55,62,75]},
     {name:"シビシ",en_name:"Sibisi",long_name:"ニコシナティ・シビシ",positions:["左SB","左SMF","CB"],params:[76,74,64,65,66,74,47,47,58,46,42,26,28,28,20,20,46,18,64,66,64,66,64,50,50,74,59,61,75]},
-    {name:"モジバ",en_name:"Modiba",long_name:"オーブリー・モジバ",positions:["CMF","左SB","右SB"],params:[62,62,74,76,61,60,58,58,68,56,50,34,36,36,26,27,56,23,58,60,58,60,58,50,50,58,59,60,75]},
-    {name:"ムボカジ",en_name:"Mbokazi",long_name:"ムベケゼリ・ムボカジ",positions:["CMF","CB"],params:[74,72,66,67,65,72,47,47,59,46,42,28,30,30,21,22,46,19,63,65,63,65,63,50,50,72,58,60,75]},
-    {name:"ムダウ",en_name:"Mudau",long_name:"クリソ・ムダウ",positions:["CMF","右SB","CB"],params:[66,66,75,77,63,64,58,58,68,58,52,36,38,38,27,28,56,24,63,65,63,65,63,50,50,62,62,62,75]},
+    {name:"モジバ",en_name:"Modiba",long_name:"オーブリー・モジバ",positions:["CMF","OMF","左SB","右SB"],params:[62,62,74,76,61,60,58,58,68,56,50,34,36,36,26,27,56,23,58,60,58,60,58,50,50,58,59,60,75]},
+    {name:"ムボカジ",en_name:"Mbokazi",long_name:"ムベケゼリ・ムボカジ",positions:["CMF","DMF","CB"],params:[74,72,66,67,65,72,47,47,59,46,42,28,30,30,21,22,46,19,63,65,63,65,63,50,50,72,58,60,75]},
+    {name:"ムダウ",en_name:"Mudau",long_name:"クリソ・ムダウ",positions:["CMF","DMF","右SB","CB"],params:[66,66,75,77,63,64,58,58,68,58,52,36,38,38,27,28,56,24,63,65,63,65,63,50,50,62,62,62,75]},
     {name:"オコン",en_name:"Okon",long_name:"イム・オコン",positions:["右SB","右SMF","CB"],params:[70,68,77,78,69,68,54,54,68,44,40,26,28,28,20,20,53,18,66,68,66,68,66,50,50,68,61,64,75]},
     {name:"フォスター",en_name:"Foster",long_name:"ライル・フォスター",positions:["CF"],params:[73,74,81,83,75,70,65,65,75,61,57,68,70,70,52,53,63,68,32,37,32,32,37,50,50,70,69,68,75]},
     {name:"レイナース",en_name:"Rayners",long_name:"イクラーム・レイナース",positions:["CF","右WG"],params:[72,72,76,78,69,70,59,59,69,52,48,63,65,65,48,50,57,63,24,29,24,24,29,50,50,70,64,64,75]},
@@ -5054,9 +5054,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   newzealand2026: {
     name:"ニュージーランド",en_name:"New Zealand",team_color:"#1A1A1A",flag:"🇳🇿",
-    default_system:"4-3-3",default_tactics:TACTICS_COUNTER,
+    default_system:"4-1-2-3",default_tactics:TACTICS_COUNTER,
     default_keyplayer:10,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_lineup:[0,1,2,3,4,5,6,8,7,9,10],
     players:[
       // GK: Oliver Sail (OVR67, DIV68, HAN66, KIC64, REF67, SPD64, POS64)
       {name:"O・セイル",en_name:"O.Sail",long_name:"オリバー・セイル",positions:["GK"],params:[50,50,50,50,67,64,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,68,66,50,64,64,75]},
@@ -5174,9 +5174,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   jordan2026: {
     name:"ヨルダン",en_name:"Jordan",team_color:"#007A3D",flag:"🇯🇴",
-    default_system:"4-3-3",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:7,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"4-1-2-3",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:8,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,8,7,9,10],
     players:[
       // GK: Yazeed Abulaila (OVR70, DIV70, HAN68, KIC64, REF70, SPD60, POS68)
       {name:"アブライラ",en_name:"Abulaila",long_name:"ヤジード・アブライラ",positions:["GK"],params:[50,50,50,50,70,60,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,70,68,50,68,64,75]},
@@ -5234,9 +5234,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   uzbekistan2026: {
     name:"ウズベキスタン",en_name:"Uzbekistan",team_color:"#1EB53A",flag:"🇺🇿",
-    default_system:"4-3-3",default_tactics:TACTICS_PRESS,
+    default_system:"4-1-2-3",default_tactics:TACTICS_PRESS,
     default_keyplayer:10,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_lineup:[0,1,2,3,4,5,6,8,7,9,10],
     players:[
       // GK: Eldor Shodiev (OVR66, DIV66, HAN64, KIC62, REF66, SPD60, POS64)
       {name:"ショディエフ",en_name:"Shodiev",long_name:"エルドル・ショディエフ",positions:["GK"],params:[50,50,50,50,66,60,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,66,64,50,64,62,75]},
@@ -5354,9 +5354,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   haiti2026: {
     name:"ハイチ",en_name:"Haiti",team_color:"#003893",flag:"🇭🇹",
-    default_system:"4-3-3",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:7,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"4-1-2-3",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:8,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,6,8,7,9,10],
     players:[
       // GK: Frantz Pierrot (OVR67, DIV68, HAN64, KIC62, REF67, SPD58, POS64)
       {name:"ピエロ",en_name:"Pierrot",long_name:"フランツ・ピエロ",positions:["GK"],params:[50,50,50,50,67,58,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,68,64,50,64,62,75]},
