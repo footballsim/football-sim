@@ -1,0 +1,553 @@
+// ============================================================
+// W杯まるごとシミュレート（全104試合一括演算モード）
+// 2026W杯の実際のグループ組み合わせ・決勝Tブラケットを使用
+// （2025/12/05抽選、2026/03プレーオフ確定版）
+// ============================================================
+
+// 12グループ×4チーム（公式スロット順）
+const WCSIM_GROUPS = {
+  A: ['mexico2026', 'southafrica2026', 'korea2026', 'czech2026'],
+  B: ['canada2026', 'bosnia2026', 'qatar2026', 'switzerland2026'],
+  C: ['brazil2026', 'morocco2026', 'haiti2026', 'scotland2026'],
+  D: ['usa2026', 'paraguay2026', 'australia2026', 'turkey2026'],
+  E: ['germany2026', 'curacao2026', 'ivorycoast2026', 'ecuador2026'],
+  F: ['netherlands2026', 'japan2026', 'sweden2026', 'tunisia2026'],
+  G: ['belgium2026', 'egypt2026', 'iran2026', 'newzealand2026'],
+  H: ['spain2026', 'capeverde2026', 'saudiarabia2026', 'uruguay2026'],
+  I: ['france2026', 'senegal2026', 'iraq2026', 'norway2026'],
+  J: ['argentina2026', 'algeria2026', 'austria2026', 'jordan2026'],
+  K: ['portugal2026', 'drcongo2026', 'uzbekistan2026', 'colombia2026'],
+  L: ['england2026', 'croatia2026', 'ghana2026', 'panama2026'],
+};
+
+// ラウンド32（FIFA公式 Match 73〜88）
+// t:'W'=グループ1位 / t:'R'=グループ2位 / t:'T'=3位通過（allowed=入り得るグループ）
+const WCSIM_R32_DEFS = [
+  { match: 73, home: {t:'R', g:'A'}, away: {t:'R', g:'B'} },
+  { match: 74, home: {t:'W', g:'E'}, away: {t:'T', allowed:['A','B','C','D','F']} },
+  { match: 75, home: {t:'W', g:'F'}, away: {t:'R', g:'C'} },
+  { match: 76, home: {t:'W', g:'C'}, away: {t:'R', g:'F'} },
+  { match: 77, home: {t:'W', g:'I'}, away: {t:'T', allowed:['C','D','F','G','H']} },
+  { match: 78, home: {t:'R', g:'E'}, away: {t:'R', g:'I'} },
+  { match: 79, home: {t:'W', g:'A'}, away: {t:'T', allowed:['C','E','F','H','I']} },
+  { match: 80, home: {t:'W', g:'L'}, away: {t:'T', allowed:['E','H','I','J','K']} },
+  { match: 81, home: {t:'W', g:'D'}, away: {t:'T', allowed:['B','E','F','I','J']} },
+  { match: 82, home: {t:'W', g:'G'}, away: {t:'T', allowed:['A','E','H','I','J']} },
+  { match: 83, home: {t:'R', g:'K'}, away: {t:'R', g:'L'} },
+  { match: 84, home: {t:'W', g:'H'}, away: {t:'R', g:'J'} },
+  { match: 85, home: {t:'W', g:'B'}, away: {t:'T', allowed:['E','F','G','I','J']} },
+  { match: 86, home: {t:'W', g:'J'}, away: {t:'R', g:'H'} },
+  { match: 87, home: {t:'W', g:'K'}, away: {t:'T', allowed:['D','E','I','J','L']} },
+  { match: 88, home: {t:'R', g:'D'}, away: {t:'R', g:'G'} },
+];
+
+// R16以降: [マッチ番号, 出場チーム1の前マッチ番号, 出場チーム2の前マッチ番号]
+const WCSIM_R16_DEFS = [[89,74,77],[90,73,75],[91,76,78],[92,79,80],[93,83,84],[94,81,82],[95,86,88],[96,85,87]];
+const WCSIM_QF_DEFS  = [[97,89,90],[98,93,94],[99,91,92],[100,95,96]];
+const WCSIM_SF_DEFS  = [[101,97,98],[102,99,100]];
+
+// ------------------------------------------------------------
+// 演算ロジック
+// ------------------------------------------------------------
+
+function wcsimTeamName(key) {
+  const d = TEAM_DATA[key];
+  return (window.LANG === 'en' && d.en_name) ? d.en_name : d.name;
+}
+
+// 勝点 → 得失差 → 総得点 → 乱数（比較器を安定させるため事前付与）
+function wcsimSortStandings(rows) {
+  rows.forEach(r => { r._rnd = Math.random(); });
+  rows.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a._rnd - b._rnd);
+}
+
+// グループ1組（総当たり6試合）を演算
+function wcsimPlayGroup(letter, keys) {
+  const table = {};
+  keys.forEach(k => { table[k] = {key: k, p:0, w:0, d:0, l:0, gf:0, ga:0, gd:0, pts:0}; });
+  const order = [[0,1],[2,3],[0,2],[3,1],[3,0],[1,2]]; // 第1節〜第3節
+  const matches = order.map(([i, j]) => {
+    const r = simulateSilent(TEAM_DATA[keys[i]], TEAM_DATA[keys[j]]);
+    wcsimStatsAbsorb(keys[i], keys[j], r, true);
+    wcsimStatsMatchDone(keys[i], keys[j], r.t1score, r.t2score, false, null);
+    const h = table[keys[i]], a = table[keys[j]];
+    h.p++; a.p++;
+    h.gf += r.t1score; h.ga += r.t2score;
+    a.gf += r.t2score; a.ga += r.t1score;
+    if (r.t1score > r.t2score)      { h.w++; h.pts += 3; a.l++; }
+    else if (r.t1score < r.t2score) { a.w++; a.pts += 3; h.l++; }
+    else                            { h.d++; a.d++; h.pts++; a.pts++; }
+    return {home: keys[i], away: keys[j], hs: r.t1score, as: r.t2score};
+  });
+  const standings = keys.map(k => table[k]);
+  standings.forEach(s => { s.gd = s.gf - s.ga; });
+  wcsimSortStandings(standings);
+  return {letter, standings, matches};
+}
+
+// ------------------------------------------------------------
+// 大会スタッツ集計（選手・チーム・大会全体）
+// ------------------------------------------------------------
+
+let _wcsimStats = null;
+
+function wcsimStatsInit() {
+  _wcsimStats = {
+    players: {},   // teamKey|選手名 → {team, name, enName, goals, assists, duels, duelWins}
+    teams: {},     // teamKey → {key, matches, goals, conceded, shots, chances, saves, cleanSheets}
+    totalMatches: 0, totalGoals: 0, etCount: 0, pkCount: 0,
+    biggestWin: null, topScoringMatch: null
+  };
+}
+
+function wcsimStatsTeam(teamKey) {
+  if (!_wcsimStats.teams[teamKey]) {
+    _wcsimStats.teams[teamKey] = {key: teamKey, matches:0, goals:0, conceded:0, shots:0, chances:0, saves:0, cleanSheets:0};
+  }
+  return _wcsimStats.teams[teamKey];
+}
+
+// simulateSilent 1回分（90分 or 延長）の結果を大会スタッツへ吸収
+function wcsimStatsAbsorb(key1, key2, r, countMatch) {
+  const absorbPlayers = (teamKey, stats) => {
+    Object.entries(stats).forEach(([name, st]) => {
+      const id = teamKey + '|' + name;
+      if (!_wcsimStats.players[id]) {
+        _wcsimStats.players[id] = {team: teamKey, name, enName: st.enName, goals:0, assists:0, duels:0, duelWins:0};
+      }
+      const p = _wcsimStats.players[id];
+      p.goals += st.goals; p.assists += (st.assists || 0);
+      p.duels += st.duels; p.duelWins += st.duelWins;
+    });
+  };
+  absorbPlayers(key1, r.playerStats);
+  absorbPlayers(key2, r.t2playerStats);
+  const tm1 = wcsimStatsTeam(key1), tm2 = wcsimStatsTeam(key2);
+  tm1.goals += r.t1score; tm1.conceded += r.t2score;
+  tm2.goals += r.t2score; tm2.conceded += r.t1score;
+  tm1.shots += r.totalStats.t1.shots; tm1.chances += r.totalStats.t1.chances;
+  tm2.shots += r.totalStats.t2.shots; tm2.chances += r.totalStats.t2.chances;
+  // totalStats.tX.gkSaves は「相手GKのセーブ数」なので入れ替えて帰属
+  tm1.saves += r.totalStats.t2.gkSaves;
+  tm2.saves += r.totalStats.t1.gkSaves;
+  if (countMatch) { tm1.matches++; tm2.matches++; }
+  _wcsimStats.totalGoals += r.t1score + r.t2score;
+}
+
+// 1試合確定時（延長込み最終スコア）の集計
+function wcsimStatsMatchDone(key1, key2, hs, as, et, pk) {
+  _wcsimStats.totalMatches++;
+  if (et) _wcsimStats.etCount++;
+  if (pk) _wcsimStats.pkCount++;
+  if (as === 0) wcsimStatsTeam(key1).cleanSheets++;
+  if (hs === 0) wcsimStatsTeam(key2).cleanSheets++;
+  const diff = Math.abs(hs - as), tot = hs + as;
+  if (diff > 0 && (!_wcsimStats.biggestWin || diff > _wcsimStats.biggestWin.diff)) {
+    _wcsimStats.biggestWin = {home: key1, away: key2, hs, as, diff};
+  }
+  if (tot > 0 && (!_wcsimStats.topScoringMatch || tot > _wcsimStats.topScoringMatch.tot)) {
+    _wcsimStats.topScoringMatch = {home: key1, away: key2, hs, as, tot};
+  }
+}
+
+// PK戦（キッカーのシュート精度 vs GKセービングで成功率を算出）
+function wcsimPenaltyShootout(t1data, t2data) {
+  const gkSave = (d) => {
+    const gk = d.players[d.default_lineup[0]];
+    if (gk && gk.positions.includes('GK')) return gk.params[23];
+    return Math.max(...d.players.map(p => p.positions.includes('GK') ? p.params[23] : 0));
+  };
+  const kickers = (d) => d.default_lineup.slice(1, 11)
+    .map(idx => d.players[idx].params[11])
+    .sort((a, b) => b - a).slice(0, 5);
+  const prob = (shoot, gk) => Math.min(0.92, Math.max(0.55, 0.75 + (shoot - gk) * 0.004));
+  const gk1 = gkSave(t1data), gk2 = gkSave(t2data);
+  const k1 = kickers(t1data), k2 = kickers(t2data);
+  let h = 0, a = 0;
+  for (let i = 0; i < 5; i++) {
+    if (Math.random() < prob(k1[i], gk2)) h++;
+    if (Math.random() < prob(k2[i], gk1)) a++;
+  }
+  // サドンデス（5巡で打ち切り、なお同点ならコイントス）
+  let round = 0;
+  while (h === a && round < 5) {
+    if (Math.random() < prob(k1[round % 5], gk2)) h++;
+    if (Math.random() < prob(k2[round % 5], gk1)) a++;
+    round++;
+  }
+  if (h === a) (Math.random() < 0.5) ? h++ : a++;
+  return { h, a };
+}
+
+// ノックアウト1試合（90分 → 延長 → PK）
+function wcsimKnockoutMatch(matchNo, homeKey, awayKey) {
+  const r = simulateSilent(TEAM_DATA[homeKey], TEAM_DATA[awayKey]);
+  wcsimStatsAbsorb(homeKey, awayKey, r, true);
+  let hs = r.t1score, as = r.t2score, et = false, pk = null;
+  if (hs === as) {
+    et = true;
+    // 延長前後半30分相当 = 6チャンスを同エンジンで演算（スタッツも吸収）
+    const ex = simulateSilent(TEAM_DATA[homeKey], TEAM_DATA[awayKey], 6);
+    wcsimStatsAbsorb(homeKey, awayKey, ex, false);
+    hs += ex.t1score; as += ex.t2score;
+    if (hs === as) pk = wcsimPenaltyShootout(TEAM_DATA[homeKey], TEAM_DATA[awayKey]);
+  }
+  wcsimStatsMatchDone(homeKey, awayKey, hs, as, et, pk);
+  const homeWin = pk ? pk.h > pk.a : hs > as;
+  return { match: matchNo, home: homeKey, away: awayKey, hs, as, et, pk,
+           winner: homeWin ? homeKey : awayKey, loser: homeWin ? awayKey : homeKey };
+}
+
+// 3位通過8チームをR32スロットへ割当（許容グループ制約をバックトラックで充足）
+function wcsimAssignThirds(qualified) {
+  const slots = WCSIM_R32_DEFS.filter(d => d.away.t === 'T');
+  const assignment = {};
+  const used = new Set();
+  function bt(i) {
+    if (i === slots.length) return true;
+    const slot = slots[i];
+    for (const team of qualified) {
+      if (used.has(team.group)) continue;
+      if (!slot.away.allowed.includes(team.group)) continue;
+      assignment[slot.match] = team; used.add(team.group);
+      if (bt(i + 1)) return true;
+      delete assignment[slot.match]; used.delete(team.group);
+    }
+    return false;
+  }
+  if (!bt(0)) {
+    // 充足解が見つからない場合のフォールバック（理論上は常に解がある）
+    const remaining = qualified.filter(q => !used.has(q.group));
+    slots.forEach(s => { if (!assignment[s.match]) assignment[s.match] = remaining.shift(); });
+  }
+  return assignment;
+}
+
+// 大会全体を一括演算
+function wcsimRunTournament() {
+  // 既存W杯モードのフラグを無効化（simulateChance内の補正分岐を確実に切る）
+  isWorldCupMode = false; isWCR32Mode = false; isWCR16Mode = false;
+  isWCQFMode = false; isWCSFMode = false; isWCFMode = false; wcPhase = '';
+
+  wcsimStatsInit();
+  const groups = {};
+  Object.keys(WCSIM_GROUPS).forEach(letter => {
+    groups[letter] = wcsimPlayGroup(letter, WCSIM_GROUPS[letter]);
+  });
+
+  // 3位ランキング → 上位8チームが通過
+  const thirds = Object.values(groups).map(g => Object.assign({group: g.letter}, g.standings[2]));
+  wcsimSortStandings(thirds);
+  const qualifiedThirds = thirds.slice(0, 8);
+  const thirdAssign = wcsimAssignThirds(qualifiedThirds);
+
+  const winners = {}, losers = {};
+  const record = (m) => { winners[m.match] = m.winner; losers[m.match] = m.loser; return m; };
+
+  const resolveSlot = (slot, matchNo) => {
+    if (slot.t === 'W') return groups[slot.g].standings[0].key;
+    if (slot.t === 'R') return groups[slot.g].standings[1].key;
+    return thirdAssign[matchNo].key;
+  };
+
+  const r32 = WCSIM_R32_DEFS.map(def =>
+    record(wcsimKnockoutMatch(def.match, resolveSlot(def.home, def.match), resolveSlot(def.away, def.match))));
+  const r16 = WCSIM_R16_DEFS.map(([no, m1, m2]) => record(wcsimKnockoutMatch(no, winners[m1], winners[m2])));
+  const qf  = WCSIM_QF_DEFS.map(([no, m1, m2]) => record(wcsimKnockoutMatch(no, winners[m1], winners[m2])));
+  const sf  = WCSIM_SF_DEFS.map(([no, m1, m2]) => record(wcsimKnockoutMatch(no, winners[m1], winners[m2])));
+  const third = record(wcsimKnockoutMatch(103, losers[101], losers[102]));
+  const final = record(wcsimKnockoutMatch(104, winners[101], winners[102]));
+
+  const result = {
+    groups, qualifiedThirds, r32, r16, qf, sf, third, final,
+    champion: final.winner, runnerUp: final.loser, thirdPlace: third.winner
+  };
+  result.mvp = wcsimSelectMVP(result);
+  _wcsimStats.mvp = result.mvp;
+  return result;
+}
+
+// 大会MVP選定: 攻撃貢献（ゴール×4＋アシスト×3＋デュエル勝利×0.4）＋チーム成績ボーナスの総合スコア
+// 優勝チーム所属がやや有利だが、圧倒的な得点王なら敗退チームからも選ばれ得るバランス
+function wcsimSelectMVP(res) {
+  const stageBonus = {};
+  Object.values(WCSIM_GROUPS).forEach(keys => keys.forEach(k => { stageBonus[k] = 0; }));
+  res.r32.forEach(m => { stageBonus[m.loser] = 1; });
+  res.r16.forEach(m => { stageBonus[m.loser] = 2; });
+  res.qf.forEach(m => { stageBonus[m.loser] = 3; });
+  stageBonus[res.third.loser]  = 4;    // 4位
+  stageBonus[res.third.winner] = 4.5;  // 3位
+  stageBonus[res.runnerUp] = 5.5;
+  stageBonus[res.champion] = 7;
+  let best = null, bestScore = -1;
+  Object.values(_wcsimStats.players).forEach(p => {
+    const score = p.goals * 4 + p.assists * 3 + p.duelWins * 0.4 + (stageBonus[p.team] || 0);
+    const tie = best && score === bestScore &&
+      (p.goals > best.goals || (p.goals === best.goals && p.assists > best.assists));
+    if (!best || score > bestScore || tie) { best = p; bestScore = score; }
+  });
+  return best;
+}
+
+// ------------------------------------------------------------
+// 画面描画
+// ------------------------------------------------------------
+
+let _wcsimTimers = [];
+function wcsimClearTimers() { _wcsimTimers.forEach(clearTimeout); _wcsimTimers = []; }
+
+// タイトル画面 → モード入場
+function showWCSim() {
+  wcsimClearTimers();
+  isWorldCupMode = false;
+  showScreen('wcsim');
+  document.getElementById('wcsim-title').textContent = t('wcsimTitle');
+  document.getElementById('wcsim-intro').textContent = t('wcsimIntro');
+  const btn = document.getElementById('wcsim-run-btn');
+  btn.textContent = t('wcsimRunBtn');
+  btn.disabled = false;
+  wcsimRenderPreview();
+  document.getElementById('screen-wcsim').scrollTop = 0;
+}
+
+// 実行前: 組み合わせプレビュー
+function wcsimRenderPreview() {
+  let html = `<div class="wcsim-section-title">${t('wcsimDrawHeader')}</div><div class="wcsim-groups-grid">`;
+  Object.entries(WCSIM_GROUPS).forEach(([letter, keys]) => {
+    html += `<div class="wcsim-group-card"><div class="wcsim-group-name">GROUP ${letter}</div>`;
+    keys.forEach(k => {
+      html += `<div class="wcsim-team-row"><span class="wcsim-team-label">${TEAM_DATA[k].flag} ${wcsimTeamName(k)}</span></div>`;
+    });
+    html += `</div>`;
+  });
+  html += `</div>`;
+  document.getElementById('wcsim-content').innerHTML = html;
+}
+
+function wcsimGroupCardHTML(g, qualifiedGroups) {
+  let html = `<div class="wcsim-group-card"><div class="wcsim-group-name">GROUP ${g.letter}</div>`;
+  g.standings.forEach((s, i) => {
+    const qualified = i < 2 || (i === 2 && qualifiedGroups.has(g.letter));
+    const cls = i < 2 ? 'wcsim-row-adv' : (qualified ? 'wcsim-row-third' : 'wcsim-row-out');
+    html += `<div class="wcsim-team-row ${cls}">` +
+      `<span class="wcsim-team-rank">${i + 1}</span>` +
+      `<span class="wcsim-team-label">${TEAM_DATA[s.key].flag} ${wcsimTeamName(s.key)}</span>` +
+      `<span class="wcsim-team-num">${s.gd > 0 ? '+' : ''}${s.gd}</span>` +
+      `<span class="wcsim-team-pts">${s.pts}</span></div>`;
+  });
+  html += `<div class="wcsim-group-matches">`;
+  g.matches.forEach(m => {
+    html += `<span class="wcsim-mini-match" title="${wcsimTeamName(m.home)} ${m.hs}-${m.as} ${wcsimTeamName(m.away)}">` +
+      `${TEAM_DATA[m.home].flag} ${m.hs}-${m.as} ${TEAM_DATA[m.away].flag}</span>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+function wcsimKOMatchHTML(m) {
+  const homeWin = m.winner === m.home;
+  const note = m.pk ? `<span class="wcsim-ko-note">PK ${m.pk.h}-${m.pk.a}</span>`
+             : (m.et ? `<span class="wcsim-ko-note">${t('wcsimAET')}</span>` : '');
+  return `<div class="wcsim-ko-match">` +
+    `<span class="wcsim-ko-team ${homeWin ? 'wcsim-ko-win' : ''}" style="text-align:right">${wcsimTeamName(m.home)} ${TEAM_DATA[m.home].flag}</span>` +
+    `<span class="wcsim-ko-score">${m.hs} - ${m.as}${note}</span>` +
+    `<span class="wcsim-ko-team ${!homeWin ? 'wcsim-ko-win' : ''}">${TEAM_DATA[m.away].flag} ${wcsimTeamName(m.away)}</span></div>`;
+}
+
+function wcsimKOSectionHTML(id, title, matches) {
+  let html = `<div id="${id}" class="wcsim-section" style="display:none">` +
+    `<div class="wcsim-section-title">${title}</div><div class="wcsim-ko-grid">`;
+  matches.forEach(m => { html += wcsimKOMatchHTML(m); });
+  html += `</div></div>`;
+  return html;
+}
+
+function wcsimPodiumHTML(res) {
+  return `<div id="wcsim-sec-podium" class="wcsim-section" style="display:none">` +
+    `<div class="wcsim-podium">` +
+    `<div class="wcsim-podium-trophy">🏆</div>` +
+    `<div class="wcsim-podium-flag">${TEAM_DATA[res.champion].flag}</div>` +
+    `<div class="wcsim-podium-label">${t('wcsimChampionLabel')}</div>` +
+    `<div class="wcsim-podium-name">${wcsimTeamName(res.champion)}</div>` +
+    `<div class="wcsim-podium-sub">` +
+    `<span>🥈 ${t('wcsimRunnerUpLabel')}: ${TEAM_DATA[res.runnerUp].flag} ${wcsimTeamName(res.runnerUp)}</span>` +
+    `<span>🥉 ${t('wcsimThirdPlaceLabel')}: ${TEAM_DATA[res.thirdPlace].flag} ${wcsimTeamName(res.thirdPlace)}</span>` +
+    (res.mvp ? `<span>⭐ ${t('wcsimMVPLabel')}: ${wcsimPlayerLabel(res.mvp)}</span>` : '') +
+    `</div>` +
+    `<button class="start-btn" onclick="showWCSimStats()" style="color:#1a1a1a;background:rgba(255,255,255,0.85);margin-top:18px">${t('wcsimStatsBtn')}</button>` +
+    `</div></div>`;
+}
+
+// ワンクリック実行
+function runWCSim() {
+  wcsimClearTimers();
+  const btn = document.getElementById('wcsim-run-btn');
+  btn.disabled = true;
+  btn.textContent = t('wcsimRunning');
+
+  const res = wcsimRunTournament();
+  const qualifiedGroups = new Set(res.qualifiedThirds.map(q => q.group));
+
+  let html = `<div id="wcsim-sec-groups" class="wcsim-section" style="display:none">` +
+    `<div class="wcsim-section-title">${t('wcsimGroupStage')}</div><div class="wcsim-groups-grid">`;
+  Object.values(res.groups).forEach(g => { html += wcsimGroupCardHTML(g, qualifiedGroups); });
+  html += `</div></div>`;
+
+  html += wcsimKOSectionHTML('wcsim-sec-r32',   `⚔️ ${t('wcRound32')}`,      res.r32);
+  html += wcsimKOSectionHTML('wcsim-sec-r16',   `⚔️ ${t('wcRound16')}`,      res.r16);
+  html += wcsimKOSectionHTML('wcsim-sec-qf',    `🔥 ${t('wcQuarterFinal')}`, res.qf);
+  html += wcsimKOSectionHTML('wcsim-sec-sf',    `🔥 ${t('wcSemiFinal')}`,    res.sf);
+  html += wcsimKOSectionHTML('wcsim-sec-third', `🥉 ${t('wcsimThirdMatch')}`, [res.third]);
+  html += wcsimKOSectionHTML('wcsim-sec-final', `🏆 ${t('wcFinal')}`,        [res.final]);
+  html += wcsimPodiumHTML(res);
+
+  document.getElementById('wcsim-content').innerHTML = html;
+
+  // 段階表示演出（グループ → 各ラウンド → 優勝発表）
+  const seq = ['wcsim-sec-groups', 'wcsim-sec-r32', 'wcsim-sec-r16', 'wcsim-sec-qf',
+               'wcsim-sec-sf', 'wcsim-sec-third', 'wcsim-sec-final', 'wcsim-sec-podium'];
+  const delays = [0, 1100, 2000, 2900, 3800, 4600, 5400, 6400];
+  seq.forEach((id, i) => {
+    _wcsimTimers.push(setTimeout(() => {
+      const screen = document.getElementById('screen-wcsim');
+      if (!screen.classList.contains('active')) return;
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.display = '';
+      if (i === 0) { screen.scrollTop = 0; }
+      else { el.scrollIntoView({behavior: 'smooth', block: i === seq.length - 1 ? 'center' : 'start'}); }
+      if (i === seq.length - 1) {
+        btn.disabled = false;
+        btn.textContent = t('wcsimRerunBtn');
+      }
+    }, delays[i]));
+  });
+}
+
+// ------------------------------------------------------------
+// スタッツ詳細画面
+// ------------------------------------------------------------
+
+function wcsimPlayerLabel(p) {
+  const nm = (window.LANG === 'en' && p.enName) ? p.enName : p.name;
+  return `${TEAM_DATA[p.team].flag} ${nm}`;
+}
+
+// 汎用ランキングカード（rows は降順ソート済み、同値は同順位表示）
+function wcsimRankingHTML(title, rows, valueFn, labelFn, subFn) {
+  let html = `<div class="wcsim-stats-card"><div class="wcsim-stats-heading">${title}</div>`;
+  if (rows.length === 0) html += `<div class="wcsim-stats-empty">-</div>`;
+  let prevVal = null, rank = 0;
+  rows.forEach((r, i) => {
+    const v = valueFn(r);
+    if (v !== prevVal) { rank = i + 1; prevVal = v; }
+    html += `<div class="wcsim-stats-row${rank <= 3 ? ' wcsim-stats-top3' : ''}">` +
+      `<span class="wcsim-stats-rank">${rank}</span>` +
+      `<span class="wcsim-stats-name">${labelFn(r)}</span>` +
+      (subFn ? `<span class="wcsim-stats-sub">${subFn(r)}</span>` : '') +
+      `<span class="wcsim-stats-val">${v}</span></div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function wcsimMatchLabel(m) {
+  return `${TEAM_DATA[m.home].flag} ${m.hs}-${m.as} ${TEAM_DATA[m.away].flag}`;
+}
+
+function wcsimRenderStats() {
+  const s = _wcsimStats;
+  const players = Object.values(s.players);
+  const teams = Object.values(s.teams);
+
+  // 選手ランキング（上位10、同値タイブレークは第2指標）
+  const topScorers = players.filter(p => p.goals > 0)
+    .sort((a, b) => b.goals - a.goals || b.assists - a.assists || b.duelWins - a.duelWins).slice(0, 10);
+  const topAssists = players.filter(p => p.assists > 0)
+    .sort((a, b) => b.assists - a.assists || b.goals - a.goals || b.duelWins - a.duelWins).slice(0, 10);
+  const topGA = players.filter(p => p.goals + p.assists > 0)
+    .sort((a, b) => (b.goals + b.assists) - (a.goals + a.assists) || b.goals - a.goals).slice(0, 10);
+  const topDuels = players.filter(p => p.duelWins > 0)
+    .sort((a, b) => b.duelWins - a.duelWins || b.duels - a.duels).slice(0, 10);
+
+  // GK（チームのセーブ数・クリーンシートをGKに帰属。先発GK固定運用のため）
+  const gks = teams.map(tm => {
+    const d = TEAM_DATA[tm.key];
+    const gk = d.players[d.default_lineup[0]];
+    return {team: tm.key, name: gk.name, enName: gk.en_name, saves: tm.saves, cs: tm.cleanSheets, matches: tm.matches};
+  }).filter(g => g.saves > 0)
+    .sort((a, b) => b.saves - a.saves || b.cs - a.cs).slice(0, 10);
+
+  // チームランキング
+  const teamLabelFn = (tm) => `${TEAM_DATA[tm.key].flag} ${wcsimTeamName(tm.key)}`;
+  const teamGoals = [...teams].sort((a, b) => b.goals - a.goals || a.conceded - b.conceded).slice(0, 5);
+  const teamCS = [...teams].filter(tm => tm.cleanSheets > 0)
+    .sort((a, b) => b.cleanSheets - a.cleanSheets || a.conceded - b.conceded).slice(0, 5);
+  const teamShots = [...teams].sort((a, b) => b.shots - a.shots).slice(0, 5);
+
+  // 大会MVP
+  let html = '';
+  if (s.mvp) {
+    html += `<div class="wcsim-mvp-card">` +
+      `<div class="wcsim-mvp-label">⭐ ${t('wcsimMVPLabel')} ⭐</div>` +
+      `<div class="wcsim-mvp-name">${wcsimPlayerLabel(s.mvp)}</div>` +
+      `<div class="wcsim-mvp-team">${wcsimTeamName(s.mvp.team)}</div>` +
+      `<div class="wcsim-mvp-stats">⚽ ${s.mvp.goals} ${t('wcsimUnitGoals')}　🎯 ${s.mvp.assists} ${t('wcsimUnitAssists')}　⚔️ ${s.mvp.duelWins} ${t('wcsimUnitDuelWins')}</div>` +
+      `</div>`;
+  }
+
+  // 大会サマリー
+  const avg = s.totalMatches ? (s.totalGoals / s.totalMatches).toFixed(2) : '0';
+  html += `<div class="wcsim-stats-card" style="margin-bottom:10px">` +
+    `<div class="wcsim-stats-heading">${t('wcsimStatsOverview')}</div>` +
+    `<div class="wcsim-overview-grid">` +
+    `<div class="wcsim-overview-item"><div class="wcsim-overview-num">${s.totalMatches}</div><div class="wcsim-overview-label">${t('wcsimStatsTotalMatches')}</div></div>` +
+    `<div class="wcsim-overview-item"><div class="wcsim-overview-num">${s.totalGoals}</div><div class="wcsim-overview-label">${t('wcsimStatsTotalGoals')}</div></div>` +
+    `<div class="wcsim-overview-item"><div class="wcsim-overview-num">${avg}</div><div class="wcsim-overview-label">${t('wcsimStatsAvgGoals')}</div></div>` +
+    `<div class="wcsim-overview-item"><div class="wcsim-overview-num">${s.etCount}</div><div class="wcsim-overview-label">${t('wcsimStatsET')}</div></div>` +
+    `<div class="wcsim-overview-item"><div class="wcsim-overview-num">${s.pkCount}</div><div class="wcsim-overview-label">${t('wcsimStatsPK')}</div></div>` +
+    `</div>`;
+  if (s.topScoringMatch) {
+    html += `<div class="wcsim-overview-note">${t('wcsimStatsTopMatch')}: ${wcsimMatchLabel(s.topScoringMatch)}</div>`;
+  }
+  if (s.biggestWin) {
+    html += `<div class="wcsim-overview-note">${t('wcsimStatsBiggestWin')}: ${wcsimMatchLabel(s.biggestWin)}</div>`;
+  }
+  html += `</div>`;
+
+  html += `<div class="wcsim-stats-grid">`;
+  html += wcsimRankingHTML(t('wcsimStatsGoalsRank'), topScorers,
+    p => p.goals, wcsimPlayerLabel, p => p.assists ? `A${p.assists}` : '');
+  html += wcsimRankingHTML(t('wcsimStatsAssistsRank'), topAssists,
+    p => p.assists, wcsimPlayerLabel, p => p.goals ? `G${p.goals}` : '');
+  html += wcsimRankingHTML(t('wcsimStatsGARank'), topGA,
+    p => p.goals + p.assists, wcsimPlayerLabel, p => `G${p.goals} A${p.assists}`);
+  html += wcsimRankingHTML(t('wcsimStatsDuelsRank'), topDuels,
+    p => p.duelWins, wcsimPlayerLabel, p => p.duels ? `${Math.round(p.duelWins / p.duels * 100)}%` : '');
+  html += wcsimRankingHTML(t('wcsimStatsGKRank'), gks,
+    g => g.saves, wcsimPlayerLabel, g => `${t('wcsimStatsCSShort')}${g.cs}`);
+  html += wcsimRankingHTML(t('wcsimStatsTeamGoals'), teamGoals,
+    tm => tm.goals, teamLabelFn, tm => `${tm.matches}${t('wcsimStatsMatchUnit')}`);
+  html += wcsimRankingHTML(t('wcsimStatsTeamCS'), teamCS,
+    tm => tm.cleanSheets, teamLabelFn, tm => `${tm.matches}${t('wcsimStatsMatchUnit')}`);
+  html += wcsimRankingHTML(t('wcsimStatsTeamShots'), teamShots,
+    tm => tm.shots, teamLabelFn, tm => `${tm.matches}${t('wcsimStatsMatchUnit')}`);
+  html += `</div>`;
+
+  document.getElementById('wcsim-stats-content').innerHTML = html;
+}
+
+function showWCSimStats() {
+  if (!_wcsimStats) return;
+  showScreen('wcsim-stats');
+  document.getElementById('wcsim-stats-title').textContent = t('wcsimStatsTitle');
+  wcsimRenderStats();
+  window.scrollTo(0, 0);
+}
+
+// スタッツ画面 → 結果画面へ戻る（ポディウム位置を維持）
+function wcsimStatsBack() {
+  showScreen('wcsim');
+  const podium = document.getElementById('wcsim-sec-podium');
+  if (podium) podium.scrollIntoView({block: 'center'});
+}

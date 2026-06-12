@@ -1705,3 +1705,313 @@ body {
   line-height: 1.8;
   text-align: left;
 }
+
+/* ===== WC FULL SIM (W杯まるごとシミュレート) ===== */
+.top-menu-wcsim {
+  background: linear-gradient(135deg, rgba(110,35,160,0.5) 0%, rgba(190,90,255,0.18) 100%);
+  border-color: rgba(200,130,255,0.38);
+}
+
+.wcsim-section { margin-bottom: 26px; }
+
+.wcsim-section-title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 2px;
+  margin: 4px 0 12px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.wcsim-groups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+  gap: 10px;
+}
+
+.wcsim-group-card {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 10px 11px;
+  backdrop-filter: blur(3px);
+}
+
+.wcsim-group-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 15px;
+  color: #ffd700;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.wcsim-team-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 4px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  color: #ffffff;
+  line-height: 1.5;
+}
+
+.wcsim-team-rank { width: 12px; color: rgba(255,255,255,0.45); font-size: 10px; flex-shrink: 0; }
+
+.wcsim-team-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.wcsim-team-num { width: 26px; text-align: right; color: rgba(255,255,255,0.55); font-size: 10.5px; flex-shrink: 0; }
+.wcsim-team-pts { width: 20px; text-align: right; color: #ffd700; font-weight: 700; flex-shrink: 0; }
+
+.wcsim-row-adv   { background: rgba(40,170,90,0.28); }
+.wcsim-row-third { background: rgba(50,110,230,0.30); }
+.wcsim-row-out   { opacity: 0.55; }
+
+.wcsim-group-matches {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 6px;
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+
+.wcsim-mini-match {
+  font-size: 10px;
+  color: rgba(255,255,255,0.7);
+  white-space: nowrap;
+  text-align: center;
+}
+
+.wcsim-ko-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 8px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.wcsim-ko-match {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.82);
+}
+
+.wcsim-ko-team {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.wcsim-ko-win { color: #ffd700; font-weight: 700; }
+
+.wcsim-ko-score {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.2;
+  font-weight: 900;
+  font-size: 14px;
+  color: #ffffff;
+  min-width: 52px;
+}
+
+.wcsim-ko-note { font-size: 9px; font-weight: 700; color: #7fd4ff; letter-spacing: 0.5px; }
+
+.wcsim-podium {
+  max-width: 420px;
+  margin: 6px auto 0;
+  text-align: center;
+  background: linear-gradient(160deg, #7b5c00 0%, #c9960c 55%, #ffd700 100%);
+  border-radius: 18px;
+  padding: 26px 18px 22px;
+  box-shadow: 0 10px 40px rgba(255,215,0,0.35);
+}
+
+.wcsim-podium-trophy { font-size: 44px; line-height: 1; }
+.wcsim-podium-flag { font-size: 64px; line-height: 1.2; margin-top: 6px; }
+
+.wcsim-podium-label {
+  font-size: 13px;
+  font-weight: 900;
+  color: rgba(60,40,0,0.75);
+  letter-spacing: 4px;
+  margin-top: 8px;
+}
+
+.wcsim-podium-name {
+  font-size: 28px;
+  font-weight: 900;
+  color: #2a1f00;
+  line-height: 1.3;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+}
+
+.wcsim-podium-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #3a2c00;
+}
+
+/* ===== WC FULL SIM STATS (大会スタッツ詳細) ===== */
+.wcsim-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px;
+}
+
+.wcsim-stats-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.wcsim-stats-heading {
+  font-size: 13.5px;
+  font-weight: 900;
+  color: #ffd700;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.wcsim-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4.5px 2px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.wcsim-stats-row:last-child { border-bottom: none; }
+
+.wcsim-stats-rank {
+  width: 18px;
+  text-align: right;
+  color: rgba(255,255,255,0.45);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.wcsim-stats-top3 .wcsim-stats-rank { color: #ffd700; font-weight: 900; }
+
+.wcsim-stats-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.wcsim-stats-sub {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+}
+
+.wcsim-stats-val {
+  flex-shrink: 0;
+  min-width: 26px;
+  text-align: right;
+  font-weight: 900;
+  color: #ffffff;
+  font-size: 13.5px;
+}
+
+.wcsim-stats-empty { color: rgba(255,255,255,0.35); font-size: 12px; text-align: center; padding: 8px 0; }
+
+.wcsim-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.wcsim-overview-item {
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 10px 6px;
+  text-align: center;
+}
+
+.wcsim-overview-num {
+  font-size: 21px;
+  font-weight: 900;
+  color: #ffd700;
+  line-height: 1.2;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 1px;
+}
+
+.wcsim-overview-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 3px;
+}
+
+.wcsim-overview-note {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.7);
+}
+
+/* ===== WC FULL SIM MVP ===== */
+.wcsim-mvp-card {
+  background: linear-gradient(135deg, #7b5c00 0%, #c9960c 50%, #ffd700 100%);
+  border-radius: 14px;
+  padding: 18px 16px 16px;
+  text-align: center;
+  margin-bottom: 10px;
+  box-shadow: 0 6px 24px rgba(255,215,0,0.25);
+}
+
+.wcsim-mvp-label {
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(60,40,0,0.8);
+  letter-spacing: 3px;
+}
+
+.wcsim-mvp-name {
+  font-size: 25px;
+  font-weight: 900;
+  color: #2a1f00;
+  margin-top: 5px;
+  line-height: 1.3;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+}
+
+.wcsim-mvp-team {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(60,40,0,0.65);
+  margin-top: 2px;
+}
+
+.wcsim-mvp-stats {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #3a2c00;
+  margin-top: 9px;
+}

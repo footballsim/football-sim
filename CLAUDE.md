@@ -12,7 +12,8 @@ football-sim/
 │   ├── players.js    # i18n・定数・PLAYER_EXTRA・system_data・TEAM_DATA（2048行）
 │   ├── simulate.js   # STATE・画面管理・設定画面・ゲームエンジン・シーン描画（3665行）
 │   ├── narration.js  # 10試合モード・WCモード・AI総括・画像生成（3242行）
-│   └── ui.js         # Firebase・WC統計システム（319行）
+│   ├── ui.js         # Firebase・WC統計システム（319行）
+│   └── tournament.js # W杯まるごとシミュレート（全104試合一括演算）
 └── css/
     └── style.css     # 全スタイル（1561行）
 ```
@@ -32,6 +33,7 @@ football-sim/
 | `sceneToText()`, `renderSceneField()` | js/simulate.js |
 | `renderFormation()`, `renderBench()` | js/simulate.js |
 | `runMultiGame()`, `showResult()` | js/narration.js |
+| `WCSIM_GROUPS`（実際の2026組分け）, `showWCSim()`, `runWCSim()` | js/tournament.js |
 | `startWCMatch()`, `showWCR32()` など | js/narration.js |
 | `generateSummary()`, `generateShareImage()` | js/narration.js |
 | Firebase設定、`showWCStats()` | js/ui.js |
@@ -68,6 +70,13 @@ football-sim/
   - VPSはリダイレクト専用。コンテンツはGitHub Pagesが配信
 
 ## 現在の実装状況（2026/06/03時点）
+
+### W杯まるごとシミュレート（2026/06/12追加・js/tournament.js）
+- タイトル3番目のカード。実際の2026W杯グループ組分け（12組×4、プレーオフ確定後）で全104試合をワンクリック一括演算
+- グループ72試合 → 3位ランキング上位8（R32スロット割当はバックトラックで許容グループ制約を充足）→ R32〜決勝・3位決定戦（FIFA公式ブラケット Match 73-104 準拠）
+- ノックアウト同点時: 延長6チャンス（`wcsimExtraTime`）→ PK戦（`wcsimPenaltyShootout`、シュート精度vsセービングで成功率算出)
+- 1試合演算は narration.js の `simulateSilent()` を再利用。日本は `japan2026`（汎用スカッド）を使用
+- 実行前に `isWorldCupMode` 等の既存モードフラグを全リセット（simulateChance内の補正分岐を切るため）
 
 ### シングルマッチ
 - チーム1・チーム2を自由選択できる2ステップUI実装済み
