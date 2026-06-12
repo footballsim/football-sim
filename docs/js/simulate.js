@@ -3786,19 +3786,20 @@ function showPlayerDetail(teamKey, playerIdx) {
   const statsHtml = buildRadarChart(stats);
 
   // ステータス詳細テーブル（2列）
-  const half = Math.ceil(paramNames.length / 2);
-  const left = paramNames.slice(0, half);
-  const right = paramNames.slice(half);
+  const paramEntries = paramNames.map((name, i) => ({name, idx: i})).filter(e => e.idx !== 28);
+  const half = Math.ceil(paramEntries.length / 2);
   let tableRows = '';
   for (let i = 0; i < half; i++) {
-    const lv = params[i] || 0;
-    const rv = params[half + i] !== undefined ? params[half + i] : null;
+    const le = paramEntries[i];
+    const re = paramEntries[half + i];
+    const lv = params[le.idx] || 0;
+    const rv = re ? (params[re.idx] !== undefined ? params[re.idx] : null) : null;
     const lc = pColor(lv);
     const rc = rv !== null ? pColor(rv) : '#aaa';
     tableRows += '<tr style="border-bottom:1px solid #e8e8e8">'
-      + '<td style="background:#fffde8;padding:6px 8px;font-size:11px;color:#555;text-align:center">' + left[i] + '</td>'
+      + '<td style="background:#fffde8;padding:6px 8px;font-size:11px;color:#555;text-align:center">' + le.name + '</td>'
       + '<td style="padding:6px 10px;font-size:12px;font-weight:700;text-align:center;color:' + lc + '">' + lv + '</td>'
-      + '<td style="background:#fffde8;padding:6px 8px;font-size:11px;color:#555;text-align:center">' + (right[i] || '') + '</td>'
+      + '<td style="background:#fffde8;padding:6px 8px;font-size:11px;color:#555;text-align:center">' + (re ? re.name : '') + '</td>'
       + '<td style="padding:6px 10px;font-size:12px;font-weight:700;text-align:center;color:' + rc + '">' + (rv !== null ? rv : '') + '</td>'
       + '</tr>';
   }
