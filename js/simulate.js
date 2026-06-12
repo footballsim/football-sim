@@ -135,6 +135,33 @@ function buildPlayersTable(containerId, teams) {
   var sortDir = 1;
   var filterNation = '';
   var filterPos = '';
+  var filterContinent = '';
+
+  // 国籍→大陸（サッカー連盟基準: オーストラリアはAFC）
+  var NATION_CONTINENT = {
+    '日本':'asia','韓国':'asia','イラン':'asia','サウジアラビア':'asia','カタール':'asia',
+    'ヨルダン':'asia','ウズベキスタン':'asia','イラク':'asia','オーストラリア':'asia',
+    'イングランド':'eur','スコットランド':'eur','スウェーデン':'eur','オランダ':'eur','ノルウェー':'eur',
+    'スペイン':'eur','フランス':'eur','ドイツ':'eur','ポルトガル':'eur','クロアチア':'eur',
+    'ベルギー':'eur','スイス':'eur','イタリア':'eur','デンマーク':'eur','オーストリア':'eur',
+    'トルコ':'eur','セルビア':'eur','ポーランド':'eur','ウクライナ':'eur','チェコ':'eur',
+    'ルーマニア':'eur','ボスニア・ヘルツェゴビナ':'eur',
+    'ブラジル':'sam','アルゼンチン':'sam','コロンビア':'sam','ウルグアイ':'sam','エクアドル':'sam',
+    'ベネズエラ':'sam','パラグアイ':'sam',
+    'メキシコ':'nca','アメリカ':'nca','カナダ':'nca','パナマ':'nca','ハイチ':'nca','キュラソー':'nca',
+    'チュニジア':'afr','モロッコ':'afr','セネガル':'afr','ナイジェリア':'afr','コートジボワール':'afr',
+    'エジプト':'afr','カメルーン':'afr','ガーナ':'afr','アルジェリア':'afr','南アフリカ':'afr',
+    'カーボベルデ':'afr','コンゴ民主共和国':'afr',
+    'ニュージーランド':'oce'
+  };
+  var CONTINENTS = [
+    {key:'asia', ja:'アジア', en:'Asia'},
+    {key:'eur',  ja:'欧州',   en:'Europe'},
+    {key:'sam',  ja:'南米',   en:'South America'},
+    {key:'nca',  ja:'北中米', en:'N/C America'},
+    {key:'afr',  ja:'アフリカ', en:'Africa'},
+    {key:'oce',  ja:'オセアニア', en:'Oceania'}
+  ];
 
   function getVal(pl, key) {
     if(key==='_nation') {
@@ -161,6 +188,7 @@ function buildPlayersTable(containerId, teams) {
     for(var i=0;i<allPlayers.length;i++) {
       var pl = allPlayers[i];
       if(filterNation && pl.nation !== filterNation) continue;
+      if(!filterNation && filterContinent && NATION_CONTINENT[pl.nation] !== filterContinent) continue;
       if(filterPos && pl.posLarge !== filterPos) continue;
       filtered.push(pl);
     }
@@ -173,11 +201,12 @@ function buildPlayersTable(containerId, teams) {
       return sortDir * (typeof av==='string' ? av.localeCompare(bv,'ja') : bv-av);
     });
 
-    // ユニーク国籍・ポジション
-    var nations = [], posLarges = [];
+    // ユニーク国籍・ポジション・国旗
+    var nations = [], posLarges = [], nationFlags = {};
     for(var i=0;i<allPlayers.length;i++) {
       if(nations.indexOf(allPlayers[i].nation)<0) nations.push(allPlayers[i].nation);
       if(posLarges.indexOf(allPlayers[i].posLarge)<0) posLarges.push(allPlayers[i].posLarge);
+      if(!nationFlags[allPlayers[i].nation]) nationFlags[allPlayers[i].nation] = allPlayers[i].flag;
     }
     posLarges.sort(function(a,b){return (POS_ORDER[a]||9)-(POS_ORDER[b]||9);});
 
@@ -185,15 +214,35 @@ function buildPlayersTable(containerId, teams) {
     var fBtnStyle = 'padding:5px 12px;border-radius:16px;border:1px solid #ccc;background:white;font-size:12px;cursor:pointer;margin:2px;font-family:inherit';
     var fBtnActiveStyle = 'padding:5px 12px;border-radius:16px;border:1px solid #003087;background:#003087;color:white;font-size:12px;cursor:pointer;margin:2px;font-family:inherit';
 
-    var filterHtml = '<div style="padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-bottom:1px solid #eee">';
-    filterHtml += '<span style="font-size:11px;color:#888;margin-right:4px">'+(_isEn?'Nation':'国籍')+'</span>';
-    filterHtml += '<button style="'+(filterNation===''?fBtnActiveStyle:fBtnStyle)+'" data-fn="">'+(_isEn?'All':'全て')+'</button>';
-    for(var ni=0;ni<nations.length;ni++) {
-      var n=nations[ni];
-      var nLabel = _isEn ? (n==='日本'?'Japan':n==='イングランド'?'England':n==='スコットランド'?'Scotland':n==='ベルギー'?'Belgium':n==='チュニジア'?'Tunisia':n==='スウェーデン'?'Sweden':n==='オランダ'?'Netherlands':n==='モロッコ'?'Morocco':n==='ブラジル'?'Brazil':n==='メキシコ'?'Mexico':n==='ノルウェー'?'Norway':n==='アルゼンチン'?'Argentina':n==='スペイン'?'Spain':n==='フランス'?'France':n) : n;
-      filterHtml += '<button style="'+(filterNation===n?fBtnActiveStyle:fBtnStyle)+'" data-fn="'+n+'">'+nLabel+'</button>';
+    function nLabelOf(n) {
+      return _isEn ? (n==='日本'?'Japan':n==='イングランド'?'England':n==='スコットランド'?'Scotland':n==='ベルギー'?'Belgium':n==='チュニジア'?'Tunisia':n==='スウェーデン'?'Sweden':n==='オランダ'?'Netherlands':n==='モロッコ'?'Morocco':n==='ブラジル'?'Brazil':n==='メキシコ'?'Mexico':n==='ノルウェー'?'Norway':n==='アルゼンチン'?'Argentina':n==='スペイン'?'Spain':n==='フランス'?'France':n==='ドイツ'?'Germany':n==='アメリカ'?'USA':n==='韓国'?'South Korea':n==='チェコ'?'Czechia':n) : n;
     }
-    filterHtml += '<span style="font-size:11px;color:#888;margin:0 4px 0 12px">'+(_isEn?'Position':'ポジション')+'</span>';
+
+    // 1行目: 大陸タブ
+    var filterHtml = '<div style="padding:10px 12px 4px;display:flex;flex-wrap:wrap;gap:2px;align-items:center">';
+    filterHtml += '<span style="font-size:11px;color:#888;margin-right:4px">'+(_isEn?'Nation':'国籍')+'</span>';
+    filterHtml += '<button style="'+(filterContinent===''&&filterNation===''?fBtnActiveStyle:fBtnStyle)+'" data-fc="">'+(_isEn?'All':'全て')+'</button>';
+    for(var ci2=0;ci2<CONTINENTS.length;ci2++) {
+      var ct=CONTINENTS[ci2];
+      filterHtml += '<button style="'+(filterContinent===ct.key?fBtnActiveStyle:fBtnStyle)+'" data-fc="'+ct.key+'">'+(_isEn?ct.en:ct.ja)+'</button>';
+    }
+    filterHtml += '</div>';
+
+    // 2行目: 選択中の大陸の国ボタン（大陸選択時のみ表示）
+    if(filterContinent) {
+      filterHtml += '<div style="padding:4px 12px;display:flex;flex-wrap:wrap;gap:2px;align-items:center;background:#f4f6fa">';
+      filterHtml += '<button style="'+(filterNation===''?fBtnActiveStyle:fBtnStyle)+'" data-fn="">'+(_isEn?'All':'全て')+'</button>';
+      for(var ni=0;ni<nations.length;ni++) {
+        var n=nations[ni];
+        if(NATION_CONTINENT[n] !== filterContinent) continue;
+        filterHtml += '<button style="'+(filterNation===n?fBtnActiveStyle:fBtnStyle)+'" data-fn="'+n+'">'+(nationFlags[n]||'')+' '+nLabelOf(n)+'</button>';
+      }
+      filterHtml += '</div>';
+    }
+
+    // 3行目: ポジション + 件数
+    filterHtml += '<div style="padding:4px 12px 10px;display:flex;flex-wrap:wrap;gap:2px;align-items:center;border-bottom:1px solid #eee">';
+    filterHtml += '<span style="font-size:11px;color:#888;margin:0 4px 0 0">'+(_isEn?'Position':'ポジション')+'</span>';
     filterHtml += '<button style="'+(filterPos===''?fBtnActiveStyle:fBtnStyle)+'" data-fp="">'+(_isEn?'All':'全て')+'</button>';
     for(var pi=0;pi<posLarges.length;pi++) {
       var pg=posLarges[pi];
@@ -253,6 +302,17 @@ function buildPlayersTable(containerId, teams) {
     el.innerHTML = filterHtml + '<div class="table-wrap"><table class="sheet-table" style="width:auto"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table></div>';
 
     // フィルターボタンイベント
+    var fcs = el.querySelectorAll('[data-fc]');
+    for(var fci=0;fci<fcs.length;fci++) {
+      (function(btn){
+        btn.addEventListener('click', function(){
+          filterContinent = btn.getAttribute('data-fc');
+          filterNation = '';
+          sortKey = '_nation'; sortDir = 1;
+          render();
+        });
+      })(fcs[fci]);
+    }
     var fns = el.querySelectorAll('[data-fn]');
     for(var fi=0;fi<fns.length;fi++) {
       (function(btn){
