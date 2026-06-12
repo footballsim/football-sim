@@ -4150,7 +4150,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   czech2026: {
     name:"チェコ",en_name:"Czech Republic",team_color:"#D7141A",flag:"🇨🇿",
-    default_system:"3-4-2-1",default_tactics:TACTICS_PRESS,
+    default_system:"3-4-2-1",default_tactics:TACTICS_COUNTER,
     default_keyplayer:5,default_marked_player:10,
     default_lineup:[0,4,3,1,5,2,7,6,9,8,10],
     players:[
