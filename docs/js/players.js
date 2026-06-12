@@ -3214,9 +3214,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   korea2026: {
     name:"韓国",en_name:"South Korea",team_color:"#C60C30",flag:"🇰🇷",
-    default_system:"3-4-3",default_tactics:TACTICS_FREE,
-    default_keyplayer:10,default_marked_player:2,
-    default_lineup:[0,2,14,3,5,6,1,4,7,10,9],
+    default_system:"3-4-2-1",default_tactics:TACTICS_FREE,
+    default_keyplayer:9,default_marked_player:2,
+    default_lineup:[12,14,2,3,6,5,1,4,7,8,9],
     players:[
       // GK: Jo Hyeon-woo (FC26 OVR75, DIV79, HAN72, KIC62, REF77, SPD79, POS73)
       {name:"ジョ・ヒョヌ",en_name:"Jo Hyeon-woo",long_name:"ジョ・ヒョヌ",positions:["GK"],params:[50,50,50,50,77,79,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,79,72,50,73,73,75]},
@@ -4150,56 +4150,63 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   czech2026: {
     name:"チェコ",en_name:"Czech Republic",team_color:"#D7141A",flag:"🇨🇿",
-    default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
+    default_system:"3-4-2-1",default_tactics:TACTICS_PRESS,
     default_keyplayer:5,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_lineup:[0,1,2,3,5,4,7,6,9,8,10],
     players:[
-      // GK: Staněk (FC26 OVR79, DIV80, HAN78, KIC74, REF80, SPD60, POS79)
-      {name:"スタネク",en_name:"Stanek",long_name:"ジンドジフ・スタネク",positions:["GK"],params:[50,50,50,50,80,60,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,80,78,50,79,74,75]},
-      // RB: Coufal (FC26 OVR76, PAC80, SHO54, PAS68, DRI72, DEF76, PHY74)
-      {name:"コウファル",en_name:"Coufal",long_name:"ウラジミール・コウファル",positions:["右SB"],params:[74,74,80,81,74,70,70,70,74,68,62,46,46,50,38,40,70,48,74,76,74,74,72,50,50,68,70,68,75]},
-      // RCB: T.Holeš (FC26 OVR75, PAC74, SHO44, PAS64, DRI62, DEF76, PHY80)
-      {name:"T・ホレシュ",en_name:"T.Holes",long_name:"トマーシュ・ホレシュ",positions:["CB","DMF"],params:[80,78,74,75,70,78,60,60,70,64,58,36,34,42,28,30,60,30,76,78,76,76,74,50,50,78,72,70,75]},
-      // LCB: L.Krejčí (FC26 OVR74, PAC72, SHO42, PAS62, DRI62, DEF76, PHY78)
-      {name:"L・クレイチ",en_name:"L.Krejci",long_name:"ラディスラフ・クレイチー",positions:["CB"],params:[78,78,72,73,70,76,60,60,70,62,56,34,32,40,26,28,60,30,76,78,76,76,74,50,50,76,70,68,75]},
-      // LSB: D.Doudera (FC26 OVR73, PAC80, SHO50, PAS64, DRI66, DEF70, PHY68)
-      {name:"ドゥデラ",en_name:"Doudera",long_name:"ダビド・ドゥデラ",positions:["左SB"],params:[66,66,80,81,72,62,64,64,72,64,58,42,42,46,34,36,64,46,68,70,68,68,66,50,50,60,64,62,75]},
-      // RDMF: T.Souček (FC26 OVR80, PAC72, SHO74, PAS76, DRI74, DEF80, PHY84) ← keyplayer
-      {name:"スーチェク",en_name:"Soucek",long_name:"トマーシュ・スーチェク",positions:["CMF","DMF"],params:[84,84,72,73,77,82,72,72,77,76,70,70,70,74,54,58,72,68,78,80,78,78,76,50,50,82,76,74,75]},
-      // LDMF: L.Provod (FC26 OVR75, PAC76, SHO66, PAS74, DRI74, DEF68, PHY70)
-      {name:"プロボド",en_name:"Provod",long_name:"ルカーシュ・プロボド",positions:["CMF","DMF"],params:[70,72,76,77,72,66,72,72,72,74,68,60,62,64,50,52,72,60,66,68,66,66,64,50,50,64,68,68,75]},
-      // RSM: A.Hložek (FC26 OVR80, PAC84, SHO76, PAS76, DRI80, DEF48, PHY68)
-      {name:"フロジェク",en_name:"Hlozek",long_name:"アダム・フロジェク",positions:["右WG","OMF","右SMF"],params:[66,68,84,86,80,62,78,80,80,76,70,72,72,74,60,64,80,70,44,46,44,44,46,50,50,60,72,72,75]},
-      // LSM: O.Lingr (FC26 OVR74, PAC84, SHO66, PAS68, DRI74, DEF44, PHY64)
-      {name:"リングル",en_name:"Lingr",long_name:"オンドジェイ・リングル",positions:["左WG","右WG"],params:[62,64,84,86,76,58,72,74,76,68,62,62,62,64,48,52,72,62,40,42,40,40,42,50,50,56,64,64,75]},
-      // OMF: A.Barák (FC26 OVR77, PAC72, SHO74, PAS78, DRI76, DEF60, PHY72)
-      {name:"バラク",en_name:"Barak",long_name:"アントニン・バラク",positions:["OMF","CMF"],params:[70,72,72,73,76,66,74,76,76,78,72,70,70,74,62,66,76,68,56,58,56,56,58,50,50,64,72,72,75]},
-      // CF: P.Schick (FC26 OVR81, PAC76, SHO84, PAS68, DRI76, DEF38, PHY78) ← marked
-      {name:"シック",en_name:"Schick",long_name:"パトリク・シック",positions:["CF"],params:[78,78,76,77,80,74,74,76,80,68,62,82,80,84,58,62,74,76,34,36,34,34,36,50,50,74,74,74,75]},
-      // Sub GK: Mandous M (FC26 OVR75, DIV76, HAN74, KIC70, REF76, SPD58, POS75)
-      {name:"マンドゥース",en_name:"Mandous",long_name:"ミカル・マンドゥース",positions:["GK"],params:[50,50,50,50,76,58,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,75,70,75]},
-      // Sub GK: Kovar M (FC26 OVR74, DIV75, HAN73, KIC68, REF75, SPD56, POS74)
+      // GK: Kovar (starter)
       {name:"コヴァール",en_name:"Kovar",long_name:"マルティン・コヴァール",positions:["GK"],params:[50,50,50,50,75,56,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,75,73,50,74,68,75]},
-      // Sub RB: Kadeřábek (FC26 OVR75, PAC78, SHO52, PAS66, DRI70, DEF74, PHY74)
-      {name:"カデジャベク",en_name:"Kaderabek",long_name:"パヴェル・カデジャベク",positions:["右SB"],params:[74,74,78,79,72,70,68,68,72,66,60,44,44,48,36,38,68,46,72,74,72,72,70,50,50,68,68,66,75]},
-      // Sub CB: D.Zima (FC26 OVR73, PAC74, SHO42, PAS60, DRI60, DEF74, PHY76)
+      // CB: Hranac
+      {name:"フラナツ",en_name:"Hranac",long_name:"ダビド・フラナツ",positions:["CB","DMF"],params:[80,78,74,74,70,78,62,60,70,65,58,34,32,42,26,28,62,30,76,78,76,76,74,51,51,78,70,72,75]},
+      // CB: Sojka
+      {name:"ソイカ",en_name:"Sojka",long_name:"オンドジェイ・ソイカ",positions:["CB","DMF"],params:[76,76,72,72,68,76,60,58,68,62,56,36,34,42,28,30,60,30,74,76,74,74,72,51,51,74,66,68,75]},
+      // CB: Chaloupek
+      {name:"チャロウペク",en_name:"Chaloupek",long_name:"マテイ・チャロウペク",positions:["CB"],params:[74,74,70,70,66,74,58,56,66,60,54,32,30,38,26,28,58,28,72,74,72,72,70,51,51,72,64,66,75]},
+      // CMF/DMF: T.Krejci
+      {name:"T・クレイチ",en_name:"T.Krejci",long_name:"トマーシュ・クレイチー",positions:["CMF","DMF","OMF"],params:[72,74,72,73,70,72,68,68,70,70,66,52,54,56,46,48,68,54,64,66,64,64,62,50,50,68,68,70,75]},
+      // CMF/DMF: Soucek (keyplayer)
+      {name:"スーチェク",en_name:"Soucek",long_name:"トマーシュ・スーチェク",positions:["CMF","DMF"],params:[84,84,72,73,77,82,72,72,77,76,70,70,70,74,54,58,72,68,78,80,78,78,76,50,50,82,76,74,75]},
+      // Left SMF/WB: Zeleny
+      {name:"ゼレニー",en_name:"Zeleny",long_name:"アダム・ゼレニー",positions:["左SMF","左WG","CMF"],params:[62,66,80,82,72,62,70,70,74,64,58,52,52,54,46,48,68,52,54,56,54,54,52,50,50,58,66,66,75]},
+      // Right SMF/WB: Coufal
+      {name:"コウファル",en_name:"Coufal",long_name:"ウラジミール・コウファル",positions:["右SB","右SMF","CB"],params:[74,74,80,81,74,70,70,70,74,68,62,46,46,50,38,40,70,48,74,76,74,74,72,50,50,68,70,68,75]},
+      // OMF: Sulc
+      {name:"スルツ",en_name:"Sulc",long_name:"パヴェル・スルツ",positions:["OMF","右WG","左WG"],params:[60,74,74,72,80,60,78,56,70,76,72,64,62,64,70,68,70,68,62,58,60,64,60,50,50,58,74,70,75]},
+      // OMF: Provod
+      {name:"プロボド",en_name:"Provod",long_name:"ルカーシュ・プロボド",positions:["OMF","CMF","左WG"],params:[70,72,76,77,72,66,72,72,72,74,68,60,62,64,50,52,72,60,66,68,66,66,64,50,50,64,68,68,75]},
+      // CF: Schick (marked)
+      {name:"シック",en_name:"Schick",long_name:"パトリク・シック",positions:["CF"],params:[78,78,76,77,80,74,74,76,80,68,62,82,80,84,58,62,74,76,34,36,34,34,36,50,50,74,74,74,75]},
+      // Sub GK: Hornicek
+      {name:"ホルニチェク",en_name:"Hornicek",long_name:"ルカーシュ・ホルニチェク",positions:["GK"],params:[50,50,50,50,74,58,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,74,70,50,72,68,75]},
+      // Sub GK: Stanek
+      {name:"スタネク",en_name:"Stanek",long_name:"ジンドジフ・スタネク",positions:["GK"],params:[50,50,50,50,80,60,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,80,78,50,79,74,75]},
+      // Sub CB: T.Holes
+      {name:"T・ホレシュ",en_name:"T.Holes",long_name:"トマーシュ・ホレシュ",positions:["CB","DMF"],params:[80,78,74,75,70,78,60,60,70,64,58,36,34,42,28,30,60,30,76,78,76,76,74,50,50,78,72,70,75]},
+      // Sub CB: Zima
       {name:"ジマ",en_name:"Zima",long_name:"ダビド・ジマ",positions:["CB"],params:[76,76,74,75,68,74,58,58,68,60,54,34,32,40,26,28,58,28,74,76,74,74,72,50,50,74,68,66,75]},
-      // Sub DMF/CMF: Ševčík (FC26 OVR73, PAC70, SHO60, PAS72, DRI68, DEF72, PHY72)
-      {name:"シェフチーク",en_name:"Sevcik",long_name:"ペトル・シェフチーク",positions:["CMF","DMF"],params:[72,72,70,71,70,68,66,66,70,72,66,54,56,58,44,46,66,54,70,72,70,70,68,50,50,66,66,64,75]},
-      // Sub CF/OMF: Kuchta J (FC26 OVR76, PAC76, SHO76, PAS64, DRI72, DEF42, PHY76)
+      // Sub LB: Jurasek
+      {name:"D・ユラーセク",en_name:"D.Jurasek",long_name:"ダヴィド・ユラーセク",positions:["左SB","左SMF"],params:[64,74,76,74,80,74,72,50,64,68,70,46,48,54,60,62,66,58,74,74,72,73,70,50,50,62,68,68,75]},
+      // Sub CM: Sochurek
+      {name:"ソフレク",en_name:"Sochurek",long_name:"フゴ・ソフレク",positions:["CMF","DMF"],params:[66,68,72,72,68,66,68,66,68,68,62,56,56,58,48,50,66,54,60,62,60,60,58,50,50,60,64,64,75]},
+      // Sub CM: Sadilek
+      {name:"サディーレク",en_name:"Sadilek",long_name:"ミカル・サディーレク",positions:["CMF","DMF"],params:[64,68,72,73,70,64,70,68,70,70,66,58,58,60,52,54,68,60,62,62,60,60,58,50,50,60,68,66,75]},
+      // Sub CM: Darida
+      {name:"ダリダ",en_name:"Darida",long_name:"ウラジミール・ダリダ",positions:["CMF","DMF","OMF"],params:[68,72,74,74,74,68,72,72,73,72,68,62,62,64,58,60,72,62,64,66,64,64,62,50,50,66,70,70,75]},
+      // Sub CM: Cerv
+      {name:"ツェルフ",en_name:"Cerv",long_name:"ルカーシュ・ツェルフ",positions:["CMF","DMF"],params:[66,68,72,72,68,66,66,64,68,66,60,52,52,54,44,46,64,52,62,62,60,60,58,50,50,62,64,64,75]},
+      // Sub RM: Doudera
+      {name:"ドゥデラ",en_name:"Doudera",long_name:"ダビド・ドゥデラ",positions:["右SMF","右SB","左SB"],params:[66,66,80,81,72,62,64,64,72,64,58,42,42,46,34,36,64,46,68,70,68,68,66,50,50,60,64,62,75]},
+      // Sub AM: Visinsky
+      {name:"ビシンスキー",en_name:"Visinsky",long_name:"デニス・ビシンスキー",positions:["OMF","左WG"],params:[60,66,74,75,72,60,72,70,72,70,64,62,62,64,56,58,70,62,54,56,54,54,52,50,50,56,68,68,75]},
+      // Sub CF: Kuchta
       {name:"クフタ",en_name:"Kuchta",long_name:"ヤン・クフタ",positions:["CF","OMF"],params:[76,76,76,77,74,72,70,72,74,64,58,74,72,74,50,54,70,70,38,40,38,38,40,50,50,72,66,64,75]},
-      // Sub LW: J.Pešek (FC26 OVR73, PAC82, SHO64, PAS66, DRI72, DEF42, PHY64)
-      {name:"ペシェク",en_name:"Pesek",long_name:"ヤクブ・ペシェク",positions:["左WG","右WG"],params:[62,62,82,84,74,58,70,72,74,66,60,60,60,62,46,50,70,60,38,40,38,38,40,50,50,56,60,60,75]},
-      // Sub CF: Jurečka (FC26 OVR74, PAC74, SHO72, PAS60, DRI66, DEF36, PHY74)
-      {name:"ユレチュカ",en_name:"Jurecka",long_name:"ヴァーツラフ・ユレチュカ",positions:["CF"],params:[74,74,74,75,72,70,64,64,72,60,54,70,68,72,44,48,62,66,32,32,30,30,34,50,50,70,62,60,75]}
-    ,
-    {name:"D・ユラーセク",en_name:"D.Jurasek",long_name:"ダヴィド・ユラーセク",positions:["左SB","左SMF"],params:[64,74,76,74,80,74,72,50,64,68,70,46,48,54,60,62,66,58,74,74,72,73,70,50,50,62,68,68,75]},
-    {name:"スルツ",en_name:"Sulc",long_name:"パヴェル・スルツ",positions:["OMF","右WG","左WG"],params:[60,74,74,72,80,60,78,56,70,76,72,64,62,64,70,68,70,68,62,58,60,64,60,50,50,58,74,70,75]},
-    {name:"カラベツ",en_name:"Karabec",long_name:"アダム・カラベツ",positions:["OMF","CMF"],params:[60,75,68,66,80,66,74,58,68,74,72,60,60,64,68,66,68,66,66,64,64,66,62,50,50,58,72,68,75]},
-    {name:"M・ユレチュカ",en_name:"M.Jurecka",long_name:"ミラン・ユレチュカ",positions:["CF","OMF"],params:[68,72,70,68,77,46,80,50,62,66,70,70,70,60,64,60,66,70,42,40,38,54,38,50,50,68,60,58,75]},
-    {name:"N・サトカ",en_name:"N.Satka",long_name:"ニコラス・サトカ",positions:["CB"],params:[74,74,70,68,79,76,62,52,60,70,68,40,44,56,48,40,62,42,76,78,76,77,78,50,50,76,64,70,75]},
-    {name:"P・ボウス",en_name:"P.Vousek",long_name:"パトリク・ボウシェク",positions:["右SB","CB"],params:[66,74,74,72,79,73,70,50,62,68,70,46,48,52,58,60,64,56,73,73,71,72,69,50,50,64,66,66,75]},
-    {name:"L・ケイマル",en_name:"L.Chytil",long_name:"ルカス・チティル",positions:["CF","左WG"],params:[66,72,74,72,78,46,80,50,64,66,70,72,70,60,68,64,68,72,43,41,40,54,40,50,50,66,62,60,75]}]
+      // Sub CF: Chory
+      {name:"チョリー",en_name:"Chory",long_name:"トマーシュ・チョリー",positions:["CF"],params:[78,76,74,74,72,78,64,62,68,62,56,68,66,70,44,48,64,66,44,44,42,42,44,50,50,76,66,64,75]},
+      // Sub CF: Chytil
+      {name:"ヒティル",en_name:"Chytil",long_name:"モイミル・ヒティル",positions:["CF","OMF"],params:[74,74,78,79,72,70,70,68,73,64,58,68,66,70,44,48,68,66,36,38,36,36,36,50,50,66,68,70,75]},
+      // Sub CF: Hlozek
+      {name:"フロジェク",en_name:"Hlozek",long_name:"アダム・フロジェク",positions:["CF","右WG","右SMF"],params:[66,68,84,86,80,62,78,80,80,76,70,72,72,74,60,64,80,70,44,46,44,44,46,50,50,60,72,72,75]}
+    ]
   },
 
   nigeria2026: {
