@@ -4906,7 +4906,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   southafrica2026: {
     name:"南アフリカ",en_name:"South Africa",team_color:"#007A4D",flag:"🇿🇦",
-    default_system:"5-2-1-2",default_tactics:TACTICS_PRESS,
+    default_system:"5-2-1-2",default_tactics:TACTICS_COUNTER,
     default_keyplayer:9,default_marked_player:9,
     default_lineup:[0,8,7,4,6,5,1,3,2,9,10],
     players:[
