@@ -878,7 +878,8 @@ function startWCMatch(idx) {
 }
 
 // サイレントシミュレーション（UIなしで1試合演算）
-function simulateSilent(t1data, t2data) {
+// numChances 指定時はそのチャンス数だけ演算（延長戦などの短時間用）。省略時は通常90分（16〜17チャンス）
+function simulateSilent(t1data, t2data, numChances) {
   const buildState = (data) => {
     const sysIdx = system_data.findIndex(s => s.name === data.default_system);
     return {
@@ -897,8 +898,12 @@ function simulateSilent(t1data, t2data) {
   });
   const gs = { team1: t1, team2: t2 };
   const silentResults = [];
-  for (let i = 0; i < 16; i++) silentResults.push(simulateChance(gs, i));
-  if (Math.random() < 0.5) silentResults.push(simulateChance(gs, 16));
+  if (numChances === undefined) {
+    for (let i = 0; i < 16; i++) silentResults.push(simulateChance(gs, i));
+    if (Math.random() < 0.5) silentResults.push(simulateChance(gs, 16));
+  } else {
+    for (let i = 0; i < numChances; i++) silentResults.push(simulateChance(gs, i));
+  }
 
   // 詳細データ集計（t1・t2視点）
   const silentGoalScorers = [];
@@ -908,7 +913,7 @@ function simulateSilent(t1data, t2data) {
   const silentAreaDef = {};
 
   silentResults.forEach(res => {
-    res.scenes.forEach(sc => {
+    res.scenes.forEach((sc, si) => {
       const isGoal  = sc.result === 'ゴール！！';
       const isNormal = ['成功','失敗','ファール'].includes(sc.result);
       const isShoot  = ['ゴール！！','GK防いだ！','枠を外した！'].includes(sc.result);
@@ -918,10 +923,28 @@ function simulateSilent(t1data, t2data) {
       if (sc.offence === t1) {
         const p = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
         if (p) {
-          if (!silentPlayerStats[p.name]) silentPlayerStats[p.name] = {goals:0, duels:0, duelWins:0, enName:p.en_name};
+          if (!silentPlayerStats[p.name]) silentPlayerStats[p.name] = {goals:0, assists:0, duels:0, duelWins:0, enName:p.en_name};
           silentPlayerStats[p.name].duels++;
           if (isGoal || sc.result === '成功' || sc.result === 'ファール') silentPlayerStats[p.name].duelWins++;
-          if (isGoal) { silentPlayerStats[p.name].goals++; silentGoalScorers.push({time: res.time, name: p.name, teamName: t1data.name, teamFlag: t1data.flag}); }
+          if (isGoal) {
+            silentPlayerStats[p.name].goals++;
+            silentGoalScorers.push({time: res.time, name: p.name, teamName: t1data.name, teamFlag: t1data.flag});
+            // アシスト: 同チームの連続成功シーンを遡り、最初に現れる「得点者と別の選手」の成功プレーを計上
+            // （シュートは前段デュエル+ゴール判定の2シーン構成のため、直前だけでなく遡って探す）
+            let assistPos = -1;
+            for (let k = si - 1; k >= 0; k--) {
+              const ps = res.scenes[k];
+              if (ps.offence !== t1 || ps.result !== '成功') break;
+              if (ps.ofsPos !== sc.ofsPos) { assistPos = ps.ofsPos; break; }
+            }
+            if (assistPos >= 0) {
+              const ap = t1.players[t1.lineup[assistPos]];
+              if (ap) {
+                if (!silentPlayerStats[ap.name]) silentPlayerStats[ap.name] = {goals:0, assists:0, duels:0, duelWins:0, enName:ap.en_name};
+                silentPlayerStats[ap.name].assists = (silentPlayerStats[ap.name].assists || 0) + 1;
+              }
+            }
+          }
         }
         const win = isShoot ? isGoal : sc.result === '成功' || sc.result === 'ファール';
         const atkArea = (['FW_L','CR_L'].includes(sc.area)) ? 'GOAL_L'
@@ -934,10 +957,27 @@ function simulateSilent(t1data, t2data) {
       if (sc.offence === t2) {
         const p2 = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
         if (p2) {
-          if (!silentT2PlayerStats[p2.name]) silentT2PlayerStats[p2.name] = {goals:0, duels:0, duelWins:0, enName:p2.en_name};
+          if (!silentT2PlayerStats[p2.name]) silentT2PlayerStats[p2.name] = {goals:0, assists:0, duels:0, duelWins:0, enName:p2.en_name};
           silentT2PlayerStats[p2.name].duels++;
           if (isGoal || sc.result === '成功' || sc.result === 'ファール') silentT2PlayerStats[p2.name].duelWins++;
-          if (isGoal) { silentT2PlayerStats[p2.name].goals++; silentGoalScorers.push({time: res.time, name: p2.name, teamName: t2data.name, teamFlag: t2data.flag}); }
+          if (isGoal) {
+            silentT2PlayerStats[p2.name].goals++;
+            silentGoalScorers.push({time: res.time, name: p2.name, teamName: t2data.name, teamFlag: t2data.flag});
+            // アシスト: 同チームの連続成功シーンを遡り、最初に現れる「得点者と別の選手」の成功プレーを計上
+            let assistPos2 = -1;
+            for (let k = si - 1; k >= 0; k--) {
+              const ps = res.scenes[k];
+              if (ps.offence !== t2 || ps.result !== '成功') break;
+              if (ps.ofsPos !== sc.ofsPos) { assistPos2 = ps.ofsPos; break; }
+            }
+            if (assistPos2 >= 0) {
+              const ap2 = t2.players[t2.lineup[assistPos2]];
+              if (ap2) {
+                if (!silentT2PlayerStats[ap2.name]) silentT2PlayerStats[ap2.name] = {goals:0, assists:0, duels:0, duelWins:0, enName:ap2.en_name};
+                silentT2PlayerStats[ap2.name].assists = (silentT2PlayerStats[ap2.name].assists || 0) + 1;
+              }
+            }
+          }
         }
       }
       // t1守備シーン

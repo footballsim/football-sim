@@ -82,6 +82,43 @@ const i18n = {
     matchTitleEng: '日本 vs イングランド',
     btnPlayersList: '📋 選手データリスト',
     topLblWC: '2026W杯モード（日本代表）', topDescWC: 'グループステージから頂点を目指す',
+    topLblWCSim: 'W杯まるごとシミュレート', topDescWCSim: '実際の組み合わせで全104試合を一括演算',
+    wcsimTitle: '🌍 W杯まるごとシミュレート',
+    wcsimIntro: '2026W杯の実際のグループ組み合わせで、グループステージから決勝まで全104試合を一括シミュレート。今回の優勝国はどこだ？',
+    wcsimRunBtn: '🎲 大会まるごとシミュレート',
+    wcsimRunning: '⏳ シミュレート中…',
+    wcsimRerunBtn: '🔄 もう一度シミュレート',
+    wcsimDrawHeader: '出場48カ国・グループ組み合わせ',
+    wcsimGroupStage: 'グループステージ 結果',
+    wcsimThirdMatch: '3位決定戦',
+    wcsimChampionLabel: '優勝',
+    wcsimRunnerUpLabel: '準優勝',
+    wcsimThirdPlaceLabel: '3位',
+    wcsimAET: '延長',
+    wcsimStatsBtn: '📊 スタッツ詳細',
+    wcsimStatsTitle: '📊 大会スタッツ詳細',
+    wcsimStatsOverview: '📋 大会データ',
+    wcsimStatsTotalMatches: '総試合数',
+    wcsimStatsTotalGoals: '総ゴール数',
+    wcsimStatsAvgGoals: '1試合平均',
+    wcsimStatsET: '延長戦',
+    wcsimStatsPK: 'PK戦',
+    wcsimStatsTopMatch: '最多ゴール試合',
+    wcsimStatsBiggestWin: '最大点差勝利',
+    wcsimStatsGoalsRank: '🥇 得点ランキング',
+    wcsimStatsAssistsRank: '🎯 アシストランキング',
+    wcsimStatsGARank: '⚡ ゴール＋アシスト',
+    wcsimStatsDuelsRank: '⚔️ デュエル勝利数',
+    wcsimStatsGKRank: '🧤 GKセーブ数',
+    wcsimStatsTeamGoals: '🏟️ チーム総得点',
+    wcsimStatsTeamCS: '🛡️ クリーンシート',
+    wcsimStatsTeamShots: '🎯 チームシュート数',
+    wcsimStatsCSShort: 'CS',
+    wcsimStatsMatchUnit: '試合',
+    wcsimMVPLabel: '大会MVP',
+    wcsimUnitGoals: 'ゴール',
+    wcsimUnitAssists: 'アシスト',
+    wcsimUnitDuelWins: 'デュエル勝利',
     topLblSingle: 'シングルマッチ', topDescSingle: '好きな対戦カードをシミュレート',
     topLblPlayers: '選手データ', topDescPlayers: '全選手のパラメータを確認',
     xFollowLabel: '@Iwasaki18M をフォロー',
@@ -239,6 +276,43 @@ const i18n = {
     matchTitleEng: 'Japan vs England',
     btnPlayersList: '📋 Player Data List',
     topLblWC: '2026 W-Cup Mode (Japan)', topDescWC: 'From group stage to the top',
+    topLblWCSim: 'Full W-Cup Simulation', topDescWCSim: 'Simulate all 104 matches with the real draw',
+    wcsimTitle: '🌍 Full W-Cup Simulation',
+    wcsimIntro: 'Simulate the entire 2026 W-Cup with the real group draw — all 104 matches from the group stage to the final. Who lifts the trophy this time?',
+    wcsimRunBtn: '🎲 Simulate the Whole Cup',
+    wcsimRunning: '⏳ Simulating…',
+    wcsimRerunBtn: '🔄 Simulate Again',
+    wcsimDrawHeader: 'The 48 Teams & Group Draw',
+    wcsimGroupStage: 'Group Stage Results',
+    wcsimThirdMatch: 'Third-Place Match',
+    wcsimChampionLabel: 'CHAMPIONS',
+    wcsimRunnerUpLabel: 'Runners-up',
+    wcsimThirdPlaceLabel: 'Third place',
+    wcsimAET: 'AET',
+    wcsimStatsBtn: '📊 Stats Details',
+    wcsimStatsTitle: '📊 Tournament Stats',
+    wcsimStatsOverview: '📋 Tournament Data',
+    wcsimStatsTotalMatches: 'Matches',
+    wcsimStatsTotalGoals: 'Total Goals',
+    wcsimStatsAvgGoals: 'Avg / Match',
+    wcsimStatsET: 'Extra Time',
+    wcsimStatsPK: 'Shootouts',
+    wcsimStatsTopMatch: 'Highest-Scoring Match',
+    wcsimStatsBiggestWin: 'Biggest Win',
+    wcsimStatsGoalsRank: '🥇 Top Scorers',
+    wcsimStatsAssistsRank: '🎯 Top Assists',
+    wcsimStatsGARank: '⚡ Goals + Assists',
+    wcsimStatsDuelsRank: '⚔️ Duel Wins',
+    wcsimStatsGKRank: '🧤 GK Saves',
+    wcsimStatsTeamGoals: '🏟️ Team Goals',
+    wcsimStatsTeamCS: '🛡️ Clean Sheets',
+    wcsimStatsTeamShots: '🎯 Team Shots',
+    wcsimStatsCSShort: 'CS',
+    wcsimStatsMatchUnit: ' MP',
+    wcsimMVPLabel: 'Tournament MVP',
+    wcsimUnitGoals: 'Goals',
+    wcsimUnitAssists: 'Assists',
+    wcsimUnitDuelWins: 'Duel Wins',
     topLblSingle: 'Single Match', topDescSingle: 'Simulate any matchup',
     topLblPlayers: 'Player Data', topDescPlayers: 'Check all player parameters',
     xFollowLabel: 'Follow @Iwasaki18M',
@@ -452,6 +526,8 @@ function applyLang() {
   _setText('btn-players-list', t('btnPlayersList'));
   _setText('top-lbl-wc',      t('topLblWC'));
   _setText('top-desc-wc',     t('topDescWC'));
+  _setText('top-lbl-wcsim',   t('topLblWCSim'));
+  _setText('top-desc-wcsim',  t('topDescWCSim'));
   _setText('top-lbl-single',  t('topLblSingle'));
   _setText('top-desc-single', t('topDescSingle'));
   _setText('top-lbl-players', t('topLblPlayers'));
@@ -2580,17 +2656,17 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     default_system:"4-2-3-1", default_tactics:2, default_keyplayer:8, default_marked_player:7,
     default_lineup:[0,1,2,3,4,8,5,10,6,7,9,10],
     players:[
-      {name:"ガン",en_name:"Gunn",long_name:"アンガス・ガン",positions:["GK"],params:[50,50,50,50,83,78,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,83,80,50,75,78,75]},
-      {name:"パターソン",en_name:"Patterson",long_name:"ネイサン・パターソン",positions:["右SB"],params:[74,80,77,76,75,72,75,68,70,71,70,65,67,63,58,60,70,70,72,74,68,74,72,50,50,68,76,74,75]},
+      {name:"ガン",en_name:"Gunn",long_name:"アンガス・ガン",positions:["GK"],params:[50,50,50,50,74,48,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,73,71,50,70,78,75]},
+      {name:"パターソン",en_name:"Patterson",long_name:"ネイサン・パターソン",positions:["右SB"],params:[67,73,71,70,72,65,75,68,67,63,62,46,48,44,50,52,70,51,72,74,68,74,72,50,50,61,76,74,75]},
       {name:"ヘンドリー",en_name:"Hendry",long_name:"ジャック・ヘンドリー",positions:["CB"],params:[81,76,72,70,76,83,70,55,55,65,70,60,62,55,55,55,60,58,74,80,80,82,70,50,50,78,72,76,75]},
       {name:"マッケンナ",en_name:"McKenna",long_name:"スコット・マッケンナ",positions:["CB","左CB"],params:[80,77,73,71,77,82,71,56,56,66,71,61,63,56,56,56,61,59,75,81,81,83,71,50,50,77,73,77,75]},
       {name:"ロバートソン",en_name:"Robertson",long_name:"アンドリュー・ロバートソン",positions:["左SB","左SMF"],params:[76,80,76,78,79,73,79,74,76,76,74,67,70,65,62,63,74,73,76,77,72,76,76,50,50,70,79,82,75]},
-      {name:"ファーガソン",en_name:"Ferguson",long_name:"ルイス・ファーガソン",positions:["CMF","DMF"],params:[77,82,74,73,80,72,74,72,70,78,76,72,72,70,65,65,75,74,79,78,76,76,75,50,50,70,78,78,75]},
-      {name:"マクリーン",en_name:"McLean",long_name:"ケニー・マクリーン",positions:["CMF","DMF"],params:[75,80,72,71,78,71,73,70,69,77,78,73,72,70,70,68,73,72,77,76,74,74,73,50,50,68,76,76,75]},
-      {name:"マッギン",en_name:"McGinn",long_name:"ジョン・マッギン",positions:["CMF","OMF"],params:[78,84,74,74,82,74,76,76,73,81,79,76,76,73,72,70,78,78,78,76,72,72,76,50,50,72,80,82,75]},
+      {name:"ファーガソン",en_name:"Ferguson",long_name:"ルイス・ファーガソン",positions:["CMF","DMF"],params:[77,82,74,73,83,72,79,77,73,78,76,79,79,77,65,65,80,81,75,74,72,72,71,50,50,70,74,78,75]},
+      {name:"マクリーン",en_name:"McLean",long_name:"ケニー・マクリーン",positions:["CMF","DMF"],params:[75,80,61,60,73,71,73,70,64,68,69,68,67,65,61,59,73,67,69,68,66,66,65,50,50,68,68,76,75]},
+      {name:"マッギン",en_name:"McGinn",long_name:"ジョン・マッギン",positions:["CMF","OMF"],params:[82,88,69,69,82,78,80,80,73,81,79,76,76,73,72,70,82,78,78,76,72,72,76,50,50,76,80,82,75]},
       {name:"マクトミネイ",en_name:"McTominay",long_name:"スコット・マクトミネイ",positions:["CMF","OMF","DMF"],params:[82,83,75,74,82,75,76,74,72,68,79,78,78,75,70,68,76,80,78,77,72,72,76,50,50,73,80,83,75]},
-      {name:"ダイクス",en_name:"Dykes",long_name:"リンドン・ダイクス",positions:["CF"],params:[83,80,74,73,78,80,72,68,67,68,66,76,76,70,60,58,66,80,65,65,48,55,66,50,50,77,76,76,75]},
-      {name:"コンウェイ",en_name:"Conway",long_name:"トミー・コンウェイ",positions:["CF","WG"],params:[74,80,78,79,78,71,78,73,74,70,67,73,73,70,62,62,71,76,65,62,50,55,68,50,50,65,76,75,75]}
+      {name:"ダイクス",en_name:"Dykes",long_name:"リンドン・ダイクス",positions:["CF"],params:[83,80,66,65,72,80,68,64,61,53,51,70,70,64,45,43,62,74,34,34,25,25,35,50,50,77,45,76,75]},
+      {name:"コンウェイ",en_name:"Conway",long_name:"トミー・コンウェイ",positions:["CF","WG"],params:[59,65,78,79,78,56,78,73,74,57,54,73,73,70,49,49,71,76,29,26,25,25,32,50,50,50,40,75,75]}
     ,
       {name:"フォレスター",en_name:"Forster",long_name:"フレイザー・フォレスター",positions:["GK"],params:[50,50,50,50,76,78,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,74,72,50,75,68,75]},
       {name:"マクリーン2",en_name:"Gordon2",long_name:"クレイグ・ゴードン",positions:["GK"],params:[50,50,50,50,78,74,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,77,74,50,78,70,75]},
@@ -3819,25 +3895,25 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
     players:[
       // GK: Borjan (FC26 OVR77, DIV78, HAN76, KIC72, REF79, SPD55, POS77)
-      {name:"ボルヤン",en_name:"Borjan",long_name:"ミラン・ボルヤン",positions:["GK"],params:[50,50,50,50,79,55,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,78,76,50,77,72,75]},
+      {name:"ボルヤン",en_name:"Borjan",long_name:"ミラン・ボルヤン",positions:["GK"],params:[50,50,50,50,75,46,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,71,76,50,81,72,75]},
       // RB: Johnston (FC26 OVR76, PAC80, SHO58, PAS70, DRI72, DEF76, PHY76)
-      {name:"ジョンストン",en_name:"Johnston",long_name:"アリスター・ジョンストン",positions:["右SB"],params:[76,76,80,81,75,72,70,70,75,70,64,48,50,52,40,42,70,52,74,76,74,74,72,50,50,70,70,70,75]},
+      {name:"ジョンストン",en_name:"Johnston",long_name:"アリスター・ジョンストン",positions:["右SB"],params:[81,81,80,81,75,77,70,70,75,76,70,57,59,61,46,48,70,61,74,76,74,74,72,50,50,75,70,70,75]},
       // RCB: K.Miller (FC26 OVR77, PAC78, SHO44, PAS68, DRI66, DEF78, PHY80)
-      {name:"K・ミラー",en_name:"K.Miller",long_name:"カマル・ミラー",positions:["CB"],params:[80,80,78,79,72,80,64,64,72,68,62,36,34,42,28,30,64,34,78,80,78,78,76,50,50,80,74,72,75]},
+      {name:"K・ミラー",en_name:"K.Miller",long_name:"カマル・ミラー",positions:["CB"],params:[80,80,74,75,68,80,59,59,68,61,55,47,45,53,25,25,59,45,67,69,67,67,65,50,50,80,63,72,75]},
       // LCB: Cornelius (FC26 OVR74, PAC76, SHO40, PAS64, DRI62, DEF76, PHY79)
-      {name:"コーネリウス",en_name:"Cornelius",long_name:"デレク・コーネリウス",positions:["CB"],params:[78,78,76,77,68,78,60,60,68,64,58,32,30,38,26,28,60,30,76,78,76,76,74,50,50,78,72,70,75]},
+      {name:"コーネリウス",en_name:"Cornelius",long_name:"デレク・コーネリウス",positions:["CB"],params:[85,85,66,67,63,85,60,60,63,58,52,44,42,50,25,25,60,42,71,73,71,71,69,50,50,85,67,70,75]},
       // LSB: Adekugbe (FC26 OVR73, PAC82, SHO54, PAS68, DRI72, DEF70, PHY70)
       {name:"アデクグベ",en_name:"Adekugbe",long_name:"サミュエル・アデクグベ",positions:["左SB"],params:[70,70,82,83,74,66,70,70,74,68,62,46,48,50,40,42,70,54,68,70,68,68,66,50,50,64,68,68,75]},
       // RDMF: Eustaquio (FC26 OVR80, PAC74, SHO73, PAS82, DRI80, DEF78, PHY76)
-      {name:"ユスタキオ",en_name:"Eustaquio",long_name:"ステファン・ユスタキオ",positions:["CMF","DMF"],params:[76,78,74,75,78,74,78,80,78,82,78,68,70,72,54,58,80,72,76,78,76,76,74,50,50,70,78,78,75]},
+      {name:"ユスタキオ",en_name:"Eustaquio",long_name:"ステファン・ユスタキオ",positions:["CMF","DMF"],params:[76,78,65,66,70,74,71,73,70,76,72,68,70,72,48,52,73,72,72,74,72,72,70,50,50,70,74,78,75]},
       // LDMF: Osorio (FC26 OVR76, PAC72, SHO68, PAS76, DRI76, DEF72, PHY72)
-      {name:"オソリオ",en_name:"Osorio",long_name:"ジョナサン・オソリオ",positions:["CMF","DMF"],params:[72,74,72,73,73,70,74,74,73,76,70,62,64,66,52,54,74,66,70,72,70,70,68,50,50,66,72,72,75]},
+      {name:"オソリオ",en_name:"Osorio",long_name:"ジョナサン・オソリオ",positions:["CMF","DMF"],params:[65,67,49,50,62,63,74,74,62,76,70,62,64,66,52,54,74,66,61,63,61,61,59,50,50,59,63,72,75]},
       // RSM: Buchanan (FC26 OVR78, PAC90, SHO70, PAS72, DRI82, DEF48, PHY68)
       {name:"ブキャナン",en_name:"Buchanan",long_name:"テイジョン・ブキャナン",positions:["右WG","右SMF"],params:[66,68,90,92,82,62,80,82,82,72,66,66,66,68,54,58,82,72,44,46,44,44,46,50,50,60,72,72,75]},
       // LSM: A.Davies (FC26 OVR87, PAC97, SHO74, PAS76, DRI86, DEF78, PHY80) ← keyplayer
-      {name:"A・デイビス",en_name:"A.Davies",long_name:"アルフォンソ・デイビス",positions:["左WG","左SB","左SMF"],params:[80,82,97,98,87,78,84,86,87,76,70,70,70,74,58,62,86,78,76,78,76,76,74,50,50,72,82,80,75]},
+      {name:"A・デイビス",en_name:"A.Davies",long_name:"アルフォンソ・デイビス",positions:["左WG","左SB","左SMF"],params:[76,78,92,93,85,74,84,86,85,81,75,65,65,69,63,67,86,73,76,78,76,76,74,50,50,68,82,80,75]},
       // OMF: Kone (FC26 OVR79, PAC80, SHO72, PAS76, DRI78, DEF72, PHY76)
-      {name:"コネ",en_name:"Kone",long_name:"イスマエル・コネ",positions:["CMF","OMF"],params:[76,78,80,81,76,74,76,78,76,76,72,68,68,70,56,58,78,70,70,72,70,70,68,50,50,70,74,74,75]},
+      {name:"コネ",en_name:"Kone",long_name:"イスマエル・コネ",positions:["CMF","OMF"],params:[71,73,80,81,76,69,76,78,76,72,68,68,68,70,52,54,78,70,70,72,70,70,68,50,50,65,74,74,75]},
       // CF: J.David (FC26 OVR86, PAC87, SHO87, PAS77, DRI85, DEF44, PHY72) ← marked
       {name:"J・デービッド",en_name:"J.David",long_name:"ジョナサン・デービッド",positions:["CF"],params:[72,74,87,88,84,68,83,85,84,77,70,84,82,86,64,66,85,84,40,42,40,40,42,50,50,64,82,82,75]},
       // Sub GK: Crepeau (FC26 OVR77, DIV78, HAN76, KIC74, REF79, SPD60, POS77)
@@ -4038,17 +4114,17 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
     players:[
       // GK: Bayindir (FC26 OVR80, DIV81, HAN79, KIC76, REF81, SPD60, POS80)
-      {name:"バイウンドゥル",en_name:"Bayindir",long_name:"アルタイ・バイウンドゥル",positions:["GK"],params:[50,50,50,50,81,60,50,50,50,50,76,50,50,50,50,50,50,50,50,50,50,50,50,81,79,50,80,76,75]},
+      {name:"バイウンドゥル",en_name:"Bayindir",long_name:"アルタイ・バイウンドゥル",positions:["GK"],params:[50,50,50,50,77,30,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,77,72,50,75,76,75]},
       // RB: Z.Celik (FC26 OVR79, PAC82, SHO60, PAS74, DRI76, DEF78, PHY78)
-      {name:"Z・チェリク",en_name:"Z.Celik",long_name:"ゼキ・チェリク",positions:["右SB"],params:[78,78,82,83,78,74,74,76,78,74,68,52,54,56,46,48,76,58,76,78,76,76,74,50,50,72,74,74,75]},
+      {name:"Z・チェリク",en_name:"Z.Celik",long_name:"ゼキ・チェリク",positions:["右SB"],params:[78,78,71,72,73,74,74,76,73,74,68,57,59,61,46,48,76,63,76,78,76,76,74,50,50,72,74,74,75]},
       // RCB: M.Demiral (FC26 OVR82, PAC80, SHO50, PAS70, DRI70, DEF84, PHY86) ← captain
-      {name:"デミラル",en_name:"Demiral",long_name:"メリフ・デミラル",positions:["CB"],params:[86,84,80,81,79,88,68,68,79,70,64,42,40,48,32,36,68,38,84,86,84,84,82,50,50,88,80,80,75]},
+      {name:"デミラル",en_name:"Demiral",long_name:"メリフ・デミラル",positions:["CB"],params:[81,79,69,70,70,83,60,60,70,55,49,42,40,48,25,25,60,38,80,82,80,80,78,50,50,83,76,80,75]},
       // LCB: S.Akaydin (FC26 OVR76, PAC72, SHO44, PAS68, DRI64, DEF78, PHY80)
-      {name:"アカイドゥン",en_name:"Akaydin",long_name:"サメト・アカイドゥン",positions:["CB"],params:[80,80,72,73,70,80,62,62,70,68,62,36,34,42,28,30,62,32,78,80,78,78,76,50,50,80,74,72,75]},
+      {name:"アカイドゥン",en_name:"Akaydin",long_name:"サメト・アカイドゥン",positions:["CB"],params:[76,76,54,55,54,76,48,48,54,46,40,36,34,42,25,25,48,32,73,75,73,73,71,50,50,76,69,72,75]},
       // LSB: F.Kadioglu (FC26 OVR80, PAC84, SHO62, PAS76, DRI78, DEF76, PHY72)
       {name:"カドゥオール",en_name:"Kadioglu",long_name:"フェルディ・カドゥオール",positions:["左SB","左WG"],params:[72,74,84,85,79,70,76,78,79,76,70,56,58,60,52,58,78,66,74,76,74,74,72,50,50,66,76,76,75]},
       // RDMF: H.Calhanoglu (FC26 OVR87, PAC78, SHO82, PAS90, DRI86, DEF82, PHY80) ← keyplayer
-      {name:"チャルハノール",en_name:"Calhanoglu",long_name:"ハカン・チャルハノール",positions:["DMF","CMF","OMF"],params:[80,82,78,79,86,78,84,86,86,90,86,80,80,84,72,76,86,84,82,84,82,80,80,50,50,74,86,88,75]},
+      {name:"チャルハノール",en_name:"Calhanoglu",long_name:"ハカン・チャルハノール",positions:["DMF","CMF","OMF"],params:[73,75,70,71,80,71,80,82,80,90,86,80,80,84,72,76,82,84,82,84,82,80,80,50,50,67,86,88,75]},
       // LDMF: S.Ozcan (FC26 OVR75, PAC74, SHO62, PAS74, DRI72, DEF76, PHY76)
       {name:"S・オズジャン",en_name:"S.Ozcan",long_name:"サリフ・オズジャン",positions:["DMF","CMF"],params:[76,78,74,75,73,74,70,70,73,74,68,56,58,60,48,50,70,62,74,76,74,74,72,50,50,70,72,72,75]},
       // RSM: Akturkoğlu (FC26 OVR79, PAC90, SHO74, PAS72, DRI82, DEF46, PHY68)
@@ -4058,7 +4134,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // OMF: Arda Güler (FC26 OVR84, PAC80, SHO82, PAS84, DRI88, DEF48, PHY68)
       {name:"ギュレル",en_name:"Guler",long_name:"アルダ・ギュレル",positions:["OMF","右WG"],params:[68,70,80,82,84,64,86,88,84,84,80,80,80,82,74,78,88,84,44,46,44,44,46,50,50,62,82,82,75]},
       // CF: B.Yilmaz (FC26 OVR78, PAC78, SHO78, PAS66, DRI76, DEF42, PHY74) ← marked
-      {name:"B・イルドゥズ",en_name:"B.Yilmaz",long_name:"バリシュ・アルペル・イルマズ",positions:["CF","右WG"],params:[74,76,78,79,77,70,74,76,77,66,60,76,74,78,58,60,74,76,38,40,38,38,40,50,50,68,72,70,75]},
+      {name:"B・イルドゥズ",en_name:"B.Yilmaz",long_name:"バリシュ・アルペル・イルマズ",positions:["CF","右WG"],params:[91,93,92,93,87,87,79,81,87,75,69,76,74,78,67,69,79,76,68,70,68,68,70,50,50,85,99,70,75]},
       // Sub GK: Uğurcan Çakır (FC26 OVR79, DIV80, HAN78, KIC74, REF80, SPD58, POS79)
       {name:"U・チャクル",en_name:"U.Cakir",long_name:"ウールカン・チャクル",positions:["GK"],params:[50,50,50,50,80,58,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,80,78,50,79,74,75]},
       // Sub GK: Uurkan (FC26 OVR76, DIV77, HAN75, KIC70, REF77, SPD55, POS76)

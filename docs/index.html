@@ -80,6 +80,13 @@
           <div class="top-menu-desc" id="top-desc-wc">グループステージから頂点を目指す</div>
         </div>
       </div>
+      <div class="top-menu-card top-menu-wcsim" onclick="showWCSim()">
+        <div class="top-menu-icon">🌍</div>
+        <div>
+          <div class="top-menu-label" id="top-lbl-wcsim">W杯まるごとシミュレート</div>
+          <div class="top-menu-desc" id="top-desc-wcsim">実際の組み合わせで全104試合を一括演算</div>
+        </div>
+      </div>
       <div class="top-menu-card top-menu-single" onclick="showScreen('single')">
         <div class="top-menu-icon">⚽</div>
         <div>
@@ -109,6 +116,30 @@
     </div>
     <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v2.1.2</div>
   </div>
+</div>
+
+<!-- WC FULL SIM SCREEN: W杯まるごとシミュレート -->
+<div id="screen-wcsim" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div class="screen-header" style="background:rgba(0,0,0,0.3);width:100%">
+    <button class="back-btn" style="color:#fff" onclick="showScreen('title')">← 戻る</button>
+    <div class="screen-title-text" style="color:#ffffff" id="wcsim-title">🌍 W杯まるごとシミュレート</div>
+  </div>
+  <div style="width:100%;max-width:880px;padding:14px 14px 48px;box-sizing:border-box">
+    <div id="wcsim-intro" style="text-align:center;color:rgba(255,255,255,0.78);font-size:12.5px;line-height:1.8;margin:4px auto 14px;max-width:560px"></div>
+    <div style="max-width:360px;margin:0 auto 20px">
+      <button id="wcsim-run-btn" class="start-btn" onclick="runWCSim()" style="color:#ffffff">🎲 大会まるごとシミュレート</button>
+    </div>
+    <div id="wcsim-content"></div>
+  </div>
+</div>
+
+<!-- WC FULL SIM STATS SCREEN: 大会スタッツ詳細 -->
+<div id="screen-wcsim-stats" class="screen" style="background:linear-gradient(160deg,#0d1117 0%,#0f1923 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div class="screen-header" style="background:rgba(0,0,0,0.4);width:100%">
+    <button class="back-btn" style="color:#fff" onclick="wcsimStatsBack()">← 戻る</button>
+    <div class="screen-title-text" style="color:#ffffff" id="wcsim-stats-title">📊 大会スタッツ詳細</div>
+  </div>
+  <div id="wcsim-stats-content" style="width:100%;max-width:880px;padding:14px 14px 48px;box-sizing:border-box"></div>
 </div>
 
 <!-- SINGLE MATCH SCREEN: チーム1選択 -->
@@ -728,6 +759,7 @@
 <script src="js/simulate.js"></script>
 <script src="js/narration.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/tournament.js"></script>
 <div id="oop-toast"></div>
 </body>
 </html>
