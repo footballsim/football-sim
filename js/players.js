@@ -2762,7 +2762,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   mexico2026: {
     name:"メキシコ",en_name:"Mexico",team_color:"#006847",flag:"🇲🇽",
-    default_system:"4-1-2-3",default_tactics:TACTICS_POSSESSION,
+    default_system:"4-1-2-3",default_tactics:TACTICS_PRESS,
     default_keyplayer:10,default_marked_player:10,
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
     players:[
