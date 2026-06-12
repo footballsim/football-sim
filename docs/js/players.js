@@ -2452,7 +2452,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"町野",en_name:"Machino",long_name:"町野修斗",positions:["CF","OMF","左WG","左SMF"],params:[78,78,74,72,76,78,72,68,68,68,64,76,74,66,58,58,66,78,58,54,48,52,64,51,51,76,76,74,75]},
       {name:"上田",en_name:"Ueda",long_name:"上田綺世",positions:["CF"],params:[79,80,76,77,81,96,78,73,75,74,54,83,76,81,67,68,78,84,36,38,36,36,35,51,51,90,72,84,75]},
       {name:"塩貝",en_name:"Shiokkai",long_name:"塩貝健人",positions:["CF","WG"],params:[68,68,86,88,72,76,68,78,84,66,56,74,68,73,66,74,72,74,48,50,48,44,48,51,51,66,70,76,75]},
-      {name:"冨安",en_name:"Tomiyasu",long_name:"冨安健洋",positions:["右CB","CB","右SB","左SB"],params:[82,72,74,73,82,85,66,80,74,82,78,55,50,70,62,60,80,70,82,84,84,84,82,51,51,82,76,80,75]}
+      {name:"冨安",en_name:"Tomiyasu",long_name:"冨安健洋",positions:["右CB","CB","右SB","左SB"],params:[82,72,74,73,82,85,66,80,74,82,78,55,50,70,62,60,80,70,82,84,84,84,82,51,51,82,76,80,75]},
+      {name:"久保",en_name:"Kubo",long_name:"久保建英",positions:["OMF","右SMF","右WG"],params:[62,76,85,88,80,72,87,87,86,79,72,79,78,83,77,79,86,80,42,60,58,46,52,51,51,54,80,80,75]}
     ]
   },
   scotland2026: {
