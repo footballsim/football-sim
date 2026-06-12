@@ -1767,7 +1767,7 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "シャルル": {"profile": "ハイチのCBバックアップ。安定した守備でスクワッドに貢献する守備的プレイヤー。", "profile_en": "Haiti's backup centre-back. A defensive player who contributes to the squad with stable defending.", "height": 183, "weight": 79},
 "ティリオン": {"profile": "キュラソーの右SBバックアップ。堅実な守備と機動力でサイドを守るDF。", "profile_en": "Curaçao's backup right-back. A defender who guards the flank with solid defending and mobility.", "height": 180, "weight": 76},
 "スマルシル": {"profile": "キュラソーのDMFバックアップ。守備的貢献と安定したポジショニングで代表を支える。", "profile_en": "Curaçao's backup DMF. Supports the national team with defensive contribution and stable positioning.", "height": 180, "weight": 76},
-"D・コールス": {"profile": "CBと右SBをこなせるキュラソーのユーティリティDF。守備の多様性でスクワッドに貢献する。", "profile_en": "A Curaçao utility defender capable of centre-back and right-back. Contributes to the squad with defensive versatility.", "height": 183, "weight": 79}
+"D・コールス": {"profile": "CBと右SBをこなせるキュラソーのユーティリティDF。守備の多様性でスクワッドに貢献する。", "profile_en": "A Curaçao utility defender capable of centre-back and right-back. Contributes to the squad with defensive versatility.", "height": 183, "weight": 79},
 
   "アレオラ": {"profile": "卓越した反射神経と安定したコーチングを誇るフランスのGKバックアップ。空中戦にも強く、代表GK陣を支える存在。", "profile_en": "France's backup goalkeeper with excellent reflexes and commanding presence. Strong in aerial duels, he provides solid cover for the national squad.", "height": 197, "weight": 110},
   "シュバリエ": {"profile": "若手GKとしてフランス代表に台頭し、脚元の技術と反射神経を武器とする守護神。次世代のフランスGKとして期待される。", "profile_en": "An emerging young goalkeeper who rose to the French national team through sharp reflexes and strong footwork. Seen as a next-generation French keeper.", "height": 194, "weight": 88},
