@@ -3216,7 +3216,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     name:"韓国",en_name:"South Korea",team_color:"#C60C30",flag:"🇰🇷",
     default_system:"3-4-2-1",default_tactics:TACTICS_FREE,
     default_keyplayer:9,default_marked_player:2,
-    default_lineup:[12,14,2,3,6,5,1,4,7,8,9],
+    default_lineup:[12,2,3,14,6,5,1,4,8,7,9],
     players:[
       // GK: Jo Hyeon-woo (FC26 OVR75, DIV79, HAN72, KIC62, REF77, SPD79, POS73)
       {name:"ジョ・ヒョヌ",en_name:"Jo Hyeon-woo",long_name:"ジョ・ヒョヌ",positions:["GK"],params:[50,50,50,50,77,79,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,79,72,50,73,73,75]},
@@ -4152,7 +4152,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     name:"チェコ",en_name:"Czech Republic",team_color:"#D7141A",flag:"🇨🇿",
     default_system:"3-4-2-1",default_tactics:TACTICS_PRESS,
     default_keyplayer:5,default_marked_player:10,
-    default_lineup:[0,1,2,3,5,4,7,6,9,8,10],
+    default_lineup:[0,2,7,3,4,1,5,6,9,8,10],
     players:[
       // GK: Kovar (starter)
       {name:"コヴァール",en_name:"Kovar",long_name:"マルティン・コヴァール",positions:["GK"],params:[50,50,50,50,75,56,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,75,73,50,74,68,75]},
