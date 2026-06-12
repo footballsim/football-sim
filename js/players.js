@@ -2393,7 +2393,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   japan2026vsEngland: {
     name:"日本",en_name:"Japan",team_color:"#003087",flag:"🇯🇵",
     default_system:"3-4-2-1", default_tactics:4, default_keyplayer:9, default_marked_player:6,
-    default_lineup:[0,1,2,3,4,5,10,6,8,7,9,10],
+    default_lineup:[0,1,2,3,4,5,10,6,8,22,9,10],
     players:[
       {name:"鈴木彩",en_name:"Suzuki A.",long_name:"鈴木彩艶",positions:["GK"],params:[50,50,50,50,80,78,50,50,50,50,71,50,50,50,50,50,50,50,50,50,50,50,50,80,76,50,75,74,75]},
       {name:"谷口",en_name:"Taniguchi",long_name:"谷口彰悟",positions:["CB"],params:[75,80,74,62,75,76,68,62,66,77,77,48,55,68,54,60,76,65,76,78,76,74,73,51,51,76,70,78,75]},
@@ -2415,7 +2415,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"板倉",en_name:"Itakura",long_name:"板倉滉",positions:["CB","DMF"],params:[83,80,78,78,76,87,68,62,72,74,73,44,52,62,52,58,74,55,83,84,81,81,81,51,51,83,66,76,75]},
       {name:"鈴木唯",en_name:"Suzuki Y.",long_name:"鈴木唯人",positions:["OMF","右WG","右SMF"],params:[54,84,83,85,72,64,86,80,82,78,68,70,71,75,62,65,79,77,58,58,55,55,53,50,50,54,78,72,75]},
       {name:"田中碧",en_name:"Tanaka A.",long_name:"田中碧",positions:["CMF","DMF","OMF"],params:[63,81,68,70,72,68,80,73,70,76,72,63,70,70,62,68,76,62,73,72,70,72,71,50,50,56,72,77,75]},
-      {name:"遠藤航",en_name:"Endo W.",long_name:"遠藤航",positions:["DMF","CMF","CB","右SB"],params:[67,77,52,66,77,85,72,76,64,79,78,67,73,73,49,45,78,68,78,79,77,79,80,50,50,79,75,79,75]},
+      {name:"町野",en_name:"Machino",long_name:"町野修斗",positions:["CF","OMF","左WG","左SMF"],params:[78,78,74,72,76,78,72,68,68,68,64,76,74,66,58,58,66,78,58,54,48,52,64,51,51,76,76,74,75]},
       {name:"久保",en_name:"Kubo",long_name:"久保建英",positions:["OMF","右SMF","右WG"],params:[62,76,85,88,80,72,87,87,86,79,72,79,78,83,77,79,86,80,42,60,58,46,52,51,51,54,80,80,75]},
       {name:"前田大",en_name:"Maeda",long_name:"前田大然",positions:["WG","左SMF","CF","OMF"],params:[67,93,88,91,84,85,90,72,80,73,56,78,73,73,55,72,70,82,56,58,56,58,60,51,51,72,75,75,75]},
       {name:"塩貝",en_name:"Shiokkai",long_name:"塩貝健人",positions:["CF","WG"],params:[68,68,86,88,72,76,68,78,84,66,56,74,68,73,66,74,72,74,48,50,48,44,48,51,51,66,70,76,75]},
@@ -2452,8 +2452,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"町野",en_name:"Machino",long_name:"町野修斗",positions:["CF","OMF","左WG","左SMF"],params:[78,78,74,72,76,78,72,68,68,68,64,76,74,66,58,58,66,78,58,54,48,52,64,51,51,76,76,74,75]},
       {name:"上田",en_name:"Ueda",long_name:"上田綺世",positions:["CF"],params:[79,80,76,77,81,96,78,73,75,74,54,83,76,81,67,68,78,84,36,38,36,36,35,51,51,90,72,84,75]},
       {name:"塩貝",en_name:"Shiokkai",long_name:"塩貝健人",positions:["CF","WG"],params:[68,68,86,88,72,76,68,78,84,66,56,74,68,73,66,74,72,74,48,50,48,44,48,51,51,66,70,76,75]},
-      {name:"冨安",en_name:"Tomiyasu",long_name:"冨安健洋",positions:["右CB","CB","右SB","左SB"],params:[82,72,74,73,82,85,66,80,74,82,78,55,50,70,62,60,80,70,82,84,84,84,82,51,51,82,76,80,75]},
-      {name:"遠藤航",en_name:"Endo W.",long_name:"遠藤航",positions:["DMF","CMF","CB","右SB"],params:[67,77,52,66,77,85,72,76,64,79,78,67,73,73,49,45,78,68,78,79,77,79,80,50,50,79,75,79,75]}
+      {name:"冨安",en_name:"Tomiyasu",long_name:"冨安健洋",positions:["右CB","CB","右SB","左SB"],params:[82,72,74,73,82,85,66,80,74,82,78,55,50,70,62,60,80,70,82,84,84,84,82,51,51,82,76,80,75]}
     ]
   },
   scotland2026: {
@@ -2493,7 +2492,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   japan2026vsNetherlands: {
     name:"日本",en_name:"Japan",team_color:"#003087",flag:"🇯🇵",
     default_system:"3-4-2-1", default_tactics:4, default_keyplayer:9, default_marked_player:1,
-    default_lineup:[0,1,2,3,4,20,10,6,21,5,9],
+    default_lineup:[0,1,2,3,4,5,10,6,21,22,9],
     players:[
       {name:"鈴木彩",en_name:"Suzuki A.",long_name:"鈴木彩艶",positions:["GK"],params:[50,50,50,50,80,78,50,50,50,50,71,50,50,50,50,50,50,50,50,50,50,50,50,80,76,50,75,74,75]},
       {name:"谷口",en_name:"Taniguchi",long_name:"谷口彰悟",positions:["CB"],params:[75,80,74,62,75,76,68,62,66,77,77,48,55,68,54,60,76,65,76,78,76,74,73,51,51,76,70,78,75]},
@@ -2515,7 +2514,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"板倉",en_name:"Itakura",long_name:"板倉滉",positions:["CB","DMF"],params:[83,80,78,78,76,87,68,62,72,74,73,44,52,62,52,58,74,55,83,84,81,81,81,51,51,83,66,76,75]},
       {name:"鈴木唯",en_name:"Suzuki Y.",long_name:"鈴木唯人",positions:["OMF","右WG","右SMF"],params:[54,84,83,85,72,64,86,80,82,78,68,70,71,75,62,65,79,77,58,58,55,55,53,50,50,54,78,72,75]},
       {name:"田中碧",en_name:"Tanaka A.",long_name:"田中碧",positions:["CMF","DMF","OMF"],params:[63,81,68,70,72,68,80,73,70,76,72,63,70,70,62,68,76,62,73,72,70,72,71,50,50,56,72,77,75]},
-      {name:"遠藤航",en_name:"Endo W.",long_name:"遠藤航",positions:["DMF","CMF","CB","右SB"],params:[67,77,52,66,77,85,72,76,64,79,78,67,73,73,49,45,78,68,78,79,77,79,80,50,50,79,75,79,75]},
+      {name:"町野",en_name:"Machino",long_name:"町野修斗",positions:["CF","OMF","左WG","左SMF"],params:[78,78,74,72,76,78,72,68,68,68,64,76,74,66,58,58,66,78,58,54,48,52,64,51,51,76,76,74,75]},
       {name:"久保",en_name:"Kubo",long_name:"久保建英",positions:["OMF","右SMF","右WG"],params:[62,76,85,88,80,72,87,87,86,79,72,79,78,83,77,79,86,80,42,60,58,46,52,51,51,54,80,80,75]},
       {name:"前田大",en_name:"Maeda",long_name:"前田大然",positions:["WG","左SMF","CF","OMF"],params:[67,93,88,91,84,85,90,72,80,73,56,78,73,73,55,72,70,82,56,58,56,58,60,51,51,72,75,75,75]},
       {name:"塩貝",en_name:"Shiokkai",long_name:"塩貝健人",positions:["CF","WG"],params:[68,68,86,88,72,76,68,78,84,66,56,74,68,73,66,74,72,74,48,50,48,44,48,51,51,66,70,76,75]},
@@ -2526,7 +2525,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   japan2026vsTunisia: {
     name:"日本",en_name:"Japan",team_color:"#003087",flag:"🇯🇵",
     default_system:"3-4-2-1", default_tactics:4, default_keyplayer:9, default_marked_player:1,
-    default_lineup:[0,1,2,3,4,20,10,6,21,5,9],
+    default_lineup:[0,1,2,3,4,5,10,6,21,22,9],
     players:[
       {name:"鈴木彩",en_name:"Suzuki A.",long_name:"鈴木彩艶",positions:["GK"],params:[50,50,50,50,80,78,50,50,50,50,71,50,50,50,50,50,50,50,50,50,50,50,50,80,76,50,75,74,75]},
       {name:"谷口",en_name:"Taniguchi",long_name:"谷口彰悟",positions:["CB"],params:[75,80,74,62,75,76,68,62,66,77,77,48,55,68,54,60,76,65,76,78,76,74,73,51,51,76,70,78,75]},
@@ -2548,7 +2547,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"板倉",en_name:"Itakura",long_name:"板倉滉",positions:["CB","DMF"],params:[83,80,78,78,76,87,68,62,72,74,73,44,52,62,52,58,74,55,83,84,81,81,81,51,51,83,66,76,75]},
       {name:"鈴木唯",en_name:"Suzuki Y.",long_name:"鈴木唯人",positions:["OMF","右WG","右SMF"],params:[54,84,83,85,72,64,86,80,82,78,68,70,71,75,62,65,79,77,58,58,55,55,53,50,50,54,78,72,75]},
       {name:"田中碧",en_name:"Tanaka A.",long_name:"田中碧",positions:["CMF","DMF","OMF"],params:[63,81,68,70,72,68,80,73,70,76,72,63,70,70,62,68,76,62,73,72,70,72,71,50,50,56,72,77,75]},
-      {name:"遠藤航",en_name:"Endo W.",long_name:"遠藤航",positions:["DMF","CMF","CB","右SB"],params:[67,77,52,66,77,85,72,76,64,79,78,67,73,73,49,45,78,68,78,79,77,79,80,50,50,79,75,79,75]},
+      {name:"町野",en_name:"Machino",long_name:"町野修斗",positions:["CF","OMF","左WG","左SMF"],params:[78,78,74,72,76,78,72,68,68,68,64,76,74,66,58,58,66,78,58,54,48,52,64,51,51,76,76,74,75]},
       {name:"久保",en_name:"Kubo",long_name:"久保建英",positions:["OMF","右SMF","右WG"],params:[62,76,85,88,80,72,87,87,86,79,72,79,78,83,77,79,86,80,42,60,58,46,52,51,51,54,80,80,75]},
       {name:"前田大",en_name:"Maeda",long_name:"前田大然",positions:["WG","左SMF","CF","OMF"],params:[67,93,88,91,84,85,90,72,80,73,56,78,73,73,55,72,70,82,56,58,56,58,60,51,51,72,75,75,75]},
       {name:"塩貝",en_name:"Shiokkai",long_name:"塩貝健人",positions:["CF","WG"],params:[68,68,86,88,72,76,68,78,84,66,56,74,68,73,66,74,72,74,48,50,48,44,48,51,51,66,70,76,75]},
@@ -2559,7 +2558,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   japan2026vsSweden: {
     name:"日本",en_name:"Japan",team_color:"#003087",flag:"🇯🇵",
     default_system:"3-4-2-1", default_tactics:4, default_keyplayer:9, default_marked_player:1,
-    default_lineup:[0,1,2,3,4,20,10,6,21,5,9],
+    default_lineup:[0,1,2,3,4,5,10,6,21,22,9],
     players:[
       {name:"鈴木彩",en_name:"Suzuki A.",long_name:"鈴木彩艶",positions:["GK"],params:[50,50,50,50,80,78,50,50,50,50,71,50,50,50,50,50,50,50,50,50,50,50,50,80,76,50,75,74,75]},
       {name:"谷口",en_name:"Taniguchi",long_name:"谷口彰悟",positions:["CB"],params:[75,80,74,62,75,76,68,62,66,77,77,48,55,68,54,60,76,65,76,78,76,74,73,51,51,76,70,78,75]},
@@ -2581,7 +2580,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"板倉",en_name:"Itakura",long_name:"板倉滉",positions:["CB","DMF"],params:[83,80,78,78,76,87,68,62,72,74,73,44,52,62,52,58,74,55,83,84,81,81,81,51,51,83,66,76,75]},
       {name:"鈴木唯",en_name:"Suzuki Y.",long_name:"鈴木唯人",positions:["OMF","右WG","右SMF"],params:[54,84,83,85,72,64,86,80,82,78,68,70,71,75,62,65,79,77,58,58,55,55,53,50,50,54,78,72,75]},
       {name:"田中碧",en_name:"Tanaka A.",long_name:"田中碧",positions:["CMF","DMF","OMF"],params:[63,81,68,70,72,68,80,73,70,76,72,63,70,70,62,68,76,62,73,72,70,72,71,50,50,56,72,77,75]},
-      {name:"遠藤航",en_name:"Endo W.",long_name:"遠藤航",positions:["DMF","CMF","CB","右SB"],params:[67,77,52,66,77,85,72,76,64,79,78,67,73,73,49,45,78,68,78,79,77,79,80,50,50,79,75,79,75]},
+      {name:"町野",en_name:"Machino",long_name:"町野修斗",positions:["CF","OMF","左WG","左SMF"],params:[78,78,74,72,76,78,72,68,68,68,64,76,74,66,58,58,66,78,58,54,48,52,64,51,51,76,76,74,75]},
       {name:"久保",en_name:"Kubo",long_name:"久保建英",positions:["OMF","右SMF","右WG"],params:[62,76,85,88,80,72,87,87,86,79,72,79,78,83,77,79,86,80,42,60,58,46,52,51,51,54,80,80,75]},
       {name:"前田大",en_name:"Maeda",long_name:"前田大然",positions:["WG","左SMF","CF","OMF"],params:[67,93,88,91,84,85,90,72,80,73,56,78,73,73,55,72,70,82,56,58,56,58,60,51,51,72,75,75,75]},
       {name:"塩貝",en_name:"Shiokkai",long_name:"塩貝健人",positions:["CF","WG"],params:[68,68,86,88,72,76,68,78,84,66,56,74,68,73,66,74,72,74,48,50,48,44,48,51,51,66,70,76,75]},
