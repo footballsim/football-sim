@@ -2706,8 +2706,8 @@ function shareToReddit(mode) {
       if(chanceResults){chanceResults.forEach(function(r){r.scenes.forEach(function(s){if(s.offence===gameState.team1)t1a++;else t2a++;});});}
       var p1=Math.round(t1a/(t1a+t2a||1)*100);
       title = (isEn
-        ? name1+' '+score1+'-'+score2+' '+name2+' | Possession: '+p1+'% vs '+(100-p1)+'% | Football Simulation Lab'
-        : name1+' '+score1+'-'+score2+' '+name2+' | ポゼッション: '+p1+'% vs '+(100-p1)+'% | Football Simulation Lab');
+        ? name1+' '+score1+'-'+score2+' '+name2+' | Possession: '+p1+'% vs '+(100-p1)+'% | Football Sim'
+        : name1+' '+score1+'-'+score2+' '+name2+' | ポゼッション: '+p1+'% vs '+(100-p1)+'% | Football Sim');
     } catch(e) {
       title = name1 + ' ' + score1 + '-' + score2 + ' ' + name2 + (isEn ? ' — Match Simulation Result' : ' シミュレーション結果');
     }
@@ -2719,8 +2719,8 @@ function shareToReddit(mode) {
     var n1 = getTeamName(team1Data), n2 = getTeamName(team2Data);
     var mp1 = window._multiPoss1 || 50;
     title = (isEn
-      ? n1+' '+t1wins+'W-'+draws+'D-'+t2wins+'W over '+GAMES+' matches | Possession: '+mp1+'% vs '+(100-mp1)+'% | Football Simulation Lab'
-      : n1+' '+t1wins+'勝-'+draws+'分-'+t2wins+'勝（'+GAMES+'試合）| ポゼッション: '+mp1+'% vs '+(100-mp1)+'% | Football Simulation Lab');
+      ? n1+' '+t1wins+'W-'+draws+'D-'+t2wins+'W over '+GAMES+' matches | Possession: '+mp1+'% vs '+(100-mp1)+'% | Football Sim'
+      : n1+' '+t1wins+'勝-'+draws+'分-'+t2wins+'勝（'+GAMES+'試合）| ポゼッション: '+mp1+'% vs '+(100-mp1)+'% | Football Sim');
   }
 
   var redditUrl = 'https://www.reddit.com/submit?url=' + encodeURIComponent(siteUrl) + '&title=' + encodeURIComponent(title);
@@ -3081,7 +3081,7 @@ function generateShareImage(mode) {
     if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
       navigator.share({
         files: [file],
-        title: 'Football Simulation Lab',
+        title: 'Football Sim',
         text: shareText + '\n' + shareUrl,
       }).catch(function(err) {
         if (err.name !== 'AbortError') {
@@ -3314,7 +3314,7 @@ function drawShareCanvas(ctx, d, isEn, S) {
   }
 
   // watermark
-  textCenter(ctx, 'Football Simulation Lab', S-180, S-28, '400 22px Arial', DIMWHITE);
+  textCenter(ctx, 'Football Sim', S-180, S-28, '400 22px Arial', DIMWHITE);
 }
 
 
