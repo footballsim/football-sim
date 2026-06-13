@@ -3950,25 +3950,25 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
     players:[
       // GK: E.Mendy (FC26 OVR80, DIV81, HAN79, KIC74, REF81, SPD55, POS80)
-      {name:"E・メンディ",en_name:"E.Mendy",long_name:"エドゥアール・メンディ",positions:["GK"],params:[50,50,50,50,81,55,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,81,79,50,80,74,75]},
+      {name:"E・メンディ",en_name:"E.Mendy",long_name:"エドゥアール・メンディ",positions:["GK"],params:[50,50,50,50,81,34,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,81,79,50,80,74,75]},
       // RB: F.Mendy (FC26 OVR74, PAC82, SHO54, PAS68, DRI72, DEF72, PHY70)
       {name:"F・メンディ",en_name:"F.Mendy",long_name:"フォルモーズ・メンディ",positions:["右SB"],params:[70,72,82,83,75,68,70,70,75,68,62,46,46,50,38,40,70,52,70,72,70,70,68,50,50,64,68,68,75]},
       // RCB: Koulibaly (FC26 OVR82, PAC77, SHO52, PAS72, DRI72, DEF84, PHY86) ← captain
-      {name:"クリバリ",en_name:"Koulibaly",long_name:"カリドゥ・クリバリ",positions:["CB"],params:[86,84,77,78,79,88,70,72,79,72,66,44,42,50,36,38,72,40,84,86,84,84,82,50,50,88,80,80,75]},
+      {name:"クリバリ",en_name:"Koulibaly",long_name:"カリドゥ・クリバリ",positions:["CB"],params:[86,84,73,74,74,88,63,65,74,65,59,44,42,50,29,31,65,40,84,86,84,84,82,50,50,88,80,80,75]},
       // LCB: PA.Cisse (FC26 OVR77, PAC72, SHO44, PAS66, DRI66, DEF78, PHY82)
       {name:"PA・シス",en_name:"PA.Cisse",long_name:"パプ・アブー・シス",positions:["CB"],params:[82,82,72,73,70,84,64,64,70,66,60,36,34,42,28,30,64,32,78,80,78,78,76,50,50,84,74,74,75]},
       // LSB: Niakhate (FC26 OVR76, PAC80, SHO46, PAS68, DRI68, DEF76, PHY76)
-      {name:"ニャカテ",en_name:"Niakhate",long_name:"ムサ・ニャカテ",positions:["左SB","CB"],params:[76,76,80,81,72,74,66,66,72,68,62,38,36,44,32,34,66,38,74,76,74,74,72,50,50,72,72,70,75]},
+      {name:"ニャカテ",en_name:"Niakhate",long_name:"ムサ・ニャカテ",positions:["左SB","CB"],params:[76,76,68,69,66,74,66,66,66,68,62,38,36,44,32,34,66,38,74,76,74,74,72,50,50,72,72,70,75]},
       // RDMF: PM.Sarr (FC26 OVR80, PAC76, SHO72, PAS80, DRI80, DEF80, PHY76) ← keyplayer
-      {name:"PM・サール",en_name:"PM.Sarr",long_name:"パプ・マタル・サール",positions:["CMF","DMF"],params:[76,78,76,77,78,74,78,80,78,80,76,68,70,72,54,58,80,72,78,80,78,78,76,50,50,70,78,78,75]},
+      {name:"PM・サール",en_name:"PM.Sarr",long_name:"パプ・マタル・サール",positions:["CMF","DMF"],params:[76,78,67,68,74,74,78,80,74,80,76,64,66,68,54,58,80,68,78,80,78,78,76,50,50,70,78,78,75]},
       // LDMF: L.Camara (FC26 OVR78, PAC76, SHO66, PAS76, DRI76, DEF76, PHY78)
-      {name:"L・カマラ",en_name:"L.Camara",long_name:"ラミン・カマラ",positions:["DMF","CMF"],params:[78,80,76,77,76,76,74,74,76,76,72,62,64,66,52,54,74,68,74,76,74,74,72,50,50,72,76,74,75]},
+      {name:"L・カマラ",en_name:"L.Camara",long_name:"ラミン・カマラ",positions:["DMF","CMF"],params:[72,74,76,77,76,70,74,74,76,76,72,62,64,66,52,54,74,68,74,76,74,74,72,50,50,66,76,74,75]},
       // OMF: Iliman Ndiaye (FC26 OVR79, PAC80, SHO76, PAS78, DRI82, DEF46, PHY68)
       {name:"I・ンディアイ",en_name:"I.Ndiaye",long_name:"イリマン・ンディアイ",positions:["OMF","左WG"],params:[66,68,80,82,79,64,80,82,79,78,72,72,72,74,64,68,82,76,42,44,42,42,44,50,50,62,74,74,75]},
       // RW: I.Sarr (FC26 OVR78, PAC88, SHO72, PAS70, DRI80, DEF46, PHY72)
-      {name:"I・サール",en_name:"I.Sarr",long_name:"イスマイラ・サール",positions:["右WG","左WG"],params:[72,72,88,90,82,68,78,80,82,70,64,68,66,70,56,60,80,72,42,44,42,42,44,50,50,64,72,72,75]},
+      {name:"I・サール",en_name:"I.Sarr",long_name:"イスマイラ・サール",positions:["右WG","左WG"],params:[72,72,88,90,82,68,78,80,82,70,64,68,66,70,56,60,80,72,37,39,37,37,39,50,50,64,67,72,75]},
       // LW: Mane (FC26 OVR82, PAC87, SHO82, PAS76, DRI86, DEF51, PHY76) ← keyplayer
-      {name:"マネ",en_name:"Mane",long_name:"サディオ・マネ",positions:["左WG","右WG","CF"],params:[76,78,87,88,84,72,84,86,84,76,70,80,78,82,62,66,86,82,48,50,48,48,50,50,50,68,82,80,75]},
+      {name:"マネ",en_name:"Mane",long_name:"サディオ・マネ",positions:["左WG","右WG","CF"],params:[76,78,81,82,81,72,84,86,81,76,70,80,78,82,62,66,86,82,43,45,43,43,45,50,50,68,77,80,75]},
       // CF: N.Jackson (FC26 OVR83, PAC84, SHO82, PAS66, DRI80, DEF44, PHY78) ← marked
       {name:"N・ジャクソン",en_name:"N.Jackson",long_name:"ニコラス・ジャクソン",positions:["CF","左WG"],params:[78,80,84,85,81,76,78,80,81,66,60,80,78,82,54,58,80,80,40,42,40,40,42,50,50,74,76,76,75]},
       // Sub GK: Seny Dieng (FC26 OVR76, DIV77, HAN75, KIC70, REF77, SPD58, POS76)
@@ -4122,17 +4122,17 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // LCB: S.Akaydin (FC26 OVR76, PAC72, SHO44, PAS68, DRI64, DEF78, PHY80)
       {name:"アカイドゥン",en_name:"Akaydin",long_name:"サメト・アカイドゥン",positions:["CB"],params:[76,76,54,55,54,76,48,48,54,46,40,36,34,42,25,25,48,32,73,75,73,73,71,50,50,76,69,72,75]},
       // LSB: F.Kadioglu (FC26 OVR80, PAC84, SHO62, PAS76, DRI78, DEF76, PHY72)
-      {name:"カドゥオール",en_name:"Kadioglu",long_name:"フェルディ・カドゥオール",positions:["左SB","左WG"],params:[72,74,84,85,79,70,76,78,79,76,70,56,58,60,52,58,78,66,74,76,74,74,72,50,50,66,76,76,75]},
+      {name:"カドゥオール",en_name:"Kadioglu",long_name:"フェルディ・カドゥオール",positions:["左SB","左WG"],params:[65,67,84,85,79,63,76,78,79,76,70,56,58,60,52,58,78,66,74,76,74,74,72,50,50,59,76,76,75]},
       // RDMF: H.Calhanoglu (FC26 OVR87, PAC78, SHO82, PAS90, DRI86, DEF82, PHY80) ← keyplayer
       {name:"チャルハノール",en_name:"Calhanoglu",long_name:"ハカン・チャルハノール",positions:["DMF","CMF","OMF"],params:[73,75,70,71,80,71,80,82,80,90,86,80,80,84,72,76,82,84,82,84,82,80,80,50,50,67,86,88,75]},
       // LDMF: S.Ozcan (FC26 OVR75, PAC74, SHO62, PAS74, DRI72, DEF76, PHY76)
       {name:"S・オズジャン",en_name:"S.Ozcan",long_name:"サリフ・オズジャン",positions:["DMF","CMF"],params:[76,78,74,75,73,74,70,70,73,74,68,56,58,60,48,50,70,62,74,76,74,74,72,50,50,70,72,72,75]},
       // RSM: Akturkoğlu (FC26 OVR79, PAC90, SHO74, PAS72, DRI82, DEF46, PHY68)
-      {name:"アクトゥルコール",en_name:"Akturkoğlu",long_name:"ケレム・アクトゥルコール",positions:["右WG","右SMF"],params:[66,68,90,92,82,62,80,82,82,72,66,70,70,72,56,60,82,72,42,44,42,42,44,50,50,60,72,72,75]},
+      {name:"アクトゥルコール",en_name:"Akturkoğlu",long_name:"ケレム・アクトゥルコール",positions:["右WG","右SMF"],params:[59,61,84,86,79,55,80,82,79,72,66,70,70,72,56,60,82,72,42,44,42,42,44,50,50,53,72,72,75]},
       // LSM: K.Yildiz (FC26 OVR81, PAC82, SHO80, PAS78, DRI84, DEF50, PHY72)
-      {name:"K・イルドゥズ",en_name:"K.Yildiz",long_name:"ケナン・イルドゥズ",positions:["左WG","左SMF","OMF"],params:[72,74,82,84,82,68,82,84,82,78,72,78,76,80,66,70,84,80,46,48,46,46,48,50,50,66,78,78,75]},
+      {name:"K・イルドゥズ",en_name:"K.Yildiz",long_name:"ケナン・イルドゥズ",positions:["左WG","左SMF","OMF"],params:[67,69,82,84,82,63,82,84,82,78,72,78,76,80,66,70,84,80,46,48,46,46,48,50,50,61,78,78,75]},
       // OMF: Arda Güler (FC26 OVR84, PAC80, SHO82, PAS84, DRI88, DEF48, PHY68)
-      {name:"ギュレル",en_name:"Guler",long_name:"アルダ・ギュレル",positions:["OMF","右WG"],params:[68,70,80,82,84,64,86,88,84,84,80,80,80,82,74,78,88,84,44,46,44,44,46,50,50,62,82,82,75]},
+      {name:"ギュレル",en_name:"Guler",long_name:"アルダ・ギュレル",positions:["OMF","右WG"],params:[58,60,76,78,80,54,82,84,80,84,80,80,80,82,74,78,84,84,44,46,44,44,46,50,50,52,82,82,75]},
       // CF: B.Yilmaz (FC26 OVR78, PAC78, SHO78, PAS66, DRI76, DEF42, PHY74) ← marked
       {name:"B・イルドゥズ",en_name:"B.Yilmaz",long_name:"バリシュ・アルペル・イルマズ",positions:["CF","右WG"],params:[91,93,92,93,87,87,79,81,87,75,69,76,74,78,67,69,79,76,68,70,68,68,70,50,50,85,99,70,75]},
       // Sub GK: Uğurcan Çakır (FC26 OVR79, DIV80, HAN78, KIC74, REF80, SPD58, POS79)
