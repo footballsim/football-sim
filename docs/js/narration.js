@@ -2676,6 +2676,14 @@ function shareToX(mode) {
     var winner = document.getElementById('result-winner').textContent;
     var emoji  = winner.includes('勝利')||winner.includes('Win') ? '🎉' : winner.includes('敗')||winner.includes('Defeat') ? '😭' : '🤝';
     text = emoji + ' ' + name1 + ' ' + score1 + '-' + score2 + ' ' + name2 + '\n' + winner + '\n\n' + siteUrl + '\n' + tags;
+  } else if (mode === 'wcsim') {
+    var s = _wcsimStats;
+    var cn = wcsimTeamName(s.champion), rn = wcsimTeamName(s.runnerUp), tn3 = wcsimTeamName(s.thirdPlace);
+    var mvpN = s.mvp ? ((isEn && s.mvp.enName) ? s.mvp.enName : s.mvp.name) : '';
+    text = (isEn
+      ? '🏆 2026 World Cup — Full Simulation\nChampions: ' + TEAM_DATA[s.champion].flag + ' ' + cn + '\n🥈 ' + rn + '   🥉 ' + tn3 + (s.mvp ? '\n⭐ MVP: ' + mvpN : '')
+      : '🏆 2026 W杯まるごとシミュレート\n優勝: ' + TEAM_DATA[s.champion].flag + ' ' + cn + '\n🥈 ' + rn + '   🥉 ' + tn3 + (s.mvp ? '\n⭐ 大会MVP: ' + mvpN : ''))
+      + '\n\n' + siteUrl + '\n' + tags;
   } else {
     var GAMES = window._multiGAMES || 10;
     var t1wins = window._multiT1wins || 0;
@@ -2711,6 +2719,13 @@ function shareToReddit(mode) {
     } catch(e) {
       title = name1 + ' ' + score1 + '-' + score2 + ' ' + name2 + (isEn ? ' — Match Simulation Result' : ' シミュレーション結果');
     }
+  } else if (mode === 'wcsim') {
+    var s = _wcsimStats;
+    var cn = wcsimTeamName(s.champion), rn = wcsimTeamName(s.runnerUp);
+    var mvpN = s.mvp ? ((isEn && s.mvp.enName) ? s.mvp.enName : s.mvp.name) : '';
+    title = (isEn
+      ? '🏆 World Cup Full Sim — Champions: ' + cn + ' | Runner-up: ' + rn + (s.mvp ? ' | MVP: ' + mvpN : '') + ' | Football Sim'
+      : '🏆 W杯まるごとシミュレート — 優勝: ' + cn + '／準優勝: ' + rn + (s.mvp ? '／MVP: ' + mvpN : '') + ' | Football Sim');
   } else {
     var GAMES = window._multiGAMES || 10;
     var t1wins = window._multiT1wins || 0;
@@ -3049,6 +3064,18 @@ function generateShareImage(mode) {
       winner: document.getElementById('result-winner').textContent,
       poss1: poss1, poss2: 100 - poss1,
     };
+  } else if (mode === 'wcsim') {
+    var ws = _wcsimStats;
+    d = {
+      mode: 'wcsim',
+      champFlag: TEAM_DATA[ws.champion].flag, champName: wcsimTeamName(ws.champion),
+      ruFlag: TEAM_DATA[ws.runnerUp].flag, ruName: wcsimTeamName(ws.runnerUp),
+      thFlag: TEAM_DATA[ws.thirdPlace].flag, thName: wcsimTeamName(ws.thirdPlace),
+      mvpFlag: ws.mvp ? TEAM_DATA[ws.mvp.team].flag : '',
+      mvpName: ws.mvp ? ((isEn && ws.mvp.enName) ? ws.mvp.enName : ws.mvp.name) : '',
+      mvpG: ws.mvp ? ws.mvp.goals : 0, mvpA: ws.mvp ? ws.mvp.assists : 0, hasMvp: !!ws.mvp,
+      totalGoals: ws.totalGoals
+    };
   } else {
     d = {
       mode: 'multi',
@@ -3064,10 +3091,13 @@ function generateShareImage(mode) {
     d.draws = d.games - d.t1wins - d.t2wins;
   }
 
-  drawShareCanvas(ctx, d, isEn, S);
+  if (d.mode === 'wcsim') drawWcsimShareCanvas(ctx, d, isEn, S);
+  else drawShareCanvas(ctx, d, isEn, S);
 
   var shareText = (d.mode === 'single')
     ? (isEn ? d.name1+' '+d.score1+'-'+d.score2+' '+d.name2 : d.name1+' '+d.score1+'-'+d.score2+' '+d.name2)
+    : (d.mode === 'wcsim')
+    ? (isEn ? '🏆 '+d.champName+' — 2026 World Cup Sim Champions!' : '🏆 '+d.champName+'が2026W杯シミュレートで優勝！')
     : (isEn ? d.name1+' '+d.t1wins+'W vs '+d.name2+' '+d.t2wins+'W ('+d.games+' matches)' : d.name1+' '+d.t1wins+'勝 vs '+d.name2+' '+d.t2wins+'勝（'+d.games+'試合）');
   var shareUrl = 'https://footballsim.github.io/football-sim/';
 

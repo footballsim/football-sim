@@ -263,7 +263,11 @@ function wcsimRunTournament() {
     champion: final.winner, runnerUp: final.loser, thirdPlace: third.winner
   };
   result.mvp = wcsimSelectMVP(result);
+  // シェア機能から参照するため最終結果を _wcsimStats に保持
   _wcsimStats.mvp = result.mvp;
+  _wcsimStats.champion = result.champion;
+  _wcsimStats.runnerUp = result.runnerUp;
+  _wcsimStats.thirdPlace = result.thirdPlace;
   return result;
 }
 
@@ -375,6 +379,11 @@ function wcsimPodiumHTML(res) {
     (res.mvp ? `<span>⭐ ${t('wcsimMVPLabel')}: ${wcsimPlayerLabel(res.mvp)}</span>` : '') +
     `</div>` +
     `<button class="start-btn" onclick="showWCSimStats()" style="color:#1a1a1a;background:rgba(255,255,255,0.85);margin-top:18px">${t('wcsimStatsBtn')}</button>` +
+    `<div style="display:flex;gap:8px;margin-top:10px">` +
+    `<button onclick="shareToX('wcsim')" style="flex:1;padding:11px 4px;border:none;border-radius:10px;background:#000;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">𝕏 ${t('shareX')}</button>` +
+    `<button onclick="shareToReddit('wcsim')" style="flex:1;padding:11px 4px;border:none;border-radius:10px;background:#ff4500;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Reddit</button>` +
+    `<button onclick="generateShareImage('wcsim')" style="flex:1;padding:11px 4px;border:none;border-radius:10px;background:linear-gradient(135deg,#1a3a6b,#0050cc);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${t('shareImg')}</button>` +
+    `</div>` +
     `</div></div>`;
 }
 
@@ -549,4 +558,49 @@ function wcsimStatsBack() {
   showScreen('wcsim');
   const podium = document.getElementById('wcsim-sec-podium');
   if (podium) podium.scrollIntoView({block: 'center'});
+}
+
+// ------------------------------------------------------------
+// シェア画像（優勝カード, 1080x1080）— generateShareImage('wcsim') から呼ばれる
+// ------------------------------------------------------------
+function drawWcsimShareCanvas(ctx, d, isEn, S) {
+  function tc(txt, x, y, font, color, maxW) {
+    ctx.font = font; ctx.fillStyle = color; ctx.textAlign = 'center';
+    if (maxW) ctx.fillText(txt, x, y, maxW); else ctx.fillText(txt, x, y);
+  }
+  const cx = S / 2;
+
+  // ゴールド背景（ポディウムと同系）
+  const g = ctx.createLinearGradient(0, 0, 0, S);
+  g.addColorStop(0, '#7b5c00'); g.addColorStop(0.55, '#c9960c'); g.addColorStop(1, '#ffd700');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, S, S);
+
+  // 装飾の光輪
+  ctx.beginPath(); ctx.arc(cx, 300, 360, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.07)'; ctx.fill();
+
+  tc(isEn ? '2026 WORLD CUP — FULL SIMULATION' : '2026 W杯 まるごとシミュレート',
+     cx, 108, '700 32px Arial', 'rgba(40,28,0,0.72)', S - 120);
+
+  tc('🏆', cx, 270, '150px Arial', '#ffffff');
+  tc(d.champFlag, cx, 445, '150px Arial', '#ffffff');
+
+  tc(isEn ? 'CHAMPIONS' : '優 勝', cx, 512, '700 36px Arial', 'rgba(40,28,0,0.78)');
+  tc(d.champName, cx, 600, '900 88px Arial', '#241a00', S - 120);
+
+  tc('🥈 ' + (isEn ? 'Runner-up: ' : '準優勝: ') + d.ruFlag + ' ' + d.ruName,
+     cx, 700, '700 40px Arial', '#3a2c00', S - 120);
+  tc('🥉 ' + (isEn ? 'Third: ' : '3位: ') + d.thFlag + ' ' + d.thName,
+     cx, 762, '700 40px Arial', '#3a2c00', S - 120);
+
+  if (d.hasMvp) {
+    tc('⭐ ' + (isEn ? 'MVP: ' : '大会MVP: ') + d.mvpFlag + ' ' + d.mvpName + '  (' + d.mvpG + 'G ' + d.mvpA + 'A)',
+       cx, 856, '700 38px Arial', '#3a2c00', S - 120);
+  }
+
+  // フッター
+  ctx.beginPath(); ctx.moveTo(140, 960); ctx.lineTo(S - 140, 960);
+  ctx.strokeStyle = 'rgba(40,28,0,0.25)'; ctx.lineWidth = 2; ctx.stroke();
+  tc('⚽ Football Sim', cx, 1012, '700 32px Arial', 'rgba(40,28,0,0.7)');
+  tc('football-sim.com', cx, 1052, '400 24px Arial', 'rgba(40,28,0,0.5)');
 }
