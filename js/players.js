@@ -81,7 +81,7 @@ const i18n = {
     matchTitleNed: '日本 vs オランダ',
     matchTitleEng: '日本 vs イングランド',
     btnPlayersList: '📋 選手データリスト',
-    topLblWC: '2026W杯モード（日本代表）', topDescWC: 'グループステージから頂点を目指す',
+    topLblWC: '2026W杯モード<br>（日本代表）', topDescWC: 'グループステージから頂点を目指す',
     topLblWCSim: 'W杯まるごとシミュレート', topDescWCSim: '実際の組み合わせで全104試合を一括演算',
     wcsimTitle: '🌍 W杯まるごとシミュレート',
     wcsimIntro: '2026W杯の実際のグループ組み合わせで、グループステージから決勝まで全104試合を一括シミュレート。今回の優勝国はどこだ？',
@@ -275,7 +275,7 @@ const i18n = {
     matchTitleNed: 'Japan vs Netherlands',
     matchTitleEng: 'Japan vs England',
     btnPlayersList: '📋 Player Data List',
-    topLblWC: '2026 W-Cup Mode (Japan)', topDescWC: 'From group stage to the top',
+    topLblWC: '2026 W-Cup Mode<br>(Japan)', topDescWC: 'From group stage to the top',
     topLblWCSim: 'Full W-Cup Simulation', topDescWCSim: 'Simulate all 104 matches with the real draw',
     wcsimTitle: '🌍 Full W-Cup Simulation',
     wcsimIntro: 'Simulate the entire 2026 W-Cup with the real group draw — all 104 matches from the group stage to the final. Who lifts the trophy this time?',
@@ -524,7 +524,7 @@ function applyLang() {
   _setText('match-title-ned', t('matchTitleNed'));
   _setText('match-title-eng', t('matchTitleEng'));
   _setText('btn-players-list', t('btnPlayersList'));
-  _setText('top-lbl-wc',      t('topLblWC'));
+  _setHTML('top-lbl-wc',      t('topLblWC'));
   _setText('top-desc-wc',     t('topDescWC'));
   _setText('top-lbl-wcsim',   t('topLblWCSim'));
   _setText('top-desc-wcsim',  t('topDescWCSim'));
