@@ -2015,3 +2015,35 @@ body {
   color: #3a2c00;
   margin-top: 9px;
 }
+
+/* ===== WC FULL SIM: ヘッダータイトル & 実行ボタンの1行化・視認性 ===== */
+#wcsim-title {
+  font-size: 16px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+/* 実行ボタン: 青背景に埋もれないアンバー系＋濃色文字で「押せる」感を強調、1行に収める */
+#wcsim-run-btn {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  padding: 16px 18px;
+  border-radius: 14px;
+  color: #1a1326;
+  background: linear-gradient(135deg, #ffce3a 0%, #ff9e1b 100%);
+  border: 1px solid rgba(255,255,255,0.55);
+  box-shadow: 0 6px 22px rgba(255,158,27,0.5);
+}
+#wcsim-run-btn::after {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
+}
+#wcsim-run-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(255,158,27,0.65);
+}
+#wcsim-run-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
