@@ -58,12 +58,15 @@ football-sim/
 - 既存のCSS変数（--japan-blue, --japan-red等）を尊重する
 - テキスト色は必ず明示的に指定すること。background変更時は必ずcolorも合わせて指定する
 - 新しいscreenを追加する際は必ず暗い背景（`linear-gradient(160deg, #003087 0%, #0050cc 50%, #1a7a3a 100%)`）を設定する。白背景+白文字の組み合わせはNG
+- **⚠️ キャッシュバスティング必須**: `js/` または `css/` のファイルを変更したら、`index.html` 内の全アセット参照のバージョン文字列 `?v=YYYYMMDD` を必ず更新する（root と `docs/` 両方）。
+  - 理由: GitHub Pages は全アセットを `max-age=600` で配信。バージョン未更新だとスマホ（特にiOS Safari）が古いJSを掴み続け、新旧ファイルが混在して不具合になる（実例: 2026/06/13、旧`narration.js`キャッシュでアシスト集計が0になった）。HTMLは毎回更新されるため`?v`を上げれば全端末へ確実に反映される。
+  - 対象: `index.html` の `css/style.css?v=...` と `js/*.js?v=...`（players/simulate/narration/ui/tournament の5本）。全て同じ日付に揃える。
 
 ## インフラ情報
 - **本番URL**: https://football-sim.com （GitHub Pages でホスト）
 - **リポジトリ**: https://github.com/footballsim/football-sim
 - **公開ディレクトリ**: `docs/` フォルダ（`docs/index.html` がトップページ）
-  - ⚠️ `docs/` は現在も旧単一ファイル構成。本番反映時は `js/` `css/` も `docs/` にコピーが必要
+  - 本番反映手順: ルートの `index.html` / `js/` / `css/` を `docs/` 以下にコピー（`docs/` も2026/06以降は分割構成に同期済み）。コピー後に上記キャッシュバスティングの `?v` 更新を忘れない
 - **VPS**: GMOクラウドVPSマイクロ / IP: 153.122.40.240 / CentOS 6.6
   - SSH: `ssh -oHostKeyAlgorithms=+ssh-rsa root@153.122.40.240`
   - http→https リダイレクト設定済み（Apache `/etc/httpd/conf/httpd.conf`）
