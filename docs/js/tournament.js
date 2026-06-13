@@ -384,7 +384,12 @@ function wcsimPodiumHTML(res) {
     `<button onclick="shareToReddit('wcsim')" style="flex:1;padding:11px 4px;border:none;border-radius:10px;background:#ff4500;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Reddit</button>` +
     `<button onclick="generateShareImage('wcsim')" style="flex:1;padding:11px 4px;border:none;border-radius:10px;background:linear-gradient(135deg,#1a3a6b,#0050cc);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${t('shareImg')}</button>` +
     `</div>` +
-    `</div></div>`;
+    `</div>` +
+    `<div class="wcsim-ai-card">` +
+    `<button id="wcsim-summary-btn" class="wcsim-ai-btn" onclick="generateWcsimSummary()">${t('wcsimSummaryBtn')}</button>` +
+    `<div id="wcsim-summary-content" class="wcsim-ai-content"></div>` +
+    `</div>` +
+    `</div>`;
 }
 
 // ワンクリック実行
@@ -603,4 +608,74 @@ function drawWcsimShareCanvas(ctx, d, isEn, S) {
   ctx.strokeStyle = 'rgba(40,28,0,0.25)'; ctx.lineWidth = 2; ctx.stroke();
   tc('⚽ Football Sim', cx, 1012, '700 32px Arial', 'rgba(40,28,0,0.7)');
   tc('football-sim.com', cx, 1052, '400 24px Arial', 'rgba(40,28,0,0.5)');
+}
+
+
+// ------------------------------------------------------------
+// AI大会総括（ルールベース・ローカル生成）
+// ※ 共有AI Workerは単一試合/日本代表W杯向けプロンプト固定のため、
+//   グローバル大会の総括は _wcsimStats から自前生成する（10試合モードと同方式）
+// ------------------------------------------------------------
+function generateWcsimSummary() {
+  var btn = document.getElementById('wcsim-summary-btn');
+  var el  = document.getElementById('wcsim-summary-content');
+  if (!btn || !el || !_wcsimStats) return;
+  var isEn = window.LANG === 'en';
+  btn.disabled = true; btn.textContent = t('generatingLabel'); btn.style.opacity = '0.6';
+  el.innerHTML = '<span style="color:rgba(255,255,255,0.5);font-size:12px">✨ ' + (isEn ? 'Generating...' : '生成中...') + '</span>';
+
+  var s = _wcsimStats;
+  var tn = function(k){ return wcsimTeamName(k); };
+  var champ = tn(s.champion), ru = tn(s.runnerUp), third = tn(s.thirdPlace);
+  var jpKey = 'japan2026vsNetherlands';
+  var isJpChamp = s.champion === jpKey;
+
+  // 得点王
+  var scList = Object.values(s.players).filter(function(p){ return p.goals > 0; })
+    .sort(function(a,b){ return b.goals - a.goals || b.assists - a.assists; });
+  var topSc = scList[0];
+  var topScName = topSc ? ((isEn && topSc.enName) ? topSc.enName : topSc.name) : '';
+  // MVP
+  var mvpName = s.mvp ? ((isEn && s.mvp.enName) ? s.mvp.enName : s.mvp.name) : '';
+  // 日本の成績
+  var jpFinish;
+  if (isJpChamp)                   jpFinish = isEn ? 'won the whole thing' : '優勝';
+  else if (s.runnerUp === jpKey)   jpFinish = isEn ? 'reached the final (runners-up)' : '準優勝';
+  else if (s.thirdPlace === jpKey) jpFinish = isEn ? 'finished 3rd' : '3位';
+  else {
+    var jm = s.teams[jpKey] ? s.teams[jpKey].matches : 0;
+    var rJa = {3:'グループステージ敗退',4:'ベスト32',5:'ベスト16',6:'ベスト8',7:'ベスト4'};
+    var rEn = {3:'exited in the group stage',4:'reached the Round of 32',5:'reached the Round of 16',6:'reached the quarter-finals',7:'reached the semi-finals'};
+    jpFinish = (isEn ? rEn : rJa)[jm] || (isEn ? 'exited in the group stage' : 'グループステージ敗退');
+  }
+  var avg = s.totalMatches ? (s.totalGoals / s.totalMatches).toFixed(2) : '0';
+  // 大会の性格（PK・延長の多さ）
+  var dramaJa = s.pkCount >= 7 ? '大荒れの' : s.pkCount >= 4 ? '接戦の' : '順当な';
+  var dramaEn = s.pkCount >= 7 ? 'a dramatic, shootout-filled' : s.pkCount >= 4 ? 'a tightly-contested' : 'a relatively straightforward';
+  var goalJa = avg >= 1.6 ? '攻撃的な' : avg <= 1.2 ? '締まった' : 'バランスの取れた';
+  var goalEn = avg >= 1.6 ? 'high-scoring' : avg <= 1.2 ? 'defensively tight' : 'balanced';
+
+  var lines;
+  if (isEn) {
+    lines = [];
+    lines.push('🏆 ' + champ + (isJpChamp ? ' are CHAMPIONS of the world!' : ' are crowned champions, beating ' + ru + ' in the final.') + (isJpChamp ? ' Japan beat ' + ru + ' in the final to lift the trophy.' : ' ' + third + ' took third place.'));
+    if (topSc) lines.push('Golden Boot: ' + topScName + ' (' + tn(topSc.team) + ') with ' + topSc.goals + ' goals. Tournament MVP went to ' + mvpName + (s.mvp ? ' (' + tn(s.mvp.team) + ', ' + s.mvp.goals + 'G/' + s.mvp.assists + 'A)' : '') + '.');
+    lines.push('It was ' + dramaEn + ', ' + goalEn + ' tournament: ' + s.totalGoals + ' goals across ' + s.totalMatches + ' matches (avg ' + avg + '), with ' + s.etCount + ' going to extra time and ' + s.pkCount + ' decided on penalties.');
+    if (!isJpChamp) lines.push('As for Japan — they ' + jpFinish + ' this time.');
+  } else {
+    lines = [];
+    lines.push('🏆 ' + (isJpChamp ? '日本が世界の頂点に立った！決勝で' + ru + 'を破り、悲願の優勝を成し遂げた。' : champ + 'が頂点に立った。決勝で' + ru + 'を下し優勝、3位は' + third + 'だった。'));
+    if (topSc) lines.push('得点王は' + topScName + '（' + tn(topSc.team) + '）の' + topSc.goals + 'ゴール。大会MVPには' + mvpName + (s.mvp ? '（' + tn(s.mvp.team) + '・' + s.mvp.goals + 'ゴール' + s.mvp.assists + 'アシスト）' : '') + 'が輝いた。');
+    lines.push('全' + s.totalMatches + '試合で' + s.totalGoals + 'ゴール、1試合平均' + avg + 'の' + goalJa + '大会。' + s.etCount + '試合が延長戦、' + s.pkCount + '試合がPK戦にもつれる' + dramaJa + 'トーナメントとなった。');
+    if (!isJpChamp) lines.push('日本は今回、' + jpFinish + 'という結果に終わった。');
+  }
+  var text = lines.join('\n\n');
+
+  // 生成演出（軽く間を置いて表示）
+  setTimeout(function() {
+    el.innerHTML = '<div style="line-height:1.95;font-size:13px;color:rgba(255,255,255,0.92);text-align:left">'
+      + text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>') + '</div>';
+    btn.textContent = isEn ? '✅ Generated' : '✅ 生成済み';
+    btn.style.opacity = '0.6';
+  }, 450);
 }
