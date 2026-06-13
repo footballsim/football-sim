@@ -2664,8 +2664,8 @@ function setResultImage(team1Score, team2Score) {
 
 function shareToX(mode) {
   var isEn = window.LANG === 'en';
-  var siteUrl = 'https://footballsim.github.io/football-sim/';
-  var tags = isEn ? '#FootballSimulationLab #Soccer #FootballSim' : '#FootballSimulationLab #サッカー #日本代表';
+  var siteUrl = 'https://football-sim.com/';
+  var tags = isEn ? '#Footballsim #Soccer' : '#Footballsim #フットボールシム';
   var text;
 
   if (!mode || mode === 'single') {
@@ -2700,7 +2700,7 @@ function shareToX(mode) {
 
 function shareToReddit(mode) {
   var isEn = window.LANG === 'en';
-  var siteUrl = 'https://footballsim.github.io/football-sim/';
+  var siteUrl = 'https://football-sim.com/';
   var title, text;
 
   if (!mode || mode === 'single') {
@@ -3099,7 +3099,7 @@ function generateShareImage(mode) {
     : (d.mode === 'wcsim')
     ? (isEn ? '🏆 '+d.champName+' — 2026 World Cup Sim Champions!' : '🏆 '+d.champName+'が2026W杯シミュレートで優勝！')
     : (isEn ? d.name1+' '+d.t1wins+'W vs '+d.name2+' '+d.t2wins+'W ('+d.games+' matches)' : d.name1+' '+d.t1wins+'勝 vs '+d.name2+' '+d.t2wins+'勝（'+d.games+'試合）');
-  var shareUrl = 'https://footballsim.github.io/football-sim/';
+  var shareUrl = 'https://football-sim.com/';
 
   canvas.toBlob(function(blob) {
     var file = new File([blob], 'football-sim-result.png', { type: 'image/png' });
