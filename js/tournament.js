@@ -501,7 +501,6 @@ function wcsimRenderStats() {
   html += `<div class="wcsim-stats-card" style="margin-bottom:10px">` +
     `<div class="wcsim-stats-heading">${t('wcsimStatsOverview')}</div>` +
     `<div class="wcsim-overview-grid">` +
-    `<div class="wcsim-overview-item"><div class="wcsim-overview-num">${s.totalMatches}</div><div class="wcsim-overview-label">${t('wcsimStatsTotalMatches')}</div></div>` +
     `<div class="wcsim-overview-item"><div class="wcsim-overview-num">${s.totalGoals}</div><div class="wcsim-overview-label">${t('wcsimStatsTotalGoals')}</div></div>` +
     `<div class="wcsim-overview-item"><div class="wcsim-overview-num">${avg}</div><div class="wcsim-overview-label">${t('wcsimStatsAvgGoals')}</div></div>` +
     `<div class="wcsim-overview-item"><div class="wcsim-overview-num">${s.etCount}</div><div class="wcsim-overview-label">${t('wcsimStatsET')}</div></div>` +
