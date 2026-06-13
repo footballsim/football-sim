@@ -11,7 +11,7 @@ const WCSIM_GROUPS = {
   C: ['brazil2026', 'morocco2026', 'haiti2026', 'scotland2026'],
   D: ['usa2026', 'paraguay2026', 'australia2026', 'turkey2026'],
   E: ['germany2026', 'curacao2026', 'ivorycoast2026', 'ecuador2026'],
-  F: ['netherlands2026', 'japan2026', 'sweden2026', 'tunisia2026'],
+  F: ['netherlands2026', 'japan2026vsNetherlands', 'sweden2026', 'tunisia2026'],
   G: ['belgium2026', 'egypt2026', 'iran2026', 'newzealand2026'],
   H: ['spain2026', 'capeverde2026', 'saudiarabia2026', 'uruguay2026'],
   I: ['france2026', 'senegal2026', 'iraq2026', 'norway2026'],
