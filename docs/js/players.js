@@ -703,6 +703,8 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "シモンズ": {"profile": "フランスリーグが誇る若き天才プレーメーカー。ドリブル技術とラストパスの質はすでに世界最高水準に達しており、狭いスペースでの崩しが圧倒的。", "profile_en": "A young genius playmaker in Ligue 1. His dribbling and final-third creativity are already at world-class level — in tight spaces he is virtually unstoppable, a constant danger to any defence.", "height": 174, "weight": 72},
 "ガクポ": {"profile": "イングランドの強豪クラブで活躍する多才なアタッカー。左ウイングとCFをこなす器用さに加え、強いフィジカルと正確なシュートで安定したゴール量産を続ける。", "profile_en": "A versatile Premier League attacker who can play as a winger or striker. His physical strength, intelligent movement and clinical finishing ensure he is a constant threat wherever he plays.", "height": 189, "weight": 82},
 "デパイ": {"profile": "オランダ代表歴代最多得点者。左足の爆発力と個人技は健在で、ゴール前での閃きと豊富な経験が攻撃陣を牽引する。", "profile_en": "The Netherlands' all-time top scorer. His explosive left foot and individual skill remain at elite level, with the experience and instinct in front of goal to unlock any defence.", "height": 181, "weight": 78},
+"ファン・ヘッケ": {"profile": "高い対人能力とビルドアップ能力を兼ね備えた現代型CB。落ち着いた展開力と的確なポジショニングで最終ラインに安定をもたらし、オランダ守備陣の新たな主軸として台頭する。", "profile_en": "A modern ball-playing centre-back combining strong one-on-one defending with composed build-up. His calm distribution and sharp positioning bring stability to the backline, marking him as an emerging pillar of the Dutch defence.", "height": 187, "weight": 78},
+"サマービル": {"profile": "圧倒的なスピードと鋭い仕掛けを武器とするウインガー。左右両サイドからカットインしてゴールを狙う得点感覚に優れ、オランダ攻撃陣に推進力と意外性をもたらす。", "profile_en": "A winger armed with explosive pace and incisive dribbling. Comfortable cutting inside from either flank to threaten goal, he injects drive and unpredictability into the Dutch attack.", "height": 174, "weight": 67},
 "アーケ": {"profile": "攻撃的なプレースタイルが持ち味のマンシティCB。高い守備能力に加え、最終ラインから積極的に前線に絡む姿勢がクーマン監督に重用される所以。", "profile_en": "A City CB known for his attacking instincts. His solid defending combined with the willingness to push forward and join attacks makes him a unique asset for Koeman's Netherlands.", "height": 181, "weight": 78},
 "ゲールトルイダ": {"profile": "守備の安定性を重視した信頼性の高い右SB。攻撃参加は控えめながら対人守備とポジショニングで相手の右サイドを封じる。", "profile_en": "A reliable right-back who prioritises defensive solidity. While less adventurous going forward, his one-on-one defending and positional discipline make him a consistent presence.", "height": 183, "weight": 78},
 "フリンポン": {"profile": "圧倒的な加速力とドリブル突破力を武器とする爆速右SB。ドイツの強豪クラブで磨かれた攻撃センスとスプリント力で右サイドを完全制圧する。", "profile_en": "A lightning-quick right-back with devastating speed and dribbling. His explosive pace and attacking instincts honed at a top German club make him one of the most dynamic full-backs in the world.", "height": 174, "weight": 75},
@@ -2861,15 +2863,15 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   netherlands2026: {
     name:"オランダ",en_name:"Netherlands",team_color:"#FF6600",flag:"🇳🇱",
-    default_system:"4-2-1-3", default_tactics:TACTICS_POSSESSION, default_keyplayer:6, default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"4-1-2-3", default_tactics:TACTICS_POSSESSION, default_keyplayer:5, default_marked_player:10,
+    default_lineup:[0,1,3,26,4,6,5,7,27,9,8],
     players:[
       {name:"フェルブルッヘン",en_name:"Verbruggen",long_name:"バルト・フェルブルッヘン",positions:["GK"],params:[50,50,50,50,77,73,50,50,50,50,76,50,50,50,50,50,50,50,50,50,50,50,50,82,76,50,82,71,75]},
       {name:"ドゥムフリース",en_name:"Dumfries",long_name:"デンゼル・ドゥムフリース",positions:["右SB","右SMF"],params:[82,87,89,79,83,90,70,81,85,79,73,74,61,78,45,72,82,82,77,78,78,78,78,50,50,85,68,78,75]},
       {name:"ティンバーJ",en_name:"J.Timber",long_name:"ユリエン・ティンバー",positions:["右SB","CB","左SB"],params:[83,82,77,76,86,87,71,77,77,81,75,42,47,62,31,70,81,73,82,84,82,82,82,50,50,78,77,82,75]},
       {name:"ファン・ダイク",en_name:"Van Dijk",long_name:"フィルヒル・ファン・ダイク",positions:["CB"],params:[91,76,79,67,88,90,53,70,75,80,83,53,64,65,70,60,77,47,87,90,88,88,89,50,50,88,70,89,75]},
       {name:"ファン・デ・フェン",en_name:"Van de Ven",long_name:"ミッキー・ファン・デ・フェン",positions:["CB","左SB"],params:[84,72,94,85,83,92,60,76,85,77,74,59,58,67,34,52,75,62,80,82,84,81,82,50,50,79,60,83,75]},
-      {name:"グラーフェンベルフ",en_name:"Gravenberch",long_name:"ライアン・グラーフェンベルフ",positions:["DMF","CMF"],params:[81,84,77,75,85,81,76,87,82,85,84,78,78,83,70,76,87,75,87,82,79,83,79,50,50,67,82,88,75]},
+      {name:"グラーフェンベルフ",en_name:"Gravenberch",long_name:"ライアン・グラーフェンベルフ",positions:["DMF","CMF","OMF"],params:[81,84,77,75,85,81,76,87,82,85,84,78,78,83,70,76,87,75,87,82,79,83,79,50,50,67,82,88,75]},
       {name:"デ・ヨング",en_name:"De Jong",long_name:"フレンキー・デ・ヨング",positions:["CMF","DMF"],params:[74,86,82,81,86,82,88,86,84,90,87,76,70,82,64,84,88,78,82,78,77,80,77,50,50,72,87,90,75]},
       {name:"レインデルス",en_name:"Reijnders",long_name:"ティジャニ・レインデルス",positions:["CMF","DMF","OMF"],params:[70,91,76,83,83,77,76,83,80,87,84,78,84,82,70,77,86,82,75,74,73,75,74,50,50,62,84,84,75]},
       {name:"マレン",en_name:"Malen",long_name:"ドニエル・マレン",positions:["右WG","CF","右SMF","左WG","左SMF"],params:[76,82,88,86,80,72,83,82,84,75,64,78,72,78,62,74,82,82,52,52,46,52,56,50,50,60,74,76,75]},
@@ -2890,7 +2892,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ファン・ダイク2",en_name:"Orban",long_name:"マタイス・デ・リフト",positions:["CB"],params:[82,76,76,74,76,80,68,62,66,66,64,42,38,50,36,34,62,54,78,80,80,80,78,50,50,80,64,72,74]},
       {name:"ドニ・メイン",en_name:"Malen2",long_name:"デイリー・クラーセン",positions:["CMF","OMF"],params:[66,76,72,70,76,66,74,72,72,80,74,62,58,64,56,58,74,68,66,62,62,60,60,50,50,56,64,68,74]},
       {name:"ウープス",en_name:"Woups",long_name:"テン・ハフ",positions:["左SB","左WG"],params:[64,72,76,74,70,62,70,66,69,68,62,52,48,54,42,44,62,56,64,64,62,62,60,50,50,56,56,58,74]},
-      {name:"ドニ",en_name:"Doni",long_name:"コディ・ガクポ2",positions:["CF","左WG","OMF"],params:[70,76,80,80,78,68,78,74,77,70,64,72,70,68,54,54,72,70,60,56,58,56,56,50,50,64,66,68,74]}
+      {name:"ドニ",en_name:"Doni",long_name:"コディ・ガクポ2",positions:["CF","左WG","OMF"],params:[70,76,80,80,78,68,78,74,77,70,64,72,70,68,54,54,72,70,60,56,58,56,56,50,50,64,66,68,74]},
+      {name:"ファン・ヘッケ",en_name:"van Hecke",long_name:"ヤン・パウル・ファン・ヘッケ",positions:["CB"],params:[78,75,67,69,83,84,68,70,71,74,73,46,46,58,40,48,66,56,80,80,80,81,79,50,50,82,77,78,75]},
+      {name:"サマービル",en_name:"Summerville",long_name:"クライセンシオ・サマービル",positions:["左WG","右WG","左SMF","右SMF"],params:[58,75,90,90,83,62,88,84,87,73,66,76,74,72,58,70,82,80,38,34,30,34,62,50,50,48,74,76,75]}
 ]
   },
   morocco2026: {
