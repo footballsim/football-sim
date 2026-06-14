@@ -2074,3 +2074,36 @@ body {
 }
 .wcsim-ai-btn:disabled { cursor: default; }
 .wcsim-ai-content:not(:empty) { margin-top: 12px; }
+
+/* ===== タイトル ヒーローバナー（祝福イメージ） ===== */
+.title-hero-banner {
+  position: relative;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  margin: 0 auto;
+  box-shadow: 0 10px 34px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.title-hero-img {
+  display: block;
+  width: 100%;
+  height: clamp(96px, 27vw, 150px);
+  object-fit: cover;
+  object-position: center 30%;
+}
+.title-hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(6,14,31,0.95) 0%, rgba(6,14,31,0.55) 22%, rgba(6,14,31,0) 52%);
+  pointer-events: none;
+}
+.title-hero-banner .title-sub {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  margin: 0;
+  text-align: center;
+  font-size: clamp(30px, 7.5vw, 52px);
+}
