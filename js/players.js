@@ -1507,6 +1507,12 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "マウリシオ": {"profile": "経験豊富なゲームメイクとパスセンスでパラグアイ攻撃に知性をもたらすOMF。正確な配球と局面打開のテクニックで代表の攻撃を引き出すベテランプレイメイカー。", "profile_en": "An experienced playmaker who brings intelligence to Paraguay's attack with game-reading and passing sense. A veteran who unlocks the national team's offensive play with precise distribution and technique to open up tight situations.", "height": 175, "weight": 70},
 "G・カバジェロ": {"profile": "スピードと積極的なプレーでパラグアイ右サイドに活力をもたらすウィンガー。若さとエネルギーを武器にサイドを駆け上がり、代表のアタッキングオプションを広げるアタッカー。", "profile_en": "A winger who brings vitality to Paraguay's right flank with pace and proactive play. Charging up the flank with youthful energy, he expands the national team's attacking options.", "height": 177, "weight": 72},
 "A・アルセ": {"profile": "フィジカルの強さと積極的なシュートでパラグアイ前線に迫力をもたらすCF。ゴール前での強引さとポジショニングの良さで相手守備に脅威を与えるストライカー。", "profile_en": "A striker who adds power to Paraguay's forward line with physical strength and proactive shooting. His forceful presence in front of goal and intelligent positioning pose a constant threat to opposing defences.", "height": 181, "weight": 76},
+"ヒル": {"profile": "長身を生かしたハイボール処理とシュートストップでパラグアイのゴールを守る大型GK。落ち着いたセービングと堂々とした存在感でゴール前に安定をもたらす守護神。", "profile_en": "A tall goalkeeper who guards Paraguay's goal with commanding aerial control and shot-stopping. Composed saves and an imposing presence bring stability in front of goal.", "height": 198, "weight": 90},
+"ベラスケス": {"profile": "フィジカルの強さと対人守備でパラグアイの守備ラインを支えるCB。空中戦の強さと堅実なポジショニングで安定感をもたらす若き守備の柱。", "profile_en": "A centre-back who anchors Paraguay's backline with physical strength and one-on-one defending. Aerial dominance and sound positioning make him a dependable young pillar of the defence.", "height": 184, "weight": 80},
+"オヘダ": {"profile": "豊富な運動量とボール奪取でパラグアイ中盤の底を支えるDMF。前への推進力と読みの鋭さで攻守をつなぐダイナミックなミッドフィールダー。", "profile_en": "A defensive midfielder who shields Paraguay's midfield with high energy and ball-winning. Forward drive and sharp anticipation link defence and attack as a dynamic presence.", "height": 183, "weight": 74},
+"カク": {"profile": "卓越したパスセンスとドリブルでパラグアイ攻撃を操る創造的なプレイメイカー。鋭いラストパスと巧みな動き出しで相手守備をこじ開ける技巧派アタッカー。", "profile_en": "A creative playmaker who orchestrates Paraguay's attack with outstanding passing vision and dribbling. Incisive final balls and clever movement unlock opposing defences.", "height": 168, "weight": 68},
+"アバロス": {"profile": "長身とフィジカルを武器に最前線で起点を作るターゲット型のCF。空中戦の強さと力強いフィニッシュで相手守備に脅威を与えるストライカー。", "profile_en": "A target-man centre-forward who holds up play with height and physicality. Aerial strength and powerful finishing make him a constant threat to opposing defences.", "height": 188, "weight": 84},
+"ピッタ": {"profile": "長身ながら機動力も備えたモダンなCF。スピードとポジショニングで裏を狙い、ゴール前での落ち着きでチャンスをものにする若手ストライカー。", "profile_en": "A modern centre-forward who pairs height with mobility. He attacks the space in behind with pace and positioning, finishing chances with composure as a rising striker.", "height": 190, "weight": 83},
 // Algeria 2026
 "ルカ・ジダン": {"profile": "サッカーの名家に生まれた守護神。鋭い反応と的確なポジショニングでアルジェリアのゴールを守り、落ち着きのあるセービングでチームに安定感をもたらすGK。", "profile_en": "A goalkeeper born into a celebrated football family. Sharp reflexes and precise positioning protect Algeria's goal, with composed shot-stopping bringing stability to the team.", "height": 183, "weight": 80},
 "ベルガリ": {"profile": "豊富なスタミナと積極的な攻撃参加でアルジェリアの右サイドを活性化するSB。守備の強度と前線への積極的な動きを両立させ、代表の右サイドを機能させる。", "profile_en": "A right-back who activates Algeria's right flank with high stamina and proactive forward runs. He balances defensive intensity with attacking involvement to make the national team's right side function.", "height": 175, "weight": 72},
@@ -3229,9 +3235,10 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   usa2026: {
     name:"アメリカ",en_name:"United States",team_color:"#002868",flag:"🇺🇸",
-    default_system:"4-1-2-3",default_tactics:TACTICS_FREE,
+    default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
     default_keyplayer:8,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,9,7,8,21],
+    // 4-2-3-1: GK Freese / DF Freeman-Richards-Ream-A.Robinson / DM Adams-Tillman / AM Dest-McKennie-Pulisic / CF Balogun
+    default_lineup:[24,15,2,11,4,5,19,1,8,6,21],
     players:[
       // GK: Turner (FC26 OVR74, DIV76, HAN72, KIC67, REF74, POS73)
       {name:"ターナー",en_name:"Turner",long_name:"マット・ターナー",positions:["GK"],params:[50,50,50,50,74,70,50,50,50,50,67,50,50,50,50,50,50,50,50,50,50,50,50,76,72,50,73,73,75]},
@@ -3272,7 +3279,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CM: Berhalter (FC26 OVR67, PAC71, SHO54, PAS66, DRI67, DEF65, PHY71)
       {name:"バーハルター",en_name:"Berhalter",long_name:"セバスチャン・バーハルター",positions:["CMF","DMF"],params:[66,86,70,70,68,66,79,66,70,66,62,44,46,46,38,52,64,46,64,66,64,64,64,50,50,62,58,66,75]},
       // Sub CAM: Tillman (FC26 OVR82, PAC84, SHO76, PAS77, DRI83, DEF65, PHY77)
-      {name:"ティルマン",en_name:"Tillman",long_name:"マリク・ティルマン",positions:["OMF","右SMF","左SMF"],params:[72,76,83,84,80,72,82,83,84,77,74,70,74,72,64,74,82,74,64,66,64,64,64,50,50,68,76,78,75]},
+      {name:"ティルマン",en_name:"Tillman",long_name:"マリク・ティルマン",positions:["OMF","右SMF","左SMF","DMF"],params:[72,76,83,84,80,72,82,83,84,77,74,70,74,72,64,74,82,74,64,66,64,64,64,50,50,68,76,78,75]},
       // Sub CAM: Reyna (FC26 OVR75, PAC67, SHO72, PAS72, DRI80, DEF38, PHY68)
       {name:"レイナ",en_name:"Reyna",long_name:"ジョヴァンニ・レイナ",positions:["OMF","右SMF","左SMF"],params:[62,70,66,68,78,60,81,82,73,74,70,68,72,68,64,72,80,72,36,38,36,36,36,50,50,58,74,74,75]},
       // Sub ST: Balogun (FC26 OVR77, PAC84, SHO77, PAS62, DRI77, DEF23, PHY68)
@@ -4923,62 +4930,65 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   paraguay2026: {
     name:"パラグアイ",en_name:"Paraguay",team_color:"#D52B1E",flag:"🇵🇾",
-    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:9,default_marked_player:10,
+    default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:8,default_marked_player:10,
+    // 4-4-2 (添付スタメン): GK Gill / DF Cáceres-G.Gómez-Alderete-J.Alonso / MF D.Gómez-Cubas-Bobadilla-Almirón / FW Enciso-Sanabria。index0-10=先発(スロット順), 11-25=控え(画像のサブ順)。計26名
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
     players:[
-      // GK: G.Olveira (FC26 OVR73, DIV73, HAN72, KIC66, REF73, SPD55, POS73)
-      {name:"オルベイラ",en_name:"Olveira",long_name:"ガストン・オルベイラ",positions:["GK"],params:[50,50,50,50,73,55,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,73,72,50,73,73,75]},
-      // RB: J.Cáceres (FC26 OVR73, PAC76, SHO46, PAS62, DRI66, DEF72, PHY70)
+      // ▼ 先発XI（4-4-2スロット順: GK/右SB/右CB/左CB/左SB/右DMF/左DMF/右SMF/左SMF/右CF/左CF）
+      // 0 GK: O.Gill (FC26 OVR62, DIV63, HAN62, KIC60, REF62, SPD26, POS63)
+      {name:"ヒル",en_name:"Gill",long_name:"オルランド・ヒル",positions:["GK"],params:[50,50,50,50,62,26,50,50,50,50,60,50,50,50,50,50,50,50,50,50,50,50,50,63,62,50,63,62,75]},
+      // 1 RB: J.Cáceres (FC26 OVR73, PAC76, SHO46, PAS62, DRI66, DEF72, PHY70)
       {name:"J・カセレス",en_name:"J.Caceres",long_name:"フリオ・カセレス",positions:["右SB"],params:[70,70,76,78,69,68,66,66,71,62,58,45,46,46,33,34,63,46,72,74,72,72,74,50,50,66,68,70,75]},
-      // RCB: G.Gómez (FC26 OVR78, PAC72, SHO44, PAS64, DRI62, DEF78, PHY80) C
+      // 2 RCB: G.Gómez (FC26 OVR78, PAC72, SHO44, PAS64, DRI62, DEF78, PHY80) C
       {name:"G・ゴメス",en_name:"G.Gomez",long_name:"グスタボ・ゴメス",positions:["CB"],params:[80,78,72,73,77,78,60,60,72,64,58,36,34,42,28,30,60,30,78,80,78,78,76,50,50,78,72,75,75]},
-      // LCB: O.Alderete (FC26 OVR80, PAC72, SHO42, PAS63, DRI62, DEF80, PHY82)
+      // 3 LCB: O.Alderete (FC26 OVR80, PAC72, SHO42, PAS63, DRI62, DEF80, PHY82)
       {name:"O・アルデレテ",en_name:"O.Alderete",long_name:"オマル・アルデレテ",positions:["CB"],params:[82,82,72,74,79,80,62,62,67,63,59,41,42,42,30,31,59,45,80,82,80,80,82,50,50,80,70,77,75]},
-      // LB: J.Alonso (FC26 OVR74, PAC72, SHO44, PAS62, DRI66, DEF72, PHY74)
+      // 4 LB: J.Alonso (FC26 OVR74, PAC72, SHO44, PAS62, DRI66, DEF72, PHY74)
       {name:"J・アロンソ",en_name:"J.Alonso",long_name:"フニオール・アロンソ",positions:["左SB","CB"],params:[74,74,72,74,69,72,66,66,69,62,58,43,44,44,32,33,63,45,72,74,72,72,74,50,50,70,66,71,75]},
-      // LDMF: D.Gómez (FC26 OVR77, PAC76, SHO64, PAS72, DRI72, DEF58, PHY68)
-      {name:"D・ゴメス",en_name:"D.Gomez",long_name:"ディエゴ・ゴメス",positions:["DMF","CMF","右SMF","OMF"],params:[68,70,76,78,72,66,72,72,74,72,67,62,64,64,46,47,68,58,58,60,58,58,60,50,50,64,69,74,75]},
-      // RDMF: D.Bobadilla (FC26 OVR73, PAC67, SHO58, PAS68, DRI65, DEF68, PHY72)
-      {name:"ボバディージャ",en_name:"Bobadilla",long_name:"ダミアン・ボバディージャ",positions:["DMF","CMF"],params:[72,74,67,69,64,70,65,65,66,68,63,56,58,58,42,43,62,54,68,70,68,68,70,50,50,68,63,70,75]},
-      // RM: R.Sosa (FC26 OVR74, PAC82, SHO68, PAS64, DRI76, DEF38, PHY62)
-      {name:"R・ソサ",en_name:"R.Sosa",long_name:"ラモン・ソサ",positions:["右WG","右SMF","左WG"],params:[62,62,82,84,77,58,76,76,79,64,60,66,68,68,49,50,72,65,38,40,38,38,40,50,50,45,72,71,75]},
-      // CAM: J.Enciso (FC26 OVR75, PAC78, SHO72, PAS72, DRI78, DEF48, PHY66)
-      {name:"エンシソ",en_name:"Enciso",long_name:"フリオ・エンシソ",positions:["OMF","左SMF","右WG"],params:[64,66,78,79,76,60,76,78,76,72,66,68,68,72,58,62,78,64,44,46,44,44,46,50,50,58,66,72,75]},
-      // LM: M.Almirón (FC26 OVR76, PAC82, SHO70, PAS80, DRI80, DEF64, PHY76) ← keyplayer
-      {name:"アルミロン",en_name:"Almiron",long_name:"ミゲル・アルミロン",positions:["左SMF","OMF","CMF"],params:[74,76,82,83,80,70,78,80,80,80,74,64,66,70,58,62,80,68,60,62,60,60,62,50,50,68,74,73,75]},
-      // CF: A.Sanabria (FC26 OVR75, PAC72, SHO72, PAS64, DRI70, DEF40, PHY68) ← marked
-      {name:"サナブリア",en_name:"Sanabria",long_name:"アントニオ・サナブリア",positions:["CF","OMF"],params:[68,68,72,74,71,65,70,70,71,64,60,70,72,72,52,53,67,68,40,42,40,40,42,50,50,65,69,72,75]},
-      // Sub CF: Á.Romero (FC26 OVR76, PAC78, SHO74, PAS62, DRI70, DEF40, PHY74)
-      {name:"A・ロメロ",en_name:"A.Romero",long_name:"アンヘル・ロメロ",positions:["CF","右WG"],params:[74,74,78,79,74,70,68,70,74,62,56,72,70,74,50,54,68,68,36,38,36,36,38,50,50,68,64,64,75]},
-      // Sub CB: Balbuena F (FC26 OVR74, PAC70, SHO42, PAS60, DRI58, DEF74, PHY78)
-      {name:"バルブエナ",en_name:"Balbuena",long_name:"ファビアン・バルブエナ",positions:["CB","右SB"],params:[78,76,70,71,68,76,56,56,66,60,54,32,30,38,24,26,56,28,74,76,74,74,72,50,50,74,66,64,75]},
-      // Sub DMF: Cubas J (FC26 OVR74, PAC72, SHO58, PAS68, DRI66, DEF74, PHY74)
+      // 5 RDMF: J.Cubas (FC26 OVR74, PAC72, SHO58, PAS68, DRI66, DEF74, PHY74)
       {name:"クバス",en_name:"Cubas",long_name:"ジュニオール・クバス",positions:["DMF","CMF"],params:[74,74,72,73,68,70,64,64,68,68,62,52,54,56,44,46,64,52,72,74,72,72,70,50,50,70,64,62,75]},
-      // Sub LW: Cardozo A (FC26 OVR73, PAC80, SHO64, PAS58, DRI70, DEF38, PHY64)
-      {name:"カルドソ",en_name:"Cardozo",long_name:"アンヘル・カルドソ",positions:["右WG","左WG"],params:[62,62,80,81,70,58,68,70,70,58,52,60,60,62,44,48,68,56,34,36,34,34,36,50,50,56,58,56,75]},
-      // Sub GK: A.Silva (FC26 OVR71, DIV72, HAN70, KIC65, REF72, SPD54, POS71)
-      {name:"アントニー・シルバ",en_name:"A.Silva",long_name:"アントニー・シルバ",positions:["GK"],params:[50,50,50,50,72,54,50,50,50,50,65,50,50,50,50,50,50,50,50,50,50,50,50,72,70,50,71,65,75]},
-      // Sub GK: R.Fernández (FC26 OVR68, DIV68, HAN67, KIC64, REF68, SPD52, POS68)
-      {name:"R・フェルナンデス",en_name:"R.Fernandez",long_name:"ロドリゴ・フェルナンデス",positions:["GK"],params:[50,50,50,50,68,52,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,68,67,50,68,68,75]},
-      // Sub CB: J.Canale (FC26 OVR70, PAC64, SHO36, PAS56, DRI55, DEF70, PHY76)
-      {name:"カナレ",en_name:"Canale",long_name:"ファビオ・カナレ",positions:["CB"],params:[76,76,64,66,69,74,55,55,60,56,52,35,36,36,26,27,52,39,70,72,70,70,72,50,50,74,62,67,75]},
-      // Sub LB: A.Maidana (FC26 OVR62, PAC72, SHO38, PAS54, DRI58, DEF58, PHY64)
+      // 6 LDMF: D.Bobadilla (FC26 OVR73, PAC67, SHO58, PAS68, DRI65, DEF68, PHY72)
+      {name:"ボバディージャ",en_name:"Bobadilla",long_name:"ダミアン・ボバディージャ",positions:["DMF","CMF"],params:[72,74,67,69,64,70,65,65,66,68,63,56,58,58,42,43,62,54,68,70,68,68,70,50,50,68,63,70,75]},
+      // 7 RM: D.Gómez (FC26 OVR77, PAC76, SHO64, PAS72, DRI72, DEF58, PHY68)
+      {name:"D・ゴメス",en_name:"D.Gomez",long_name:"ディエゴ・ゴメス",positions:["DMF","CMF","右SMF","OMF"],params:[68,70,76,78,72,66,72,72,74,72,67,62,64,64,46,47,68,58,58,60,58,58,60,50,50,64,69,74,75]},
+      // 8 LM: M.Almirón (FC26 OVR76, PAC82, SHO70, PAS80, DRI80, DEF64, PHY76) ← keyplayer
+      {name:"アルミロン",en_name:"Almiron",long_name:"ミゲル・アルミロン",positions:["左SMF","OMF","CMF"],params:[74,76,82,83,80,70,78,80,80,80,74,64,66,70,58,62,80,68,60,62,60,60,62,50,50,68,74,73,75]},
+      // 9 RCF: J.Enciso (FC26 OVR75, PAC78, SHO72, PAS72, DRI78, DEF48, PHY66) ※添付の2トップ起用に合わせCF適性追加
+      {name:"エンシソ",en_name:"Enciso",long_name:"フリオ・エンシソ",positions:["OMF","左SMF","右WG","CF"],params:[64,66,78,79,76,60,76,78,76,72,66,68,68,72,58,62,78,64,44,46,44,44,46,50,50,58,66,72,75]},
+      // 10 LCF: A.Sanabria (FC26 OVR75, PAC72, SHO72, PAS64, DRI70, DEF40, PHY68)
+      {name:"サナブリア",en_name:"Sanabria",long_name:"アントニオ・サナブリア",positions:["CF","OMF"],params:[68,68,72,74,71,65,70,70,71,64,60,70,72,72,52,53,67,68,40,42,40,40,42,50,50,65,69,72,75]},
+      // ▼ 控え（画像のサブ表示順）
+      // 11 GK: R.Fernández (FC26 OVR68, DIV68, HAN67, KIC64, REF68, SPD52, POS68)
+      {name:"R・フェルナンデス",en_name:"R.Fernandez",long_name:"ロベルト・フェルナンデス",positions:["GK"],params:[50,50,50,50,68,52,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,68,67,50,68,68,75]},
+      // 12 GK: G.Olveira (FC26 OVR73, DIV73, HAN72, KIC66, REF73, SPD55, POS73)
+      {name:"オルベイラ",en_name:"Olveira",long_name:"ガストン・オルベイラ",positions:["GK"],params:[50,50,50,50,73,55,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,73,72,50,73,73,75]},
+      // 13 CB: J.Canale (FC26 OVR70, PAC64, SHO36, PAS56, DRI55, DEF70, PHY76)
+      {name:"カナレ",en_name:"Canale",long_name:"ホセ・カナレ",positions:["CB"],params:[76,76,64,66,69,74,55,55,60,56,52,35,36,36,26,27,52,39,70,72,70,70,72,50,50,74,62,67,75]},
+      // 14 CB: G.Velázquez (FC26 OVR73, PAC74, SHO31, PAS47, DRI55, DEF72, PHY78)
+      {name:"ベラスケス",en_name:"Velazquez",long_name:"グスタボ・ベラスケス",positions:["CB"],params:[80,74,74,73,72,78,52,54,64,47,44,30,30,36,24,26,52,28,72,74,72,72,70,50,50,78,70,72,75]},
+      // 15 CB: F.Balbuena (FC26 OVR74, PAC70, SHO42, PAS60, DRI58, DEF74, PHY78)
+      {name:"バルブエナ",en_name:"Balbuena",long_name:"ファビアン・バルブエナ",positions:["CB","右SB"],params:[78,76,70,71,68,76,56,56,66,60,54,32,30,38,24,26,56,28,74,76,74,74,72,50,50,74,66,64,75]},
+      // 16 LB: A.Maidana (FC26 OVR62, PAC72, SHO38, PAS54, DRI58, DEF58, PHY64)
       {name:"マイダナ",en_name:"Maidana",long_name:"アレハンドロ・マイダナ",positions:["左SB"],params:[64,64,72,74,58,62,58,58,65,54,50,37,38,38,27,28,55,39,58,60,58,58,60,50,50,60,60,60,75]},
-      // Sub LM: M.Galarza (FC26 OVR70, PAC76, SHO62, PAS68, DRI72, DEF48, PHY66)
+      // 17 DMF: B.Ojeda (FC26 OVR70, PAC67, SHO54, PAS64, DRI72, DEF66, PHY73)
+      {name:"オヘダ",en_name:"Ojeda",long_name:"ブライアン・オヘダ",positions:["DMF","CMF"],params:[72,74,67,68,68,68,70,70,70,64,60,48,50,52,40,42,68,52,66,68,66,66,68,50,50,66,64,70,75]},
+      // 18 LM: M.Galarza (FC26 OVR70, PAC76, SHO62, PAS68, DRI72, DEF48, PHY66)
       {name:"M・ガラルサ",en_name:"M.Galarza",long_name:"マティアス・ガラルサ",positions:["左SMF","左WG","右SMF"],params:[66,66,76,78,72,62,72,72,74,68,63,60,62,62,45,46,68,59,48,50,48,48,50,50,50,48,66,67,75]},
-      // Sub CAM: Mauricio (FC26 OVR76, PAC72, SHO72, PAS76, DRI76, DEF60, PHY68)
+      // 19 AM: Kaku / A.Romero Gamarra (FC26 OVR79, PAC81, SHO73, PAS81, DRI80, DEF52, PHY64)
+      {name:"カク",en_name:"Kaku",long_name:"アレハンドロ・ロメロ・ガマラ",positions:["OMF","左SMF","右SMF","CMF"],params:[66,74,81,82,78,60,82,82,80,82,78,72,72,74,70,74,82,74,52,52,50,50,54,50,50,50,74,74,75]},
+      // 20 AM: Mauricio (FC26 OVR76, PAC72, SHO72, PAS76, DRI76, DEF60, PHY68)
       {name:"マウリシオ",en_name:"Mauricio",long_name:"マウリシオ・ペレイラ",positions:["OMF","CMF","左SMF"],params:[68,68,72,74,72,64,76,76,74,76,71,70,72,72,52,53,72,68,60,62,60,60,62,50,50,49,63,73,75]},
-      // Sub RM: G.Caballero (FC26 OVR67, PAC78, SHO62, PAS60, DRI68, DEF32, PHY60)
+      // 21 RW: G.Caballero (FC26 OVR67, PAC78, SHO62, PAS60, DRI68, DEF32, PHY60)
       {name:"G・カバジェロ",en_name:"G.Caballero",long_name:"グスタボ・カバジェロ",positions:["右WG","右SMF"],params:[60,60,78,80,71,56,68,68,73,60,56,60,62,62,45,46,65,59,32,34,32,32,34,50,50,43,67,64,75]},
-      // Sub CF: A.Arce (FC26 OVR75, PAC80, SHO72, PAS60, DRI72, DEF36, PHY70)
-      {name:"A・アルセ",en_name:"A.Arce",long_name:"アンヘル・アルセ",positions:["CF","右WG"],params:[70,70,80,82,76,67,72,72,76,60,56,70,72,72,52,53,68,68,36,38,36,36,38,50,50,67,73,72,75]},
-      // Sub LB: Arzamendia (FC26 OVR74, PAC80, SHO50, PAS64, DRI68, DEF70, PHY68)
-      {name:"アルサメンディア",en_name:"Arzamendia",long_name:"サンティアゴ・アルサメンディア",positions:["左SB"],params:[66,66,80,81,70,62,66,66,70,64,58,42,42,46,34,36,66,44,68,70,68,68,66,50,50,60,62,60,75]},
-      // Sub DMF: M.Villasanti (FC26 OVR74, PAC70, SHO56, PAS70, DRI66, DEF76, PHY74)
-      {name:"ビジャサンティ",en_name:"Villasanti",long_name:"マティアス・ビジャサンティ",positions:["DMF","CMF"],params:[74,74,70,71,70,70,64,64,70,70,64,50,52,54,42,44,64,52,74,76,74,74,72,50,50,70,66,64,75]},
-      // Sub CB: Alonso G (FC26 OVR73, PAC70, SHO40, PAS58, DRI56, DEF74, PHY76)
-      {name:"アロンソ",en_name:"Alonso",long_name:"ガブリエル・アロンソ",positions:["CB"],params:[76,74,70,71,66,74,54,54,66,58,52,32,30,38,24,26,54,26,74,76,74,74,72,50,50,74,66,64,75]}
+      // 22 SS/RW: R.Sosa (FC26 OVR74, PAC82, SHO68, PAS64, DRI76, DEF38, PHY62)
+      {name:"R・ソサ",en_name:"R.Sosa",long_name:"ラモン・ソサ",positions:["右WG","右SMF","左WG"],params:[62,62,82,84,77,58,76,76,79,64,60,66,68,68,49,50,72,65,38,40,38,38,40,50,50,45,72,71,75]},
+      // 23 CF: G.Ávalos (FC26 OVR75, PAC67, SHO75, PAS63, DRI73, DEF45, PHY84)
+      {name:"アバロス",en_name:"Avalos",long_name:"ガブリエル・アバロス",positions:["CF"],params:[82,68,67,66,72,80,66,72,70,63,56,75,76,76,52,54,70,72,45,44,42,42,44,50,50,82,72,72,75]},
+      // 24 CF: I.Pitta (FC26 OVR70, ST。サブスタッツは近似推定)
+      {name:"ピッタ",en_name:"Pitta",long_name:"イシドロ・ピッタ",positions:["CF"],params:[74,70,75,74,70,76,68,70,72,56,52,70,72,72,48,50,68,68,34,34,32,32,36,50,50,74,68,70,75]},
+      // 25 CF: Á.Arce (FC26 OVR75, PAC80, SHO72, PAS60, DRI72, DEF36, PHY70)
+      {name:"A・アルセ",en_name:"A.Arce",long_name:"アレックス・アルセ",positions:["CF","右WG"],params:[70,70,80,82,76,67,72,72,76,60,56,70,72,72,52,53,68,68,36,38,36,36,38,50,50,67,73,72,75]}
     ]
   },
 
