@@ -766,6 +766,11 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "マレン": {"profile": "鋭いスプリントとカットインが得意な右WG。得点能力も高く攻撃に変化をもたらすアタッカー。", "profile_en": "A right winger known for sharp sprinting and cutting inside to threaten goal. A dynamic attacker who adds variety to the team.", "height": 175, "weight": 71},
 "ブーヌ": {"profile": "卓越した反応速度と広い守備範囲でゴールを守る守護神。足元の技術も高くビルドアップに貢献する。", "profile_en": "A goalkeeper with outstanding reflexes and a wide defensive range. Also technically composed with the ball at his feet.", "height": 191, "weight": 83},
 "ハキミ": {"profile": "爆発的なスプリントと正確なクロスでサイドを制圧する世界最高クラスの右SB。攻守どちらでも高品質なパフォーマンスを誇る。", "profile_en": "One of the world's finest right-backs, dominating the flank with explosive pace and precise crossing — formidable in both attack and defence.", "height": 181, "weight": 73},
+"リヤド": {"profile": "長身を生かした空中戦と落ち着いた対応が光る若きセンターバック。将来を嘱望される守備の柱。", "profile_en": "A young centre-back who excels in the air thanks to his height and stays composed under pressure. A defensive cornerstone with a bright future.", "height": 190, "weight": 82},
+"ディオプ": {"profile": "恵まれた体格と強さを誇る経験豊富なセンターバック。空中戦と対人守備で最終ラインに安定をもたらす。", "profile_en": "An experienced centre-back with an imposing physique and strength. He brings stability to the back line through aerial dominance and solid one-on-one defending.", "height": 194, "weight": 95},
+"マズラウィ": {"profile": "両サイドをこなす万能型のフルバック。豊富な運動量と的確な攻撃参加で攻守にバランスをもたらす。", "profile_en": "A versatile full-back capable on either flank. His high work rate and well-timed attacking runs bring balance to both phases of play.", "height": 183, "weight": 73},
+"ブアディ": {"profile": "10代ながら高い完成度を見せる守備的MF。豊富な運動量とボール奪取、的確な配球で中盤を制圧する逸材。", "profile_en": "A defensive midfielder showing remarkable maturity despite his teenage years. A gem who controls midfield with tireless running, ball-winning and accurate distribution.", "height": 185, "weight": 74},
+"エル・カヌース": {"profile": "創造性あふれる左利きのアタッカー。鋭いドリブルと決定的なラストパスで攻撃にアクセントを加える。", "profile_en": "A creative left-footed attacker. His incisive dribbling and decisive final passes add a cutting edge to the attack.", "height": 178, "weight": 72},
 "アゲルド": {"profile": "高さと体格を活かした空中戦の強さが持ち味のCB。ライン統率力と集中力も高い。", "profile_en": "A commanding centre-back who excels in aerial duels thanks to his height and build. Organises the line with concentration and authority.", "height": 192, "weight": 88},
 "マシナ": {"profile": "左足の精度が高く、攻守のバランスに優れる左CB/SB。セットプレーでも活躍する。", "profile_en": "A left-sided defender with a precise left foot and strong balance between attack and defence. Also effective from set pieces.", "height": 187, "weight": 79},
 "サラー＝エディン": {"profile": "左サイドで守備と攻撃参加を両立するSB。スピードと粘り強いプレーで相手を圧倒する。", "profile_en": "A left-back who combines solid defending with effective attacking participation. His pace and tenacity overwhelm opponents.", "height": 183, "weight": 73},
@@ -786,6 +791,10 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "マルティネッリ": {"profile": "積極的な守備参加とスプリントで左サイドに躍動するWG。チェイシングとゴール前への積極性が武器。", "profile_en": "A dynamic left winger who presses high and sprints endlessly. His relentless energy and aggression in front of goal are his hallmarks.", "height": 176, "weight": 75},
 "クーニャ": {"profile": "豊富な運動量と高いテクニックで多様なポジションをこなす万能FW。前線でのプレーの幅が広い。", "profile_en": "A versatile forward with high work rate and technical skill who can play across multiple attacking positions.", "height": 181, "weight": 77},
 "ヴィニシウス": {"profile": "圧倒的な速度と鋭いドリブルで左サイドから守備を崩す世界屈指のアタッカー。得点力も一流。", "profile_en": "One of the world's most dangerous attackers, shredding defences from the left with blistering pace and incisive dribbling. An elite goalscorer.", "height": 176, "weight": 73},
+"アリソン": {"profile": "卓越した反射神経と安定したハンドリングを誇る世界最高峰のGK。足元の技術も高く、最後方からビルドアップを支える守護神。", "profile_en": "A world-class goalkeeper with outstanding reflexes and reliable handling. Comfortable with his feet, he anchors the build-up from the very back.", "height": 191, "weight": 91},
+"ガブリエウ": {"profile": "圧倒的な空中戦と対人守備を誇る左利きの強靭なCB。冷静な読みと力強い競り合いで最終ラインを統率する。", "profile_en": "A powerful left-footed centre-back dominant in the air and in duels. His composed reading and strength in challenges marshal the back line.", "height": 190, "weight": 82},
+"イバニェス": {"profile": "対人とスピードに優れたユーティリティDF。CBと右SBをこなし、強度ある守備と的確なカバーリングで貢献する。", "profile_en": "A versatile defender strong in duels and pace. Comfortable at centre-back and right-back, he contributes with intense defending and sound covering.", "height": 187, "weight": 82},
+"イゴール・チアゴ": {"profile": "長身を生かしたポストプレーと高い決定力を備えたストライカー。空中戦の強さとボックス内の落ち着きでゴールを量産する。", "profile_en": "A striker with strong hold-up play from his tall frame and sharp finishing. His aerial strength and composure in the box bring a steady goal output.", "height": 191, "weight": 86},
 "ランゲル": {"profile": "安定したセービングとペナルティエリアの統率力を持つGK。的確な判断でゴールを守る。", "profile_en": "A goalkeeper with stable shot-stopping and strong command of his penalty area. His sound judgement protects the goal.", "height": 187, "weight": 82},
 "I.レジェス": {"profile": "右サイドで攻守にバランスよく貢献するSB。積極的な前進と守備での対応力が光る。", "profile_en": "A balanced right-back who contributes effectively at both ends. Known for his attacking forays and reliable defending.", "height": 178, "weight": 73},
 "モンテス": {"profile": "高さと空中戦の強さを誇る守備の要CB。セットプレーでも圧倒的な存在感を発揮する。", "profile_en": "A commanding centre-back whose aerial strength and height make him dominant in the air. Imposes himself at set pieces too.", "height": 186, "weight": 82},
@@ -2916,9 +2925,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   morocco2026: {
     name:"モロッコ",en_name:"Morocco",team_color:"#C1272D",flag:"🇲🇦",
-    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_system:"4-2-1-3",default_tactics:TACTICS_COUNTER,
     default_keyplayer:1,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_lineup:[0,1,27,26,28,29,6,19,7,30,9],
     players:[
       {name:"ブーヌ",en_name:"Bounou",long_name:"ヤシン・ブーヌ",positions:["GK"],params:[50,50,50,50,78,65,50,50,50,50,76,50,50,50,50,50,50,50,50,50,50,50,50,84,74,50,83,76,75]},
       {name:"ハキミ",en_name:"Hakimi",long_name:"アシュラフ・ハキミ",positions:["右SB","右SMF","左SB"],params:[74,94,94,90,90,84,83,81,88,86,75,80,75,83,80,79,85,84,85,85,81,84,83,50,50,71,78,84,75]},
@@ -2946,14 +2955,20 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ブルデ",en_name:"Boudouh",long_name:"イルリ・ブドゥ",positions:["右WG","右SMF"],params:[62,70,80,80,74,60,76,72,76,64,58,62,60,60,46,46,62,62,54,50,52,50,50,50,50,52,58,60,74]},
       {name:"ダリ",en_name:"Dari",long_name:"ノアム・ダリ",positions:["CB","左SB"],params:[78,74,72,70,72,78,66,60,63,64,62,36,32,46,32,30,60,52,74,76,76,76,74,50,50,76,60,68,74]},
       {name:"M・アブデルハミド",en_name:"M.Abdelhamid",long_name:"モハメド・アブデルハミド",positions:["CB"],params:[78,72,70,68,70,76,64,58,61,62,60,34,30,44,30,28,58,50,72,74,74,74,72,50,50,74,58,66,74]},
-      {name:"カビル",en_name:"Kabir",long_name:"マフムード・アハムード",positions:["CF","OMF"],params:[70,72,76,74,74,70,72,68,70,66,60,68,66,66,52,50,62,66,52,52,54,50,52,50,50,62,64,64,74]}
+      {name:"カビル",en_name:"Kabir",long_name:"マフムード・アハムード",positions:["CF","OMF"],params:[70,72,76,74,74,70,72,68,70,66,60,68,66,66,52,50,62,66,52,52,54,50,52,50,50,62,64,64,74]},
+      // ↓ 2026/06/14 vs ブラジル 先発（TM準拠）。FC26 OVR目安で能力推定
+      {name:"リヤド",en_name:"C.Riad",long_name:"シャディ・リヤド",positions:["CB"],params:[80,76,74,72,74,82,66,62,68,66,62,36,32,46,30,34,62,42,76,76,75,76,72,50,50,80,73,70,75]},
+      {name:"ディオプ",en_name:"I.Diop",long_name:"イサ・ディオプ",positions:["CB"],params:[84,74,74,72,73,84,62,58,66,62,58,34,30,44,28,32,58,40,76,77,77,76,72,50,50,82,72,70,75]},
+      {name:"マズラウィ",en_name:"Mazraoui",long_name:"ヌサイル・マズラウィ",positions:["左SB","右SB","右SMF"],params:[70,82,82,82,82,72,80,78,82,78,74,56,54,62,54,62,80,70,78,79,76,77,76,50,50,64,76,78,75]},
+      {name:"ブアディ",en_name:"Bouaddi",long_name:"アユーブ・ブアディ",positions:["DMF","CMF"],params:[74,82,72,72,76,74,76,76,74,74,70,58,56,62,52,56,76,64,76,76,74,75,76,50,50,66,76,74,75]},
+      {name:"エル・カヌース",en_name:"El Khannouss",long_name:"ビラル・エル・カヌース",positions:["OMF","左WG","左SMF","右WG"],params:[64,76,80,82,80,64,84,84,82,78,72,72,70,72,66,72,84,80,50,48,46,48,58,50,50,56,80,76,75]}
 ]
   },
   brazil2026: {
     name:"ブラジル",en_name:"Brazil",team_color:"#009C3B",flag:"🇧🇷",
-    default_system:"4-4-2",default_tactics:TACTICS_PRESS,
-    default_keyplayer:10,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"4-2-1-3",default_tactics:TACTICS_PRESS,
+    default_keyplayer:9,default_marked_player:10,
+    default_lineup:[26,28,3,27,4,6,23,16,7,10,29],
     players:[
       {name:"エデルソン",en_name:"Ederson",long_name:"エデルソン・サンタナ・デ・モラエス",positions:["GK"],params:[50,50,50,50,83,78,50,50,50,50,91,50,50,50,50,50,50,50,50,50,50,50,50,85,83,50,84,72,75]},
       {name:"ウェスレー",en_name:"Wesley",long_name:"ウェスレー・ヴィニシウス・フランサ・リマ",positions:["右SB","右SMF","左SMF"],params:[75,78,90,90,80,84,89,81,86,77,73,62,66,71,58,68,79,81,74,75,76,76,77,50,50,66,67,76,75]},
@@ -2981,7 +2996,12 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"グスタボ",en_name:"G.Guedes",long_name:"グスタボ・ゲデス",positions:["左WG","右WG","CF"],params:[68,74,80,80,76,66,78,74,77,68,62,68,66,66,52,52,70,68,60,56,58,56,58,50,50,60,66,68,74]},
       {name:"ブルーノ・ギマランエス",en_name:"B.Guimaraes",long_name:"ブルーノ・ギマランエス",positions:["DMF","CMF"],params:[78,82,74,72,80,76,76,72,73,80,78,60,56,66,54,52,76,72,80,82,80,78,76,50,50,72,74,80,75]},
       {name:"レイニエル",en_name:"Renan2",long_name:"レイニエル・ジェズス",positions:["CMF","OMF"],params:[66,74,72,72,74,66,76,74,73,76,70,64,62,66,58,60,74,70,64,62,62,60,60,50,50,56,66,68,74]},
-      {name:"フェリペ・アンデルソン",en_name:"F.Anderson",long_name:"フェリペ・アンデルソン",positions:["右WG","OMF","左WG"],params:[68,76,82,82,78,68,82,78,80,74,68,70,68,68,58,58,76,72,60,56,60,58,58,50,50,62,68,70,74]}
+      {name:"フェリペ・アンデルソン",en_name:"F.Anderson",long_name:"フェリペ・アンデルソン",positions:["右WG","OMF","左WG"],params:[68,76,82,82,78,68,82,78,80,74,68,70,68,68,58,58,76,72,60,56,60,58,58,50,50,62,68,70,74]},
+      // ↓ 2026/06/14 vs モロッコ 先発（TM準拠）。FC26 OVR目安で能力推定
+      {name:"アリソン",en_name:"Alisson",long_name:"アリソン・ベッカー",positions:["GK"],params:[50,50,50,50,88,60,50,50,50,50,85,50,50,50,50,50,50,50,50,50,50,50,50,88,85,50,87,85,75]},
+      {name:"ガブリエウ",en_name:"Gabriel",long_name:"ガブリエウ・マガリャンイス",positions:["CB"],params:[86,80,76,74,84,90,66,64,74,72,70,48,50,58,30,38,66,52,85,86,86,85,82,50,50,88,85,84,75]},
+      {name:"イバニェス",en_name:"R.Ibanez",long_name:"ホジェル・イバニェス",positions:["右SB","CB"],params:[80,78,78,76,76,82,68,64,71,68,64,38,36,48,32,38,64,48,78,79,78,78,76,50,50,80,76,74,75]},
+      {name:"イゴール・チアゴ",en_name:"Igor Thiago",long_name:"イゴール・チアゴ",positions:["CF"],params:[84,78,76,74,78,80,72,76,76,68,62,82,82,80,54,58,76,80,36,38,34,36,64,50,50,80,80,76,75]}
 ]
   },
   mexico2026: {
