@@ -666,6 +666,10 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "マクリーン": {"profile": "落ち着いたボールコントロールと正確なパスでゲームをコントロールするCMF。経験とインテリジェンスが持ち味。", "profile_en": "A composed central midfielder who controls the game with steady ball control and accurate passing. His experience and intelligence are his strengths.", "height": 187, "weight": 80},
 "マッギン": {"profile": "爆発的なエネルギーと高い技術力でゲームを動かすダイナモ型CMF。攻守両面でスコットランドのエンジンとなる。", "profile_en": "An explosive and technically gifted dynamo who drives the game forward. Scotland's engine in both attack and defence.", "height": 180, "weight": 79},
 "マクトミネイ": {"profile": "大型のボックス・トゥ・ボックスMF。パワーとテクニックを兼備し、ゴールへの強引な推進力が最大の武器。", "profile_en": "A powerful box-to-box midfielder combining power and technique. His driving runs and forceful forward play are his greatest weapon.", "height": 193, "weight": 83},
+"ヒッキー": {"profile": "両サイドをこなす攻撃的なフルバック。スピードと豊富な運動量でサイドを上下動し、攻守に貢献する。", "profile_en": "An attacking full-back capable on both flanks. His pace and high work rate up and down the wing contribute in both attack and defence.", "height": 175, "weight": 68},
+"ガノンドーク": {"profile": "圧倒的なスピードと大胆な仕掛けが武器の若手右ウインガー。縦への突破とカットインで違いを生み出す逸材。", "profile_en": "A young right winger armed with blistering pace and fearless dribbling. A talent who makes the difference with direct runs and cut-ins.", "height": 172, "weight": 65},
+"C・アダムス": {"profile": "スピードと強さを兼ね備えた献身的なストライカー。前線からの守備とゴール前の鋭さでチームに貢献する。", "profile_en": "A hard-working striker combining pace and strength. He contributes with pressing from the front and sharpness in the box.", "height": 178, "weight": 70},
+"シャンクランド": {"profile": "ボックス内の動き出しと決定力に長けた生粋のゴールゲッター。少ない機会を確実に仕留める嗅覚が武器。", "profile_en": "A natural goalscorer with excellent movement in the box and clinical finishing. His instinct to convert half-chances is his weapon.", "height": 178, "weight": 75},
 "ダイクス": {"profile": "強靭なフィジカルとポストプレーを武器とするターゲットマン。空中戦での強さとシュート精度で得点を狙う。", "profile_en": "A target-man striker who uses his powerful physique and hold-up play to lead the line. Dangerous in the air and a clinical finisher.", "height": 193, "weight": 88},
 "コンウェイ": {"profile": "スピードと機動力を活かして前線を縦横無尽に駆け回るストライカー。サイドでも機能するマルチロールFW。", "profile_en": "A striker who roams the frontline relentlessly using speed and mobility. Can also operate effectively from wide positions.", "height": 181, "weight": 76},
 "ピックフォード": {"profile": "卓越したセービングと1対1の強さを誇るイングランドの正GK。ハイボール処理も安定しゴールを守り続ける。", "profile_en": "England's first-choice goalkeeper with outstanding saving ability and strength in one-on-one situations. Consistently reliable in handling high balls.", "height": 185, "weight": 80},
@@ -1815,6 +1819,14 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "J・レオン": {"profile": "DMFとしてハイチ中盤の守備的基盤を担う。高い守備意識とボール奪取力でチームを支えるハードワーカー。", "profile_en": "Provides the defensive foundation of Haiti's midfield as DMF. A hard worker who supports the team with defensive awareness and ball-winning ability.", "height": 179, "weight": 75},
 "マティアス・パイアン": {"profile": "欧州でキャリアを積んだハイチのCMF。高いパス精度と技術力でゲームを組み立てるゲームメイカー。", "profile_en": "A Haitian central midfielder with a career built in Europe. A game-maker who builds play with a pass accuracy and technical skill.", "height": 177, "weight": 73},
 "ナゾン": {"profile": "米国リーグで活躍するハイチ代表のエースウインガー。爆発的なスプリントでサイドを制圧し、CFもこなせる万能型アタッカー。", "profile_en": "Haiti's ace winger active in US football. A versatile attacker who dominates the flank with explosive pace and can also play centre-forward.", "height": 175, "weight": 70},
+"プラシド": {"profile": "ハイチ代表のキャプテンを務める経験豊富な守護神。落ち着いた佇まいとリーダーシップで最終ラインをまとめる正GK。", "profile_en": "An experienced goalkeeper and captain of Haiti. The first-choice keeper who organises the back line with composure and leadership.", "height": 185, "weight": 81},
+"デルクロワ": {"profile": "欧州で育った左利きのセンターバック。落ち着いたビルドアップと対人の強さで守備を支える。", "profile_en": "A left-footed centre-back developed in Europe. He supports the defence with composed build-up and strength in duels.", "height": 185, "weight": 78},
+"エクスペリアンス": {"profile": "豊富な運動量で上下動を繰り返す左サイドバック。スピードを生かした攻め上がりが持ち味。", "profile_en": "A left-back with the energy to get up and down the flank, whose attacking runs and pace are his trademark.", "height": 180, "weight": 74},
+"ジャンジャック": {"profile": "運動量と球際の強さを備えたボックス・トゥ・ボックスMF。中盤の底で攻守をつなぐ。", "profile_en": "A box-to-box midfielder with a strong engine and tenacity in challenges, linking defence and attack from deep in midfield.", "height": 180, "weight": 74},
+"ベルガルド": {"profile": "ハイチ攻撃の中核を担うテクニカルなMF。鋭いドリブルと推進力、ラストパスでチャンスを生み出す代表の主軸。", "profile_en": "A technical midfielder at the heart of Haiti's attack. His sharp dribbling, forward drive and final passes create chances — a cornerstone of the national team.", "height": 180, "weight": 73},
+"デードソン": {"profile": "スピードと突破力に優れた右サイドの若手アタッカー。縦への仕掛けで相手守備を脅かす。", "profile_en": "A young right-sided attacker with pace and the ability to beat his man, threatening defences with direct running.", "height": 178, "weight": 70},
+"プロビデンス": {"profile": "快足を武器に左サイドを駆け上がるウインガー。カットインからのシュートとドリブル突破が魅力。", "profile_en": "A winger who flies down the left with his pace. His cut-ins to shoot and dribbling runs are his main strengths.", "height": 178, "weight": 72},
+"イシドル": {"profile": "スピードと決定力を兼ね備えたモダンなストライカー。裏抜けと強さでハイチの最前線を担う。", "profile_en": "A modern striker combining pace and finishing. His runs in behind and physical presence lead Haiti's front line.", "height": 186, "weight": 78},
 "バジル": {"profile": "OMFとCMFをこなすテクニカルなハイチのMF。高いパス精度と技術力でゲームをコントロールする攻撃的MF。", "profile_en": "A technical Haitian midfielder capable of OMF and CMF. An attacking midfielder who controls the game with pass accuracy and technical quality.", "height": 176, "weight": 72},
 "ゲリエ": {"profile": "ハイチの快速左ウインガー。高い走力でサイドを疾走し、縦突破からゴールに絡むサイドアタッカー。", "profile_en": "Haiti's pacey left winger. A wide attacker who races down the flank with pace and gets involved in goals with direct running.", "height": 173, "weight": 68},
 "R・ダムス": {"profile": "米国リーグで活躍するハイチのストライカー。高い走力と鋭いシュートセンスでゴールを狙う代表の主力CF。", "profile_en": "A Haitian striker active in US football. Haiti's key centre-forward who targets goal with pace and shooting instinct.", "height": 184, "weight": 80},
@@ -1823,13 +1835,13 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "デジレ": {"profile": "CBとして代表のバックアップを担うハイチのDF。強靭なフィジカルと守備経験でチームに安定感をもたらす。", "profile_en": "A Haitian defender providing backup at centre-back. Brings stability to the team with his physicality and defensive experience.", "height": 183, "weight": 80},
 "アルキュス": {"profile": "CBのバックアップとして代表スクワッドに名を連ねるDF。堅実な守備で代表の守備オプションを広げる。", "profile_en": "A defender listed as backup centre-back in the national squad. Expands the team's defensive options with solid defending.", "height": 182, "weight": 78},
 "デリック・エティエン": {"profile": "右SBと右ウイングをこなすハイチのユーティリティプレイヤー。高い走力とエネルギッシュなプレーで貢献する。", "profile_en": "A Haitian utility player capable of right-back and right wing. Contributes with pace and energetic play.", "height": 177, "weight": 73},
-"F・ピエロ": {"profile": "左SBのバックアップとして代表に名を連ねる守備的プレイヤー。堅実なポジショニングと守備貢献が評価される。", "profile_en": "A defensive player listed as backup left-back in the national team. Valued for solid positioning and defensive contribution.", "height": 178, "weight": 74},
+"F・ピエロ": {"profile": "長身を生かしたポストプレーと高さが武器のハイチ代表ストライカー。空中戦とフィジカルで前線の起点となる。", "profile_en": "A Haiti striker whose hold-up play and height are his weapons. His aerial ability and physicality make him a focal point up front.", "height": 188, "weight": 82},
 "カブラル": {"profile": "DMFとCMFをこなす守備的MF。ハイチ中盤のバックアップとして豊富な運動量でチームを助ける。", "profile_en": "A defensive midfielder capable of DMF and CMF. Helps the team as midfield backup with high work rate.", "height": 179, "weight": 75},
 "レア・シリキ": {"profile": "フランス出身のハイチ系CMF。高いパス精度と機動力で中盤に活力をもたらすオールラウンドMF。", "profile_en": "A French-born Haitian central midfielder. An all-round midfielder who brings vitality to the midfield with pass accuracy and mobility.", "height": 177, "weight": 73},
 "フォルトー": {"profile": "右ウイングとOMFをこなすアタッカー。高い走力でサイドアタックを活性化するバックアップ選手。", "profile_en": "An attacker capable of right wing and OMF. A backup player who activates flank attacks with pace.", "height": 174, "weight": 70},
 "N・アレクシス": {"profile": "左ウイングとCFをこなすアタッカー。高い走力でゴールに絡むオフェンシブなバックアップ選手。", "profile_en": "An attacker capable of left wing and centre-forward. An offensive backup player who gets involved in goals with pace.", "height": 173, "weight": 69},
 "サバ": {"profile": "CFとして代表のバックアップを担う若手ストライカー。フィジカルと得点本能でゴールを狙う。", "profile_en": "A young striker providing backup at centre-forward for the national team. Targets goal with physicality and scoring instinct.", "height": 182, "weight": 78},
-"アデ": {"profile": "OMFと左ウイングをこなすクリエイティブな選手。技術力とパスセンスでハイチの攻撃に多様性をもたらす。", "profile_en": "A creative player capable of OMF and left wing. Adds variety to Haiti's attack with technical ability and passing sense.", "height": 174, "weight": 70},
+"アデ": {"profile": "長身と強さを誇るハイチの主力センターバック。空中戦と対人守備で最終ラインを統率する。", "profile_en": "Haiti's key centre-back with height and strength. He marshals the back line through aerial dominance and solid one-on-one defending.", "height": 188, "weight": 84},
 "E・ルーム": {"profile": "米国リーグで活躍するキュラソーの守護神。鋭い反応速度と安定したセービングでキュラソー代表のゴールを守るトップクラスのGK。", "profile_en": "Curaçao's goalkeeper active in US football. A top-class keeper who protects Curaçao's goal with sharp reflexes and reliable shot-stopping.", "height": 191, "weight": 88},
 "C・マルティナ": {"profile": "欧州でキャリアを築いたキュラソーのベテランDF。両サイドバックをこなせるユーティリティプレイヤーとして代表に長年貢献。", "profile_en": "A veteran Curaçao defender with a career built in Europe. A utility player capable of either full-back position who has long contributed to the national team.", "height": 180, "weight": 77},
 "メデル": {"profile": "キュラソーのCBとして守備ラインを支える。強靭なフィジカルと安定したポジショニングでゴール前を固める。", "profile_en": "Supports Curaçao's defensive line as centre-back. Secures the goal area with his physicality and solid positioning.", "height": 184, "weight": 80},
@@ -2683,8 +2695,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   scotland2026: {
     name:"スコットランド",en_name:"Scotland",team_color:"#003f8a", flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-    default_system:"4-2-3-1", default_tactics:2, default_keyplayer:8, default_marked_player:7,
-    default_lineup:[0,1,2,3,4,8,5,10,6,7,9,10],
+    default_system:"4-4-2", default_tactics:2, default_keyplayer:5, default_marked_player:7,
+    default_lineup:[0,26,2,14,4,8,5,27,7,28,29],
     players:[
       {name:"ガン",en_name:"Gunn",long_name:"アンガス・ガン",positions:["GK"],params:[50,50,50,50,74,48,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,73,71,50,70,78,75]},
       {name:"パターソン",en_name:"Patterson",long_name:"ネイサン・パターソン",positions:["右SB"],params:[67,73,71,70,72,65,75,68,67,63,62,46,48,44,50,52,70,51,72,74,68,74,72,50,50,61,76,74,75]},
@@ -2693,7 +2705,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ロバートソン",en_name:"Robertson",long_name:"アンドリュー・ロバートソン",positions:["左SB","左SMF"],params:[76,80,76,78,79,73,79,74,76,76,74,67,70,65,62,63,74,73,76,77,72,76,76,50,50,70,79,82,75]},
       {name:"ファーガソン",en_name:"Ferguson",long_name:"ルイス・ファーガソン",positions:["CMF","DMF"],params:[77,82,74,73,83,72,79,77,73,78,76,79,79,77,65,65,80,81,75,74,72,72,71,50,50,70,74,78,75]},
       {name:"マクリーン",en_name:"McLean",long_name:"ケニー・マクリーン",positions:["CMF","DMF"],params:[75,80,61,60,73,71,73,70,64,68,69,68,67,65,61,59,73,67,69,68,66,66,65,50,50,68,68,76,75]},
-      {name:"マッギン",en_name:"McGinn",long_name:"ジョン・マッギン",positions:["CMF","OMF"],params:[82,88,69,69,82,78,80,80,73,81,79,76,76,73,72,70,82,78,78,76,72,72,76,50,50,76,80,82,75]},
+      {name:"マッギン",en_name:"McGinn",long_name:"ジョン・マッギン",positions:["CMF","OMF","左SMF"],params:[82,88,69,69,82,78,80,80,73,81,79,76,76,73,72,70,82,78,78,76,72,72,76,50,50,76,80,82,75]},
       {name:"マクトミネイ",en_name:"McTominay",long_name:"スコット・マクトミネイ",positions:["CMF","OMF","DMF"],params:[82,83,75,74,82,75,76,74,72,68,79,78,78,75,70,68,76,80,78,77,72,72,76,50,50,73,80,83,75]},
       {name:"ダイクス",en_name:"Dykes",long_name:"リンドン・ダイクス",positions:["CF"],params:[83,80,66,65,72,80,68,64,61,53,51,70,70,64,45,43,62,74,34,34,25,25,35,50,50,77,45,76,75]},
       {name:"コンウェイ",en_name:"Conway",long_name:"トミー・コンウェイ",positions:["CF","WG"],params:[59,65,78,79,78,56,78,73,74,57,54,73,73,70,49,49,71,76,29,26,25,25,32,50,50,50,40,75,75]}
@@ -2712,7 +2724,12 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"マクケン",en_name:"McKenna2",long_name:"コナー・マクケン",positions:["OMF","左WG"],params:[62,72,74,74,72,60,74,70,72,72,64,60,58,60,52,52,68,64,56,52,54,52,52,50,50,52,58,60,74]},
       {name:"ブラウン",en_name:"Brown",long_name:"スコット・ブラウン",positions:["DMF","CMF"],params:[72,78,68,66,70,70,66,62,64,70,66,50,46,54,44,42,64,60,72,74,72,70,70,50,50,64,60,64,74]},
       {name:"ドーソン",en_name:"Dawson",long_name:"マイケル・ドーソン",positions:["CB","右SB"],params:[74,70,70,68,68,72,62,56,59,60,58,32,28,42,28,26,56,48,68,70,70,70,68,50,50,70,54,62,74]},
-      {name:"T・ファーガソン",en_name:"T.Ferguson",long_name:"トム・ファーガソン",positions:["CF"],params:[70,70,76,74,72,68,70,64,67,62,56,66,64,64,50,48,60,62,50,48,50,48,48,50,50,62,60,60,74]}
+      {name:"T・ファーガソン",en_name:"T.Ferguson",long_name:"トム・ファーガソン",positions:["CF"],params:[70,70,76,74,72,68,70,64,67,62,56,66,64,64,50,48,60,62,50,48,50,48,48,50,50,62,60,60,74]},
+      // ↓ 2026/06/14 vs ハイチ 先発（TM準拠 4-4-2）。FC26 OVR目安で能力推定
+      {name:"ヒッキー",en_name:"Hickey",long_name:"アーロン・ヒッキー",positions:["右SB","左SB","右SMF"],params:[68,80,80,80,76,68,76,72,76,70,66,52,50,56,50,54,72,64,72,73,70,72,72,50,50,60,72,74,75]},
+      {name:"ガノンドーク",en_name:"Gannon-Doak",long_name:"ベン・ガノンドーク",positions:["右WG","右SMF","左WG"],params:[56,74,88,88,74,62,82,80,84,66,60,64,62,64,50,58,80,72,36,34,32,34,62,50,50,52,70,70,75]},
+      {name:"C・アダムス",en_name:"C.Adams",long_name:"シェ・アダムス",positions:["CF","左WG"],params:[76,78,78,76,74,72,74,74,76,64,58,76,76,76,54,56,74,76,36,38,36,36,66,50,50,72,72,72,75]},
+      {name:"シャンクランド",en_name:"Shankland",long_name:"ローレンス・シャンクランド",positions:["CF"],params:[74,72,68,68,74,76,68,70,68,62,56,78,80,76,56,56,70,78,30,32,30,30,58,50,50,74,76,72,75]}
 ]
   },
   japan2026vsNetherlands: {
@@ -5609,9 +5626,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   haiti2026: {
     name:"ハイチ",en_name:"Haiti",team_color:"#003893",flag:"🇭🇹",
-    default_system:"4-1-2-3",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:8,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,8,7,9,10],
+    default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:5,default_marked_player:10,
+    default_lineup:[26,14,22,27,28,30,29,31,32,33,16],
     players:[
       // GK: Frantz Pierrot (OVR67, DIV68, HAN64, KIC62, REF67, SPD58, POS64)
       {name:"ピエロ",en_name:"Pierrot",long_name:"フランツ・ピエロ",positions:["GK"],params:[50,50,50,50,67,58,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,68,64,50,64,62,75]},
@@ -5642,11 +5659,11 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CB: Kervens Desire (OVR70)
       {name:"デジレ",en_name:"Desire",long_name:"ケルヴェン・デジレ",positions:["CB"],params:[74,72,66,64,63,72,56,56,62,60,56,32,30,38,28,32,54,32,68,70,70,69,68,50,50,70,58,62,75]},
       // Sub CB: Carlens Arcus (OVR68)
-      {name:"アルキュス",en_name:"Arcus",long_name:"カルランス・アルキュス",positions:["CB"],params:[70,70,64,62,62,68,54,54,60,58,54,28,26,34,24,28,52,28,66,68,68,67,66,50,50,66,56,58,75]},
+      {name:"アルキュス",en_name:"Arcus",long_name:"カルランス・アルキュス",positions:["右SB","CB"],params:[70,74,74,74,66,66,62,60,68,62,58,32,30,38,28,32,58,40,68,70,68,68,68,50,50,66,62,62,75]},
       // Sub RB: Derrick Etienne (OVR70, PAC78, SHO58, PAS60, DRI68, DEF62, PHY66)
       {name:"デリック・エティエン",en_name:"D.Etienne",long_name:"デリック・エティエン",positions:["右SB","右WG"],params:[66,68,78,80,74,62,66,66,74,60,56,52,54,56,42,48,64,52,60,62,60,60,58,50,50,58,60,60,75]},
       // Sub LB: Frantzdy Pierrot (OVR68)
-      {name:"F・ピエロ",en_name:"F.Pierrot",long_name:"フランツジー・ピエロ",positions:["左SB"],params:[68,70,68,68,64,64,60,60,64,60,56,32,30,36,26,30,58,36,64,66,64,64,62,50,50,58,56,56,75]},
+      {name:"F・ピエロ",en_name:"F.Pierrot",long_name:"フランツジー・ピエロ",positions:["CF"],params:[84,74,74,72,72,82,64,66,68,58,54,74,74,76,50,52,66,74,32,34,32,32,60,50,50,82,70,68,75]},
       // Sub DMF: Remy Cabral (OVR68)
       {name:"カブラル",en_name:"Cabral",long_name:"レミー・カブラル",positions:["DMF","CMF"],params:[68,72,64,64,62,64,62,62,63,66,62,44,46,50,38,42,62,46,66,68,66,66,64,50,50,60,58,58,75]},
       // Sub CMF: James Léa Siliki (OVR72, PAC72, SHO62, PAS72, DRI72, DEF64, PHY70)
@@ -5658,13 +5675,22 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CF: Steeven Saba (OVR69)
       {name:"サバ",en_name:"Saba",long_name:"スティーヴン・サバ",positions:["CF"],params:[68,64,72,72,68,66,62,62,68,56,52,62,64,66,44,48,60,62,24,26,26,25,24,50,50,64,58,58,75]},
       // Sub OMF: Ricardo Ade (OVR67)
-      {name:"アデ",en_name:"Ade",long_name:"リカルド・アデ",positions:["OMF","左WG"],params:[60,64,66,66,66,56,64,64,66,66,62,50,50,52,40,44,62,50,52,54,52,52,50,50,50,50,58,56,75]},
+      {name:"アデ",en_name:"Ade",long_name:"リカルド・アデ",positions:["CB"],params:[82,74,70,68,71,80,60,56,60,60,56,36,32,42,28,32,56,38,74,75,75,74,70,50,50,80,68,68,75]},
       // Sub RW: Etzer Bedard (OVR66)
       {name:"ベダール",en_name:"Bedard",long_name:"エッツェル・ベダール",positions:["右WG","CF"],params:[62,64,70,72,67,60,62,62,67,56,52,52,54,56,42,46,60,54,28,30,30,29,28,50,50,52,54,54,75]},
       // Sub LB: Frantzousky Jean (OVR65)
       {name:"ジャン",en_name:"Jean",long_name:"フランツォスキー・ジャン",positions:["左SB"],params:[64,66,64,64,60,60,56,56,60,56,52,28,26,32,22,26,54,32,60,62,60,60,58,50,50,54,50,50,75]},
       // Sub CB: Rockens Charles (OVR65)
-      {name:"シャルル",en_name:"Charles",long_name:"ロッカンス・シャルル",positions:["CB"],params:[64,64,60,58,60,62,50,50,56,52,48,22,20,28,18,22,48,22,60,62,60,60,58,50,50,60,48,48,75]}
+      {name:"シャルル",en_name:"Charles",long_name:"ロッカンス・シャルル",positions:["CB"],params:[64,64,60,58,60,62,50,50,56,52,48,22,20,28,18,22,48,22,60,62,60,60,58,50,50,60,48,48,75]},
+      // ↓ 2026/06/14 vs スコットランド 先発（TM準拠 4-4-2 double 6）。FC26 OVR目安で能力推定
+      {name:"プラシド",en_name:"Placide",long_name:"ジョニー・プラシド",positions:["GK"],params:[50,50,50,50,70,58,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,70,68,50,70,72,75]},
+      {name:"デルクロワ",en_name:"Delcroix",long_name:"ハネス・デルクロワ",positions:["CB","左SB"],params:[78,74,76,74,73,80,66,64,68,68,64,40,36,48,32,38,64,44,72,73,72,72,72,50,50,76,70,70,75]},
+      {name:"エクスペリアンス",en_name:"Experience",long_name:"マルタン・エクスペリアンス",positions:["左SB"],params:[68,74,78,78,68,66,68,66,72,62,58,44,42,48,38,42,64,52,66,67,65,66,68,50,50,60,62,62,75]},
+      {name:"ジャンジャック",en_name:"Jean Jacques",long_name:"ダンレイ・ジャンジャック",positions:["CMF","DMF"],params:[74,80,70,70,70,72,70,68,70,68,64,56,54,60,48,52,68,60,70,70,68,69,72,50,50,68,68,68,75]},
+      {name:"ベルガルド",en_name:"Bellegarde",long_name:"ジャン＝リクネル・ベルガルド",positions:["CMF","OMF","DMF"],params:[72,82,78,78,80,70,80,80,80,76,70,70,68,72,62,66,80,74,66,64,62,64,72,50,50,64,78,76,75]},
+      {name:"デードソン",en_name:"Deedson",long_name:"デードソン・ルイシウス",positions:["右WG","右SMF","左WG"],params:[60,72,82,82,72,60,76,72,78,62,58,60,58,62,46,52,72,66,38,36,36,36,60,50,50,54,64,64,75]},
+      {name:"プロビデンス",en_name:"Providence",long_name:"ルベン・プロビデンス",positions:["左WG","左SMF","右WG"],params:[60,72,84,84,73,60,78,74,79,62,58,64,62,64,48,54,74,68,36,34,34,34,60,50,50,52,66,66,75]},
+      {name:"イシドル",en_name:"Isidor",long_name:"ウィルソン・イシドル",positions:["CF","左WG"],params:[74,78,82,82,76,74,76,76,79,64,58,74,74,74,52,56,76,76,36,38,36,36,66,50,50,72,72,72,75]}
     ]
   },
   curacao2026: {
