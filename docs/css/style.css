@@ -2078,12 +2078,13 @@ body {
 /* ===== タイトル ヒーローバナー（祝福イメージ） ===== */
 .title-hero-banner {
   position: relative;
-  width: 100%;
-  border-radius: 16px;
+  width: auto;
+  /* .title-hero の左右padding(24px)を相殺して端まで全幅表示 */
+  margin: 0 -24px;
+  border-radius: 0;
   overflow: hidden;
-  margin: 0 auto;
-  box-shadow: 0 10px 34px rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  border: none;
 }
 .title-hero-img {
   display: block;
