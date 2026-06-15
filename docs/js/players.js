@@ -716,6 +716,9 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ブロン": {"profile": "フランス系チュニジア人のCB。フィジカルの強さと対人守備を武器に最終ラインを支える。", "profile_en": "A Franco-Tunisian CB whose physical strength and man-marking ability make him a reliable presence at the heart of the defence.", "height": 186, "weight": 80},
 "スキリ": {"profile": "チュニジア中盤の要。ドイツリーグで培った豊富なスタミナと高いインターセプト能力で守備陣を支える80キャップ超えのベテラン。", "profile_en": "The engine of Tunisia's midfield with 80+ caps. His stamina and interception ability honed in the Bundesliga make him the defensive anchor for the Eagles.", "height": 184, "weight": 78},
 "ハニバル": {"profile": "マンチェスター・ユナイテッドのアカデミー出身の若き才能。創造的なドリブルと鋭いラストパスでチュニジア攻撃の核を担う。", "profile_en": "A young talent from a top English academy. His creative dribbling and sharp final passes make him the most dangerous attacking option for Tunisia.", "height": 178, "weight": 72},
+"シャマク": {"profile": "反応の速さとシュートストップに優れる若手GK。落ち着いたハンドリングでゴールを守る期待の守護神。", "profile_en": "A young goalkeeper with quick reflexes and strong shot-stopping. A promising keeper who guards the goal with composed handling.", "height": 188, "weight": 82},
+"レキク": {"profile": "対人の強さと空中戦を武器とする左利きのセンターバック。冷静なカバーリングと配球で最終ラインを支える。", "profile_en": "A left-footed centre-back whose strengths are physical duels and aerial ability. He supports the backline with calm covering and distribution.", "height": 186, "weight": 80},
+"ベン・ハミダ": {"profile": "経験豊富で安定感のあるセンターバック。的確なポジショニングと粘り強い守備で守備ラインに落ち着きをもたらす。", "profile_en": "An experienced and dependable centre-back. His accurate positioning and tenacious defending bring composure to the back line.", "height": 185, "weight": 78},
 "マストゥーリ": {"profile": "チュニジアの主な得点源。ゴール前での的確なポジショニングと決定力でチームを牽引するストライカー。", "profile_en": "Tunisia's primary goalscorer. His clever positioning and clinical finishing in the box make him the focal point of the Carthage Eagles' attack.", "height": 180, "weight": 76},
 "ムサクニ": {"profile": "チュニジア歴代3位の得点記録を持つ技巧派アタッカー。卓越したテクニックと経験でチームに違いをもたらす。", "profile_en": "Tunisia's third all-time top scorer, a technically gifted attacker whose experience and skill on the ball can unlock any defence.", "height": 172, "weight": 70},
 "ヨハンソン": {"profile": "スウェーデンの正GK。安定したセービングと落ち着いたポジショニングでチームを支える。", "profile_en": "Sweden's first-choice goalkeeper. His reliable shot-stopping and composed positioning provide a solid foundation for the team.", "height": 192, "weight": 86},
@@ -727,6 +730,7 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "エランガ": {"profile": "爆発的なスプリント力と直線的なドリブルが武器の右サイドアタッカー。スウェーデンの縦への推進力を担う。", "profile_en": "A right-sided attacker with explosive pace and direct dribbling. His vertical running gives Sweden their most dynamic attacking threat from the flanks.", "height": 181, "weight": 78},
 "イサク": {"profile": "スムーズな技術と優れたゴール感覚を持つ世界有数のCF。イングランド最高峰のリーグでも際立つ存在感を放つ。", "profile_en": "One of the world's finest centre-forwards with smooth technique and elite goal sense. A dominant presence in England's top flight who can decide any match.", "height": 192, "weight": 87},
 "ギェケレシュ": {"profile": "スウェーデンをW杯に導いたハットトリックの英雄。圧倒的なフィジカルと決定力を兼備する欧州屈指のストライカー。", "profile_en": "The hat-trick hero who carried Sweden to the W-Cup. A striker combining dominant physicality with clinical finishing, one of Europe's most complete forwards.", "height": 186, "weight": 86},
+"ベルナードソン": {"profile": "スピードと果敢な仕掛けが持ち味の右ウインガー。サイドからのドリブル突破とクロスで攻撃に厚みをもたらす。", "profile_en": "A right winger characterised by pace and fearless dribbling. His runs and crosses from the flank add an extra dimension to the attack.", "height": 183, "weight": 76},
 "クルセフスキ": {"profile": "右サイドを主戦場とするスウェーデンの多才なアタッカー。高い技術とダイナミックな推進力でゴールとアシストを量産する。", "profile_en": "A versatile Swedish attacker most dangerous on the right side. His technical quality and dynamic forward runs generate goals and assists at the highest level.", "height": 186, "weight": 82},
 "ジェームズ": {"profile": "オーバーラップからの精度の高いクロスと安定した守備を誇る右SB。フィジカルも強く攻守でクオリティを発揮する。", "profile_en": "A right-back who combines precise crossing from overlapping runs with solid defending. Physically strong, he delivers quality at both ends.", "height": 180, "weight": 80},
 "ライス": {"profile": "抜群のスタミナとインターセプト能力で中盤を制圧するハードワーカー。チームの核として守備と攻撃をつなぐ。", "profile_en": "A hard-working midfielder who dominates the midfield with his stamina and interceptions. The engine of the team, linking defence and attack.", "height": 185, "weight": 80},
@@ -2803,8 +2807,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   tunisia2026: {
     name:"チュニジア",en_name:"Tunisia",team_color:"#CC0000",flag:"🇹🇳",
-    default_system:"4-2-3-1", default_tactics:TACTICS_COUNTER, default_keyplayer:7, default_marked_player:3,
-    default_lineup:[11,13,2,3,4,5,16,6,9,17,8,11],
+    default_system:"5-2-1-2", default_tactics:TACTICS_COUNTER, default_keyplayer:8, default_marked_player:3,
+    default_lineup:[26,2,13,27,28,21,16,5,6,7,9],
     players:[
       {name:"ダメン",en_name:"Dahmen",long_name:"アイメン・ダメン",positions:["GK"],params:[50,50,50,50,82,76,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,82,80,50,74,78,75]},
       {name:"ザアルーニ",en_name:"Zaalouni",long_name:"ザアルーニ",positions:["右SB"],params:[74,80,76,74,78,76,74,64,62,68,66,62,60,56,52,52,62,60,78,78,72,74,74,51,51,66,72,72,75]},
@@ -2813,9 +2817,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"エル・アブディ",en_name:"El Abdi",long_name:"アリ・エル・アブディ",positions:["左SB","左SMF"],params:[71,81,77,75,76,73,77,66,72,71,68,64,62,64,54,54,64,62,75,76,73,75,75,50,50,64,70,71,75]},
       {name:"スキリ",en_name:"Skhiri",long_name:"エリエス・スキリ",positions:["DMF","CMF"],params:[70,82,65,66,79,77,74,76,71,77,75,74,72,74,55,72,74,73,80,77,75,78,76,50,50,75,71,78,75]},
       {name:"ハニバル",en_name:"Hannibal",long_name:"ハニバル・メジュブリ",positions:["OMF","CMF","右SMF"],params:[81,87,76,76,76,77,71,76,76,75,72,62,63,63,60,60,73,62,71,67,66,71,70,50,50,72,77,77,75]},
-      {name:"ベン・スリマネ",en_name:"Ben Slimane",long_name:"ベン・スリマネ",positions:["CMF","左SMF","OMF"],params:[72,78,76,76,80,68,78,82,74,84,76,76,72,66,64,64,76,72,70,66,60,62,70,50,50,62,74,72,75]},
+      {name:"ベン・スリマネ",en_name:"Ben Slimane",long_name:"ベン・スリマネ",positions:["CMF","左SMF","OMF","CF"],params:[72,78,76,76,80,68,78,82,74,84,76,76,72,66,64,64,76,72,70,66,60,62,70,50,50,62,74,72,75]},
       {name:"マストゥーリ",en_name:"Mastouri",long_name:"ハゼム・マストゥーリ",positions:["CF","左WG","左SMF"],params:[65,67,68,70,68,62,68,69,69,64,61,70,74,67,54,54,62,68,54,50,50,55,56,50,50,62,64,63,65]},
-      {name:"サアド",en_name:"Saad",long_name:"エリアス・サアド",positions:["左WG","左SMF","右WG","右SMF","OMF"],params:[57,61,73,73,73,52,76,76,75,69,64,71,61,66,56,56,67,66,32,28,28,34,35,50,50,52,42,71,75]},
+      {name:"サアド",en_name:"Saad",long_name:"エリアス・サアド",positions:["左WG","左SMF","右WG","右SMF","OMF","CF"],params:[57,61,73,73,73,52,76,76,75,69,64,71,61,66,56,56,67,66,32,28,28,34,35,50,50,52,42,71,75]},
       {name:"ムサクニ",en_name:"Msakni",long_name:"ユセフ・ムサクニ",positions:["左WG","左SMF","OMF"],params:[72,74,76,76,76,68,76,84,78,78,72,78,78,66,62,64,76,78,60,56,50,54,64,51,51,70,72,70,75]},
       {name:"ファルハティ",en_name:"Farhati",long_name:"ヌールッディーン・ファルハティ",positions:["GK"],params:[50,50,50,50,79,74,50,50,50,50,60,50,50,50,50,50,50,50,50,50,50,50,50,77,72,50,70,74,75]},
       {name:"メリア",en_name:"Meriah",long_name:"ヤシン・メリア",positions:["CB","DMF","右SB"],params:[76,74,70,68,78,80,70,56,56,66,64,52,52,50,50,50,58,54,80,82,80,80,70,51,51,76,70,74,75]},
@@ -2832,12 +2836,16 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     {name:"チャアラリ",en_name:"Chaalali",long_name:"ゲラン・チャアラリ",positions:["CMF","OMF"],params:[62,77,70,68,81,68,74,62,70,78,74,60,62,66,70,66,70,68,70,68,68,68,66,50,50,62,76,72,75]},
     {name:"スリティ",en_name:"Sliti",long_name:"アニス・スリティ",positions:["左WG","右WG"],params:[58,72,76,74,78,58,78,52,70,68,68,62,62,56,70,73,68,68,46,42,46,54,44,50,50,56,64,62,75]},
     {name:"ケニシ",en_name:"Khenissi",long_name:"タハ・ヤシン・ケニシ",positions:["CF","OMF"],params:[72,74,72,70,78,46,82,50,64,66,72,74,72,62,68,62,70,76,42,40,40,56,40,50,50,74,62,60,75]},
-    {name:"ジャジリ",en_name:"Jaziri",long_name:"セイフェディン・ジャジリ",positions:["CF"],params:[74,72,70,68,76,48,80,50,62,64,70,70,72,62,64,60,68,72,44,42,40,58,42,50,50,76,60,58,75]}]
+    {name:"ジャジリ",en_name:"Jaziri",long_name:"セイフェディン・ジャジリ",positions:["CF"],params:[74,72,70,68,76,48,80,50,62,64,70,70,72,62,64,60,68,72,44,42,40,58,42,50,50,76,60,58,75]},
+    // ↓ 2026/06/15 vs スウェーデン 先発（TM準拠）。FC26 OVR目安で能力推定
+    {name:"シャマク",en_name:"Chamakh",long_name:"アブデルムヒブ・シャマク",positions:["GK"],params:[50,50,50,50,73,72,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,73,71,50,70,70,75]},
+    {name:"レキク",en_name:"Rekik",long_name:"オマール・レキク",positions:["CB"],params:[76,74,70,68,72,80,66,58,64,66,64,32,30,44,28,32,58,36,70,71,71,70,68,50,50,76,69,66,75]},
+    {name:"ベン・ハミダ",en_name:"Ben Hamida",long_name:"モハメド・アミン・ベン・ハミダ",positions:["CB"],params:[78,74,64,62,73,79,64,56,60,66,62,34,32,42,30,34,56,38,72,73,73,72,68,50,50,77,70,70,75]}]
   },
   sweden2026: {
     name:"スウェーデン",en_name:"Sweden",team_color:"#006AA7",flag:"🇸🇪",
-    default_system:"3-4-2-1", default_tactics:TACTICS_COUNTER, default_keyplayer:10, default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"3-3-2-2", default_tactics:TACTICS_COUNTER, default_keyplayer:9, default_marked_player:10,
+    default_lineup:[0,3,12,1,4,26,7,5,8,10,24],
     players:[
       {name:"ノルドフェルト",en_name:"Nordfeldt",long_name:"ヤコブ・ノルドフェルト",positions:["GK"],params:[50,50,50,50,74,69,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,70,69,50,69,74,75]},
       {name:"ラゲルビエルケ",en_name:"Lagerbielke",long_name:"グスタフ・ラゲルビエルケ",positions:["CB"],params:[80,66,61,41,70,79,44,60,61,74,75,35,22,51,28,33,67,31,71,75,71,72,73,50,50,76,62,69,75]},
@@ -2865,7 +2873,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"アレイソン",en_name:"Aleisso",long_name:"エリアス・アレイソン",positions:["OMF","CMF"],params:[62,72,72,72,72,60,72,70,71,74,66,60,58,60,52,54,68,64,58,54,56,54,54,50,50,52,56,58,74]},
       {name:"カルソン",en_name:"Karlsson",long_name:"ヴィクトル・カールソン",positions:["左WG","CF","OMF"],params:[64,72,78,78,72,62,76,70,74,66,60,64,62,62,48,48,64,62,52,48,50,48,48,50,50,58,58,58,74]},
       {name:"イサク",en_name:"Isak",long_name:"アレクサンダル・イサク",positions:["CF","左WG"],params:[74,78,82,80,80,72,80,76,79,72,66,78,76,74,60,58,76,76,60,58,60,58,58,50,50,68,72,74,74]},
-      {name:"R・グスタフソン",en_name:"R.Gustafsson",long_name:"ロビン・グスタフソン",positions:["DMF","CMF"],params:[74,78,72,70,72,72,68,62,65,72,68,52,48,56,44,42,66,60,72,74,72,70,70,50,50,66,62,66,74]}
+      {name:"R・グスタフソン",en_name:"R.Gustafsson",long_name:"ロビン・グスタフソン",positions:["DMF","CMF"],params:[74,78,72,70,72,72,68,62,65,72,68,52,48,56,44,42,66,60,72,74,72,70,70,50,50,66,62,66,74]},
+      // RW(2026/06/15 vs チュニジア 先発、TM準拠): Alexander Bernhardsson
+      {name:"ベルナードソン",en_name:"Bernhardsson",long_name:"アレクサンデル・ベルナードソン",positions:["右WG","右SMF","左WG"],params:[68,80,82,82,74,66,80,78,80,72,68,72,72,72,58,66,78,74,44,42,40,42,68,50,50,58,70,70,75]}
 ]
   },
   netherlands2026: {
