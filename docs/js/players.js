@@ -1824,6 +1824,13 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "エルソン・ホーイ": {"profile": "左SBと左ウイングをこなせるキュラソーのユーティリティプレイヤー。高い走力で攻守のバランスを保つサイドプレイヤー。", "profile_en": "A Curaçao utility player capable of left-back and left wing. A wide player who maintains balance between attack and defence with pace.", "height": 175, "weight": 70},
 "L・バクナ": {"profile": "キュラソー代表のキャプテンを長年務めるエース。欧州リーグで高い評価を受け、高いパス精度と総合力でチームをけん引するリーダー。", "profile_en": "A long-standing captain and ace of Curaçao. Highly regarded in European football, leading the team with pass accuracy and all-round ability.", "height": 178, "weight": 74},
 "J・バクナ": {"profile": "レアンドロ・バクナの弟で、CMFとOMFをこなせるテクニカルプレイヤー。高い技術力でキュラソーの攻撃をサポートする。", "profile_en": "The younger brother of Leandro Bacuna, a technical player capable of CMF and OMF. Supports Curaçao's attack with technical quality.", "height": 177, "weight": 73},
+"オビスポ": {"profile": "落ち着いたビルドアップと的確な対人守備を持ち味とするセンターバック。左利きの正確な配球で最終ラインからの組み立てを担い、キュラソー守備陣の中心として安定をもたらす。", "profile_en": "A composed ball-playing centre-back with reliable one-on-one defending. His accurate left-footed distribution anchors the build-up and brings stability as a central figure of the Curaçao defence.", "height": 185, "weight": 78},
+"フォンフィレ": {"profile": "豊富な運動量で上下動を繰り返す攻撃的な左サイドバック。スピードを生かしたオーバーラップでサイドに推進力をもたらす。", "profile_en": "An attacking left-back with the energy to get up and down the flank all game. His pace on the overlap gives Curaçao drive down the left.", "height": 178, "weight": 72},
+"フロラヌス": {"profile": "対人の強さとスピードを兼ね備えた右サイドバック。守備での粘り強さに加え攻め上がりも厭わない献身的なプレイヤー。", "profile_en": "A right-back combining physical strength with pace. A committed player who defends tenaciously while contributing to the attack.", "height": 183, "weight": 76},
+"コメネンシア": {"profile": "豊富な運動量と推進力で中盤を支える若き守備的MF。ボール奪取からの前進と意外性のある得点力でキュラソーの心臓となる。", "profile_en": "A young defensive midfielder driving the centre of the park with tireless running. His ball-winning, forward carrying and surprising goal threat make him the heartbeat of Curaçao.", "height": 178, "weight": 70},
+"チョン": {"profile": "技巧的なドリブルと鋭い仕掛けが武器の攻撃的MF。左足から繰り出すラストパスとカットインでチャンスを演出する。", "profile_en": "An attacking midfielder armed with skilful dribbling and incisive runs. His left-footed final balls and cut-ins create chances for the team.", "height": 185, "weight": 73},
+"ハンセン": {"profile": "スピードと突破力に優れた前線の選手。サイドからでも中央からでもゴールを狙える得点感覚を持つアタッカー。", "profile_en": "A forward blessed with pace and the ability to beat his man. An attacker with the instinct to threaten goal from wide or through the middle.", "height": 180, "weight": 72},
+"ロカディア": {"profile": "長身を生かしたポストプレーと決定力を備えたベテランストライカー。空中戦の強さとゴール前での落ち着きでチームの得点源となる。", "profile_en": "A veteran striker with strong hold-up play and finishing from his tall frame. His aerial strength and composure in front of goal make him a focal point for the team.", "height": 188, "weight": 85},
 "ネポムセノ": {"profile": "オランダリーグで活躍するキュラソーのウインガー。爆発的なスプリントで両サイドを制圧し、縦突破からゴールに絡む。", "profile_en": "A Curaçao winger active in Dutch football. Dominates both flanks with explosive pace and gets involved in goals with direct running.", "height": 173, "weight": 68},
 "G・ウェイナルドゥム": {"profile": "ジョルジニオ・ウェイナルドゥムの近縁で、キュラソー代表として活躍するOMF。高い技術力と機動力でキュラソーの攻撃に欠かせない存在。", "profile_en": "A relative of Georginio Wijnaldum who represents Curaçao. An OMF indispensable to Curaçao's attack with technical quality and mobility.", "height": 175, "weight": 71},
 "ジャンガ": {"profile": "左ウイングとCFをこなせるキュラソーの快速アタッカー。高い走力でサイドを疾走し、得点にも絡める万能型フォワード。", "profile_en": "A pacey Curaçao attacker capable of left wing and centre-forward. A versatile forward who races down the flank with pace and can also contribute with goals.", "height": 174, "weight": 70},
@@ -3180,7 +3187,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     name:"ドイツ",en_name:"Germany",team_color:"#000000",flag:"🇩🇪",
     default_system:"4-2-3-1",default_tactics:TACTICS_FREE,
     default_keyplayer:8,default_marked_player:9,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_lineup:[0,1,3,13,16,5,17,7,8,9,10],
     players:[
       // GK: Neuer (FC26 OVR84)
       {name:"ノイアー",en_name:"Neuer",long_name:"マヌエル・ノイアー",positions:["GK"],params:[50,50,50,50,84,78,50,50,50,50,88,50,50,50,50,50,50,50,50,50,50,50,50,84,82,50,83,80,75]},
@@ -5632,9 +5639,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   curacao2026: {
     name:"キュラソー",en_name:"Curacao",team_color:"#003399",flag:"🇨🇼",
-    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:6,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"4-3-1-2",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:7,default_marked_player:10,
+    default_lineup:[0,28,18,26,27,29,6,5,30,32,31],
     players:[
       // GK: Eloy Room (OVR73, DIV74, HAN70, KIC66, REF73, SPD56, POS70)
       {name:"E・ルーム",en_name:"E.Room",long_name:"エロイ・ルーム",positions:["GK"],params:[50,50,50,50,73,56,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,74,70,50,70,66,75]},
@@ -5672,8 +5679,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"エブエヒ",en_name:"Ebuehi",long_name:"ティロン・エブエヒ",positions:["左SB","右SB"],params:[68,70,72,72,67,62,62,62,67,62,58,36,38,40,30,34,60,40,66,68,66,66,64,50,50,58,58,58,75]},
       // Sub CMF: Stijn Spierings (OVR70)
       {name:"スピアリングス",en_name:"Spierings",long_name:"スティン・スピアリングス",positions:["CMF","DMF"],params:[70,74,66,66,65,66,64,64,65,68,64,48,50,52,40,44,64,48,66,68,66,66,64,50,50,62,60,60,75]},
-      // Sub CMF: Chedric Bazoer (OVR68)
-      {name:"バゾール",en_name:"Bazoer",long_name:"セドリック・バゾール",positions:["CMF","DMF"],params:[68,72,64,64,63,64,62,62,63,66,62,44,46,50,38,42,62,46,64,66,64,64,62,50,50,58,56,58,75]},
+      // RCB(14/06 vs Germany 先発): Riechedly Bazoer (OVR72, CB/DM, 元アヤックス/AZ)
+      {name:"バゾール",en_name:"Bazoer",long_name:"リーチェドリー・バゾール",positions:["CB","DMF","CMF"],params:[76,74,68,67,72,76,64,70,68,74,72,48,46,58,44,48,70,52,72,72,71,72,70,50,50,72,71,70,75]},
       // Sub RW: Qumariyah Maatsen (OVR70)
       {name:"マーツェン",en_name:"Maatsen",long_name:"クマーリヤ・マーツェン",positions:["右WG","OMF"],params:[60,64,74,76,70,56,66,66,70,62,58,56,58,60,44,50,64,56,30,32,32,31,30,50,50,48,58,58,75]},
       // Sub LW: Delano Burgzorg (OVR72, PAC84, SHO68, PAS62, DRI72, DEF34, PHY62)
@@ -5687,7 +5694,15 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub DMF: Yael Smarshil (OVR65)
       {name:"スマルシル",en_name:"Smarshil",long_name:"ヤエル・スマルシル",positions:["DMF"],params:[64,68,62,62,61,62,58,58,61,62,58,38,40,44,32,36,58,40,62,64,62,62,60,50,50,56,52,52,75]},
       // Sub CB: Dion Cools (OVR66)
-      {name:"D・コールス",en_name:"D.Cools",long_name:"ディオン・コールス",positions:["CB","右SB"],params:[66,68,64,62,62,64,54,54,60,56,52,28,26,34,22,26,52,28,62,64,62,62,60,50,50,60,52,52,75]}
+      {name:"D・コールス",en_name:"D.Cools",long_name:"ディオン・コールス",positions:["CB","右SB"],params:[66,68,64,62,62,64,54,54,60,56,52,28,26,34,22,26,52,28,62,64,62,62,60,50,50,60,52,52,75]},
+      // ↓ 2026/06/14 vs ドイツ 先発（TM準拠）。FC26 OVR目安で能力推定
+      {name:"オビスポ",en_name:"Obispo",long_name:"アルマンド・オビスポ",positions:["CB"],params:[76,72,68,67,72,78,62,64,66,70,66,38,36,46,30,34,62,40,73,74,74,73,70,50,50,74,72,70,75]},
+      {name:"フォンフィレ",en_name:"Fonville",long_name:"デフェロン・フォンフィレ",positions:["左SB","右SB"],params:[68,76,78,78,70,64,70,68,74,68,64,44,44,50,40,48,66,56,68,68,67,67,70,50,50,58,66,64,75]},
+      {name:"フロラヌス",en_name:"Floranus",long_name:"シェレル・フロラヌス",positions:["右SB","CB"],params:[70,74,76,76,70,66,68,66,72,66,62,42,42,48,38,44,64,52,68,69,68,68,70,50,50,62,67,64,75]},
+      {name:"コメネンシア",en_name:"Comenencia",long_name:"リバノ・コメネンシア",positions:["DMF","CMF"],params:[68,76,70,70,66,64,68,68,70,68,64,60,60,62,48,52,68,58,66,66,64,64,70,50,50,56,64,66,75]},
+      {name:"チョン",en_name:"Chong",long_name:"タヒス・チョン",positions:["OMF","CMF","右SMF"],params:[62,70,78,77,72,60,76,74,76,71,66,66,64,68,54,64,76,72,52,50,48,50,64,50,50,52,66,66,75]},
+      {name:"ハンセン",en_name:"Hansen",long_name:"ソンチェ・ハンセン",positions:["CF","右WG","左WG"],params:[64,74,84,84,73,64,78,76,80,66,60,70,70,70,52,60,74,72,36,34,32,34,64,50,50,58,68,66,75]},
+      {name:"ロカディア",en_name:"Locadia",long_name:"ユルヘン・ロカディア",positions:["CF"],params:[78,66,72,70,71,76,66,68,70,62,58,72,72,74,52,54,68,70,30,32,30,30,56,50,50,76,70,66,75]}
     ]
   },
   drcongo2026: {
