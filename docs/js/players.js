@@ -3723,7 +3723,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     name:"ウルグアイ",en_name:"Uruguay",team_color:"#4EB5E0",flag:"🇺🇾",
     default_system:"4-4-2",default_tactics:TACTICS_FREE,
     default_keyplayer:7,default_marked_player:10,
-    default_lineup:[11,1,14,4,15,6,26,5,18,10,24],
+    default_lineup:[11,1,14,4,15,6,26,5,18,24,10],
     players:[
       // GK: Rochet (est. OVR76, DIV76, HAN74, KIC72, REF78, SPD58, POS76) ← starter
       {name:"ロシェ",en_name:"Rochet",long_name:"セルヒオ・ロシェ",positions:["GK"],params:[50,50,50,50,78,58,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,76,72,75]},
