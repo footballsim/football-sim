@@ -2933,8 +2933,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   sweden2026: {
     name:"スウェーデン",en_name:"Sweden",team_color:"#006AA7",flag:"🇸🇪",
-    default_system:"3-3-2-2", default_tactics:TACTICS_COUNTER, default_keyplayer:9, default_marked_player:10,
-    default_lineup:[0,3,12,1,4,26,7,5,8,10,24],
+    default_system:"3-3-2-2", default_tactics:TACTICS_COUNTER, default_keyplayer:10, default_marked_player:10,
+    default_lineup:[0,12,3,1,4,26,7,8,5,24,10],
     players:[
       {name:"ノルドフェルト",en_name:"Nordfeldt",long_name:"ヤコブ・ノルドフェルト",positions:["GK"],params:[50,50,50,50,74,69,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,70,69,50,69,74,75]},
       {name:"ラゲルビエルケ",en_name:"Lagerbielke",long_name:"グスタフ・ラゲルビエルケ",positions:["CB"],params:[80,66,61,41,70,79,44,60,61,74,75,35,22,51,28,33,67,31,71,75,71,72,73,50,50,76,62,69,75]},
