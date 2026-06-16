@@ -4140,9 +4140,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   ecuador2026: {
     name:"エクアドル",en_name:"Ecuador",team_color:"#FFD100",flag:"🇪🇨",
-    default_system:"4-2-2-2",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:5,default_marked_player:10,
-    default_lineup:[0,28,27,26,3,5,29,31,30,7,10],
+    default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:6,default_marked_player:10,
+    default_lineup:[0,28,27,26,3,29,5,31,30,7,10],
     players:[
       // GK: Galindez (FC26 OVR75, DIV76, HAN74, KIC70, REF76, SPD55, POS75)
       {name:"ガリンデス",en_name:"Galindez",long_name:"エルナン・ガリンデス",positions:["GK"],params:[50,50,50,50,76,55,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,75,70,75]},
@@ -4629,9 +4629,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   ivorycoast2026: {
     name:"コートジボワール",en_name:"Ivory Coast",team_color:"#FF8200",flag:"🇨🇮",
-    default_system:"4-2-2-2",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:6,default_marked_player:10,
-    default_lineup:[0,27,1,26,4,28,5,30,29,31,17],
+    default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:5,default_marked_player:10,
+    default_lineup:[0,27,1,26,4,5,28,30,29,17,31],
     players:[
       // GK: Fofana Y (FC26 OVR76, DIV77, HAN75, KIC70, REF77, SPD58, POS76)
       {name:"フォファナ",en_name:"Fofana",long_name:"ヤヒア・フォファナ",positions:["GK"],params:[50,50,50,50,77,58,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,77,75,50,76,70,75]},
