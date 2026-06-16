@@ -4812,8 +4812,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   iran2026: {
     name:"イラン",en_name:"Iran",team_color:"#239F40",flag:"🇮🇷",
     default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:9,default_marked_player:10,
-    default_lineup:[0,13,26,27,28,5,30,29,31,10,32],
+    default_keyplayer:10,default_marked_player:10,
+    default_lineup:[0,13,26,27,28,5,30,29,31,32,10],
     players:[
       // GK: Beiranvand (FC26 OVR80, DIV81, HAN79, KIC72, REF81, SPD64, POS80)
       {name:"ベイランバンド",en_name:"Beiranvand",long_name:"アリレザ・ベイランバンド",positions:["GK"],params:[50,50,50,50,81,64,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,81,79,50,80,72,75]},
