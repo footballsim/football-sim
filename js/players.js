@@ -4873,7 +4873,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   saudiarabia2026: {
     name:"サウジアラビア",en_name:"Saudi Arabia",team_color:"#006C35",flag:"🇸🇦",
-    default_system:"4-4-2",default_tactics:TACTICS_CATENACCIO,
+    default_system:"4-4-2",default_tactics:TACTICS_FREE,
     default_keyplayer:8,default_marked_player:10,
     default_lineup:[0,1,2,14,26,5,15,27,9,8,28],
     players:[
