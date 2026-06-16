@@ -1071,6 +1071,7 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "R・ロドリゲス": {"profile": "安定した守備と積極的な攻撃参加を兼備するスイス代表の不動の左SB。豊富な代表経験がチームを下支えする。", "profile_en": "Switzerland's long-serving left-back who balances reliable defending with energetic forward runs. His vast international experience is a key asset.", "height": 185, "weight": 77},
 "フロイラー": {"profile": "高いボール奪取能力と正確な配球でスイスの中盤をコントロールするDMF。攻守の切り替えが速く、献身的なハードワークが持ち味。", "profile_en": "A DMF who controls Switzerland's midfield with strong ball-winning ability and precise distribution. Known for quick transitions and tireless hard work.", "height": 183, "weight": 74},
 "ジャカ": {"profile": "スイス代表のキャプテン。広い視野と正確なパスでゲームを組み立てるCMFで、力強いリーダーシップでチームを牽引する代表の心臓。", "profile_en": "Switzerland's captain and midfield commander. Builds the game with excellent vision and precise passing, driving the team with strong leadership.", "height": 186, "weight": 80},
+"アエビシャー": {"profile": "豊富な運動量と展開力を備えたボックス・トゥ・ボックスMF。攻守両面でスイス中盤に貢献する。", "profile_en": "A box-to-box midfielder with a strong engine and distribution, contributing to Switzerland's midfield in both phases.", "height": 183, "weight": 76},
 "シャキリ": {"profile": "鋭いドリブルとシュートでスイスの攻撃を彩る技巧派WG。コンパクトな体格から繰り出す機動力と創造性でゲームを変える存在。", "profile_en": "A skilful winger who brightens Switzerland's attack with sharp dribbling and shooting. His mobility and creativity from a compact frame can change any game.", "height": 169, "weight": 77},
 "バルガス": {"profile": "爆発的なスプリントとゴール前での仕掛けを武器とするアタッカー。右サイドからの突破と積極的なシュートでスイスの攻撃を勢いづける。", "profile_en": "An attacker whose weapons are explosive pace and a direct approach in the final third. His runs from the right and direct shooting give Switzerland attacking momentum.", "height": 175, "weight": 68},
 "ンドワイエ": {"profile": "圧倒的なスピードと高さを兼備する若きアタッカー。左サイドからの縦突破と積極的なシュートでスイスの攻撃に迫力をもたらす。", "profile_en": "A young attacker combining exceptional pace with impressive physical presence. Direct drives from the left and ambitious shooting add real power to Switzerland's attack.", "height": 186, "weight": 80},
@@ -1726,6 +1727,12 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ブーディアフ": {"profile": "フランス出身のカタール代表DMF。高い守備意識でボール奪取に秀で、中盤のスクリーナーとして機能する。", "profile_en": "A French-born defensive midfielder for Qatar. Excels at ball-winning with defensive awareness and functions as a midfield screener.", "height": 181, "weight": 78},
 "ハテム": {"profile": "カタール中盤の司令塔。高いパス精度でゲームをコントロールし、攻守にわたる充実した貢献が評価される。", "profile_en": "Qatar's midfield playmaker. Controls the game with a pass accuracy and is valued for his all-round contribution in attack and defence.", "height": 178, "weight": 73},
 "A・アフィフ": {"profile": "カタールが誇るスーパースター。爆発的なスプリントと圧倒的なドリブル技術でアジア屈指のウインガーとして世界的な評価を得る。", "profile_en": "Qatar's superstar. One of Asia's premier wingers with worldwide recognition, combining explosive pace with outstanding dribbling.", "height": 172, "weight": 67},
+"アブナダ": {"profile": "反応の速さと安定したハンドリングを持つカタールのGK。落ち着いた対応でゴールを守る。", "profile_en": "A Qatari goalkeeper with quick reflexes and steady handling, protecting the goal with composure.", "height": 188, "weight": 82},
+"イッサ・ラエ": {"profile": "対人と空中戦に強さを発揮するセンターバック。粘り強い守備で最終ラインに安定をもたらす。", "profile_en": "A centre-back strong in duels and the air, bringing stability to the back line with tenacious defending.", "height": 186, "weight": 80},
+"アルウィ": {"profile": "スピードと運動量を備えた若い右サイドバック。攻守に積極的に関与する。", "profile_en": "A young right-back with pace and energy, active in both attack and defence.", "height": 178, "weight": 70},
+"J・ガベル": {"profile": "球際の強さとカバーリングで中盤の底を支える守備的MF。", "profile_en": "A defensive midfielder who anchors the centre with strength in challenges and good covering.", "height": 180, "weight": 74},
+"エドミウソン": {"profile": "技術とドリブルでサイドを切り裂くアタッカー。決定的な仕事ができる経験豊富なウインガー。", "profile_en": "An experienced winger who slices through the flank with skill and dribbling, capable of decisive contributions.", "height": 178, "weight": 74},
+"アブドゥリサグ": {"profile": "スピードと裏抜けを武器とする前線の選手。カタール攻撃に推進力をもたらす。", "profile_en": "A forward whose weapons are pace and runs in behind, bringing drive to Qatar's attack.", "height": 182, "weight": 75},
 "ハイドス": {"profile": "カタールのベテランOMF。長年にわたってカタール代表を牽引してきたキャプテン経験者で、高いドリブルと豊富な経験が武器。", "profile_en": "Qatar's veteran attacking midfielder. A former captain who has led Qatar for years, using dribbling and vast experience as his weapons.", "height": 172, "weight": 67},
 "I・モハメッド": {"profile": "左ウイングとして速さを活かしたサイドアタックを得意とする選手。高い走力で縦に突破し、クロスとカットインを使い分ける。", "profile_en": "A left winger who specialises in pace-driven flank attacks. Uses pace to beat defenders directly, then switches between crossing and cutting inside.", "height": 174, "weight": 70},
 "アルモエズ・アリ": {"profile": "カタール代表のストライカーとして数多くの国際大会でゴールを量産したエースFW。高い走力と強靭なフィジカルを持つパワーフォワード。", "profile_en": "Qatar's ace striker who has scored prolifically in numerous international tournaments. A powerful forward combining pace with strong physicality.", "height": 181, "weight": 76},
@@ -3725,8 +3732,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   switzerland2026: {
     name:"スイス",en_name:"Switzerland",team_color:"#DA291C",flag:"🇨🇭",
     default_system:"4-1-2-3",default_tactics:TACTICS_FREE,
-    default_keyplayer:6,default_marked_player:10,
-    default_lineup:[0,1,2,12,4,6,17,5,8,9,10],
+    default_keyplayer:5,default_marked_player:10,
+    default_lineup:[0,15,2,12,4,6,5,26,9,8,10],
     players:[
       // GK: Kobel (FC26 OVR84, DIV82, HAN80, KIC78, REF84, SPD66, POS82)
       {name:"コベル",en_name:"Kobel",long_name:"グレゴール・コベル",positions:["GK"],params:[50,50,50,50,84,66,50,50,50,50,78,50,50,50,50,50,50,50,50,50,50,50,50,82,80,50,82,80,75]},
@@ -3745,9 +3752,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // RAM: Shaqiri (FC26 OVR80, PAC74, SHO78, PAS80, DRI84, DEF48, PHY66)
       {name:"シャキリ",en_name:"Shaqiri",long_name:"シェルダン・シャキリ",positions:["右SMF","OMF","右WG"],params:[66,70,74,76,79,62,82,84,79,80,76,74,72,76,72,76,84,72,44,46,46,46,44,50,50,60,76,76,75]},
       // CAM: Vargas (FC26 OVR79, PAC82, SHO72, PAS74, DRI80, DEF55, PHY70)
-      {name:"バルガス",en_name:"Vargas",long_name:"ルーベン・バルガス",positions:["OMF","右SMF","左SMF","右WG"],params:[70,72,82,84,81,66,80,80,81,74,70,66,68,68,60,66,80,68,52,54,54,53,52,50,50,62,74,74,75]},
+      {name:"バルガス",en_name:"Vargas",long_name:"ルーベン・バルガス",positions:["OMF","右SMF","左SMF","右WG","左WG"],params:[70,72,82,84,81,66,80,80,81,74,70,66,68,68,60,66,80,68,52,54,54,53,52,50,50,62,74,74,75]},
       // LAM: Ndoye (FC26 OVR78, PAC88, SHO68, PAS72, DRI80, DEF54, PHY70)
-      {name:"ンドワイエ",en_name:"Ndoye",long_name:"ダン・ンドワイエ",positions:["左SMF","左WG","右SMF"],params:[70,72,88,90,84,66,80,80,84,72,68,60,62,64,54,62,80,64,50,52,52,51,50,50,50,60,72,72,75]},
+      {name:"ンドワイエ",en_name:"Ndoye",long_name:"ダン・ンドワイエ",positions:["左SMF","左WG","右SMF","右WG"],params:[70,72,88,90,84,66,80,80,84,72,68,60,62,64,54,62,80,64,50,52,52,51,50,50,50,60,72,72,75]},
       // CF: Embolo (FC26 OVR79, PAC79, SHO74, PAS66, DRI76, DEF38, PHY82)
       {name:"エンボロ",en_name:"Embolo",long_name:"ブリール・エンボロ",positions:["CF","左WG"],params:[82,80,79,80,77,82,74,76,77,66,62,70,72,72,56,60,76,72,34,36,36,35,34,50,50,78,74,76,75]},
       // Sub GK: Sommer (FC26 OVR84, DIV83, HAN80, KIC82, REF83, SPD40, POS84)
@@ -3759,7 +3766,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub LB: Frei (FC26 OVR75, PAC72, SHO50, PAS68, DRI70, DEF72, PHY72)
       {name:"フレイ",en_name:"Frei",long_name:"ケヴィン・フレイ",positions:["左SB"],params:[72,74,72,72,71,68,66,68,71,68,64,40,42,44,36,42,68,46,70,72,72,71,70,50,50,64,66,70,75]},
       // Sub CMF: Zakaria (FC26 OVR78, PAC80, SHO62, PAS72, DRI76, DEF76, PHY82)
-      {name:"ザカリア",en_name:"Zakaria",long_name:"ドニ・ザカリア",positions:["CMF","DMF"],params:[82,82,80,80,78,82,74,76,78,72,68,52,56,58,48,52,74,56,76,76,76,75,74,50,50,78,70,78,75]},
+      {name:"ザカリア",en_name:"Zakaria",long_name:"ドニ・ザカリア",positions:["右SB","CMF","DMF"],params:[82,82,80,80,78,82,74,76,78,72,68,52,56,58,48,52,74,56,76,76,76,75,74,50,50,78,70,78,75]},
       // Sub DMF: Jashari (FC26 OVR78, PAC74, SHO62, PAS78, DRI78, DEF74, PHY74)
       {name:"ヤシャリ",en_name:"Jashari",long_name:"アルドン・ヤシャリ",positions:["DMF","CMF"],params:[74,78,74,72,76,70,74,76,76,78,74,52,54,56,48,52,76,54,74,74,74,73,72,50,50,68,74,76,75]},
       // Sub CMF: Rieder (FC26 OVR74, PAC74, SHO64, PAS72, DRI74, DEF68, PHY72)
@@ -3779,7 +3786,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub LB: Muheim (FC26 OVR75, PAC80, SHO54, PAS68, DRI72, DEF72, PHY72)
       {name:"ムヘイム",en_name:"Muheim",long_name:"ミロ・ムヘイム",positions:["左SB","左SMF"],params:[72,74,80,82,76,68,70,70,76,68,64,44,46,48,38,44,70,48,70,72,72,71,70,50,50,62,66,70,75]},
       // Sub CB: Amenda (FC26 OVR78, PAC78, SHO46, PAS70, DRI70, DEF78, PHY82)
-      {name:"アメンダ",en_name:"Amenda",long_name:"アンソニー・アメンダ",positions:["CB"],params:[82,78,78,76,74,82,66,66,74,70,66,36,32,40,32,38,66,36,76,78,78,77,76,50,50,82,72,76,75]}
+      {name:"アメンダ",en_name:"Amenda",long_name:"アンソニー・アメンダ",positions:["CB"],params:[82,78,78,76,74,82,66,66,74,70,66,36,32,40,32,38,66,36,76,78,78,77,76,50,50,82,72,76,75]},
+      // ↓ 2026/06/13 vs カタール 先発（TM準拠）: Michel Aebischer
+      {name:"アエビシャー",en_name:"Aebischer",long_name:"ミシェル・アエビシャー",positions:["CMF","OMF","DMF"],params:[74,80,74,74,76,72,74,76,74,78,74,66,64,68,58,60,78,68,70,72,70,70,68,50,50,68,74,76,75]}
     ]
   },
 
@@ -5395,14 +5404,14 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   qatar2026: {
     name:"カタール",en_name:"Qatar",team_color:"#8D1B3D",flag:"🇶🇦",
-    default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
-    default_keyplayer:7,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"3-4-3",default_tactics:TACTICS_PRESS,
+    default_keyplayer:9,default_marked_player:10,
+    default_lineup:[26,17,1,27,29,16,28,13,30,7,31],
     players:[
       // GK: Meshaal Barsham (OVR77, DIV78, HAN74, KIC70, REF77, SPD58, POS74)
       {name:"バルシャム",en_name:"Barsham",long_name:"メシャール・バルシャム",positions:["GK"],params:[50,50,50,50,77,58,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,78,74,50,74,70,75]},
       // RB: Pedro Miguel (OVR76, PAC76, SHO54, PAS72, DRI74, DEF76, PHY72)
-      {name:"ペドロ・ミゲル",en_name:"Pedro Miguel",long_name:"ペドロ・ミゲル",positions:["右SB","左SB"],params:[72,74,76,76,75,70,74,74,75,72,68,46,48,52,40,44,72,52,74,76,74,74,72,50,50,68,72,72,75]},
+      {name:"ペドロ・ミゲル",en_name:"Pedro Miguel",long_name:"ペドロ・ミゲル",positions:["CB","右SB","左SB"],params:[72,74,76,76,75,70,74,74,75,72,68,46,48,52,40,44,72,52,74,76,74,74,72,50,50,68,72,72,75]},
       // CB: Tarek Salman (OVR71, PAC70, SHO42, PAS64, DRI62, DEF72, PHY76)
       {name:"タレク・サルマン",en_name:"T.Salman",long_name:"タレク・サルマン",positions:["CB"],params:[76,74,70,68,64,76,58,58,64,64,60,34,32,40,30,34,58,34,70,72,72,71,70,50,50,74,62,66,75]},
       // CB: Bassam Al-Rawi (OVR72, PAC70, SHO44, PAS66, DRI64, DEF74, PHY78)
@@ -5426,15 +5435,15 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub GK: Yousuf Hassan (OVR66)
       {name:"Y・ハッサン",en_name:"Y.Hassan",long_name:"ユースフ・ハッサン",positions:["GK"],params:[50,50,50,50,66,58,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,66,64,50,64,62,75]},
       // Sub CB: Homam Ahmed (OVR70)
-      {name:"ホマム",en_name:"Homam",long_name:"ホマム・アフマド",positions:["CB"],params:[74,72,68,66,64,74,56,56,62,62,58,32,30,38,28,32,56,32,68,70,70,69,68,50,50,72,58,62,75]},
+      {name:"ホマム",en_name:"Homam",long_name:"ホマム・アル＝アミン",positions:["左SMF","左SB","CB"],params:[74,72,68,66,64,74,56,56,62,62,58,32,30,38,28,32,56,32,68,70,70,69,68,50,50,72,58,62,75]},
       // Sub CB: Mohammed Waad (OVR68)
       {name:"ワアド",en_name:"Waad",long_name:"モハメッド・ワアド",positions:["CB"],params:[70,70,66,64,62,70,54,54,60,58,54,28,26,34,24,28,52,28,66,68,68,67,66,50,50,68,56,58,75]},
       // Sub RB: Salem Al-Hajri (OVR70)
       {name:"アルハジュリー",en_name:"Al-Hajri",long_name:"サレム・アルハジュリー",positions:["右SB","左SB"],params:[70,72,72,72,67,66,62,62,67,62,58,38,40,42,32,36,62,42,66,68,68,67,66,50,50,60,62,62,75]},
       // Sub LB: Assim Madibo (OVR68)
-      {name:"マディボ",en_name:"Madibo",long_name:"アシム・マディボ",positions:["左SB","CB"],params:[68,72,70,70,65,66,60,60,65,60,56,34,32,38,28,32,58,36,66,68,68,67,66,50,50,62,58,58,75]},
+      {name:"マディボ",en_name:"Madibo",long_name:"アシム・マディボ",positions:["DMF","左SB","CB"],params:[68,72,70,70,65,66,60,60,65,60,56,34,32,38,28,32,58,36,66,68,68,67,66,50,50,62,58,58,75]},
       // Sub CMF: Boualem Khoukhi (OVR72)
-      {name:"フーキー",en_name:"Khoukhi",long_name:"ブアレム・フーキー",positions:["CMF","DMF"],params:[72,76,66,66,67,68,66,66,67,70,66,48,50,54,42,46,66,52,66,68,68,67,66,50,50,64,62,66,75]},
+      {name:"フーキー",en_name:"Khoukhi",long_name:"ブアレム・フーキー",positions:["CB","CMF","DMF"],params:[72,76,66,66,67,68,66,66,67,70,66,48,50,54,42,46,66,52,66,68,68,67,66,50,50,64,62,66,75]},
       // Sub DMF: Ahmed Fatehi (OVR70)
       {name:"ファテヒ",en_name:"Fatehi",long_name:"アフマド・ファテヒ",positions:["DMF","CMF"],params:[70,74,66,66,65,66,64,64,65,68,64,46,48,52,40,44,64,48,68,70,68,68,66,50,50,62,60,62,75]},
       // Sub OMF: Ahmed Alaaeldin (OVR68)
@@ -5450,7 +5459,14 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub RB: Abdelrahman Musa (OVR66)
       {name:"A・ムサ",en_name:"A.Musa",long_name:"アブデルラフマン・ムサ",positions:["右SB"],params:[66,68,68,68,64,62,60,60,64,58,54,32,30,36,26,30,58,34,64,66,64,64,62,50,50,58,56,56,75]},
       // Sub CF: Khaled Al-Shammari (OVR66)
-      {name:"アルシャンマリー",en_name:"Al-Shammari",long_name:"ハーレド・アルシャンマリー",positions:["CF"],params:[66,64,68,68,65,64,60,60,65,54,50,58,60,62,42,46,58,58,24,26,26,25,24,50,50,62,54,54,75]}
+      {name:"アルシャンマリー",en_name:"Al-Shammari",long_name:"ハーレド・アルシャンマリー",positions:["CF"],params:[66,64,68,68,65,64,60,60,65,54,50,58,60,62,42,46,58,58,24,26,26,25,24,50,50,62,54,54,75]},
+      // ↓ 2026/06/13 vs スイス 先発（TM準拠 3-4-3/5バック）。FC26 OVR目安で能力推定
+      {name:"アブナダ",en_name:"Abunada",long_name:"マフムード・アブナダ",positions:["GK"],params:[50,50,50,50,71,58,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,72,70,50,70,68,75]},
+      {name:"イッサ・ラエ",en_name:"Issa Laye",long_name:"イッサ・ラエ",positions:["CB"],params:[76,72,68,66,63,76,56,56,62,60,56,32,30,38,28,32,56,34,70,71,70,70,68,50,50,72,60,62,75]},
+      {name:"アルウィ",en_name:"Al-Oui",long_name:"アユーブ・アルウィ",positions:["右SB","右SMF","CB"],params:[68,74,76,76,68,66,64,62,70,62,58,36,38,42,30,34,62,42,66,67,66,66,68,50,50,62,60,60,75]},
+      {name:"J・ガベル",en_name:"Jassem Gaber",long_name:"ジャセム・ガベル",positions:["DMF","CMF"],params:[72,76,66,66,65,70,64,64,66,68,64,46,48,52,40,44,66,50,68,69,68,68,68,50,50,68,62,64,75]},
+      {name:"エドミウソン",en_name:"Edmilson Jr",long_name:"エドミウソン・ジュニオール",positions:["右WG","左WG","OMF"],params:[66,72,80,82,76,64,78,78,80,72,66,70,72,72,56,62,78,72,40,42,42,41,40,50,50,58,72,72,75]},
+      {name:"アブドゥリサグ",en_name:"Abdurisag",long_name:"ユスフ・アブドゥリサグ",positions:["CF","右WG"],params:[70,72,78,78,71,68,70,68,76,60,56,66,68,68,48,52,68,66,32,34,34,33,32,50,50,68,62,62,75]}
     ]
   },
   jordan2026: {
