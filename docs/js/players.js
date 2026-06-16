@@ -4086,9 +4086,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   ecuador2026: {
     name:"エクアドル",en_name:"Ecuador",team_color:"#FFD100",flag:"🇪🇨",
-    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_system:"4-2-2-2",default_tactics:TACTICS_COUNTER,
     default_keyplayer:5,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_lineup:[0,28,27,26,3,5,29,31,30,7,10],
     players:[
       // GK: Galindez (FC26 OVR75, DIV76, HAN74, KIC70, REF76, SPD55, POS75)
       {name:"ガリンデス",en_name:"Galindez",long_name:"エルナン・ガリンデス",positions:["GK"],params:[50,50,50,50,76,55,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,76,74,50,75,70,75]},
@@ -4105,7 +4105,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // LDMF: Cifuentes (FC26 OVR75, PAC72, SHO64, PAS76, DRI74, DEF72, PHY72)
       {name:"シフエンテス",en_name:"Cifuentes",long_name:"ホセ・シフエンテス",positions:["CMF","DMF"],params:[72,74,72,73,72,70,72,72,72,76,70,60,62,64,50,52,72,64,70,72,70,70,68,50,50,66,72,70,75]},
       // RSM: G.Plata (FC26 OVR76, PAC86, SHO70, PAS68, DRI78, DEF42, PHY64)
-      {name:"G・プラタ",en_name:"G.Plata",long_name:"ゴンサロ・プラタ",positions:["右WG","右SMF"],params:[62,64,86,88,78,58,76,78,78,68,62,66,66,68,54,58,76,68,38,40,38,38,40,50,50,56,68,68,75]},
+      {name:"G・プラタ",en_name:"G.Plata",long_name:"ゴンサロ・プラタ",positions:["右WG","右SMF","CF"],params:[62,64,86,88,78,58,76,78,78,68,62,66,66,68,54,58,76,68,38,40,38,38,40,50,50,56,68,68,75]},
       // LSM: Sarmiento (FC26 OVR75, PAC82, SHO70, PAS72, DRI76, DEF42, PHY64)
       {name:"サルミエント",en_name:"Sarmiento",long_name:"ジェレミー・サルミエント",positions:["左WG","左SMF"],params:[62,64,82,84,76,58,74,76,76,72,66,66,66,68,52,56,74,68,38,40,38,38,40,50,50,56,68,68,75]},
       // OMF: R.Ibarra (FC26 OVR73, PAC80, SHO68, PAS70, DRI74, DEF42, PHY64)
@@ -4133,15 +4133,22 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ムコ",en_name:"Mina",long_name:"ヤイル・ミナ",positions:["CB"],params:[80,72,70,68,70,78,62,56,60,60,58,32,28,42,28,26,56,48,72,74,74,74,72,50,50,78,54,62,74]},
       {name:"カルモナ",en_name:"Carmona",long_name:"アンジェル・カルモナ",positions:["CMF","OMF"],params:[62,68,70,70,68,60,68,66,67,70,62,54,50,54,46,46,62,56,58,56,56,54,52,50,50,50,50,52,74]},
       {name:"V・チャベス",en_name:"V.Chavez",long_name:"バレンティン・チャベス",positions:["CB","右SB"],params:[68,68,68,66,66,66,58,52,56,58,56,28,24,38,26,24,52,44,62,64,62,62,60,50,50,62,46,54,74]},
-      {name:"タピア",en_name:"Tapia",long_name:"ロメル・タピア",positions:["GK"],params:[50,50,50,50,72,66,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,71,68,50,72,64,75]}
+      {name:"タピア",en_name:"Tapia",long_name:"ロメル・タピア",positions:["GK"],params:[50,50,50,50,72,66,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,71,68,50,72,64,75]},
+      // ↓ 2026/06/14 vs コートジボワール 先発（TM準拠 4-2-2-2）。FC26 OVR目安で能力推定
+      {name:"パチョ",en_name:"W.Pacho",long_name:"ウィリアン・パチョ",positions:["CB","左SB"],params:[82,80,78,76,78,84,68,66,74,74,70,40,36,46,32,38,68,44,84,85,84,84,82,50,50,82,76,80,75]},
+      {name:"オルドニェス",en_name:"Ordonez",long_name:"ジョエル・オルドニェス",positions:["CB"],params:[80,78,76,74,74,82,66,64,72,70,66,36,32,44,30,34,66,42,78,79,78,78,76,50,50,80,72,72,75]},
+      {name:"A・フランコ",en_name:"A.Franco",long_name:"アラン・フランコ",positions:["右SB","CB"],params:[74,76,78,78,72,72,68,66,72,68,64,44,44,48,38,40,68,50,72,74,72,72,70,50,50,70,68,68,75]},
+      {name:"ビテ",en_name:"P.Vite",long_name:"ペドロ・ビテ",positions:["CMF","DMF","OMF"],params:[72,80,74,74,74,70,74,74,74,74,70,60,60,62,52,54,74,64,68,70,68,68,70,50,50,64,72,70,75]},
+      {name:"ミンダ",en_name:"A.Minda",long_name:"アラン・ミンダ",positions:["左WG","OMF","左SMF"],params:[62,72,84,86,75,60,80,78,82,70,64,66,66,68,54,60,78,70,38,36,36,36,60,50,50,54,70,68,75]},
+      {name:"イェボア",en_name:"Yeboah",long_name:"ジョン・イェボア",positions:["右WG","OMF","右SMF"],params:[66,74,82,84,74,62,78,76,80,70,64,66,66,68,54,58,76,68,40,38,38,38,62,50,50,56,68,68,75]}
 ]
   },
 
   australia2026: {
     name:"オーストラリア",en_name:"Australia",team_color:"#00843D",flag:"🇦🇺",
-    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:5,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"3-4-3",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:9,default_marked_player:10,
+    default_lineup:[26,28,2,27,29,30,31,32,33,35,34],
     players:[
       // GK: M.Ryan (FC26 OVR78, DIV79, HAN77, KIC74, REF79, SPD60, POS78)
       {name:"M・ライアン",en_name:"M.Ryan",long_name:"マシュー・ライアン",positions:["GK"],params:[50,50,50,50,79,60,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,79,77,50,78,74,75]},
@@ -4189,14 +4196,25 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     {name:"T.ドージャ",en_name:"T.Dougall",long_name:"トム・ドーガル",positions:["CMF","DMF"],params:[64,79,66,64,82,72,64,56,62,74,70,52,56,62,62,58,68,60,76,76,76,78,76,50,50,64,72,70,75]},
     {name:"マクラーレン",en_name:"McLaren",long_name:"ジェームズ・マクラーレン",positions:["左SB","左SMF"],params:[64,73,74,72,79,73,70,50,62,66,70,46,48,52,58,60,64,56,73,73,71,72,69,50,50,62,66,66,75]},
     {name:"ノックス",en_name:"Nox",long_name:"フランコ・ノックス",positions:["右WG","左WG"],params:[58,72,77,75,78,56,78,50,68,68,68,62,62,56,72,74,68,68,44,40,44,52,42,50,50,56,64,62,75]},
-    {name:"メタノア",en_name:"Metanoa",long_name:"ブレナン・メタノア",positions:["CF","右WG"],params:[68,72,73,71,77,46,80,50,64,66,70,72,70,60,66,62,68,72,43,41,40,54,40,50,50,68,62,60,75]}]
+    {name:"メタノア",en_name:"Metanoa",long_name:"ブレナン・メタノア",positions:["CF","右WG"],params:[68,72,73,71,77,46,80,50,64,66,70,72,70,60,66,62,68,72,43,41,40,54,40,50,50,68,62,60,75]},
+    // ↓ 2026/06/14 vs トルコ 先発（TM準拠 3-4-3、若手世代）。FC26 OVR目安で能力推定
+    {name:"ビーチ",en_name:"Beach",long_name:"パトリック・ビーチ",positions:["GK"],params:[50,50,50,50,72,64,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,72,70,50,71,68,75]},
+    {name:"バージェス",en_name:"Burgess",long_name:"キャメロン・バージェス",positions:["CB"],params:[76,74,68,66,70,76,60,58,64,66,62,34,30,44,28,32,60,40,73,74,73,73,72,50,50,76,68,68,75]},
+    {name:"チルカティ",en_name:"Circati",long_name:"アレッサンドロ・チルカティ",positions:["CB"],params:[78,76,72,70,72,80,64,64,70,70,66,36,32,44,30,34,66,42,75,76,75,75,74,50,50,78,70,70,75]},
+    {name:"オコン＝エングスラー",en_name:"Okon-Engstler",long_name:"ポール・オコン＝エングスラー",positions:["DMF","CMF"],params:[70,78,72,72,72,70,72,72,72,72,68,52,52,56,46,50,72,58,70,70,68,69,70,50,50,64,68,68,75]},
+    {name:"オニール",en_name:"O.Neill",long_name:"エイデン・オニール",positions:["CMF","DMF"],params:[76,82,74,72,74,74,72,72,73,74,70,58,60,62,50,54,72,64,74,74,72,73,72,50,50,70,70,72,75]},
+    {name:"イタリアーノ",en_name:"Italiano",long_name:"ジェイコブ・イタリアーノ",positions:["右SMF","右WG"],params:[66,76,82,82,72,64,74,72,78,66,62,52,52,56,46,50,72,60,62,64,62,62,66,50,50,58,64,64,75]},
+    {name:"ボス",en_name:"J.Bos",long_name:"ジョーダン・ボス",positions:["左SB","左SMF","左WG"],params:[70,80,84,84,76,68,78,76,82,74,70,62,60,64,52,58,76,66,72,73,70,72,74,50,50,62,72,74,75]},
+    {name:"メトカーフ",en_name:"Metcalfe",long_name:"コナー・メトカーフ",positions:["右WG","右SMF","CMF"],params:[70,80,78,78,74,68,74,72,75,72,68,62,62,64,52,54,72,66,58,60,58,58,64,50,50,64,68,70,75]},
+    {name:"トゥーレ",en_name:"M.Toure",long_name:"モハメド・トゥーレ",positions:["CF"],params:[74,74,80,80,73,74,72,72,78,62,56,70,70,70,48,52,68,70,34,36,34,34,62,50,50,72,68,66,75]},
+    {name:"イランクンダ",en_name:"Irankunda",long_name:"ネストリー・イランクンダ",positions:["左WG","左SMF","右WG"],params:[62,72,88,90,76,64,82,82,86,68,62,72,70,74,60,68,82,74,32,34,32,32,60,50,50,54,72,72,75]}]
   },
 
   turkey2026: {
     name:"トルコ",en_name:"Turkey",team_color:"#E30A17",flag:"🇹🇷",
     default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
-    default_keyplayer:5,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_keyplayer:6,default_marked_player:10,
+    default_lineup:[11,1,2,26,4,27,5,9,10,28,7],
     players:[
       // GK: Bayindir (FC26 OVR80, DIV81, HAN79, KIC76, REF81, SPD60, POS80)
       {name:"バイウンドゥル",en_name:"Bayindir",long_name:"アルタイ・バイウンドゥル",positions:["GK"],params:[50,50,50,50,77,30,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,77,72,50,75,76,75]},
@@ -4213,13 +4231,13 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // LDMF: S.Ozcan (FC26 OVR75, PAC74, SHO62, PAS74, DRI72, DEF76, PHY76)
       {name:"S・オズジャン",en_name:"S.Ozcan",long_name:"サリフ・オズジャン",positions:["DMF","CMF"],params:[76,78,74,75,73,74,70,70,73,74,68,56,58,60,48,50,70,62,74,76,74,74,72,50,50,70,72,72,75]},
       // RSM: Akturkoğlu (FC26 OVR79, PAC90, SHO74, PAS72, DRI82, DEF46, PHY68)
-      {name:"アクトゥルコール",en_name:"Akturkoğlu",long_name:"ケレム・アクトゥルコール",positions:["右WG","右SMF"],params:[59,61,84,86,79,55,80,82,79,72,66,70,70,72,56,60,82,72,42,44,42,42,44,50,50,53,72,72,75]},
+      {name:"アクトゥルコール",en_name:"Akturkoğlu",long_name:"ケレム・アクトゥルコール",positions:["右WG","右SMF","CF"],params:[59,61,84,86,79,55,80,82,79,72,66,70,70,72,56,60,82,72,42,44,42,42,44,50,50,53,72,72,75]},
       // LSM: K.Yildiz (FC26 OVR81, PAC82, SHO80, PAS78, DRI84, DEF50, PHY72)
       {name:"K・イルドゥズ",en_name:"K.Yildiz",long_name:"ケナン・イルドゥズ",positions:["左WG","左SMF","OMF"],params:[67,69,82,84,82,63,82,84,82,78,72,78,76,80,66,70,84,80,46,48,46,46,48,50,50,61,78,78,75]},
       // OMF: Arda Güler (FC26 OVR84, PAC80, SHO82, PAS84, DRI88, DEF48, PHY68)
-      {name:"ギュレル",en_name:"Guler",long_name:"アルダ・ギュレル",positions:["OMF","右WG"],params:[58,60,76,78,80,54,82,84,80,84,80,80,80,82,74,78,84,84,44,46,44,44,46,50,50,52,82,82,75]},
+      {name:"ギュレル",en_name:"Guler",long_name:"アルダ・ギュレル",positions:["OMF","右WG","右SMF"],params:[58,60,76,78,80,54,82,84,80,84,80,80,80,82,74,78,84,84,44,46,44,44,46,50,50,52,82,82,75]},
       // CF: B.Yilmaz (FC26 OVR78, PAC78, SHO78, PAS66, DRI76, DEF42, PHY74) ← marked
-      {name:"B・イルドゥズ",en_name:"B.Yilmaz",long_name:"バリシュ・アルペル・イルマズ",positions:["CF","右WG"],params:[91,93,92,93,87,87,79,81,87,75,69,76,74,78,67,69,79,76,68,70,68,68,70,50,50,85,99,70,75]},
+      {name:"B・イルドゥズ",en_name:"B.Yilmaz",long_name:"バリシュ・アルペル・イルマズ",positions:["CF","右WG","左SMF"],params:[91,93,92,93,87,87,79,81,87,75,69,76,74,78,67,69,79,76,68,70,68,68,70,50,50,85,99,70,75]},
       // Sub GK: Uğurcan Çakır (FC26 OVR79, DIV80, HAN78, KIC74, REF80, SPD58, POS79)
       {name:"U・チャクル",en_name:"U.Cakir",long_name:"ウールカン・チャクル",positions:["GK"],params:[50,50,50,50,80,58,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,80,78,50,79,74,75]},
       // Sub GK: Uurkan (FC26 OVR76, DIV77, HAN75, KIC70, REF77, SPD55, POS76)
@@ -4243,7 +4261,11 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     {name:"カプラン",en_name:"Kaplan",long_name:"チャウカイ・カプラン",positions:["右WG","左WG"],params:[58,72,78,76,78,56,78,50,68,68,68,62,62,56,70,72,68,68,44,40,44,52,42,50,50,56,64,62,75]},
     {name:"アルダ・カラン",en_name:"A.Karan",long_name:"アルダ・カラン",positions:["CF"],params:[68,72,73,71,77,46,80,50,64,66,70,72,70,60,66,62,68,72,43,41,40,54,40,50,50,68,62,60,75]},
     {name:"ヨクスル",en_name:"Yokuslu",long_name:"オカイ・ヨクスル",positions:["DMF","CMF"],params:[68,82,66,64,84,76,64,56,62,76,74,52,58,64,62,58,70,60,80,80,80,82,80,50,50,70,74,72,75]},
-    {name:"ウンデル",en_name:"Under",long_name:"ジェンギズ・ウンデル",positions:["右WG","左WG"],params:[63,74,80,78,80,56,82,54,72,70,70,66,66,58,74,76,72,70,44,40,44,52,42,50,50,60,66,64,75]}]
+    {name:"ウンデル",en_name:"Under",long_name:"ジェンギズ・ウンデル",positions:["右WG","左WG"],params:[63,74,80,78,80,56,82,54,72,70,70,66,66,58,74,76,72,70,44,40,44,52,42,50,50,60,66,64,75]},
+    // ↓ 2026/06/14 vs オーストラリア 先発（TM準拠）。FC26 OVR目安で能力推定
+    {name:"バルダクチュ",en_name:"Bardakci",long_name:"アブデュルケリム・バルダクチュ",positions:["CB"],params:[80,78,68,66,72,80,62,62,68,72,68,40,36,48,34,40,66,42,78,79,78,78,76,50,50,80,72,72,75]},
+    {name:"ユクセク",en_name:"Yuksek",long_name:"イスマイル・ユクセク",positions:["DMF","CMF"],params:[80,82,74,72,74,78,70,70,72,74,70,52,54,58,46,50,72,58,78,78,76,77,76,50,50,76,70,74,75]},
+    {name:"キョクチュ",en_name:"Kokcu",long_name:"オルクン・キョクチュ",positions:["OMF","CMF","DMF"],params:[74,80,74,74,80,72,80,82,78,82,80,76,76,78,72,74,82,78,66,66,62,64,64,50,50,66,80,80,75]}]
   },
 
   serbia2026: {
@@ -4553,14 +4575,14 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   ivorycoast2026: {
     name:"コートジボワール",en_name:"Ivory Coast",team_color:"#FF8200",flag:"🇨🇮",
-    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:5,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"4-2-2-2",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:6,default_marked_player:10,
+    default_lineup:[0,27,1,26,4,28,5,30,29,31,17],
     players:[
       // GK: Fofana Y (FC26 OVR76, DIV77, HAN75, KIC70, REF77, SPD58, POS76)
       {name:"フォファナ",en_name:"Fofana",long_name:"ヤヒア・フォファナ",positions:["GK"],params:[50,50,50,50,77,58,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,77,75,50,76,70,75]},
       // RB: W.Singo (FC26 OVR78, PAC88, SHO54, PAS70, DRI74, DEF76, PHY76)
-      {name:"シンゴ",en_name:"Singo",long_name:"ウィリフレッド・シンゴ",positions:["右SB"],params:[76,76,88,89,76,72,72,74,76,70,64,46,48,50,40,42,72,50,74,76,74,74,72,50,50,70,72,72,75]},
+      {name:"シンゴ",en_name:"Singo",long_name:"ウィリフレッド・シンゴ",positions:["右SB","CB"],params:[76,76,88,89,76,72,72,74,76,70,64,46,48,50,40,42,72,50,74,76,74,74,72,50,50,70,72,72,75]},
       // RCB: E.Bailly (FC26 OVR76, PAC80, SHO44, PAS62, DRI62, DEF76, PHY82)
       {name:"E・バイリー",en_name:"E.Bailly",long_name:"エリック・バイリー",positions:["CB"],params:[82,80,80,81,72,82,60,60,72,62,56,36,34,42,28,30,60,30,76,78,76,76,74,50,50,82,74,72,75]},
       // LCB: E.Ndicka (FC26 OVR78, PAC80, SHO44, PAS68, DRI66, DEF78, PHY80)
@@ -4601,7 +4623,14 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"フォファナ2",en_name:"W.Fofana",long_name:"ウィリアム・フォファナ",positions:["CB"],params:[80,72,78,76,76,78,68,62,66,62,60,34,30,44,28,26,58,50,74,76,76,76,74,50,50,76,56,64,74]},
       {name:"ビドゥ",en_name:"Bidu",long_name:"ファイット・ビドゥ",positions:["左SB","左WG","左SMF"],params:[66,70,76,74,68,64,70,64,67,66,60,50,46,52,40,40,58,54,62,62,60,60,58,50,50,56,50,52,74]},
       {name:"ゴグイ",en_name:"Gogui",long_name:"マックス・アロコ",positions:["DMF","CMF","CB"],params:[72,72,68,66,68,70,62,56,59,62,58,36,32,44,30,28,56,50,68,70,70,68,68,50,50,66,52,58,74]},
-      {name:"マクンブ",en_name:"Makumbu",long_name:"ブランドン・アグエセ",positions:["CF","OMF"],params:[68,70,76,74,72,66,68,62,65,62,56,64,62,62,46,44,56,58,48,46,48,46,46,50,50,58,56,54,74]}
+      {name:"マクンブ",en_name:"Makumbu",long_name:"ブランドン・アグエセ",positions:["CF","OMF"],params:[68,70,76,74,72,66,68,62,65,62,56,64,62,62,46,44,56,58,48,46,48,46,46,50,50,58,56,54,74]},
+      // ↓ 2026/06/14 vs エクアドル 先発（TM準拠 4-2-2-2）。FC26 OVR目安で能力推定
+      {name:"アグバドゥ",en_name:"Agbadou",long_name:"エマニュエル・アグバドゥ",positions:["CB"],params:[78,76,72,70,72,80,62,60,68,66,62,34,30,44,28,32,62,40,76,77,76,76,74,50,50,78,70,70,75]},
+      {name:"G・ドゥエ",en_name:"G.Doue",long_name:"ゲラ・ドゥエ",positions:["右SB"],params:[70,78,84,84,74,70,74,72,78,68,64,48,48,52,40,44,72,54,74,74,72,73,72,50,50,66,68,70,75]},
+      {name:"S・フォファナ",en_name:"S.Fofana",long_name:"セコ・フォファナ",positions:["DMF","CMF"],params:[82,84,76,74,76,80,74,76,76,76,72,62,64,66,52,56,78,66,76,77,76,76,74,50,50,74,74,76,75]},
+      {name:"B・トゥーレ",en_name:"B.Toure",long_name:"バズマナ・トゥーレ",positions:["左WG","OMF","左SMF"],params:[64,74,86,88,76,64,80,80,84,70,64,68,68,70,56,62,80,72,40,38,38,38,62,50,50,56,72,70,75]},
+      {name:"Y・ディオマンデ",en_name:"Y.Diomande",long_name:"ヤン・ディオマンデ",positions:["右WG","OMF","右SMF"],params:[62,74,88,90,76,62,82,80,85,68,62,70,68,72,58,64,82,72,38,36,36,36,60,50,50,54,72,70,75]},
+      {name:"ワヒ",en_name:"E.Wahi",long_name:"エリ・ワヒ",positions:["CF","左WG"],params:[78,78,86,86,76,78,76,76,82,66,60,76,76,76,54,56,74,76,34,36,34,34,64,50,50,76,72,70,75]}
 ]
   },
 
