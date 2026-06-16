@@ -2259,6 +2259,7 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
   // New Zealand
   "クロコム": {"profile": "長身を生かした守備範囲の広いゴールキーパー。ハイボールに強い。", "profile_en": "A tall goalkeeper with wide coverage and command of high balls.", "height": 194},
   "サーマン": {"profile": "落ち着いた対応が光るセンターバック。空中戦とビルドアップに貢献する。", "profile_en": "A composed centre-back who contributes in the air and in build-up.", "height": 190},
+  "ジコ": {"profile": "スピードと仕掛けに優れる両翼のアタッカー。得点力も高く、右でも左でもサイドで違いを生む。", "profile_en": "A pacey, direct winger comfortable on either flank, with an eye for goal that makes him a difference-maker.", "height": 179},
 };
 
 const PARAM_NAMES = [
@@ -3482,7 +3483,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     name:"ベルギー",en_name:"Belgium",team_color:"#CC0000",flag:"🇧🇪",
     default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
     default_keyplayer:9,default_marked_player:10,
-    default_lineup:[0,13,16,15,1,5,6,7,8,9,22],
+    default_lineup:[0,13,15,16,1,6,5,8,7,9,22],
     players:[
       // GK: Courtois (FC26 OVR90, DIV85, HAN89, KIC76, REF90, SPD52, POS88)
       {name:"クルトワ",en_name:"Courtois",long_name:"ティボー・クルトワ",positions:["GK"],params:[50,50,50,50,90,52,50,50,50,50,76,50,50,50,50,50,50,50,50,50,50,50,50,85,89,50,88,84,75]},
@@ -3501,7 +3502,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // RW: Doku (FC26 OVR83, PAC92, SHO73, PAS77, DRI88, DEF32, PHY71)
       {name:"ドク",en_name:"Doku",long_name:"ジェレミー・ドク",positions:["左WG","右WG","左SMF","右SMF"],params:[73,63,88,95,75,73,93,81,88,76,69,72,76,77,55,72,91,75,20,30,40,28,65,50,50,40,75,76,75]},
       // LW: Trossard (FC26 OVR83, PAC80, SHO81, PAS80, DRI85, DEF30, PHY60)
-      {name:"トロサール",en_name:"Trossard",long_name:"レアンドロ・トロサール",positions:["左WG","CF","左SMF"],params:[55,76,75,87,82,74,92,84,83,82,77,83,83,83,69,83,84,84,18,31,30,28,58,50,50,65,82,84,75]},
+      {name:"トロサール",en_name:"Trossard",long_name:"レアンドロ・トロサール",positions:["左WG","CF","左SMF","右SMF"],params:[55,76,75,87,82,74,92,84,83,82,77,83,83,83,69,83,84,84,18,31,30,28,58,50,50,65,82,84,75]},
       // CAM: De Bruyne (FC26 OVR87, PAC66, SHO83, PAS92, DRI84, DEF65, PHY72)
       {name:"デ・ブライネ",en_name:"De Bruyne",long_name:"ケヴィン・デ・ブライネ",positions:["CMF","OMF"],params:[74,66,66,65,89,70,68,89,75,92,93,78,81,90,83,93,85,87,65,70,65,64,73,50,50,55,89,87,75]},
       // ST: Lukaku (FC26 OVR83, PAC78, SHO82, PAS75, DRI74, DEF41, PHY83)
@@ -4690,8 +4691,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   egypt2026: {
     name:"エジプト",en_name:"Egypt",team_color:"#C8102E",flag:"🇪🇬",
     default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:7,default_marked_player:10,
-    default_lineup:[11,26,27,28,24,29,30,9,7,31,10],
+    default_keyplayer:9,default_marked_player:10,
+    default_lineup:[11,26,28,27,24,29,30,32,31,9,10],
     players:[
       // GK: El-Shenawy (FC26 OVR76, DIV77, HAN75, KIC70, REF77, SPD56, POS76)
       {name:"エル・シェナウィー",en_name:"El-Shenawy",long_name:"モハメド・エル＝シェナウィー",positions:["GK"],params:[50,50,50,50,77,56,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,77,75,50,76,70,75]},
@@ -4744,7 +4745,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ハムディ・ファティ",en_name:"H.Fathy",long_name:"ハムディ・ファティ",positions:["DMF","CMF","CB"],params:[78,80,72,72,72,76,68,66,70,72,68,52,52,56,44,48,70,56,74,74,72,73,72,50,50,72,70,70,75]},
       {name:"ラシーン",en_name:"Lasheen",long_name:"モハナド・ラシーン",positions:["DMF","CMF"],params:[76,80,72,72,72,72,70,70,72,72,68,52,52,56,44,48,72,58,72,73,72,72,72,50,50,68,70,70,75]},
       {name:"アティア",en_name:"Attia",long_name:"マルワン・アティア",positions:["DMF","CMF"],params:[76,80,70,70,72,72,70,70,72,72,68,52,52,56,44,48,72,58,72,73,72,72,72,50,50,68,70,70,75]},
-      {name:"アシュール",en_name:"E.Ashour",long_name:"エマム・アシュール",positions:["OMF","CMF"],params:[74,80,74,74,78,72,78,80,78,80,74,72,72,74,64,66,80,76,64,64,62,62,64,50,50,66,78,76,75]}
+      {name:"アシュール",en_name:"E.Ashour",long_name:"エマム・アシュール",positions:["OMF","CMF","左SMF"],params:[74,80,74,74,78,72,78,80,78,80,74,72,72,74,64,66,80,76,64,64,62,62,64,50,50,66,78,76,75]},
+      // WG(2026/06/15 vs ベルギー 先発、右AM起用): Mostafa Ziko
+      {name:"ジコ",en_name:"M.Ziko",long_name:"ムスタファ・ジコ",positions:["右SMF","左WG","右WG","左SMF"],params:[64,76,84,85,74,62,80,78,80,70,62,74,73,73,58,68,78,74,42,42,40,40,58,50,50,58,72,72,75]}
 ]
   },
 
