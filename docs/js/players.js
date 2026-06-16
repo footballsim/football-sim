@@ -1174,6 +1174,8 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "A・デイビス": {"profile": "世界最高クラスのスピードと無尽蔵のスタミナを誇るカナダ代表のスーパースター。バイエルンで左SBとして世界制覇を経験し、カナダ代表ではウィング的な役割でもチームを牽引する。", "profile_en": "Canada's superstar boasting world-class pace and boundless stamina. Having won major honours at Bayern as a left-back, he also drives the national team forward in a wider role.", "height": 177, "weight": 75},
 "コネ": {"profile": "高いボール奪取能力と正確なパスワークを兼備するカナダ期待の若手CMF。チェルシーでの経験を代表に持ち込み、カナダ中盤に活力とダイナミズムをもたらす逸材。", "profile_en": "A talented young Canadian CMF combining strong ball-winning and precise passing. Bringing experience from Chelsea into the national team, he injects energy and dynamism into Canada's midfield.", "height": 185, "weight": 80},
 "J・デービッド": {"profile": "卓越した決定力と高いスピードでヨーロッパのトップリーグを席巻するカナダの至宝。ゴール感覚とポジショニングの鋭さはヨーロッパでも指折りのストライカーとして名を馳せる。", "profile_en": "Canada's gem who has swept through European top leagues with exceptional finishing and pace. His goalscoring instinct and sharp positioning have earned him recognition as one of Europe's finest strikers.", "height": 179, "weight": 74},
+"ド・フジュロル": {"profile": "落ち着いた対応とビルドアップ能力を備えた若手センターバック。フィジカルと展開力でカナダ最終ラインの新たな選択肢となる。", "profile_en": "A composed young centre-back with sound build-up ability. His physicality and distribution make him a new option for the Canadian back line.", "height": 188, "weight": 80},
+"オルワセイ": {"profile": "スピードと高さを兼ね備えたカナダのストライカー。裏への抜け出しとポストワークで前線に推進力をもたらす。", "profile_en": "A Canadian striker combining pace and height. His runs in behind and hold-up play bring drive to the front line.", "height": 188, "weight": 82},
 "クレポー": {"profile": "正確なセービングとフットワークを誇るカナダ代表の実力派GK。長身を活かした制空権とリフレックスセービングでゴールを守るもう一人の守護神候補。", "profile_en": "A capable Canadian goalkeeper with precise shot-stopping and good footwork. His aerial command and reflex saves make him a strong candidate for the top spot in goal.", "height": 189, "weight": 85},
 "セントクレア": {"profile": "若くして代表に名乗りを上げる将来有望なGK。高い反射神経と冷静な判断力を武器に、カナダGK陣の次世代を担う存在として着実に成長している。", "profile_en": "A promising young goalkeeper who has already made his mark on the national team. Armed with sharp reflexes and calm decision-making, he is steadily developing as the next generation of Canadian goalkeeping.", "height": 192, "weight": 84},
 "ラリア": {"profile": "爆発的な加速力と積極的な攻撃参加でカナダの右サイドに推進力をもたらす右SB。スプリント能力の高さはチームでも指折りで、サイドを高い強度でこなすダイナミックなDF。", "profile_en": "A right-back who brings drive to Canada's right side with explosive acceleration and proactive forward runs. One of the team's fastest players, he covers his flank with relentless energy.", "height": 174, "weight": 68},
@@ -3961,9 +3963,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   canada2026: {
     name:"カナダ",en_name:"Canada",team_color:"#FF0000",flag:"🇨🇦",
-    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:8,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:9,default_marked_player:10,
+    default_lineup:[11,1,26,3,13,5,9,7,17,10,27],
     players:[
       // GK: Borjan (FC26 OVR77, DIV78, HAN76, KIC72, REF79, SPD55, POS77)
       {name:"ボルヤン",en_name:"Borjan",long_name:"ミラン・ボルヤン",positions:["GK"],params:[50,50,50,50,75,46,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,71,76,50,81,72,75]},
@@ -3984,7 +3986,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // LSM: A.Davies (FC26 OVR87, PAC97, SHO74, PAS76, DRI86, DEF78, PHY80) ← keyplayer
       {name:"A・デイビス",en_name:"A.Davies",long_name:"アルフォンソ・デイビス",positions:["左WG","左SB","左SMF"],params:[76,78,92,93,85,74,84,86,85,81,75,65,65,69,63,67,86,73,76,78,76,76,74,50,50,68,82,80,75]},
       // OMF: Kone (FC26 OVR79, PAC80, SHO72, PAS76, DRI78, DEF72, PHY76)
-      {name:"コネ",en_name:"Kone",long_name:"イスマエル・コネ",positions:["CMF","OMF"],params:[71,73,80,81,76,69,76,78,76,72,68,68,68,70,52,54,78,70,70,72,70,70,68,50,50,65,74,74,75]},
+      {name:"コネ",en_name:"Kone",long_name:"イスマエル・コネ",positions:["CMF","OMF","DMF"],params:[71,73,80,81,76,69,76,78,76,72,68,68,68,70,52,54,78,70,70,72,70,70,68,50,50,65,74,74,75]},
       // CF: J.David (FC26 OVR86, PAC87, SHO87, PAS77, DRI85, DEF44, PHY72) ← marked
       {name:"J・デービッド",en_name:"J.David",long_name:"ジョナサン・デービッド",positions:["CF"],params:[72,74,87,88,84,68,83,85,84,77,70,84,82,86,64,66,85,84,40,42,40,40,42,50,50,64,82,82,75]},
       // Sub GK: Crepeau (FC26 OVR77, DIV78, HAN76, KIC74, REF79, SPD60, POS77)
@@ -3992,7 +3994,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub GK: St.Clair (FC26 OVR74, DIV75, HAN73, KIC70, REF75, SPD62, POS74)
       {name:"セントクレア",en_name:"St.Clair",long_name:"タイラー・セントクレア",positions:["GK"],params:[50,50,50,50,75,62,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,75,73,50,74,70,75]},
       // Sub RB: Laryea (FC26 OVR75, PAC86, SHO58, PAS68, DRI72, DEF72, PHY68)
-      {name:"ラリア",en_name:"Laryea",long_name:"リッチー・ラリア",positions:["右SB"],params:[68,70,86,87,77,64,70,70,77,68,62,48,48,52,40,42,70,52,70,72,70,70,68,50,50,62,68,68,75]},
+      {name:"ラリア",en_name:"Laryea",long_name:"リッチー・ラリア",positions:["右SB","左SB"],params:[68,70,86,87,77,64,70,70,77,68,62,48,48,52,40,42,70,52,70,72,70,70,68,50,50,62,68,68,75]},
       // Sub CB: Mavinga (FC26 OVR74, PAC76, SHO40, PAS62, DRI62, DEF76, PHY78)
       {name:"マヴィンガ",en_name:"Mavinga",long_name:"クリス・マヴィンガ",positions:["CB"],params:[78,78,76,77,68,76,60,60,68,62,56,32,30,38,26,28,60,30,74,76,74,74,72,50,50,78,72,70,75]},
       // Sub CB: D.Henry (FC26 OVR74, PAC76, SHO40, PAS64, DRI62, DEF76, PHY79)
@@ -4000,7 +4002,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CMF: Kaye (FC26 OVR74, PAC76, SHO64, PAS74, DRI74, DEF72, PHY72)
       {name:"ケイ",en_name:"Kaye",long_name:"マーク・アンソニー・ケイ",positions:["CMF","DMF"],params:[72,74,76,77,73,68,72,72,73,74,68,58,60,62,48,50,72,64,70,72,70,70,68,50,50,66,70,70,75]},
       // Sub LW: L.Millar (FC26 OVR74, PAC82, SHO68, PAS70, DRI76, DEF42, PHY66)
-      {name:"L・ミラー",en_name:"L.Millar",long_name:"リアム・ミラー",positions:["左WG","右WG"],params:[64,66,82,84,76,62,74,76,76,70,64,64,64,68,52,54,74,68,38,40,38,38,40,50,50,58,68,68,75]},
+      {name:"L・ミラー",en_name:"L.Millar",long_name:"リアム・ミラー",positions:["左WG","右WG","左SMF"],params:[64,66,82,84,76,62,74,76,76,70,64,64,64,68,52,54,74,68,38,40,38,38,40,50,50,58,68,68,75]},
       // Sub CF: Larin (FC26 OVR75, PAC77, SHO77, PAS62, DRI72, DEF40, PHY82)
       {name:"ラリン",en_name:"Larin",long_name:"サイル・ラリン",positions:["CF","左WG"],params:[82,82,77,78,76,80,70,70,76,62,56,74,74,76,48,50,70,72,36,36,34,34,38,50,50,80,70,68,75]},
       // Sub CF: Akinola (FC26 OVR73, PAC88, SHO72, PAS62, DRI72, DEF36, PHY72)
@@ -4011,7 +4013,10 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     {name:"D・ドア",en_name:"D.Doe",long_name:"デヴィッド・ドア",positions:["CB"],params:[74,75,70,68,80,76,62,52,60,70,68,40,44,56,48,40,62,42,76,78,76,77,78,50,50,76,64,70,75]},
     {name:"ドナ",en_name:"Doner",long_name:"ヴァレンティン・ドナー",positions:["OMF","CMF","右WG"],params:[60,76,72,70,80,62,76,58,70,76,72,62,62,64,70,68,70,68,62,60,62,66,62,50,50,58,74,70,75]},
     {name:"ロバーツ",en_name:"Roberts",long_name:"マイルズ・ロバーツ",positions:["右WG","左WG"],params:[58,72,78,76,78,56,80,50,70,68,68,62,62,56,72,74,70,68,44,40,44,52,42,50,50,56,64,62,75]},
-    {name:"アンブロー",en_name:"Ambrose",long_name:"ジョナサン・アンブロー",positions:["CF"],params:[70,72,73,71,77,46,80,50,64,66,70,72,70,62,66,62,68,72,43,41,40,54,40,50,50,70,62,60,75]}]
+    {name:"アンブロー",en_name:"Ambrose",long_name:"ジョナサン・アンブロー",positions:["CF"],params:[70,72,73,71,77,46,80,50,64,66,70,72,70,62,66,62,68,72,43,41,40,54,40,50,50,70,62,60,75]},
+    // ↓ 2026/06/12 vs ボスニア 先発（TM準拠）。FC26 OVR目安で能力推定
+    {name:"ド・フジュロル",en_name:"De Fougerolles",long_name:"リュック・ド・フジュロル",positions:["CB"],params:[76,74,74,72,68,76,62,62,67,64,60,36,32,44,28,32,62,40,70,71,70,70,70,50,50,72,66,66,75]},
+    {name:"オルワセイ",en_name:"Oluwaseyi",long_name:"タニ・オルワセイ",positions:["CF","左WG"],params:[76,76,84,84,75,74,72,72,80,60,56,72,72,72,50,52,70,72,32,34,32,32,62,50,50,74,70,68,75]}]
   },
 
   senegal2026: {
@@ -4418,8 +4423,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   czech2026: {
     name:"チェコ",en_name:"Czech Republic",team_color:"#D7141A",flag:"🇨🇿",
     default_system:"3-4-2-1",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:5,default_marked_player:10,
-    default_lineup:[0,4,3,1,5,2,7,6,9,8,10],
+    default_keyplayer:4,default_marked_player:10,
+    default_lineup:[0,4,3,1,5,18,7,15,9,8,10],
     players:[
       // GK: Kovar (starter)
       {name:"コヴァール",en_name:"Kovar",long_name:"マルティン・コヴァール",positions:["GK"],params:[50,50,50,50,75,56,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,75,73,50,74,68,75]},
@@ -5117,8 +5122,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   bosnia2026: {
     name:"ボスニア・ヘルツェゴビナ",en_name:"Bosnia & Herzegovina",team_color:"#002868",flag:"🇧🇦",
     default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:10,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_keyplayer:9,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,5,13,7,8,9,18],
     players:[
       // GK: Nikola Vasilj (FC26 OVR77, DIV77, HAN72, KIC65, REF79, SPD77, POS77)
       {name:"バシリ",en_name:"Vasilj",long_name:"ニコラ・バシリ",positions:["GK"],params:[50,50,50,50,79,77,50,50,50,50,65,50,50,50,50,50,50,50,50,50,50,50,50,77,72,50,77,74,75]},
