@@ -944,16 +944,42 @@ function teamLabel(t) {
     ? TEAM_DATA[t.key].en_name : t.label;
 }
 
+// SINGLE_TEAMS を実際のW杯グループ(A〜L)順にまとめる。
+// WCSIM_GROUPS(tournament.js)に含まれない国＝W杯非出場(イタリア等)は自動的に除外される。
+function groupedSingleTeams() {
+  const byKey = {};
+  SINGLE_TEAMS.forEach(t => { byKey[t.key] = t; });
+  return Object.entries(WCSIM_GROUPS).map(([letter, keys]) => ({
+    letter,
+    teams: keys.map(k => byKey[k]).filter(Boolean),
+  }));
+}
+
+// グループ見出し付きのチーム選択HTMLを生成（excludeKey は一覧から除外）
+function renderTeamGroups(handler, excludeKey) {
+  const groupWord = (window.LANG === 'en') ? 'Group' : 'グループ';
+  return groupedSingleTeams().map(g => {
+    const items = g.teams
+      .filter(t => t.key !== excludeKey)
+      .map(t =>
+        `<div class="team-select-item" onclick="${handler}('${t.key}')">
+          <span class="tsi-flag">${t.flag}</span>
+          <span class="tsi-name">${teamLabel(t)}</span>
+        </div>`
+      ).join('');
+    if (!items) return '';
+    return `<div class="team-group">
+        <div class="team-group-header"><span class="tg-label">${groupWord}</span><span class="tg-badge">${g.letter}</span></div>
+        <div class="team-group-items">${items}</div>
+      </div>`;
+  }).join('');
+}
+
 // チーム1選択リストを構築（言語切替時に再構築）
 function buildTeam1List() {
   const list = document.getElementById('team1-select-list');
   if (!list || list.dataset.built === (window.LANG || 'ja')) return;
-  list.innerHTML = SINGLE_TEAMS.map(t =>
-    `<div class="team-select-item" onclick="selectTeam1('${t.key}')">
-      <span class="tsi-flag">${t.flag}</span>
-      <span class="tsi-name">${teamLabel(t)}</span>
-    </div>`
-  ).join('');
+  list.innerHTML = renderTeamGroups('selectTeam1', null);
   list.dataset.built = window.LANG || 'ja';
 }
 
@@ -964,14 +990,7 @@ function selectTeam1(key) {
   document.getElementById('single2-team1-display').textContent = t1.flag + ' ' + teamLabel(t1);
 
   const list = document.getElementById('team2-select-list');
-  list.innerHTML = SINGLE_TEAMS
-    .filter(t => t.key !== key)
-    .map(t =>
-      `<div class="team-select-item" onclick="selectTeam2('${t.key}')">
-        <span class="tsi-flag">${t.flag}</span>
-        <span class="tsi-name">${teamLabel(t)}</span>
-      </div>`
-    ).join('');
+  list.innerHTML = renderTeamGroups('selectTeam2', key);
   showScreen('single2');
 }
 
