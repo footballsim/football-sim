@@ -3007,7 +3007,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     name:"モロッコ",en_name:"Morocco",team_color:"#C1272D",flag:"🇲🇦",
     default_system:"4-2-1-3",default_tactics:TACTICS_COUNTER,
     default_keyplayer:1,default_marked_player:10,
-    default_lineup:[0,1,27,26,28,29,6,19,7,30,9],
+    default_lineup:[0,1,27,26,28,6,29,19,7,30,9],
     players:[
       {name:"ブーヌ",en_name:"Bounou",long_name:"ヤシン・ブーヌ",positions:["GK"],params:[50,50,50,50,78,65,50,50,50,50,76,50,50,50,50,50,50,50,50,50,50,50,50,84,74,50,83,76,75]},
       {name:"ハキミ",en_name:"Hakimi",long_name:"アシュラフ・ハキミ",positions:["右SB","右SMF","左SB"],params:[74,94,94,90,90,84,83,81,88,86,75,80,75,83,80,79,85,84,85,85,81,84,83,50,50,71,78,84,75]},
@@ -3048,7 +3048,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     name:"ブラジル",en_name:"Brazil",team_color:"#009C3B",flag:"🇧🇷",
     default_system:"4-2-1-3",default_tactics:TACTICS_PRESS,
     default_keyplayer:9,default_marked_player:10,
-    default_lineup:[26,28,3,27,4,6,23,16,7,10,29],
+    default_lineup:[26,28,3,27,4,23,6,16,7,10,29],
     players:[
       {name:"エデルソン",en_name:"Ederson",long_name:"エデルソン・サンタナ・デ・モラエス",positions:["GK"],params:[50,50,50,50,83,78,50,50,50,50,91,50,50,50,50,50,50,50,50,50,50,50,50,85,83,50,84,72,75]},
       {name:"ウェスレー",en_name:"Wesley",long_name:"ウェスレー・ヴィニシウス・フランサ・リマ",positions:["右SB","右SMF","左SMF"],params:[75,78,90,90,80,84,89,81,86,77,73,62,66,71,58,68,79,81,74,75,76,76,77,50,50,66,67,76,75]},
