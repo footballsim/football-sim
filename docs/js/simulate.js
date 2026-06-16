@@ -2236,6 +2236,10 @@ function simulateChance(gs, chanceNo) {
   else if (team2.tactics === TACTICS_COUNTER) t2point *= 0.85;
   else if (team2.tactics === TACTICS_CATENACCIO) t2point *= 0.70;
 
+  // まるごとシミュレート専用: 開催国/過去優勝国のチーム力ブースト（他モードでは未設定=1.0）
+  t1point *= (window._wcsimMul1 || 1);
+  t2point *= (window._wcsimMul2 || 1);
+
   let offence = Math.random() < t1point / (t1point + t2point) ? team1 : team2;
   let defence = offence === team1 ? team2 : team1;
 

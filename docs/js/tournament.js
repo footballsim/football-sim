@@ -55,6 +55,24 @@ function wcsimTeamName(key) {
   return (window.LANG === 'en' && d.en_name) ? d.en_name : d.name;
 }
 
+// チーム力ブースト: 開催国は全試合+5%、過去優勝国は決勝Tのみ+8%（チーム力倍率のみ）
+const WCSIM_HOSTS = ['mexico2026', 'canada2026', 'usa2026'];
+const WCSIM_PAST_CHAMPIONS = ['brazil2026', 'germany2026', 'spain2026', 'uruguay2026', 'france2026', 'argentina2026', 'england2026'];
+function wcsimStrengthMul(key, isKnockout) {
+  let m = 1;
+  if (WCSIM_HOSTS.includes(key)) m *= 1.05;
+  if (isKnockout && WCSIM_PAST_CHAMPIONS.includes(key)) m *= 1.08;
+  return m;
+}
+// ブースト倍率をグローバルにセットして simulateSilent を実行（simulateChance が参照）
+function wcsimSilent(key1, key2, isKnockout, numChances) {
+  window._wcsimMul1 = wcsimStrengthMul(key1, isKnockout);
+  window._wcsimMul2 = wcsimStrengthMul(key2, isKnockout);
+  const r = simulateSilent(TEAM_DATA[key1], TEAM_DATA[key2], numChances);
+  window._wcsimMul1 = 1; window._wcsimMul2 = 1;
+  return r;
+}
+
 // 勝点 → 得失差 → 総得点 → 乱数（比較器を安定させるため事前付与）
 function wcsimSortStandings(rows) {
   rows.forEach(r => { r._rnd = Math.random(); });
@@ -67,7 +85,7 @@ function wcsimPlayGroup(letter, keys) {
   keys.forEach(k => { table[k] = {key: k, p:0, w:0, d:0, l:0, gf:0, ga:0, gd:0, pts:0}; });
   const order = [[0,1],[2,3],[0,2],[3,1],[3,0],[1,2]]; // 第1節〜第3節
   const matches = order.map(([i, j]) => {
-    const r = simulateSilent(TEAM_DATA[keys[i]], TEAM_DATA[keys[j]]);
+    const r = wcsimSilent(keys[i], keys[j], false);
     wcsimStatsAbsorb(keys[i], keys[j], r, true);
     wcsimStatsMatchDone(keys[i], keys[j], r.t1score, r.t2score, false, null);
     const h = table[keys[i]], a = table[keys[j]];
@@ -181,13 +199,13 @@ function wcsimPenaltyShootout(t1data, t2data) {
 
 // ノックアウト1試合（90分 → 延長 → PK）
 function wcsimKnockoutMatch(matchNo, homeKey, awayKey) {
-  const r = simulateSilent(TEAM_DATA[homeKey], TEAM_DATA[awayKey]);
+  const r = wcsimSilent(homeKey, awayKey, true);
   wcsimStatsAbsorb(homeKey, awayKey, r, true);
   let hs = r.t1score, as = r.t2score, et = false, pk = null;
   if (hs === as) {
     et = true;
     // 延長前後半30分相当 = 6チャンスを同エンジンで演算（スタッツも吸収）
-    const ex = simulateSilent(TEAM_DATA[homeKey], TEAM_DATA[awayKey], 6);
+    const ex = wcsimSilent(homeKey, awayKey, true, 6);
     wcsimStatsAbsorb(homeKey, awayKey, ex, false);
     hs += ex.t1score; as += ex.t2score;
     if (hs === as) pk = wcsimPenaltyShootout(TEAM_DATA[homeKey], TEAM_DATA[awayKey]);
