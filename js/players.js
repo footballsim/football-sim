@@ -4202,7 +4202,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     name:"オーストラリア",en_name:"Australia",team_color:"#00843D",flag:"🇦🇺",
     default_system:"3-4-3",default_tactics:TACTICS_COUNTER,
     default_keyplayer:9,default_marked_player:10,
-    default_lineup:[26,28,2,27,29,30,31,32,33,35,34],
+    default_lineup:[26,27,2,28,29,30,31,32,33,35,34],
     players:[
       // GK: M.Ryan (FC26 OVR78, DIV79, HAN77, KIC74, REF79, SPD60, POS78)
       {name:"M・ライアン",en_name:"M.Ryan",long_name:"マシュー・ライアン",positions:["GK"],params:[50,50,50,50,79,60,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,79,77,50,78,74,75]},
@@ -4267,8 +4267,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   turkey2026: {
     name:"トルコ",en_name:"Turkey",team_color:"#E30A17",flag:"🇹🇷",
     default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
-    default_keyplayer:6,default_marked_player:10,
-    default_lineup:[11,1,2,26,4,27,5,9,10,28,7],
+    default_keyplayer:5,default_marked_player:10,
+    default_lineup:[11,1,2,26,4,5,27,9,10,28,7],
     players:[
       // GK: Bayindir (FC26 OVR80, DIV81, HAN79, KIC76, REF81, SPD60, POS80)
       {name:"バイウンドゥル",en_name:"Bayindir",long_name:"アルタイ・バイウンドゥル",positions:["GK"],params:[50,50,50,50,77,30,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,77,72,50,75,76,75]},
