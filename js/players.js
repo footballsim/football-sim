@@ -827,6 +827,7 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ラポルト": {"profile": "精度の高いパスと確かな空中戦で後方を支える大型CB。ラインの統制力が高い。", "profile_en": "A commanding centre-back whose precise passing and aerial ability support the backline. Excellent at organising the defensive unit.", "height": 192, "weight": 83},
 "クチュレジャ": {"profile": "左サイドで堅固な守備と積極的な攻撃参加を両立するSB。スピードと技術で相手WGを封じる。", "profile_en": "A left-back who combines solid defending with active attacking play. Uses pace and technique to contain opposing wingers.", "height": 181, "weight": 77},
 "ロドリ": {"profile": "ゲームを読む能力と正確なパスで中盤をコントロールする世界最高クラスのDMF。守備でも絶対的な強さを誇る。", "profile_en": "A world-class defensive midfielder who reads the game brilliantly and controls proceedings with precise passing. Equally dominant on the defensive side.", "height": 191, "weight": 82},
+"F・ルイス": {"profile": "左足から多彩なパスを操る大型のセントラルMF。落ち着いたボール捌きと推進力で中盤を支配し、スペインの攻撃にリズムをもたらす。", "profile_en": "A tall central midfielder who dictates with a varied left-footed passing range. His composed control and forward drive let him govern midfield and set the rhythm of Spain's attack.", "height": 189, "weight": 73},
 "ペドリ": {"profile": "狭いスペースでも技術とパスセンスを発揮するCMF。リズムを作る能力と球際の強さも持ち合わせる。", "profile_en": "A central midfielder who uses his technique and passing sense in tight spaces. His ability to set the tempo and compete physically is impressive.", "height": 174, "weight": 63},
 "フェルミン": {"profile": "創造性と得点力を持つOMF。ゲームメイクと前線への飛び出しで攻撃のアクセントとなる。", "profile_en": "An attacking midfielder with creativity and a goal threat. Adds variety to the attack with his playmaking and runs in behind.", "height": 177, "weight": 65},
 "ヤマル": {"profile": "10代にして世界屈指の右WG。圧倒的な技術とスピードで相手DFを翻弄する特別な才能。", "profile_en": "A world-class right winger in his teens. A rare talent who torments defenders with exceptional technique and speed.", "height": 180, "weight": 70},
@@ -1632,6 +1633,7 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "D・ドゥアルテ": {"profile": "東欧のリーグで実績を積んだCMF。豊富な運動量とボール奪取能力を兼備し、攻守のトランジションで存在感を発揮するミッドフィルダー。", "profile_en": "A central midfielder with a strong track record in Eastern European leagues. A midfielder who impresses in transitions with high work rate and ball-winning ability.", "height": 181, "weight": 75},
 "K・ピナ": {"profile": "ロシアの強豪クラブで活躍するCMF。高い走力と高いパス精度でゲームを組み立て、攻守両面で貢献できるオールラウンドなミッドフィルダー。", "profile_en": "A central midfielder who thrives at a top Russian club. An all-round midfielder who builds play with pace and passing accuracy, contributing on both sides of the game.", "height": 182, "weight": 77},
 "ピコ": {"profile": "圧倒的な身体能力と空中戦の強さを誇るCB。スピードには欠けるが強靭なフィジカルと高い守備能力でゴール前を封鎖し、セットプレーでも存在感を発揮するフィジカル型センターバック。", "profile_en": "A CB boasting overwhelming physicality and aerial dominance. A physically dominant centre-back who seals off the goal with dominant physicality and strong defence, also making his presence felt at set pieces.", "height": 191, "weight": 90},
+"D・ボルジェス": {"profile": "対人の強さと空中戦を武器とするカーボベルデのセンターバック。粘り強い守備と的確なポジショニングで最終ラインを支える。", "profile_en": "A Cape Verde centre-back whose strengths are physical duels and aerial ability. He supports the back line with tenacious defending and sound positioning.", "height": 185, "weight": 80},
 "J・パウロ": {"profile": "ルーマニアのトップクラブで守備経験を積んだCB。バランスのとれた守備能力とビルドアップ参加を特徴とし、代表バックラインの選択肢として重要なローテーション要員。", "profile_en": "A centre-back who has honed his defensive game at a top Romanian club. A key rotation player in the national team backline, characterised by well-rounded defensive ability and active participation in build-up play.", "height": 184, "weight": 78},
 "S・カブラル": {"profile": "ポルトガルの名門クラブの育成組織で磨かれた左SB。高い走力とオーバーラップを武器に攻撃参加し、若さとポテンシャルを秘めたサイドバック。", "profile_en": "A left-back polished in the academy of a prestigious Portuguese club. Using pace and overlapping runs to join attacks, a full-back with youth and considerable potential.", "height": 179, "weight": 72},
 "ディニー": {"profile": "中東リーグでプレーするSB。守備の安定性と体力を武器に両サイドをカバーし、代表スクワッドのバックラインを支えるユーティリティ性の高いディフェンダー。", "profile_en": "A full-back playing in the Middle Eastern league. A versatile defender who covers both flanks using defensive stability and stamina, supporting the national team's defensive reserves.", "height": 180, "weight": 76},
@@ -3092,9 +3094,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   spain2026: {
     name:"スペイン",en_name:"Spain",team_color:"#AA151B",flag:"🇪🇸",
-    default_system:"4-2-1-3",default_tactics:TACTICS_POSSESSION,
-    default_keyplayer:8,default_marked_player:8,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"4-1-2-3",default_tactics:TACTICS_POSSESSION,
+    default_keyplayer:6,default_marked_player:8,
+    default_lineup:[0,1,2,3,4,5,6,26,17,20,10],
     players:[
       {name:"U.シモン",en_name:"U.Simon",long_name:"ウナイ・シモン",positions:["GK"],params:[50,50,50,50,81,74,50,50,50,50,76,50,50,50,50,50,50,50,50,50,50,50,50,85,78,50,82,78,75]},
       {name:"Mリョレンテ",en_name:"M.Llorente",long_name:"マルコス・リョレンテ",positions:["右SB","CMF","右SMF"],params:[79,93,92,90,84,86,83,83,87,82,78,79,79,80,62,80,82,83,83,83,76,80,78,50,50,70,81,80,75]},
@@ -3117,12 +3119,14 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"フェルラン・トーレス",en_name:"F.Torres",long_name:"フェルラン・トーレス",positions:["左WG","右WG","CF"],params:[68,76,84,84,80,66,82,78,81,72,66,74,72,70,58,58,74,74,60,56,58,56,58,50,50,58,70,72,74]},
       {name:"C・アスピリクエタ",en_name:"Azpilicueta",long_name:"セサル・アスピリクエタ",positions:["右SB","CB"],params:[72,80,74,72,74,72,70,68,70,74,72,48,44,54,44,44,68,62,72,74,72,72,70,50,50,68,68,72,74]},
       {name:"カルバハル",en_name:"Carvajal",long_name:"ダニエル・カルバハル",positions:["右SB","右SMF"],params:[70,80,78,76,76,70,74,72,74,76,74,56,52,60,50,52,70,68,72,74,72,72,70,50,50,64,68,72,74]},
-      {name:"ガビ",en_name:"Gavi",long_name:"ガビ",positions:["CMF","OMF","DMF"],params:[66,82,76,78,82,66,84,82,79,84,76,64,62,66,60,62,82,76,76,74,72,72,70,50,50,60,74,78,75]},
+      {name:"ガビ",en_name:"Gavi",long_name:"ガビ",positions:["CMF","OMF","DMF","左WG"],params:[66,82,76,78,82,66,84,82,79,84,76,64,62,66,60,62,82,76,76,74,72,72,70,50,50,60,74,78,75]},
       {name:"オルモ",en_name:"Olmo",long_name:"ダニ・オルモ",positions:["OMF","右WG","CMF"],params:[68,78,80,80,82,68,82,80,80,80,74,72,70,70,62,62,80,76,66,62,64,62,62,50,50,60,72,76,74]},
       {name:"G・トーレス",en_name:"G.Torres",long_name:"ガウ・トーレス",positions:["CB","右SB"],params:[80,76,76,74,76,80,70,64,70,68,66,44,40,52,38,36,66,56,76,78,78,78,76,50,50,78,66,72,74]},
       {name:"ノルマン",en_name:"Normand",long_name:"ノルマン・バセリガ",positions:["CB"],params:[82,78,74,72,74,80,68,62,66,66,64,42,38,50,36,34,64,56,78,80,80,80,78,50,50,80,66,72,74]},
       {name:"ブラウト",en_name:"Braut",long_name:"イニゴ・ブラウト",positions:["CMF","OMF"],params:[66,76,72,72,76,66,76,76,74,80,72,62,58,64,56,58,76,70,68,66,66,64,64,50,50,58,66,70,74]},
-      {name:"J・ガリンデス",en_name:"Joselu",long_name:"ホセル",positions:["CF"],params:[78,76,72,70,74,78,66,62,66,68,66,72,70,70,56,52,64,70,56,56,58,56,56,50,50,74,68,70,74]}
+      {name:"J・ガリンデス",en_name:"Joselu",long_name:"ホセル",positions:["CF"],params:[78,76,72,70,74,78,66,62,66,68,66,72,70,70,56,52,64,70,56,56,58,56,56,50,50,74,68,70,74]},
+      // CM(2026/06/15 vs カーボベルデ 先発、TM準拠): Fabián Ruiz
+      {name:"F・ルイス",en_name:"F.Ruiz",long_name:"ファビアン・ルイス",positions:["CMF","DMF","OMF"],params:[78,82,66,66,84,72,78,84,76,86,84,78,76,80,70,74,86,80,78,78,74,76,76,50,50,66,80,84,75]}
 ]
   },
   france2026: {
@@ -5206,9 +5210,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   capeverde2026: {
     name:"カーボベルデ",en_name:"Cape Verde",team_color:"#003893",flag:"🇨🇻",
-    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:7,default_marked_player:7,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"4-1-2-3",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:8,default_marked_player:7,
+    default_lineup:[0,21,3,23,4,6,17,16,7,11,10],
     players:[
       // GK: Vozinha (~OVR66, REF68, SPD62, KIC64, DIV66, HAN65, POS68)
       {name:"ヴォジーニャ",en_name:"Vozinha",long_name:"ヴォジーニャ",positions:["GK"],params:[50,50,50,50,68,62,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,66,65,50,68,68,75]},
@@ -5245,7 +5249,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub OMF: Jamiro Monteiro (OVR69, PAC72, SHO59, PAS70, DRI72, DEF54, PHY68)
       {name:"モンテイロ",en_name:"Monteiro",long_name:"ジャミロ・モンテイロ",positions:["OMF","CMF"],params:[68,68,72,74,70,64,72,72,72,70,65,57,59,59,42,44,68,56,54,56,54,54,56,50,50,49,58,66,75]},
       // Sub DMF: Laros Duarte (~OVR67, PAC70, SHO55, PAS66, DRI66, DEF64, PHY67)
-      {name:"L・ドゥアルテ",en_name:"L.Duarte",long_name:"ラロス・ドゥアルテ",positions:["DMF","CMF"],params:[67,69,70,72,66,65,66,66,68,66,61,53,55,55,40,41,63,51,64,66,64,64,66,50,50,63,60,64,75]},
+      {name:"L・ドゥアルテ",en_name:"L.Duarte",long_name:"ラロス・ドゥアルテ",positions:["DMF","CMF","OMF"],params:[67,69,70,72,66,65,66,66,68,66,61,53,55,55,40,41,63,51,64,66,64,64,66,50,50,63,60,64,75]},
       // Sub DMF: Yannick Semedo (~OVR64, PAC67, SHO52, PAS64, DRI63, DEF62, PHY65)
       {name:"Y・セメド",en_name:"Y.Semedo",long_name:"ヤニック・セメド",positions:["DMF","CMF"],params:[65,67,67,69,63,63,63,63,65,64,60,50,52,52,37,38,60,49,62,64,62,62,64,50,50,61,59,61,75]},
       // Sub CMF: Kevin Pina (~OVR65, PAC69, SHO55, PAS65, DRI65, DEF61, PHY64)
@@ -5256,8 +5260,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"S・モレイラ",en_name:"S.Moreira",long_name:"スティーヴン・モレイラ",positions:["CB","右SB"],params:[74,74,73,75,72,72,71,71,72,67,62,32,33,33,24,24,67,43,72,74,72,72,74,50,50,72,67,69,75]},
       // Sub LB: Stopira (~OVR63, PAC58, SHO30, PAS52, DRI56, DEF63, PHY68)
       {name:"ストピーラ",en_name:"Stopira",long_name:"ストピーラ",positions:["左SB","CB"],params:[68,68,58,60,60,66,56,56,57,52,48,29,30,30,22,22,53,35,63,65,63,63,65,50,50,64,56,60,75]},
-      // Sub DF: Diney (~OVR60, PAC66, SHO28, PAS46, DRI50, DEF60, PHY68)
-      {name:"ディニー",en_name:"Diney",long_name:"ディニー",positions:["右SB","左SB"],params:[68,68,66,68,55,66,50,50,58,46,43,27,28,28,20,21,48,31,60,62,60,60,62,50,50,64,58,58,75]},
+      // LCB(2026/06/15 vs Spain 先発): Diney Borges (CB) ※別人の「ディニー」とPLAYER_EXTRA衝突回避のため別名
+      {name:"D・ボルジェス",en_name:"Diney",long_name:"ディニー・ボルジェス",positions:["CB","右SB","左SB"],params:[74,72,68,66,67,74,58,56,60,58,54,30,28,36,24,26,54,38,70,71,70,70,70,50,50,72,64,64,75]},
       // Sub GK: Marcio Rosa (~OVR62, REF62, SPD60, KIC60, DIV62, HAN60, POS62)
       {name:"マルシオ",en_name:"Marcio",long_name:"マルシオ・ロサ",positions:["GK"],params:[50,50,50,50,62,60,50,50,50,50,60,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,62,62,75]},
       // Sub GK: CJ dos Santos (~OVR60, REF61, SPD60, KIC58, DIV60, HAN59, POS61)
