@@ -4873,9 +4873,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   saudiarabia2026: {
     name:"サウジアラビア",en_name:"Saudi Arabia",team_color:"#006C35",flag:"🇸🇦",
-    default_system:"4-4-2",default_tactics:TACTICS_FREE,
+    default_system:"4-2-3-1",default_tactics:TACTICS_FREE,
     default_keyplayer:8,default_marked_player:10,
-    default_lineup:[0,1,2,14,26,5,15,27,9,8,28],
+    default_lineup:[0,1,2,14,26,5,15,27,9,28,8],
     players:[
       // GK: Al-Owais (FC26 OVR78, DIV79, HAN77, KIC72, REF79, SPD60, POS78)
       {name:"アルオワイス",en_name:"Al-Owais",long_name:"モハンマド・アルオワイス",positions:["GK"],params:[50,50,50,50,79,60,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,79,77,50,78,72,75]},
