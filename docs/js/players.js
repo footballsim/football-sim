@@ -3156,8 +3156,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   spain2026: {
     name:"スペイン",en_name:"Spain",team_color:"#AA151B",flag:"🇪🇸",
     default_system:"4-1-2-3",default_tactics:TACTICS_POSSESSION,
-    default_keyplayer:6,default_marked_player:8,
-    default_lineup:[0,1,2,3,4,5,6,26,17,20,10],
+    default_keyplayer:7,default_marked_player:8,
+    default_lineup:[0,1,2,3,4,5,26,6,17,20,10],
     players:[
       {name:"U.シモン",en_name:"U.Simon",long_name:"ウナイ・シモン",positions:["GK"],params:[50,50,50,50,81,74,50,50,50,50,76,50,50,50,50,50,50,50,50,50,50,50,50,85,78,50,82,78,75]},
       {name:"Mリョレンテ",en_name:"M.Llorente",long_name:"マルコス・リョレンテ",positions:["右SB","CMF","右SMF"],params:[79,93,92,90,84,86,83,83,87,82,78,79,79,80,62,80,82,83,83,83,76,80,78,50,50,70,81,80,75]},
