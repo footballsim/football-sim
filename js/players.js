@@ -164,7 +164,7 @@ const i18n = {
     timeFirst: '前半 1-45分', timeSecond: '後半 46-90分', timeLoss: 'ロスタイム',
     wcScreenTitle: '🏆 W杯グループステージ', wcGroupLabel: 'GROUP C',
     wcColTeam: 'チーム', wcColMP: '試', wcColW2: '勝', wcColD2: '分', wcColL2: '敗', wcColGF: '得点', wcColGA: '失点', wcColGD: '得失', wcColPts2: '勝点',
-    wcResultTitle: '🏆 グループC 最終結果', wcBtnReplay: '🔄 もう一度グループステージ', wcBtnTitle: '🏠 タイトルへ',
+    wcResultTitle: '🏆 グループC 最終結果', wcBtnTournament: '🏆 トーナメントへ', wcBtnReplay: '🔄 もう一度グループステージ', wcBtnTitle: '🏠 タイトルへ',
     wcNextNed: '⚽ 次へ：日本 vs オランダ', wcNextTun: '⚽ 次へ：日本 vs チュニジア', wcNextSwe: '⚽ 次へ：日本 vs スウェーデン',
     wcBtnFinal: '🏆 最終順位を見る',
     wcAdvanced: '🎉 グループ突破！', wcEliminated: '😢 グループ敗退',
@@ -359,7 +359,7 @@ const i18n = {
     timeFirst: '1st Half (1-45min)', timeSecond: '2nd Half (46-90min)', timeLoss: 'Stoppage',
     wcScreenTitle: '🏆 WC Group Stage', wcGroupLabel: 'GROUP C',
     wcColTeam: 'Team', wcColMP: 'MP', wcColW2: 'W', wcColD2: 'D', wcColL2: 'L', wcColGF: 'GF', wcColGA: 'GA', wcColGD: 'GD', wcColPts2: 'Pts',
-    wcResultTitle: '🏆 Group C Final Standings', wcBtnReplay: '🔄 Play Group Stage Again', wcBtnTitle: '🏠 Title',
+    wcResultTitle: '🏆 Group C Final Standings', wcBtnTournament: '🏆 To Knockout Stage', wcBtnReplay: '🔄 Play Group Stage Again', wcBtnTitle: '🏠 Title',
     wcNextNed: '⚽ Next: Japan vs Netherlands', wcNextTun: '⚽ Next: Japan vs Tunisia', wcNextSwe: '⚽ Next: Japan vs Sweden',
     wcBtnFinal: '🏆 View Final Standings',
     wcAdvanced: '🎉 Group Stage Cleared!', wcEliminated: '😢 Eliminated',
@@ -616,6 +616,7 @@ function applyLang() {
   _setText('wc-th-gd',    t('wcColGD'));
   _setText('wc-th-pts',   t('wcColPts2'));
   _setText('wc-result-title', t('wcResultTitle'));
+  var wcTBtn = document.getElementById('wc-btn-tournament'); if (wcTBtn) wcTBtn.textContent = t('wcBtnTournament');
   var wcRBtn = document.getElementById('wc-btn-replay');  if (wcRBtn) wcRBtn.textContent = t('wcBtnReplay');
   var wcHBtn = document.getElementById('wc-btn-home-title'); if (wcHBtn) wcHBtn.textContent = t('wcBtnTitle');
   var wcBBtn = document.getElementById('wc-result-back-btn'); if (wcBBtn) wcBBtn.textContent = t('wcBtnBackToGroup');
