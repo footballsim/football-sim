@@ -125,7 +125,7 @@ function buildPlayersTable(containerId, teams) {
       allPlayers.push({
         name:p.name, en_name:p.en_name, long_name:p.long_name, positions:p.positions,
         posLarge:posLg, params:p.params, sv:sv, overall:overall,
-        flag:data.flag, nation:data.name, teamKey:key, playerIdx:i,
+        flag:data.flag, nation:data.name, nationEn:data.en_name, teamKey:key, playerIdx:i,
         teamData:data
       });
     }
@@ -202,11 +202,12 @@ function buildPlayersTable(containerId, teams) {
     });
 
     // ユニーク国籍・ポジション・国旗
-    var nations = [], posLarges = [], nationFlags = {};
+    var nations = [], posLarges = [], nationFlags = {}, nationEnMap = {};
     for(var i=0;i<allPlayers.length;i++) {
       if(nations.indexOf(allPlayers[i].nation)<0) nations.push(allPlayers[i].nation);
       if(posLarges.indexOf(allPlayers[i].posLarge)<0) posLarges.push(allPlayers[i].posLarge);
       if(!nationFlags[allPlayers[i].nation]) nationFlags[allPlayers[i].nation] = allPlayers[i].flag;
+      if(!nationEnMap[allPlayers[i].nation]) nationEnMap[allPlayers[i].nation] = allPlayers[i].nationEn;
     }
     posLarges.sort(function(a,b){return (POS_ORDER[a]||9)-(POS_ORDER[b]||9);});
 
@@ -215,7 +216,7 @@ function buildPlayersTable(containerId, teams) {
     var fBtnActiveStyle = 'padding:5px 12px;border-radius:16px;border:1px solid #003087;background:#003087;color:white;font-size:12px;cursor:pointer;margin:2px;font-family:inherit';
 
     function nLabelOf(n) {
-      return _isEn ? (n==='日本'?'Japan':n==='イングランド'?'England':n==='スコットランド'?'Scotland':n==='ベルギー'?'Belgium':n==='チュニジア'?'Tunisia':n==='スウェーデン'?'Sweden':n==='オランダ'?'Netherlands':n==='モロッコ'?'Morocco':n==='ブラジル'?'Brazil':n==='メキシコ'?'Mexico':n==='ノルウェー'?'Norway':n==='アルゼンチン'?'Argentina':n==='スペイン'?'Spain':n==='フランス'?'France':n==='ドイツ'?'Germany':n==='アメリカ'?'USA':n==='韓国'?'South Korea':n==='チェコ'?'Czechia':n) : n;
+      return _isEn ? (nationEnMap[n] || n) : n;
     }
 
     // 1行目: 大陸タブ
@@ -283,7 +284,7 @@ function buildPlayersTable(containerId, teams) {
       var bgRow = ri%2===0 ? 'white' : '#f8f9fc';
       var plDispName = (_isEn && pl.en_name) ? pl.en_name : pl.name;
       var td = '<td style="padding:4px 8px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;color:#1a3a6b;white-space:nowrap;border-bottom:1px solid #eee;position:sticky;left:0;background:'+bgRow+';z-index:1" onclick="showPlayerDetail(\''+pl.teamKey+'\','+pl.playerIdx+')">'+plDispName+'</td>';
-      var plNation = _isEn ? (pl.nation==='日本'?'Japan':pl.nation==='イングランド'?'England':pl.nation==='スコットランド'?'Scotland':pl.nation==='ベルギー'?'Belgium':pl.nation) : pl.nation;
+      var plNation = _isEn ? (pl.nationEn || pl.nation) : pl.nation;
       td += '<td style="padding:4px 6px;font-size:11px;text-align:center;border-bottom:1px solid #eee;white-space:nowrap;background:'+bgRow+'">'+pl.flag+' '+plNation+'</td>';
       td += '<td style="padding:4px 6px;font-size:10px;text-align:center;border-bottom:1px solid #eee;white-space:nowrap;background:'+bgRow+'">';
       td += '<span style="font-size:10px;font-weight:700;background:#003087;color:white;padding:2px 6px;border-radius:3px">'+pl.posLarge+'</span>';
