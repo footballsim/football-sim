@@ -4252,7 +4252,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     {name:"ノックス",en_name:"Nox",long_name:"フランコ・ノックス",positions:["右WG","左WG"],params:[58,72,77,75,78,56,78,50,68,68,68,62,62,56,72,74,68,68,44,40,44,52,42,50,50,56,64,62,75]},
     {name:"メタノア",en_name:"Metanoa",long_name:"ブレナン・メタノア",positions:["CF","右WG"],params:[68,72,73,71,77,46,80,50,64,66,70,72,70,60,66,62,68,72,43,41,40,54,40,50,50,68,62,60,75]},
     // ↓ 2026/06/14 vs トルコ 先発（TM準拠 3-4-3、若手世代）。FC26 OVR目安で能力推定
-    {name:"ビーチ",en_name:"Beach",long_name:"パトリック・ビーチ",positions:["GK"],params:[50,50,50,50,72,64,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,72,70,50,71,68,75]},
+    // GK(先発): Beach (W杯2026トルコ戦8セーブ完封/Sofascore9.4でM・ライアンを上回り起用 → DIV79/REF79/POS78/HAN76/KIC70/SPD66, ~OVR78)
+    {name:"ビーチ",en_name:"Beach",long_name:"パトリック・ビーチ",positions:["GK"],params:[50,50,50,50,79,66,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,79,76,50,78,72,75]},
     {name:"バージェス",en_name:"Burgess",long_name:"キャメロン・バージェス",positions:["CB"],params:[76,74,68,66,70,76,60,58,64,66,62,34,30,44,28,32,60,40,73,74,73,73,72,50,50,76,68,68,75]},
     {name:"チルカティ",en_name:"Circati",long_name:"アレッサンドロ・チルカティ",positions:["CB"],params:[78,76,72,70,72,80,64,64,70,70,66,36,32,44,30,34,66,42,75,76,75,75,74,50,50,78,70,70,75]},
     {name:"オコン＝エングスラー",en_name:"Okon-Engstler",long_name:"ポール・オコン＝エングスラー",positions:["DMF","CMF"],params:[70,78,72,72,72,70,72,72,72,72,68,52,52,56,46,50,72,58,70,70,68,69,70,50,50,64,68,68,75]},
@@ -5332,8 +5333,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     default_keyplayer:8,default_marked_player:7,
     default_lineup:[0,21,3,23,4,6,17,16,7,11,10],
     players:[
-      // GK: Vozinha (~OVR66, REF68, SPD62, KIC64, DIV66, HAN65, POS68)
-      {name:"ヴォジーニャ",en_name:"Vozinha",long_name:"ヴォジーニャ",positions:["GK"],params:[50,50,50,50,68,62,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,66,65,50,68,68,75]},
+      // GK: Vozinha (W杯2026スペイン戦27本浴び7セーブ完封POTMで再評価 → DIV80/REF80/POS80/HAN78/KIC66/SPD62, ~OVR79)
+      {name:"ヴォジーニャ",en_name:"Vozinha",long_name:"ヴォジーニャ",positions:["GK"],params:[50,50,50,50,80,62,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,80,78,50,80,78,75]},
       // RB: Wagner Pina (OVR71, PAC81, SHO51, PAS64, DRI70, DEF64, PHY65)
       {name:"W・ピナ",en_name:"W.Pina",long_name:"ワグネル・ピナ",positions:["右SB","右WG","右SMF"],params:[65,65,81,83,74,61,70,70,76,64,60,49,51,51,37,38,67,48,64,66,64,64,66,50,50,47,63,68,75]},
       // RCB: Logan Costa (OVR77, PAC60, SHO40, PAS59, DRI67, DEF77, PHY78)
@@ -5502,8 +5503,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ビリングスリー",en_name:"Billingsley",long_name:"ノア・ビリングスリー",positions:["CB"],params:[68,68,64,62,62,68,54,54,60,56,52,28,26,34,24,28,52,28,64,66,64,64,62,50,50,66,54,58,75]},
       // Sub RW/CF: Bill Tuilagi (OVR67)
       {name:"B・トゥイラギ",en_name:"B.Tuilagi",long_name:"ビル・トゥイラギ",positions:["右WG","CF"],params:[72,66,74,76,71,72,64,64,71,58,54,58,58,62,44,48,62,56,32,34,34,33,32,50,50,70,60,60,75]},
-      // Sub LB: Elijah Just (OVR66)
-      {name:"E・ジャスト",en_name:"E.Just",long_name:"イライジャ・ジャスト",positions:["左SB","左SMF"],params:[66,68,66,66,62,62,58,58,62,58,54,30,28,34,24,28,56,34,62,64,62,62,60,50,50,58,54,54,75]},
+      // LW: Elijah Just (W杯2026イラン戦2得点=NZ史上初の1試合2発で再評価。本職ウインガー → ~OVR70)
+      {name:"E・ジャスト",en_name:"E.Just",long_name:"イライジャ・ジャスト",positions:["左WG","左SMF","OMF","左SB"],params:[62,72,80,82,70,60,76,72,78,64,58,68,66,70,44,54,72,68,36,38,36,36,42,50,50,52,64,68,75]},
       // ↓ 2026/06/15 vs イラン 先発（TM準拠 4-2-3-1）。FC26 OVR目安で能力推定
       {name:"クロコム",en_name:"Crocombe",long_name:"マックス・クロコム",positions:["GK"],params:[50,50,50,50,71,64,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,71,69,50,70,68,75]},
       {name:"サーマン",en_name:"F.Surman",long_name:"フィン・サーマン",positions:["CB"],params:[76,74,70,68,68,76,62,60,66,64,60,34,32,42,28,30,60,40,70,72,70,70,68,50,50,76,66,66,75]}
