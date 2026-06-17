@@ -2260,6 +2260,10 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
   "クロコム": {"profile": "長身を生かした守備範囲の広いゴールキーパー。ハイボールに強い。", "profile_en": "A tall goalkeeper with wide coverage and command of high balls.", "height": 194},
   "サーマン": {"profile": "落ち着いた対応が光るセンターバック。空中戦とビルドアップに貢献する。", "profile_en": "A composed centre-back who contributes in the air and in build-up.", "height": 190},
   "ジコ": {"profile": "スピードと仕掛けに優れる両翼のアタッカー。得点力も高く、右でも左でもサイドで違いを生む。", "profile_en": "A pacey, direct winger comfortable on either flank, with an eye for goal that makes him a difference-maker.", "height": 179},
+  "L・マルティネス": {"profile": "左利きの闘志あふれるセンターバック。激しい寄せと正確なビルドアップで最終ラインを統率する。", "profile_en": "A combative left-footed centre-back who marshals the back line with aggressive pressing and accurate build-up.", "height": 175},
+  "モンティエル": {"profile": "粘り強い守備と精度の高いクロスが持ち味の右サイドバック。大舞台での勝負強さも光る。", "profile_en": "A tenacious right-back with accurate crossing and a knack for stepping up in big moments.", "height": 175},
+  "アルマダ": {"profile": "創造性に富む左利きのアタッカー。ドリブルとラストパス、強烈なミドルシュートで違いを生む。", "profile_en": "A creative left-footed attacker who makes the difference with dribbling, killer passes and a fierce long-range shot.", "height": 171},
+  "F・メディナ": {"profile": "対人と空中戦に強い左サイドバック。センターバックもこなし、力強い攻め上がりも見せる。", "profile_en": "A left-back strong in duels and the air who can also play centre-back and surges forward with power.", "height": 184},
 };
 
 const PARAM_NAMES = [
@@ -3227,9 +3231,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 },
   argentina2026: {
     name:"アルゼンチン",en_name:"Argentina",team_color:"#74ACDF",flag:"🇦🇷",
-    default_system:"4-1-2-3",default_tactics:TACTICS_COUNTER,
+    default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
     default_keyplayer:9,default_marked_player:9,
-    default_lineup:[0,4,3,2,1,5,7,6,9,8,10],
+    default_lineup:[0,27,3,26,29,6,5,7,28,9,16],
     players:[
       {name:"E.マルティネス",en_name:"E.Martinez",long_name:"エミリアーノ・マルティネス",positions:["GK"],params:[50,50,50,50,85,80,50,50,50,50,82,50,50,50,50,50,50,50,50,50,50,50,50,88,83,50,86,83,75]},
       {name:"タリアフィコ",en_name:"Tagliafico",long_name:"ニコラス・タリアフィコ",positions:["左SB","CB","左SMF"],params:[71,78,68,75,79,83,78,73,70,74,72,57,47,67,41,67,77,71,78,79,76,77,75,50,50,78,68,77,75]},
@@ -3257,7 +3261,12 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"パラシオス",en_name:"Palacios",long_name:"エクセキエル・パラシオス",positions:["CMF","OMF","DMF"],params:[72,76,74,74,76,70,74,72,73,78,72,60,56,62,52,52,72,70,72,70,70,70,68,50,50,60,68,72,74]},
       {name:"アルバレス2",en_name:"J.Alvarez2",long_name:"アリエル・アルバレス",positions:["CB","左SB"],params:[78,76,72,70,72,78,66,62,66,66,64,40,36,48,34,32,62,54,76,78,78,78,76,50,50,78,64,72,74]},
       {name:"マウロ",en_name:"Fernandez",long_name:"ファクンド・フェルナンデス",positions:["右SB","CB"],params:[72,76,76,74,74,72,70,68,71,70,68,48,44,54,42,42,66,62,70,72,70,70,68,50,50,66,66,70,74]},
-      {name:"ガリンデス",en_name:"Galindez2",long_name:"エステバン・ガリンデス",positions:["GK"],params:[50,50,50,50,73,68,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,72,70,50,72,66,75]}
+      {name:"ガリンデス",en_name:"Galindez2",long_name:"エステバン・ガリンデス",positions:["GK"],params:[50,50,50,50,73,68,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,72,70,50,72,66,75]},
+      // 2026/06/17 vs アルジェリア 先発(TM準拠)で追加した4選手
+      {name:"L・マルティネス",en_name:"L.Martinez",long_name:"リサンドロ・マルティネス",positions:["CB","DMF","左SB"],params:[78,80,74,74,84,74,76,72,72,82,78,45,40,55,40,55,76,50,84,85,83,84,82,50,50,78,84,84,72]},
+      {name:"モンティエル",en_name:"Montiel",long_name:"ゴンサロ・モンティエル",positions:["右SB","右SMF"],params:[66,80,78,77,75,72,76,72,74,76,70,62,62,70,58,68,72,72,76,78,76,76,74,50,50,66,76,76,75]},
+      {name:"アルマダ",en_name:"Almada",long_name:"ティアゴ・アルマダ",positions:["OMF","左WG","右WG","左SMF","右SMF"],params:[64,78,80,82,82,68,86,85,84,82,76,78,76,80,72,80,86,84,46,48,44,46,52,50,50,56,78,78,72]},
+      {name:"F・メディナ",en_name:"F.Medina",long_name:"ファクンド・メディナ",positions:["左SB","CB","左SMF"],params:[74,80,82,80,75,76,74,68,72,72,66,52,52,64,50,58,70,64,76,80,76,76,74,50,50,72,74,78,72]}
 ]
   },
   england2026: {
@@ -5175,9 +5184,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   algeria2026: {
     name:"アルジェリア",en_name:"Algeria",team_color:"#006233",flag:"🇩🇿",
-    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:7,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"4-1-2-3",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:10,default_marked_player:10,
+    default_lineup:[0,1,2,3,4,13,6,15,16,14,9],
     players:[
       // GK: Luca Zidane (FC26 OVR68, DIV72, HAN70, KIC65, REF69, SPD55, POS71)
       {name:"ルカ・ジダン",en_name:"L.Zidane",long_name:"ルカ・ジネディーヌ・ジダン",positions:["GK"],params:[50,50,50,50,69,55,50,50,50,50,65,50,50,50,50,50,50,50,50,50,50,50,50,72,70,50,71,65,75]},
@@ -5192,7 +5201,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // DMF: Ramiz Zerrouki (FC26 OVR73, PAC62, SHO66, PAS69, DRI72, DEF68, PHY80)
       {name:"ゼルーキ",en_name:"Zerrouki",long_name:"ラミズ・ゼルーキ",positions:["DMF","CMF"],params:[78,78,62,63,68,76,66,66,67,69,63,54,56,60,44,48,64,58,66,68,66,66,64,50,50,74,64,66,75]},
       // CMF: Hicham Boudaoui (FC26 OVR76, PAC72, SHO64, PAS70, DRI74, DEF66, PHY74)
-      {name:"ブダウィ",en_name:"Boudaoui",long_name:"ヒシャム・ブダウィ",positions:["CMF","DMF","右SMF"],params:[72,72,72,73,72,70,68,68,72,70,64,54,56,60,44,48,66,62,64,66,64,64,62,50,50,70,66,68,75]},
+      {name:"ブダウィ",en_name:"Boudaoui",long_name:"ヒシャム・ブダウィ",positions:["CMF","DMF","右SMF","OMF"],params:[72,72,72,73,72,70,68,68,72,70,64,54,56,60,44,48,66,62,64,66,64,64,62,50,50,70,66,68,75]},
       // RMF: Riyad Mahrez (FC26 OVR84, PAC78, SHO80, PAS81, DRI88, DEF39, PHY63)
       {name:"マフレズ",en_name:"Mahrez",long_name:"リヤド・マフレズ",positions:["右WG","右SMF","OMF","CF"],params:[60,62,78,79,80,58,86,88,82,81,77,78,80,76,68,72,88,76,36,38,36,36,38,50,50,58,78,78,75]},
       // OMF: Houssem Aouar (FC26 OVR77, PAC66, SHO73, PAS75, DRI79, DEF64, PHY66)
@@ -5208,7 +5217,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CMF: Nabil Bentaleb (~OVR73, PAC66, SHO62, PAS72, DRI70, DEF70, PHY74)
       {name:"ベンタレブ",en_name:"Bentaleb",long_name:"ナビル・ベンタレブ",positions:["CMF","DMF"],params:[72,72,66,67,70,70,64,64,68,72,68,56,58,62,46,50,62,60,68,70,68,68,66,50,50,70,66,66,75]},
       // Sub CMF: Fares Chaibi (FC26 OVR75, PAC70, SHO68, PAS73, DRI76, DEF58, PHY68)
-      {name:"シャイビ",en_name:"Chaibi",long_name:"ファレス・シャイビ",positions:["OMF","CMF"],params:[66,66,70,71,72,64,70,70,72,73,69,64,66,64,52,56,72,64,56,58,56,56,58,50,50,62,68,68,75]},
+      {name:"シャイビ",en_name:"Chaibi",long_name:"ファレス・シャイビ",positions:["OMF","CMF","左WG"],params:[66,66,70,71,72,64,70,70,72,73,69,64,66,64,52,56,72,64,56,58,56,56,58,50,50,62,68,68,75]},
       // Sub CMF: Ibrahim Maza (FC26 OVR71, PAC64, SHO60, PAS68, DRI72, DEF52, PHY62)
       {name:"マザ",en_name:"Maza",long_name:"イブラヒム・マザ",positions:["CMF","OMF"],params:[60,60,64,65,68,58,68,68,67,68,64,56,58,58,46,50,70,60,50,52,50,50,52,50,50,56,62,62,75]},
       // Sub RW: Anis Hadj Moussa (FC26 OVR76, PAC80, SHO68, PAS68, DRI78, DEF44, PHY62)
