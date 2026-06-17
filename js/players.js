@@ -5727,7 +5727,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   iraq2026: {
     name:"イラク",en_name:"Iraq",team_color:"#007A3D",flag:"🇮🇶",
-    default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
+    default_system:"4-4-2",default_tactics:TACTICS_PRESS,
     default_keyplayer:9,default_marked_player:10,
     default_lineup:[0,26,27,28,29,30,31,6,20,7,32],
     players:[
