@@ -2792,8 +2792,8 @@ function generateSummary() {
   // GK名取得
   var t1gkP = t1.players[t1.lineup[0]];
   var t2gkP = t2.players[t2.lineup[0]];
-  var t1gkName = t1gkP ? (window.LANG==='en' && t1gkP.en_name ? t1gkP.en_name : t1gkP.name) : '-';
-  var t2gkName = t2gkP ? (window.LANG==='en' && t2gkP.en_name ? t2gkP.en_name : t2gkP.name) : '-';
+  var t1gkName = t1gkP ? (window.LANG==='en' && t1gkP.en_name ? t1gkP.en_name : (t1gkP.long_name || t1gkP.name)) : '-';
+  var t2gkName = t2gkP ? (window.LANG==='en' && t2gkP.en_name ? t2gkP.en_name : (t2gkP.long_name || t2gkP.name)) : '-';
 
   var matchData = {
     team1:   getTeamName(team1Data),
@@ -2922,8 +2922,8 @@ function generateMultiSummary(t1wins, t2wins, draws, t1poss, t1shoot, t2shoot, G
   // GK名取得（team1Data/team2Data から取得 ─ gameState は simulateSilent では更新されないため使用不可）
   var t1gkP = team1Data && team1Data.players ? team1Data.players[team1Data.default_lineup[0]] : null;
   var t2gkP = team2Data && team2Data.players ? team2Data.players[team2Data.default_lineup[0]] : null;
-  var t1gkName = t1gkP ? (isEn && t1gkP.en_name ? t1gkP.en_name : t1gkP.name) : '-';
-  var t2gkName = t2gkP ? (isEn && t2gkP.en_name ? t2gkP.en_name : t2gkP.name) : '-';
+  var t1gkName = t1gkP ? (isEn && t1gkP.en_name ? t1gkP.en_name : (t1gkP.long_name || t1gkP.name)) : '-';
+  var t2gkName = t2gkP ? (isEn && t2gkP.en_name ? t2gkP.en_name : (t2gkP.long_name || t2gkP.name)) : '-';
 
   var matchData = {
     team1:      t1n,
