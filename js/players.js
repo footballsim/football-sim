@@ -4097,7 +4097,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   senegal2026: {
     name:"セネガル",en_name:"Senegal",team_color:"#00853F",flag:"🇸🇳",
-    default_system:"4-1-2-3",default_tactics:TACTICS_PRESS,
+    default_system:"4-1-2-3",default_tactics:TACTICS_FREE,
     default_keyplayer:9,default_marked_player:10,
     default_lineup:[0,17,2,4,26,15,6,20,8,9,10],
     players:[
