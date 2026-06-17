@@ -468,7 +468,7 @@ const i18n = {
   }
 };
 
-function t(key) { return (i18n[window.LANG]||i18n.ja)[key] || i18n.ja[key] || key; }
+function t(key) { var d = i18n[window.LANG] || i18n.ja; if (d[key] !== undefined) return d[key]; if (i18n.ja[key] !== undefined) return i18n.ja[key]; return key; }
 
 const WC_TEAM_EN = {'日本':'Japan','オランダ':'Netherlands','チュニジア':'Tunisia','スウェーデン':'Sweden'};
 function getWCTeamName(jpName) { return window.LANG === 'en' ? (WC_TEAM_EN[jpName] || jpName) : jpName; }
