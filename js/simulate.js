@@ -430,6 +430,20 @@ function _recordKOResult(stageKey, decidedBy, pkS1, pkS2) {
   });
 }
 
+// W杯結果画面の表示名を言語に応じて解決（英語モードはen_nameへ）
+var _wcEnMapsCache = null;
+function _wcEnMaps() {
+  if (_wcEnMapsCache) return _wcEnMapsCache;
+  var tm = {}, pm = {};
+  for (var k in TEAM_DATA) { var td = TEAM_DATA[k]; if (!td) continue;
+    if (td.name && td.en_name) tm[td.name] = td.en_name;
+    if (td.players) td.players.forEach(function(p){ if (p && p.name && p.en_name && !pm[p.name]) pm[p.name] = p.en_name; });
+  }
+  _wcEnMapsCache = { team: tm, player: pm }; return _wcEnMapsCache;
+}
+function wcTeamDisp(jp) { return (window.LANG === "en" && _wcEnMaps().team[jp]) ? _wcEnMaps().team[jp] : jp; }
+function wcPlayerDisp(jp) { return (window.LANG === "en" && _wcEnMaps().player[jp]) ? _wcEnMaps().player[jp] : jp; }
+
 function showWCEliminated(stageKey) {
   _wcEliminatedStage = stageKey;
   const msgKeys = {wc_r32:'wcEliminatedMsgR32', wc_r16:'wcEliminatedMsgR16', wc_qf:'wcEliminatedMsgQF', wc_sf:'wcEliminatedMsgSF', wc_final:'wcEliminatedMsgFin'};
@@ -446,7 +460,7 @@ function showWCEliminated(stageKey) {
     const col = m.s1 > m.s2 ? '#4ade80' : m.s1 < m.s2 ? '#f87171' : '#fbbf24';
     html += `<div style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.07)">
       <span style="font-size:11px;color:rgba(255,255,255,0.4);min-width:36px">${t('wcMatchLabel')}${m.matchNum}${t('wcMatchSuffix')}</span>
-      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵${t('wcElimJapan')} <b>${m.s1}–${m.s2}</b> ${m.t2flag}${m.t2name}</span>
+      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵${t('wcElimJapan')} <b>${m.s1}–${m.s2}</b> ${m.t2flag}${wcTeamDisp(m.t2name)}</span>
       <span style="font-size:12px;font-weight:700;color:${col};min-width:14px;text-align:right">${res}</span>
     </div>`;
   });
@@ -459,7 +473,7 @@ function showWCEliminated(stageKey) {
     else if (r.decidedBy === 'et') sc += ` <span style="font-size:10px;color:rgba(255,255,255,0.4)">(${t('wcElimET')})</span>`;
     html += `<div style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.07)">
       <span style="font-size:11px;color:rgba(255,255,255,0.4);min-width:36px">${koLabels[r.stage]||r.stage}</span>
-      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵${t('wcElimJapan')} ${sc} ${r.oppFlag}${r.oppName}</span>
+      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵${t('wcElimJapan')} ${sc} ${r.oppFlag}${wcTeamDisp(r.oppName)}</span>
       <span style="font-size:12px;font-weight:700;color:${col};min-width:14px;text-align:right">${res}</span>
     </div>`;
   });
@@ -495,7 +509,7 @@ function showWCEliminated(stageKey) {
       <div style="padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.08)">${t('wcElimScorers')}</div>`;
     scorerList.slice(0, 10).forEach(function(g) {
       html += `<div style="padding:7px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06)">
-        <span style="color:#fff;font-size:13px">🇯🇵 ${g.name}</span>
+        <span style="color:#fff;font-size:13px">🇯🇵 ${wcPlayerDisp(g.name)}</span>
         <span style="font-size:13px;font-weight:700;display:flex;gap:8px">
           <span style="color:#ffd700;min-width:28px;text-align:right">${g.goals}G</span>
           <span style="color:rgba(255,255,255,0.5);min-width:28px;text-align:right">${g.assists}A</span>
@@ -513,11 +527,11 @@ function showWCEliminated(stageKey) {
     const mvpStats = [
       mvpSt.goals > 0 ? mvpSt.goals + t('wcElimGoalLabel') : '',
       mvpSt.assists > 0 ? mvpSt.assists + t('wcElimAssistLabel') : '',
-      t('wcElimDuelWinLabel') + mvpSt.duelWins + t('wcElimDuelWinSuffix') + (mvpSt.duels > 0 ? '（' + Math.round(mvpSt.duelWins/mvpSt.duels*100) + '%）' : ''),
+      t('wcElimDuelWinLabel') + mvpSt.duelWins + t('wcElimDuelWinSuffix') + (mvpSt.duels > 0 ? (window.LANG==='en'?' (':'（') + Math.round(mvpSt.duelWins/mvpSt.duels*100) + (window.LANG==='en'?'%)':'%）') : ''),
     ].filter(Boolean).join(t('wcElimDuelWinSep'));
     html += `<div style="background:rgba(184,134,11,0.3);border:1px solid rgba(255,215,0,0.35);border-radius:10px;padding:14px;margin-bottom:12px;text-align:center">
       <div style="font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;margin-bottom:6px">${t('wcElimMVP')}</div>
-      <div style="font-size:22px;font-weight:700;color:#ffd700">${mvpName}</div>
+      <div style="font-size:22px;font-weight:700;color:#ffd700">${wcPlayerDisp(mvpName)}</div>
       <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:4px">${mvpStats}</div>
     </div>`;
   }
@@ -525,11 +539,11 @@ function showWCEliminated(stageKey) {
   // ⑤ AI総括
   html += `<div style="background:rgba(0,0,0,0.35);border-radius:10px;overflow:hidden;margin-bottom:8px">
     <div style="padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between">
-      <span>🤖 AI総括</span>
-      <button id="wc-elim-summary-btn" onclick="generateWCEliminatedSummary()" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#fff;cursor:pointer;font-family:inherit;font-weight:700">生成する</button>
+      <span>${t('wcElimAiTitle')}</span>
+      <button id="wc-elim-summary-btn" onclick="generateWCEliminatedSummary()" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#fff;cursor:pointer;font-family:inherit;font-weight:700">${t('wcElimAiBtn')}</button>
     </div>
     <div id="wc-elim-summary-content" style="padding:12px;font-size:13px;line-height:1.9;color:rgba(255,255,255,0.85)">
-      <span style="color:rgba(255,255,255,0.35);font-size:12px">「生成する」をタップするとAIが大会を総括します</span>
+      <span style="color:rgba(255,255,255,0.35);font-size:12px">${t('wcElimAiPlaceholder')}</span>
     </div>
   </div>`;
 
@@ -550,7 +564,7 @@ function showWCChampion() {
     const res = m.s1 > m.s2 ? t('winLabel') : m.s1 < m.s2 ? t('loseLabel') : t('drawLabel');
     html += `<div style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.1)">
       <span style="font-size:11px;color:rgba(255,255,255,0.6);min-width:36px">${t('wcMatchLabel')}${m.matchNum}${t('wcMatchSuffix')}</span>
-      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵${t('wcElimJapan')} <b>${m.s1}–${m.s2}</b> ${m.t2flag}${m.t2name}</span>
+      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵${t('wcElimJapan')} <b>${m.s1}–${m.s2}</b> ${m.t2flag}${wcTeamDisp(m.t2name)}</span>
       <span style="font-size:12px;font-weight:700;color:${col};min-width:14px;text-align:right">${res}</span>
     </div>`;
   });
@@ -562,7 +576,7 @@ function showWCChampion() {
     else if (r.decidedBy === 'et') sc += ` <span style="font-size:10px;color:rgba(255,255,255,0.5)">(${t('wcElimET')})</span>`;
     html += `<div style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.1)">
       <span style="font-size:11px;color:rgba(255,255,255,0.6);min-width:36px">${koLabels[r.stage]||r.stage}</span>
-      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵${t('wcElimJapan')} ${sc} ${r.oppFlag}${r.oppName}</span>
+      <span style="font-size:13px;color:#fff;flex:1;text-align:center">🇯🇵${t('wcElimJapan')} ${sc} ${r.oppFlag}${wcTeamDisp(r.oppName)}</span>
       <span style="font-size:12px;font-weight:700;color:${col};min-width:14px;text-align:right">${res}</span>
     </div>`;
   });
@@ -597,7 +611,7 @@ function showWCChampion() {
       <div style="padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.15)">${t('wcElimScorers')}</div>`;
     scorerList.slice(0, 10).forEach(function(g) {
       html += `<div style="padding:7px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.1)">
-        <span style="color:#fff;font-size:13px">🇯🇵 ${g.name}</span>
+        <span style="color:#fff;font-size:13px">🇯🇵 ${wcPlayerDisp(g.name)}</span>
         <span style="font-size:13px;font-weight:700;display:flex;gap:8px">
           <span style="color:#ffd700;min-width:28px;text-align:right">${g.goals}G</span>
           <span style="color:rgba(255,255,255,0.6);min-width:28px;text-align:right">${g.assists}A</span>
@@ -615,11 +629,11 @@ function showWCChampion() {
     const mvpStats = [
       mvpSt.goals > 0 ? mvpSt.goals + t('wcElimGoalLabel') : '',
       mvpSt.assists > 0 ? mvpSt.assists + t('wcElimAssistLabel') : '',
-      t('wcElimDuelWinLabel') + mvpSt.duelWins + t('wcElimDuelWinSuffix') + (mvpSt.duels > 0 ? '（' + Math.round(mvpSt.duelWins/mvpSt.duels*100) + '%）' : ''),
+      t('wcElimDuelWinLabel') + mvpSt.duelWins + t('wcElimDuelWinSuffix') + (mvpSt.duels > 0 ? (window.LANG==='en'?' (':'（') + Math.round(mvpSt.duelWins/mvpSt.duels*100) + (window.LANG==='en'?'%)':'%）') : ''),
     ].filter(Boolean).join(t('wcElimDuelWinSep'));
     html += `<div style="background:rgba(255,215,0,0.2);border:1px solid rgba(255,215,0,0.5);border-radius:10px;padding:14px;margin-bottom:12px;text-align:center">
       <div style="font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:1px;margin-bottom:6px">${t('wcElimMVP')}</div>
-      <div style="font-size:22px;font-weight:700;color:#ffd700">${mvpName}</div>
+      <div style="font-size:22px;font-weight:700;color:#ffd700">${wcPlayerDisp(mvpName)}</div>
       <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px">${mvpStats}</div>
     </div>`;
   }
@@ -627,25 +641,25 @@ function showWCChampion() {
   // ⑤ AI総括
   html += `<div style="background:rgba(0,0,0,0.2);border-radius:10px;overflow:hidden;margin-bottom:8px">
     <div style="padding:8px 12px;font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:space-between">
-      <span>🤖 AI総括</span>
-      <button id="wc-champion-summary-btn" onclick="generateWCChampionSummary()" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.15);color:#fff;cursor:pointer;font-family:inherit;font-weight:700">生成する</button>
+      <span>${t('wcElimAiTitle')}</span>
+      <button id="wc-champion-summary-btn" onclick="generateWCChampionSummary()" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.15);color:#fff;cursor:pointer;font-family:inherit;font-weight:700">${t('wcElimAiBtn')}</button>
     </div>
     <div id="wc-champion-summary-content" style="padding:12px;font-size:13px;line-height:1.9;color:rgba(255,255,255,0.9)">
-      <span style="color:rgba(255,255,255,0.5);font-size:12px">「生成する」をタップするとAIが大会を総括します</span>
+      <span style="color:rgba(255,255,255,0.5);font-size:12px">${t('wcElimAiPlaceholder')}</span>
     </div>
   </div>`;
 
   const contentEl = document.getElementById('wc-champion-content');
   if (contentEl) contentEl.innerHTML = html;
-  showWCChampion();
+  showScreen('worldcup-champion');
 }
 
 function generateWCEliminatedSummary() {
   var btn = document.getElementById('wc-elim-summary-btn');
   var el  = document.getElementById('wc-elim-summary-content');
   if (!btn || !el) return;
-  btn.disabled = true; btn.textContent = '生成中…'; btn.style.opacity = '0.6';
-  el.innerHTML = '<span style="color:rgba(255,255,255,0.4);font-size:12px">生成中…</span>';
+  btn.disabled = true; btn.textContent = t('wcElimAiGenerating'); btn.style.opacity = '0.6';
+  el.innerHTML = '<span style="color:rgba(255,255,255,0.4);font-size:12px">'+t('wcElimAiGenerating')+'</span>';
 
   var matchLines = [];
   wcMatchScores.forEach(function(m) {
@@ -708,7 +722,7 @@ function generateWCEliminatedSummary() {
     var textEl=el.querySelector('div');
     function read(){
       reader.read().then(function(chunk){
-        if(chunk.done){btn.textContent='生成済み';btn.disabled=true;btn.style.opacity='0.6';return;}
+        if(chunk.done){btn.textContent=t('wcElimAiDone');btn.disabled=true;btn.style.opacity='0.6';return;}
         buffer+=decoder.decode(chunk.value,{stream:true});
         var lines=buffer.split('\n');buffer=lines.pop();
         lines.forEach(function(line){
@@ -716,12 +730,12 @@ function generateWCEliminatedSummary() {
           var data=line.slice(6).trim();if(data==='[DONE]')return;
           try{var json=JSON.parse(data);if(json.type==='content_block_delta'&&json.delta&&json.delta.text){fullText+=json.delta.text;textEl.innerHTML=fullText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}}catch(e){}
         });read();
-      }).catch(function(err){el.innerHTML='<span style="color:#ff6b6b;font-size:11px">'+err.message+'</span>';btn.textContent='リトライ';btn.disabled=false;btn.style.opacity='1';});
+      }).catch(function(err){el.innerHTML='<span style="color:#ff6b6b;font-size:11px">'+err.message+'</span>';btn.textContent=t('wcElimAiRetry');btn.disabled=false;btn.style.opacity='1';});
     }
     read();
   }).catch(function(err){
     el.innerHTML='<span style="color:#ff6b6b;font-size:11px">'+err.message+'</span>';
-    btn.textContent='リトライ';btn.disabled=false;btn.style.opacity='1';
+    btn.textContent=t('wcElimAiRetry');btn.disabled=false;btn.style.opacity='1';
   });
 }
 
@@ -729,8 +743,8 @@ function generateWCChampionSummary() {
   var btn = document.getElementById('wc-champion-summary-btn');
   var el  = document.getElementById('wc-champion-summary-content');
   if (!btn || !el) return;
-  btn.disabled = true; btn.textContent = '生成中…'; btn.style.opacity = '0.6';
-  el.innerHTML = '<span style="color:rgba(255,255,255,0.4);font-size:12px">生成中…</span>';
+  btn.disabled = true; btn.textContent = t('wcElimAiGenerating'); btn.style.opacity = '0.6';
+  el.innerHTML = '<span style="color:rgba(255,255,255,0.4);font-size:12px">'+t('wcElimAiGenerating')+'</span>';
 
   var koL = {wc_r32:'ベスト32',wc_r16:'ベスト16',wc_qf:'準々決勝',wc_sf:'準決勝',wc_final:'決勝'};
   var totalGF = wcMatchScores.reduce(function(s,m){return s+m.s1;},0)+wcKnockoutResults.reduce(function(s,r){return s+r.s1;},0);
@@ -776,7 +790,7 @@ function generateWCChampionSummary() {
     var textEl=el.querySelector('div');
     function read(){
       reader.read().then(function(chunk){
-        if(chunk.done){btn.textContent='生成済み';btn.disabled=true;btn.style.opacity='0.6';return;}
+        if(chunk.done){btn.textContent=t('wcElimAiDone');btn.disabled=true;btn.style.opacity='0.6';return;}
         buffer+=decoder.decode(chunk.value,{stream:true});
         var lines=buffer.split('\n');buffer=lines.pop();
         lines.forEach(function(line){
@@ -784,12 +798,12 @@ function generateWCChampionSummary() {
           var data=line.slice(6).trim();if(data==='[DONE]')return;
           try{var json=JSON.parse(data);if(json.type==='content_block_delta'&&json.delta&&json.delta.text){fullText+=json.delta.text;textEl.innerHTML=fullText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}}catch(e){}
         });read();
-      }).catch(function(err){el.innerHTML='<span style="color:#ff6b6b;font-size:11px">'+err.message+'</span>';btn.textContent='リトライ';btn.disabled=false;btn.style.opacity='1';});
+      }).catch(function(err){el.innerHTML='<span style="color:#ff6b6b;font-size:11px">'+err.message+'</span>';btn.textContent=t('wcElimAiRetry');btn.disabled=false;btn.style.opacity='1';});
     }
     read();
   }).catch(function(err){
     el.innerHTML='<span style="color:#ff6b6b;font-size:11px">'+err.message+'</span>';
-    btn.textContent='リトライ';btn.disabled=false;btn.style.opacity='1';
+    btn.textContent=t('wcElimAiRetry');btn.disabled=false;btn.style.opacity='1';
   });
 }
 
