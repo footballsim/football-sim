@@ -58,15 +58,17 @@ football-sim/
 - 既存のCSS変数（--japan-blue, --japan-red等）を尊重する
 - テキスト色は必ず明示的に指定すること。background変更時は必ずcolorも合わせて指定する
 - 新しいscreenを追加する際は必ず暗い背景（`linear-gradient(160deg, #003087 0%, #0050cc 50%, #1a7a3a 100%)`）を設定する。白背景+白文字の組み合わせはNG
-- **⚠️ キャッシュバスティング必須**: `js/` または `css/` のファイルを変更したら、`index.html` 内の全アセット参照のバージョン文字列 `?v=YYYYMMDD` を必ず更新する（root と `docs/` 両方）。
-  - 理由: GitHub Pages は全アセットを `max-age=600` で配信。バージョン未更新だとスマホ（特にiOS Safari）が古いJSを掴み続け、新旧ファイルが混在して不具合になる（実例: 2026/06/13、旧`narration.js`キャッシュでアシスト集計が0になった）。HTMLは毎回更新されるため`?v`を上げれば全端末へ確実に反映される。
-  - 対象: `index.html` の `css/style.css?v=...` と `js/*.js?v=...`（players/simulate/narration/ui/tournament の5本）。全て同じ日付に揃える。
+- **⚠️ キャッシュバスティング**: `npm run build` が `docs/index.html` の `?v=` を**ビルド時刻 `?v=YYYYMMDD_HHMM` で自動更新**する（手動更新は不要）。
+  - 理由: GitHub Pages は全アセットを `max-age=600` で配信。バージョン未更新だとスマホ（特にiOS Safari）が古いJSを掴み続け不具合になる（実例: 2026/06/13、旧`narration.js`キャッシュでアシスト集計が0になった）。ビルド毎に一意な版数を振るので全端末へ確実に反映される。
+  - root の `index.html` は編集ソース。配信される `docs/index.html` は build が生成するので**手で編集しない**。
 
 ## インフラ情報
 - **本番URL**: https://football-sim.com （GitHub Pages でホスト）
 - **リポジトリ**: https://github.com/footballsim/football-sim
 - **公開ディレクトリ**: `docs/` フォルダ（`docs/index.html` がトップページ）
-  - 本番反映手順: ルートの `index.html` / `js/` / `css/` を `docs/` 以下にコピー（`docs/` も2026/06以降は分割構成に同期済み）。コピー後に上記キャッシュバスティングの `?v` 更新を忘れない
+  - **本番反映手順: `npm run build`** → `docs/` を生成（`js/*.js` を難読化、`index.html`/`css`/`img` を複製、`?v=` 自動更新）→ commit & push。
+  - ⚠️ **`docs/` は難読化済みの成果物。手で編集しない**。変更は必ず root の `js/` / `index.html` / `css/` を直して再ビルドする（`docs/js/*.js` は hex名＋base64文字列配列で読めない）。可読jsを `docs/` へコピーし直すと難読化が外れるので禁止。
+  - 難読化方針(build.js): `players.js`=最小化のみ（巨大base64画像のため `stringArray:false`）、エンジン系=最小化+軽難読化。**`renameGlobals:false` 必須**（HTML onclick／他ファイル参照のグローバル名を保持）。検証は preview の `football-sim-docs`(port5174=docs/配信)で実起動確認。
 - **VPS**: GMOクラウドVPSマイクロ / IP: 153.122.40.240 / CentOS 6.6
   - SSH: `ssh -oHostKeyAlgorithms=+ssh-rsa root@153.122.40.240`
   - http→https リダイレクト設定済み（Apache `/etc/httpd/conf/httpd.conf`）
@@ -184,8 +186,7 @@ football-sim/
    - 2026W杯は12グループ×4チーム = 48チーム
 
 3. **本番（docs/）への反映**
-   - `docs/` フォルダはまだ旧単一ファイル構成のまま
-   - 反映時は `index.html`, `js/`, `css/` を `docs/` 以下にコピーが必要
+   - `npm run build` で `docs/` を生成（js難読化＋`?v`自動更新）→ commit & push。**docs/ は手編集しない**。
 
 ### パラメータ体系（29個）
 ```
