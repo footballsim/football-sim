@@ -2264,6 +2264,8 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
   "モンティエル": {"profile": "粘り強い守備と精度の高いクロスが持ち味の右サイドバック。大舞台での勝負強さも光る。", "profile_en": "A tenacious right-back with accurate crossing and a knack for stepping up in big moments.", "height": 175},
   "アルマダ": {"profile": "創造性に富む左利きのアタッカー。ドリブルとラストパス、強烈なミドルシュートで違いを生む。", "profile_en": "A creative left-footed attacker who makes the difference with dribbling, killer passes and a fierce long-range shot.", "height": 171},
   "F・メディナ": {"profile": "対人と空中戦に強い左サイドバック。センターバックもこなし、力強い攻め上がりも見せる。", "profile_en": "A left-back strong in duels and the air who can also play centre-back and surges forward with power.", "height": 184},
+  "D・ドゥエ": {"profile": "両足を高い精度で扱う若き万能アタッカー。ドリブル突破と決定的パス、強烈なシュートで違いを生む。", "profile_en": "A two-footed young all-round attacker who makes the difference with dribbling, decisive passes and a powerful shot.", "height": 181},
+  "M・ディウフ": {"profile": "スピードと攻撃参加に優れる若い左サイドバック。豊富な運動量で上下動を繰り返す。", "profile_en": "A fast, attack-minded young left-back who shuttles up and down the flank with relentless energy.", "height": 183},
 };
 
 const PARAM_NAMES = [
@@ -3196,9 +3198,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   france2026: {
     name:"フランス",en_name:"France",team_color:"#002395",flag:"🇫🇷",
-    default_system:"4-2-1-3",default_tactics:TACTICS_POSSESSION,
-    default_keyplayer:9,default_marked_player:9,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"4-2-3-1",default_tactics:TACTICS_POSSESSION,
+    default_keyplayer:10,default_marked_player:9,
+    default_lineup:[0,1,2,3,4,5,18,7,26,8,9],
     players:[
     {name:"マニャン",en_name:"Maignan",long_name:"マイク・マニャン",positions:["GK"],params:[50,50,50,50,87,79,50,50,50,50,85,50,50,50,50,50,50,50,50,50,50,50,50,87,83,50,88,77,75]},
     {name:"クンデ",en_name:"Kounde",long_name:"ジュール・クンデ",positions:["右SB","CB"],params:[75,83,84,83,85,76,85,79,82,81,74,60,55,70,55,60,79,73,81,83,82,84,84,50,50,74,73,78,75]},
@@ -3208,7 +3210,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     {name:"チュアメニ",en_name:"Tchouameni",long_name:"オーレリアン・チュアメニ",positions:["DMF","CMF","CB"],params:[82,87,76,77,82,78,71,72,74,81,76,64,58,68,57,53,73,71,85,83,82,84,84,50,50,73,75,79,75]},
     {name:"カンテ",en_name:"Kante",long_name:"エンゴロ・カンテ",positions:["DMF","CMF"],params:[73,90,73,75,85,68,83,75,75,79,72,63,60,70,57,54,76,82,89,85,87,89,87,50,50,60,74,81,75]},
     {name:"オリーズ",en_name:"Olise",long_name:"マイケル・オリーズ",positions:["右WG","右SMF","OMF"],params:[70,78,87,86,85,69,92,88,88,83,78,84,76,86,81,87,88,83,57,46,48,55,54,50,50,60,83,80,75]},
-    {name:"デンベレ",en_name:"Dembele",long_name:"ウスマン・デンベレ",positions:["CF","右WG","右SMF","左WG","左SMF"],params:[74,78,90,92,88,68,92,91,91,81,74,81,74,84,69,81,88,82,49,35,38,44,40,50,50,62,79,79,75]},
+    {name:"デンベレ",en_name:"Dembele",long_name:"ウスマン・デンベレ",positions:["CF","右WG","右SMF","左WG","左SMF","OMF"],params:[74,78,90,92,88,68,92,91,91,81,74,81,74,84,69,81,88,82,49,35,38,44,40,50,50,62,79,79,75]},
     {name:"ムバッペ",en_name:"Mbappe",long_name:"キリアン・ムバッペ",positions:["CF","左WG","左SMF","右WG","右SMF"],params:[78,82,95,97,91,90,94,91,93,86,75,93,80,93,70,80,93,91,37,34,29,32,26,50,50,78,83,89,75]},
     {name:"テュラム",en_name:"Thuram",long_name:"マルクス・テュラム",positions:["CF","左WG","左SMF"],params:[84,84,82,82,83,86,80,76,79,76,71,78,72,79,58,59,78,83,53,43,44,51,47,50,50,91,75,80,75]}
     ,
@@ -3226,7 +3228,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"バルコラ",en_name:"Barcola",long_name:"ブラッドリー・バルコラ",positions:["左WG","右WG","左SMF"],params:[68,78,90,90,84,68,86,80,85,72,66,72,68,70,54,56,76,76,68,60,64,64,62,50,50,58,72,74,74]},
       {name:"ンクンク",en_name:"Nkunku",long_name:"クリストファー・ンクンク",positions:["CF","OMF","左WG"],params:[72,78,82,82,82,72,84,80,81,76,72,78,76,76,60,62,80,80,64,60,60,60,62,50,50,68,76,78,75]},
       {name:"L・エルナンデス",en_name:"L.Hernandez",long_name:"リュカ・エルナンデス",positions:["CB","左SB"],params:[80,78,76,74,76,78,72,66,73,70,68,44,40,54,40,38,68,58,76,78,78,78,76,50,50,76,68,74,74]},
-      {name:"ゲンドゥジ",en_name:"Guendouzi",long_name:"マッテオ・ゲンドゥジ",positions:["CMF","DMF","OMF"],params:[74,80,74,72,76,72,74,72,73,80,78,60,56,64,56,54,74,72,74,72,72,72,70,50,50,66,70,74,74]}
+      {name:"ゲンドゥジ",en_name:"Guendouzi",long_name:"マッテオ・ゲンドゥジ",positions:["CMF","DMF","OMF"],params:[74,80,74,72,76,72,74,72,73,80,78,60,56,64,56,54,74,72,74,72,72,72,70,50,50,66,70,74,74]},
+      // 2026/06/16 vs セネガル 先発(TM準拠)で追加: Désiré Doué
+      {name:"D・ドゥエ",en_name:"D.Doue",long_name:"デジレ・ドゥエ",positions:["左WG","右WG","OMF","左SMF","右SMF"],params:[66,80,84,86,84,66,88,86,86,80,74,76,74,76,64,72,86,82,52,52,48,50,56,50,50,58,78,78,73]}
 ]
 },
   argentina2026: {
@@ -4093,9 +4097,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   senegal2026: {
     name:"セネガル",en_name:"Senegal",team_color:"#00853F",flag:"🇸🇳",
-    default_system:"4-2-1-3",default_tactics:TACTICS_PRESS,
+    default_system:"4-1-2-3",default_tactics:TACTICS_PRESS,
     default_keyplayer:9,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_lineup:[0,17,2,4,26,15,6,20,8,9,10],
     players:[
       // GK: E.Mendy (FC26 OVR80, DIV81, HAN79, KIC74, REF81, SPD55, POS80)
       {name:"E・メンディ",en_name:"E.Mendy",long_name:"エドゥアール・メンディ",positions:["GK"],params:[50,50,50,50,81,34,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,81,79,50,80,74,75]},
@@ -4110,7 +4114,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // RDMF: PM.Sarr (FC26 OVR80, PAC76, SHO72, PAS80, DRI80, DEF80, PHY76) ← keyplayer
       {name:"PM・サール",en_name:"PM.Sarr",long_name:"パプ・マタル・サール",positions:["CMF","DMF"],params:[76,78,67,68,74,74,78,80,74,80,76,64,66,68,54,58,80,68,78,80,78,78,76,50,50,70,78,78,75]},
       // LDMF: L.Camara (FC26 OVR78, PAC76, SHO66, PAS76, DRI76, DEF76, PHY78)
-      {name:"L・カマラ",en_name:"L.Camara",long_name:"ラミン・カマラ",positions:["DMF","CMF"],params:[72,74,76,77,76,70,74,74,76,76,72,62,64,66,52,54,74,68,74,76,74,74,72,50,50,66,76,74,75]},
+      {name:"L・カマラ",en_name:"L.Camara",long_name:"ラミン・カマラ",positions:["DMF","CMF","OMF"],params:[72,74,76,77,76,70,74,74,76,76,72,62,64,66,52,54,74,68,74,76,74,74,72,50,50,66,76,74,75]},
       // OMF: Iliman Ndiaye (FC26 OVR79, PAC80, SHO76, PAS78, DRI82, DEF46, PHY68)
       {name:"I・ンディアイ",en_name:"I.Ndiaye",long_name:"イリマン・ンディアイ",positions:["OMF","左WG"],params:[66,68,80,82,79,64,80,82,79,78,72,72,72,74,64,68,82,76,42,44,42,42,44,50,50,62,74,74,75]},
       // RW: I.Sarr (FC26 OVR78, PAC88, SHO72, PAS70, DRI80, DEF46, PHY72)
@@ -4132,19 +4136,20 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CMF: N.Mendy (FC26 OVR75, PAC68, SHO58, PAS72, DRI70, DEF76, PHY76)
       {name:"N・メンディ",en_name:"N.Mendy",long_name:"ナンパリス・メンディ",positions:["DMF","CMF"],params:[76,78,68,70,71,72,68,68,71,72,66,52,54,56,44,46,68,60,76,78,76,76,74,50,50,70,72,70,75]},
       // Sub RW: Krepin Diatta (FC26 OVR75, PAC84, SHO70, PAS68, DRI76, DEF44, PHY68)
-      {name:"クレパン・ジャッタ",en_name:"K.Diatta",long_name:"クレパン・ジャッタ",positions:["右WG","左WG"],params:[66,68,84,86,78,62,74,76,78,68,62,66,66,68,54,58,74,68,40,42,40,40,42,50,50,60,68,68,75]},
+      {name:"クレパン・ジャッタ",en_name:"K.Diatta",long_name:"クレパン・ジャッタ",positions:["右WG","左WG","右SB"],params:[66,68,84,86,78,62,74,76,78,68,62,66,66,68,54,58,74,68,40,42,40,40,42,50,50,60,68,68,75]},
       // Sub CF: H.Diallo (FC26 OVR77, PAC78, SHO78, PAS62, DRI74, DEF38, PHY80)
       {name:"H・ジャロ",en_name:"H.Diallo",long_name:"アビブ・ジャロ",positions:["CF"],params:[80,80,78,79,77,78,72,72,77,62,56,76,76,78,52,54,72,76,34,34,32,32,36,50,50,78,70,68,75]},
       // Sub CF/LW: Boulaye Dia (FC26 OVR78, PAC84, SHO76, PAS68, DRI78, DEF42, PHY72)
       {name:"B・ジア",en_name:"B.Dia",long_name:"ブライ・ジア",positions:["CF","左WG"],params:[72,74,84,85,79,68,76,78,79,68,62,74,72,76,54,56,76,76,38,40,38,38,40,50,50,66,70,70,75]},
       // Sub CMF: Pape Gueye (FC26 OVR74, PAC72, SHO62, PAS72, DRI72, DEF74, PHY76)
-      {name:"P・ゲイェ",en_name:"P.Gueye",long_name:"パプ・ゲイェ",positions:["CMF","DMF"],params:[76,78,72,73,71,72,70,70,71,72,66,56,58,60,46,48,70,60,74,76,74,74,72,50,50,70,72,70,75]}
+      {name:"P・ゲイェ",en_name:"P.Gueye",long_name:"パプ・ゲイェ",positions:["CMF","DMF","OMF"],params:[76,78,72,73,71,72,70,70,71,72,66,56,58,60,46,48,70,60,74,76,74,74,72,50,50,70,72,70,75]}
     ,
     {name:"I・ジオップ",en_name:"I.Diop",long_name:"イサ・ジオップ",positions:["CB"],params:[78,76,72,70,81,80,64,54,62,72,72,42,46,58,50,44,64,44,79,83,80,80,82,50,50,80,66,74,75]},
     {name:"C・クヤテ",en_name:"C.Kouyate",long_name:"チェイク・クヤテ",positions:["CMF","DMF"],params:[70,80,68,66,82,74,66,56,64,74,74,54,58,62,64,58,68,62,78,78,78,80,78,50,50,70,74,70,75]},
     {name:"L・バルデ",en_name:"L.Balde",long_name:"ラミン・バルデ",positions:["左WG","CF"],params:[62,72,77,75,78,56,80,50,70,68,68,64,64,56,72,74,70,70,46,42,46,54,44,50,50,60,64,62,75]},
     {name:"M・ルム",en_name:"M.Loum",long_name:"ママドゥ・ルム",positions:["CMF","DMF"],params:[64,78,68,66,82,70,64,56,62,74,72,52,56,62,62,58,68,60,74,74,72,74,72,50,50,62,72,70,75]},
-    {name:"L・ガッサマ",en_name:"L.Gassama",long_name:"ラミン・ガッサマ",positions:["左SB","右SB"],params:[64,73,74,72,79,73,70,50,62,66,70,46,48,52,58,60,64,56,73,73,71,72,69,50,50,62,66,66,75]}]
+    {name:"L・ガッサマ",en_name:"L.Gassama",long_name:"ラミン・ガッサマ",positions:["左SB","右SB"],params:[64,73,74,72,79,73,70,50,62,66,70,46,48,52,58,60,64,56,73,73,71,72,69,50,50,62,66,66,75]},
+      {name:"M・ディウフ",en_name:"M.Diouf",long_name:"エル・ハッジ・マリック・ディウフ",positions:["左SB","左SMF","左WG"],params:[72,80,86,86,76,72,76,70,76,70,64,50,48,56,42,50,70,62,72,74,72,72,74,50,50,66,72,74,74]}]
   },
 
   ecuador2026: {
