@@ -2269,7 +2269,15 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
   "Gマルティネス": {"profile": "国内リーグで得点を重ねるCF。ポストプレーとフィニッシュで前線の起点となる。", "profile_en": "A centre-forward who racks up goals domestically, leading the line with hold-up play and finishing."},
   "B・トゥーレ": {"profile": "スピードとドリブルで左サイドを切り裂くアタッカー。鋭い仕掛けと運動量でチャンスを生む。", "profile_en": "A winger who slices down the left with pace and dribbling, creating chances with sharp running."},
   "Kw・ウィリアムズ": {"profile": "前線で体を張るストライカー。フィジカルと決定力でゴールを狙う。", "profile_en": "A striker who battles up front, hunting goals with physicality and finishing."},
-  "ホングラ": {"profile": "球際に強い守備的MF。豊富な運動量とボール奪取でカメルーン中盤を支える。", "profile_en": "A combative defensive midfielder anchoring Cameroon midfield with energy and ball-winning."}
+  "ホングラ": {"profile": "球際に強い守備的MF。豊富な運動量とボール奪取でカメルーン中盤を支える。", "profile_en": "A combative defensive midfielder anchoring Cameroon midfield with energy and ball-winning."},
+  "アウルスネス": {"profile": "攻守にわたり貢献するボックス・トゥ・ボックス型MF。豊富な運動量と正確なパスで中盤を支える。", "profile_en": "A box-to-box midfielder who contributes at both ends, anchoring midfield with stamina and accurate passing.", "height": 180},
+  "フセイン・アリ": {"profile": "対人とスピードに優れる右サイドバック。攻撃参加も厭わず上下動を繰り返す。", "profile_en": "A right-back strong in duels and pace, shuttling up and down the flank with willing forward runs."},
+  "タフシーン": {"profile": "長身を生かした空中戦と対人守備が武器のセンターバック。最終ラインの高さを担う。", "profile_en": "A tall centre-back whose aerial dominance and one-on-one defending anchor the back line.", "height": 193},
+  "ハシェム": {"profile": "落ち着いた対応と読みの良さで最終ラインを支えるセンターバック。", "profile_en": "A composed centre-back who supports the back line with calm defending and sharp reading."},
+  "ドスキー": {"profile": "攻撃参加と精度の高い左足が持ち味の左サイドバック。鋭いクロスでチャンスを演出する。", "profile_en": "A left-back with attacking drive and an accurate left foot, creating chances with sharp crosses.", "height": 173},
+  "アル＝アンマリ": {"profile": "球際に強く展開力もある守備的MF。豊富な運動量で中盤を上下動する。", "profile_en": "A defensive midfielder strong in duels with good distribution, covering midfield tirelessly.", "height": 184},
+  "Z・イスマイル": {"profile": "ボール奪取と運動量に優れるアンカー。中盤の底でリズムを整える。", "profile_en": "An anchor excelling at ball-winning and work rate, setting the rhythm at the base of midfield.", "height": 185},
+  "アル＝ハマディ": {"profile": "体を張ったポストプレーと得点力でイラク前線を担うストライカー。", "profile_en": "A striker who leads the Iraqi line with strong hold-up play and finishing.", "height": 184}
 };
 
 const PARAM_NAMES = [
@@ -3130,9 +3138,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   norway2026: {
     name:"ノルウェー",en_name:"Norway",team_color:"#EF2B2D",flag:"🇳🇴",
-    default_system:"4-3-2-1A",default_tactics:TACTICS_FREE,
+    default_system:"4-1-2-3",default_tactics:TACTICS_FREE,
     default_keyplayer:10,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_lineup:[0,1,2,3,4,5,6,26,8,9,10],
     players:[
       {name:"ニーランド",en_name:"Nyland",long_name:"オルヤン・ニーランド",positions:["GK"],params:[50,50,50,50,74,66,50,50,50,50,77,50,50,50,50,50,50,50,50,50,50,50,50,75,69,50,73,74,75]},
       {name:"ライアーソン",en_name:"Ryerson",long_name:"フリアン・ライアーソン",positions:["右SB","右SMF","左SB"],params:[81,83,73,76,78,75,76,77,75,76,70,62,61,69,54,65,76,63,74,75,81,78,83,50,50,68,63,73,75]},
@@ -3160,7 +3168,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"T・ヨハンセン",en_name:"T.Johansen",long_name:"トルスビョルン・ヨハンセン",positions:["右SB","右SMF"],params:[68,76,76,74,72,68,70,66,69,70,68,48,44,52,42,42,62,60,66,68,66,66,64,50,50,60,62,66,74]},
       {name:"チューレ",en_name:"Thorsby",long_name:"マルティン・トルズビー",positions:["CMF","DMF","右SMF"],params:[72,78,72,70,72,72,68,64,66,72,68,54,50,58,46,46,66,62,72,74,72,70,70,50,50,66,64,68,74]},
       {name:"カンティル",en_name:"Cantwell",long_name:"ブロデリック・キャントウェル",positions:["OMF","左WG"],params:[64,72,74,74,74,62,76,74,74,74,66,64,62,64,56,56,72,68,58,56,56,54,54,50,50,54,62,64,74]},
-      {name:"フルランド",en_name:"Furland",long_name:"ジョナス・フールランド",positions:["CF"],params:[72,72,78,76,74,72,72,66,69,64,58,70,68,68,52,50,62,68,52,52,52,50,52,50,50,66,66,66,74]}
+      {name:"フルランド",en_name:"Furland",long_name:"ジョナス・フールランド",positions:["CF"],params:[72,72,78,76,74,72,72,66,69,64,58,70,68,68,52,50,62,68,52,52,52,50,52,50,50,66,66,66,74]},
+      // 2026/06/17 vs イラク 先発(TM準拠)で追加: Fredrik Aursnes
+      {name:"アウルスネス",en_name:"Aursnes",long_name:"フレドリク・アウルスネス",positions:["CMF","DMF","OMF","左SMF"],params:[70,84,76,76,80,70,80,80,80,82,78,66,64,70,60,64,82,76,74,74,72,72,74,50,50,66,80,80,75]}
 ]
   },
   spain2026: {
@@ -5717,9 +5727,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   iraq2026: {
     name:"イラク",en_name:"Iraq",team_color:"#007A3D",flag:"🇮🇶",
-    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:7,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:9,default_marked_player:10,
+    default_lineup:[0,26,27,28,29,30,31,6,20,7,32],
     players:[
       // GK: Jalal Hassan (OVR70, DIV70, HAN68, KIC64, REF70, SPD56, POS68)
       {name:"J・ハッサン",en_name:"J.Hassan",long_name:"ジャラル・ハッサン",positions:["GK"],params:[50,50,50,50,70,56,50,50,50,50,64,50,50,50,50,50,50,50,50,50,50,50,50,70,68,50,68,64,75]},
@@ -5734,7 +5744,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // DMF: Ameen Al-Dali (OVR72, PAC66, SHO58, PAS74, DRI68, DEF74, PHY74)
       {name:"アルダーリー",en_name:"Al-Dali",long_name:"アミン・アルダーリー",positions:["DMF","CMF"],params:[74,78,66,66,67,70,66,66,67,74,70,50,52,56,42,46,66,50,72,74,72,72,70,50,50,68,66,68,75]},
       // CMF: Ibrahim Bayesh (OVR72, PAC68, SHO60, PAS72, DRI70, DEF68, PHY70)
-      {name:"バイエシュ",en_name:"Bayesh",long_name:"イブラヒム・バイエシュ",positions:["CMF","DMF"],params:[70,74,68,68,69,66,68,68,69,72,68,52,54,56,44,48,68,52,66,68,66,66,64,50,50,62,64,64,75]},
+      {name:"バイエシュ",en_name:"Bayesh",long_name:"イブラヒム・バイエシュ",positions:["CMF","DMF","右SMF"],params:[70,74,68,68,69,66,68,68,69,72,68,52,54,56,44,48,68,52,66,68,66,66,64,50,50,62,64,64,75]},
       // RW: Aymen Hussein (OVR74, PAC80, SHO70, PAS66, DRI74, DEF40, PHY68) - keyplayer
       {name:"アイメン・フセイン",en_name:"Aymen Hussein",long_name:"アイメン・フセイン",positions:["右WG","CF","右SMF"],params:[68,70,80,82,77,64,72,72,77,66,62,66,68,68,52,56,70,66,36,38,38,37,36,50,50,60,68,68,75]},
       // OMF: Bashar Resan (OVR74, PAC70, SHO66, PAS74, DRI74, DEF50, PHY68)
@@ -5762,7 +5772,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub RW: Ahmad Yasin (OVR70)
       {name:"ヤシン",en_name:"Yasin",long_name:"アフマド・ヤシン",positions:["右WG","OMF"],params:[62,68,74,76,71,58,68,68,71,64,60,56,58,60,46,52,66,58,34,36,36,35,34,50,50,52,60,60,75]},
       // Sub LW: Ali Jassim (OVR68)
-      {name:"ジャシム",en_name:"Jassim",long_name:"アリ・ジャシム",positions:["左WG","右WG"],params:[60,66,72,74,69,54,66,66,69,62,58,54,54,58,44,50,64,56,32,34,34,33,32,50,50,48,58,58,75]},
+      {name:"ジャシム",en_name:"Jassim",long_name:"アリ・ジャシム",positions:["左WG","右WG","左SMF"],params:[60,66,72,74,69,54,66,66,69,62,58,54,54,58,44,50,64,56,32,34,34,33,32,50,50,48,58,58,75]},
       // Sub OMF: Ahmed Raad (OVR68)
       {name:"ラアード",en_name:"Raad",long_name:"アフマド・ラアード",positions:["OMF","CMF"],params:[62,68,66,66,67,58,66,66,67,68,64,52,52,54,42,46,64,52,58,60,58,58,56,50,50,52,60,58,75]},
       // Sub CF: Alaa Abbas Mahdi (OVR70)
@@ -5772,7 +5782,15 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub DMF: Mahmoud Taher (OVR67)
       {name:"M・タヒル",en_name:"M.Taher",long_name:"マフムード・タヒル",positions:["DMF","CMF"],params:[68,72,62,62,61,64,60,60,61,64,60,42,44,48,36,40,60,44,62,64,62,62,60,50,50,58,54,56,75]},
       // Sub RB: Musa Hamza (OVR65)
-      {name:"H・ムサ",en_name:"H.Musa",long_name:"ムサ・ハムザ",positions:["右SB"],params:[64,66,64,64,60,60,56,56,60,56,52,28,26,32,22,26,54,32,60,62,60,60,58,50,50,56,52,52,75]}
+      {name:"H・ムサ",en_name:"H.Musa",long_name:"ムサ・ハムザ",positions:["右SB"],params:[64,66,64,64,60,60,56,56,60,56,52,28,26,32,22,26,54,32,60,62,60,60,58,50,50,56,52,52,75]},
+      // 2026/06/17 vs ノルウェー 先発(TM準拠)で追加した7選手
+      {name:"フセイン・アリ",en_name:"Hussein Ali",long_name:"フセイン・アリ",positions:["右SB"],params:[68,76,80,80,72,68,72,66,72,66,60,46,46,52,40,44,64,56,70,72,70,70,72,50,50,62,68,68,75]},
+      {name:"タフシーン",en_name:"Tahseen",long_name:"ザイド・タフシーン",positions:["CB"],params:[80,74,68,66,68,82,56,54,58,62,56,40,38,46,30,34,58,40,74,76,74,74,68,50,50,82,70,70,74]},
+      {name:"ハシェム",en_name:"Hashem",long_name:"アカム・ハシェム",positions:["CB"],params:[76,74,68,68,68,74,60,58,62,64,58,40,38,46,30,34,60,42,74,76,74,74,70,50,50,74,70,70,75]},
+      {name:"ドスキー",en_name:"Doski",long_name:"メルチャス・ドスキー",positions:["左SB","左SMF"],params:[66,78,80,80,72,64,74,70,74,70,64,50,50,54,46,50,70,60,70,72,70,70,72,50,50,58,68,70,75]},
+      {name:"アル＝アンマリ",en_name:"Al-Ammari",long_name:"アミル・アル＝アンマリ",positions:["DMF","CMF","OMF"],params:[74,80,72,72,74,72,72,70,72,76,72,62,62,66,56,58,74,68,74,74,72,72,72,50,50,70,72,72,75]},
+      {name:"Z・イスマイル",en_name:"Z.Ismail",long_name:"ザイド・イスマイル",positions:["DMF","CMF"],params:[74,80,72,72,74,74,70,68,72,72,68,52,54,60,46,50,70,62,74,76,74,74,72,50,50,72,70,70,75]},
+      {name:"アル＝ハマディ",en_name:"Al-Hamadi",long_name:"アリ・アル＝ハマディ",positions:["CF"],params:[78,76,80,80,74,74,70,70,74,68,62,76,76,74,52,56,72,76,40,42,40,40,56,50,50,74,72,72,75]}
     ]
   },
   haiti2026: {
