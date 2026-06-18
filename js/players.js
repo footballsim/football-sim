@@ -3457,9 +3457,10 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   portugal2026: {
     name:"ポルトガル",en_name:"Portugal",team_color:"#D20000",flag:"🇵🇹",
-    default_system:"4-2-1-3",default_tactics:TACTICS_POSSESSION,
-    default_keyplayer:7,default_marked_player:9,
-    default_lineup:[0,1,2,3,4,5,6,7,8,10,9],
+    default_system:"4-2-3-1",default_tactics:TACTICS_POSSESSION,
+    default_keyplayer:9,default_marked_player:9,
+    // 4-2-3-1 (vs COD 2026/06/17 TM spielbericht/4776619 準拠): GK Costa / Cancelo-Araújo-Veiga-Mendes / Neves-Vitinha / B.Silva-Bruno-Neto / Ronaldo
+    default_lineup:[0,1,14,15,4,6,5,16,20,7,9],
     players:[
       // GK: Diogo Costa (SoFIFA FC26 OVR84, DIV83, HAN78, KIC82, REF86, SPD35, POS83)
       {name:"コスタ",en_name:"D.Costa",long_name:"ジオゴ・コスタ",positions:["GK"],params:[50,50,50,50,86,35,50,50,50,50,82,50,50,50,50,50,50,50,50,50,50,50,50,83,78,50,83,82,75]},
@@ -3494,7 +3495,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CB: Renato Veiga (SoFIFA FC26 OVR78, PAC80, SHO60, PAS73, DRI72, DEF77, PHY82)
       {name:"レナト・ヴェイガ",en_name:"R.Veiga",long_name:"レナト・ヴェイガ",positions:["CB","左SB","DMF"],params:[80,80,80,78,76,82,70,70,76,73,68,50,50,54,44,48,70,46,74,77,75,74,72,50,50,78,68,72,75]},
       // Sub CMF: Bernardo Silva (SoFIFA FC26 OVR83, PAC56, SHO77, PAS83, DRI88, DEF70, PHY64)
-      {name:"ベルナルド",en_name:"B.Silva",long_name:"ベルナルド・シルバ",positions:["CMF","右SMF","OMF"],params:[62,68,56,60,72,62,90,88,72,83,78,72,74,72,68,72,88,74,66,70,67,66,64,50,50,58,78,78,75]},
+      {name:"ベルナルド",en_name:"B.Silva",long_name:"ベルナルド・シルバ",positions:["CMF","右SMF","OMF","右WG"],params:[62,68,56,60,72,62,90,88,72,83,78,72,74,72,68,72,88,74,66,70,67,66,64,50,50,58,78,78,75]},
       // Sub CMF: Rúben Neves (SoFIFA FC26 OVR85, PAC57, SHO75, PAS87, DRI78, DEF78, PHY77)
       {name:"R.ネヴェス",en_name:"R.Neves",long_name:"ルベン・ネヴェス",positions:["CMF","DMF"],params:[76,80,57,55,67,76,76,78,67,87,84,68,70,72,76,72,78,70,76,78,76,75,74,50,50,72,72,78,75]},
       // Sub CMF: Samú Costa (SoFIFA FC26 OVR78, PAC61, SHO66, PAS69, DRI71, DEF77, PHY79)
@@ -3502,7 +3503,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub AMF: Trincão (SoFIFA FC26 OVR83, PAC80, SHO81, PAS80, DRI84, DEF40, PHY71)
       {name:"トリンカオ",en_name:"Trincao",long_name:"フランシスコ・トリンカオ",positions:["右SMF","左SMF","OMF"],params:[68,72,80,82,82,68,86,84,82,80,74,76,78,76,68,72,84,78,37,40,37,36,35,50,50,60,74,74,75]},
       // Sub RW: Pedro Neto (SoFIFA FC26 OVR82, PAC91, SHO77, PAS77, DRI83, DEF40, PHY70)
-      {name:"P.ネト",en_name:"P.Neto",long_name:"ペドロ・ネト",positions:["右SMF","左SMF","右WG"],params:[66,72,91,91,87,66,86,82,87,77,72,70,72,72,60,66,82,70,38,40,37,36,35,50,50,54,72,72,75]},
+      {name:"P.ネト",en_name:"P.Neto",long_name:"ペドロ・ネト",positions:["右SMF","左SMF","右WG","左WG"],params:[66,72,91,91,87,66,86,82,87,77,72,70,72,72,60,66,82,70,38,40,37,36,35,50,50,54,72,72,75]},
       // Sub FW: João Félix (SoFIFA FC26 OVR81, PAC77, SHO81, PAS78, DRI83, DEF45, PHY66)
       {name:"J.フェリックス",en_name:"J.Felix",long_name:"ジョアン・フェリックス",positions:["CF","OMF","右SMF"],params:[62,68,77,78,80,64,84,82,80,78,72,76,78,76,68,72,82,78,42,45,42,41,40,50,50,62,72,72,75]},
       // Sub FW: Gonçalo Ramos (SoFIFA FC26 OVR80, PAC73, SHO79, PAS64, DRI77, DEF48, PHY79)
@@ -5959,24 +5960,25 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   drcongo2026: {
     name:"コンゴ民主共和国",en_name:"DR Congo",team_color:"#007FFF",flag:"🇨🇩",
-    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
+    default_system:"5-2-1-2",default_tactics:TACTICS_COUNTER,
     default_keyplayer:10,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    // 5-2-1-2 (=5-3-2 / vs POR 2026/06/17 TM spielbericht/4776619 準拠): GK Mpasi / Masuaku-Tuanzebe-Kapuadi-Mbemba-Wan-Bissaka(5バック) / Mukau-E.Kayembe / Moutoussamy / Bakambu-Wissa
+    default_lineup:[0,17,1,2,3,4,6,15,5,12,10],
     players:[
       // GK: Lionel Mpasi (OVR67, DIV67, HAN66, KIC66, REF65, SPD45, POS66)
       {name:"ムパシ",en_name:"Mpasi",long_name:"リオネル・ムパシ",positions:["GK"],params:[50,50,50,50,65,45,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,67,66,50,66,66,75]},
       // RB: Aaron Wan-Bissaka (OVR80, PAC80, SHO51, PAS69, DRI77, DEF78, PHY73)
-      {name:"ワンビサカ",en_name:"Wan-Bissaka",long_name:"アーロン・ワン=ビサカ",positions:["右SB"],params:[73,73,80,82,78,71,77,77,79,69,64,49,51,51,37,38,73,51,78,80,78,78,80,50,50,69,73,77,75]},
+      {name:"ワンビサカ",en_name:"Wan-Bissaka",long_name:"アーロン・ワン=ビサカ",positions:["右SB","右SMF"],params:[73,73,80,82,78,71,77,77,79,69,64,49,51,51,37,38,73,51,78,80,78,78,80,50,50,69,73,77,75]},
       // CB: Chancel Mbemba (est OVR75, PAC72, SHO38, PAS64, DRI68, DEF74, PHY80) - Captain
       {name:"ムベンバ",en_name:"Mbemba",long_name:"シャンセル・ムベンバ",positions:["CB","左SB"],params:[80,80,72,74,74,78,68,68,70,64,60,37,38,38,27,28,65,43,74,76,74,74,76,50,50,78,67,72,75]},
       // CB: Axel Tuanzebe (OVR73, PAC76, SHO36, PAS64, DRI68, DEF73, PHY75)
       {name:"トゥアンゼベ",en_name:"Tuanzebe",long_name:"アクセル・トゥアンゼベ",positions:["CB","右SB"],params:[75,75,76,78,71,73,68,68,72,64,60,35,36,36,26,27,65,43,73,75,73,73,75,50,50,71,69,70,75]},
       // LB: Arthur Masuaku (OVR75, PAC79, SHO62, PAS74, DRI78, DEF68, PHY79)
-      {name:"マスアク",en_name:"Masuaku",long_name:"アルトゥール・マスアク",positions:["左SB","左WG"],params:[79,79,79,81,73,77,78,78,79,74,69,60,62,62,45,46,74,58,68,70,68,68,70,50,50,75,68,72,75]},
+      {name:"マスアク",en_name:"Masuaku",long_name:"アルトゥール・マスアク",positions:["左SB","左WG","左SMF"],params:[79,79,79,81,73,77,78,78,79,74,69,60,62,62,45,46,74,58,68,70,68,68,70,50,50,75,68,72,75]},
       // LDM: Samuel Moutoussamy (est OVR66, PAC70, SHO57, PAS64, DRI66, DEF62, PHY68)
-      {name:"ムトゥサミ",en_name:"Moutoussamy",long_name:"サミュエル・ムトゥサミ",positions:["DMF","CMF"],params:[68,70,70,72,66,66,66,66,68,64,60,55,57,57,41,42,63,51,62,64,62,62,64,50,50,64,59,63,75]},
+      {name:"ムトゥサミ",en_name:"Moutoussamy",long_name:"サミュエル・ムトゥサミ",positions:["DMF","CMF","OMF"],params:[68,70,70,72,66,66,66,66,68,64,60,55,57,57,41,42,63,51,62,64,62,62,64,50,50,64,59,63,75]},
       // RDM: Ngal'ayel Mukau (OVR74, PAC69, SHO57, PAS65, DRI71, DEF70, PHY75)
-      {name:"ムカウ",en_name:"Mukau",long_name:"ンガレイ・ムカウ",positions:["DMF","CMF"],params:[75,77,69,71,68,73,71,71,70,65,60,55,57,57,41,42,67,52,70,72,70,70,72,50,50,71,63,71,75]},
+      {name:"ムカウ",en_name:"Mukau",long_name:"ンガレイ・ムカウ",positions:["DMF","CMF","OMF"],params:[75,77,69,71,68,73,71,71,70,65,60,55,57,57,41,42,67,52,70,72,70,70,72,50,50,71,63,71,75]},
       // RM: Théo Bongonda (est OVR70, PAC79, SHO65, PAS66, DRI74, DEF30, PHY62)
       {name:"ボンゴンダ",en_name:"Bongonda",long_name:"テオ・ボンゴンダ",positions:["右WG","右SMF","左WG"],params:[62,62,79,81,75,58,74,74,77,66,61,63,65,65,47,48,70,62,30,32,30,30,32,50,50,45,69,67,75]},
       // OMF: Nathanaël Mbuku (OVR70, PAC73, SHO63, PAS68, DRI74, DEF35, PHY53)
