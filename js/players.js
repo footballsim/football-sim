@@ -1684,6 +1684,16 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "アロヨ": {"profile": "高い走力で左サイドを席巻する快速ウインガー。縦突破の速さとドリブル技術でDFを翻弄する。", "profile_en": "A pacey winger who sweeps down the left with pace. Beats defenders with direct running and dribbling skill.", "height": 171, "weight": 66},
 "I・ディアス": {"profile": "ヨーロッパリーグで得点力を証明した強力なストライカー。高い走力と強靭なフィジカルを活かした突破からゴールを狙う。", "profile_en": "A powerful striker who has proven his goal-scoring ability in European competition. Attacks goal with pace and strong physical presence.", "height": 183, "weight": 82},
 "モスケラ": {"profile": "中米リーグで活躍するパナマの第2GK。安定したセービングと冷静な判断力でバックアップとしての役割を担う。", "profile_en": "Panama's second-choice goalkeeper active in the Central American league. Provides reliable backup with stable shot-stopping and composed judgement.", "height": 185, "weight": 80},
+"オポク": {"profile": "フィジカルと対人守備でガーナの最終ラインを支えるCB。落ち着いた守備とビルドアップ参加で安定感をもたらす中央の守備者。", "profile_en": "A centre-back who anchors Ghana's backline with physicality and one-on-one defending. Composed defending and build-up involvement bring stability through the centre.", "height": 190, "weight": 82},
+"アジェテイ": {"profile": "スピードと対人の強さを兼ね備える若きCB。読みの鋭さとカバーリングでガーナ守備陣に勢いをもたらす成長株。", "profile_en": "A young centre-back combining pace with one-on-one strength. Sharp reading and covering bring energy to Ghana's defence as a rising talent.", "height": 186, "weight": 80},
+"セナヤ": {"profile": "スタミナと積極的な攻め上がりでガーナの右サイドを駆けるSB。守備強度とクロスを両立させるダイナミックなフルバック。", "profile_en": "A full-back who powers Ghana's right flank with stamina and adventurous overlaps. Combines defensive intensity with crossing as a dynamic presence.", "height": 180, "weight": 74},
+"イレンチー": {"profile": "豊富な運動量とパス能力でガーナ中盤を支える若いCM。ボール奪取と前進のバランスに優れた成長著しいMF。", "profile_en": "A young central midfielder who supports Ghana's engine room with high energy and passing. Well-balanced between ball-winning and progression, a fast-developing talent.", "height": 180, "weight": 73},
+"ヌアマ": {"profile": "爆発的なスピードとドリブルでガーナの右サイドを切り裂くウインガー。鋭い仕掛けと推進力で相手守備に脅威を与えるアタッカー。", "profile_en": "A winger who tears down Ghana's right flank with explosive pace and dribbling. Sharp incursions and drive make him a constant threat to opposing defences.", "height": 175, "weight": 70},
+"ホセ・コルドバ": {"profile": "長身と対人守備でパナマ守備の中央を統率する若きCB。空中戦の強さと落ち着きで最終ラインに安定をもたらす。", "profile_en": "A young centre-back who marshals the middle of Panama's defence with height and one-on-one defending. Aerial strength and composure bring stability to the backline.", "height": 191, "weight": 84},
+"J・ラモス": {"profile": "フィジカルと堅実な守備でパナマの3バックを支えるCB。対人の強さとカバーリングで守備ラインに信頼性をもたらすDF。", "profile_en": "A centre-back who supports Panama's back three with physicality and dependable defending. One-on-one strength and covering bring reliability to the defensive line.", "height": 184, "weight": 78},
+"ハーヴェイ": {"profile": "豊富な運動量とボール奪取でパナマ中盤の底を支えるMF。守備への貢献と展開力を両立させるバランス型ミッドフィールダー。", "profile_en": "A midfielder who shields Panama's midfield with high energy and ball-winning. A balanced player combining defensive contribution with distribution.", "height": 178, "weight": 73},
+"JL・ロドリゲス": {"profile": "スピードとドリブルでパナマの前線を仕掛けるウインガー。サイドからの突破とゴールへの推進力で相手守備に揺さぶりをかける。", "profile_en": "A winger who threatens Panama's front line with pace and dribbling. His flank breaks and drive toward goal unsettle opposing defences.", "height": 172, "weight": 68},
+"C・マルティネス": {"profile": "俊敏な動きとドリブルでパナマのサイドに変化をもたらす若いアタッカー。積極的な仕掛けとスピードで攻撃に活力を加える。", "profile_en": "A young attacker who brings variety to Panama's flanks with quick movement and dribbling. Proactive incursions and pace add vitality to the attack.", "height": 176, "weight": 70},
 "A・カルデロン": {"profile": "第3GKとして代表スクワッドに名を連ねる若手守護神。経験を積みながら将来の正GK候補として成長を続ける。", "profile_en": "A young keeper listed as the third goalkeeper in the squad. Continues to develop as a future number-one candidate while gaining experience.", "height": 184, "weight": 79},
 "A・アンドラーデ": {"profile": "CBとして代表でバックアップを担うフィジカル系DF。強靭な体格と対人守備の強さでスタメンCBを支える。", "profile_en": "A physically imposing centre-back providing backup in the squad. Supports the starting CBs with his build and strong man-marking.", "height": 183, "weight": 80},
 "ブラックマン": {"profile": "CBと右SBをこなせるユーティリティDF。右サイドの守備的オプションとして代表での存在感を示す。", "profile_en": "A utility defender capable of playing both centre-back and right-back. Makes his presence felt in the squad as a defensive option on the right side.", "height": 182, "weight": 79},
@@ -4980,8 +4990,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   ghana2026: {
     name:"ガーナ",en_name:"Ghana",team_color:"#006B3F",flag:"🇬🇭",
     default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:9,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_keyplayer:10,default_marked_player:10,
+    // 4-2-3-1 (=TM 4-4-1-1 / vs PAN 2026/06/18 TM準拠): GK Ati-Zigi / Senaya-Adjetey-Opoku-G.Mensah / Owusu-Yirenkyi / Nuamah-Semenyo / Sulemana(OMF) / Ayew。不在5名追加
+    default_lineup:[0,28,27,26,4,19,29,30,16,8,17],
     players:[
       // GK: Ati-Zigi (FC26 OVR74, DIV75, HAN73, KIC68, REF75, SPD58, POS74)
       {name:"アティ・ジギ",en_name:"Ati-Zigi",long_name:"ローレンス・アティ＝ジギ",positions:["GK"],params:[50,50,50,50,75,58,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,75,73,50,74,68,75]},
@@ -5000,7 +5011,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // RSM: Fatawu (FC26 OVR76, PAC90, SHO68, PAS64, DRI74, DEF42, PHY62)
       {name:"ファタウ",en_name:"Fatawu",long_name:"アブドゥル・ファタウ",positions:["右WG","右SMF"],params:[60,62,90,92,76,56,72,74,76,64,58,64,64,66,48,52,72,62,38,40,38,38,40,50,50,54,64,64,75]},
       // LSM: K.Sulemana (FC26 OVR76, PAC88, SHO68, PAS66, DRI76, DEF44, PHY68)
-      {name:"カマルディン",en_name:"K.Sulemana",long_name:"カマルディン・スレマナ",positions:["左WG","右WG"],params:[66,66,88,90,76,62,74,76,76,66,60,64,64,66,50,54,76,62,40,42,40,40,42,50,50,58,66,66,75]},
+      {name:"カマルディン",en_name:"K.Sulemana",long_name:"カマルディン・スレマナ",positions:["左WG","右WG","OMF"],params:[66,66,88,90,76,62,74,76,76,66,60,64,64,66,50,54,76,62,40,42,40,40,42,50,50,58,66,66,75]},
       // OMF: M.Kudus (FC26 OVR84, PAC86, SHO80, PAS78, DRI84, DEF60, PHY76) ← keyplayer
       {name:"クドゥス",en_name:"Kudus",long_name:"モハメド・クドゥス",positions:["OMF","右WG","左WG"],params:[74,76,86,88,84,70,82,84,84,78,72,76,76,80,64,68,84,76,56,58,56,56,58,50,50,68,80,80,75]},
       // CF: I.Williams (FC26 OVR82, PAC90, SHO80, PAS68, DRI80, DEF44, PHY76) ← marked
@@ -5016,7 +5027,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub DMF: Iddrisu Baba (FC26 OVR74, PAC74, SHO52, PAS68, DRI66, DEF76, PHY78)
       {name:"イドリス・ババ",en_name:"I.Baba",long_name:"イドリス・ババ",positions:["DMF","CMF"],params:[78,78,74,75,70,74,64,64,70,68,62,46,46,50,38,40,64,48,74,76,74,74,72,50,50,74,66,64,75]},
       // Sub LW: Semenyo A (FC26 OVR77, PAC88, SHO70, PAS66, DRI76, DEF48, PHY72)
-      {name:"セメニョ",en_name:"Semenyo",long_name:"アントワーヌ・セメニョ",positions:["右WG","左WG","CF"],params:[70,72,88,90,76,66,74,76,76,66,60,66,66,68,50,54,76,64,44,46,44,44,46,50,50,64,68,68,75]},
+      {name:"セメニョ",en_name:"Semenyo",long_name:"アントワーヌ・セメニョ",positions:["右WG","左WG","CF","左SMF"],params:[70,72,88,90,76,66,74,76,76,66,60,66,66,68,50,54,76,64,44,46,44,44,46,50,50,64,68,68,75]},
       // Sub CF: J.Ayew (FC26 OVR77, PAC78, SHO74, PAS70, DRI74, DEF52, PHY70)
       {name:"J・アイユー",en_name:"J.Ayew",long_name:"ジョルダン・アイユー",positions:["CF","右WG","左WG"],params:[68,70,78,79,74,66,72,74,74,70,64,70,70,74,54,58,72,66,48,50,48,48,50,50,50,62,68,68,75]},
       // Sub CF: Williams K (FC26 OVR73, PAC80, SHO68, PAS54, DRI66, DEF38, PHY70)
@@ -5028,7 +5039,18 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     {name:"E・ジャシ",en_name:"E.Gyasi",long_name:"エマニュエル・ジャシ",positions:["右WG","CF"],params:[64,74,76,74,80,56,80,50,68,66,68,64,64,56,70,72,68,68,44,40,44,52,42,50,50,62,64,62,75]},
     {name:"K・ソワ",en_name:"K.Sowah",long_name:"カマル・ソワ",positions:["右WG","左WG","OMF"],params:[60,73,76,74,79,58,78,52,68,70,70,62,62,56,70,72,68,68,44,40,44,52,42,50,50,58,66,64,75]},
     {name:"D・アンコア",en_name:"D.Ankoa",long_name:"ダニエル・アモ・アンコア",positions:["DMF","CB"],params:[72,78,68,66,80,74,62,54,60,70,70,44,48,58,50,42,62,44,76,76,76,76,76,50,50,70,66,66,75]},
-    {name:"Kw・ウィリアムズ",en_name:"K.Williams",long_name:"クワブス・ウィリアムズ",positions:["CF"],params:[70,72,72,70,77,46,80,50,64,66,70,70,70,60,64,60,66,72,42,40,38,54,38,50,50,70,60,58,75]}]
+    {name:"Kw・ウィリアムズ",en_name:"K.Williams",long_name:"クワブス・ウィリアムズ",positions:["CF"],params:[70,72,72,70,77,46,80,50,64,66,70,70,70,60,64,60,66,72,42,40,38,54,38,50,50,70,60,58,75]},
+      // ▼ vs PAN(2026/06/18)先発の新規。FC26 OVRは実値・サブスタッツは近似推定
+      // 26 LCB: J.Opoku (FC26 OVR72)
+      {name:"オポク",en_name:"Opoku",long_name:"ジェローム・オポク",positions:["CB"],params:[78,74,68,66,70,76,56,56,62,60,56,36,34,42,28,32,56,32,73,74,73,73,70,50,50,76,70,70,75]},
+      // 27 RCB: J.Adjetey (FC26 OVR70)
+      {name:"アジェテイ",en_name:"Adjetey",long_name:"ジョナス・アジェテイ",positions:["CB"],params:[76,74,72,70,70,74,58,58,64,58,54,34,32,40,26,30,56,30,70,72,70,70,72,50,50,74,68,68,75]},
+      // 28 RB: M.Senaya (FC26 OVR70)
+      {name:"セナヤ",en_name:"Senaya",long_name:"マルヴィン・セナヤ",positions:["右SB","左SB"],params:[70,74,78,78,70,70,66,66,72,62,58,44,46,48,36,40,66,48,68,70,68,68,70,50,50,66,66,68,75]},
+      // 29 CM: C.Yirenkyi (FC26 OVR71)
+      {name:"イレンチー",en_name:"Yirenkyi",long_name:"カレブ・イレンチー",positions:["DMF","CMF"],params:[72,76,74,74,69,70,70,70,72,68,64,50,52,56,44,48,68,56,70,72,70,70,68,50,50,68,66,69,75]},
+      // 30 WG: E.Nuamah (FC26 OVR75)
+      {name:"ヌアマ",en_name:"Nuamah",long_name:"エルネスト・ヌアマ",positions:["右WG","左WG","右SMF","左SMF"],params:[60,68,88,90,80,62,84,82,86,68,62,66,68,68,52,56,82,70,36,38,36,36,38,50,50,56,72,72,75]}]
   },
 
   romania2026: {
@@ -5433,9 +5455,10 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   panama2026: {
     name:"パナマ",en_name:"Panama",team_color:"#CC0000",flag:"🇵🇦",
-    default_system:"4-2-3-1",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:10,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"3-4-3",default_tactics:TACTICS_COUNTER,
+    default_keyplayer:5,default_marked_player:10,
+    // 3-4-3 flach (vs GHA 2026/06/18 TM準拠): GK Mosquera / Andrade-J.Córdoba-Ramos(3バック) / Blackman-Barcenas-Harvey-Murillo / Rodríguez-Waterman-Martínez。不在5名追加
+    default_lineup:[11,26,27,13,28,7,15,14,30,29,21],
     players:[
       // GK: Luis Mejia (OVR76, DIV74, HAN72, KIC68, REF76, SPD62, POS74)
       {name:"メヒア",en_name:"Mejia",long_name:"ルイス・メヒア",positions:["GK"],params:[50,50,50,50,76,62,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,74,72,50,74,68,75]},
@@ -5452,7 +5475,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // CMF: Adalberto Carrasquilla (OVR78, PAC68, SHO64, PAS80, DRI76, DEF70, PHY72)
       {name:"カラスキジャ",en_name:"Carrasquilla",long_name:"アダルベルト・カラスキジャ",positions:["CMF","DMF"],params:[72,80,68,68,72,68,74,74,72,80,76,56,58,62,50,54,74,62,70,70,70,69,68,50,50,66,72,74,75]},
       // RSM: Edgar Barcenas (OVR73, PAC82, SHO68, PAS68, DRI76, DEF42, PHY64)
-      {name:"バルセナス",en_name:"Barcenas",long_name:"エドガル・バルセナス",positions:["右SMF","右WG"],params:[64,70,82,84,79,60,74,74,79,68,64,62,62,66,52,56,74,64,38,40,40,39,38,50,50,56,68,66,75]},
+      {name:"バルセナス",en_name:"Barcenas",long_name:"エドガル・バルセナス",positions:["右SMF","右WG","DMF","CMF"],params:[64,70,82,84,79,60,74,74,79,68,64,62,62,66,52,56,74,64,38,40,40,39,38,50,50,56,68,66,75]},
       // OMF: Alberto Quintero (OVR72, PAC72, SHO66, PAS72, DRI74, DEF46, PHY64)
       {name:"キンテロ",en_name:"Quintero",long_name:"アルベルト・キンテロ",positions:["OMF","左SMF"],params:[64,72,72,74,73,58,72,72,73,72,68,60,60,64,52,56,72,62,42,44,44,43,42,50,50,56,66,64,75]},
       // LSM: Abdiel Arroyo (OVR73, PAC82, SHO68, PAS68, DRI76, DEF44, PHY66)
@@ -5466,9 +5489,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CB: Andres Andrade (OVR71)
       {name:"A・アンドラーデ",en_name:"A.Andrade",long_name:"アンドレス・アンドラーデ",positions:["CB"],params:[76,74,72,70,65,76,58,58,65,64,60,34,32,40,30,34,58,34,70,72,72,71,70,50,50,74,60,66,75]},
       // Sub CB: Cesar Blackman (OVR69)
-      {name:"ブラックマン",en_name:"Blackman",long_name:"セサル・ブラックマン",positions:["CB","右SB"],params:[74,72,70,68,63,74,56,56,63,62,58,32,30,38,28,32,56,32,68,70,70,69,68,50,50,72,58,64,75]},
+      {name:"ブラックマン",en_name:"Blackman",long_name:"セサル・ブラックマン",positions:["CB","右SB","左SMF"],params:[74,72,70,68,63,74,56,56,63,62,58,32,30,38,28,32,56,32,68,70,70,69,68,50,50,72,58,64,75]},
       // Sub RB: Michael Murillo (OVR72)
-      {name:"M・ムリジョ",en_name:"M.Murillo",long_name:"マイケル・ムリジョ",positions:["右SB"],params:[72,74,78,78,73,70,68,68,73,64,60,40,42,44,34,38,68,46,68,70,70,69,68,50,50,66,66,68,75]},
+      {name:"M・ムリジョ",en_name:"M.Murillo",long_name:"マイケル・ムリジョ",positions:["右SB","右SMF"],params:[72,74,78,78,73,70,68,68,73,64,60,40,42,44,34,38,68,46,68,70,70,69,68,50,50,66,66,68,75]},
       // Sub LB: Freddy Gondola (OVR70)
       {name:"ゴンドラ",en_name:"Gondola",long_name:"フレディ・ゴンドラ",positions:["左SB"],params:[70,72,72,72,67,66,62,62,67,62,58,38,40,42,32,36,62,42,66,68,68,67,66,50,50,62,60,62,75]},
       // Sub DMF: Gilberto Hernandez (OVR70)
@@ -5488,7 +5511,18 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub LW: Naldo (OVR68)
       {name:"ナルド",en_name:"Naldo",long_name:"ナルド",positions:["左WG","左SMF"],params:[64,68,76,78,72,60,66,66,72,60,56,56,56,60,44,50,66,58,34,36,36,35,34,50,50,54,60,60,75]},
       // Sub CB: Edgar Becos (OVR68)
-      {name:"ベコス",en_name:"Becos",long_name:"エドガル・ベコス",positions:["CB"],params:[74,72,66,64,62,74,54,54,62,60,56,30,28,36,26,30,54,30,68,70,70,69,68,50,50,72,56,62,75]}
+      {name:"ベコス",en_name:"Becos",long_name:"エドガル・ベコス",positions:["CB"],params:[74,72,66,64,62,74,54,54,62,60,56,30,28,36,26,30,54,30,68,70,70,69,68,50,50,72,56,62,75]},
+      // ▼ vs GHA(2026/06/18)先発の新規。Córdoba/HarveyはFC26実OVR・他は推定
+      // 26 中央CB: J.Córdoba (FC26 OVR68)
+      {name:"ホセ・コルドバ",en_name:"Jose.Cordoba",long_name:"ホセ・コルドバ",positions:["CB"],params:[78,72,72,72,66,76,52,52,62,56,52,30,28,36,24,28,52,28,68,70,68,68,70,50,50,76,64,66,75]},
+      // 27 CB: J.Ramos (推定OVR67)
+      {name:"J・ラモス",en_name:"J.Ramos",long_name:"ジオバニ・ラモス",positions:["CB"],params:[76,72,70,70,65,74,52,52,60,54,50,28,26,34,22,26,52,28,68,70,68,68,70,50,50,74,62,64,75]},
+      // 28 CM: C.Harvey (FC26 OVR65)
+      {name:"ハーヴェイ",en_name:"Harvey",long_name:"カルロス・ハーヴェイ",positions:["DMF","CMF"],params:[72,72,70,70,63,68,64,64,66,62,58,46,48,52,40,44,64,52,64,66,64,64,66,50,50,64,60,62,75]},
+      // 29 WG: J.L.Rodríguez (推定OVR70)
+      {name:"JL・ロドリゲス",en_name:"JL.Rodriguez",long_name:"ホセ・ルイス・ロドリゲス",positions:["左WG","右WG","左SMF"],params:[60,68,84,86,74,58,76,74,80,62,58,62,64,64,48,52,74,64,36,38,36,36,38,50,50,54,66,66,75]},
+      // 30 WG: C.Martínez (推定OVR67)
+      {name:"C・マルティネス",en_name:"C.Martinez",long_name:"クリスティアン・マルティネス",positions:["右WG","左WG","右SMF"],params:[58,66,82,84,72,56,74,72,78,58,54,58,60,60,46,50,72,62,36,38,36,36,38,50,50,52,64,64,75]}
     ]
   },
   newzealand2026: {
