@@ -628,8 +628,11 @@ function drawWcsimShareCanvas(ctx, d, isEn, S) {
   ctx.beginPath(); ctx.arc(cx, 300, 360, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(255,255,255,0.07)'; ctx.fill();
 
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 2;
   tc(isEn ? '2026 WORLD CUP — FULL SIMULATION' : '2026 W杯 まるごとシミュレート',
-     cx, 108, '700 32px Arial', 'rgba(40,28,0,0.72)', S - 120);
+     cx, 110, '800 33px Arial', '#fff8e1', S - 120);
+  ctx.restore();
 
   tc('🏆', cx, 270, '150px Arial', '#ffffff');
   tc(d.champFlag, cx, 445, '150px Arial', '#ffffff');
