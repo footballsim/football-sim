@@ -972,6 +972,10 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "クラマリッチ": {"profile": "鋭いポジショニングと正確なシュートで得点を量産するクロアチア屈指のフィニッシャー。狭いスペースでも冷静にチャンスを作り出す技術は圧巻。", "profile_en": "Croatia's most clinical finisher, producing goals consistently through intelligent positioning and precise shooting. Remarkably composed in tight spaces, he turns half-chances into goals.", "height": 177, "weight": 73},
 "ペリシッチ": {"profile": "力強いフィジカルと高い技術力を兼備するベテラン左ウィング。ゴールとアシストの両面でチームを牽引してきた万能アタッカー。", "profile_en": "A powerful and technically gifted veteran left winger who has consistently driven the team with both goals and assists. A complete attacker with imposing physical presence.", "height": 187, "weight": 84},
 "モドリッチ": {"profile": "比類なき技術とゲームビジョンでクロアチアを象徴するキャプテン。年齢を感じさせない精度とエレガントなプレースタイルで中盤に君臨し続ける伝説のプレイメーカー。", "profile_en": "Croatia's iconic captain whose unparalleled technique and game vision define the team's identity. His ageless precision and elegant style make him a legendary playmaker who continues to dominate the midfield.", "height": 172, "weight": 66},
+"ストーンズ": {"profile": "卓越したビルドアップと対人守備でイングランド守備を統率するCB。冷静な判断と高い技術で最終ラインから攻撃を組み立てる現代型ディフェンダー。", "profile_en": "A centre-back who marshals England's defence with outstanding build-up play and one-on-one defending. Composed decision-making and high technique let him orchestrate attacks from the back as a modern defender.", "height": 188, "weight": 85},
+"ヴシュコビッチ": {"profile": "長身とフィジカルを武器にクロアチア守備の未来を担う若きCB。空中戦の強さと落ち着いた対人守備で最終ラインに高さと安定をもたらす。", "profile_en": "A young centre-back carrying the future of Croatia's defence with height and physicality. Aerial strength and composed one-on-one defending bring height and stability to the backline.", "height": 196, "weight": 84},
+"バトゥリナ": {"profile": "卓越したパスセンスとドリブルでクロアチア攻撃を彩る創造的なOMF。鋭いラストパスと局面打開の技術で中盤から好機を生み出す技巧派。", "profile_en": "A creative attacking midfielder who lights up Croatia's attack with outstanding passing and dribbling. Incisive final balls and the technique to unlock tight situations create chances from midfield.", "height": 180, "weight": 73},
+"ムサ": {"profile": "長身とフィジカルを生かしたポストプレーと決定力でクロアチア前線を担うCF。空中戦の強さと鋭いフィニッシュで相手守備に脅威を与えるストライカー。", "profile_en": "A centre-forward who leads Croatia's front line with physical hold-up play and finishing. Aerial strength and sharp finishing make him a constant threat to opposing defences.", "height": 192, "weight": 85},
 "ペトコビッチ": {"profile": "高さと体の強さを活かしたポストプレーでチームを前進させる大型CF。空中戦での強さと連携プレーが持ち味のターゲットマン型ストライカー。", "profile_en": "A physically imposing target striker who drives the team forward with his height and hold-up play. Dominant in the air and intelligent in link-up play, he is a focal point in Croatia's attack.", "height": 191, "weight": 85},
 "グルビッチ": {"profile": "長い手足を活かした広いセービングエリアと落ち着いたポジショニングで確実にゴールを守るバックアップGK。", "profile_en": "A tall backup goalkeeper whose long reach gives him a wide saving range. Composed positioning makes him a dependable reserve between the posts.", "height": 194, "weight": 84},
 "コタルスキ": {"profile": "高い身体能力と安定したセービングで将来を嘱望される若いGK。国際経験を積みながら着実にレベルを上げている。", "profile_en": "A young goalkeeper with impressive athleticism and steady shot-stopping, attracting attention as a future talent. Growing steadily with international experience.", "height": 193, "weight": 85},
@@ -3310,8 +3314,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   england2026: {
     name:"イングランド",en_name:"England",team_color:"#C8102E",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",
     default_system:"4-2-3-1",default_tactics:TACTICS_FREE,
-    default_keyplayer:8,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,7,9,8,10],
+    default_keyplayer:9,default_marked_player:10,
+    // 4-2-3-1 (vs CRO 2026/06/17 TM準拠): GK Pickford / James-Konsa-Stones-O'Reilly / Anderson-Rice / Madueke-Bellingham-Gordon / Kane
+    default_lineup:[0,1,2,18,4,6,5,21,9,8,10],
     players:[
       {name:"ピックフォード",en_name:"Pickford",long_name:"ジョーダン・ピックフォード",positions:["GK"],params:[50,50,50,50,82,75,50,50,50,50,88,50,50,50,50,50,50,50,50,50,50,50,50,83,77,50,79,72,75]},
       {name:"ジェームズ",en_name:"R.James",long_name:"リース・ジェームズ",positions:["右SB","DMF","右SMF"],params:[87,68,76,75,84,88,66,78,77,83,82,67,70,75,83,83,82,74,85,84,84,84,83,50,50,77,78,82,75]},
@@ -3332,7 +3337,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ラムズデール",en_name:"Ramsdale",long_name:"アーロン・ラムズデール",positions:["GK"],params:[50,50,50,50,80,72,50,50,50,50,72,50,50,50,50,50,50,50,50,50,50,50,50,79,76,50,80,72,75]},
       {name:"サウスゲート",en_name:"Flekken2",long_name:"マーク・フレッケン",positions:["GK"],params:[50,50,50,50,78,74,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,78,74,50,78,72,75]},
       {name:"ショーン・ダイク",en_name:"Dier",long_name:"エリック・ダイア",positions:["CB","DMF"],params:[78,76,72,70,74,76,66,62,65,66,64,40,36,48,34,32,62,54,74,76,76,76,74,50,50,74,62,68,74]},
-      {name:"スゥォレ",en_name:"Swole",long_name:"ジェドン・ソランキー",positions:["CB","右SB"],params:[76,76,76,74,74,74,68,64,67,66,64,40,36,48,34,32,62,54,72,74,74,74,72,50,50,72,60,66,74]},
+      {name:"ストーンズ",en_name:"Stones",long_name:"ジョン・ストーンズ",positions:["CB","右SB","DMF"],params:[78,78,72,72,80,76,70,72,72,78,74,40,38,46,34,40,74,46,84,84,84,84,80,50,50,78,82,82,75]},
       {name:"ルーク・ショー",en_name:"L.Shaw",long_name:"ルーク・ショー",positions:["左SB","左SMF"],params:[72,78,76,74,74,70,72,70,72,74,70,52,48,58,46,48,68,64,70,72,70,70,68,50,50,66,64,68,74]},
       {name:"ギャラガー",en_name:"Gallagher",long_name:"コナー・ギャラガー",positions:["CMF","DMF","OMF"],params:[76,82,78,76,78,74,76,72,74,76,72,62,58,66,54,52,72,70,76,78,74,74,72,50,50,68,68,72,74]},
       {name:"マドゥエケ",en_name:"Madueke",long_name:"ンオニ・マドゥエケ",positions:["右WG","右SMF","左WG"],params:[66,74,84,84,78,64,82,78,81,70,64,70,68,66,52,54,72,70,60,56,58,56,56,50,50,56,64,66,74]},
@@ -3650,14 +3655,15 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   croatia2026: {
     name:"クロアチア",en_name:"Croatia",team_color:"#CC0000",flag:"🇭🇷",
-    default_system:"4-2-3-1",default_tactics:TACTICS_FREE,
-    default_keyplayer:9,default_marked_player:2,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"3-4-2-1",default_tactics:TACTICS_FREE,
+    default_keyplayer:5,default_marked_player:2,
+    // 3-4-2-1 (vs ENG 2026/06/17 TM準拠): GK Livaković / Vušković-Šutalo-Gvardiol(3バック) / Perišić-Modrić-Pašalić-Stanišić / Baturina-Sučić / Musa
+    default_lineup:[0,13,3,26,6,9,1,8,18,27,28],
     players:[
       // GK: Livakovic (FC26 OVR82, DIV83, HAN82, KIC78, REF84, SPD79, POS82)
       {name:"リバコビッチ",en_name:"Livakovic",long_name:"ドミニク・リバコビッチ",positions:["GK"],params:[50,50,50,50,84,79,50,50,50,50,78,50,50,50,50,50,50,50,50,50,50,50,50,83,82,50,82,76,75]},
       // RB: Stanisic (FC26 OVR76, PAC80, SHO51, PAS70, DRI73, DEF72, PHY73)
-      {name:"スタニシッチ",en_name:"Stanisic",long_name:"ヨシプ・スタニシッチ",positions:["右SB"],params:[70,74,80,82,74,70,74,72,77,70,66,46,44,52,38,40,72,54,70,72,70,70,70,50,50,66,68,70,75]},
+      {name:"スタニシッチ",en_name:"Stanisic",long_name:"ヨシプ・スタニシッチ",positions:["右SB","右SMF"],params:[70,74,80,82,74,70,74,72,77,70,66,46,44,52,38,40,72,54,70,72,70,70,70,50,50,66,68,70,75]},
       // RCB: Caleta-Car (FC26 OVR78, PAC70, SHO41, PAS61, DRI60, DEF77, PHY82)
       {name:"カレタ＝カー",en_name:"Caleta-Car",long_name:"ドゥイェ・カレタ＝カー",positions:["CB"],params:[82,80,70,68,72,82,58,58,64,62,56,34,32,42,28,30,58,40,76,78,76,76,74,50,50,80,70,74,75]},
       // LCB: Gvardiol (FC26 OVR84, PAC83, SHO57, PAS72, DRI74, DEF84, PHY79)
@@ -3705,7 +3711,14 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub WG: Pjaca (FC26 OVR~70, PAC77, SHO65, PAS68, DRI75, DEF36, PHY64)
       {name:"ピャツァ",en_name:"Pjaca",long_name:"マルコ・ピャツァ",positions:["左WG","右WG"],params:[60,66,76,78,72,58,76,72,76,66,60,62,62,66,52,58,74,68,34,32,30,32,40,50,50,56,64,64,75]},
       // Sub CF: Spikic (young talent, estimated)
-      {name:"スピキッチ",en_name:"Spikic",long_name:"ダリオ・スピキッチ",positions:["CF","右WG"],params:[62,68,76,80,74,62,72,70,76,62,58,62,62,66,48,52,72,66,32,30,28,30,38,50,50,58,62,62,75]}
+      {name:"スピキッチ",en_name:"Spikic",long_name:"ダリオ・スピキッチ",positions:["CF","右WG"],params:[62,68,76,80,74,62,72,70,76,62,58,62,62,66,48,52,72,66,32,30,28,30,38,50,50,58,62,62,75]},
+      // ▼ vs ENG(2026/06/17)先発の新規。FC26 OVRは実値・サブスタッツは近似推定
+      // 26 LCB: L.Vušković (FC26 OVR72・長身)
+      {name:"ヴシュコビッチ",en_name:"Vuskovic",long_name:"ルカ・ヴシュコビッチ",positions:["CB"],params:[80,74,74,72,70,80,54,54,64,60,56,32,30,38,26,30,56,30,70,72,70,70,72,50,50,80,66,68,75]},
+      // 27 左シャドー: M.Baturina (FC26 OVR78)
+      {name:"バトゥリナ",en_name:"Baturina",long_name:"マルティン・バトゥリナ",positions:["OMF","CMF","左SMF"],params:[62,72,72,73,76,62,82,82,76,78,72,68,70,72,62,66,82,76,46,48,46,46,48,50,50,58,76,76,75]},
+      // 28 CF: P.Musa (FC26 OVR76・長身)
+      {name:"ムサ",en_name:"Musa",long_name:"ペタル・ムサ",positions:["CF"],params:[82,76,76,76,74,82,68,70,74,62,58,76,76,76,52,54,70,74,38,40,38,38,40,50,50,82,74,72,75]}
     ]
   },
   colombia2026: {
