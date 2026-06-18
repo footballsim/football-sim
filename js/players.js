@@ -2266,7 +2266,7 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
   "G・ドゥエ": {"profile": "攻撃参加に積極的な右サイドバック。スピードとスタミナでサイドを上下動する。", "profile_en": "An attack-minded right-back who patrols the flank with pace and stamina.", "height": 186},
   "S・フォファナ": {"profile": "推進力に優れたボックス・トゥ・ボックス型MF。ドリブルでの持ち運びと豊富な運動量が武器。", "profile_en": "A driving box-to-box midfielder who carries the ball forward with surging runs and relentless energy.", "height": 185},
   "Y・ディオマンデ": {"profile": "右サイドで仕掛けるアタッカー。鋭いドリブルとシュートで好機を作る若手。", "profile_en": "A young right-sided attacker creating chances with sharp dribbling and shooting.", "height": 182},
-  "ワヒ": {"profile": "裏抜けと決定力に優れるストライカー。スピードを生かして最終ラインを攻略する。", "profile_en": "A striker with clinical finishing and movement in behind, exploiting space with his speed.", "height": 182},
+  "ワヒ": {"profile": "裏抜けと決定力に優れるストライカー。スピードを生かして最終ラインを攻略する。", "profile_en": "A striker with clinical finishing and movement in behind, exploiting space with his speed.", "height": 182}, "アマド": {"profile": "細かいタッチのドリブルと右サイドからのカットインで違いを生む技巧派ウインガー。決定的な仕事ができる。", "profile_en": "A skilful winger who makes the difference with close dribbling and cutting in from the right, capable of decisive moments.", "height": 173}, "ゲサン": {"profile": "スピードとフィジカルを兼備し、裏抜けからゴールを奪う万能型ストライカー。", "profile_en": "A versatile striker combining pace and physicality, scoring through runs in behind.", "height": 185}, "ボニー": {"profile": "長身を生かしたポストプレーと意外な俊足を併せ持つ大型ストライカー。", "profile_en": "A big striker who combines hold-up play with surprising pace.", "height": 189}, "ディアキテ": {"profile": "スピードとフィジカルで最終ラインを脅かす若手CF。", "profile_en": "A young centre-forward who threatens defences with pace and strength.", "height": 188}, "O・ディオマンデ": {"profile": "スピードと対人の強さを兼備する現代型CB。ビルドアップにも関与する。", "profile_en": "A modern centre-back combining pace and physical duels, who also contributes to build-up play.", "height": 189}, "コソノウ": {"profile": "長身ながら俊足で、広い守備範囲を誇るセンターバック。", "profile_en": "A tall yet quick centre-back with an expansive defensive range.", "height": 191}, "アクパ": {"profile": "落ち着いた対応と空中戦の強さを見せる若手センターバック。", "profile_en": "A composed young centre-back who shows strength in aerial duels.", "height": 183}, "セリ": {"profile": "正確な配球と展開力で中盤を操るレジスタ。", "profile_en": "A deep-lying playmaker who controls midfield with accurate distribution and vision.", "height": 168}, "ウライ": {"profile": "豊富な運動量と対人守備で中盤を支える新鋭ボランチ。", "profile_en": "An emerging defensive midfielder who anchors the middle with energy and tackling.", "height": 173}, "ギアゴン": {"profile": "ドリブルと推進力でチャンスを作る若手アタッカー。", "profile_en": "A young attacker who creates chances with dribbling and forward drive."}, "ラフォン": {"profile": "長身を活かしたシュートストップとハイボール処理に優れる経験豊富なGK。", "profile_en": "An experienced goalkeeper who excels at shot-stopping and commanding crosses with his height.", "height": 194}, "M・コネ": {"profile": "反応の速さを武器とする若手GK。", "profile_en": "A young goalkeeper whose quick reflexes are his main weapon.", "height": 186},
   // Egypt
   "M・ハニー": {"profile": "攻守のバランスに優れた右サイドバック。安定した守備と正確なクロスが持ち味。", "profile_en": "A well-balanced right-back, dependable in defence and a provider of accurate crosses.", "height": 175},
   "Y・イブラヒム": {"profile": "経験豊富なセンターバック。読みの良い守備と統率力で最終ラインをまとめる。", "profile_en": "An experienced centre-back who organises the back line with smart reading and leadership.", "height": 185},
@@ -3465,7 +3465,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CAM: Reyna (FC26 OVR75, PAC67, SHO72, PAS72, DRI80, DEF38, PHY68)
       {name:"レイナ",en_name:"Reyna",long_name:"ジョヴァンニ・レイナ",positions:["OMF","右SMF","左SMF"],params:[62,70,66,68,78,60,81,82,73,74,70,68,72,68,64,72,80,72,36,38,36,36,36,50,50,58,74,74,75]},
       // Sub ST: Balogun (FC26 OVR77, PAC84, SHO77, PAS62, DRI77, DEF23, PHY68)
-      {name:"バログン",en_name:"Balogun",long_name:"フォラリン・バログン",positions:["CF","右SMF"],params:[62,72,85,82,74,86,74,76,80,62,58,74,74,72,60,66,74,74,20,22,20,20,20,50,50,80,76,72,75]},
+      {name:"バログン",en_name:"Balogun",long_name:"フォラリン・バログン",positions:["CF","右SMF"],params:[62,72,85,82,74,86,74,76,80,62,58,78,78,75,60,66,74,77,20,22,20,20,20,50,50,80,76,76,75]},
       // Sub FW: Wright (FC26 OVR73, PAC82, SHO72, PAS60, DRI71, DEF33, PHY76)
       {name:"ライト",en_name:"Wright",long_name:"ハジ・ライト",positions:["CF","左SMF"],params:[74,72,82,80,70,76,68,70,76,60,56,68,68,68,52,58,68,68,30,32,30,30,30,50,50,78,68,68,75]},
       // Sub FW: Zendejas (FC26 OVR77, RW, estimated PAC80, SHO70, PAS73, DRI80, DEF38, PHY55)
@@ -3617,7 +3617,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // LB: Tae-seok Lee (FC26 OVR69, PAC79, SHO40, PAS60, DRI68, DEF62, PHY71)
       {name:"イ・テソク",en_name:"Lee Tae-seok",long_name:"イ・テソク",positions:["左SB","右SB","左SMF"],params:[68,78,78,80,72,70,68,66,73,62,56,34,36,38,34,40,64,38,60,62,60,60,60,50,50,64,66,68,75]},
       // CDM: In-beom Hwang (FC26 OVR77, PAC62, SHO70, PAS76, DRI77, DEF63, PHY65)
-      {name:"ファン・インボム",en_name:"Hwang In-beom",long_name:"ファン・インボム",positions:["DMF","CMF","OMF"],params:[62,72,62,62,74,64,72,76,70,76,72,64,66,68,62,64,76,68,62,62,62,60,60,50,50,60,72,76,75]},
+      {name:"ファン・インボム",en_name:"Hwang In-beom",long_name:"ファン・インボム",positions:["DMF","CMF","OMF"],params:[62,72,62,62,74,64,72,76,70,79,75,68,66,68,62,64,76,72,62,62,62,60,60,50,50,60,75,76,75]},
       // CM: Seung-ho Paik (FC26 OVR72, PAC67, SHO67, PAS70, DRI73, DEF66, PHY75)
       {name:"ペク・スンホ",en_name:"Paik Seung-ho",long_name:"ペク・スンホ",positions:["CMF","DMF","OMF"],params:[74,78,68,66,72,74,72,72,70,72,66,62,62,66,60,62,72,64,64,66,64,64,62,50,50,70,70,72,75]},
       // RAM: Kang-in Lee (FC26 OVR79, PAC72, SHO75, PAS80, DRI82, DEF50, PHY64)
@@ -4330,7 +4330,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     {name:"メタノア",en_name:"Metanoa",long_name:"ブレナン・メタノア",positions:["CF","右WG"],params:[68,72,73,71,77,46,80,50,64,66,70,72,70,60,66,62,68,72,43,41,40,54,40,50,50,68,62,60,75]},
     // ↓ 2026/06/14 vs トルコ 先発（TM準拠 3-4-3、若手世代）。FC26 OVR目安で能力推定
     // GK(先発): Beach (W杯2026トルコ戦8セーブ完封/Sofascore9.4でM・ライアンを上回り起用 → DIV79/REF79/POS78/HAN76/KIC70/SPD66, ~OVR78)
-    {name:"ビーチ",en_name:"Beach",long_name:"パトリック・ビーチ",positions:["GK"],params:[50,50,50,50,79,66,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,79,76,50,78,72,75]},
+    {name:"ビーチ",en_name:"Beach",long_name:"パトリック・ビーチ",positions:["GK"],params:[50,50,50,50,81,66,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,81,78,50,80,72,75]},
     {name:"バージェス",en_name:"Burgess",long_name:"キャメロン・バージェス",positions:["CB"],params:[76,74,68,66,70,76,60,58,64,66,62,34,30,44,28,32,60,40,73,74,73,73,72,50,50,76,68,68,75]},
     {name:"チルカティ",en_name:"Circati",long_name:"アレッサンドロ・チルカティ",positions:["CB"],params:[78,76,72,70,72,80,64,64,70,70,66,36,32,44,30,34,66,42,75,76,75,75,74,50,50,78,70,70,75]},
     {name:"オコン＝エングスラー",en_name:"Okon-Engstler",long_name:"ポール・オコン＝エングスラー",positions:["DMF","CMF"],params:[70,78,72,72,72,70,72,72,72,72,68,52,52,56,46,50,72,58,70,70,68,69,70,50,50,64,68,68,75]},
@@ -4708,61 +4708,64 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   ivorycoast2026: {
     name:"コートジボワール",en_name:"Ivory Coast",team_color:"#FF8200",flag:"🇨🇮",
     default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
-    default_keyplayer:5,default_marked_player:10,
-    default_lineup:[0,27,1,26,4,5,28,30,29,17,31],
+    default_keyplayer:5,default_marked_player:9,
+    // 2026/06/15 vs エクアドル 1-0（実XI・TM/Wikipedia準拠）。先発(4-4-2): Y.Fofana / G.Doué-Singo-Agbadou-Konan / Y.Diomandé-Kessié-S.Fofana-B.Touré / Pépé-Wahi。Amad Dialloは56分投入→90分に決勝点。FC26正式26名へ刷新（Haller落選・Zaha/Bailly/Aurier/Gradel/Bamba/Gbamin等の旧主力を整理し Amad/Guessand/Bonny/O.Diomandé/Kossounou/Seri/Oulaï/Akpa/Guiagon/Diakité/Lafont/M.Koné を追加）
+    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
     players:[
-      // GK: Fofana Y (FC26 OVR76, DIV77, HAN75, KIC70, REF77, SPD58, POS76)
+      // ▼ vs エクアドル 先発XI（4-4-2）
+      // GK: Yahia Fofana (FC26 OVR76)
       {name:"フォファナ",en_name:"Fofana",long_name:"ヤヒア・フォファナ",positions:["GK"],params:[50,50,50,50,77,58,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,77,75,50,76,70,75]},
-      // RB: W.Singo (FC26 OVR78, PAC88, SHO54, PAS70, DRI74, DEF76, PHY76)
+      // RB: Guéla Doué (FC26 OVR77)
+      {name:"G・ドゥエ",en_name:"G.Doue",long_name:"ゲラ・ドゥエ",positions:["右SB","CB"],params:[70,78,84,84,74,70,74,72,78,68,64,48,48,52,40,44,72,54,74,74,72,73,72,50,50,66,68,70,75]},
+      // CB(本職RB): Wilfried Singo (FC26 OVR78)
       {name:"シンゴ",en_name:"Singo",long_name:"ウィリフレッド・シンゴ",positions:["右SB","CB"],params:[76,76,88,89,76,72,72,74,76,70,64,46,48,50,40,42,72,50,74,76,74,74,72,50,50,70,72,72,75]},
-      // RCB: E.Bailly (FC26 OVR76, PAC80, SHO44, PAS62, DRI62, DEF76, PHY82)
-      {name:"E・バイリー",en_name:"E.Bailly",long_name:"エリック・バイリー",positions:["CB"],params:[82,80,80,81,72,82,60,60,72,62,56,36,34,42,28,30,60,30,76,78,76,76,74,50,50,82,74,72,75]},
-      // LCB: E.Ndicka (FC26 OVR78, PAC80, SHO44, PAS68, DRI66, DEF78, PHY80)
-      {name:"ンディカ",en_name:"Ndicka",long_name:"エヴァン・ンディカ",positions:["CB","左SB"],params:[80,80,80,81,74,80,64,64,74,68,62,36,34,42,28,30,64,32,78,80,78,78,76,50,50,80,74,72,75]},
-      // LSB: G.Konan (FC26 OVR74, PAC82, SHO50, PAS64, DRI68, DEF70, PHY68)
-      {name:"コナン",en_name:"Konan",long_name:"ガスリン・コナン",positions:["左SB"],params:[66,66,82,83,72,62,66,66,72,64,58,42,42,46,34,36,66,44,68,70,68,68,66,50,50,60,66,64,75]},
-      // RDMF: F.Kessié (FC26 OVR82, PAC78, SHO76, PAS80, DRI78, DEF80, PHY86) ← keyplayer
-      {name:"ケシエ",en_name:"Kessie",long_name:"フランク・ケシエ",positions:["CMF","DMF"],params:[86,86,78,79,82,86,76,78,82,80,74,72,72,76,56,60,78,68,78,80,78,78,76,50,50,86,80,78,75]},
-      // LDMF: I.Sangaré (FC26 OVR79, PAC76, SHO62, PAS72, DRI72, DEF80, PHY82)
-      {name:"I・サンガレ",en_name:"I.Sangare",long_name:"イブラヒム・サンガレ",positions:["DMF","CMF"],params:[82,82,76,77,76,80,70,70,76,72,66,56,58,60,46,50,70,58,78,80,78,78,76,50,50,80,76,74,75]},
-      // RSM: S.Adingra (FC26 OVR77, PAC88, SHO70, PAS68, DRI78, DEF46, PHY68)
-      {name:"アダン",en_name:"Adingra",long_name:"サイモン・アダン",positions:["右WG","右SMF"],params:[66,68,88,90,78,62,76,78,78,68,62,66,66,68,52,56,78,66,42,44,42,42,44,50,50,60,68,68,75]},
-      // LSM: M.Cornet (FC26 OVR77, PAC82, SHO70, PAS70, DRI76, DEF58, PHY70)
-      {name:"コルネ",en_name:"Cornet",long_name:"マクセル・コルネ",positions:["左WG","左SMF"],params:[68,70,82,84,76,64,74,76,76,70,64,66,66,68,54,58,76,64,54,56,54,54,56,50,50,62,68,68,75]},
-      // OMF: W.Zaha (FC26 OVR78, PAC80, SHO74, PAS74, DRI82, DEF50, PHY76)
-      {name:"ザハ",en_name:"Zaha",long_name:"ウィルフレッド・ザハ",positions:["OMF","左WG","右WG"],params:[74,76,80,81,80,70,80,82,80,74,68,70,70,74,60,64,82,72,46,48,46,46,48,50,50,68,72,72,75]},
-      // CF: S.Haller (FC26 OVR81, PAC72, SHO82, PAS68, DRI74, DEF42, PHY84) ← marked
-      {name:"アラー",en_name:"Haller",long_name:"セバスティアン・アラー",positions:["CF"],params:[84,82,72,73,80,82,72,74,80,68,62,80,78,82,54,58,72,78,38,40,38,38,40,50,50,84,74,72,75]},
-      // Sub GK: Sangare B (FC26 OVR73, DIV74, HAN72, KIC68, REF74, SPD56, POS73)
-      {name:"B・サンガレ",en_name:"B.Sangare",long_name:"バドラ・アリ・サンガレ",positions:["GK"],params:[50,50,50,50,74,56,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,74,72,50,73,68,75]},
-      // Sub GK: Zouzoua (FC26 OVR71, DIV72, HAN70, KIC65, REF72, SPD54, POS71)
-      {name:"ズズア",en_name:"Zouzoua",long_name:"ジャン・ブリス・ズズア",positions:["GK"],params:[50,50,50,50,72,54,50,50,50,50,65,50,50,50,50,50,50,50,50,50,50,50,50,72,70,50,71,65,75]},
-      // Sub RB: Aurier S (FC26 OVR73, PAC80, SHO58, PAS68, DRI70, DEF72, PHY72)
-      {name:"オーリエ",en_name:"Aurier",long_name:"セルジュ・オーリエ",positions:["右SB"],params:[72,72,80,81,70,68,68,68,70,68,62,50,50,52,42,44,68,50,70,72,70,70,68,50,50,66,66,64,75]},
-      // Sub CB: Gbamin (FC26 OVR74, PAC70, SHO44, PAS66, DRI62, DEF76, PHY78)
-      {name:"グバミン",en_name:"Gbamin",long_name:"ジャンフィリップ・グバミン",positions:["CB","DMF"],params:[78,76,70,71,70,76,60,60,70,66,60,36,34,42,26,28,60,28,76,78,76,76,74,50,50,76,70,68,75]},
-      // Sub CMF: Gradel M (FC26 OVR74, PAC80, SHO68, PAS66, DRI72, DEF48, PHY68)
-      {name:"グラデル",en_name:"Gradel",long_name:"マックス・グラデル",positions:["右WG","OMF"],params:[66,68,80,81,72,62,70,72,72,66,60,64,64,66,52,56,70,62,44,46,44,44,46,50,50,60,66,64,75]},
-      // Sub LW: Bamba J (FC26 OVR75, PAC86, SHO64, PAS64, DRI74, DEF44, PHY66)
-      {name:"バンバ",en_name:"Bamba",long_name:"ジョナタン・バンバ",positions:["左WG","右WG"],params:[64,64,86,88,74,60,72,74,74,64,58,60,60,62,48,52,72,60,40,42,40,40,42,50,50,58,62,62,75]},
-      // Sub CF: Pépé N (FC26 OVR78, PAC86, SHO74, PAS72, DRI80, DEF46, PHY70)
-      {name:"ペペ",en_name:"Pepe",long_name:"ニコラ・ペペ",positions:["右WG","左WG","CF"],params:[68,70,86,88,78,64,78,80,78,72,66,70,70,72,58,62,80,68,42,44,42,42,44,50,50,62,68,68,75]}
-    ,
-      {name:"ドロ",en_name:"Dro",long_name:"スレイマン・ドロ",positions:["CMF","DMF"],params:[70,76,72,70,72,68,70,66,68,72,66,52,48,56,46,44,64,60,68,70,68,66,66,50,50,60,58,62,74]},
-      {name:"I・コネ",en_name:"Kone",long_name:"イブラヒム・コネ",positions:["CF","左WG"],params:[72,72,82,82,76,68,76,70,73,64,58,70,68,68,52,50,62,66,52,50,52,50,50,50,50,64,62,60,74]},
-      {name:"マルタン",en_name:"Martin",long_name:"ジョナサン・フラン",positions:["右SB","CB"],params:[68,72,72,70,68,66,64,58,61,62,60,34,30,42,28,28,56,50,62,64,62,62,60,50,50,58,50,54,74]},
-      {name:"エヤン",en_name:"Eyan",long_name:"エリック・ベリ",positions:["左WG","OMF"],params:[60,68,76,76,70,58,72,68,71,66,58,60,58,58,48,48,62,58,52,48,50,48,48,50,50,50,52,52,74]},
-      {name:"フォファナ2",en_name:"W.Fofana",long_name:"ウィリアム・フォファナ",positions:["CB"],params:[80,72,78,76,76,78,68,62,66,62,60,34,30,44,28,26,58,50,74,76,76,76,74,50,50,76,56,64,74]},
-      {name:"ビドゥ",en_name:"Bidu",long_name:"ファイット・ビドゥ",positions:["左SB","左WG","左SMF"],params:[66,70,76,74,68,64,70,64,67,66,60,50,46,52,40,40,58,54,62,62,60,60,58,50,50,56,50,52,74]},
-      {name:"ゴグイ",en_name:"Gogui",long_name:"マックス・アロコ",positions:["DMF","CMF","CB"],params:[72,72,68,66,68,70,62,56,59,62,58,36,32,44,30,28,56,50,68,70,70,68,68,50,50,66,52,58,74]},
-      {name:"マクンブ",en_name:"Makumbu",long_name:"ブランドン・アグエセ",positions:["CF","OMF"],params:[68,70,76,74,72,66,68,62,65,62,56,64,62,62,46,44,56,58,48,46,48,46,46,50,50,58,56,54,74]},
-      // ↓ 2026/06/14 vs エクアドル 先発（TM準拠 4-2-2-2）。FC26 OVR目安で能力推定
+      // CB: Emmanuel Agbadou (FC26 OVR78)
       {name:"アグバドゥ",en_name:"Agbadou",long_name:"エマニュエル・アグバドゥ",positions:["CB"],params:[78,76,72,70,72,80,62,60,68,66,62,34,30,44,28,32,62,40,76,77,76,76,74,50,50,78,70,70,75]},
-      {name:"G・ドゥエ",en_name:"G.Doue",long_name:"ゲラ・ドゥエ",positions:["右SB"],params:[70,78,84,84,74,70,74,72,78,68,64,48,48,52,40,44,72,54,74,74,72,73,72,50,50,66,68,70,75]},
+      // LB: Ghislain Konan (FC26 OVR74)
+      {name:"コナン",en_name:"Konan",long_name:"ガスリン・コナン",positions:["左SB"],params:[66,66,82,83,72,62,66,66,72,64,58,42,42,46,34,36,66,44,68,70,68,68,66,50,50,60,66,64,75]},
+      // CM: Franck Kessié (FC26 OVR82・主将) ← keyplayer
+      {name:"ケシエ",en_name:"Kessie",long_name:"フランク・ケシエ",positions:["CMF","DMF"],params:[86,86,78,79,82,86,76,78,82,80,74,72,72,76,56,60,78,68,78,80,78,78,76,50,50,86,80,78,75]},
+      // CM: Seko Fofana (FC26 OVR79)
       {name:"S・フォファナ",en_name:"S.Fofana",long_name:"セコ・フォファナ",positions:["DMF","CMF"],params:[82,84,76,74,76,80,74,76,76,76,72,62,64,66,52,56,78,66,76,77,76,76,74,50,50,74,74,76,75]},
-      {name:"B・トゥーレ",en_name:"B.Toure",long_name:"バズマナ・トゥーレ",positions:["左WG","OMF","左SMF"],params:[64,74,86,88,76,64,80,80,84,70,64,68,68,70,56,62,80,72,40,38,38,38,62,50,50,56,72,70,75]},
+      // RM: Yan Diomandé (FC26 OVR66・新鋭)
       {name:"Y・ディオマンデ",en_name:"Y.Diomande",long_name:"ヤン・ディオマンデ",positions:["右WG","OMF","右SMF"],params:[62,74,88,90,76,62,82,80,85,68,62,70,68,72,58,64,82,72,38,36,36,36,60,50,50,54,72,70,75]},
-      {name:"ワヒ",en_name:"E.Wahi",long_name:"エリ・ワヒ",positions:["CF","左WG"],params:[78,78,86,86,76,78,76,76,82,66,60,76,76,76,54,56,74,76,34,36,34,34,64,50,50,76,72,70,75]}
+      // LM: Bazoumana Touré (推定OVR74)
+      {name:"B・トゥーレ",en_name:"B.Toure",long_name:"バズマナ・トゥーレ",positions:["左WG","OMF","左SMF"],params:[64,74,86,88,76,64,80,80,84,70,64,68,68,70,56,62,80,72,40,38,38,38,62,50,50,56,72,70,75]},
+      // CF: Nicolas Pépé (FC26 OVR78)
+      {name:"ペペ",en_name:"Pepe",long_name:"ニコラ・ペペ",positions:["右WG","左WG","CF"],params:[68,70,86,88,78,64,78,80,78,72,66,70,70,72,58,62,80,68,42,44,42,42,44,50,50,62,68,68,75]},
+      // CF: Elye Wahi (推定OVR78)
+      {name:"ワヒ",en_name:"E.Wahi",long_name:"エリ・ワヒ",positions:["CF","左WG"],params:[78,78,86,86,76,78,76,76,82,66,60,76,76,76,54,56,74,76,34,36,34,34,64,50,50,76,72,70,75]},
+      // ▼ 控え
+      // GK: Alban Lafont (FC26 OVR75)
+      {name:"ラフォン",en_name:"Lafont",long_name:"アルバン・ラフォン",positions:["GK"],params:[50,50,50,50,75,60,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,75,74,50,75,74,75]},
+      // GK: Mohamed Koné (推定OVR70)
+      {name:"M・コネ",en_name:"M.Kone",long_name:"モハメド・コネ",positions:["GK"],params:[50,50,50,50,70,58,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,70,68,50,70,68,75]},
+      // CB: Evan Ndicka (FC26 OVR78)
+      {name:"ンディカ",en_name:"Ndicka",long_name:"エヴァン・ンディカ",positions:["CB","左SB"],params:[80,80,80,81,74,80,64,64,74,68,62,36,34,42,28,30,64,32,78,80,78,78,76,50,50,80,74,72,75]},
+      // CB: Ousmane Diomandé (FC26 OVR80)
+      {name:"O・ディオマンデ",en_name:"O.Diomande",long_name:"ウスマン・ディオマンデ",positions:["CB"],params:[80,78,82,82,74,80,64,64,74,68,62,36,32,44,28,30,64,38,78,80,79,79,78,50,50,80,74,74,75]},
+      // CB: Odilon Kossounou (FC26 OVR80)
+      {name:"コソノウ",en_name:"Kossounou",long_name:"オディロン・コソノウ",positions:["CB","右SB"],params:[82,78,84,82,74,82,62,62,74,66,60,34,30,42,26,28,62,36,78,80,78,78,80,50,50,82,72,72,75]},
+      // CB: Clément Akpa (推定OVR70)
+      {name:"アクパ",en_name:"Akpa",long_name:"クレマン・アクパ",positions:["CB"],params:[78,74,74,72,68,76,60,58,66,62,58,32,30,40,26,28,58,36,72,74,72,72,70,50,50,76,64,64,75]},
+      // DMF: Ibrahim Sangaré (FC26 OVR79)
+      {name:"I・サンガレ",en_name:"I.Sangare",long_name:"イブラヒム・サンガレ",positions:["DMF","CMF"],params:[82,82,76,77,76,80,70,70,76,72,66,56,58,60,46,50,70,58,78,80,78,78,76,50,50,80,76,74,75]},
+      // CMF: Jean-Michaël Seri (FC26 OVR69)
+      {name:"セリ",en_name:"Seri",long_name:"ジャン＝ミカエル・セリ",positions:["CMF","DMF"],params:[62,72,62,62,72,58,72,74,68,76,74,56,58,60,58,62,74,62,64,64,62,62,60,50,50,52,72,72,75]},
+      // DMF: Christ Inao Oulaï (FC26 OVR64・新鋭)
+      {name:"ウライ",en_name:"Oulai",long_name:"クリスト・イナオ・ウライ",positions:["DMF","CMF"],params:[76,76,72,72,66,74,64,64,68,64,58,46,46,50,40,42,64,52,68,70,68,68,66,50,50,70,60,64,75]},
+      // OMF: Parfait Guiagon (推定OVR66・新鋭)
+      {name:"ギアゴン",en_name:"Guiagon",long_name:"パルフェ・ギアゴン",positions:["OMF","CMF","右WG"],params:[64,72,76,78,68,62,72,70,74,68,62,58,58,60,48,52,72,62,52,52,50,50,52,50,50,58,64,62,75]},
+      // RW: Simon Adingra (FC26 OVR77)
+      {name:"アダン",en_name:"Adingra",long_name:"サイモン・アダン",positions:["右WG","右SMF"],params:[66,68,88,90,78,62,76,78,78,68,62,66,66,68,52,56,78,66,42,44,42,42,44,50,50,60,68,68,75]},
+      // RW/OMF: Amad Diallo (FC26 OVR79・vs ECU 決勝点)
+      {name:"アマド",en_name:"Amad",long_name:"アマド・ディアロ",positions:["右WG","OMF","左WG"],params:[58,72,85,87,80,60,86,85,85,76,70,74,74,72,60,70,85,80,40,38,36,38,50,50,50,48,78,78,75]},
+      // CF: Evann Guessand (FC26 OVR79・新エース)
+      {name:"ゲサン",en_name:"Guessand",long_name:"エヴァン・ゲサン",positions:["CF","右WG"],params:[78,76,82,80,78,80,74,76,80,72,64,76,76,76,52,56,76,78,30,32,30,30,40,50,50,78,74,74,75]},
+      // CF: Ange-Yoan Bonny (FC26 OVR76)
+      {name:"ボニー",en_name:"Bonny",long_name:"アンジェ＝ヨアン・ボニー",positions:["CF"],params:[76,74,86,84,76,78,72,74,80,66,60,74,74,74,50,54,74,76,28,30,28,28,40,50,50,76,72,70,75]},
+      // CF: Oumar Diakité (FC26 OVR72)
+      {name:"ディアキテ",en_name:"Diakite",long_name:"ウマル・ディアキテ",positions:["CF"],params:[74,72,82,82,74,76,70,70,76,58,52,70,70,72,46,50,68,72,26,28,26,26,40,50,50,74,68,66,75]}
 ]
   },
 
@@ -4923,7 +4926,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub GK: Naghdi (FC26 OVR71, DIV72, HAN70, KIC65, REF72, SPD54, POS71)
       {name:"ナグディ",en_name:"Naghdi",long_name:"ブヤム・ナグディ",positions:["GK"],params:[50,50,50,50,72,54,50,50,50,50,65,50,50,50,50,50,50,50,50,50,50,50,50,72,70,50,71,65,75]},
       // Sub RB: Rezaeian (FC26 OVR73, PAC76, SHO48, PAS60, DRI62, DEF72, PHY70)
-      {name:"レザエイアン",en_name:"Rezaeian",long_name:"ラミン・レザエイアン",positions:["右SB","左SB"],params:[70,70,76,77,68,66,60,60,68,60,54,40,40,44,32,34,60,42,70,72,70,70,68,50,50,64,62,60,75]},
+      {name:"レザエイアン",en_name:"Rezaeian",long_name:"ラミン・レザエイアン",positions:["右SB","左SB"],params:[70,70,76,77,68,66,60,60,68,60,60,48,47,50,32,34,60,50,70,72,70,70,68,50,50,64,62,66,75]},
       // Sub CB: Hosseinnezhad (FC26 OVR72, PAC70, SHO40, PAS60, DRI58, DEF72, PHY76)
       {name:"ホセイン・ネジャド",en_name:"Hosseinnezhad",long_name:"ホセイン・ホセイン・ネジャド",positions:["CB"],params:[76,74,70,71,66,74,56,56,66,60,54,32,30,38,24,26,56,28,72,74,72,72,70,50,50,74,66,64,75]},
       // Sub DMF: Kanani (FC26 OVR74, PAC70, SHO58, PAS72, DRI68, DEF76, PHY72)
@@ -5423,7 +5426,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     default_lineup:[0,21,3,23,4,6,17,16,7,11,10],
     players:[
       // GK: Vozinha (W杯2026スペイン戦27本浴び7セーブ完封POTMで再評価 → DIV80/REF80/POS80/HAN78/KIC66/SPD62, ~OVR79)
-      {name:"ヴォジーニャ",en_name:"Vozinha",long_name:"ヴォジーニャ",positions:["GK"],params:[50,50,50,50,80,62,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,80,78,50,80,78,75]},
+      {name:"ヴォジーニャ",en_name:"Vozinha",long_name:"ヴォジーニャ",positions:["GK"],params:[50,50,50,50,82,62,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,82,78,50,82,78,75]},
       // RB: Wagner Pina (OVR71, PAC81, SHO51, PAS64, DRI70, DEF64, PHY65)
       {name:"W・ピナ",en_name:"W.Pina",long_name:"ワグネル・ピナ",positions:["右SB","右WG","右SMF"],params:[65,65,81,83,74,61,70,70,76,64,60,49,51,51,37,38,67,48,64,66,64,64,66,50,50,47,63,68,75]},
       // RCB: Logan Costa (OVR77, PAC60, SHO40, PAS59, DRI67, DEF77, PHY78)
@@ -5469,7 +5472,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub LB: Stopira (~OVR63, PAC58, SHO30, PAS52, DRI56, DEF63, PHY68)
       {name:"ストピーラ",en_name:"Stopira",long_name:"ストピーラ",positions:["左SB","CB"],params:[68,68,58,60,60,66,56,56,57,52,48,29,30,30,22,22,53,35,63,65,63,63,65,50,50,64,56,60,75]},
       // LCB(2026/06/15 vs Spain 先発): Diney Borges (CB) ※別人の「ディニー」とPLAYER_EXTRA衝突回避のため別名
-      {name:"D・ボルジェス",en_name:"Diney",long_name:"ディニー・ボルジェス",positions:["CB","右SB","左SB"],params:[74,72,68,66,67,74,58,56,60,58,54,30,28,36,24,26,54,38,70,71,70,70,70,50,50,72,64,64,75]},
+      {name:"D・ボルジェス",en_name:"Diney",long_name:"ディニー・ボルジェス",positions:["CB","右SB","左SB"],params:[74,72,68,66,67,74,58,56,60,58,54,30,28,36,24,26,54,38,73,74,73,72,70,50,50,74,64,68,75]},
       // Sub GK: Marcio Rosa (~OVR62, REF62, SPD60, KIC60, DIV62, HAN60, POS62)
       {name:"マルシオ",en_name:"Marcio",long_name:"マルシオ・ロサ",positions:["GK"],params:[50,50,50,50,62,60,50,50,50,50,60,50,50,50,50,50,50,50,50,50,50,50,50,62,60,50,62,62,75]},
       // Sub GK: CJ dos Santos (~OVR60, REF61, SPD60, KIC58, DIV60, HAN59, POS61)
