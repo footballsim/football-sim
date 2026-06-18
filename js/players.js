@@ -1025,6 +1025,7 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "J・アリアス": {"profile": "爆発的なスプリントと鋭いドリブルで右サイドを切り裂くアタッカー。得点への貢献度も高くゴールとアシストを量産する右サイドの推進力。", "profile_en": "An attacker who tears through the right flank with explosive pace and sharp dribbling. High goal contribution with goals and assists makes him a consistent offensive threat on the right.", "height": 178, "weight": 74},
 "J・ロドリゲス": {"profile": "卓越したビジョンと精密なパス技術でコロンビアの攻撃を司るゲームメイカー。正確な左足のFK・シュートでゴールに直結するプレーを見せるスター選手。", "profile_en": "Colombia's playmaker who orchestrates the attack with outstanding vision and pinpoint passing technique. His precise left-footed free kicks and shooting create direct goal threats, making him the team's star player.", "height": 180, "weight": 76},
 "L・ディアス": {"profile": "圧倒的なスピードと高度なドリブル技術で左サイドから相手守備を破壊するエース。コロンビア代表の核として攻撃を牽引するプレミアリーグでも活躍する世界クラスの左ウィング。", "profile_en": "Colombia's ace who destroys opposing defences from the left with overwhelming speed and advanced dribbling. A world-class left winger excelling at the highest level, leading the national team's attack as its central figure.", "height": 178, "weight": 73},
+"L・スアレス": {"profile": "鋭いフィニッシュと裏への抜け出しでコロンビア前線を担うCF。決定力とポジショニングの良さでゴールを量産する現代型ストライカー。", "profile_en": "A centre-forward who leads Colombia's front line with sharp finishing and runs in behind. Clinical finishing and intelligent positioning let him produce goals as a modern striker.", "height": 184, "weight": 76},
 "ボレ": {"profile": "高さとポストプレーを武器にチームの攻撃を前進させるCF。前線での献身的な守備とリンクアッププレーでコロンビアの攻撃を活性化するストライカー。", "profile_en": "A forward who drives the team's attack forward using his height and hold-up play. A striker who activates Colombia's offence with relentless pressing and intelligent link-up play.", "height": 180, "weight": 76},
 "A・モンテロ": {"profile": "安定したセービングと高い反応速度を誇るGK。コーチングの質も高くDFラインと緊密に連携するバックアップ守護神。", "profile_en": "A goalkeeper with reliable saves and sharp reflexes. His strong communication and close coordination with the defensive line make him a dependable backup.", "height": 188, "weight": 84},
 "キンタナ": {"profile": "高い身体能力を活かしたダイナミックなセービングが武器の若きGK。成長著しく将来が期待される次世代の守護神候補。", "profile_en": "A young goalkeeper whose dynamic saves demonstrate impressive athleticism. A rapidly improving talent attracting attention as a next-generation keeper.", "height": 194, "weight": 89},
@@ -1798,6 +1799,12 @@ const PLAYER_EXTRA = {"川島": {"longName": "川島永嗣", "height": 185, "wei
 "ファフーリ": {"profile": "鋭いドリブルとスピードでヨルダンの右の前線を仕掛けるアタッカー。サイドからの突破とゴールへの推進力で相手守備に脅威を与える。", "profile_en": "An attacker who threatens from the right of Jordan's front line with sharp dribbling and pace. His wide breaks and drive toward goal trouble opposing defences.", "height": 175, "weight": 70},
 "オルワン": {"profile": "ゴールへの嗅覚とフィジカルを兼備するヨルダンのストライカー。裏への抜け出しと決定力で得点を狙う前線の起点となるCF。", "profile_en": "A Jordanian striker who combines a nose for goal with physicality. A focal centre-forward who attacks the space in behind and finishes chances.", "height": 183, "weight": 78},
 "ショディエフ": {"profile": "ウズベキスタン代表の守護神。鋭い反応速度と安定したセービングでゴールを守る正GK。", "profile_en": "Uzbekistan's starting goalkeeper. Guards the goal with sharp reflexes and reliable shot-stopping.", "height": 188, "weight": 84},
+"ユスポフ": {"profile": "安定したセービングと落ち着きでウズベキスタンのゴールを守る正GK。的確なポジショニングと存在感でゴールラインを統率する守護神。", "profile_en": "Uzbekistan's starting goalkeeper who guards the goal with composed shot-stopping. Precise positioning and presence command the goal line.", "height": 186, "weight": 80},
+"クサノフ": {"profile": "圧倒的なスピードと対人の強さを誇る若きCB。トップレベルで鍛えた回復力とカバーリングでウズベキスタン守備の中心を担う、世界が注目する逸材。", "profile_en": "A young centre-back boasting overwhelming pace and one-on-one strength. Recovery speed and covering honed at the top level make him the centerpiece of Uzbekistan's defence and a globally watched talent.", "height": 186, "weight": 75},
+"アブドゥラエフ": {"profile": "長身とフィジカルでウズベキスタンの最終ラインを支えるCB。空中戦の強さと堅実な対人守備で守備に安定をもたらすディフェンダー。", "profile_en": "A centre-back who anchors Uzbekistan's backline with height and physicality. Aerial strength and solid one-on-one defending bring stability to the defence.", "height": 187, "weight": 80},
+"モズゴボイ": {"profile": "豊富な運動量とパス能力でウズベキスタン中盤を支える若いCM。守備と展開の両面でチームに貢献するバランス型ミッドフィールダー。", "profile_en": "A young central midfielder who supports Uzbekistan's midfield with high energy and passing. Contributes both defensively and in distribution as a balanced player.", "height": 180, "weight": 74},
+"カリモフ": {"profile": "スピードと積極的な攻め上がりでウズベキスタンの右サイドを駆けるウイングバック。守備と攻撃を往復するスタミナが武器のサイドプレイヤー。", "profile_en": "A wing-back who powers Uzbekistan's right flank with pace and adventurous forward runs. His stamina to shuttle up and down is his main weapon.", "height": 178, "weight": 72},
+"ウルノフ": {"profile": "鋭いドリブルとスピードでウズベキスタンの前線を仕掛けるウインガー。サイドからの突破と推進力で相手守備に脅威を与えるアタッカー。", "profile_en": "A winger who threatens Uzbekistan's front line with sharp dribbling and pace. His flank breaks and drive make him a threat to opposing defences.", "height": 178, "weight": 70},
 "ヤフシボエフ": {"profile": "右SBとして代表に貢献するウズベキスタンのサイドプレイヤー。高い走力と攻守のバランスが高く評価される。", "profile_en": "A Uzbekistani wide player who contributes as right-back for the national team. Highly valued for his pace and balance between attack and defence.", "height": 179, "weight": 74},
 "トゥルスノフ": {"profile": "ウズベキスタン守備の柱となるCB。強靭なフィジカルと高い守備意識でゴール前を固める主力DF。", "profile_en": "A pillar of Uzbekistan's defence as centre-back. A key defender who secures the goal area with his physicality and high defensive awareness.", "height": 186, "weight": 83},
 "マフムドフ": {"profile": "CBとして守備ラインを支えるウズベキスタンのDF。強靭なフィジカルと安定したポジショニングで代表に貢献する。", "profile_en": "A Uzbekistani centre-back who underpins the defensive line. Contributes to the national team with his physicality and solid positioning.", "height": 184, "weight": 80},
@@ -3723,9 +3730,10 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   colombia2026: {
     name:"コロンビア",en_name:"Colombia",team_color:"#FCD116",flag:"🇨🇴",
-    default_system:"4-2-3-1",default_tactics:TACTICS_FREE,
-    default_keyplayer:8,default_marked_player:9,
-    default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
+    default_system:"4-1-2-3",default_tactics:TACTICS_FREE,
+    default_keyplayer:9,default_marked_player:9,
+    // 4-1-2-3 (=TM 4-3-3 offensiv / vs UZB 2026/06/18 TM準拠): GK Vargas / Muñoz-Sánchez-Lucumí-Mojica / Lerma / James-Puerta / Arias-Díaz / Suárez。不在Suárez追加
+    default_lineup:[0,1,3,2,4,17,9,18,7,8,26],
     players:[
       // GK: Camilo Vargas (est. OVR79, DIV78, HAN77, KIC74, REF79, SPD65, POS79)
       {name:"C・バルガス",en_name:"C.Vargas",long_name:"カミロ・バルガス",positions:["GK"],params:[50,50,50,50,79,65,50,50,50,50,74,50,50,50,50,50,50,50,50,50,50,50,50,78,77,50,79,74,75]},
@@ -3764,7 +3772,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CDM: Jefferson Lerma (est. OVR78, PAC72, SHO64, PAS75, DRI73, DEF80, PHY82)
       {name:"レルマ",en_name:"Lerma",long_name:"ジェファーソン・レルマ",positions:["DMF","CMF"],params:[82,82,72,70,74,80,72,72,72,74,70,60,62,66,50,52,72,64,80,82,80,78,78,50,50,78,72,76,75]},
       // Sub CM: Gustavo Puerta (est. OVR75, PAC76, SHO72, PAS78, DRI78, DEF62, PHY72)
-      {name:"プエルタ",en_name:"Puerta",long_name:"グスタボ・プエルタ",positions:["CMF","DMF"],params:[68,78,76,78,78,68,80,76,78,78,74,68,70,72,58,62,78,70,62,64,62,60,60,50,50,66,72,74,75]},
+      {name:"プエルタ",en_name:"Puerta",long_name:"グスタボ・プエルタ",positions:["CMF","DMF","OMF"],params:[68,78,76,78,78,68,80,76,78,78,74,68,70,72,58,62,78,70,62,64,62,60,60,50,50,66,72,74,75]},
       // Sub CM: Sebastián Gómez (est. OVR74, PAC71, SHO64, PAS76, DRI74, DEF70, PHY68)
       {name:"S・ゴメス",en_name:"S.Gomez",long_name:"セバスティアン・ゴメス",positions:["CMF","DMF"],params:[64,72,70,72,74,64,76,72,72,76,72,60,62,64,52,56,74,66,68,70,68,66,66,50,50,60,68,68,75]},
       // Sub CF: Cucho Hernández (est. OVR82, PAC88, SHO81, PAS72, DRI85, DEF40, PHY78)
@@ -3778,7 +3786,9 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CF: Miguel Borja (est. OVR76, PAC76, SHO76, PAS64, DRI66, DEF36, PHY80)
       {name:"M・ボルハ",en_name:"M.Borja",long_name:"ミゲル・ボルハ",positions:["CF"],params:[80,78,74,76,68,82,62,62,68,62,56,74,74,78,42,44,62,74,34,32,30,32,40,50,50,80,66,70,75]},
       // Sub CM: Stiven Alzate (est. OVR74, PAC76, SHO65, PAS74, DRI76, DEF60, PHY68)
-      {name:"アルサーテ",en_name:"Alzate",long_name:"スティベン・アルサーテ",positions:["CMF","DMF","右SMF"],params:[64,74,76,78,74,64,78,74,76,74,70,60,62,64,52,56,74,66,58,60,58,56,56,50,50,60,68,68,75]}
+      {name:"アルサーテ",en_name:"Alzate",long_name:"スティベン・アルサーテ",positions:["CMF","DMF","右SMF"],params:[64,74,76,78,74,64,78,74,76,74,70,60,62,64,52,56,74,66,58,60,58,56,56,50,50,60,68,68,75]},
+      // 26 CF: L.J.Suárez (FC26 OVR77) vs UZB先発・1トップ
+      {name:"L・スアレス",en_name:"L.J.Suarez",long_name:"ルイス・ハビエル・スアレス",positions:["CF"],params:[78,74,80,80,76,78,72,74,78,62,56,78,80,78,54,56,74,78,38,38,36,36,40,50,50,78,80,76,75]}
     ]
   },
   uruguay2026: {
@@ -5742,9 +5752,10 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   uzbekistan2026: {
     name:"ウズベキスタン",en_name:"Uzbekistan",team_color:"#1EB53A",flag:"🇺🇿",
-    default_system:"4-1-2-3",default_tactics:TACTICS_PRESS,
+    default_system:"3-4-3",default_tactics:TACTICS_COUNTER,
     default_keyplayer:10,default_marked_player:10,
-    default_lineup:[0,1,2,3,4,5,6,8,7,9,10],
+    // 3-4-3 flach (vs COL 2026/06/18 TM準拠・戦術カウンター): GK Yusupov / Khusanov-Ashurmatov-Abdullaev(3バック) / Nasrullaev-Shukurov-Mozgovoy-Karimov / Urunov-Shomurodov-Fayzullaev。不在6名追加
+    default_lineup:[26,17,28,27,29,5,30,15,7,31,10],
     players:[
       // GK: Eldor Shodiev (OVR66, DIV66, HAN64, KIC62, REF66, SPD60, POS64)
       {name:"ショディエフ",en_name:"Shodiev",long_name:"エルドル・ショディエフ",positions:["GK"],params:[50,50,50,50,66,60,50,50,50,50,62,50,50,50,50,50,50,50,50,50,50,50,50,66,64,50,64,62,75]},
@@ -5777,7 +5788,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub CB: Khasan Abdusalomov (OVR68)
       {name:"アブドサロモフ",en_name:"Abdusalomov",long_name:"ハサン・アブドサロモフ",positions:["CB"],params:[72,70,64,62,62,70,54,54,60,58,54,28,26,34,24,28,52,28,66,68,68,67,66,50,50,68,56,58,75]},
       // Sub RB: Sherzod Nasrullayev (OVR70)
-      {name:"ナスルラエフ",en_name:"Nasrullayev",long_name:"シェルゾド・ナスルラエフ",positions:["右SB","左SB"],params:[70,72,72,72,67,66,62,62,67,62,58,38,40,42,32,36,62,42,66,68,68,67,66,50,50,60,60,60,75]},
+      {name:"ナスルラエフ",en_name:"Nasrullayev",long_name:"シェルゾド・ナスルラエフ",positions:["右SB","左SB","左SMF"],params:[70,72,72,72,67,66,62,62,67,62,58,38,40,42,32,36,62,42,66,68,68,67,66,50,50,60,60,60,75]},
       // Sub LB: Dilshod Komilov (OVR68)
       {name:"D・コミロフ",en_name:"D.Komilov",long_name:"ディルショド・コミロフ",positions:["左SB"],params:[68,70,68,68,64,64,60,60,64,60,56,32,30,36,26,30,58,36,64,66,64,64,62,50,50,58,56,56,75]},
       // Sub DMF: Rustam Ashurmatov (OVR70)
@@ -5797,7 +5808,20 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub RB: Mansur Jumayev (OVR66)
       {name:"ジュマエフ",en_name:"Jumayev",long_name:"マンスル・ジュマエフ",positions:["右SB"],params:[66,68,66,66,62,62,58,58,62,58,54,30,28,34,24,28,56,34,62,64,62,62,60,50,50,58,54,54,75]},
       // Sub LW: Saidakbar Mirzayev (OVR65)
-      {name:"ミルザエフ",en_name:"Mirzayev",long_name:"サイダクバル・ミルザエフ",positions:["左WG"],params:[58,62,68,70,65,52,62,62,65,58,54,50,52,54,40,44,60,50,28,30,30,29,28,50,50,44,54,52,75]}
+      {name:"ミルザエフ",en_name:"Mirzayev",long_name:"サイダクバル・ミルザエフ",positions:["左WG"],params:[58,62,68,70,65,52,62,62,65,58,54,50,52,54,40,44,60,50,28,30,30,29,28,50,50,44,54,52,75]},
+      // ▼ vs COL(2026/06/18)先発の新規。KhusanovのみFC26実OVR・他はFC26未掲載のため推定
+      // 26 GK: U.Yusupov (推定OVR71)
+      {name:"ユスポフ",en_name:"Yusupov",long_name:"ウトキル・ユスポフ",positions:["GK"],params:[50,50,50,50,71,55,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,71,70,50,71,71,75]},
+      // 27 左CB: A.Khusanov (FC26 OVR77・俊足CB)
+      {name:"クサノフ",en_name:"Khusanov",long_name:"アブドゥコディル・クサノフ",positions:["CB"],params:[82,78,85,84,74,82,64,62,74,60,54,30,28,36,24,28,62,30,76,77,76,76,80,50,50,80,74,75,75]},
+      // 28 右CB: A.Abdullaev (推定OVR70)
+      {name:"アブドゥラエフ",en_name:"Abdullaev",long_name:"アブドゥラ・アブドゥラエフ",positions:["CB"],params:[78,74,72,70,68,76,54,54,62,58,54,32,30,38,26,30,54,30,70,72,70,70,72,50,50,76,66,68,75]},
+      // 29 CM: A.Mozgovoy (推定OVR71)
+      {name:"モズゴボイ",en_name:"Mozgovoy",long_name:"アクマル・モズゴボイ",positions:["DMF","CMF"],params:[72,76,72,72,68,68,70,70,71,68,64,50,52,56,44,48,68,56,68,70,68,68,68,50,50,66,66,69,75]},
+      // 30 右WB: B.Karimov (推定OVR69)
+      {name:"カリモフ",en_name:"Karimov",long_name:"ベフルズ・カリモフ",positions:["右SB","右SMF"],params:[68,74,78,78,68,66,66,66,72,62,58,46,48,50,38,42,66,50,66,68,66,66,68,50,50,64,64,66,75]},
+      // 31 WG: O.Urunov (推定OVR72)
+      {name:"ウルノフ",en_name:"Urunov",long_name:"オストン・ウルノフ",positions:["左WG","右WG","OMF"],params:[62,70,82,84,74,60,76,74,80,64,60,64,66,66,48,52,74,64,40,42,40,40,42,50,50,56,68,68,75]}
     ]
   },
   iraq2026: {
