@@ -4107,7 +4107,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     default_system:"4-4-2",default_tactics:TACTICS_PRESS,
     default_keyplayer:9,default_marked_player:9,
     // default_lineupは「W杯初戦」vs BiH(2026/06/13 1-1)のXIで固定(4-4-2): Crépeau / Johnston-De Fougerolles-Cornelius-Laryea / Buchanan-Koné-Eustáquio-L.Millar / J.David-Oluwaseyi。FC26正式26名へ刷新済(Borjan/K.Miller/Adekugbe/Mavinga等の旧MLS勢を整理し Bombito/Sigur/A.Jones/Waterman/N.Saliba/Choinière/Ahmed/Shaffelburg/Flores/P.David/Goodman を追加)。Davies(主将)は初戦/第2節とも控え
-    default_lineup:[0,1,2,3,4,5,6,7,22,9,24],
+    default_lineup:[0,1,2,3,4,7,6,5,22,9,24],
     players:[
       // ▼ 選手配列（先頭11は第2節vsカタール布陣＝Ahmed/Larin先発。default_lineupは上記＝初戦vs BiHのXIでMillar/Oluwaseyi先発）
       // GK: Crépeau (FC26 OVR77)
