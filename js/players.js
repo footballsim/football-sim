@@ -4102,7 +4102,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 
   canada2026: {
     name:"カナダ",en_name:"Canada",team_color:"#FF0000",flag:"🇨🇦",
-    default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
+    default_system:"4-4-2",default_tactics:TACTICS_PRESS,
     default_keyplayer:9,default_marked_player:10,
     default_lineup:[11,1,26,3,13,5,9,7,17,10,27],
     players:[
@@ -5616,7 +5616,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
   qatar2026: {
     name:"カタール",en_name:"Qatar",team_color:"#8D1B3D",flag:"🇶🇦",
-    default_system:"3-4-3",default_tactics:TACTICS_PRESS,
+    default_system:"3-4-3",default_tactics:TACTICS_COUNTER,
     default_keyplayer:9,default_marked_player:10,
     default_lineup:[26,17,1,27,29,16,28,13,30,7,31],
     players:[
