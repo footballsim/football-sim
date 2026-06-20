@@ -3454,7 +3454,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // Sub RB: Scally (FC26 OVR74, PAC83, SHO49, PAS60, DRI69, DEF71, PHY76)
       {name:"スカリー",en_name:"Scally",long_name:"ジョー・スカリー",positions:["右SB","左SB"],params:[70,85,84,80,72,80,74,68,76,69,62,40,42,44,36,52,66,44,71,74,70,70,72,50,50,72,60,70,75]},
       // Sub RB: Freeman (FC26 OVR65, PAC82, SHO57, PAS62, DRI67, DEF58, PHY73)
-      {name:"フリーマン",en_name:"Freeman",long_name:"アレックス・フリーマン",positions:["右SB"],params:[68,76,80,83,72,82,68,66,74,62,56,46,48,48,38,50,64,48,56,60,58,58,56,50,50,68,56,62,75]},
+      // 2026/06/20 vs豪 POTM+得点で上方修正(守備/POS/offが過小): intercept56→60 tackle60→64 cover58→62 offensive48→52 POS56→62 mentality62→66
+      {name:"フリーマン",en_name:"Freeman",long_name:"アレックス・フリーマン",positions:["右SB"],params:[68,76,80,83,72,82,68,66,74,62,56,46,48,48,38,50,64,52,60,64,58,62,56,50,50,68,62,66,75]},
       // Sub LB: Arfsten (FC26 OVR67, PAC75, SHO61, PAS60, DRI69, DEF60, PHY65)
       {name:"アーフステン",en_name:"Arfsten",long_name:"マックス・アーフステン",positions:["左SB","CMF"],params:[60,70,74,73,68,64,77,68,72,60,56,50,52,52,42,52,66,52,58,62,60,60,58,50,50,60,58,64,75]},
       // Sub CDM: Roldan (FC26 OVR74, PAC77, SHO64, PAS69, DRI73, DEF71, PHY79)
