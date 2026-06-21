@@ -5979,8 +5979,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     default_keyplayer:7,default_marked_player:10,
     default_lineup:[0,28,18,26,27,29,6,5,30,32,31],
     players:[
-      // GK: Eloy Room (OVR73, DIV74, HAN70, KIC66, REF73, SPD56, POS70)
-      {name:"E・ルーム",en_name:"E.Room",long_name:"エロイ・ルーム",positions:["GK"],params:[50,50,50,50,73,56,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,74,70,50,70,66,75]},
+      // GK: Eloy Room — 2026/06/21 vsエクアドル 評価10・15セーブ・POTM(完封)で上方修正: REF73→78 DIV74→79 HAN70→74 POS70→75 MENT66→72
+      {name:"E・ルーム",en_name:"E.Room",long_name:"エロイ・ルーム",positions:["GK"],params:[50,50,50,50,78,56,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,79,74,50,75,72,75]},
       // RB: Cuco Martina (OVR70, PAC72, SHO48, PAS66, DRI68, DEF70, PHY68)
       {name:"C・マルティナ",en_name:"C.Martina",long_name:"クコ・マルティナ",positions:["右SB","左SB"],params:[68,70,72,72,70,64,66,66,70,66,62,40,42,44,34,38,66,44,68,70,68,68,66,50,50,60,62,62,75]},
       // CB: Jair Meder (OVR71, PAC68, SHO42, PAS62, DRI60, DEF72, PHY76)
