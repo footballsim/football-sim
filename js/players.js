@@ -3531,7 +3531,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // RW: Francisco Conceição (SoFIFA FC26 OVR79, PAC88, SHO73, PAS74, DRI85, DEF37, PHY50)
       {name:"コンセイサン",en_name:"Conceicao",long_name:"フランシスコ・コンセイサン",positions:["右WG","左WG","OMF","右SMF"],params:[46,54,88,88,86,48,88,84,86,74,68,66,68,66,58,64,84,66,34,37,33,32,30,50,50,44,68,68,75]},
       // CF: Cristiano Ronaldo (SoFIFA FC26 OVR85, PAC76, SHO88, PAS76, DRI80, DEF34, PHY76)
-      {name:"ロナウド",en_name:"Ronaldo",long_name:"クリスティアーノ・ロナウド",positions:["CF","左WG","右WG"],params:[76,76,76,78,78,80,78,78,78,76,72,90,88,88,82,76,78,84,30,34,30,29,28,50,50,82,82,86,75]},
+      {name:"ロナウド",en_name:"Ronaldo",long_name:"クリスティアーノ・ロナウド",positions:["CF","左WG","右WG"],params:[76,70,72,70,78,80,72,78,78,76,72,90,88,88,82,76,78,84,30,34,30,29,28,50,50,82,82,86,75]}, // 2026/06下方修正: 41歳・WC6.1。決定力は維持し身体のみ老化反映(スタミナ76→70,速度76→72,加速78→70,敏捷78→72)
       // LW: Rafael Leão (SoFIFA FC26 OVR84, PAC93, SHO78, PAS80, DRI86, DEF28, PHY75)
       {name:"レオン",en_name:"Leao",long_name:"ラファエル・レオン",positions:["左WG","CF","OMF","右SMF","左SMF"],params:[72,76,93,92,89,72,88,86,89,80,74,72,74,74,62,68,86,76,24,28,24,23,22,50,50,62,76,74,75]},
       // Sub RB: Matheus Nunes (SoFIFA FC26 OVR82, PAC87, SHO70, PAS79, DRI79, DEF78, PHY77) - used as RB
@@ -3594,7 +3594,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // CAM: De Bruyne (FC26 OVR87, PAC66, SHO83, PAS92, DRI84, DEF65, PHY72)
       {name:"デ・ブライネ",en_name:"De Bruyne",long_name:"ケヴィン・デ・ブライネ",positions:["CMF","OMF"],params:[74,66,66,65,89,70,68,89,75,92,93,78,81,90,83,93,85,87,65,70,65,64,73,50,50,55,89,87,75]},
       // ST: Lukaku (FC26 OVR83, PAC78, SHO82, PAS75, DRI74, DEF41, PHY83)
-      {name:"ルカク",en_name:"Lukaku",long_name:"ロメル・ルカク",positions:["CF"],params:[94,74,86,71,84,92,55,80,76,80,70,84,88,86,60,74,76,82,36,40,35,38,80,50,50,83,84,82,75]},
+      {name:"ルカク",en_name:"Lukaku",long_name:"ロメル・ルカク",positions:["CF"],params:[94,70,80,71,80,92,55,80,76,80,70,84,84,86,60,74,76,82,36,40,35,38,80,50,50,83,84,82,75]}, // 2026/06下方修正: 33歳・WC対イラン5.7・途中交代。速度86→80,スタミナ74→70,反応84→80,センス88→84
       // Sub GK: Lammens (FC26 OVR81, DIV79, HAN77, KIC71, REF77, SPD25, POS79)
       {name:"ランメンス",en_name:"Lammens",long_name:"センヌ・ランメンス",positions:["GK"],params:[50,50,50,50,77,25,50,50,50,50,71,50,50,50,50,50,50,50,50,50,50,50,50,79,77,50,79,72,75]},
       // Sub GK: Penders (FC26 OVR77, estimated)
@@ -3714,7 +3714,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // LSM: Perisic (FC26 OVR80, PAC77, SHO72, PAS76, DRI80, DEF58, PHY78)
       {name:"ペリシッチ",en_name:"Perisic",long_name:"イヴァン・ペリシッチ",positions:["左SMF","左WG","左SB"],params:[76,80,76,78,76,76,80,78,76,76,72,70,72,74,58,64,80,76,54,52,50,52,60,50,50,74,74,76,75]},
       // OMF: Modric (FC26 OVR84, PAC78, SHO72, PAS92, DRI88, DEF67, PHY68)
-      {name:"モドリッチ",en_name:"Modric",long_name:"ルカ・モドリッチ",positions:["OMF","CMF","DMF"],params:[64,76,76,78,82,62,90,88,82,92,86,68,70,72,72,76,90,86,64,66,64,62,62,50,50,60,84,84,75]},
+      {name:"モドリッチ",en_name:"Modric",long_name:"ルカ・モドリッチ",positions:["OMF","CMF","DMF"],params:[64,76,70,72,82,62,80,80,76,86,82,68,70,72,72,76,80,80,64,66,64,62,62,50,50,60,84,84,75]}, // 2026/06下方修正: 40歳・WC6.0・Sofascore ATT64/TEC70。身体/技術を下げパスは維持(敏捷90→80,ボール90→80,速度↓,Sパス92→86)
       // CF: Petkovic (FC26 OVR74, PAC66, SHO72, PAS63, DRI67, DEF40, PHY80)
       {name:"ペトコビッチ",en_name:"Petkovic",long_name:"ブルーノ・ペトコビッチ",positions:["CF"],params:[80,78,64,68,66,82,64,64,66,62,58,72,72,76,44,46,64,76,36,36,34,36,44,50,50,80,68,72,75]},
       // Sub GK: Grbic (FC26 OVR75, DIV76, HAN74, KIC71, REF76, SPD75, POS74)
@@ -3848,7 +3848,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       // CF: D.Nunez (FC26 OVR79, PAC88, SHO79, PAS72, DRI76, DEF49, PHY82)
       {name:"D・ヌニェス",en_name:"D.Nunez",long_name:"ダーウィン・ヌニェス",positions:["CF","左WG"],params:[82,82,88,89,82,80,74,76,82,70,64,78,76,80,52,50,74,78,44,44,42,42,46,50,50,80,76,74,75]},
       // Sub GK: Muslera (FC26 OVR79, DIV81, HAN80, KIC66, REF77, SPD43, POS78)
-      {name:"ムスレラ",en_name:"Muslera",long_name:"フェルナンド・ムスレラ",positions:["GK"],params:[50,50,50,50,77,43,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,81,80,50,78,76,75]},
+      {name:"ムスレラ",en_name:"Muslera",long_name:"フェルナンド・ムスレラ",positions:["GK"],params:[50,50,50,50,73,43,50,50,50,50,66,50,50,50,50,50,50,50,50,50,50,50,50,77,76,50,74,76,75]}, // 2026/06下方修正: 40歳・WC6.4/5.4・両戦失点直結ミス・GP-1.09。REF/DIV/HAN/POSを各-4
       // Sub GK: Mele (est. OVR72, DIV72, HAN70, KIC68, REF73, SPD55, POS70)
       {name:"メレ",en_name:"Mele",long_name:"サンティアゴ・メレ",positions:["GK"],params:[50,50,50,50,73,55,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,72,70,50,70,68,75]},
       // Sub CB: S.Bueno (FC26 OVR76, PAC50, SHO31, PAS56, DRI56, DEF77, PHY77)
