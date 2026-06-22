@@ -2146,3 +2146,248 @@ body {
   text-align: center;
   font-size: clamp(30px, 7.5vw, 52px);
 }
+
+/* ============================================================
+   日本代表・運命の分岐（JWC）
+   ============================================================ */
+.top-menu-jwc {
+  background: linear-gradient(135deg, rgba(150,40,90,0.5) 0%, rgba(255,90,150,0.16) 100%);
+  border-color: rgba(255,120,170,0.4);
+}
+
+/* 実行前プレビュー */
+.jwc-pre-card {
+  max-width: 360px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.jwc-pre-title {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 10px;
+}
+.jwc-pre-teams { display: flex; flex-direction: column; gap: 6px; }
+.jwc-pre-team {
+  font-size: 14px;
+  color: #fff;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+}
+.jwc-pre-me {
+  background: linear-gradient(90deg, rgba(188,0,45,0.5), rgba(188,0,45,0.12));
+  border: 1px solid rgba(255,90,120,0.5);
+  font-weight: 800;
+}
+
+/* セクション共通 */
+.jwc-section { margin-bottom: 26px; }
+.jwc-sec-title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 1.5px;
+  margin: 4px 0 14px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* 総合ヒーロー */
+.jwc-hero {
+  max-width: 560px;
+  margin: 0 auto 22px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 16px 12px;
+}
+.jwc-hero-row { display: flex; justify-content: space-around; align-items: center; }
+.jwc-hero-item { text-align: center; flex: 1; }
+.jwc-hero-num { font-size: clamp(28px, 8vw, 40px); font-weight: 900; line-height: 1; }
+.jwc-hero-lbl { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 6px; }
+
+/* 順位分布スタックバー */
+.jwc-stack {
+  max-width: 600px;
+  margin: 0 auto 12px;
+  display: flex;
+  height: 26px;
+  border-radius: 8px;
+  overflow: hidden;
+  gap: 2px;
+}
+.jwc-stack-seg { height: 100%; transition: width 0.4s; }
+.jwc-stack-legend {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 16px;
+}
+.jwc-leg { font-size: 12px; color: rgba(255,255,255,0.75); display: inline-flex; align-items: center; gap: 6px; }
+.jwc-leg b { color: #fff; }
+.jwc-leg-dot { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+
+/* 優勝確率くらべ */
+.jwc-compare { display: flex; gap: 10px; max-width: 600px; margin: 0 auto 14px; }
+.jwc-cmp-card {
+  flex: 1;
+  border: 2px solid;
+  border-radius: 14px;
+  padding: 14px 6px 12px;
+  text-align: center;
+}
+.jwc-cmp-head { font-size: 13px; font-weight: 800; margin-bottom: 8px; }
+.jwc-cmp-champ { font-size: clamp(30px, 9vw, 44px); font-weight: 900; line-height: 1; }
+.jwc-cmp-unit { font-size: 18px; font-weight: 700; }
+.jwc-cmp-sub { font-size: 11px; color: rgba(255,255,255,0.5); margin: 2px 0 8px; }
+.jwc-cmp-fin { font-size: 11px; color: rgba(255,255,255,0.7); }
+.jwc-cmp-fin b { color: #7ec8f0; font-size: 13px; }
+
+/* 読みどころ */
+.jwc-insight {
+  max-width: 600px;
+  margin: 0 auto;
+  background: rgba(0,0,0,0.25);
+  border-left: 3px solid #ffd700;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.jwc-insight-head { font-size: 12px; font-weight: 800; color: #ffd700; margin-bottom: 6px; }
+.jwc-insight-body { font-size: 12.5px; line-height: 1.85; color: rgba(255,255,255,0.9); }
+.jwc-insight-body b { color: #fff; font-weight: 800; }
+
+/* タブ */
+.jwc-tab-hint { text-align: center; font-size: 11px; color: rgba(255,255,255,0.45); margin-bottom: 8px; }
+.jwc-tabs { display: flex; gap: 6px; max-width: 480px; margin: 0 auto 16px; }
+.jwc-tab {
+  flex: 1;
+  padding: 11px 4px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+/* シナリオ詳細 */
+.jwc-empty { text-align: center; color: rgba(255,255,255,0.4); padding: 28px; font-size: 13px; }
+.jwc-d-block {
+  max-width: 600px;
+  margin: 0 auto 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.jwc-d-title { font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 12px; }
+.jwc-d-note { font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.4); }
+
+/* 勝ち上がりカーブ */
+.jwc-rung { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.jwc-rung-lbl { width: 64px; font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 700; flex-shrink: 0; text-align: right; }
+.jwc-rung-bar { flex: 1; }
+.jwc-rung-pct { width: 46px; text-align: right; font-size: 14px; font-weight: 800; flex-shrink: 0; }
+
+/* 最有力ルート */
+.jwc-path { display: flex; flex-direction: column; align-items: center; }
+.jwc-path-step {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+.jwc-path-rd { width: 76px; font-size: 10px; color: rgba(255,255,255,0.5); font-weight: 700; flex-shrink: 0; }
+.jwc-path-team { flex: 1; font-size: 13px; color: #fff; font-weight: 700; }
+.jwc-path-pct { font-size: 12px; color: rgba(255,255,255,0.55); font-weight: 700; }
+.jwc-path-arrow { color: rgba(255,255,255,0.25); font-size: 10px; margin: 2px 0; }
+
+/* ラウンド別 対戦相手 */
+.jwc-round { margin-bottom: 16px; }
+.jwc-round:last-child { margin-bottom: 0; }
+.jwc-round-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.jwc-round-name { font-size: 13px; font-weight: 800; color: #fff; }
+.jwc-round-meta { display: inline-flex; gap: 10px; align-items: baseline; }
+.jwc-round-reach { font-size: 10px; color: rgba(255,255,255,0.4); }
+.jwc-round-win { font-size: 12px; font-weight: 800; }
+.jwc-opp-list { display: flex; flex-direction: column; gap: 5px; }
+.jwc-opp { display: flex; align-items: center; gap: 10px; }
+.jwc-opp-name { width: 118px; font-size: 12px; color: rgba(255,255,255,0.85); flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jwc-opp-bar { flex: 1; }
+.jwc-opp-pct { width: 34px; text-align: right; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.jwc-opp-hh { width: 44px; text-align: right; font-size: 10px; font-weight: 700; color: #9be8b0; flex-shrink: 0; }
+
+/* トーナメント表（日本目線の縦型ブラケット） */
+.jwc-bracket { display: flex; flex-direction: column; align-items: center; }
+.jwc-bk-champ {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  background: linear-gradient(135deg, rgba(184,134,11,0.5), rgba(255,215,0,0.14));
+  border: 2px solid #ffd700; border-radius: 14px; padding: 9px 26px; text-align: center;
+  box-shadow: 0 0 18px rgba(255,215,0,0.18);
+}
+.jwc-bk-crown { font-size: 28px; line-height: 1.1; }
+.jwc-bk-champ-txt { font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 700; letter-spacing: 1px; }
+.jwc-bk-champ-pct { font-size: 26px; font-weight: 900; color: #ffd700; line-height: 1.1; }
+.jwc-bk-arrow { color: rgba(255,255,255,0.28); font-size: 11px; line-height: 1.5; }
+.jwc-bk-rung {
+  width: 100%; max-width: 360px; display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  border-left-width: 4px; border-radius: 10px; padding: 9px 12px; box-sizing: border-box;
+}
+.jwc-bk-dim { opacity: 0.6; }
+.jwc-bk-rd { width: 62px; flex-shrink: 0; }
+.jwc-bk-rd-nm { font-size: 11px; font-weight: 800; color: #fff; }
+.jwc-bk-reach { font-size: 9px; color: rgba(255,255,255,0.42); margin-top: 1px; white-space: nowrap; }
+.jwc-bk-mid { flex: 1; min-width: 0; }
+.jwc-bk-o1 { font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jwc-bk-o1-nm { font-weight: 700; }
+.jwc-bk-o1 b { color: rgba(255,255,255,0.6); font-weight: 700; }
+.jwc-bk-o2 { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jwc-bk-win { width: 44px; flex-shrink: 0; text-align: right; font-size: 17px; font-weight: 900; line-height: 1; }
+.jwc-bk-win small { font-size: 10px; font-weight: 700; }
+.jwc-bk-win-lbl { font-size: 8px; color: rgba(255,255,255,0.4); font-weight: 700; margin-top: 2px; }
+.jwc-bk-start {
+  width: 100%; max-width: 360px; display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: linear-gradient(90deg, rgba(188,0,45,0.55), rgba(188,0,45,0.22));
+  border: 1px solid rgba(255,90,120,0.5); border-radius: 12px; padding: 11px 14px; box-sizing: border-box;
+}
+.jwc-bk-jp { font-size: 15px; font-weight: 800; color: #fff; }
+.jwc-bk-scen { font-size: 11px; font-weight: 800; color: #10131a; padding: 3px 10px; border-radius: 12px; white-space: nowrap; }
+
+/* 全体トーナメント表（公式ブラケット構造のSVG） */
+.jwc-fb-note {
+  max-width: 600px; margin: 0 auto 10px; text-align: center;
+  font-size: 11.5px; line-height: 1.7; color: rgba(255,255,255,0.7);
+}
+.jwc-fb-note b { color: #fff; font-weight: 700; }
+.jwc-fb-scroll {
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  background: rgba(0,0,0,0.22); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 8px;
+}
+.jwc-fb-scroll svg { display: block; height: auto; }
+.jwc-fb-hint {
+  text-align: center; font-size: 10px; color: rgba(255,255,255,0.4);
+  margin-top: 6px; letter-spacing: 1px;
+}
+
+@media (max-width: 480px) {
+  .jwc-compare { gap: 6px; }
+  .jwc-cmp-card { padding: 12px 3px 10px; }
+  .jwc-opp-name { width: 78px; }
+  .jwc-opp-hh { width: 40px; }
+  .jwc-bk-rd { width: 54px; }
+  .jwc-bk-o1 { font-size: 12px; }
+}

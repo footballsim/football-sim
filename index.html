@@ -91,6 +91,13 @@
           <div class="top-menu-desc" id="top-desc-wcsim">実際の組み合わせで全104試合を一括演算</div>
         </div>
       </div>
+      <div class="top-menu-card top-menu-jwc" onclick="showJWC()">
+        <div class="top-menu-icon">🔮</div>
+        <div>
+          <div class="top-menu-label" id="top-lbl-jwc">日本代表・運命の分岐</div>
+          <div class="top-menu-desc" id="top-desc-jwc">予選1位・2位・3位、それぞれの未来を一括占う</div>
+        </div>
+      </div>
       <div class="top-menu-card top-menu-single" onclick="showScreen('single')">
         <div class="top-menu-icon">⚽</div>
         <div>
@@ -145,6 +152,21 @@
     <div class="screen-title-text" style="color:#ffffff" id="wcsim-stats-title">📊 大会スタッツ詳細</div>
   </div>
   <div id="wcsim-stats-content" style="width:100%;max-width:880px;padding:14px 14px 48px;box-sizing:border-box"></div>
+</div>
+
+<!-- JWC SCREEN: 日本代表・運命の分岐（予選順位別シミュレート） -->
+<div id="screen-jwc" class="screen" style="background:linear-gradient(160deg,#06183f 0%,#0a275f 55%,#0d1b3e 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div class="screen-header" style="background:rgba(0,0,0,0.32);width:100%">
+    <button class="back-btn" style="color:#fff" onclick="showScreen('title')">← 戻る</button>
+    <div class="screen-title-text" style="color:#ffffff" id="jwc-title">🔮 運命の分岐</div>
+  </div>
+  <div style="width:100%;max-width:880px;padding:14px 14px 48px;box-sizing:border-box">
+    <div id="jwc-intro" style="text-align:center;color:rgba(255,255,255,0.8);font-size:12.5px;line-height:1.85;margin:4px auto 14px;max-width:600px"></div>
+    <div style="max-width:380px;margin:0 auto 18px">
+      <button id="jwc-run-btn" class="start-btn" onclick="runJWC()">🎲 3つの運命を一括シミュレート</button>
+    </div>
+    <div id="jwc-content"></div>
+  </div>
 </div>
 
 <!-- SINGLE MATCH SCREEN: チーム1選択 -->
@@ -765,6 +787,7 @@
 <script src="js/narration.js?v=20260617t"></script>
 <script src="js/ui.js?v=20260617t"></script>
 <script src="js/tournament.js?v=20260617t"></script>
+<script src="js/japanwc.js?v=20260622r"></script>
 <div id="oop-toast"></div>
 </body>
 </html>
