@@ -1,0 +1,47 @@
+rules_version = '2';
+
+// =============================================================
+// Firestore セキュリティルール（football-sim / みんなの戦績）
+//
+// 【運用】Firebase Console（プロジェクト football-simulator-4710f）
+//   → Firestore Database → ルール で公開・管理している（CLIは未使用）。
+//   このファイルはライブ内容の版管理ミラー＝記録用。Console を正とし、
+//   ルール本体（allow 文）は常に Console と一致させること。
+//   ※ firebase.json / .firebaserc も残してあるので、将来 CLI に切り替える
+//      場合は `firebase deploy --only firestore:rules` でこのファイルを反映可。
+//
+// 【経緯】2026-06-24、テストモード初期ルール
+//   `allow read, write: if request.time < timestamp.date(2026, 6, 24)`
+//   が当日失効し read が 403 PERMISSION_DENIED に。「みんなの戦績」が
+//   「データの取得に失敗しました」になったため、恒久ルール化した。
+//
+// 【方針】wc_match_results は認証なしの公開集計。read / create を開放し、
+//   改ざん・削除（update / delete）は禁止。
+//   書き込みスキーマ（js/ui.js writeWCMatchResult）:
+//     matchType  : 'wc_group' | 'wc_r32' | 'wc_r16' | 'wc_qf' | 'wc_sf' | 'wc_final'
+//     result     : 'win' | 'loss' | 'draw'
+//     opponent   : string（相手の英語名）
+//     resultType : 'regular' | 'et' | 'pk'
+//     ts         : serverTimestamp
+// =============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /wc_match_results/{doc} {
+      allow read: if true;
+
+      allow create: if request.resource.data.result in ['win', 'loss', 'draw']
+                    && request.resource.data.resultType in ['regular', 'et', 'pk']
+                    && request.resource.data.matchType is string
+                    && request.resource.data.opponent is string;
+
+      allow update, delete: if false;
+    }
+
+    // 上記以外のコレクションはすべて拒否。
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
