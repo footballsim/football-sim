@@ -72,39 +72,33 @@ async function main() {
       }
     }
   }
-  // 形態学オープン＋再構成: 細い橋を切って主役だけ残す。色キーの取り残し（観客の塊等）が
-  //   細い橋で主役に繋がっても、R回収縮で橋が切れ→最大連結成分(主役)→R回膨張して元形状と論理積で復元。
-  const R = parseInt(process.env.KEYOUT_R || '3', 10);
-  const M = new Uint8Array(N); for (let p = 0; p < N; p++) M[p] = alpha[p] ? 1 : 0;
-  const erode = (s) => { const o = new Uint8Array(N); for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) { const p = y * W + x; if (s[p] && s[p - 1] && s[p + 1] && s[p - W] && s[p + W]) o[p] = 1; } return o; };
-  const dilate = (s) => { const o = new Uint8Array(N); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const p = y * W + x; if (s[p] || (x > 0 && s[p - 1]) || (x < W - 1 && s[p + 1]) || (y > 0 && s[p - W]) || (y < H - 1 && s[p + W])) o[p] = 1; } return o; };
-  let Me = M; for (let k = 0; k < R; k++) Me = erode(Me);
-  const comp = new Int32Array(N).fill(-1); const q = new Int32Array(N);
-  let best = -1, bestSize = 0;
+  // 仕上げ: サイズ T 以上の連結成分を全て残す（最大=胴体, 次=ポインティングの手 等。観客の塊はフラッドで除去済み）。
+  //   微小ノイズ(<T)を捨てる。手は手首の僅かな隙間で別成分になり得るが、サイズ閾で救済される。
+  const T = parseInt(process.env.KEYOUT_T || '3000', 10);
+  const comp = new Int32Array(N).fill(-1); const q = new Int32Array(N); const keepRoot = {};
+  let nKept = 0, total = 0;
   for (let s = 0; s < N; s++) {
-    if (!Me[s] || comp[s] !== -1) continue;
+    if (alpha[s] === 0 || comp[s] !== -1) continue;
     let head = 0, tail = 0; q[tail++] = s; comp[s] = s; let size = 0;
     while (head < tail) {
       const p = q[head++]; size++; const x = p % W, y = (p / W) | 0;
       for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
         if (!dx && !dy) continue; const nx = x + dx, ny = y + dy;
         if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-        const np = ny * W + nx; if (Me[np] && comp[np] === -1) { comp[np] = s; q[tail++] = np; }
+        const np = ny * W + nx; if (alpha[np] !== 0 && comp[np] === -1) { comp[np] = s; q[tail++] = np; }
       }
     }
-    if (size > bestSize) { bestSize = size; best = s; }
+    if (size >= T) { keepRoot[s] = 1; nKept++; total += size; }
   }
-  let K = new Uint8Array(N); for (let p = 0; p < N; p++) K[p] = (Me[p] && comp[p] === best) ? 1 : 0;
-  for (let k = 0; k < R; k++) K = dilate(K);
   let minX = W, minY = H, maxX = -1, maxY = -1;
   for (let p = 0; p < N; p++) {
-    const keep = K[p] && M[p];
+    const keep = alpha[p] !== 0 && keepRoot[comp[p]];
     data[p * C + 3] = keep ? 255 : 0;
     if (keep) { const x = p % W, y = (p / W) | 0; if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
   }
   if (maxX < 0) { console.error('nothing kept'); process.exit(1); }
   const cw = maxX - minX + 1, ch = maxY - minY + 1;
-  console.log('kept blob', bestSize, 'px; bbox', cw + 'x' + ch, 'at', minX + ',' + minY);
+  console.log('kept', nKept, 'components', total, 'px; bbox', cw + 'x' + ch, 'at', minX + ',' + minY);
   let img = sharp(Buffer.from(data), { raw: { width: W, height: H, channels: C } }).extract({ left: minX, top: minY, width: cw, height: ch });
   if (scaleH && ch > scaleH) img = img.resize({ height: scaleH, kernel: 'nearest' });
   await img.png().toFile(outPath);

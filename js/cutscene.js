@@ -211,6 +211,7 @@ function _csAttackRight(sc) {
 function renderSceneArt(sc) {
   var on = SCENE_ART_ENABLED && (typeof window === 'undefined' || window.SCENE_ART_ENABLED !== false);
   if (!on || typeof document === 'undefined' || !sc) return null;
+  if (sc.result === 'ファール') return _renderFoulScene(sc);   // ファール=主審カット（全アクション共通・recolorなし・笛＆FOUL!）
   if (sc.action === 'ミドルシュート') return _renderMidShotScene(sc);   // 専用ミドル: 成功(抜け)=直進 / ブロック=右上deflect。ゴールでも goal-net でなくミドル演出。
   if (sc.result === 'ゴール！！') return _renderGoalScene(sc);   // 全ゴール=新ゴール演出（旧バイシクル廃止）
   // ヘディング競り合い（クロス/セットプレー段, result=成功/失敗）= 専用ヘディング演出。シュート段(scenario=シュート)は下の通常処理へ。
@@ -227,7 +228,14 @@ function renderSceneArt(sc) {
   // ロングパスは2フレーム＋コードのボールで横長カットインを動的描画（攻撃側チーム色）。
   if (moment === 'longpass' && entry.fileA) return _renderLongpassScene(sc, entry);
   // ショートパスは単一フレームのパサー＋コードのボールで短い横パス。
-  if (moment === 'shortpass' && entry.file) return _renderShortpassScene(sc, entry);
+  //   失敗/カウンター = 専用ポーズが無いので、ロングパス失敗と同じカット・タブロー演出を流用。
+  if (moment === 'shortpass' && entry.file) {
+    if (sc.result === '失敗' || sc.result === 'カウンター') {
+      var _lpFail = _pickCutscene('longpass', sc.offence && sc.offence.team_color);
+      if (_lpFail && _lpFail.fileA) return _renderLongpassScene(sc, _lpFail);
+    }
+    return _renderShortpassScene(sc, entry);
+  }
   // シュート: 枠外=ニアポスト脇を外す演出、GK防いだ！=GKカット、ブロック=シューター演出。（ゴールは上で処理）
   if (moment === 'shot' && entry.file) {
     if (sc.result === '枠を外した！') return _renderMissScene(sc);
@@ -1345,6 +1353,79 @@ function _renderMidShotScene(sc, opts) {
     ctx.restore();
     if (strike > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (strike * 0.4) + ')'; ctx.fillRect(0, 0, W, H); }   // 発射フラッシュ
     if (impact > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (impact * 0.4) + ')'; ctx.fillRect(0, 0, W, H); }
+    hud();
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return canvas;
+}
+
+// ============================================================
+// ファール専用カット: 主審(笛＋ポイント)を“いつもの背景”に重ねる。主審は中立色なので recolor しない。
+//   攻撃方向で主審を左右反転（指す向き＝プレー再開方向）。笛フラッシュ＋FOUL!。元絵 tools/art/cutscenes/foul_ref_src.png。
+// ============================================================
+var _FOUL_REF_SRC = 'img/cutscenes/foul_ref_t_01.png';
+function _renderFoulScene(sc) {
+  var W = 480, H = 216, ground = 214;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var refImg = _loadCutsceneImg(_FOUL_REF_SRC);
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var accent = '#ffcf33';   // 警告色（イエロー）
+
+  var gs = (typeof gameState !== 'undefined' && gameState) ? gameState : {};
+  var t1 = gs.team1, t2 = gs.team2;
+  var c1 = (t1 && t1.team_color) || '#1f4fd6', c2 = (t2 && t2.team_color) || '#e36b1f';
+  function dom(id) { var el = (typeof document !== 'undefined') && document.getElementById(id); return el ? el.textContent : ''; }
+  var timeTxt = dom('game-time-display'), s1 = dom('score1'), s2 = dom('score2');
+  // ファールは守備側の反則 → FK は攻撃側。倒された側=攻撃選手を表示。
+  var atkP = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  var atkName = atkP ? ((typeof getPlayerName === 'function') ? getPlayerName(atkP) : atkP.name) : '';
+  var atkTeamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  var label = en ? 'FOUL!' : 'ファール！';
+  var flip = !_csAttackRight(sc);   // ネイティブ=右を指す。左攻めは反転して左を指す（再開方向）
+  var P = 1500;
+
+  function burst(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 12, y + Math.sin(an) * 12); ctx.lineTo(x + Math.cos(an) * 44, y + Math.sin(an) * 44); ctx.stroke(); } }
+  function hud() {
+    var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
+    if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
+    ctx.fillStyle = c1; ctx.fillRect(W - 150, 12, 13, 13); ctx.fillStyle = c2; ctx.fillRect(W - 22, 12, 13, 13);
+    ctx.fillStyle = '#fff'; ctx.font = '800 13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(_csAbbr(t1), W - 132, 23);
+    ctx.textAlign = 'right'; ctx.fillText(_csAbbr(t2), W - 28, 23);
+    if (s1 !== '' || s2 !== '') { ctx.textAlign = 'center'; ctx.font = '900 15px "Arial Black",sans-serif'; ctx.fillText(s1 + ' - ' + s2, W - 77, 23); }
+    var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
+    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = accent; ctx.fillText(label, 12, H - 9);
+    if (atkName) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(atkName + (atkTeamNm ? (' · ' + atkTeamNm) : ''), W - 12, H - 10); }
+  }
+
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var p = Math.min(1, (now - T0) / P);
+    ctx.clearRect(0, 0, W, H); ctx.imageSmoothingEnabled = false;
+    ctx.save();
+    if (flip) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+    _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+    var pop = Math.min(1, p / 0.16), z = 0.92 + 0.08 * pop;   // 主審がポップイン
+    var sh = 198 * z, whX = W * 0.30, whY = H * 0.34;
+    if (refImg.complete && refImg.naturalWidth) {
+      var sw = refImg.naturalWidth * (sh / refImg.naturalHeight);
+      var sx = W * 0.40 - sw / 2, sy = ground - sh;
+      ctx.drawImage(refImg, sx, sy, sw, sh);
+      whX = sx + sw * 0.30; whY = sy + sh * 0.27;             // 笛の位置（口元）
+    }
+    var wf = (p < 0.24) ? 1 - p / 0.24 : 0;                   // 笛フラッシュ（開始時）
+    if (wf > 0) burst(whX, whY, wf * 0.9);
+    ctx.restore();
+    if (wf > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (wf * 0.32) + ')'; ctx.fillRect(0, 0, W, H); }
     hud();
     if (p < 1) requestAnimationFrame(frame);
   }
