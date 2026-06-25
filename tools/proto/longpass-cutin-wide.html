@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>横長カットイン（ボール修正）</title>
+<style>
+  body{margin:0;background:#0b1e3a;color:#fff;font-family:system-ui,'Noto Sans JP',sans-serif;padding:16px}
+  h1{font-size:16px;font-weight:600;margin:0 0 10px}
+  canvas{width:560px;height:auto;image-rendering:pixelated;border-radius:12px;display:block;box-shadow:0 12px 32px rgba(0,0,0,.5)}
+  .lab{margin-top:8px;font-size:12px;color:rgba(255,255,255,.8)}
+</style>
+</head>
+<body>
+<h1>横長カットイン（CT2構図・正しいサッカーボール）</h1>
+<canvas id="cv" width="480" height="216"></canvas>
+<div class="lab" id="lab">loading…</div>
+<script>
+  var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),lab=document.getElementById('lab');
+  var W=480,H=216,ground=190,accent='#1f4fd6';
+  window.FREEZE=null;
+  function load(s){return new Promise(function(r){var i=new Image();i.onload=function(){r(i);};i.src=s;});}
+  // 静的背景（横長スタジアム＋ゴール）を1回だけ描いてキャッシュ
+  var bg=document.createElement('canvas');bg.width=W;bg.height=H;var b=bg.getContext('2d');
+  (function(){var s=42;function rnd(){s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff;}
+   var g=b.createLinearGradient(0,0,0,118);g.addColorStop(0,'#6a90e8');g.addColorStop(1,'#7fa0ee');b.fillStyle=g;b.fillRect(0,0,W,118);
+   for(var i=0;i<26;i++){var cx=rnd()*W,cy=12+rnd()*70,cw=14+rnd()*16;b.fillStyle='rgba(255,255,255,.85)';b.beginPath();b.ellipse(cx,cy,cw,cw*0.4,0,0,7);b.fill();}
+   b.fillStyle='#3a3f6a';b.fillRect(0,84,W,34);
+   for(var j=0;j<W*34/7;j++){var x=rnd()*W|0,y=84+rnd()*34|0;b.fillStyle=['#cfd8ff','#fff','#e3a9c8','#9fb0f0'][rnd()*4|0];b.fillRect(x,y,2,2);}
+   b.fillStyle='#5a5f86';b.fillRect(0,116,W,4);
+   var pg=b.createLinearGradient(0,120,0,H);pg.addColorStop(0,'#2f8f3a');pg.addColorStop(1,'#256e2c');b.fillStyle=pg;b.fillRect(0,120,W,H-120);
+   b.fillStyle='#2b8636';for(var k=0;k<W;k+=48)b.fillRect(k,120,24,H-120);
+   b.fillStyle='rgba(255,255,255,.45)';b.fillRect(0,128,W,2);
+   // ゴールマウス削除（ボールは左へ抜ける）
+  })();
+  function pent(cx,cy,rad,rot){ctx.beginPath();for(var i=0;i<5;i++){var a=rot+i*1.2566-1.5708,px=cx+Math.cos(a)*rad,py=cy+Math.sin(a)*rad;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.closePath();ctx.fill();}
+  function ball(x,y,r,spin){
+    ctx.globalAlpha=0.18;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+r*1.4,y,r*0.85,0,7);ctx.fill();ctx.globalAlpha=1; // subtle motion ghost
+    ctx.fillStyle='#14101a';ctx.beginPath();ctx.arc(x,y,r*1.14,0,7);ctx.fill();
+    ctx.fillStyle='#f6f6f6';ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,.12)';ctx.beginPath();ctx.arc(x+r*0.3,y+r*0.3,r*0.85,0,7);ctx.fill();
+    ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.clip();
+    ctx.fillStyle='#15151d';ctx.strokeStyle='#15151d';ctx.lineWidth=Math.max(1.2,r*0.11);ctx.lineJoin='round';
+    pent(x,y,r*0.46,spin);
+    for(var i=0;i<5;i++){var a=spin+i*1.2566-1.5708,ox=x+Math.cos(a)*r*1.02,oy=y+Math.sin(a)*r*1.02;
+      ctx.beginPath();ctx.moveTo(x+Math.cos(a)*r*0.46,y+Math.sin(a)*r*0.46);ctx.lineTo(ox,oy);ctx.stroke();
+      pent(ox,oy,r*0.42,a+0.628);}
+    ctx.restore();
+  }
+  Promise.all([load('/tools/art/cutscenes/lpA.png?t='+Date.now()),load('/tools/art/cutscenes/lpB.png?t='+Date.now())]).then(function(imgs){
+    var A=imgs[0],B=imgs[1];
+    var ph=178, pcx=326, foot=[256,178], goal=[-30,50], strikeP=0.10;
+    function speedLines(x,y,a){ctx.strokeStyle='rgba(255,255,255,'+a+')';ctx.lineWidth=2.5;for(var i=0;i<14;i++){var an=i/14*6.28;ctx.beginPath();ctx.moveTo(x+Math.cos(an)*16,y+Math.sin(an)*16);ctx.lineTo(x+Math.cos(an)*70,y+Math.sin(an)*70);ctx.stroke();}}
+    function hud(){
+      var g=ctx.createLinearGradient(0,0,0,46);g.addColorStop(0,'rgba(6,6,14,.66)');g.addColorStop(1,'rgba(6,6,14,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,46);
+      ctx.fillStyle='#fff';ctx.font='800 14px sans-serif';ctx.textAlign='left';ctx.fillText("67'",12,24);
+      ctx.fillStyle='#1f4fd6';ctx.fillRect(W-150,12,13,13);ctx.fillStyle='#e36b1f';ctx.fillRect(W-22,12,13,13);
+      ctx.fillStyle='#fff';ctx.font='800 13px sans-serif';ctx.fillText('JPN',W-132,23);ctx.textAlign='right';ctx.fillText('NED',W-28,23);
+      ctx.textAlign='center';ctx.font='900 15px "Arial Black",sans-serif';ctx.fillText('2 - 1',W-77,23);
+      var bgd=ctx.createLinearGradient(0,H-40,0,H);bgd.addColorStop(0,'rgba(6,6,14,0)');bgd.addColorStop(1,'rgba(6,6,14,.9)');ctx.fillStyle=bgd;ctx.fillRect(0,H-40,W,40);
+      ctx.fillStyle=accent;ctx.fillRect(0,H-30,W,3);
+      ctx.textAlign='left';ctx.lineJoin='round';ctx.font='900 22px "Arial Black",sans-serif';
+      ctx.lineWidth=5;ctx.strokeStyle='#0c0a14';ctx.strokeText('ロングパス',12,H-9);ctx.fillStyle='#ffe14a';ctx.fillText('ロングパス',12,H-9);
+      ctx.textAlign='right';ctx.font='700 12px sans-serif';ctx.fillStyle='#fff';ctx.fillText("10 遠藤 航 / ENDO · Japan",W-12,H-10);
+    }
+    var T0=performance.now(),P=2000;
+    function frame(now){
+      var p=(window.FREEZE!=null)?window.FREEZE:((now-T0)%P)/P;
+      ctx.clearRect(0,0,W,H);
+      var z=1.0+Math.min(1,p/0.7)*0.10;
+      ctx.save();ctx.translate(foot[0],foot[1]);ctx.scale(z,z);ctx.translate(-foot[0],-foot[1]);
+      ctx.imageSmoothingEnabled=false;ctx.drawImage(bg,0,0);
+      var pl=p<strikeP?A:B,pw=pl.naturalWidth*(ph/pl.naturalHeight);ctx.drawImage(pl,pcx-pw/2,ground-ph,pw,ph);
+      if(p<strikeP){ball(foot[0],foot[1],13,0);}else if(p<strikeP+0.22){var u=(p-strikeP)/0.22;var x=foot[0]+(goal[0]-foot[0])*u,y=foot[1]+(goal[1]-foot[1])*u;ball(x,y,13,u*16);}
+      var strike=(p>strikeP-0.02&&p<strikeP+0.08)?1-Math.abs(p-strikeP)/0.08:0;
+      if(strike>0)speedLines(foot[0],foot[1],strike*0.6);
+      ctx.restore();
+      if(strike>0){ctx.fillStyle='rgba(255,255,255,'+(strike*0.5)+')';ctx.fillRect(0,0,W,H);}
+      hud();
+      lab.textContent='phase '+p.toFixed(2)+(window.FREEZE!=null?'（固定）':'（ループ）');
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+</script>
+</body>
+</html>

@@ -27,6 +27,9 @@ function _getWCFbDb() {
 }
 
 function writeWCMatchResult(matchType, result, opponentName, resultType) {
+  // デバッグモード（?debug=1）のテストプレイは集計を汚染しないよう書き込まない。
+  // 例: ラウンドをジャンプして isWCFMode が残ったまま別の相手と対戦 → 「決勝 vs メキシコ」等の不整合データ防止。
+  if (typeof DEBUG_MODE !== 'undefined' && DEBUG_MODE) return;
   const db = _getWCFbDb();
   if (!db) return;
   db.collection('wc_match_results').add({
@@ -87,70 +90,30 @@ function _mcSimKO(rates) {
   return result;
 }
 
+// 新エンジン（運命の分岐, japanwc.js）に委譲。実ブラケットを全48チームで回し、
+// 3位通過（各組3位の上位8）も反映する。これで「運命の分岐」と数字が一致する。
+// 旧・固定勝率＋固定ブラケット方式は準々決勝以降を過小評価していた（対戦相手を最強シード固定にしていたため）。
 function runWCMonteCarlo(N) {
-  // キャリブレーション（毎回リセット）
-  _wcCalibCache = _calibrateWCRates();
-  const rt = _wcCalibCache;
-
-  const R = {
-    vsNL:{w:0,d:0,l:0}, vsTN:{w:0,d:0,l:0}, vsSW:{w:0,d:0,l:0},
-    q1st:0, q2nd:0, qFail:0,
-    r32w:0, r32Morocco:{w:0,l:0}, r32Brazil:{w:0,l:0},
-    r16w:0, r16Mexico:{w:0,l:0}, r16Norway:{w:0,l:0},
-    qfw:0,  qfFrance:{w:0,l:0},   qfEngland:{w:0,l:0},
-    sfw:0,  sfSpain:{w:0,l:0},   sfArgentina:{w:0,l:0},
-    finw:0, finArgentina:{w:0,l:0}, finFrance:{w:0,l:0},
-    N
-  };
-
-  for (let i = 0; i < N; i++) {
-    const pts = [0,0,0,0];
-    const rec = (a, b, res) => {
-      if(res>0)pts[a]+=3; else if(res===0){pts[a]+=1;pts[b]+=1;} else pts[b]+=3; return res;
-    };
-    const rNL = rec(0,1, _mcSim(rt.jp_nl));
-    const rTN = rec(0,2, _mcSim(rt.jp_tn));
-    const rSW = rec(0,3, _mcSim(rt.jp_sw));
-    rec(1,2, _mcSim(rt.nl_tn));
-    rec(1,3, _mcSim(rt.nl_sw));
-    rec(2,3, _mcSim(rt.tn_sw));
-
-    const addG = (t, res) => { if(res>0)t.w++;else if(res===0)t.d++;else t.l++; };
-    addG(R.vsNL,rNL); addG(R.vsTN,rTN); addG(R.vsSW,rSW);
-
-    let rank=1; for(let j=1;j<4;j++) if(pts[j]>pts[0]||(pts[j]===pts[0]&&Math.random()<0.5)) rank++;
-    if(rank>2){R.qFail++;continue;}
-    if(rank===1)R.q1st++;else R.q2nd++;
-
-    const isMorocco = rank===1;
-    const r32 = _mcSimKO(isMorocco ? rt.jp_mo : rt.jp_br);
-    if(r32>0){R.r32w++;R[isMorocco?'r32Morocco':'r32Brazil'].w++;}
-    else{R[isMorocco?'r32Morocco':'r32Brazil'].l++;continue;}
-
-    const isMexico = isMorocco;
-    const r16 = _mcSimKO(isMexico ? rt.jp_mx : rt.jp_no);
-    if(r16>0){R.r16w++;R[isMexico?'r16Mexico':'r16Norway'].w++;}
-    else{R[isMexico?'r16Mexico':'r16Norway'].l++;continue;}
-
-    // QF: 1位ルート→フランス、2位ルート→イングランド
-    const isFranceQF = isMorocco;
-    const qf = _mcSimKO(isFranceQF ? rt.jp_fr : rt.jp_en);
-    if(qf>0){R.qfw++;R[isFranceQF?'qfFrance':'qfEngland'].w++;}
-    else{R[isFranceQF?'qfFrance':'qfEngland'].l++;continue;}
-
-    // SF: フランスQF路線→スペイン、イングランドQF路線→アルゼンチン
-    const isSpainSF = isFranceQF;
-    const sf = _mcSimKO(isSpainSF ? rt.jp_sp : rt.jp_ar);
-    if(sf>0){R.sfw++;R[isSpainSF?'sfSpain':'sfArgentina'].w++;}
-    else{R[isSpainSF?'sfSpain':'sfArgentina'].l++;continue;}
-
-    // 決勝: スペインSF路線→アルゼンチン、アルゼンチンSF路線→フランス
-    const isArgentineFin = isSpainSF;
-    const fin = _mcSimKO(isArgentineFin ? rt.jp_ar : rt.jp_fr);
-    if(fin>0){R.finw++;R[isArgentineFin?'finArgentina':'finFrance'].w++;}
-    else{R[isArgentineFin?'finArgentina':'finFrance'].l++;}
+  if (typeof jwcRunMC !== 'function') {  // 念のためのフォールバック（通常は到達しない）
+    return {N, q1st:0,q2nd:0,q3rd:0,qFail:N, r32w:0,r16w:0,qfw:0,sfw:0,finw:0,
+      vsNL:{w:0,d:0,l:0}, vsTN:{w:0,d:0,l:0}, vsSW:{w:0,d:0,l:0}};
   }
-  return R;
+  const R2 = jwcRunMC(N);
+  const S = R2.scenarios;
+  const sum = f => f(S[1]) + f(S[2]) + f(S[3]);  // 全シナリオ（1/2/3位通過）の合算
+  const A = (typeof JWC_ANCHOR !== 'undefined') ? JWC_ANCHOR : {};
+  const grp = key => A[key] ? {w: Math.round(A[key].w * N), d: Math.round(A[key].d * N), l: Math.round(A[key].l * N)} : {w:0,d:0,l:0};
+  return {
+    N,
+    vsNL: grp('netherlands2026'), vsTN: grp('tunisia2026'), vsSW: grp('sweden2026'),
+    q1st: R2.rank[0], q2nd: R2.rank[1], q3rd: R2.thirdQual,
+    qFail: N - R2.rank[0] - R2.rank[1] - R2.thirdQual,
+    r32w: sum(s => s.reach.R16),  // 1回戦突破＝ベスト16到達
+    r16w: sum(s => s.reach.QF),   // ベスト8到達
+    qfw:  sum(s => s.reach.SF),   // ベスト4到達
+    sfw:  sum(s => s.reach.F),    // 決勝進出
+    finw: sum(s => s.champ)       // 優勝
+  };
 }
 
 // --- 統計画面 ---
@@ -188,7 +151,7 @@ function refreshMCStats() {
       return `<div style="height:5px;background:rgba(255,255,255,0.08);border-radius:3px;margin:3px 0 10px"><div style="height:100%;width:${w}%;background:${color||'linear-gradient(90deg,#1a6bb5,#27ae60)'};border-radius:3px;min-width:${v>0?2:0}px"></div></div>`;
     };
     const tri = r => `<span style="font-size:12px;font-weight:700;color:#4ade80">${pct(r.w)}%${t('wcStatsW')}</span>&nbsp;<span style="font-size:12px;color:#888">${pct(r.d)}%${t('wcStatsD')}</span>&nbsp;<span style="font-size:12px;color:#f87171">${pct(r.l)}%${t('wcStatsL')}</span>`;
-    const qualified = R.q1st + R.q2nd;
+    const qualified = R.q1st + R.q2nd + (R.q3rd || 0);
     const _koStages = t('wcStatsKOStages');
     const stages = [
       {lbl:_koStages[0], v:qualified,  color:'linear-gradient(90deg,#374151,#6b7280)'},
@@ -207,20 +170,25 @@ function refreshMCStats() {
     </div>
     <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px;margin-bottom:20px">
       <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:12px;letter-spacing:1.5px;text-transform:uppercase">${t('wcStatsQualLabel')}</div>
-      <div style="display:flex;gap:8px">
-        <div style="flex:1;text-align:center;background:rgba(255,215,0,0.12);border-radius:8px;padding:10px 4px">
-          <div style="font-size:24px;font-weight:900;color:#ffd700">${pct(R.q1st)}%</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:2px">${t('wcStatsQ1st')}</div>
+      <div style="display:flex;gap:6px">
+        <div style="flex:1;text-align:center;background:rgba(255,215,0,0.12);border-radius:8px;padding:9px 2px">
+          <div style="font-size:20px;font-weight:900;color:#ffd700">${pct(R.q1st)}%</div>
+          <div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-top:2px">${t('wcStatsQ1st')}</div>
         </div>
-        <div style="flex:1;text-align:center;background:rgba(255,255,255,0.07);border-radius:8px;padding:10px 4px">
-          <div style="font-size:24px;font-weight:900;color:#c0c0c0">${pct(R.q2nd)}%</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:2px">${t('wcStatsQ2nd')}</div>
+        <div style="flex:1;text-align:center;background:rgba(255,255,255,0.07);border-radius:8px;padding:9px 2px">
+          <div style="font-size:20px;font-weight:900;color:#c0c0c0">${pct(R.q2nd)}%</div>
+          <div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-top:2px">${t('wcStatsQ2nd')}</div>
         </div>
-        <div style="flex:1;text-align:center;background:rgba(37,99,235,0.2);border-radius:8px;padding:10px 4px">
-          <div style="font-size:24px;font-weight:900;color:#60a5fa">${pct(qualified)}%</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:2px">${t('wcStatsQRate')}</div>
+        <div style="flex:1;text-align:center;background:rgba(96,165,250,0.18);border-radius:8px;padding:9px 2px">
+          <div style="font-size:20px;font-weight:900;color:#60a5fa">${pct(R.q3rd || 0)}%</div>
+          <div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-top:2px">${window.LANG === 'en' ? '3rd' : '3位通過'}</div>
+        </div>
+        <div style="flex:1;text-align:center;background:rgba(74,222,128,0.16);border-radius:8px;padding:9px 2px">
+          <div style="font-size:20px;font-weight:900;color:#4ade80">${pct(qualified)}%</div>
+          <div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-top:2px">${t('wcStatsQRate')}</div>
         </div>
       </div>
+      <div style="font-size:9.5px;color:rgba(255,255,255,0.4);text-align:center;margin-top:8px">${window.LANG === 'en' ? '* incl. best 8 third-placed teams (2026 format)' : '※ 各組3位の上位8チームの突破を含む（2026年方式）'}</div>
     </div>
     <div>
       <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:10px;letter-spacing:1.5px;text-transform:uppercase">${t('wcStatsKnockout')}</div>
@@ -282,7 +250,22 @@ async function loadRealStats() {
   // 英語チーム名 → 日本語チーム名の逆引きマップを TEAM_DATA から生成
   const _enToJa = {};
   Object.values(TEAM_DATA).forEach(team => { if (team.en_name) _enToJa[team.en_name] = team.name; });
-  const sorted = Object.values(agg).sort((a,b) => {
+  // 各ラウンドで起こり得ない相手（過去のデバッグ等で混入したゴミデータ）は表示から除外。
+  // ※ 隠すだけで「全N試合」の母数（data.length）には手を加えない。
+  const WC_VALID = {
+    wc_group: ['netherlands2026','tunisia2026','sweden2026'],
+    wc_r32:   ['morocco2026','brazil2026'],
+    wc_r16:   ['mexico2026','norway2026'],
+    wc_qf:    ['france2026','england2026'],
+    wc_sf:    ['spain2026','argentina2026'],
+    wc_final: ['argentina2026','france2026'],
+  };
+  const _validOpp = (mt, opp) => {
+    const ks = WC_VALID[mt];
+    if (!ks) return true; // 未知のmatchTypeは念のため残す
+    return ks.some(k => { const td = TEAM_DATA[k]; return td && (opp === td.en_name || opp === td.name); });
+  };
+  const sorted = Object.values(agg).filter(a => _validOpp(a.matchType, a.opponent)).sort((a,b) => {
     const ai = order.indexOf(a.matchType), bi = order.indexOf(b.matchType);
     if (ai !== bi) return ai - bi;
     // GL内はオランダ→チュニジア→スウェーデンの固定順

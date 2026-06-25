@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ロングパス アニメ（ノーボール＋コードボール）</title>
+<style>
+  body{margin:0;background:#0b1e3a;color:#fff;font-family:system-ui,'Noto Sans JP',sans-serif;padding:16px}
+  h1{font-size:16px;font-weight:600;margin:0 0 10px}
+  canvas{width:300px;height:auto;image-rendering:pixelated;border-radius:10px;display:block;background:#16243f}
+  .lab{margin-top:8px;font-size:13px;color:rgba(255,255,255,.85)}
+</style>
+</head>
+<body>
+<h1>ロングパス アニメ（決めポーズ＋コード描画のボールが足元→飛球）</h1>
+<canvas id="cv" width="324" height="432"></canvas>
+<div class="lab" id="lab">loading…</div>
+<script>
+  var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),lab=document.getElementById('lab');
+  var W=324,H=432;
+  window.BALL={fx:0.50,fy:0.72,tx:-0.06,ty:0.16,arc:60,r:9}; // 発射(foot)→target、調整用
+  window.FREEZE_T=null; // 0..1 で位相固定（スクショ用）
+  function load(s){return new Promise(function(r){var i=new Image();i.onload=function(){r(i);};i.src=s;});}
+  load('/tools/art/cutscenes/longpass_noball_red_01.png?t='+Date.now()).then(function(img){
+    function drawImg(){ ctx.imageSmoothingEnabled=false;
+      var s=Math.min(W/img.naturalWidth,H/img.naturalHeight),dw=img.naturalWidth*s,dh=img.naturalHeight*s;
+      ctx.fillStyle='#0d1a2b';ctx.fillRect(0,0,W,H);ctx.drawImage(img,(W-dw)/2,(H-dh)/2,dw,dh); }
+    function ball(x,y,vx,vy){
+      for(var k=5;k>=1;k--){ctx.globalAlpha=0.09*k;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x-vx*k*4,y-vy*k*4,window.BALL.r-1,0,7);ctx.fill();}
+      ctx.globalAlpha=1;
+      ctx.fillStyle='#15101c';ctx.beginPath();ctx.arc(x,y,window.BALL.r+1.5,0,7);ctx.fill();
+      ctx.fillStyle='#fafafa';ctx.beginPath();ctx.arc(x,y,window.BALL.r,0,7);ctx.fill();
+      ctx.fillStyle='#222';ctx.beginPath();ctx.arc(x-2,y-1,2.4,0,7);ctx.fill();ctx.beginPath();ctx.arc(x+3,y+2,1.8,0,7);ctx.fill();
+    }
+    function lines(x,y){ ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2;
+      for(var a=0;a<6.28;a+=0.5){ctx.beginPath();ctx.moveTo(x+Math.cos(a)*10,y+Math.sin(a)*10);ctx.lineTo(x+Math.cos(a)*26,y+Math.sin(a)*26);ctx.stroke();} }
+    var T0=performance.now(),P=1900;
+    function frame(now){
+      var B=window.BALL, fx=B.fx*W, fy=B.fy*H, tx=B.tx*W, ty=B.ty*H;
+      var p = (window.FREEZE_T!=null) ? window.FREEZE_T : ((now-T0)%P)/P;
+      drawImg();
+      var flash=0; if(p>0.22&&p<0.30)flash=1-(p-0.22)/0.08;
+      if(flash>0){ctx.fillStyle='rgba(255,255,255,'+(flash*0.5)+')';ctx.fillRect(0,0,W,H);}
+      if(p>=0.24&&p<0.70){
+        var u=(p-0.24)/0.46;
+        var x=fx+(tx-fx)*u, y=fy+(ty-fy)*u - Math.sin(u*Math.PI)*B.arc;
+        var vx=(tx-fx)/W*3, vy=((ty-fy)/H*3 - Math.cos(u*Math.PI)*0.6);
+        if(p<0.30) lines(fx,fy);
+        ball(x,y,vx,vy);
+      }
+      lab.textContent='phase '+p.toFixed(2)+(window.FREEZE_T!=null?'（固定）':'（ループ）')+'  | 発射 fx='+B.fx+' fy='+B.fy;
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+</script>
+</body>
+</html>

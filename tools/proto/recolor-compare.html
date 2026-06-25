@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>パレットスワップ 比較</title>
+<style>
+  body{margin:0;background:#0b1e3a;color:#fff;font-family:system-ui,'Noto Sans JP',sans-serif;padding:16px}
+  h1{font-size:17px;font-weight:600;margin:0 0 4px}
+  p{font-size:13px;color:rgba(255,255,255,.8);margin:0 0 14px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .c{text-align:center}
+  .c img{width:150px;height:auto;image-rendering:pixelated;border-radius:8px;display:block;background:#16243f}
+  .c div{font-size:12px;margin-top:5px;color:rgba(255,255,255,.85)}
+</style>
+</head>
+<body>
+<h1>パレットスワップ比較（赤1枚 → 各キット色）</h1>
+<p>赤の元画像から、彩度の高い赤（ジャージ/ソックス）だけを色相変換。肌・空・芝が保たれているか確認。</p>
+<div class="row">
+  <div class="c"><img src="/tools/art/cutscenes/goal_bicycle_red_01.png"><div>RED（元）</div></div>
+  <div class="c"><img src="/tools/art/cutscenes/_rc_blue.png"><div>BLUE</div></div>
+  <div class="c"><img src="/tools/art/cutscenes/_rc_yellow.png"><div>YELLOW</div></div>
+  <div class="c"><img src="/tools/art/cutscenes/_rc_green.png"><div>GREEN</div></div>
+  <div class="c"><img src="/tools/art/cutscenes/_rc_white.png"><div>WHITE</div></div>
+  <div class="c"><img src="/tools/art/cutscenes/_rc_dark.png"><div>DARK</div></div>
+</div>
+</body>
+</html>

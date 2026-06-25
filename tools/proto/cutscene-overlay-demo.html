@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>カットシーン HUD オーバーレイ デモ</title>
+<style>
+  body{margin:0;background:linear-gradient(160deg,#003087,#0050cc 50%,#1a7a3a);color:#fff;font-family:system-ui,'Noto Sans JP',sans-serif;padding:18px}
+  h1{font-size:18px;font-weight:600;margin:0 0 6px}
+  p.lead{font-size:13px;color:rgba(255,255,255,.85);margin:0 0 16px;max-width:760px;line-height:1.6}
+  .row{display:flex;gap:18px;flex-wrap:wrap}
+  .card canvas{width:300px;height:auto;border-radius:10px;display:block;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  .cap{font-size:12px;color:rgba(255,255,255,.8);margin-top:6px;text-align:center}
+  .legend{margin-top:16px;font-size:12px;color:rgba(255,255,255,.8);line-height:1.7}
+  .sw{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:middle}
+</style>
+</head>
+<body>
+<h1>カットシーン HUD オーバーレイ デモ</h1>
+<p class="lead">点線の枠が<b>アートレイヤー（あなたの AI 生成 PNG、3:4）</b>が入る場所。その上に football-sim が<b>動的 HUD</b>（分・スコア・チームカラー・得点者名・GOAL!! 演出）を実行時に重ねます。上下の薄い帯が HUD セーフゾーン＝絵の主役を置かない領域。</p>
+<div class="row" id="row"></div>
+<div class="legend">
+  <span class="sw" style="background:#88a8ff"></span>アートレイヤー（AI PNG が差し込まれる）
+  <span class="sw" style="background:#ffd23a"></span>動的 HUD（このコードが描画）
+  <span class="sw" style="background:rgba(255,255,255,.35)"></span>セーフゾーン目安
+</div>
+<script>
+var W=360,H=480;
+function rr(ctx,x,y,w,h,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.fill();}
+function artLayer(ctx){
+  var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0d1430');g.addColorStop(.32,'#16243f');g.addColorStop(.5,'#1f6e2c');g.addColorStop(1,'#2f9a40');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // floodlit bokeh crowd (deterministic)
+  var s=7;for(var i=0;i<120;i++){s=(s*1103515245+12345)&0x7fffffff;var x=(s%W),y=20+((s>>8)%120),a=((s>>4)%30)/100;ctx.fillStyle='rgba(255,240,200,'+a+')';ctx.fillRect(x,y,3,3);}
+  // placeholder hero silhouette (the AI art will replace this)
+  ctx.strokeStyle='rgba(255,255,255,.16)';ctx.lineWidth=2;ctx.setLineDash([6,6]);ctx.strokeRect(10,H*0.18,W-20,H*0.62);ctx.setLineDash([]);
+  ctx.fillStyle='rgba(0,0,0,.30)';
+  ctx.beginPath();ctx.arc(W/2-6,H*0.40,20,0,7);ctx.fill();
+  ctx.lineWidth=26;ctx.strokeStyle='rgba(0,0,0,.30)';ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(W/2-6,H*0.43);ctx.lineTo(W/2+34,H*0.55);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W/2+30,H*0.55);ctx.lineTo(W/2+70,H*0.44);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W/2+10,H*0.52);ctx.lineTo(W/2-30,H*0.42);ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.85)';ctx.beginPath();ctx.arc(W/2+92,H*0.40,9,0,7);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.30)';ctx.font='700 12px sans-serif';ctx.textAlign='center';
+  ctx.fillText('ART LAYER — AI PNG (3:4)',W/2,H*0.18+18);
+}
+function safeZones(ctx){
+  ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=1;ctx.setLineDash([5,5]);
+  ctx.beginPath();ctx.moveTo(0,H*0.18);ctx.lineTo(W,H*0.18);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,H*0.80);ctx.lineTo(W,H*0.80);ctx.stroke();ctx.setLineDash([]);
+}
+function topHUD(ctx,homeAbbr,homeCol,homeScore,awayAbbr,awayCol,awayScore,minute){
+  var g=ctx.createLinearGradient(0,0,0,H*0.2);g.addColorStop(0,'rgba(6,6,14,.72)');g.addColorStop(1,'rgba(6,6,14,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H*0.2);
+  // minute chip
+  rr(ctx,12,12,52,24,5,'rgba(8,8,16,.8)');
+  ctx.fillStyle='#fff';ctx.font='800 15px sans-serif';ctx.textAlign='center';ctx.fillText(minute,38,29);
+  // scoreboard pill
+  var px=W-176,py=12,pw=164,ph=26;rr(ctx,px,py,pw,ph,6,'rgba(8,8,16,.8)');
+  ctx.fillStyle=homeCol;ctx.fillRect(px+6,py+6,14,14);
+  ctx.fillStyle=awayCol;ctx.fillRect(px+pw-20,py+6,14,14);
+  ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='800 13px sans-serif';ctx.fillText(homeAbbr,px+26,py+18);
+  ctx.textAlign='right';ctx.fillText(awayAbbr,px+pw-26,py+18);
+  ctx.textAlign='center';ctx.font='900 15px "Arial Black",sans-serif';ctx.fillText(homeScore+' - '+awayScore,px+pw/2,py+18);
+}
+function bottomHUD(ctx,accent,big,bigCol,line1,line2){
+  var g=ctx.createLinearGradient(0,H*0.78,0,H);g.addColorStop(0,'rgba(6,6,14,0)');g.addColorStop(.35,'rgba(6,6,14,.78)');g.addColorStop(1,'rgba(6,6,14,.92)');
+  ctx.fillStyle=g;ctx.fillRect(0,H*0.78,W,H*0.22);
+  ctx.fillStyle=accent;ctx.fillRect(0,H*0.80,W,4);
+  ctx.textAlign='left';ctx.lineJoin='round';
+  ctx.font='900 40px "Arial Black",sans-serif';
+  ctx.lineWidth=7;ctx.strokeStyle='#0c0a14';ctx.strokeText(big,18,H*0.80+44);
+  ctx.fillStyle=bigCol;ctx.fillText(big,18,H*0.80+44);
+  ctx.fillStyle='#fff';ctx.font='800 17px sans-serif';ctx.fillText(line1,18,H-30);
+  ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='600 12px sans-serif';ctx.fillText(line2,18,H-12);
+}
+function frame(ctx){ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=2;ctx.strokeRect(1,1,W-2,H-2);}
+var CARDS=[
+ {cap:'ゴール（得点チーム=日本・青）',draw:function(ctx){
+   artLayer(ctx);safeZones(ctx);
+   topHUD(ctx,'JPN','#1f4fd6',2,'NED','#e36b1f',1,"67'");
+   bottomHUD(ctx,'#1f4fd6','GOAL!!','#ffe14a','10  上田 綺世 / UEDA','67′  アシスト: 久保');
+   frame(ctx);}},
+ {cap:'スーパーセーブ（GK）',draw:function(ctx){
+   artLayer(ctx);safeZones(ctx);
+   topHUD(ctx,'JPN','#1f4fd6',2,'NED','#e36b1f',1,"71'");
+   bottomHUD(ctx,'#2bbf6a','SUPER SAVE','#9fd0ff','1  鈴木 彩艶 / SUZUKI','71′  決定機を阻止');
+   frame(ctx);}}
+];
+var row=document.getElementById('row');
+CARDS.forEach(function(c){
+  var d=document.createElement('div');d.className='card';
+  var cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  var cap=document.createElement('div');cap.className='cap';cap.textContent=c.cap;
+  d.appendChild(cv);d.appendChild(cap);row.appendChild(d);
+  var ctx=cv.getContext('2d');c.draw(ctx);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>構えフレーム ミラー比較</title>
+<style>
+  body{margin:0;background:#0b1e3a;color:#fff;font-family:system-ui,'Noto Sans JP',sans-serif;padding:16px}
+  h1{font-size:17px;font-weight:600;margin:0 0 4px}
+  p{font-size:13px;color:rgba(255,255,255,.8);margin:0 0 14px}
+  .row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+  .c{text-align:center}
+  .c img{width:200px;height:auto;image-rendering:pixelated;border-radius:8px;display:block;background:#16243f}
+  .c div{font-size:13px;margin-top:6px;font-weight:600}
+  .c small{display:block;font-weight:400;color:rgba(255,255,255,.7)}
+</style>
+</head>
+<body>
+<h1>蹴り足の一致確認（A→B で繋いだとき軸足/向きが揃うか）</h1>
+<p>真ん中=B（蹴った後・既存）。左右の構えA候補のうち、Bと「軸足・向き・蹴り足」が自然に繋がる方を採用。</p>
+<div class="row">
+  <div class="c"><img src="/tools/art/cutscenes/longpass_windup_red_01.png"><div>A（構え・元）<small>生成そのまま</small></div></div>
+  <div class="c"><img src="/tools/art/cutscenes/longpass_red_01.png"><div>B（蹴った後・既存）<small>これに繋ぐ</small></div></div>
+  <div class="c"><img src="/tools/art/cutscenes/longpass_windup_flip_red_01.png"><div>A'（構え・ミラー）<small>左右反転</small></div></div>
+</div>
+</body>
+</html>

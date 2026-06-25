@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base href="/"><!-- 実アプリ(index.html=root)と同じく相対 img/ を root 起点で解決 -->
+<title>longpass renderSceneArt 統合テスト</title>
+<style>
+  body{margin:0;background:#0b1e3a;color:#fff;font-family:system-ui,'Noto Sans JP',sans-serif;padding:16px}
+  h1{font-size:15px;margin:0 0 12px}
+  .row{display:flex;gap:14px;flex-wrap:wrap}
+  .cell{width:430px;background:#0d1a2b;border-radius:10px;overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.5)}
+  .cap{font-size:12px;padding:6px 10px;color:rgba(255,255,255,.85)}
+</style>
+</head>
+<body>
+<h1>js/cutscene.js renderSceneArt('ロングパス') — 攻撃側チーム色で動的合成</h1>
+<div class="row" id="row"></div>
+<!-- HUD が読む実DOM（試合画面相当） -->
+<div style="display:none">
+  <span id="game-time-display">67'</span><span id="score1">2</span><span id="score2">1</span>
+</div>
+<script src="/js/cutscene.js?t=20260624q"></script>
+<script>
+  // 試合側グローバルのスタブ
+  function getTeamName(t){ return t && t.name; }
+  function getPlayerName(p){ return p && p.name; }
+  function mkTeam(name, color){
+    return { name:name, team_color:color,
+      lineup:['p1','p2','p3','p4','p5','p6','p7','p8','p9','p10','p11'],
+      players:{ p1:{ name:'1 '+name+' GK' }, p5:{ name:'4 '+name+' DF' }, p10:{ name: name==='Japan'?'10 遠藤 航 / ENDO':'9 Striker' } } };
+  }
+  var JPN = mkTeam('Japan', '#c8102e');     // 赤
+  var NED = mkTeam('Netherlands', '#1f4fd6'); // 青
+  window.gameState = { team1: JPN, team2: NED };
+
+  function mkScene(off, def, result){ return { action:'ロングパス', result:result||'', area:'MF', offence:off, defence:def, ofsPos:9, dfsPos:4 }; }
+  function mkShot(off, def, result, action){ return { action:action||'シュート', result:result, area:'FW_M', offence:off, defence:def, ofsPos:9, dfsPos:4 }; }
+
+  // 攻撃側=各キット色で確認（frames は得点側色バケツに自動マッチ）
+  var cases = [
+    ['攻撃: Japan 赤 (#c8102e)',      mkScene(mkTeam('Japan','#c8102e'), NED)],
+    ['攻撃: 青 (#1f4fd6)',            mkScene(mkTeam('BlueFC','#1f4fd6'), JPN)],
+    ['攻撃: オレンジ Netherlands (#f36c21)', mkScene(mkTeam('NLD','#f36c21'), JPN)],
+    ['攻撃: 水色 Argentina (#75aadb)', mkScene(mkTeam('ARG','#75aadb'), JPN)],
+    ['攻撃: 黄 (#e6c200)',            mkScene(mkTeam('GoldFC','#e6c200'), NED)],
+    ['攻撃: 緑 (#1f8f3a)',            mkScene(mkTeam('GreenFC','#1f8f3a'), NED)],
+    ['攻撃: 白 (#e8e8e8)',            mkScene(mkTeam('WhiteFC','#e8e8e8'), JPN)],
+    ['攻撃: 黒/dark (#23242a)',       mkScene(mkTeam('DarkFC','#23242a'), JPN)],
+    ['失敗: 青攻撃→橙守備がカット',    mkScene(mkTeam('JPN','#1f4fd6'), mkTeam('NLD','#f36c21'), '失敗')],
+    ['失敗: 橙攻撃→青守備がカット',    mkScene(mkTeam('NLD','#f36c21'), mkTeam('JPN','#1f4fd6'), '失敗')],
+    ['シュート 枠外 (青)',           mkShot(mkTeam('JPN','#1f4fd6'), NED, '枠を外した！')],
+    ['シュート GKセーブ (橙)',        mkShot(mkTeam('NLD','#f36c21'), JPN, 'GK防いだ！')],
+    ['ミドル ブロック (緑)',          mkShot(mkTeam('GreenFC','#1f8f3a'), JPN, 'ブロック', 'ミドルシュート')],
+    ['GKセーブ 弾く (橙攻撃→青GK)',   mkShot(mkTeam('NLD','#f36c21'), mkTeam('JPN','#1f4fd6'), 'GK防いだ！')],
+    ['GK 抜かれる すり抜け (橙攻撃→青GK)', { __gkBeat:true, action:'シュート', result:'ゴール！！', offence: mkTeam('NLD','#f36c21'), defence: mkTeam('JPN','#1f4fd6'), ofsPos:9, dfsPos:4 }],
+    ['⚽ ゴール！！ (青)',              mkShot(mkTeam('JPN','#1f4fd6'), NED, 'ゴール！！')],
+    ['⚽ ゴール！！ (橙→緑GK)',         mkShot(mkTeam('NLD','#f36c21'), mkTeam('GreenFC','#1f8f3a'), 'ゴール！！')],
+    // ===== 攻撃方向テスト（offence===gameState.team1(JPN)=右攻め / team2(NED)=左攻め）=====
+    ['→ T1右: ロングパス', {action:'ロングパス',result:'成功',area:'MF',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: ロングパス', {action:'ロングパス',result:'成功',area:'MF',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    ['→ T1右: シュート枠外', {action:'シュート',result:'枠を外した！',area:'FW_M',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: シュート枠外', {action:'シュート',result:'枠を外した！',area:'FW_M',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    ['→ T1右: GKセーブ', {action:'シュート',result:'GK防いだ！',area:'FW_M',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: GKセーブ', {action:'シュート',result:'GK防いだ！',area:'FW_M',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    ['→ T1右: ゴール', {action:'シュート',result:'ゴール！！',area:'FW_M',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: ゴール', {action:'シュート',result:'ゴール！！',area:'FW_M',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    ['ショートパス (赤)', {action:'ショートパス',result:'成功',area:'MF',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}],
+    ['→ T1右: ショートパス', {action:'ショートパス',result:'成功',area:'MF',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: ショートパス', {action:'ショートパス',result:'成功',area:'MF',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    ['ドリブル成功 (青攻→赤守)', {action:'ドリブル突破',result:'成功',area:'MF',offence:mkTeam('JPN','#1f4fd6'),defence:mkTeam('NLD','#f36c21'),ofsPos:9,dfsPos:4}],
+    ['ドリブル失敗 (青攻→赤守)', {action:'ドリブル突破',result:'失敗',area:'MF',offence:mkTeam('JPN','#1f4fd6'),defence:mkTeam('NLD','#f36c21'),ofsPos:9,dfsPos:4}],
+    ['→ T1右: ドリブル成功', {action:'ドリブル突破',result:'成功',area:'MF',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: ドリブル成功', {action:'ドリブル突破',result:'成功',area:'MF',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    ['→ T1右: ドリブル失敗', {action:'ドリブル突破',result:'失敗',area:'MF',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    // ===== 飛び出し（Run In Behind）: dribbleスプライト流用・成功=抜け出す / 失敗=読まれてカット =====
+    ['飛び出し成功 (青攻→赤守)', {action:'飛び出し',result:'成功',area:'FW_M',offence:mkTeam('JPN','#1f4fd6'),defence:mkTeam('NLD','#f36c21'),ofsPos:9,dfsPos:4}],
+    ['飛び出し失敗 (青攻→赤守)', {action:'飛び出し',result:'失敗',area:'FW_M',offence:mkTeam('JPN','#1f4fd6'),defence:mkTeam('NLD','#f36c21'),ofsPos:9,dfsPos:4}],
+    ['→ T1右: 飛び出し成功', {action:'飛び出し',result:'成功',area:'FW_M',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: 飛び出し成功', {action:'飛び出し',result:'成功',area:'FW_M',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    ['→ T1右: 飛び出し失敗', {action:'飛び出し',result:'失敗',area:'FW_M',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: 飛び出し失敗', {action:'飛び出し',result:'失敗',area:'FW_M',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    // ===== ヘディングシュート競り合い（赤→攻撃色 / 緑→守備色・成功=ボール右 / 失敗=ボール左）=====
+    ['ヘディング成功 (青攻→橙守)', {action:'ヘディングシュート',scenario:'クロス',result:'成功',area:'FW_M',offence:mkTeam('BlueFC','#1f4fd6'),defence:mkTeam('OrgFC','#f36c21'),ofsPos:9,dfsPos:4}],
+    ['ヘディング失敗 (青攻→橙守)', {action:'ヘディングシュート',scenario:'クロス',result:'失敗',area:'FW_M',offence:mkTeam('BlueFC','#1f4fd6'),defence:mkTeam('OrgFC','#f36c21'),ofsPos:9,dfsPos:4}],
+    ['→ T1右: ヘディング成功', {action:'ヘディングシュート',scenario:'クロス',result:'成功',area:'FW_M',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: ヘディング成功', {action:'ヘディングシュート',scenario:'クロス',result:'成功',area:'FW_M',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    ['→ T1右: ヘディング失敗', {action:'ヘディングシュート',scenario:'クロス',result:'失敗',area:'FW_M',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: ヘディング失敗', {action:'ヘディングシュート',scenario:'クロス',result:'失敗',area:'FW_M',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    // ===== ミドルシュート（赤シューター→攻撃色 / 緑ブロック守備→守備色・成功=直進 / ブロック=右上deflect）=====
+    ['ミドル成功・直進 (青攻→橙守)', {action:'ミドルシュート',scenario:'ミドルシュート',result:'ゴール！！',area:'FW_M',offence:mkTeam('BlueFC','#1f4fd6'),defence:mkTeam('OrgFC','#f36c21'),ofsPos:9,dfsPos:4}],
+    ['ミドル失敗・ブロック (青攻→橙守)', {action:'ミドルシュート',scenario:'ミドルシュート',result:'ブロック',area:'FW_M',offence:mkTeam('BlueFC','#1f4fd6'),defence:mkTeam('OrgFC','#f36c21'),ofsPos:9,dfsPos:4}],
+    ['→ T1右: ミドル成功(直進)', {action:'ミドルシュート',scenario:'ミドルシュート',result:'ゴール！！',area:'FW_M',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: ミドル成功(直進)', {action:'ミドルシュート',scenario:'ミドルシュート',result:'ゴール！！',area:'FW_M',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    ['→ T1右: ミドル失敗(ブロック)', {action:'ミドルシュート',scenario:'ミドルシュート',result:'ブロック',area:'FW_M',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: ミドル失敗(ブロック)', {action:'ミドルシュート',scenario:'ミドルシュート',result:'ブロック',area:'FW_M',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    // ===== ボレーシュート（ロングパスの蹴りアニメ流用・ボール起点=軸足の膝あたり）=====
+    ['ボレー成功 (赤)', {action:'ボレーシュート',scenario:'クロス',result:'成功',area:'FW_M',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}],
+    ['ボレー失敗・カット (青攻→橙守)', {action:'ボレーシュート',scenario:'クロス',result:'失敗',area:'FW_M',offence:mkTeam('JPN','#1f4fd6'),defence:mkTeam('NLD','#f36c21'),ofsPos:9,dfsPos:4}],
+    ['→ T1右: ボレー成功', {action:'ボレーシュート',scenario:'クロス',result:'成功',area:'FW_M',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: ボレー成功', {action:'ボレーシュート',scenario:'クロス',result:'成功',area:'FW_M',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    // ===== クロス（ミドルシュート流用・成功=斜め上へ高速 / 失敗=守備に当たり反対方向）=====
+    ['クロス成功・斜め上 (青攻→橙守)', {action:'クロス',scenario:'クロス',result:'成功',area:'FW_R',offence:mkTeam('BlueFC','#1f4fd6'),defence:mkTeam('OrgFC','#f36c21'),ofsPos:9,dfsPos:4}],
+    ['クロス失敗・反対方向 (青攻→橙守)', {action:'クロス',scenario:'クロス',result:'失敗',area:'FW_R',offence:mkTeam('BlueFC','#1f4fd6'),defence:mkTeam('OrgFC','#f36c21'),ofsPos:9,dfsPos:4}],
+    ['→ T1右: クロス成功', {action:'クロス',scenario:'クロス',result:'成功',area:'FW_R',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: クロス成功', {action:'クロス',scenario:'クロス',result:'成功',area:'FW_R',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}]
+  ];
+  var row = document.getElementById('row');
+  cases.forEach(function(c){
+    var cell = document.createElement('div'); cell.className='cell';
+    var art = (c[1] && c[1].__gkBeat) ? _renderGkScene(c[1], 'beat') : renderSceneArt(c[1]);
+    if (art) cell.appendChild(art);
+    var cap = document.createElement('div'); cap.className='cap'; cap.textContent=c[0]; cell.appendChild(cap);
+    row.appendChild(cell);
+  });
+  window.__ready = true;
+</script>
+</body>
+</html>

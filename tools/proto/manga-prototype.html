@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>漫画マッチアップ・レンダラ プロトタイプ</title>
+<style>
+  body{margin:0;background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);color:#fff;font-family:system-ui,'Noto Sans JP',sans-serif;padding:18px}
+  h1{font-size:18px;font-weight:600;margin:0 0 14px}
+  .wrap{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;max-width:1000px}
+  @media(max-width:620px){.wrap{grid-template-columns:1fr}}
+  .card{display:flex;flex-direction:column;gap:6px}
+  .card canvas{width:100%;height:auto;image-rendering:pixelated;border-radius:8px;display:block}
+  .cap{font-size:13px;color:rgba(255,255,255,0.85)}
+  .cap b{font-weight:600;color:#fff}
+</style>
+</head>
+<body>
+<h1>漫画マッチアップ・レンダラ プロトタイプ（ファミコン キャプテン翼風カットイン）v3</h1>
+<div class="wrap" id="ctWrap"></div>
+<script>
+var W=470,H=264,GR=2;
+function sh(hex,f){var n=parseInt(hex.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255;return 'rgb('+Math.min(255,r*f|0)+','+Math.min(255,g*f|0)+','+Math.min(255,b*f|0)+')';}
+function snap(v){return Math.round(v/GR)*GR;}
+function rect(ctx,x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(snap(x),snap(y),snap(w),snap(h));}
+function seg(ctx,a,b,half,c){var dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy),n=Math.max(1,Math.ceil(L/GR)),i;for(i=0;i<=n;i++){var t=i/n,x=a[0]+dx*t,y=a[1]+dy*t;rect(ctx,x-half,y-half,half*2,half*2,c);}}
+function limb(ctx,a,b,half,c,P){seg(ctx,a,b,half+2,P.out);seg(ctx,a,b,half,c);}
+function disc(ctx,cx,cy,r,c){for(var y=-r;y<=r;y+=GR)for(var x=-r;x<=r;x+=GR)if(x*x+y*y<=r*r)rect(ctx,cx+x,cy+y,GR,GR,c);}
+function head(ctx,cx,cy,r,P,f){
+  disc(ctx,cx,cy,r+2,P.out);
+  for(var y=-r;y<=r;y+=GR)for(var x=-r;x<=r;x+=GR){if(x*x+y*y>r*r)continue;
+    var rx=x*f,c;
+    if(y<-r*0.12||rx<-r*0.32)c=P.hair; else c=(rx>r*0.5)?P.skinD:P.skin;
+    rect(ctx,cx+x,cy+y,GR,GR,c);}
+  var sk=[0.95,0.75,0.6,0.8,1.0];
+  for(var k=-2;k<=2;k++){var bx=cx+k*(r*0.34),by=cy-r*0.62;seg(ctx,[bx,by],[bx+f*r*0.22,by-r*sk[k+2]],Math.max(2,r*0.17),P.hair);}
+  var ew=Math.max(4,r*0.34),eh=Math.max(4,r*0.44),ex=cx+f*r*0.34,ey=cy-r*0.02;
+  rect(ctx,ex-ew/2,ey-eh/2,ew,eh,'#fff');
+  rect(ctx,ex+(f>0?0:-ew*0.45),ey-eh*0.3,ew*0.5,eh*0.85,'#20242e');
+  rect(ctx,ex-ew/2,ey-eh*0.75,ew*1.15,Math.max(2,r*0.12),P.out);
+  rect(ctx,cx+f*(r*0.5),cy+r*0.42,r*0.22,r*0.18,P.skinD);
+}
+function ball(ctx,bx,by,dir,r){r=r||8;var i;for(i=3;i>=1;i--){ctx.globalAlpha=0.13*i;disc(ctx,bx-dir[0]*i*9,by-dir[1]*i*9,r-1,'#fff');}ctx.globalAlpha=1;disc(ctx,bx,by,r+2,'#15101c');disc(ctx,bx,by,r,'#fafafa');rect(ctx,bx-r*0.5,by-1,r*0.45,r*0.45,'#23232b');rect(ctx,bx+1,by+1,r*0.38,r*0.38,'#23232b');}
+function body(ctx,J,ox,oy,f,P,num,s){
+  s=s||1;
+  function T(p){return [ox+f*p[0]*s,oy+p[1]*s];}
+  var j={};for(var k in J)j[k]=T(J[k]);
+  var tH=Math.round(11*s),lH=Math.round(7*s),aH=Math.round(6*s),bH=Math.round(6*s),hr=Math.round(15*s);
+  limb(ctx,j.shB,j.elB,aH,P.kit,P);limb(ctx,j.elB,j.haB,aH-1,P.skin,P);disc(ctx,j.haB[0],j.haB[1],aH-1,P.hand||P.skin);
+  limb(ctx,j.hipB,j.knB,lH,P.skin,P);limb(ctx,j.knB,j.akB,lH-1,P.sock,P);limb(ctx,j.akB,j.toB,bH,P.boot,P);
+  limb(ctx,j.pel,j.chest,tH,P.kit,P);
+  rect(ctx,j.chest[0]-tH*0.8,j.chest[1]-2*s,tH*1.6,3*s,P.kitD);
+  rect(ctx,j.pel[0]-tH*0.9,j.pel[1]-2*s,tH*1.8,9*s,P.shorts);
+  limb(ctx,j.hipF,j.knF,lH,P.skin,P);limb(ctx,j.knF,j.akF,lH-1,P.sock,P);limb(ctx,j.akF,j.toF,bH,P.boot,P);
+  limb(ctx,j.shF,j.elF,aH,P.kit,P);limb(ctx,j.elF,j.haF,aH-1,P.skin,P);disc(ctx,j.haF[0],j.haF[1],aH-1,P.hand||P.skin);
+  head(ctx,j.head[0],j.head[1],hr,P,f);
+  var mx=(j.pel[0]+j.chest[0])/2,my=(j.pel[1]+j.chest[1])/2;
+  ctx.fillStyle='#fff';ctx.font='900 '+Math.round(13*s)+'px "Arial Black",sans-serif';ctx.textAlign='center';
+  ctx.lineWidth=3;ctx.strokeStyle=P.kitD;ctx.strokeText(num,mx,my+4*s);ctx.fillText(num,mx,my+4*s);
+  return j.head;
+}
+function pal(kit){return {kit:kit,kitD:sh(kit,.6),skin:'#f4caa0',skinD:sh('#f4caa0',.82),hair:'#241c12',sock:'#f2f2f4',shorts:'#fbfbfd',boot:'#181820',out:'#15101c',hand:'#f4caa0'};}
+var SHOOT={pel:[0,0],chest:[-7,-27],head:[-12,-46],hipB:[-4,2],knB:[-12,22],akB:[-10,44],toB:[2,47],hipF:[4,0],knF:[22,-8],akF:[40,-18],toF:[52,-22],shB:[-11,-23],elB:[-26,-15],haB:[-36,-22],shF:[-3,-25],elF:[12,-19],haF:[22,-28]};
+var DRIB={pel:[0,0],chest:[7,-27],head:[13,-45],hipB:[-2,2],knB:[-10,20],akB:[-16,40],toB:[-8,45],hipF:[5,0],knF:[15,18],akF:[11,40],toF:[20,44],shB:[3,-25],elB:[-9,-14],haB:[-15,-22],shF:[9,-25],elF:[22,-16],haF:[28,-6]};
+var LUNGE={pel:[0,4],chest:[-5,-21],head:[-9,-39],hipF:[4,4],knF:[20,12],akF:[36,15],toF:[45,15],hipB:[-2,6],knB:[-7,24],akB:[2,41],toB:[9,43],shF:[1,-19],elF:[15,-13],haF:[25,-15],shB:[-9,-19],elB:[-19,-9],haB:[-27,-13]};
+var DIVE={pel:[0,0],chest:[-19,-7],head:[-32,-12],hipB:[6,2],knB:[20,7],akB:[34,5],toB:[41,3],hipF:[6,7],knF:[22,13],akF:[36,13],toF:[43,13],shF:[-21,-9],elF:[-35,-18],haF:[-48,-26],shB:[-19,-3],elB:[-31,-10],haB:[-44,-18]};
+function bgPitch(ctx,goal){
+  var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#16331f');g.addColorStop(.32,'#1f6e2c');g.addColorStop(1,'#2f9a40');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,0.09)';ctx.lineWidth=2;
+  for(var x=-2;x<=8;x++){ctx.beginPath();ctx.moveTo(W*0.5+(x-3)*14,84);ctx.lineTo(W*0.5+(x-3)*120,H);ctx.stroke();}
+  ctx.strokeStyle='rgba(255,255,255,0.10)';for(var y=92;y<H;y+=Math.max(8,(y-70)/3)){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  if(goal){var gx=goal>0?W-58:8;ctx.fillStyle='rgba(255,255,255,0.10)';ctx.fillRect(gx,66,50,90);
+    ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.strokeRect(gx,66,50,90);
+    ctx.strokeStyle='rgba(255,255,255,0.20)';ctx.lineWidth=1;
+    for(var i=gx+5;i<gx+50;i+=6){ctx.beginPath();ctx.moveTo(i,66);ctx.lineTo(i,156);ctx.stroke();}
+    for(var jj=70;jj<156;jj+=6){ctx.beginPath();ctx.moveTo(gx,jj);ctx.lineTo(gx+50,jj);ctx.stroke();}}
+}
+function focus(ctx,fx,fy){ctx.strokeStyle='rgba(255,255,255,0.09)';ctx.lineWidth=2;for(var a=0;a<6.28;a+=0.22){ctx.beginPath();ctx.moveTo(fx+Math.cos(a)*60,fy+Math.sin(a)*44);ctx.lineTo(fx+Math.cos(a)*440,fy+Math.sin(a)*440);ctx.stroke();}}
+function shadow(ctx,x,y,w){ctx.fillStyle='rgba(0,0,0,0.22)';ctx.beginPath();ctx.ellipse(x,y,w,w*0.2,0,0,6.28);ctx.fill();}
+function banner(ctx,txt,col){ctx.fillStyle='rgba(8,6,14,0.5)';ctx.fillRect(0,10,W,40);
+  ctx.font='900 26px "Arial Black",sans-serif';ctx.textAlign='center';ctx.lineJoin='round';
+  ctx.lineWidth=7;ctx.strokeStyle='#0d0a14';ctx.strokeText(txt,W/2,40);ctx.fillStyle=col;ctx.fillText(txt,W/2,40);}
+var BADGE={'ゴール！！':['#ffd23a','#5a3d00','G O A L'],'成功':['#3fc46a','#06310f','BREAK!'],'GK防いだ！':['#7db0ff','#06203f','SAVE!']};
+function badge(ctx,res,area){var b=BADGE[res]||['#ddd','#111',res];
+  rect(ctx,8,H-26,112,20,'#100c16');rect(ctx,10,H-24,108,16,b[0]);
+  ctx.fillStyle=b[1];ctx.font='900 13px "Arial Black",sans-serif';ctx.textAlign='center';ctx.fillText(b[2],64,H-11);
+  ctx.textAlign='right';ctx.font='700 11px sans-serif';ctx.fillStyle='rgba(255,255,255,0.8)';ctx.fillText(area,W-10,H-12);}
+function tag(ctx,name,x,y,col){ctx.textAlign='center';ctx.font='800 11px sans-serif';var w=ctx.measureText(name).width+12;
+  rect(ctx,x-w/2,y,w,15,'#100c16');rect(ctx,x-w/2,y,4,15,col);ctx.fillStyle='#fff';ctx.fillText(name,x,y+11);}
+function frame(ctx){ctx.strokeStyle='#0b0912';ctx.lineWidth=9;ctx.strokeRect(0,0,W,H);}
+var PANELS=[
+ {cap:'<b>シュート</b> → ゴール！！',res:'ゴール！！',area:'PA 中央',move:['ドライブシュート!!','#ffe14a'],draw:function(ctx){
+   bgPitch(ctx,1);focus(ctx,250,140);
+   var rb=ctx.createRadialGradient(W-40,114,8,W-40,114,160);rb.addColorStop(0,'rgba(255,255,255,0.85)');rb.addColorStop(.45,'rgba(255,232,140,0.32)');rb.addColorStop(1,'rgba(255,232,140,0)');ctx.fillStyle=rb;ctx.fillRect(0,0,W,H);
+   body(ctx,DIVE,W-64,118,-1,pal('#2bbf6a'),'1',1.05);
+   shadow(ctx,150,232,46);
+   var h=body(ctx,SHOOT,150,156,1,pal('#1f4fd6'),'10',1.7);
+   ball(ctx,300,108,[1,-0.15],10);
+   tag(ctx,'UEDA',h[0],h[1]-30,'#1f4fd6');}},
+ {cap:'<b>ドリブル突破</b> → 成功',res:'成功',area:'敵陣 右',move:['ドリブルとっぱ!','#ffffff'],draw:function(ctx){
+   bgPitch(ctx,0);focus(ctx,235,150);
+   shadow(ctx,170,228,44);shadow(ctx,305,222,42);
+   var hd=body(ctx,LUNGE,338,158,-1,pal('#d11f2a'),'4',1.55);
+   var ha=body(ctx,DRIB,140,156,1,pal('#1f4fd6'),'11',1.6);
+   ball(ctx,184,222,[1,0],9);
+   tag(ctx,'DOAN',ha[0],ha[1]-32,'#1f4fd6');tag(ctx,'GVARDIOL',hd[0],hd[1]-30,'#d11f2a');}},
+ {cap:'<b>ヘディング</b> → GK防いだ！',res:'GK防いだ！',area:'ゴール前',move:['ナイスセーブ!!','#9fd0ff'],draw:function(ctx){
+   bgPitch(ctx,-1);focus(ctx,250,120);
+   shadow(ctx,300,226,52);
+   var P=pal('#2bbf6a');P.hand='#ffd24a';
+   var h=body(ctx,DIVE,266,150,1,P,'1',1.7);
+   ball(ctx,150,104,[-1,-0.2],9);
+   tag(ctx,'GK',h[0],h[1]-30,'#2bbf6a');}}
+];
+var wrap=document.getElementById('ctWrap');
+PANELS.forEach(function(sp){
+  var card=document.createElement('div');card.className='card';
+  var cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  var cap=document.createElement('div');cap.className='cap';cap.innerHTML=sp.cap;
+  card.appendChild(cv);card.appendChild(cap);wrap.appendChild(card);
+  var ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
+  sp.draw(ctx);
+  banner(ctx,sp.move[0],sp.move[1]);
+  badge(ctx,sp.res,sp.area);frame(ctx);
+});
+</script>
+</body>
+</html>

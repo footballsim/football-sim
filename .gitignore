@@ -1,2 +1,6 @@
 node_modules/
 .claude/
+tools/art/.env
+tools/art/cutscenes/
+ui-mockup.html
+ui-mockup-v2.html

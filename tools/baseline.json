@@ -1,0 +1,79 @@
+{
+  "generatedAt": "2026-06-19T05:43:42.979Z",
+  "nMatchesPerMatchup": 2000,
+  "elapsedMs": 7711,
+  "totalScenes": 416845,
+  "globalAvgTotalGoals": 1.389,
+  "sceneResultRates": {
+    "成功": 0.44099,
+    "失敗": 0.3606,
+    "GK防いだ！": 0.04163,
+    "カウンター": 0.05174,
+    "ゴール！！": 0.03999,
+    "ファール": 0.0322,
+    "枠を外した！": 0.02457,
+    "ブロック": 0.00828
+  },
+  "matchups": [
+    {
+      "matchup": "japan2026vsNetherlands vs netherlands2026",
+      "n": 2000,
+      "winPct": 23.75,
+      "drawPct": 36.4,
+      "lossPct": 39.85,
+      "avgT1Goals": 0.575,
+      "avgT2Goals": 0.85,
+      "avgTotalGoals": 1.424
+    },
+    {
+      "matchup": "japan2026vsNetherlands vs brazil2026",
+      "n": 2000,
+      "winPct": 25.7,
+      "drawPct": 37.45,
+      "lossPct": 36.85,
+      "avgT1Goals": 0.594,
+      "avgT2Goals": 0.781,
+      "avgTotalGoals": 1.375
+    },
+    {
+      "matchup": "japan2026vsTunisia vs tunisia2026",
+      "n": 2000,
+      "winPct": 48.75,
+      "drawPct": 35.8,
+      "lossPct": 15.45,
+      "avgT1Goals": 0.965,
+      "avgT2Goals": 0.406,
+      "avgTotalGoals": 1.371
+    },
+    {
+      "matchup": "brazil2026 vs argentina2026",
+      "n": 2000,
+      "winPct": 36.9,
+      "drawPct": 35.85,
+      "lossPct": 27.25,
+      "avgT1Goals": 0.769,
+      "avgT2Goals": 0.613,
+      "avgTotalGoals": 1.382
+    },
+    {
+      "matchup": "germany2026 vs usa2026",
+      "n": 2000,
+      "winPct": 45.4,
+      "drawPct": 36.45,
+      "lossPct": 18.15,
+      "avgT1Goals": 0.938,
+      "avgT2Goals": 0.483,
+      "avgTotalGoals": 1.421
+    },
+    {
+      "matchup": "spain2026 vs morocco2026",
+      "n": 2000,
+      "winPct": 54,
+      "drawPct": 33.75,
+      "lossPct": 12.25,
+      "avgT1Goals": 1.018,
+      "avgT2Goals": 0.344,
+      "avgTotalGoals": 1.361
+    }
+  ]
+}

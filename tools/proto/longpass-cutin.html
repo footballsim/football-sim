@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>映える静止カットイン（A案）</title>
+<style>
+  body{margin:0;background:#0b1e3a;color:#fff;font-family:system-ui,'Noto Sans JP',sans-serif;padding:16px}
+  h1{font-size:16px;font-weight:600;margin:0 0 10px}
+  canvas{width:330px;height:auto;image-rendering:pixelated;border-radius:12px;display:block;box-shadow:0 12px 32px rgba(0,0,0,.5)}
+  .lab{margin-top:8px;font-size:12px;color:rgba(255,255,255,.8)}
+</style>
+</head>
+<body>
+<h1>映える静止カットイン（カメラ寄り＋巨大ボール＋閃光＋HUD）</h1>
+<canvas id="cv" width="360" height="480"></canvas>
+<div class="lab" id="lab">loading…</div>
+<script>
+  var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),lab=document.getElementById('lab');
+  var W=360,H=480;
+  window.FREEZE=null; // 0..1
+  function rr(c,x,y,w,h,r,col){c.fillStyle=col;c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.fill();}
+  function load(s){return new Promise(function(r){var i=new Image();i.onload=function(){r(i);};i.src=s;});}
+  load('/img/cutscenes/longpass_noball_red_01.png?t='+Date.now()).then(function(img){
+    var fx=0.50, fy=0.72, accent='#1f4fd6';
+    function pushIn(z){ // 焦点(fx,fy)を固定したままズームイン
+      ctx.imageSmoothingEnabled=false;
+      ctx.drawImage(img, fx*W*(1-z), fy*H*(1-z), W*z, H*z);
+    }
+    function speedLines(x,y,a){ ctx.strokeStyle='rgba(255,255,255,'+a+')';ctx.lineWidth=3;
+      for(var i=0;i<16;i++){var an=i/16*6.28;ctx.beginPath();ctx.moveTo(x+Math.cos(an)*22,y+Math.sin(an)*22);ctx.lineTo(x+Math.cos(an)*120,y+Math.sin(an)*120);ctx.stroke();} }
+    function ball(u){ var sx=fx*W,sy=fy*H, x=sx+(-0.08*W-sx)*u, y=sy+(0.16*H-sy)*u-Math.sin(u*Math.PI)*34;
+      var r=5+Math.sin(u*Math.PI)*24;                 // 小→特大→小（CT2）
+      for(var k=5;k>=1;k--){ctx.globalAlpha=0.09*k;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+k*9,y+k*3,Math.max(3,r*0.85),0,7);ctx.fill();}
+      ctx.globalAlpha=1;ctx.fillStyle='#15101c';ctx.beginPath();ctx.arc(x,y,r+2,0,7);ctx.fill();
+      ctx.fillStyle='#fafafa';ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+      var sp=u*18;ctx.fillStyle='#1c1c1c';for(var i=0;i<5;i++){var an=sp+i*1.256;ctx.beginPath();ctx.arc(x+Math.cos(an)*r*0.5,y+Math.sin(an)*r*0.5,r*0.22,0,7);ctx.fill();} }
+    function hud(){
+      var g=ctx.createLinearGradient(0,0,0,H*0.18);g.addColorStop(0,'rgba(6,6,14,.7)');g.addColorStop(1,'rgba(6,6,14,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H*0.18);
+      rr(ctx,12,12,56,24,5,'rgba(8,8,16,.8)');ctx.fillStyle='#fff';ctx.font='800 15px sans-serif';ctx.textAlign='center';ctx.fillText("67'",40,29);
+      var px=W-172,pw=160;rr(ctx,px,12,pw,26,6,'rgba(8,8,16,.8)');
+      ctx.fillStyle='#1f4fd6';ctx.fillRect(px+6,18,14,14);ctx.fillStyle='#e36b1f';ctx.fillRect(px+pw-20,18,14,14);
+      ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='800 13px sans-serif';ctx.fillText('JPN',px+26,30);ctx.textAlign='right';ctx.fillText('NED',px+pw-26,30);
+      ctx.textAlign='center';ctx.font='900 15px "Arial Black",sans-serif';ctx.fillText('2 - 1',px+pw/2,30);
+      var bg=ctx.createLinearGradient(0,H*0.82,0,H);bg.addColorStop(0,'rgba(6,6,14,0)');bg.addColorStop(1,'rgba(6,6,14,.9)');ctx.fillStyle=bg;ctx.fillRect(0,H*0.82,W,H*0.18);
+      ctx.fillStyle=accent;ctx.fillRect(0,H*0.84,W,4);
+      ctx.textAlign='left';ctx.lineJoin='round';ctx.font='900 30px "Arial Black",sans-serif';
+      ctx.lineWidth=6;ctx.strokeStyle='#0c0a14';ctx.strokeText('ロングパス',18,H*0.84+36);ctx.fillStyle='#ffe14a';ctx.fillText('ロングパス',18,H*0.84+36);
+      ctx.fillStyle='#fff';ctx.font='700 14px sans-serif';ctx.fillText("10  遠藤 航 / ENDO   ·   Japan",18,H-16);
+    }
+    var T0=performance.now(),P=2600;
+    function frame(now){
+      var p=(window.FREEZE!=null)?window.FREEZE:((now-T0)%P)/P;
+      ctx.clearRect(0,0,W,H);
+      var z = 1.02 + Math.min(1,p/0.8)*0.16;            // カメラ寄り
+      pushIn(z);
+      var strike=(p>0.26&&p<0.36)?1-(p-0.26)/0.10:0;
+      if(strike>0){ speedLines(fx*W,fy*H,strike*0.6); ctx.fillStyle='rgba(255,255,255,'+(strike*0.55)+')';ctx.fillRect(0,0,W,H); }
+      if(p>=0.30&&p<0.80){ ball((p-0.30)/0.50); }
+      hud();
+      lab.textContent='phase '+p.toFixed(2)+(window.FREEZE!=null?'（固定）':'（ループ）');
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+</script>
+</body>
+</html>

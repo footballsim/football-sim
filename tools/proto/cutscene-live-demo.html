@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>カットシーン 実合成プレビュー</title>
+<style>
+  body{margin:0;background:linear-gradient(160deg,#003087,#0050cc 50%,#1a7a3a);color:#fff;font-family:system-ui,'Noto Sans JP',sans-serif;padding:18px}
+  h1{font-size:18px;font-weight:600;margin:0 0 4px}
+  p.lead{font-size:13px;color:rgba(255,255,255,.85);margin:0 0 16px}
+  .row{display:flex;gap:18px;flex-wrap:wrap}
+  .card canvas{width:300px;height:auto;image-rendering:pixelated;border-radius:10px;display:block;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  .cap{font-size:12px;color:rgba(255,255,255,.85);margin-top:6px;text-align:center;width:300px}
+</style>
+</head>
+<body>
+<h1>カットシーン 実合成プレビュー</h1>
+<p class="lead">あなたの画像（画像2）を粗ドット化し、その上に football-sim の動的 HUD を合成した実カードです。</p>
+<div class="row" id="row"></div>
+<script>
+var W=360,H=480;
+function rr(ctx,x,y,w,h,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.fill();}
+function topHUD(ctx,hA,hC,hS,aA,aC,aS,minute){
+  var g=ctx.createLinearGradient(0,0,0,H*0.2);g.addColorStop(0,'rgba(6,6,14,.72)');g.addColorStop(1,'rgba(6,6,14,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H*0.2);
+  rr(ctx,12,12,52,24,5,'rgba(8,8,16,.8)');
+  ctx.fillStyle='#fff';ctx.font='800 15px sans-serif';ctx.textAlign='center';ctx.fillText(minute,38,29);
+  var px=W-176,py=12,pw=164,ph=26;rr(ctx,px,py,pw,ph,6,'rgba(8,8,16,.8)');
+  ctx.fillStyle=hC;ctx.fillRect(px+6,py+6,14,14);ctx.fillStyle=aC;ctx.fillRect(px+pw-20,py+6,14,14);
+  ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='800 13px sans-serif';ctx.fillText(hA,px+26,py+18);
+  ctx.textAlign='right';ctx.fillText(aA,px+pw-26,py+18);
+  ctx.textAlign='center';ctx.font='900 15px "Arial Black",sans-serif';ctx.fillText(hS+' - '+aS,px+pw/2,py+18);
+}
+function bottomHUD(ctx,accent,big,bigCol,line1,line2){
+  var g=ctx.createLinearGradient(0,H*0.78,0,H);g.addColorStop(0,'rgba(6,6,14,0)');g.addColorStop(.35,'rgba(6,6,14,.78)');g.addColorStop(1,'rgba(6,6,14,.92)');
+  ctx.fillStyle=g;ctx.fillRect(0,H*0.78,W,H*0.22);
+  ctx.fillStyle=accent;ctx.fillRect(0,H*0.80,W,4);
+  ctx.textAlign='left';ctx.lineJoin='round';
+  ctx.font='900 40px "Arial Black",sans-serif';
+  ctx.lineWidth=7;ctx.strokeStyle='#0c0a14';ctx.strokeText(big,18,H*0.80+44);
+  ctx.fillStyle=bigCol;ctx.fillText(big,18,H*0.80+44);
+  ctx.fillStyle='#fff';ctx.font='800 17px sans-serif';ctx.fillText(line1,18,H-30);
+  ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='600 12px sans-serif';ctx.fillText(line2,18,H-12);
+}
+function safeZones(ctx){
+  ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=1;ctx.setLineDash([5,5]);
+  ctx.beginPath();ctx.moveTo(0,H*0.18);ctx.lineTo(W,H*0.18);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,H*0.80);ctx.lineTo(W,H*0.80);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='700 11px sans-serif';ctx.textAlign='left';
+  ctx.fillText('HUD safe (top 18%)',6,H*0.18-5);ctx.fillText('HUD safe (bottom 20%)',6,H*0.80+14);
+}
+function frame(ctx){ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=2;ctx.strokeRect(1,1,W-2,H-2);}
+function loadImg(src){return new Promise(function(res,rej){var im=new Image();im.onload=function(){res(im);};im.onerror=rej;im.src=src;});}
+var row=document.getElementById('row');
+function makeCard(cap,draw){
+  var d=document.createElement('div');d.className='card';
+  var cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  var c=document.createElement('div');c.className='cap';c.textContent=cap;
+  d.appendChild(cv);d.appendChild(c);row.appendChild(d);
+  draw(cv.getContext('2d'));
+}
+Promise.all([
+  loadImg('/tools/art/cutscenes/goal_bicycle_red_01.png'),
+  loadImg('/tools/art/cutscenes/goal_bicycle_red_01.raw.png')
+]).then(function(imgs){
+  var pix=imgs[0], raw=imgs[1];
+  makeCard('① 完成カード（粗ドット＋HUD合成）',function(ctx){
+    ctx.imageSmoothingEnabled=false;ctx.drawImage(pix,0,0,W,H);
+    topHUD(ctx,'JPN','#1f4fd6',2,'NED','#e36b1f',1,"67'");
+    bottomHUD(ctx,'#1f4fd6','GOAL!!','#ffe14a','10  上田 綺世 / UEDA','67′  アシスト: 久保');
+    frame(ctx);
+  });
+  makeCard('② 素材のみ（粗ドット・セーフゾーン）',function(ctx){
+    ctx.imageSmoothingEnabled=false;ctx.drawImage(pix,0,0,W,H);safeZones(ctx);frame(ctx);
+  });
+  makeCard('③ 比較: 生成直後（スムーズ）',function(ctx){
+    ctx.imageSmoothingEnabled=true;ctx.drawImage(raw,0,0,W,H);frame(ctx);
+  });
+}).catch(function(e){
+  var d=document.createElement('div');d.textContent='画像の読み込みに失敗: '+e;d.style.color='#ffb';row.appendChild(d);
+});
+</script>
+</body>
+</html>

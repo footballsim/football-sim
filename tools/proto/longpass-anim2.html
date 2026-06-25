@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ロングパス 2フレーム・アニメ確認</title>
+<style>
+  body{margin:0;background:#0b1e3a;color:#fff;font-family:system-ui,'Noto Sans JP',sans-serif;padding:16px}
+  h1{font-size:16px;font-weight:600;margin:0 0 10px}
+  canvas{width:300px;height:auto;image-rendering:pixelated;border-radius:10px;display:block;background:#16243f}
+  .lab{margin-top:8px;font-size:13px;color:rgba(255,255,255,.85)}
+</style>
+</head>
+<body>
+<h1>ロングパス 2フレーム・アニメ（A=構え → B=蹴った後）。ボールは足元→飛球へ。</h1>
+<canvas id="cv" width="324" height="432"></canvas>
+<div class="lab" id="lab">loading…</div>
+<script>
+  var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),lab=document.getElementById('lab');
+  var W=324,H=432;
+  function load(s){return new Promise(function(r){var i=new Image();i.onload=function(){r(i);};i.src=s;});}
+  window.FREEZE=null;
+  Promise.all([
+    load('/tools/art/cutscenes/longpass_windup_red_01.png'),
+    load('/tools/art/cutscenes/longpass_red_01.png')
+  ]).then(function(im){
+    var A=im[0],B=im[1];
+    function drawImg(img){ ctx.imageSmoothingEnabled=false;
+      var s=Math.min(W/img.naturalWidth,H/img.naturalHeight),dw=img.naturalWidth*s,dh=img.naturalHeight*s;
+      ctx.fillStyle='#0d1a2b';ctx.fillRect(0,0,W,H);ctx.drawImage(img,(W-dw)/2,(H-dh)/2,dw,dh); }
+    var T0=performance.now(),P=2000;
+    function frame(now){
+      var ph=window.FREEZE, p=((now-T0)%P)/P, flash=0, which;
+      if(ph==='A'){which='A';}
+      else if(ph==='B'){which='B';}
+      else { which = p<0.45 ? 'A' : 'B'; if(p>0.45&&p<0.50)flash=1-(p-0.45)/0.05; }
+      drawImg(which==='A'?A:B);
+      if(flash>0){ctx.fillStyle='rgba(255,255,255,'+(flash*0.5)+')';ctx.fillRect(0,0,W,H);}
+      lab.textContent = 'いま: フレーム'+which+(ph?'（固定）':'（ループ再生中）');
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+</script>
+</body>
+</html>

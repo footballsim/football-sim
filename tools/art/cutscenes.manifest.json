@@ -1,0 +1,44 @@
+{
+  "_schema": {
+    "doc": "カットシーン素材のカタログ。実行時に moment（＋kit色）でマッチして1枚選び、HUDを上に重ねる。生成手順は CUTSCENE_ART_GUIDE.md。js/cutscene.js の CUTSCENE_MANIFEST と同期する。",
+    "fields": {
+      "id": "一意ID（= ファイル名の拡張子なし）",
+      "moment": "goal | save | tackle | duel | red_card | injury | celebration | miss",
+      "subtype": "細分類（例: bicycle, header, dive）。任意",
+      "file": "cutscenes/ 配下の PNG（出荷は img/cutscenes/ にコピー）。単一画像モーメント用",
+      "fileA/fileB": "2フレーム・モーメント用（longpass）。fileA=構え/windup, fileB=蹴り/kick。コードのボールと合成して横長カットインを動的描画",
+      "kit": "キット色系統 red|blue|skyblue(水色)|white|yellow|orange|green|dark|any（得点チーム色に近いものを_colorBucketで選択）",
+      "weight": "同一 moment+kit 内の抽選重み（既定 1）"
+    },
+    "status": "goal_bicycle = AI生成1枚(red) + recolor.js のパレットスワップで全キット色（red/blue/yellow/green/white/dark）。出荷済 img/cutscenes/。longpass = 2フレーム(lpA/lpB)を recolor.js で6色化(longpass_a/b_<kit>_01.png)＋コードのボールで横長カットインを js/cutscene.js の _renderLongpassScene が実試合に動的合成（攻撃側チーム色）。他モーメントは生成後に追記。"
+  },
+  "version": 1,
+  "cutscenes": [
+    { "id": "goal_bicycle_red_01",    "moment": "goal", "subtype": "bicycle", "kit": "red",    "file": "cutscenes/goal_bicycle_red_01.png",    "weight": 1, "tags": ["spectacular"] },
+    { "id": "goal_bicycle_blue_01",   "moment": "goal", "subtype": "bicycle", "kit": "blue",   "file": "cutscenes/goal_bicycle_blue_01.png",   "weight": 1, "tags": ["spectacular", "recolor"] },
+    { "id": "goal_bicycle_yellow_01", "moment": "goal", "subtype": "bicycle", "kit": "yellow", "file": "cutscenes/goal_bicycle_yellow_01.png", "weight": 1, "tags": ["spectacular", "recolor"] },
+    { "id": "goal_bicycle_green_01",  "moment": "goal", "subtype": "bicycle", "kit": "green",  "file": "cutscenes/goal_bicycle_green_01.png",  "weight": 1, "tags": ["spectacular", "recolor"] },
+    { "id": "goal_bicycle_white_01",   "moment": "goal", "subtype": "bicycle", "kit": "white",   "file": "cutscenes/goal_bicycle_white_01.png",   "weight": 1, "tags": ["spectacular", "recolor"] },
+    { "id": "goal_bicycle_dark_01",    "moment": "goal", "subtype": "bicycle", "kit": "dark",    "file": "cutscenes/goal_bicycle_dark_01.png",    "weight": 1, "tags": ["spectacular", "recolor"] },
+    { "id": "goal_bicycle_orange_01",  "moment": "goal", "subtype": "bicycle", "kit": "orange",  "file": "cutscenes/goal_bicycle_orange_01.png",  "weight": 1, "tags": ["spectacular", "recolor"] },
+    { "id": "goal_bicycle_skyblue_01", "moment": "goal", "subtype": "bicycle", "kit": "skyblue", "file": "cutscenes/goal_bicycle_skyblue_01.png", "weight": 1, "tags": ["spectacular", "recolor"] },
+
+    { "id": "longpass_red",    "moment": "longpass", "kit": "red",    "fileA": "cutscenes/longpass_a_red_01.png",    "fileB": "cutscenes/longpass_b_red_01.png",    "weight": 1, "tags": ["match-action", "2frame"] },
+    { "id": "longpass_blue",   "moment": "longpass", "kit": "blue",   "fileA": "cutscenes/longpass_a_blue_01.png",   "fileB": "cutscenes/longpass_b_blue_01.png",   "weight": 1, "tags": ["match-action", "2frame", "recolor"] },
+    { "id": "longpass_yellow", "moment": "longpass", "kit": "yellow", "fileA": "cutscenes/longpass_a_yellow_01.png", "fileB": "cutscenes/longpass_b_yellow_01.png", "weight": 1, "tags": ["match-action", "2frame", "recolor"] },
+    { "id": "longpass_green",  "moment": "longpass", "kit": "green",  "fileA": "cutscenes/longpass_a_green_01.png",  "fileB": "cutscenes/longpass_b_green_01.png",  "weight": 1, "tags": ["match-action", "2frame", "recolor"] },
+    { "id": "longpass_white",   "moment": "longpass", "kit": "white",   "fileA": "cutscenes/longpass_a_white_01.png",   "fileB": "cutscenes/longpass_b_white_01.png",   "weight": 1, "tags": ["match-action", "2frame", "recolor"] },
+    { "id": "longpass_dark",    "moment": "longpass", "kit": "dark",    "fileA": "cutscenes/longpass_a_dark_01.png",    "fileB": "cutscenes/longpass_b_dark_01.png",    "weight": 1, "tags": ["match-action", "2frame", "recolor"] },
+    { "id": "longpass_orange",  "moment": "longpass", "kit": "orange",  "fileA": "cutscenes/longpass_a_orange_01.png",  "fileB": "cutscenes/longpass_b_orange_01.png",  "weight": 1, "tags": ["match-action", "2frame", "recolor"] },
+    { "id": "longpass_skyblue", "moment": "longpass", "kit": "skyblue", "fileA": "cutscenes/longpass_a_skyblue_01.png", "fileB": "cutscenes/longpass_b_skyblue_01.png", "weight": 1, "tags": ["match-action", "2frame", "recolor"] },
+
+    { "id": "shot_red",     "moment": "shot", "kit": "red",     "file": "cutscenes/shot_red_01.png",     "weight": 1, "tags": ["match-action"] },
+    { "id": "shot_blue",    "moment": "shot", "kit": "blue",    "file": "cutscenes/shot_blue_01.png",    "weight": 1, "tags": ["match-action", "recolor"] },
+    { "id": "shot_yellow",  "moment": "shot", "kit": "yellow",  "file": "cutscenes/shot_yellow_01.png",  "weight": 1, "tags": ["match-action", "recolor"] },
+    { "id": "shot_green",   "moment": "shot", "kit": "green",   "file": "cutscenes/shot_green_01.png",   "weight": 1, "tags": ["match-action", "recolor"] },
+    { "id": "shot_white",   "moment": "shot", "kit": "white",   "file": "cutscenes/shot_white_01.png",   "weight": 1, "tags": ["match-action", "recolor"] },
+    { "id": "shot_dark",    "moment": "shot", "kit": "dark",    "file": "cutscenes/shot_dark_01.png",    "weight": 1, "tags": ["match-action", "recolor"] },
+    { "id": "shot_orange",  "moment": "shot", "kit": "orange",  "file": "cutscenes/shot_orange_01.png",  "weight": 1, "tags": ["match-action", "recolor"] },
+    { "id": "shot_skyblue", "moment": "shot", "kit": "skyblue", "file": "cutscenes/shot_skyblue_01.png", "weight": 1, "tags": ["match-action", "recolor"] }
+  ]
+}

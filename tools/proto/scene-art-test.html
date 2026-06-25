@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>per-scene アート テスト</title>
+<style>
+  body{margin:0;background:#0b1e3a;color:#fff;font-family:system-ui,'Noto Sans JP',sans-serif;padding:16px}
+  h1{font-size:17px;font-weight:600;margin:0 0 4px}
+  p{font-size:13px;color:rgba(255,255,255,.8);margin:0 0 14px}
+  .row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
+  .c{width:360px}
+  .c .panel{width:100%;border-radius:8px;overflow:hidden;background:#0d1a2b;min-height:60px}
+  .c .lab{font-size:12px;margin-top:6px;color:rgba(255,255,255,.85)}
+</style>
+</head>
+<body>
+<h1>per-scene アート テスト（実 renderSceneArt）</h1>
+<p>field パネル相当に、各シーンの action 別アートを描画。攻撃側チーム色で kit を自動選択。アート未整備の action は null=従来SVGにフォールバック。</p>
+<div class="row" id="row"></div>
+<script>
+  function getTeamName(t){ return t && t.name; }
+</script>
+<script src="/js/cutscene.js"></script>
+<script>
+  CUTSCENE_MANIFEST.forEach(function(c){ if (c.file.indexOf('/') !== 0) c.file = '/' + c.file; });
+  var cases = [
+    { lab:'ロングパス · 日本（青キット選択）', sc:{ action:'ロングパス', result:'成功', offence:{ name:'Japan', team_color:'#1f4fd6' } } },
+    { lab:'ロングパス · スペイン（赤キット選択）', sc:{ action:'ロングパス', result:'成功', offence:{ name:'Spain', team_color:'#c0392b' } } },
+    { lab:'ロングパス · ブラジル（黄キット選択）', sc:{ action:'ロングパス', result:'成功', offence:{ name:'Brazil', team_color:'#f1c40f' } } },
+    { lab:'ショートパス（アート未整備 → null=SVGフォールバック）', sc:{ action:'ショートパス', result:'成功', offence:{ name:'Japan', team_color:'#1f4fd6' } } }
+  ];
+  var row = document.getElementById('row');
+  cases.forEach(function(cs){
+    var wrap = document.createElement('div'); wrap.className = 'c';
+    var panel = document.createElement('div'); panel.className = 'panel';
+    var lab = document.createElement('div'); lab.className = 'lab'; lab.textContent = cs.lab;
+    var art = renderSceneArt(cs.sc);
+    if (art) panel.appendChild(art);
+    else panel.innerHTML = '<div style="padding:18px;color:rgba(255,255,255,.6);font-size:13px">renderSceneArt = null（→ 試合では renderSceneField の SVG が出ます）</div>';
+    wrap.appendChild(panel); wrap.appendChild(lab); row.appendChild(wrap);
+  });
+</script>
+</body>
+</html>

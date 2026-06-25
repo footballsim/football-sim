@@ -3515,7 +3515,9 @@ function nextChance() {
   const textDiv = document.getElementById('log-text-' + currentChanceIdx);
   const sc = res.scenes[currentSceneIdx];
   const prevSc = currentSceneIdx > 0 ? res.scenes[currentSceneIdx - 1] : null;
-  const fieldSvg = renderSceneField(sc, prevSc);
+  // per-scene アート（js/cutscene.js）。該当アートが無ければ null → 従来SVGにフォールバック。
+  const _sceneArt = (typeof renderSceneArt === 'function') ? renderSceneArt(sc) : null;
+  const fieldSvg = _sceneArt || renderSceneField(sc, prevSc);
   const liveFieldWrap = document.getElementById('live-field-wrap');
   if (liveFieldWrap) {
     liveFieldWrap.style.display = '';
@@ -3533,9 +3535,13 @@ function nextChance() {
     // ゴールシーンが画面に出たタイミングでスコアを更新する
     document.getElementById('score1').textContent = res.t1score;
     document.getElementById('score2').textContent = res.t2score;
-    const anim = document.getElementById('goal-anim');
-    anim.style.display = 'block';
-    setTimeout(() => anim.style.display = 'none', 1600);
+    // 方式C: カットシーン takeover（js/cutscene.js, エンジン無改変）。未ロード/無効なら従来のGOAL演出へフォールバック。
+    const _csShown = (typeof showGoalCutscene === 'function') && showGoalCutscene(sc, res);
+    if (!_csShown) {
+      const anim = document.getElementById('goal-anim');
+      anim.style.display = 'block';
+      setTimeout(() => anim.style.display = 'none', 1600);
+    }
   }
 
   // double rAF: _updateSubBtn等によるレイアウト変化が終わってからスクロール

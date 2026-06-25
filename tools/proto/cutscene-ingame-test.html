@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>cutscene in-game test</title>
+<style>
+  body{margin:0;background:#0b1e3a;font-family:system-ui,'Noto Sans JP',sans-serif;color:#fff;height:100vh}
+  .bar{padding:10px 14px;font-size:13px;color:rgba(255,255,255,.85)}
+</style>
+</head>
+<body>
+<div class="bar">js/cutscene.js を読み込み、モックのゴールで <code>showGoalCutscene()</code> を発火するテスト（実アプリと同じ描画パス）。</div>
+<script>
+  // simulate.js/players.js の代わりのモック・グローバル
+  var gameState = {
+    team1: { name: 'Japan', team_color: '#1f4fd6', players: [{ name: '上田 綺世' }], lineup: [0] },
+    team2: { name: 'Netherlands', team_color: '#e36b1f', players: [{ name: 'GK' }], lineup: [0] }
+  };
+  function getTeamName(t) { return t && t.name; }
+  function getPlayerName(p) { return p && p.name; }
+  window.LANG = 'ja';
+</script>
+<script src="/js/cutscene.js"></script>
+<script>
+  // テストページは /tools/proto/ 配下なので、アセットは絶対パスに差し替え
+  CUTSCENE_MANIFEST[0].file = '/img/cutscenes/goal_bicycle_red_01.png';
+  var sc = { offence: gameState.team1, defence: gameState.team2, ofsPos: 0, result: 'ゴール！！' };
+  var res = { t1score: 2, t2score: 1, time: '67分' };
+  window.addEventListener('load', function () { showGoalCutscene(sc, res); });
+</script>
+</body>
+</html>
