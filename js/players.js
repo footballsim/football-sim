@@ -2810,7 +2810,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     default_system:"4-4-2", default_tactics:2, default_keyplayer:5, default_marked_player:7,
     default_lineup:[0,26,2,14,4,8,5,27,7,28,29],
     players:[
-      {name:"ガン",en_name:"Gunn",long_name:"アンガス・ガン",positions:["GK"],params:[50,50,50,50,74,48,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,73,71,50,70,78,75]},
+      // 2026/06/25 ブラジル戦Highest#1・REF/DIV/HAN/POS/SPD上方修正
+      {name:"ガン",en_name:"Gunn",long_name:"アンガス・ガン",positions:["GK"],params:[50,50,50,50,78,54,50,50,50,50,70,50,50,50,50,50,50,50,50,50,50,50,50,77,75,50,74,78,75]},
       {name:"パターソン",en_name:"Patterson",long_name:"ネイサン・パターソン",positions:["右SB"],params:[67,73,71,70,72,65,75,68,67,63,62,46,48,44,50,52,70,51,72,74,68,74,72,50,50,61,76,74,75]},
       {name:"ヘンドリー",en_name:"Hendry",long_name:"ジャック・ヘンドリー",positions:["CB"],params:[81,76,72,70,76,83,70,55,55,65,70,60,62,55,55,55,60,58,74,80,80,82,70,50,50,78,72,76,75]},
       {name:"マッケンナ",en_name:"McKenna",long_name:"スコット・マッケンナ",positions:["CB","左CB"],params:[80,77,73,71,77,82,71,56,56,66,71,61,63,56,56,56,61,59,75,81,81,83,71,50,50,77,73,77,75]},
@@ -3116,7 +3117,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ディオプ",en_name:"I.Diop",long_name:"イサ・ディオプ",positions:["CB"],params:[84,74,74,72,73,84,62,58,66,62,58,34,30,44,28,32,58,40,76,77,77,76,72,50,50,82,72,70,75]},
       {name:"マズラウィ",en_name:"Mazraoui",long_name:"ヌサイル・マズラウィ",positions:["左SB","右SB","右SMF"],params:[70,82,82,82,82,72,80,78,82,78,74,56,54,62,54,62,80,70,78,79,76,77,76,50,50,64,76,78,75]},
       {name:"ブアディ",en_name:"Bouaddi",long_name:"アユーブ・ブアディ",positions:["DMF","CMF"],params:[74,82,72,72,76,74,76,76,74,74,70,58,56,62,52,56,76,64,76,76,74,75,76,50,50,66,76,74,75]},
-      {name:"エル・カヌース",en_name:"El Khannouss",long_name:"ビラル・エル・カヌース",positions:["OMF","左WG","左SMF","右WG"],params:[64,76,80,82,80,64,84,84,82,78,72,72,70,72,66,72,84,80,50,48,46,48,58,50,50,56,80,76,75]}
+      // 2026/06/25 POTM(8.9) vs ハイチ・短パス+オフェンシブ上方修正
+      {name:"エル・カヌース",en_name:"El Khannouss",long_name:"ビラル・エル・カヌース",positions:["OMF","左WG","左SMF","右WG"],params:[64,76,80,82,80,64,84,84,82,82,72,72,70,72,66,72,84,83,50,48,46,48,58,50,50,56,80,76,75]}
 ]
   },
   brazil2026: {
@@ -5394,8 +5396,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
       {name:"ハジアフメトヴィッチ",en_name:"Hadziahmetovic",long_name:"アミル・ハジアフメトヴィッチ",positions:["DMF","CMF"],params:[70,72,52,53,64,68,64,64,65,72,67,52,54,56,42,44,62,58,68,70,68,68,66,50,50,68,64,66,75]},
       // Sub CDM: Benjamin Tahirović (FC26 OVR66)
       {name:"タヒロヴィッチ",en_name:"Tahirovic",long_name:"ベンジャミン・タヒロヴィッチ",positions:["DMF","CMF"],params:[68,70,51,52,61,66,60,60,61,62,57,44,46,48,36,38,58,50,60,63,60,60,59,50,50,66,58,60,75]},
-      // Sub LW: Kerim Alajbegović (FC26 OVR68)
-      {name:"アライベゴヴィッチ",en_name:"Alajbegovic",long_name:"ケリム・アライベゴヴィッチ",positions:["左WG","左SMF","OMF"],params:[56,58,70,72,68,54,68,68,69,66,61,65,67,68,48,50,66,64,37,41,39,39,41,50,50,52,62,60,75]},
+      // Sub LW: Kerim Alajbegović (FC26 OVR68) / 2026/06/25 POTM+得点 vs カタール・フィニッシュ/シュートセンス/オフェンシブ上方修正
+      {name:"アライベゴヴィッチ",en_name:"Alajbegovic",long_name:"ケリム・アライベゴヴィッチ",positions:["左WG","左SMF","OMF"],params:[56,58,70,72,68,54,68,68,69,66,61,69,70,68,48,50,66,67,37,41,39,39,41,50,50,52,62,60,75]},
       // Sub CMF: Armin Gigović (FC26 OVR71)
       {name:"ギゴヴィッチ",en_name:"Gigovic",long_name:"アルミン・ギゴヴィッチ",positions:["CMF","DMF","右SMF"],params:[74,76,65,66,70,72,70,70,71,70,65,54,56,58,42,44,68,60,62,65,62,62,61,50,50,72,64,66,75]},
       // Sub CMF: Denis Burnić (FC26 OVR69)
@@ -5426,7 +5428,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     default_keyplayer:9,default_marked_player:9,
     default_lineup:[0,8,7,4,6,5,1,3,2,9,10],
     players:[
-    {name:"ウィリアムズ",en_name:"Williams",long_name:"ロンウェン・ウィリアムズ",positions:["GK"],params:[50,50,50,50,76,72,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,74,73,50,75,74,75]},
+    // 2026/06/25 POTM+完封 vs 韓国・REF/DIV/POS上方修正
+    {name:"ウィリアムズ",en_name:"Williams",long_name:"ロンウェン・ウィリアムズ",positions:["GK"],params:[50,50,50,50,79,72,50,50,50,50,68,50,50,50,50,50,50,50,50,50,50,50,50,77,73,50,78,74,75]},
     {name:"モコエナ",en_name:"Mokoena",long_name:"テボホ・モコエナ",positions:["DMF","CMF","OMF"],params:[68,70,76,78,73,66,67,67,73,73,68,58,60,60,43,45,65,57,64,66,64,66,64,50,50,64,62,68,75]},
     {name:"J・アダムス",en_name:"J.Adams",long_name:"ジェイデン・アダムス",positions:["CMF","DMF","OMF"],params:[62,64,72,74,66,60,60,60,68,66,61,48,50,50,36,37,58,47,56,58,56,58,56,50,50,58,55,61,75]},
     {name:"シトール",en_name:"Sithole",long_name:"スフェフェロ・シトール",positions:["DMF","CMF","OMF"],params:[74,76,64,66,60,72,57,57,62,59,55,49,51,51,37,38,55,48,62,64,62,64,62,50,50,68,55,62,75]},
@@ -5439,7 +5442,8 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     {name:"レイナース",en_name:"Rayners",long_name:"イクラーム・レイナース",positions:["CF","右WG"],params:[72,72,76,78,69,70,59,59,69,52,48,63,65,65,48,50,57,63,24,29,24,24,29,50,50,70,64,64,75]},
     {name:"マクゴパ",en_name:"Makgopa",long_name:"エビデンス・マクゴパ",positions:["CF"],params:[74,74,72,74,68,72,60,60,68,52,48,64,66,66,49,50,58,64,26,31,26,26,31,50,50,72,65,65,75]},
     {name:"モフォケン",en_name:"Mofokeng",long_name:"レレボヒレ・モフォケン",positions:["左WG","OMF","右WG"],params:[54,54,82,84,75,50,70,70,77,62,57,58,60,60,45,46,68,59,24,29,24,24,29,50,50,46,62,62,75]},
-    {name:"マセコ",en_name:"Maseko",long_name:"タパロ・マセコ",positions:["右WG","右SMF"],params:[54,54,78,80,71,50,65,65,73,58,53,56,58,58,43,44,63,57,24,29,24,24,29,50,50,46,60,60,75]},
+    // 2026/06/25 得点+2nd高評価 vs 韓国・フィニッシュ/シュートセンス/オフェンシブ上方修正
+    {name:"マセコ",en_name:"Maseko",long_name:"タパロ・マセコ",positions:["右WG","右SMF"],params:[54,54,78,80,71,50,65,65,73,58,53,60,62,58,43,44,63,61,24,29,24,24,29,50,50,46,60,60,75]},
     {name:"ムバタ",en_name:"Mbatha",long_name:"タランテ・ムバタ",positions:["CMF","DMF"],params:[66,68,70,72,65,64,61,61,67,68,63,50,52,52,38,39,59,49,60,62,60,62,60,50,50,60,57,63,75]},
     {name:"ズワネ",en_name:"Zwane",long_name:"テンバ・ズワネ",positions:["左WG","OMF","右WG"],params:[56,55,68,70,67,52,67,67,69,66,61,60,62,62,46,47,65,61,31,36,31,31,36,50,50,48,63,63,75]},
     {name:"モレミ",en_name:"Moremi",long_name:"チェパン・モレミ",positions:["左SMF","左WG","OMF"],params:[58,58,75,77,69,54,65,65,71,61,56,53,55,55,41,42,63,54,25,30,25,25,30,50,50,50,60,60,75]},
