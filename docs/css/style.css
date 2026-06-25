@@ -765,6 +765,8 @@ body {
 /* ===== LIVE FIELD（案A: フォーカスモードフィールド）===== */
 #live-field-wrap {
   width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
   overflow: hidden;
   position: relative;
   border-bottom: 2px solid rgba(255,255,255,0.08);
@@ -774,14 +776,31 @@ body {
   display: block;
   width: 100%;
 }
+/* 簡易フィールド図（カットインの下に常時表示・どのエリアでマッチアップかだけ示す） */
+#mini-field-wrap {
+  width: 100%;
+  max-width: 220px;
+  margin: 8px auto 0;
+  flex-shrink: 0;
+}
+#mini-field-wrap svg {
+  display: block;
+  width: 100%;
+  border-radius: 6px;
+}
 
 .scoreboard {
   background: linear-gradient(90deg, #003087, #001f6e, #003087);
-  padding: 16px 20px;
+  padding: 12px 20px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-end;       /* スコア数字とコロンを下端(同じ高さ)で揃える */
+  justify-content: center;     /* 両チームを離さず中央クラスタに */
+  gap: 26px;                   /* チーム / : / チーム の間隔 */
   border-bottom: 1px solid rgba(255,255,255,0.1);
+  width: 100%;
+  max-width: 520px;       /* 全幅をやめて細く・中央寄せ（画面で微調整可） */
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .team-score {
@@ -789,7 +808,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  min-width: 100px;
+  min-width: 64px;
 }
 
 .team-flag-name {
@@ -798,11 +817,12 @@ body {
   gap: 6px;
   font-size: 13px;
   font-weight: 700;
+  color: #fff;            /* 国名を白に（紺背景で読めるよう明示） */
 }
 
 .score-num {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 48px;
+  font-size: 34px;        /* 48px から縮小 */
   line-height: 1;
   color: white;
 }
@@ -816,11 +836,15 @@ body {
 
 .score-colon {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 40px;
+  font-size: 34px;        /* スコア数字と同じ高さに合わせる */
+  line-height: 1;
   color: rgba(255,255,255,0.3);
 }
 
 .game-time {
+  /* スコアボード内の時間表示は非表示（時間はカットイン左上に集約）。
+     要素は残す＝ゲームループが値をセットし、cutscene.js が textContent を読む。 */
+  display: none;
   font-size: 11px;
   color: var(--gold);
   letter-spacing: 1px;
@@ -840,7 +864,8 @@ body {
 }
 
 .chance-counter-display {
-  display: flex;
+  /* 「チャンス: x/x 攻撃:… 試合進行中」セクションは非表示（要素は残し JS の更新先を維持）。 */
+  display: none;
   justify-content: space-between;
   background: var(--surface2);
   border-radius: 10px;

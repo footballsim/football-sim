@@ -2883,118 +2883,29 @@ function renderSceneField(sc, prevSc) {
     <text x="${(zoneRight+W)/2}"      y="${H-6}" text-anchor="middle" font-size="8" fill="rgba(255,120,100,0.7)"  font-family="sans-serif" font-weight="bold">${_isEn ? 'ATK' : '敵陣'}</text>
   `;
 
-  // ────── 2. ボール軌跡アニメーション ──────
-  if (pcx !== null && pcy !== null && (Math.abs(pcx - cx) > 5 || Math.abs(pcy - cy) > 5)) {
-    const trailLen = Math.round(Math.hypot(cx - pcx, cy - pcy)) + 20;
-    const trail = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    trail.setAttribute('d', `M ${pcx},${pcy} L ${cx},${cy}`);
-    trail.setAttribute('stroke', isCounterTransition ? 'rgba(255,140,0,0.75)' : 'rgba(255,220,50,0.7)');
-    trail.setAttribute('stroke-width', '2.2');
-    trail.setAttribute('fill', 'none');
-    trail.setAttribute('stroke-dasharray', '7 5');
-    trail.setAttribute('stroke-linecap', 'round');
-    trail.innerHTML = `<animate attributeName="stroke-dashoffset" from="${trailLen}" to="0" dur="0.5s" fill="freeze"/>`;
-    svg.appendChild(trail);
-
-    // 軌跡の矢印（終点）
-    const angle = Math.atan2(cy - pcy, cx - pcx);
-    const ax = cx - Math.cos(angle) * 14;
-    const ay = cy - Math.sin(angle) * 14;
-    const arrowPath = `M ${cx},${cy} L ${ax + Math.cos(angle+0.45)*8},${ay + Math.sin(angle+0.45)*8} M ${cx},${cy} L ${ax + Math.cos(angle-0.45)*8},${ay + Math.sin(angle-0.45)*8}`;
-    const arrowEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    arrowEl.setAttribute('d', arrowPath);
-    arrowEl.setAttribute('stroke', isCounterTransition ? 'rgba(255,140,0,0.85)' : 'rgba(255,220,50,0.85)');
-    arrowEl.setAttribute('stroke-width', '2');
-    arrowEl.setAttribute('stroke-linecap', 'round');
-    arrowEl.setAttribute('fill', 'none');
-    svg.appendChild(arrowEl);
-  }
-
-  // ────── 3. エリアハイライト ──────
+  // ────── 簡略表示: 軌跡・選手名・結果バッジは省略し、マッチアップが起きているエリアだけを示す ──────
+  // エリアハイライト（リング＋中心ドット）
+  const _isGoal = sc.result === 'ゴール！！';
   const hl = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
   hl.setAttribute('cx', cx); hl.setAttribute('cy', cy);
-  hl.setAttribute('rx', '30'); hl.setAttribute('ry', '26');
-  hl.setAttribute('fill', sc.result === 'ゴール！！' ? 'rgba(255,215,0,0.18)' : 'rgba(255,255,100,0.11)');
-  hl.setAttribute('stroke', sc.result === 'ゴール！！' ? 'rgba(255,215,0,0.7)' : 'rgba(255,255,100,0.45)');
-  hl.setAttribute('stroke-width', '1');
+  hl.setAttribute('rx', '34'); hl.setAttribute('ry', '30');
+  hl.setAttribute('fill', _isGoal ? 'rgba(255,215,0,0.22)' : 'rgba(255,235,120,0.16)');
+  hl.setAttribute('stroke', _isGoal ? 'rgba(255,215,0,0.9)' : 'rgba(255,235,120,0.7)');
+  hl.setAttribute('stroke-width', '2');
   svg.appendChild(hl);
+  const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  dot.setAttribute('cx', cx); dot.setAttribute('cy', cy); dot.setAttribute('r', '4');
+  dot.setAttribute('fill', _isGoal ? '#ffd700' : '#ffe14a');
+  svg.appendChild(dot);
 
-  // ────── 4. 選手バッジ（名前タグ付き） ──────
-  const ofX = flip ? Math.min(W - 18, cx + 20) : Math.max(18, cx - 20);
-  const dfX = flip ? Math.max(18, cx - 20)      : Math.min(W - 18, cx + 20);
-
-  [[ofX, ofColor, ofName], [dfX, dfColor, dfName]].forEach(([px, color, name]) => {
-    // 影
-    const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    shadow.setAttribute('cx', px); shadow.setAttribute('cy', cy + 2);
-    shadow.setAttribute('r', '15'); shadow.setAttribute('fill', 'rgba(0,0,0,0.35)');
-    svg.appendChild(shadow);
-
-    // 選手サークル
-    const circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circ.setAttribute('cx', px); circ.setAttribute('cy', cy);
-    circ.setAttribute('r', '14'); circ.setAttribute('fill', color);
-    circ.setAttribute('stroke', 'white'); circ.setAttribute('stroke-width', '2');
-    svg.appendChild(circ);
-
-    // 円内テキスト（短縮名）
-    const shortName = name.length > 3 ? name.slice(0, 3) : name;
-    const inner = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    inner.setAttribute('x', px); inner.setAttribute('y', cy + 4);
-    inner.setAttribute('text-anchor', 'middle'); inner.setAttribute('font-size', '8.5');
-    inner.setAttribute('font-weight', 'bold'); inner.setAttribute('fill', 'white');
-    inner.setAttribute('font-family', 'sans-serif');
-    inner.textContent = shortName;
-    svg.appendChild(inner);
-
-    // 名前バッジ（バッジ背景 + テキスト）
-    const nameStr = name.length > 6 ? name.slice(0, 6) : name;
-    const badgeW = Math.max(36, nameStr.length * 8 + 10);
-    const badgeX = Math.max(4, Math.min(W - badgeW - 4, px - badgeW / 2));
-    const badgeY = cy - 32;
-
-    const badgeBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    badgeBg.setAttribute('x', badgeX); badgeBg.setAttribute('y', badgeY);
-    badgeBg.setAttribute('width', badgeW); badgeBg.setAttribute('height', '15');
-    badgeBg.setAttribute('rx', '4'); badgeBg.setAttribute('fill', 'rgba(0,0,0,0.68)');
-    svg.appendChild(badgeBg);
-
-    const badgeText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    badgeText.setAttribute('x', badgeX + badgeW / 2); badgeText.setAttribute('y', badgeY + 11);
-    badgeText.setAttribute('text-anchor', 'middle'); badgeText.setAttribute('font-size', '9.5');
-    badgeText.setAttribute('font-weight', 'bold'); badgeText.setAttribute('fill', 'white');
-    badgeText.setAttribute('font-family', 'sans-serif');
-    badgeText.textContent = nameStr;
-    svg.appendChild(badgeText);
-  });
-
-  // ────── 5. ゴール時フラッシュ ──────
-  if (sc.result === 'ゴール！！') {
-    const flash = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    flash.setAttribute('width', W); flash.setAttribute('height', H);
-    flash.setAttribute('fill', 'rgba(255,215,0,0.14)');
-    svg.appendChild(flash);
-  }
-
-  // ────── 6. 結果バッジ（左下）+ エリア名（右下） ──────
-  const rbg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  rbg.setAttribute('x', '8'); rbg.setAttribute('y', H - 22);
-  rbg.setAttribute('width', '98'); rbg.setAttribute('height', '16');
-  rbg.setAttribute('rx', '5'); rbg.setAttribute('fill', 'rgba(0,0,0,0.55)');
-  svg.appendChild(rbg);
-
-  const rbadge = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  rbadge.setAttribute('x', '57'); rbadge.setAttribute('y', H - 10);
-  rbadge.setAttribute('text-anchor', 'middle'); rbadge.setAttribute('font-size', '9.5');
-  rbadge.setAttribute('font-weight', 'bold'); rbadge.setAttribute('fill', resultColor);
-  rbadge.setAttribute('font-family', 'sans-serif');
-  rbadge.textContent = resultText;
-  svg.appendChild(rbadge);
+  // ────── 選手バッジ・ゴールフラッシュ・結果バッジは簡略化のため省略（エリア名のみ下に表示）──────
 
   const albl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  albl.setAttribute('x', W - 10); albl.setAttribute('y', H - 10);
-  albl.setAttribute('text-anchor', 'end'); albl.setAttribute('font-size', '9');
-  albl.setAttribute('fill', 'rgba(255,255,255,0.5)'); albl.setAttribute('font-family', 'sans-serif');
+  albl.setAttribute('x', W - 10); albl.setAttribute('y', H - 9);
+  albl.setAttribute('text-anchor', 'end'); albl.setAttribute('font-size', '10');
+  albl.setAttribute('font-weight', 'bold'); albl.setAttribute('font-family', 'sans-serif');
+  albl.setAttribute('fill', 'rgba(255,255,255,0.78)');
+  albl.setAttribute('paint-order', 'stroke'); albl.setAttribute('stroke', 'rgba(0,0,0,0.55)'); albl.setAttribute('stroke-width', '2.5');
   albl.textContent = _areaName;
   svg.appendChild(albl);
 
@@ -3517,12 +3428,24 @@ function nextChance() {
   const prevSc = currentSceneIdx > 0 ? res.scenes[currentSceneIdx - 1] : null;
   // per-scene アート（js/cutscene.js）。該当アートが無ければ null → 従来SVGにフォールバック。
   const _sceneArt = (typeof renderSceneArt === 'function') ? renderSceneArt(sc) : null;
-  const fieldSvg = _sceneArt || renderSceneField(sc, prevSc);
   const liveFieldWrap = document.getElementById('live-field-wrap');
+  const miniFieldWrap = document.getElementById('mini-field-wrap');
   if (liveFieldWrap) {
     liveFieldWrap.style.display = '';
     liveFieldWrap.innerHTML = '';
-    liveFieldWrap.appendChild(fieldSvg);
+    // カットインがあればそれを大きく表示し、簡易フィールド図は下に小さく添える。
+    // カットインが無いアクションは簡易フィールド図を上で大きく表示（mini は出さない）。
+    liveFieldWrap.appendChild(_sceneArt || renderSceneField(sc, prevSc));
+  }
+  if (miniFieldWrap) {
+    if (_sceneArt) {
+      miniFieldWrap.style.display = '';
+      miniFieldWrap.innerHTML = '';
+      miniFieldWrap.appendChild(renderSceneField(sc, prevSc));
+    } else {
+      miniFieldWrap.style.display = 'none';
+      miniFieldWrap.innerHTML = '';
+    }
   }
 
   // テキストを追加（ログはテキストのみ）

@@ -441,10 +441,7 @@ function _renderLongpassScene(sc, entry, opts) {
   function hud() {
     var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
     if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
-    ctx.fillStyle = c1; ctx.fillRect(W - 150, 12, 13, 13); ctx.fillStyle = c2; ctx.fillRect(W - 22, 12, 13, 13);
-    ctx.fillStyle = '#fff'; ctx.font = '800 13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(_csAbbr(t1), W - 132, 23);
-    ctx.textAlign = 'right'; ctx.fillText(_csAbbr(t2), W - 28, 23);
-    if (s1 !== '' || s2 !== '') { ctx.textAlign = 'center'; ctx.font = '900 15px "Arial Black",sans-serif'; ctx.fillText(s1 + ' - ' + s2, W - 77, 23); }
+    // ミニスコア（色チップ＋略称＋スコア）はスコアボードへ集約のため非表示。時間(左上)とラベル/選手名は残す。
     var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
     ctx.fillStyle = fail ? defColor : accent; ctx.fillRect(0, H - 30, W, 3);  // 失敗は守備チーム色
     ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
@@ -559,10 +556,7 @@ function _renderShotScene(sc, entry) {
   function hud() {
     var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
     if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
-    ctx.fillStyle = c1; ctx.fillRect(W - 150, 12, 13, 13); ctx.fillStyle = c2; ctx.fillRect(W - 22, 12, 13, 13);
-    ctx.fillStyle = '#fff'; ctx.font = '800 13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(_csAbbr(t1), W - 132, 23);
-    ctx.textAlign = 'right'; ctx.fillText(_csAbbr(t2), W - 28, 23);
-    if (s1 !== '' || s2 !== '') { ctx.textAlign = 'center'; ctx.font = '900 15px "Arial Black",sans-serif'; ctx.fillText(s1 + ' - ' + s2, W - 77, 23); }
+    // ミニスコア（色チップ＋略称＋スコア）はスコアボードへ集約のため非表示。時間(左上)とラベル/選手名は残す。
     var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
     ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
     ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
@@ -641,10 +635,7 @@ function _renderShortpassScene(sc, entry) {
   function hud() {
     var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
     if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
-    ctx.fillStyle = c1; ctx.fillRect(W - 150, 12, 13, 13); ctx.fillStyle = c2; ctx.fillRect(W - 22, 12, 13, 13);
-    ctx.fillStyle = '#fff'; ctx.font = '800 13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(_csAbbr(t1), W - 132, 23);
-    ctx.textAlign = 'right'; ctx.fillText(_csAbbr(t2), W - 28, 23);
-    if (s1 !== '' || s2 !== '') { ctx.textAlign = 'center'; ctx.font = '900 15px "Arial Black",sans-serif'; ctx.fillText(s1 + ' - ' + s2, W - 77, 23); }
+    // ミニスコア（色チップ＋略称＋スコア）はスコアボードへ集約のため非表示。時間(左上)とラベル/選手名は残す。
     var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
     ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
     ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
@@ -722,10 +713,7 @@ function _renderDribbleScene(sc) {
   function hud() {
     var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
     if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
-    ctx.fillStyle = c1; ctx.fillRect(W - 150, 12, 13, 13); ctx.fillStyle = c2; ctx.fillRect(W - 22, 12, 13, 13);
-    ctx.fillStyle = '#fff'; ctx.font = '800 13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(_csAbbr(t1), W - 132, 23);
-    ctx.textAlign = 'right'; ctx.fillText(_csAbbr(t2), W - 28, 23);
-    if (s1 !== '' || s2 !== '') { ctx.textAlign = 'center'; ctx.font = '900 15px "Arial Black",sans-serif'; ctx.fillText(s1 + ' - ' + s2, W - 77, 23); }
+    // ミニスコア（色チップ＋略称＋スコア）はスコアボードへ集約のため非表示。時間(左上)とラベル/選手名は残す。
     var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
     ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
     ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
@@ -818,10 +806,7 @@ function _renderRunInScene(sc) {
   function hud() {
     var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
     if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
-    ctx.fillStyle = c1; ctx.fillRect(W - 150, 12, 13, 13); ctx.fillStyle = c2; ctx.fillRect(W - 22, 12, 13, 13);
-    ctx.fillStyle = '#fff'; ctx.font = '800 13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(_csAbbr(t1), W - 132, 23);
-    ctx.textAlign = 'right'; ctx.fillText(_csAbbr(t2), W - 28, 23);
-    if (s1 !== '' || s2 !== '') { ctx.textAlign = 'center'; ctx.font = '900 15px "Arial Black",sans-serif'; ctx.fillText(s1 + ' - ' + s2, W - 77, 23); }
+    // ミニスコア（色チップ＋略称＋スコア）はスコアボードへ集約のため非表示。時間(左上)とラベル/選手名は残す。
     var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
     ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
     ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
@@ -910,10 +895,7 @@ function _renderGkScene(sc, mode) {
   function hud() {
     var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
     if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
-    ctx.fillStyle = c1; ctx.fillRect(W - 150, 12, 13, 13); ctx.fillStyle = c2; ctx.fillRect(W - 22, 12, 13, 13);
-    ctx.fillStyle = '#fff'; ctx.font = '800 13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(_csAbbr(t1), W - 132, 23);
-    ctx.textAlign = 'right'; ctx.fillText(_csAbbr(t2), W - 28, 23);
-    if (s1 !== '' || s2 !== '') { ctx.textAlign = 'center'; ctx.font = '900 15px "Arial Black",sans-serif'; ctx.fillText(s1 + ' - ' + s2, W - 77, 23); }
+    // ミニスコア（色チップ＋略称＋スコア）はスコアボードへ集約のため非表示。時間(左上)とラベル/選手名は残す。
     var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
     ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
     ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
@@ -1003,10 +985,7 @@ function _renderGoalScene(sc) {
   function hud() {
     var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
     if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
-    ctx.fillStyle = c1; ctx.fillRect(W - 150, 12, 13, 13); ctx.fillStyle = c2; ctx.fillRect(W - 22, 12, 13, 13);
-    ctx.fillStyle = '#fff'; ctx.font = '800 13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(_csAbbr(t1), W - 132, 23);
-    ctx.textAlign = 'right'; ctx.fillText(_csAbbr(t2), W - 28, 23);
-    if (s1 !== '' || s2 !== '') { ctx.textAlign = 'center'; ctx.font = '900 15px "Arial Black",sans-serif'; ctx.fillText(s1 + ' - ' + s2, W - 77, 23); }
+    // ミニスコア（色チップ＋略称＋スコア）はスコアボードへ集約のため非表示。時間(左上)とラベル/選手名は残す。
     var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
     ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
     if (scorerName) { ctx.textAlign = 'right'; ctx.font = '800 13px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(scorerName + (teamNm ? (' · ' + teamNm) : ''), W - 12, H - 9); }
@@ -1070,10 +1049,7 @@ function _renderMissScene(sc) {
   function hud() {
     var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
     if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
-    ctx.fillStyle = c1; ctx.fillRect(W - 150, 12, 13, 13); ctx.fillStyle = c2; ctx.fillRect(W - 22, 12, 13, 13);
-    ctx.fillStyle = '#fff'; ctx.font = '800 13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(_csAbbr(t1), W - 132, 23);
-    ctx.textAlign = 'right'; ctx.fillText(_csAbbr(t2), W - 28, 23);
-    if (s1 !== '' || s2 !== '') { ctx.textAlign = 'center'; ctx.font = '900 15px "Arial Black",sans-serif'; ctx.fillText(s1 + ' - ' + s2, W - 77, 23); }
+    // ミニスコア（色チップ＋略称＋スコア）はスコアボードへ集約のため非表示。時間(左上)とラベル/選手名は残す。
     var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
     ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
     ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
@@ -1173,10 +1149,7 @@ function _renderHeaderScene(sc) {
   function hud() {
     var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
     if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
-    ctx.fillStyle = c1; ctx.fillRect(W - 150, 12, 13, 13); ctx.fillStyle = c2; ctx.fillRect(W - 22, 12, 13, 13);
-    ctx.fillStyle = '#fff'; ctx.font = '800 13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(_csAbbr(t1), W - 132, 23);
-    ctx.textAlign = 'right'; ctx.fillText(_csAbbr(t2), W - 28, 23);
-    if (s1 !== '' || s2 !== '') { ctx.textAlign = 'center'; ctx.font = '900 15px "Arial Black",sans-serif'; ctx.fillText(s1 + ' - ' + s2, W - 77, 23); }
+    // ミニスコア（色チップ＋略称＋スコア）はスコアボードへ集約のため非表示。時間(左上)とラベル/選手名は残す。
     var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
     ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
     ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
@@ -1285,10 +1258,7 @@ function _renderMidShotScene(sc, opts) {
   function hud() {
     var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
     if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
-    ctx.fillStyle = c1; ctx.fillRect(W - 150, 12, 13, 13); ctx.fillStyle = c2; ctx.fillRect(W - 22, 12, 13, 13);
-    ctx.fillStyle = '#fff'; ctx.font = '800 13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(_csAbbr(t1), W - 132, 23);
-    ctx.textAlign = 'right'; ctx.fillText(_csAbbr(t2), W - 28, 23);
-    if (s1 !== '' || s2 !== '') { ctx.textAlign = 'center'; ctx.font = '900 15px "Arial Black",sans-serif'; ctx.fillText(s1 + ' - ' + s2, W - 77, 23); }
+    // ミニスコア（色チップ＋略称＋スコア）はスコアボードへ集約のため非表示。時間(左上)とラベル/選手名は残す。
     var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
     ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
     ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
@@ -1393,10 +1363,7 @@ function _renderFoulScene(sc) {
   function hud() {
     var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
     if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
-    ctx.fillStyle = c1; ctx.fillRect(W - 150, 12, 13, 13); ctx.fillStyle = c2; ctx.fillRect(W - 22, 12, 13, 13);
-    ctx.fillStyle = '#fff'; ctx.font = '800 13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(_csAbbr(t1), W - 132, 23);
-    ctx.textAlign = 'right'; ctx.fillText(_csAbbr(t2), W - 28, 23);
-    if (s1 !== '' || s2 !== '') { ctx.textAlign = 'center'; ctx.font = '900 15px "Arial Black",sans-serif'; ctx.fillText(s1 + ' - ' + s2, W - 77, 23); }
+    // ミニスコア（色チップ＋略称＋スコア）はスコアボードへ集約のため非表示。時間(左上)とラベル/選手名は残す。
     var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
     ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
     ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
