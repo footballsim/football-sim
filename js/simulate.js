@@ -3405,6 +3405,13 @@ function _shootSplit(sc, textHtml) {
     : (gkName ? (gkName + 'が手を伸ばすが届かない！') : 'GKが手を伸ばすが届かない！');
 
   const act = sc.action;
+  // フリーキック（中央の直接FK）: GK を必ず見せる。ゴール=蹴り→GKダイブ(届かない)→ゴール／セーブ=蹴り→GKセーブ／枠外=蹴り→枠外。
+  //   FKの定型文は1文のことが多いので、'shot'ビートは補完文(fkShot)・'result'ビートは結果文(last)を使い、結果のネタバレを避ける。
+  if (act === 'フリーキック') {
+    const fkShot = (typeof window !== 'undefined' && window.LANG === 'en') ? 'A free kick from a dangerous position!' : '絶好の位置でのフリーキック！';
+    if (sc.result === 'ゴール！！') return { parts: [fkShot, gkReach, last], steps: ['shot', 'gk', 'result'] };
+    return { parts: [fkShot, last], steps: ['shot', 'result'] };   // 枠外=蹴り→枠外 / セーブ=蹴り→GKセーブ
+  }
   const isHeaderVolley = (act === 'ヘディングシュート' || act === 'ボレーシュート');
   const isGroundShot = (act === '中央からシュート' || act === 'サイドからシュート');
 
