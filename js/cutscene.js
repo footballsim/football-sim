@@ -194,7 +194,7 @@ let SCENE_ART_ENABLED = true; // window.SCENE_ART_ENABLED===false で無効
 
 var _ACTION_MOMENT = {
   'ロングパス': 'longpass', 'ショートパス': 'shortpass',
-  'ドリブル突破': 'dribble', '飛び出し': 'runin', 'クロス': 'cross',
+  'ドリブル突破': 'dribble', '飛び出し': 'runin', 'クロス': 'cross', 'ポストプレー': 'postplay',
   'シュート': 'shot', '中央からシュート': 'shot', 'サイドからシュート': 'shot', 'ミドルシュート': 'shot'
   // ※ ヘディング/ボレーは専用ポーズ未制作のため未マップ（フィールドSVGにフォールバック）
 };
@@ -255,6 +255,7 @@ function renderSceneArt(sc) {
   if (!moment) return null;
   if (moment === 'dribble') return _renderDribbleScene(sc);     // ドリブルは専用2スプライト（緑/赤を実行時recolor・manifest非依存）
   if (moment === 'runin') return _renderRunInScene(sc);         // 飛び出し: dribbleスプライト流用・manifest非依存
+  if (moment === 'postplay') return _renderPostplayScene(sc);   // ポストプレー: 成功=ホールドアップ→反転(ドリブル流用) / 失敗=守備が弾く
   var entry = _pickCutscene(moment, sc.offence && sc.offence.team_color);
   if (!entry) return null;
 
@@ -425,7 +426,7 @@ function _csRecolorBand(base, band, kitColor, srcId) {
     if (d[i + 3] < 8) continue;
     var hsl = _lpRgb2hsl(d[i], d[i + 1], d[i + 2]), h = hsl[0], s = hsl[1], l = hsl[2];
     if (s > 0.4 && l > 0.15 && l < 0.78) {
-      var inBand = (band === 'green') ? (h > 85 && h < 165) : (h < 18 || h > 342);
+      var inBand = (band === 'green') ? (h > 85 && h < 165) : (band === 'blue') ? (h > 195 && h < 255) : (h < 18 || h > 342);
       if (inBand) { var v = _lpApplyKit(spec, h, s, l); if (v) { d[i] = v[0]; d[i + 1] = v[1]; d[i + 2] = v[2]; } }
     }
   }
@@ -783,6 +784,100 @@ function _renderDribbleScene(sc) {
     drawSpr(defSpr, defX, ground, defPh); drawSpr(dribSpr, dribX, ground, dribPh);   // 守備は常にドリブラーの後ろ（先に描画）
     if (ballY < H + 20 && ballX > -20 && ballX < W + 20) _lpBall(ctx, ballX, ballY, 12, p * 15);   // 回転は緩め（さらに半分）
     if (contact > 0) speedLines(ballX, ballY, contact * 0.8);
+    ctx.restore();
+    if (contact > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (contact * 0.4) + ')'; ctx.fillRect(0, 0, W, H); }
+    hud();
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return canvas;
+}
+
+// ============================================================
+// ポストプレー専用カットイン:
+//   成功 = ①ホールドアップ絵(postplay_t_01: 青=攻撃/白=守備, 足元でボールキープ)を見せ、
+//          ②ドリブルスプライト流用で反転して前へ抜け出す（＝反転しかわす）。
+//   失敗 = 守備がボールを弾く絵(postplay_fail_t_01)＋ボールが弾かれて流れる＋インパクト。
+//   青(攻撃キット)は実行時に攻撃チーム色へリカラー（白守備はそのまま）。表示層のみ・エンジン非接触。
+// ============================================================
+var _POSTPLAY_SRC = 'img/cutscenes/postplay_t_01.png';
+var _POSTPLAY_FAIL_SRC = 'img/cutscenes/postplay_fail_t_01.png';
+function _renderPostplayScene(sc) {
+  var W = 480, H = 216, ground = 202;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var atkColor = (sc.offence && sc.offence.team_color) || '#1f4fd6';
+  var defColor = (sc.defence && sc.defence.team_color) || '#e36b1f';
+  var success = (sc.result === '成功');
+
+  function dom(id) { var el = (typeof document !== 'undefined') && document.getElementById(id); return el ? el.textContent : ''; }
+  var timeTxt = dom('game-time-display');
+  var atkP = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  var atkName = atkP ? ((typeof getPlayerName === 'function') ? getPlayerName(atkP) : atkP.name) : '';
+  var defP = sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+  var defName = defP ? ((typeof getPlayerName === 'function') ? getPlayerName(defP) : defP.name) : '';
+  var atkTeamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
+  var defTeamNm = (typeof getTeamName === 'function' && sc.defence) ? getTeamName(sc.defence) : '';
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  var label = success ? (en ? 'HOLD-UP!' : 'ポストプレー！') : (en ? 'DISPOSSESSED!' : '奪われた！');
+  var labelCol = success ? '#ffe14a' : '#ff5a3c';
+  var accent = success ? atkColor : defColor;
+
+  var postImg = _loadCutsceneImg(_POSTPLAY_SRC);
+  var failImg = _loadCutsceneImg(_POSTPLAY_FAIL_SRC);
+  var dribImg = _loadCutsceneImg(_DRIBBLE_SRC);
+  var P = success ? 2000 : 1700, zc = [240, 116];
+  var flipH = !_csAttackRight(sc);
+
+  function speedLines(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 12, y + Math.sin(an) * 12); ctx.lineTo(x + Math.cos(an) * 52, y + Math.sin(an) * 52); ctx.stroke(); } }
+  function drawSpr(img, cx, footY, hgt) { if (!img) return; var nw = img.naturalWidth || img.width, nh = img.naturalHeight || img.height; if (!nw) return; var w = nw * (hgt / nh); ctx.drawImage(img, cx - w / 2, footY - hgt, w, hgt); }
+  function hud() {
+    var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
+    if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
+    var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
+    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = labelCol; ctx.fillText(label, 12, H - 9);
+    var nm = success ? (atkName ? (atkName + (atkTeamNm ? (' · ' + atkTeamNm) : '')) : '') : (defName ? ('✕ ' + defName + (defTeamNm ? (' · ' + defTeamNm) : '')) : '');
+    if (nm) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(nm, W - 12, H - 10); }
+  }
+
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var p = Math.min(1, (now - T0) / P);
+    ctx.clearRect(0, 0, W, H);
+    var z = 1.0 + Math.min(1, p / 0.6) * 0.05;
+    var contact = 0;
+    ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(zc[0], zc[1]); ctx.scale(z, z); ctx.translate(-zc[0], -zc[1]);
+    ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+    if (success) {
+      var pSwap = 0.5;
+      if (p < pSwap) {
+        var ppSpr = _csRecolorBand(postImg, 'blue', atkColor, 'pp') || postImg;     // 青→攻撃色（ホールドアップ・2人タブロー）
+        drawSpr(ppSpr, 244, ground, 190);
+        _lpBall(ctx, 222, ground - 16, 12, 0);                                       // 足元のボール（TUNE）
+      } else {
+        var u = (p - pSwap) / (1 - pSwap), ue = 1 - (1 - u) * (1 - u);
+        var dribSpr = _csRecolorBand(dribImg, 'green', atkColor, 'drb') || dribImg;  // 緑→攻撃色（ドリブル流用＝反転して前へ）
+        var dribX = 212 + 120 * ue;
+        drawSpr(dribSpr, dribX, ground, 184);
+        _lpBall(ctx, dribX + 48, ground - 26, 12, u * 15);                           // ボールは前方
+      }
+    } else {
+      var fSpr = _csRecolorBand(failImg, 'blue', atkColor, 'ppfail') || failImg;     // 崩れる攻撃(青)→攻撃色・白守備は維持
+      drawSpr(fSpr, 240, ground, 200);
+      var kp = 0.12, bootX = 252, bootY = ground - 44;
+      var ballX = bootX - 1450 * Math.max(0, p - kp), ballY = bootY;                 // 守備に弾かれて流れる
+      contact = (p > kp - 0.02 && p < kp + 0.10) ? 1 - Math.abs(p - kp) / 0.10 : 0;
+      if (ballX > -20 && ballX < W + 20) _lpBall(ctx, ballX, ballY, 12, p * 15);
+      if (contact > 0) speedLines(bootX, bootY, contact * 0.8);
+    }
     ctx.restore();
     if (contact > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (contact * 0.4) + ')'; ctx.fillRect(0, 0, W, H); }
     hud();
