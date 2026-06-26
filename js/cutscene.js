@@ -208,6 +208,32 @@ function _csAttackRight(sc) {
   return !!(sc && sc.offence === gs.team1);
 }
 
+// 試合表示の「シュート3分割」用（simulate.js nextChance から段階別に呼ぶ）。
+//   stepType: 'shot'=シューターの一撃 / 'gk'=GKダイブ（抜かれ/セーブ）/ 'result'=ゴール・枠外・セーブの結末。
+//   エンジン無改変・プレゼンのみ。SCENE_ART無効/未対応は null（呼び出し側が従来SVGにフォールバック）。
+function renderShootStep(sc, stepType) {
+  var on = SCENE_ART_ENABLED && (typeof window === 'undefined' || window.SCENE_ART_ENABLED !== false);
+  if (!on || typeof document === 'undefined' || !sc) return null;
+  if (stepType === 'result') {
+    if (sc.result === '枠を外した！') return _renderMissScene(sc);
+    if (sc.result === 'GK防いだ！') return _renderGkScene(sc, 'save');
+    if (sc.result === 'ブロック') return _renderMidShotScene(sc);   // ブロック=ミドル流用（右上deflect）
+    return _renderGoalScene(sc);                                    // ゴール！！（既定）
+  }
+  if (stepType === 'gk') {
+    return _renderGkScene(sc, 'dive');   // 中間ビート=結果非開示のダイブ（ゴール/枠外/セーブ共通＝ドキドキ）
+  }
+  // 'shot' = シューターの一撃のみ（結果は出さない）。result を中立化して素の蹴り描画にする。
+  var shotSc = {}; for (var k in sc) { if (Object.prototype.hasOwnProperty.call(sc, k)) shotSc[k] = sc[k]; }
+  shotSc.result = '成功';
+  if (sc.action === 'ミドルシュート') return _renderMidShotScene(shotSc);
+  if (sc.action === 'ボレーシュート') return _renderVolleyScene(shotSc);
+  if (sc.action === 'ヘディングシュート') return _renderHeaderScene(shotSc);
+  var entry = _pickCutscene('shot', sc.offence && sc.offence.team_color);
+  if (entry && entry.file) return _renderShotScene(shotSc, entry);
+  return null;
+}
+
 function renderSceneArt(sc) {
   var on = SCENE_ART_ENABLED && (typeof window === 'undefined' || window.SCENE_ART_ENABLED !== false);
   if (!on || typeof document === 'undefined' || !sc) return null;
@@ -218,6 +244,13 @@ function renderSceneArt(sc) {
   if (sc.action === 'ヘディングシュート' && sc.scenario !== 'シュート') return _renderHeaderScene(sc);
   if (sc.action === 'ボレーシュート' && sc.scenario !== 'シュート') return _renderVolleyScene(sc);   // ボレー競り合い=ロングパス蹴りアニメ流用（ボール起点を膝高さへ）
   if (sc.action === 'クロス') return _renderCrossScene(sc);   // クロス=ミドル流用（成功=斜め上/失敗=反対方向）
+  // ヘディング/ボレーの「シュート」段（クロス後の結果シーン。_ACTION_MOMENT 未登録なので個別に結果別描画）。
+  //   セーブ=GKセーブ / 枠外=枠外（ゴールは上の result==='ゴール！！' で処理済み）。これが無いとSVG図に落ちる。
+  if ((sc.action === 'ヘディングシュート' || sc.action === 'ボレーシュート') && sc.scenario === 'シュート') {
+    if (sc.result === 'GK防いだ！') return _renderGkScene(sc, 'save');
+    if (sc.result === '枠を外した！') return _renderMissScene(sc);
+    return null;
+  }
   var moment = _sceneMoment(sc);
   if (!moment) return null;
   if (moment === 'dribble') return _renderDribbleScene(sc);     // ドリブルは専用2スプライト（緑/赤を実行時recolor・manifest非依存）
@@ -888,8 +921,9 @@ function _renderGkScene(sc, mode) {
   var defTeamNm = (typeof getTeamName === 'function' && sc.defence) ? getTeamName(sc.defence) : '';
   var en = (typeof window !== 'undefined' && window.LANG === 'en');
   var save = (mode === 'save');
-  var label = save ? (en ? 'GK SAVE!' : 'ナイスセーブ！') : (en ? 'BEATEN' : '抜かれた…');
-  var labelCol = save ? '#ffe14a' : '#ff5a3c';
+  var dive = (mode === 'dive');   // 結果非開示の「跳んだ！」サスペンス（ゴール/枠外/セーブ共通＝まだ分からない）
+  var label = save ? (en ? 'GK SAVE!' : 'ナイスセーブ！') : dive ? (en ? 'DIVE—!' : 'ダイブ——！') : (en ? 'BEATEN' : '抜かれた…');
+  var labelCol = (save || dive) ? '#ffe14a' : '#ff5a3c';
 
   function speedLines(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 14, y + Math.sin(an) * 14); ctx.lineTo(x + Math.cos(an) * 60, y + Math.sin(an) * 60); ctx.stroke(); } }
   function hud() {
@@ -924,17 +958,30 @@ function _renderGkScene(sc, mode) {
     // ボール位置と画面内判定
     var bx = null, by = null, onScreen = false;
     if (p >= ballStartP) {
-      bx = W - ballSpd * (p - ballStartP);                    // 右端→左へ（赤い矢印・シュートと同速）
-      by = (save && bx < hX) ? hY - (hX - bx) * 0.55 : hY + slope * (hX - bx);   // セーブ=手元で左上へ弾く / それ以外=直進
-      onScreen = (bx > -16 && by > -16 && by < H + 16);
+      if (dive) {
+        bx = W - ballSpd * (p - ballStartP);                  // 右→左へ飛来
+        if (sc.result === 'GK防いだ！') {                      // セーブ: 手元で静止（届くか！？）
+          if (bx < hX) bx = hX;
+          by = hY;
+        } else {                                              // 抜かれ（ゴール/枠外）: 手を“すり抜けて”GKの体を越えた先まで流れる（掴まない）
+          var fzx = hX - 196;                                 // 手元から大きく先（GKの体を越えた位置）で静止＝すり抜け感
+          if (bx < fzx) bx = fzx;
+          by = hY + 0.42 * (hX - bx);                         // すり抜けた後はゴール方向（下）へ大きく流れる
+        }
+        onScreen = (bx > -16);
+      } else {
+        bx = W - ballSpd * (p - ballStartP);                  // 右端→左へ（シュートと同速）
+        by = (save && bx < hX) ? hY - (hX - bx) * 0.55 : hY + slope * (hX - bx);   // セーブ=手元で左上へ弾く / それ以外=直進
+        onScreen = (bx > -16 && by > -16 && by < H + 16);
+      }
     }
-    var ballGone = (p > ballStartP + 0.03) && !onScreen;      // ボールが画面外に出た＝終了タイミング
+    var ballGone = !dive && (p > ballStartP + 0.03) && !onScreen;   // dive はボールを手元で凍結＝終了させない
     var drawGK = function () { if (gkImg.complete && gkImg.naturalWidth) ctx.drawImage(gkImg, slide, gkY, gkW, gkH); };
     var drawBall = function () { if (onScreen) _lpBall(ctx, bx, by, 12, (p - ballStartP) * 120); };
     ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(zc[0], zc[1]); ctx.scale(z, z); ctx.translate(-zc[0], -zc[1]);
     ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
-    if (save) { drawGK(); drawBall(); } else { drawBall(); drawGK(); }   // 抜けはボールをGKの背後（先に描画）に
-    var ct = (save && p > contactP - 0.02 && p < contactP + 0.09) ? 1 - Math.abs(p - contactP) / 0.09 : 0;
+    if (save || dive) { drawGK(); drawBall(); } else { drawBall(); drawGK(); }   // 抜けはボールをGKの背後（先に描画）に
+    var ct = ((save || dive) && p > contactP - 0.02 && p < contactP + 0.09) ? 1 - Math.abs(p - contactP) / 0.09 : 0;
     if (ct > 0) speedLines(hX, hY, ct * 0.7);                  // セーブ・インパクト
     ctx.restore();
     if (ct > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (ct * 0.4) + ')'; ctx.fillRect(0, 0, W, H); }

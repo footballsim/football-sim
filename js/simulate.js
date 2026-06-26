@@ -2572,8 +2572,12 @@ function simulateChance(gs, chanceNo) {
       } else {
         crossPos = ofsPos;
         crossPlayer = ofsPlayer;
-        // 25%の確率でサイドから切れ込みシュート
-        if (Math.random() < 0.25) {
+        // 25%の確率でサイドから切れ込みシュート（同一選手）。
+        // ただし「クロス」アクション成功からの継続は、必ず別選手へのクロスにする
+        // （＝同一選手の切れ込みを禁止）。クロス能力で抜けて自分でシュート、という
+        // 矛盾（絵=クロス／文=切れ込み）を防ぐため。非クロス系とカウンター直行は従来どおり。
+        const allowCutIn = !(scene.scenario === 'サイドクロス' && scene.result === '成功');
+        if (allowCutIn && Math.random() < 0.25) {
           action = 'サイドからシュート';
           shootAction = 'サイドからシュート';
         } else {
@@ -2745,6 +2749,7 @@ function coloredName(team, pos) {
 
 // 現在表示中のチャンス内のシーンインデックス
 let currentSceneIdx = 0;
+let _shootSubStep = 0;   // シュート系シーンの3分割の現在ビート（0=シュート/1=GKダイブ/2=結果）。0でシーン境界。
 let currentEventDiv = null;
 let _pendingCoachCardEl = null; // 次の「次へ」で表示するコーチカードを一時退避
 
@@ -3371,6 +3376,62 @@ function _recalcSecondHalf() {
   document.getElementById('chance-total').textContent = chanceResults.length;
 }
 
+// シュート系シーンを「シュート → GKダイブ → 結果」に分割（表示層のみ・エンジン不変）。
+//   ・GKが抜かれるゴール/枠外 … 中間に「GKダイブ」を挟む。ゴールはゲームの定型文（例:GKが取れない）、
+//     枠外は定型文にGK文が無いので「手を伸ばすが届かない」を補う（GKは届かず＝必ずセーブしない）。
+//   ・セーブ/ブロック … 結果シーン自体がGK・守備の防ぐ動作なので中間は挟まない（2場面／ヘディング等は1場面）。
+//   ・ヘディング/ボレー … シュート動作は直前のクロス/セットプレー場面。この結果シーンの先頭はGKの反応なので
+//     先頭ビートを「GKダイブ」として扱う（クロス→GKダイブ→結果 の3場面に）。
+//   ・ミドル/FK … 構造が異なるため2場面（シュート→結果）。分割不能は null（従来1シーン）。
+function _shootSplit(sc, textHtml) {
+  if (!sc) return null;
+  const isShoot = (sc.scenario === 'シュート' || sc.scenario === 'ミドルシュート');
+  const isShootResult = (sc.result === 'ゴール！！' || sc.result === '枠を外した！' || sc.result === 'GK防いだ！' || sc.result === 'ブロック');
+  if (!isShoot || !isShootResult) return null;
+  const parts = String(textHtml || '').split(/(?:　| {2,})/).map(s => s.trim()).filter(Boolean);
+  if (!parts.length) return null;
+  const last = parts[parts.length - 1];
+  // 枠外用「GKダイブ（届かない）」の補完文（ゲームに無い）。GKは届かず＝必ずセーブしない。
+  const gkName = (typeof coloredName === 'function') ? coloredName(sc.defence, 0) : '';
+  const gkReach = (typeof window !== 'undefined' && window.LANG === 'en')
+    ? (gkName ? (gkName + ' stretches a hand but can\'t reach it!') : "The keeper stretches but can't reach it!")
+    : (gkName ? (gkName + 'が手を伸ばすが届かない！') : 'GKが手を伸ばすが届かない！');
+
+  const act = sc.action;
+  const isHeaderVolley = (act === 'ヘディングシュート' || act === 'ボレーシュート');
+  const isGroundShot = (act === '中央からシュート' || act === 'サイドからシュート');
+
+  // セーブ／ブロック: 結果シーン＝GK・守備の動作。中間は挟まない。
+  if (sc.result === 'GK防いだ！' || sc.result === 'ブロック') {
+    if (isHeaderVolley) return null;                 // ヘディング/ボレーのセーブ等は結果シーン1場面
+    if (parts.length < 2) return null;
+    return { parts: [parts[0], last], steps: ['shot', 'result'] };
+  }
+
+  // ミドルシュート（ゴール／枠外）: 定型文の中間が「ブロック届かない／GKセーブも届かない」で乱れるため、
+  //   その中間は使わず、GKダイブ(補完文)を挟んで シュート→GKダイブ→結果 の3場面にする。
+  if (sc.action === 'ミドルシュート') {
+    return { parts: [parts[0], gkReach, last], steps: ['shot', 'gk', 'result'] };
+  }
+
+  // ここから ゴール／枠を外した！（GKは抜かれる）
+  if (isHeaderVolley) {
+    // 先頭=GKの反応（シュート動作はクロス場面で表示済み）。枠外はGK文が無いので補う。
+    if (sc.result === '枠を外した！') return { parts: [gkReach, last], steps: ['gk', 'result'] };
+    if (parts.length < 2) return null;
+    return { parts: [parts[0], last], steps: ['gk', 'result'] };   // ゴール: [GKが届かない][ゴール]
+  }
+  if (isGroundShot) {
+    const shotText = parts[0];
+    if (sc.result === '枠を外した！') return { parts: [shotText, gkReach, last], steps: ['shot', 'gk', 'result'] };  // 枠外: シュート→GKダイブ(補)→枠外
+    if (parts.length >= 3) return { parts: [parts[0], parts[1], last], steps: ['shot', 'gk', 'result'] };          // ゴール: [シュート][GKが取れない][ゴール](元の文)
+    return { parts: [shotText, gkReach, last], steps: ['shot', 'gk', 'result'] };                                  // 念のため(2ビートのゴール)
+  }
+  // ミドル／FK 等: 2場面（シュート→結果）。
+  if (parts.length < 2) return null;
+  return { parts: [parts[0], last], steps: ['shot', 'result'] };
+}
+
 function nextChance() {
   // 保留中のコーチカードがあれば、まずそれだけ表示して終了
   // （テキスト最終シーンとコーチカードの間に「次へ」を挟む）
@@ -3390,7 +3451,7 @@ function nextChance() {
   const res = chanceResults[currentChanceIdx];
   const logArea = document.getElementById('log-area');
 
-  if (currentSceneIdx === 0) {
+  if (currentSceneIdx === 0 && _shootSubStep === 0) {
     // チャンス開始：交代ボタンを非表示
     document.getElementById('sub-btn').style.display = 'none';
     // チャンス開始：eventDivとフィールドを生成
@@ -3426,8 +3487,19 @@ function nextChance() {
   const textDiv = document.getElementById('log-text-' + currentChanceIdx);
   const sc = res.scenes[currentSceneIdx];
   const prevSc = currentSceneIdx > 0 ? res.scenes[currentSceneIdx - 1] : null;
-  // per-scene アート（js/cutscene.js）。該当アートが無ければ null → 従来SVGにフォールバック。
-  const _sceneArt = (typeof renderSceneArt === 'function') ? renderSceneArt(sc) : null;
+
+  // シュート系シーンは「シュート→GKダイブ→ゴール/枠外」のビートに分割し、1クリック1ビートで見せる。
+  const _split = _shootSplit(sc, res.textScenes[currentSceneIdx]);
+  const _beat = _split ? _shootSubStep : 0;
+  const _isLastBeat = !_split || (_beat >= _split.parts.length - 1);
+
+  // per-scene アート（js/cutscene.js）。分割時は段階別 renderShootStep、通常は renderSceneArt。無ければ従来SVG。
+  let _sceneArt = null;
+  if (_split && typeof renderShootStep === 'function') {
+    _sceneArt = renderShootStep(sc, _split.steps[_beat]);
+  } else if (!_split && typeof renderSceneArt === 'function') {
+    _sceneArt = renderSceneArt(sc);
+  }
   const liveFieldWrap = document.getElementById('live-field-wrap');
   const miniFieldWrap = document.getElementById('mini-field-wrap');
   if (liveFieldWrap) {
@@ -3448,13 +3520,14 @@ function nextChance() {
     }
   }
 
-  // テキストを追加（ログはテキストのみ）
+  // テキストを追加（分割時はビート単位、通常は全文）
   const line = document.createElement('div');
   line.style.cssText = 'margin-bottom:8px';
-  line.innerHTML = res.textScenes[currentSceneIdx];
+  line.innerHTML = _split ? _split.parts[_beat] : res.textScenes[currentSceneIdx];
   textDiv.appendChild(line);
 
-  if (sc && sc.result === 'ゴール！！') {
+  // ゴール時のスコア更新＆GOAL演出は「結果ビート」で（分割しない場合は従来どおり最終表示時）
+  if (sc && sc.result === 'ゴール！！' && _isLastBeat) {
     // ゴールシーンが画面に出たタイミングでスコアを更新する
     document.getElementById('score1').textContent = res.t1score;
     document.getElementById('score2').textContent = res.t2score;
@@ -3471,6 +3544,13 @@ function nextChance() {
   requestAnimationFrame(() => requestAnimationFrame(() => {
     logArea.scrollTop = logArea.scrollHeight;
   }));
+
+  // 分割中でまだビートが残るなら、シーンを進めずに同じシーンに留まる（次クリックで次ビート）
+  if (_split && !_isLastBeat) {
+    _shootSubStep++;
+    return;
+  }
+  _shootSubStep = 0;
   currentSceneIdx++;
 
   if (currentSceneIdx >= res.textScenes.length) {
