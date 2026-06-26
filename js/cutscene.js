@@ -214,6 +214,8 @@ function _csAttackRight(sc) {
 function renderShootStep(sc, stepType) {
   var on = SCENE_ART_ENABLED && (typeof window === 'undefined' || window.SCENE_ART_ENABLED !== false);
   if (!on || typeof document === 'undefined' || !sc) return null;
+  if (stepType === 'fkdeliver') return _renderFkDeliveryScene(sc);   // サイドFK=セットプレーの「蹴り出し」（クロスを上げる）
+  if (stepType === 'spcontest') return renderSceneArt(sc);           // セットプレーの「競り合い」＝ヘディング/ボレー（既存）
   if (stepType === 'result') {
     if (sc.result === '枠を外した！') return _renderMissScene(sc);
     if (sc.result === 'GK防いだ！') return _renderGkScene(sc, 'save');
@@ -892,6 +894,86 @@ function _renderFreekickScene(sc) {
       });
     }
     if (contact > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (contact * 0.5) + ')'; ctx.fillRect(0, 0, W, H); }   // インパクトのフラッシュ
+    hud();
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return canvas;
+}
+
+// ============================================================
+// サイドFK（セットプレー）の蹴り出し: キッカー(crossPos)がボールをゴール前へ高く上げる。
+//   ①蹴る前(freekick1)→②蹴った瞬間(freekick2)＋ボールが高い弧でゴール方向(上方)へ。直接FKより上向き優勢＝クロス。
+//   この後ビートで _renderHeaderScene/_renderVolleyScene の競り合いへ繋がる（_shootSplit が セットプレー を2ビート化）。
+//   提供赤キット流用・ネイティブ=左攻め・team1ミラー。表示層のみ・エンジン非接触。
+// ============================================================
+function _renderFkDeliveryScene(sc) {
+  var W = 480, H = 216, ground = 190;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var img1 = _loadCutsceneImg(_FREEKICK1_SRC), img2 = _loadCutsceneImg(_FREEKICK2_SRC);
+  var atkColor = (sc.offence && sc.offence.team_color) || '#1f4fd6';
+
+  function dom(id) { var el = (typeof document !== 'undefined') && document.getElementById(id); return el ? el.textContent : ''; }
+  var timeTxt = dom('game-time-display');
+  var kpos = (sc.crossPos != null) ? sc.crossPos : sc.ofsPos;   // キッカー＝クロス選手
+  var kicker = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[kpos]];
+  var kickerName = kicker ? ((typeof getPlayerName === 'function') ? getPlayerName(kicker) : kicker.name) : '';
+  var teamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  var label = en ? 'FREE KICK!' : 'フリーキック！';
+  var accent = atkColor;
+
+  var mirror = _csAttackRight(sc);   // ネイティブ=左攻め（ボールはゴール=左上方向へ）→ team1 ミラー
+  var sw = 0.42, P = 1500;
+  var kx = 300, kh = 182;
+  var bx0 = 286, by0 = ground - 10;  // 足元のボール
+  var vx = 220, vyUp = 360, g = 70;  // 高い弧でゴール前へ＝上昇主体の放物線（クロス）
+
+  function speedLines(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 12, y + Math.sin(an) * 12); ctx.lineTo(x + Math.cos(an) * 48, y + Math.sin(an) * 48); ctx.stroke(); } }
+  function drawSprF(img, cx, footY, h, flip) { if (!img) return; var nw = img.naturalWidth || img.width, nh = img.naturalHeight || img.height; if (!nw) return; var w = nw * (h / nh); ctx.save(); if (flip) { ctx.translate(cx, 0); ctx.scale(-1, 1); ctx.translate(-cx, 0); } ctx.drawImage(img, cx - w / 2, footY - h, w, h); ctx.restore(); }
+  function withScene(draw) { ctx.save(); if (mirror) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.imageSmoothingEnabled = false; draw(); ctx.restore(); }
+  function hud() {
+    var g2 = ctx.createLinearGradient(0, 0, 0, 46); g2.addColorStop(0, 'rgba(6,6,14,.66)'); g2.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g2; ctx.fillRect(0, 0, W, 46);
+    if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
+    var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
+    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = '#ffe14a'; ctx.fillText(label, 12, H - 9);
+    if (kickerName) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(kickerName + (teamNm ? (' · ' + teamNm) : ''), W - 12, H - 10); }
+  }
+
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var p = Math.min(1, (now - T0) / P);
+    ctx.clearRect(0, 0, W, H);
+    var spr1 = _recolorPostplay(img1, atkColor, atkColor, 'fk1') || img1;
+    var spr2 = _recolorPostplay(img2, atkColor, atkColor, 'fk2') || img2;
+    ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+
+    var contact = 0;
+    if (p < sw) {
+      // ① 蹴る前: 足元にボール
+      withScene(function () { drawSprF(spr1, kx, ground, kh, false); _lpBall(ctx, bx0, by0, 12, 0); });
+    } else {
+      // ② 蹴った瞬間: ボールを高い弧でゴール前(上方)へ上げる
+      var tt = (p - sw) / (1 - sw);
+      var bx = bx0 - vx * tt;
+      var by = by0 - vyUp * tt + g * tt * tt;         // 上昇主体の放物線
+      contact = (tt < 0.10) ? (1 - tt / 0.10) : 0;
+      withScene(function () {
+        drawSprF(spr2, kx, ground, kh, false);
+        if (bx > -20 && by > -20) _lpBall(ctx, bx, by, 11, tt * 60);
+        if (contact > 0) speedLines(bx0, by0, contact * 0.7);
+      });
+    }
+    if (contact > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (contact * 0.45) + ')'; ctx.fillRect(0, 0, W, H); }
     hud();
     if (p < 1) requestAnimationFrame(frame);
   }

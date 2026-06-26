@@ -20,7 +20,7 @@
 <div style="display:none">
   <span id="game-time-display">67'</span><span id="score1">2</span><span id="score2">1</span>
 </div>
-<script src="/js/cutscene.js?t=20260626fk1"></script>
+<script src="/js/cutscene.js?t=20260626fk2"></script>
 <script>
   // 試合側グローバルのスタブ
   function getTeamName(t){ return t && t.name; }
@@ -50,6 +50,10 @@
     ['🟢 FK (赤)', {action:'フリーキック',scenario:'シュート',result:'枠を外した！',area:'CR_M',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}],
     ['🟢→ T1右: FK', {action:'フリーキック',scenario:'シュート',result:'枠を外した！',area:'CR_M',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
     ['🟢← T2左: FK', {action:'フリーキック',scenario:'シュート',result:'枠を外した！',area:'CR_M',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    // サイドFK（セットプレー）= ①蹴り出し(クロスを上げる)→②競り合い(ヘディング/ボレー)。①が新規。
+    ['🟣 サイドFK①蹴り出し (赤)', {__fkdeliver:true,scenario:'セットプレー',action:'ヘディングシュート',result:'成功',area:'CR_R',offence:mkTeam('Japan','#c8102e'),defence:NED,crossPos:6,ofsPos:9,dfsPos:4}],
+    ['🟣→ T1右: サイドFK①蹴り出し', {__fkdeliver:true,scenario:'セットプレー',action:'ヘディングシュート',result:'成功',area:'CR_R',offence:JPN,defence:NED,crossPos:6,ofsPos:9,dfsPos:4}],
+    ['🟣 サイドFK②競り合い(ヘディング・赤攻→緑守)', {scenario:'セットプレー',action:'ヘディングシュート',result:'成功',area:'CR_R',offence:mkTeam('Japan','#c8102e'),defence:mkTeam('GreenFC','#1f8f3a'),crossPos:6,ofsPos:9,dfsPos:4}],
     ['攻撃: Japan 赤 (#c8102e)',      mkScene(mkTeam('Japan','#c8102e'), NED)],
     ['攻撃: 青 (#1f4fd6)',            mkScene(mkTeam('BlueFC','#1f4fd6'), JPN)],
     ['攻撃: オレンジ Netherlands (#f36c21)', mkScene(mkTeam('NLD','#f36c21'), JPN)],
@@ -129,7 +133,9 @@
   var row = document.getElementById('row');
   cases.forEach(function(c){
     var cell = document.createElement('div'); cell.className='cell';
-    var art = (c[1] && c[1].__gkBeat) ? _renderGkScene(c[1], 'beat') : renderSceneArt(c[1], c[2]);
+    var art = (c[1] && c[1].__gkBeat) ? _renderGkScene(c[1], 'beat')
+            : (c[1] && c[1].__fkdeliver) ? _renderFkDeliveryScene(c[1])
+            : renderSceneArt(c[1], c[2]);
     if (art) cell.appendChild(art);
     var cap = document.createElement('div'); cap.className='cap'; cap.textContent=c[0]; cell.appendChild(cap);
     row.appendChild(cell);

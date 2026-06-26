@@ -3385,6 +3385,13 @@ function _recalcSecondHalf() {
 //   ・ミドル/FK … 構造が異なるため2場面（シュート→結果）。分割不能は null（従来1シーン）。
 function _shootSplit(sc, textHtml) {
   if (!sc) return null;
+  // セットプレー（サイドFK）: 「蹴り出し(クロスを上げる)」→「競り合い(ヘディング/ボレー)」の2ビートに分割。
+  //   定型文も2文（…ボールをあげる／…シュート）なので parts と一致する。
+  if (sc.scenario === 'セットプレー') {
+    const spParts = String(textHtml || '').split(/(?:　| {2,})/).map(s => s.trim()).filter(Boolean);
+    if (spParts.length >= 2) return { parts: [spParts[0], spParts[1]], steps: ['fkdeliver', 'spcontest'] };
+    return null;
+  }
   const isShoot = (sc.scenario === 'シュート' || sc.scenario === 'ミドルシュート');
   const isShootResult = (sc.result === 'ゴール！！' || sc.result === '枠を外した！' || sc.result === 'GK防いだ！' || sc.result === 'ブロック');
   if (!isShoot || !isShootResult) return null;
