@@ -800,8 +800,35 @@ function _renderDribbleScene(sc) {
 //   失敗 = 守備がボールを弾く絵(postplay_fail_t_01)＋ボールが弾かれて流れる＋インパクト。
 //   青(攻撃キット)は実行時に攻撃チーム色へリカラー（白守備はそのまま）。表示層のみ・エンジン非接触。
 // ============================================================
-var _POSTPLAY_SRC = 'img/cutscenes/postplay_t_01.png?v=pp4';
-var _POSTPLAY_FAIL_SRC = 'img/cutscenes/postplay_fail_t_01.png?v=pp4';
+// ポストプレー専用リカラー: 赤=攻撃選手→攻撃チーム色 / 緑=守備選手→守備チーム色。
+//   _headerRecolor と同方式だが、提供アートの濃い影(l≈0.1)も拾えるよう明度下限を 0.08 に広げる。
+var _ppRecolorCache = {};
+function _recolorPostplay(base, atkColor, defColor, srcId) {
+  if (!base || !base.complete || !base.naturalWidth) return null;
+  var atkKit = _colorBucket(atkColor) || 'red';
+  var defKit = _colorBucket(defColor) || 'green';
+  var key = (srcId || '') + '|' + atkKit + '|' + defKit;
+  if (_ppRecolorCache[key]) return _ppRecolorCache[key];
+  var w = base.naturalWidth, hgt = base.naturalHeight;
+  var cv = document.createElement('canvas'); cv.width = w; cv.height = hgt;
+  var c = cv.getContext('2d'); c.imageSmoothingEnabled = false; c.drawImage(base, 0, 0);
+  var im; try { im = c.getImageData(0, 0, w, hgt); } catch (e) { return null; }
+  var d = im.data, atkSpec = _LP_KIT_SPEC[atkKit], defSpec = _LP_KIT_SPEC[defKit];
+  for (var i = 0; i < d.length; i += 4) {
+    if (d[i + 3] < 8) continue;
+    var hsl = _lpRgb2hsl(d[i], d[i + 1], d[i + 2]), h = hsl[0], s = hsl[1], l = hsl[2];
+    if (s > 0.4 && l > 0.08 && l < 0.82) {            // 濃い影(l~0.1)〜明るめまで。肌(橙h~30)・輪郭(低彩度/極暗)は除外。
+      var v = null;
+      if (h < 20 || h > 340) v = _lpApplyKit(atkSpec, h, s, l);       // 赤 → 攻撃チーム色
+      else if (h > 80 && h < 170) v = _lpApplyKit(defSpec, h, s, l);  // 緑 → 守備チーム色
+      if (v) { d[i] = v[0]; d[i + 1] = v[1]; d[i + 2] = v[2]; }
+    }
+  }
+  c.putImageData(im, 0, 0);
+  _ppRecolorCache[key] = cv; return cv;
+}
+var _POSTPLAY_SRC = 'img/cutscenes/postplay_t_01.png?v=pp5';
+var _POSTPLAY_FAIL_SRC = 'img/cutscenes/postplay_fail_t_01.png?v=pp5';
 function _renderPostplayScene(sc) {
   var W = 480, H = 216, ground = 190;   // 他シーン（ドリブル等）と同じ接地ライン
   var canvas = document.createElement('canvas');
@@ -863,7 +890,7 @@ function _renderPostplayScene(sc) {
       var pSwap = 0.5;
       if (p < pSwap) {
         withFlip(flipH, function () {
-          var ppSpr = _csRecolorBand(postImg, 'blue', atkColor, 'pp') || postImg;    // 青→攻撃色（ホールドアップ・2人タブロー）
+          var ppSpr = _recolorPostplay(postImg, atkColor, defColor, 'pp') || postImg;    // 赤→攻撃色・緑→守備色（ホールドアップ・2人タブロー）
           drawSpr(ppSpr, 244, ground, 168);                                          // 少し小さく（190→168）
           _lpBall(ctx, 224, ground - 14, 11, 0);                                     // 足元のボール
         });
@@ -879,7 +906,7 @@ function _renderPostplayScene(sc) {
       }
     } else {
       withFlip(flipH, function () {
-        var fSpr = _csRecolorBand(failImg, 'blue', atkColor, 'ppfail') || failImg;    // 崩れる攻撃(青)→攻撃色・白守備は維持
+        var fSpr = _recolorPostplay(failImg, atkColor, defColor, 'ppfail') || failImg;    // 赤→攻撃色・緑→守備色
         drawSpr(fSpr, 240, ground + 2, 150);                                         // タイト画像：足元を接地ラインへ
       });
       var kp = 0.12, bootX = 244, bootY = ground - 8;
