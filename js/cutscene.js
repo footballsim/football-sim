@@ -889,7 +889,7 @@ function _renderPostplayScene(sc) {
     if (success) {
       var pSwap = 0.5;
       if (p < pSwap) {
-        withFlip(flipH, function () {
+        withFlip(!flipH, function () {                                                   // タブロー絵はネイティブ向きが逆＝!flipHで攻撃方向に合わせる
           var ppSpr = _recolorPostplay(postImg, atkColor, defColor, 'pp') || postImg;    // 赤→攻撃色・緑→守備色（ホールドアップ・2人タブロー）
           drawSpr(ppSpr, 244, ground, 168);                                          // 少し小さく（190→168）
           _lpBall(ctx, 224, ground - 14, 11, 0);                                     // 足元のボール
@@ -905,14 +905,14 @@ function _renderPostplayScene(sc) {
         });
       }
     } else {
-      withFlip(flipH, function () {
+      withFlip(!flipH, function () {                                                  // タブロー絵はネイティブ向きが逆＝!flipHで攻撃方向に合わせる
         var fSpr = _recolorPostplay(failImg, atkColor, defColor, 'ppfail') || failImg;    // 赤→攻撃色・緑→守備色
         drawSpr(fSpr, 240, ground + 2, 150);                                         // タイト画像：足元を接地ラインへ
       });
       var kp = 0.12, bootX = 244, bootY = ground - 8;
-      var ballX = bootX + 1450 * Math.max(0, p - kp), ballY = bootY;                  // 弾かれて流れる（逆方向＝右へ）
+      var ballX = bootX + 1450 * Math.max(0, p - kp), ballY = bootY;                  // 弾かれて流れる
       contact = (p > kp - 0.02 && p < kp + 0.10) ? 1 - Math.abs(p - kp) / 0.10 : 0;
-      withFlip(flipH, function () {
+      withFlip(!flipH, function () {                                                  // 図と同じ反転でボールも描く
         if (ballX > -20 && ballX < W + 20) _lpBall(ctx, ballX, ballY, 12, p * 15);
         if (contact > 0) speedLines(bootX, bootY, contact * 0.8);
       });
