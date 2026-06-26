@@ -20,7 +20,7 @@
 <div style="display:none">
   <span id="game-time-display">67'</span><span id="score1">2</span><span id="score2">1</span>
 </div>
-<script src="/js/cutscene.js?t=20260626onetwo3"></script>
+<script src="/js/cutscene.js?t=20260626onetwo4"></script>
 <script>
   // 試合側グローバルのスタブ
   function getTeamName(t){ return t && t.name; }
@@ -39,10 +39,13 @@
 
   // 攻撃側=各キット色で確認（frames は得点側色バケツに自動マッチ）
   var cases = [
-    // ===== ワンツーパス（ショートパス成功）= ①与える→②返し→③持ち出す の3カット連結 =====
-    ['⚽ ワンツー (赤)', {action:'ショートパス',result:'成功',area:'MF',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}],
-    ['⚽→ T1右: ワンツー', {action:'ショートパス',result:'成功',area:'MF',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
-    ['⚽← T2左: ワンツー', {action:'ショートパス',result:'成功',area:'MF',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    // ===== ワンツーパス（ショートパス成功＋次シーンが同一選手=give-and-go）= ①与える→②返し→③受け止め =====
+    //   第3要素 = 次シーン（ofsPos一致=ワンツー / 不一致=別選手へのパス→従来ショートパス演出）
+    ['⚽ ワンツー 同 (赤)', {action:'ショートパス',result:'成功',area:'MF',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}, {ofsPos:9}],
+    ['⚽→ T1右: ワンツー 同', {action:'ショートパス',result:'成功',area:'MF',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}, {ofsPos:9}],
+    ['⚽← T2左: ワンツー 同', {action:'ショートパス',result:'成功',area:'MF',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}, {ofsPos:9}],
+    ['🔸 ショートパス 別選手=旧演出 (赤)', {action:'ショートパス',result:'成功',area:'MF',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}, {ofsPos:5}],
+    ['🔸 ショートパス 次シーン無し=旧演出 (赤)', {action:'ショートパス',result:'成功',area:'MF',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}],
     ['攻撃: Japan 赤 (#c8102e)',      mkScene(mkTeam('Japan','#c8102e'), NED)],
     ['攻撃: 青 (#1f4fd6)',            mkScene(mkTeam('BlueFC','#1f4fd6'), JPN)],
     ['攻撃: オレンジ Netherlands (#f36c21)', mkScene(mkTeam('NLD','#f36c21'), JPN)],
@@ -122,7 +125,7 @@
   var row = document.getElementById('row');
   cases.forEach(function(c){
     var cell = document.createElement('div'); cell.className='cell';
-    var art = (c[1] && c[1].__gkBeat) ? _renderGkScene(c[1], 'beat') : renderSceneArt(c[1]);
+    var art = (c[1] && c[1].__gkBeat) ? _renderGkScene(c[1], 'beat') : renderSceneArt(c[1], c[2]);
     if (art) cell.appendChild(art);
     var cap = document.createElement('div'); cap.className='cap'; cap.textContent=c[0]; cell.appendChild(cap);
     row.appendChild(cell);

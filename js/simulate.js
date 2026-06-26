@@ -3501,7 +3501,8 @@ function nextChance() {
   if (_split && typeof renderShootStep === 'function') {
     _sceneArt = renderShootStep(sc, _split.steps[_beat]);
   } else if (!_split && typeof renderSceneArt === 'function') {
-    _sceneArt = renderSceneArt(sc);
+    const _nextSc = res.scenes[currentSceneIdx + 1] || null;   // ワンツー判定用（次エリアの攻撃選手＝同一なら give-and-go）
+    _sceneArt = renderSceneArt(sc, _nextSc);
   }
   const liveFieldWrap = document.getElementById('live-field-wrap');
   const miniFieldWrap = document.getElementById('mini-field-wrap');

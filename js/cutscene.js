@@ -234,7 +234,7 @@ function renderShootStep(sc, stepType) {
   return null;
 }
 
-function renderSceneArt(sc) {
+function renderSceneArt(sc, nextSc) {
   var on = SCENE_ART_ENABLED && (typeof window === 'undefined' || window.SCENE_ART_ENABLED !== false);
   if (!on || typeof document === 'undefined' || !sc) return null;
   if (sc.result === 'ファール') return _renderFoulScene(sc);   // ファール=主審カット（全アクション共通・recolorなし・笛＆FOUL!）
@@ -268,7 +268,11 @@ function renderSceneArt(sc) {
       var _lpFail = _pickCutscene('longpass', sc.offence && sc.offence.team_color);
       if (_lpFail && _lpFail.fileA) return _renderLongpassScene(sc, _lpFail);
     }
-    return _renderOnetwoScene(sc);   // 成功＝ワンツー3カット連結（①与える→②返し→③受け止め）。旧 _renderShortpassScene は保持（フォールバック用）
+    // ワンツーは「同じ攻撃選手が次エリアでも続ける（give-and-go＝テキストの『同』）」時のみ。
+    //   別選手へパスをつなぐ（『別』）／次シーンが無い場合は、従来のショートパス演出に戻す（エンジンの同/別判定 simulate.js:2667 と一致＝ofsPos比較）。
+    var sameAttacker = nextSc && (nextSc.ofsPos === sc.ofsPos);
+    if (sameAttacker) return _renderOnetwoScene(sc);   // ワンツー3カット連結（①与える→②返し→③受け止め）
+    return _renderShortpassScene(sc, entry);            // 別選手へのパス＝従来の単発ショートパス
   }
   // シュート: 枠外=ニアポスト脇を外す演出、GK防いだ！=GKカット、ブロック=シューター演出。（ゴールは上で処理）
   if (moment === 'shot' && entry.file) {
