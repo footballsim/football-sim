@@ -20,7 +20,7 @@
 <div style="display:none">
   <span id="game-time-display">67'</span><span id="score1">2</span><span id="score2">1</span>
 </div>
-<script src="/js/cutscene.js?t=20260626onetwo4"></script>
+<script src="/js/cutscene.js?t=20260626fk1"></script>
 <script>
   // 試合側グローバルのスタブ
   function getTeamName(t){ return t && t.name; }
@@ -46,6 +46,10 @@
     ['⚽← T2左: ワンツー 同', {action:'ショートパス',result:'成功',area:'MF',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}, {ofsPos:9}],
     ['🔸 ショートパス 別選手=旧演出 (赤)', {action:'ショートパス',result:'成功',area:'MF',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}, {ofsPos:5}],
     ['🔸 ショートパス 次シーン無し=旧演出 (赤)', {action:'ショートパス',result:'成功',area:'MF',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}],
+    // ===== フリーキック（中央の直接FK）= ①蹴る前→②蹴った瞬間＋ボールが左上(ゴール方向)へ =====
+    ['🟢 FK (赤)', {action:'フリーキック',scenario:'シュート',result:'枠を外した！',area:'CR_M',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}],
+    ['🟢→ T1右: FK', {action:'フリーキック',scenario:'シュート',result:'枠を外した！',area:'CR_M',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['🟢← T2左: FK', {action:'フリーキック',scenario:'シュート',result:'枠を外した！',area:'CR_M',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
     ['攻撃: Japan 赤 (#c8102e)',      mkScene(mkTeam('Japan','#c8102e'), NED)],
     ['攻撃: 青 (#1f4fd6)',            mkScene(mkTeam('BlueFC','#1f4fd6'), JPN)],
     ['攻撃: オレンジ Netherlands (#f36c21)', mkScene(mkTeam('NLD','#f36c21'), JPN)],

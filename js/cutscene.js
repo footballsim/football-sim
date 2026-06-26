@@ -226,6 +226,7 @@ function renderShootStep(sc, stepType) {
   // 'shot' = シューターの一撃のみ（結果は出さない）。result を中立化して素の蹴り描画にする。
   var shotSc = {}; for (var k in sc) { if (Object.prototype.hasOwnProperty.call(sc, k)) shotSc[k] = sc[k]; }
   shotSc.result = '成功';
+  if (sc.action === 'フリーキック') return _renderFreekickScene(shotSc);   // FK=専用2フレーム（蹴る前→蹴った瞬間＋ボール弧）
   if (sc.action === 'ミドルシュート') return _renderMidShotScene(shotSc);
   if (sc.action === 'ボレーシュート') return _renderVolleyScene(shotSc);
   if (sc.action === 'ヘディングシュート') return _renderHeaderScene(shotSc);
@@ -240,6 +241,7 @@ function renderSceneArt(sc, nextSc) {
   if (sc.result === 'ファール') return _renderFoulScene(sc);   // ファール=主審カット（全アクション共通・recolorなし・笛＆FOUL!）
   if (sc.action === 'ミドルシュート') return _renderMidShotScene(sc);   // 専用ミドル: 成功(抜け)=直進 / ブロック=右上deflect。ゴールでも goal-net でなくミドル演出。
   if (sc.result === 'ゴール！！') return _renderGoalScene(sc);   // 全ゴール=新ゴール演出（旧バイシクル廃止）
+  if (sc.action === 'フリーキック') return _renderFreekickScene(sc);   // FK=専用2フレーム（枠外/セーブ等の非分割時もここ。ゴールは上で処理）
   // ヘディング競り合い（クロス/セットプレー段, result=成功/失敗）= 専用ヘディング演出。シュート段(scenario=シュート)は下の通常処理へ。
   if (sc.action === 'ヘディングシュート' && sc.scenario !== 'シュート') return _renderHeaderScene(sc);
   if (sc.action === 'ボレーシュート' && sc.scenario !== 'シュート') return _renderVolleyScene(sc);   // ボレー競り合い=ロングパス蹴りアニメ流用（ボール起点を膝高さへ）
@@ -806,6 +808,90 @@ function _renderOnetwoScene(sc) {
     if (Math.abs(p - c1) < 0.045) flash = Math.max(flash, 1 - Math.abs(p - c1) / 0.045);
     if (Math.abs(p - c2) < 0.045) flash = Math.max(flash, 1 - Math.abs(p - c2) / 0.045);
     if (flash > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (flash * 0.5) + ')'; ctx.fillRect(0, 0, W, H); }
+    hud();
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return canvas;
+}
+
+// ============================================================
+// フリーキック（中央の直接FK・action='フリーキック'）専用カットイン:
+//   ①蹴る前（freekick1）→ ②蹴った瞬間（freekick2）＋ボールが足元から弧を描いて上方（攻撃方向＝ゴール）へ伸びる の2フレーム。
+//   提供赤キットアート2枚を実行時に攻撃チーム色へリカラー。ネイティブ=左攻め（ボールは左上へ）。team1は全体ミラー。
+//   FKの「蹴り」=この場面。結果（ゴール/枠外/セーブ）はゴール分割時の後続ビート、枠外/セーブ(非分割)はテキストで提示。表示層のみ・エンジン非接触。
+// ============================================================
+var _FREEKICK1_SRC = 'img/cutscenes/freekick1_01.png';   // ①蹴る前（左向き・振りかぶり）
+var _FREEKICK2_SRC = 'img/cutscenes/freekick2_01.png';   // ②蹴った瞬間（左向き・振り抜き）
+function _renderFreekickScene(sc) {
+  var W = 480, H = 216, ground = 190;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var img1 = _loadCutsceneImg(_FREEKICK1_SRC), img2 = _loadCutsceneImg(_FREEKICK2_SRC);
+  var atkColor = (sc.offence && sc.offence.team_color) || '#1f4fd6';
+
+  function dom(id) { var el = (typeof document !== 'undefined') && document.getElementById(id); return el ? el.textContent : ''; }
+  var timeTxt = dom('game-time-display');
+  var kicker = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  var kickerName = kicker ? ((typeof getPlayerName === 'function') ? getPlayerName(kicker) : kicker.name) : '';
+  var teamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  var label = en ? 'FREE KICK!' : 'フリーキック！';
+  var accent = atkColor;
+
+  var mirror = _csAttackRight(sc);   // ネイティブ=左攻め（ボールは左上＝ゴール方向）→ team1 で全体ミラー
+  var sw = 0.42, P = 1800;
+  var kx = 282, kh = 182;            // キッカー中心x・身長
+  var bx0 = 348, by0 = ground - 10;  // ボール起点＝右下（添付の赤丸位置）。軸足側へボール1個分(24px)寄せ済(372→348)
+  var vx = 2380, vy = 880;           // シュートと同等速度（≈1.4px/ms）・浅い左上へ直進（slope≈0.37）
+
+  function speedLines(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 12, y + Math.sin(an) * 12); ctx.lineTo(x + Math.cos(an) * 50, y + Math.sin(an) * 50); ctx.stroke(); } }
+  function drawSprF(img, cx, footY, h, flip) { if (!img) return; var nw = img.naturalWidth || img.width, nh = img.naturalHeight || img.height; if (!nw) return; var w = nw * (h / nh); ctx.save(); if (flip) { ctx.translate(cx, 0); ctx.scale(-1, 1); ctx.translate(-cx, 0); } ctx.drawImage(img, cx - w / 2, footY - h, w, h); ctx.restore(); }
+  function withScene(draw) { ctx.save(); if (mirror) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.imageSmoothingEnabled = false; draw(); ctx.restore(); }   // 静止カメラ・ミラーのみ
+  function hud() {
+    var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
+    if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
+    var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
+    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = '#ffe14a'; ctx.fillText(label, 12, H - 9);
+    if (kickerName) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(kickerName + (teamNm ? (' · ' + teamNm) : ''), W - 12, H - 10); }
+  }
+
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var p = Math.min(1, (now - T0) / P);
+    ctx.clearRect(0, 0, W, H);
+    var spr1 = _recolorPostplay(img1, atkColor, atkColor, 'fk1') || img1;   // 赤キット→攻撃チーム色
+    var spr2 = _recolorPostplay(img2, atkColor, atkColor, 'fk2') || img2;
+    ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+
+    var contact = 0;
+    if (p < sw) {
+      // ① 蹴る前: 振りかぶり。ボールは足元で静止。
+      withScene(function () {
+        drawSprF(spr1, kx, ground, kh, false);   // freekick1 は左向き＝ネイティブのまま
+        _lpBall(ctx, bx0, by0, 12, 0);
+      });
+    } else {
+      // ② 蹴った瞬間: 振り抜き。ボールは右下の起点からシュート速度で浅く左上（ゴール方向）へ直進。
+      var dt = p - sw;                                  // p単位の経過（ballSpd×dt＝シュートと同じ速度感）
+      var bx = bx0 - vx * dt;
+      var by = by0 - vy * dt;                           // 浅い角度で左上へ（直進・弧なし）
+      contact = (dt < 0.06) ? (1 - dt / 0.06) : 0;
+      withScene(function () {
+        drawSprF(spr2, kx, ground, kh, false);
+        if (bx > -20 && by > -20) _lpBall(ctx, bx, by, 12, dt * 120);
+        if (contact > 0) speedLines(bx0, by0, contact * 0.8);
+      });
+    }
+    if (contact > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (contact * 0.5) + ')'; ctx.fillRect(0, 0, W, H); }   // インパクトのフラッシュ
     hud();
     if (p < 1) requestAnimationFrame(frame);
   }
