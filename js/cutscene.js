@@ -963,10 +963,8 @@ function _renderGkScene(sc, mode) {
         if (sc.result === 'GK防いだ！') {                      // セーブ: 手元で静止（届くか！？）
           if (bx < hX) bx = hX;
           by = hY;
-        } else {                                              // 抜かれ（ゴール/枠外）: 手をすり抜けて“まっすぐ”ゴール際まで直進（掴まない・下に流さない）
-          var fzx = 44;                                       // ゴール側の端付近まで飛んで静止（赤矢印＝水平一直線）
-          if (bx < fzx) bx = fzx;
-          by = hY;                                            // GKの手の高さを水平に直進（まっすぐ＝弧を描かない）
+        } else {                                              // 抜かれ（ゴール/枠外）: 手をすり抜けて“まっすぐ”飛び、止まらずそのまま画面外（ゴール方向）へ消える
+          by = hY;                                            // GKの手の高さを水平に直進（まっすぐ＝弧を描かない）。bxはクランプせず流す＝端まで行って消える
         }
         onScreen = (bx > -16);
       } else {
@@ -981,7 +979,8 @@ function _renderGkScene(sc, mode) {
     ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(zc[0], zc[1]); ctx.scale(z, z); ctx.translate(-zc[0], -zc[1]);
     ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
     if (save || dive) { drawGK(); drawBall(); } else { drawBall(); drawGK(); }   // 抜けはボールをGKの背後（先に描画）に
-    var ct = ((save || dive) && p > contactP - 0.02 && p < contactP + 0.09) ? 1 - Math.abs(p - contactP) / 0.09 : 0;
+    var handsContact = save || (dive && sc.result === 'GK防いだ！');   // 手元で実際にボールに触れる時だけインパクト（抜かれ＝すり抜けは発光なし）
+    var ct = (handsContact && p > contactP - 0.02 && p < contactP + 0.09) ? 1 - Math.abs(p - contactP) / 0.09 : 0;
     if (ct > 0) speedLines(hX, hY, ct * 0.7);                  // セーブ・インパクト
     ctx.restore();
     if (ct > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (ct * 0.4) + ')'; ctx.fillRect(0, 0, W, H); }
