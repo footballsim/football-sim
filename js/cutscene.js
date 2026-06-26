@@ -268,7 +268,7 @@ function renderSceneArt(sc) {
       var _lpFail = _pickCutscene('longpass', sc.offence && sc.offence.team_color);
       if (_lpFail && _lpFail.fileA) return _renderLongpassScene(sc, _lpFail);
     }
-    return _renderShortpassScene(sc, entry);
+    return _renderOnetwoScene(sc);   // 成功＝ワンツー3カット連結（①与える→②返し→③受け止め）。旧 _renderShortpassScene は保持（フォールバック用）
   }
   // シュート: 枠外=ニアポスト脇を外す演出、GK防いだ！=GKカット、ブロック=シューター演出。（ゴールは上で処理）
   if (moment === 'shot' && entry.file) {
@@ -699,6 +699,111 @@ function _renderShortpassScene(sc, entry) {
     if (strike > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (strike * 0.45) + ')'; ctx.fillRect(0, 0, W, H); }
     hud();
     if (!ballGone && p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return canvas;
+}
+
+// ============================================================
+// ワンツーパス（ショートパス成功）専用カットイン:
+//   ①与える（A=パサー）→ ②壁役が返す（B）→ ③受け手が止める（A）の3カットを連結（ユーザー添付の3コマ準拠）。
+//   選手は各カットで静止し、ボールだけが動く（①左へ蹴出し／②右へ返し／③左から足元へ寄り止まる）。
+//   提供赤キットアート3枚を実行時に攻撃チーム色へリカラー。ネイティブ=左攻め（右→左）。team1（右攻め）は全体ミラー。
+//   1回再生で静止。表示層のみ・エンジン非接触。
+// ============================================================
+var _ONETWO1_SRC = 'img/cutscenes/onetwo1_01.png';   // ①パサー（ファイルは右向き踏み込み）
+var _ONETWO2_SRC = 'img/cutscenes/onetwo2_01.png';   // ②壁役・返し（ファイルは左向き）
+var _ONETWO3_SRC = 'img/cutscenes/onetwo3_01.png';   // ③受け手（ファイルは右向きリーチ）
+function _renderOnetwoScene(sc) {
+  var W = 480, H = 216, ground = 190, zc = [240, 116];
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var img1 = _loadCutsceneImg(_ONETWO1_SRC), img2 = _loadCutsceneImg(_ONETWO2_SRC), img3 = _loadCutsceneImg(_ONETWO3_SRC);
+  var atkColor = (sc.offence && sc.offence.team_color) || '#1f4fd6';
+
+  function dom(id) { var el = (typeof document !== 'undefined') && document.getElementById(id); return el ? el.textContent : ''; }
+  var timeTxt = dom('game-time-display');
+  var passer = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  var passerName = passer ? ((typeof getPlayerName === 'function') ? getPlayerName(passer) : passer.name) : '';
+  var teamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  var label = en ? 'ONE-TWO!' : 'ワンツー！';
+  var accent = atkColor;
+
+  var mirror = _csAttackRight(sc);   // ネイティブ=左攻め → team1（右攻め）で全体ミラー
+  var c1 = 0.30, c2 = 0.58, P = 2200;   // 少しゆっくり（1.7→2.2秒）。③は受け止めの“溜め”を長めに
+
+  function speedLines(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 12, y + Math.sin(an) * 12); ctx.lineTo(x + Math.cos(an) * 50, y + Math.sin(an) * 50); ctx.stroke(); } }
+  function drawSprF(img, cx, footY, h, flip) { if (!img) return; var nw = img.naturalWidth || img.width, nh = img.naturalHeight || img.height; if (!nw) return; var w = nw * (h / nh); ctx.save(); if (flip) { ctx.translate(cx, 0); ctx.scale(-1, 1); ctx.translate(-cx, 0); } ctx.drawImage(img, cx - w / 2, footY - h, w, h); ctx.restore(); }
+  function withScene(draw) { ctx.save(); if (mirror) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.imageSmoothingEnabled = false; draw(); ctx.restore(); }   // 静止カメラ（選手は動かさない）。ミラーのみ。
+  function hud() {
+    var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
+    if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
+    var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
+    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = '#ffe14a'; ctx.fillText(label, 12, H - 9);
+    if (passerName) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(passerName + (teamNm ? (' · ' + teamNm) : ''), W - 12, H - 10); }
+  }
+
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var p = Math.min(1, (now - T0) / P);
+    ctx.clearRect(0, 0, W, H);
+    var spr1 = _recolorPostplay(img1, atkColor, atkColor, 'ot1') || img1;   // 赤キット→攻撃チーム色（肌・髪・スパイクは保持）
+    var spr2 = _recolorPostplay(img2, atkColor, atkColor, 'ot2') || img2;
+    var spr3 = _recolorPostplay(img3, atkColor, atkColor, 'ot3') || img3;
+
+    var lp;
+    if (p < c1) lp = p / c1;
+    else if (p < c2) lp = (p - c1) / (c2 - c1);
+    else lp = (p - c2) / (1 - c2);
+
+    // ピッチ背景（静止カメラ）
+    ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+
+    if (p < c1) {
+      // ① 与える: A は静止、ボールだけ左へ蹴り出す。onetwo1 はファイル本来の向き（右向き）のまま。
+      var xA = 348, k = 0.15;
+      withScene(function () {
+        drawSprF(spr1, xA, ground, 172, false);
+        var bx = (xA - 18) - 760 * Math.max(0, lp - k);
+        if (bx > -16) _lpBall(ctx, bx, ground - 15, 12, (lp - k) * 60);
+        if (lp > k - 0.04 && lp < k + 0.12) speedLines(xA - 18, ground - 15, (1 - Math.abs(lp - k) / 0.12) * 0.6);
+      });
+    } else if (p < c2) {
+      // ② 返し: B は静止、ボールだけ右へワンタッチで返す。onetwo2 はファイル左向き → そのまま。
+      var xB = 132, k2 = 0.15;
+      withScene(function () {
+        drawSprF(spr2, xB, ground, 172, false);
+        var bx = (xB + 18) + 760 * Math.max(0, lp - k2);
+        if (bx < W + 16) _lpBall(ctx, bx, ground - 15, 12, (lp - k2) * 60);
+        if (lp > k2 - 0.04 && lp < k2 + 0.12) speedLines(xB + 18, ground - 15, (1 - Math.abs(lp - k2) / 0.12) * 0.7);
+      });
+    } else {
+      // ③ 受け手: A は静止。左から来たボールが足元へ寄って止まる（ボールだけ動く）。onetwo3 はファイル本来の向き（右向き）のまま。
+      var xR = 300, targetX = xR - 10, targetY = ground - 14;   // 停止位置をボール1個分(24px)足元へ寄せた（-34→-10）
+      var u = Math.min(1, lp / 0.82), ue = 1 - (1 - u) * (1 - u);   // ease-out で足元へ減速し止まる
+      var bx3 = -16 + (targetX + 16) * ue;
+      withScene(function () {
+        drawSprF(spr3, xR, ground, 172, false);
+        _lpBall(ctx, bx3, targetY, 12, ue * 40);
+        if (lp > 0.74 && lp < 0.92) speedLines(targetX, targetY, (1 - Math.abs(lp - 0.83) / 0.09) * 0.45);   // トラップの小バースト
+      });
+    }
+    // カット間の白フラッシュ（テンポ）
+    var flash = 0;
+    if (Math.abs(p - c1) < 0.045) flash = Math.max(flash, 1 - Math.abs(p - c1) / 0.045);
+    if (Math.abs(p - c2) < 0.045) flash = Math.max(flash, 1 - Math.abs(p - c2) / 0.045);
+    if (flash > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (flash * 0.5) + ')'; ctx.fillRect(0, 0, W, H); }
+    hud();
+    if (p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
   return canvas;

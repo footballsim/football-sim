@@ -20,7 +20,7 @@
 <div style="display:none">
   <span id="game-time-display">67'</span><span id="score1">2</span><span id="score2">1</span>
 </div>
-<script src="/js/cutscene.js?t=20260626pp7"></script>
+<script src="/js/cutscene.js?t=20260626onetwo3"></script>
 <script>
   // 試合側グローバルのスタブ
   function getTeamName(t){ return t && t.name; }
@@ -39,6 +39,10 @@
 
   // 攻撃側=各キット色で確認（frames は得点側色バケツに自動マッチ）
   var cases = [
+    // ===== ワンツーパス（ショートパス成功）= ①与える→②返し→③持ち出す の3カット連結 =====
+    ['⚽ ワンツー (赤)', {action:'ショートパス',result:'成功',area:'MF',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}],
+    ['⚽→ T1右: ワンツー', {action:'ショートパス',result:'成功',area:'MF',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['⚽← T2左: ワンツー', {action:'ショートパス',result:'成功',area:'MF',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
     ['攻撃: Japan 赤 (#c8102e)',      mkScene(mkTeam('Japan','#c8102e'), NED)],
     ['攻撃: 青 (#1f4fd6)',            mkScene(mkTeam('BlueFC','#1f4fd6'), JPN)],
     ['攻撃: オレンジ Netherlands (#f36c21)', mkScene(mkTeam('NLD','#f36c21'), JPN)],
