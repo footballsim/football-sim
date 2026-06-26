@@ -963,10 +963,10 @@ function _renderGkScene(sc, mode) {
         if (sc.result === 'GK防いだ！') {                      // セーブ: 手元で静止（届くか！？）
           if (bx < hX) bx = hX;
           by = hY;
-        } else {                                              // 抜かれ（ゴール/枠外）: 手を“すり抜けて”GKの体を越えた先まで流れる（掴まない）
-          var fzx = hX - 196;                                 // 手元から大きく先（GKの体を越えた位置）で静止＝すり抜け感
+        } else {                                              // 抜かれ（ゴール/枠外）: 手をすり抜けて“まっすぐ”ゴール際まで直進（掴まない・下に流さない）
+          var fzx = 44;                                       // ゴール側の端付近まで飛んで静止（赤矢印＝水平一直線）
           if (bx < fzx) bx = fzx;
-          by = hY + 0.42 * (hX - bx);                         // すり抜けた後はゴール方向（下）へ大きく流れる
+          by = hY;                                            // GKの手の高さを水平に直進（まっすぐ＝弧を描かない）
         }
         onScreen = (bx > -16);
       } else {
@@ -1090,7 +1090,9 @@ function _renderMissScene(sc) {
   // ボールはゴールマウスの前を左→右に横切る（TUNE）
   var bY = 120, bR = 13, startX = -30, endX = W + 30;
   var ballSpd = 2400, P = 1700;                       // シュートと同速（2400px / 1700ms）
-  var flipH = _csAttackRight(sc);                     // ネイティブ=左攻め(ゴール左) → team1(右)で反転
+  // 枠外だけネイティブのボールが左→右で、他のシュート系(GKダイブ/シュート=右→左)と逆だった。
+  // flipHを反転して「ゴールの向き＋ボール軌道」をまとめて反転し、シュート方向と一致させる。
+  var flipH = !_csAttackRight(sc);
 
   function trail(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 46, y); ctx.stroke(); ctx.lineCap = 'butt'; }
   function hud() {
