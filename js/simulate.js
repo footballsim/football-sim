@@ -3404,6 +3404,9 @@ function _shootSplit(sc, textHtml) {
   // セーブ／ブロック: 結果シーン＝GK・守備の動作。中間は挟まない。
   if (sc.result === 'GK防いだ！' || sc.result === 'ブロック') {
     if (isHeaderVolley) return null;                 // ヘディング/ボレーのセーブ等は結果シーン1場面
+    // ミドルのブロックは分割しない＝「ブロック(相手あり)」の1場面のみ。
+    //   分割すると 'shot' ビートがフリーのミドルを再生し、ブロックと二重に見えるため。
+    if (sc.action === 'ミドルシュート' && sc.result === 'ブロック') return null;
     if (parts.length < 2) return null;
     return { parts: [parts[0], last], steps: ['shot', 'result'] };
   }
