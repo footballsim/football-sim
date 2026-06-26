@@ -20,7 +20,7 @@
 <div style="display:none">
   <span id="game-time-display">67'</span><span id="score1">2</span><span id="score2">1</span>
 </div>
-<script src="/js/cutscene.js?t=20260624q"></script>
+<script src="/js/cutscene.js?t=20260626pp4"></script>
 <script>
   // 試合側グローバルのスタブ
   function getTeamName(t){ return t && t.name; }
@@ -103,7 +103,17 @@
     ['クロス成功・斜め上 (青攻→橙守)', {action:'クロス',scenario:'クロス',result:'成功',area:'FW_R',offence:mkTeam('BlueFC','#1f4fd6'),defence:mkTeam('OrgFC','#f36c21'),ofsPos:9,dfsPos:4}],
     ['クロス失敗・反対方向 (青攻→橙守)', {action:'クロス',scenario:'クロス',result:'失敗',area:'FW_R',offence:mkTeam('BlueFC','#1f4fd6'),defence:mkTeam('OrgFC','#f36c21'),ofsPos:9,dfsPos:4}],
     ['→ T1右: クロス成功', {action:'クロス',scenario:'クロス',result:'成功',area:'FW_R',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
-    ['← T2左: クロス成功', {action:'クロス',scenario:'クロス',result:'成功',area:'FW_R',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}]
+    ['← T2左: クロス成功', {action:'クロス',scenario:'クロス',result:'成功',area:'FW_R',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    // ===== ポストプレー（成功=ホールドアップ絵→ドリブルスプライト流用で反転突破 / 失敗=守備が弾く・青キット→攻撃チーム色へリカラー）=====
+    ['ポストプレー成功 (青攻→橙守)', {action:'ポストプレー',scenario:'ポストプレー',result:'成功',area:'FW_R',offence:mkTeam('BlueFC','#1f4fd6'),defence:mkTeam('OrgFC','#f36c21'),ofsPos:9,dfsPos:4}],
+    ['ポストプレー成功 (赤)', {action:'ポストプレー',scenario:'ポストプレー',result:'成功',area:'FW_R',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}],
+    ['ポストプレー成功 (緑)', {action:'ポストプレー',scenario:'ポストプレー',result:'成功',area:'FW_R',offence:mkTeam('GreenFC','#1f8f3a'),defence:JPN,ofsPos:9,dfsPos:4}],
+    ['ポストプレー失敗 (青攻→橙守)', {action:'ポストプレー',scenario:'ポストプレー',result:'失敗',area:'FW_R',offence:mkTeam('JPN','#1f4fd6'),defence:mkTeam('NLD','#f36c21'),ofsPos:9,dfsPos:4}],
+    ['ポストプレー失敗 (赤)', {action:'ポストプレー',scenario:'ポストプレー',result:'失敗',area:'FW_R',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}],
+    ['→ T1右: ポストプレー成功', {action:'ポストプレー',scenario:'ポストプレー',result:'成功',area:'FW_R',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: ポストプレー成功', {action:'ポストプレー',scenario:'ポストプレー',result:'成功',area:'FW_R',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}],
+    ['→ T1右: ポストプレー失敗', {action:'ポストプレー',scenario:'ポストプレー',result:'失敗',area:'FW_R',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}],
+    ['← T2左: ポストプレー失敗', {action:'ポストプレー',scenario:'ポストプレー',result:'失敗',area:'FW_R',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}]
   ];
   var row = document.getElementById('row');
   cases.forEach(function(c){

@@ -800,10 +800,10 @@ function _renderDribbleScene(sc) {
 //   失敗 = 守備がボールを弾く絵(postplay_fail_t_01)＋ボールが弾かれて流れる＋インパクト。
 //   青(攻撃キット)は実行時に攻撃チーム色へリカラー（白守備はそのまま）。表示層のみ・エンジン非接触。
 // ============================================================
-var _POSTPLAY_SRC = 'img/cutscenes/postplay_t_01.png';
-var _POSTPLAY_FAIL_SRC = 'img/cutscenes/postplay_fail_t_01.png';
+var _POSTPLAY_SRC = 'img/cutscenes/postplay_t_01.png?v=pp4';
+var _POSTPLAY_FAIL_SRC = 'img/cutscenes/postplay_fail_t_01.png?v=pp4';
 function _renderPostplayScene(sc) {
-  var W = 480, H = 216, ground = 202;
+  var W = 480, H = 216, ground = 190;   // 他シーン（ドリブル等）と同じ接地ライン
   var canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
@@ -828,7 +828,7 @@ function _renderPostplayScene(sc) {
 
   var postImg = _loadCutsceneImg(_POSTPLAY_SRC);
   var failImg = _loadCutsceneImg(_POSTPLAY_FAIL_SRC);
-  var dribImg = _loadCutsceneImg(_DRIBBLE_SRC);
+  var dribImg = _loadCutsceneImg(_DRIBBLE_SRC);   // 反転突破は「抜け出し」と同じランナー単独を流用（守備なし）
   var P = success ? 2000 : 1700, zc = [240, 116];
   var flipH = !_csAttackRight(sc);
 
@@ -854,31 +854,42 @@ function _renderPostplayScene(sc) {
     ctx.clearRect(0, 0, W, H);
     var z = 1.0 + Math.min(1, p / 0.6) * 0.05;
     var contact = 0;
-    ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(zc[0], zc[1]); ctx.scale(z, z); ctx.translate(-zc[0], -zc[1]);
+    // 背景（ピッチ＝左右対称）はフリップ非依存・ズームのみ。図はフェーズ別フリップで描く。
+    ctx.save(); ctx.translate(zc[0], zc[1]); ctx.scale(z, z); ctx.translate(-zc[0], -zc[1]);
     ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+    ctx.restore();
+    function withFlip(fl, draw) { ctx.save(); ctx.imageSmoothingEnabled = false; if (fl) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(zc[0], zc[1]); ctx.scale(z, z); ctx.translate(-zc[0], -zc[1]); draw(); ctx.restore(); }
     if (success) {
       var pSwap = 0.5;
       if (p < pSwap) {
-        var ppSpr = _csRecolorBand(postImg, 'blue', atkColor, 'pp') || postImg;     // 青→攻撃色（ホールドアップ・2人タブロー）
-        drawSpr(ppSpr, 244, ground, 190);
-        _lpBall(ctx, 222, ground - 16, 12, 0);                                       // 足元のボール（TUNE）
+        withFlip(flipH, function () {
+          var ppSpr = _csRecolorBand(postImg, 'blue', atkColor, 'pp') || postImg;    // 青→攻撃色（ホールドアップ・2人タブロー）
+          drawSpr(ppSpr, 244, ground, 168);                                          // 少し小さく（190→168）
+          _lpBall(ctx, 224, ground - 14, 11, 0);                                     // 足元のボール
+        });
       } else {
         var u = (p - pSwap) / (1 - pSwap), ue = 1 - (1 - u) * (1 - u);
-        var dribSpr = _csRecolorBand(dribImg, 'green', atkColor, 'drb') || dribImg;  // 緑→攻撃色（ドリブル流用＝反転して前へ）
-        var dribX = 212 + 120 * ue;
-        drawSpr(dribSpr, dribX, ground, 184);
-        _lpBall(ctx, dribX + 48, ground - 26, 12, u * 15);                           // ボールは前方
+        // 反転してかわす: 「抜け出し」成功と同じくランナー単独（守備なし）を流用し、向きを逆（!flipH）に
+        withFlip(!flipH, function () {
+          var dribSpr = _csRecolorBand(dribImg, 'green', atkColor, 'drb') || dribImg; // 緑→攻撃色（ランナー単独）
+          var dribX = 196 + 150 * ue;
+          drawSpr(dribSpr, dribX, ground, 172);                                       // ランナー（少し小さく）
+          _lpBall(ctx, dribX + 48, ground - 24, 11, u * 15);                          // ボールは前方
+        });
       }
     } else {
-      var fSpr = _csRecolorBand(failImg, 'blue', atkColor, 'ppfail') || failImg;     // 崩れる攻撃(青)→攻撃色・白守備は維持
-      drawSpr(fSpr, 240, ground, 200);
-      var kp = 0.12, bootX = 252, bootY = ground - 44;
-      var ballX = bootX - 1450 * Math.max(0, p - kp), ballY = bootY;                 // 守備に弾かれて流れる
+      withFlip(flipH, function () {
+        var fSpr = _csRecolorBand(failImg, 'blue', atkColor, 'ppfail') || failImg;    // 崩れる攻撃(青)→攻撃色・白守備は維持
+        drawSpr(fSpr, 240, ground + 2, 150);                                         // タイト画像：足元を接地ラインへ
+      });
+      var kp = 0.12, bootX = 244, bootY = ground - 8;
+      var ballX = bootX + 1450 * Math.max(0, p - kp), ballY = bootY;                  // 弾かれて流れる（逆方向＝右へ）
       contact = (p > kp - 0.02 && p < kp + 0.10) ? 1 - Math.abs(p - kp) / 0.10 : 0;
-      if (ballX > -20 && ballX < W + 20) _lpBall(ctx, ballX, ballY, 12, p * 15);
-      if (contact > 0) speedLines(bootX, bootY, contact * 0.8);
+      withFlip(flipH, function () {
+        if (ballX > -20 && ballX < W + 20) _lpBall(ctx, ballX, ballY, 12, p * 15);
+        if (contact > 0) speedLines(bootX, bootY, contact * 0.8);
+      });
     }
-    ctx.restore();
     if (contact > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (contact * 0.4) + ')'; ctx.fillRect(0, 0, W, H); }
     hud();
     if (p < 1) requestAnimationFrame(frame);
