@@ -896,8 +896,8 @@ function _renderPostplayScene(sc) {
         });
       } else {
         var u = (p - pSwap) / (1 - pSwap), ue = 1 - (1 - u) * (1 - u);
-        // 反転してかわす: 「抜け出し」成功と同じくランナー単独（守備なし）を流用し、向きを逆（!flipH）に
-        withFlip(!flipH, function () {
+        // ランナー単独（「抜け出し」成功と同じ）。向きは他のドリブル/飛び出しと同じ攻撃方向（flipH）。
+        withFlip(flipH, function () {
           var dribSpr = _csRecolorBand(dribImg, 'green', atkColor, 'drb') || dribImg; // 緑→攻撃色（ランナー単独）
           var dribX = 196 + 150 * ue;
           drawSpr(dribSpr, dribX, ground, 172);                                       // ランナー（少し小さく）
