@@ -3392,6 +3392,14 @@ function _shootSplit(sc, textHtml) {
     if (spParts.length >= 2) return { parts: [spParts[0], spParts[1]], steps: ['fkdeliver', 'spcontest'] };
     return null;
   }
+  // クロス（オープンプレー・CRエリア）: 「中央へクロス(蹴り出し)」→「競り合い(ヘディング/ボレー)」の2ビートに分割。
+  //   定型文も2文（…中央へクロス／…シュート）なので parts と一致する。FKの蹴りカット(fkdeliver)を流用し、
+  //   クロス選手の蹴り出し → 受け手の競り合い、という流れをセットプレーと同じ仕組みで見せる。
+  if (sc.scenario === 'クロス') {
+    const crParts = String(textHtml || '').split(/(?:　| {2,})/).map(s => s.trim()).filter(Boolean);
+    if (crParts.length >= 2) return { parts: [crParts[0], crParts[1]], steps: ['fkdeliver', 'spcontest'] };
+    return null;
+  }
   const isShoot = (sc.scenario === 'シュート' || sc.scenario === 'ミドルシュート');
   const isShootResult = (sc.result === 'ゴール！！' || sc.result === '枠を外した！' || sc.result === 'GK防いだ！' || sc.result === 'ブロック');
   if (!isShoot || !isShootResult) return null;

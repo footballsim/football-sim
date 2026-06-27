@@ -214,7 +214,7 @@ function _csAttackRight(sc) {
 function renderShootStep(sc, stepType) {
   var on = SCENE_ART_ENABLED && (typeof window === 'undefined' || window.SCENE_ART_ENABLED !== false);
   if (!on || typeof document === 'undefined' || !sc) return null;
-  if (stepType === 'fkdeliver') return _renderFkDeliveryScene(sc);   // サイドFK=セットプレーの「蹴り出し」（クロスを上げる）
+  if (stepType === 'fkdeliver') return _renderFkDeliveryScene(sc);   // セットプレー/オープンプレーのクロスの「蹴り出し」（クロスを上げる）
   if (stepType === 'spcontest') return renderSceneArt(sc);           // セットプレーの「競り合い」＝ヘディング/ボレー（既存）
   if (stepType === 'result') {
     if (sc.result === '枠を外した！') return _renderMissScene(sc);
@@ -845,7 +845,9 @@ function _renderFreekickScene(sc) {
   var kickerName = kicker ? ((typeof getPlayerName === 'function') ? getPlayerName(kicker) : kicker.name) : '';
   var teamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
   var en = (typeof window !== 'undefined' && window.LANG === 'en');
-  var label = en ? 'FREE KICK!' : 'フリーキック！';
+  // オープンプレーのクロス(scenario==='クロス')に流用された蹴り出しビートは「クロス！」表示。
+  //   セットプレー/中央の直接FK(scenario!=='クロス')は従来どおり「フリーキック！」。
+  var label = (sc.scenario === 'クロス') ? (en ? 'CROSS!' : 'クロス！') : (en ? 'FREE KICK!' : 'フリーキック！');
   var accent = atkColor;
 
   var mirror = _csAttackRight(sc);   // ネイティブ=左攻め（ボールは左上＝ゴール方向）→ team1 で全体ミラー
@@ -906,10 +908,11 @@ function _renderFreekickScene(sc) {
 }
 
 // ============================================================
-// サイドFK（セットプレー）の蹴り出し: 中央の直接FKと同じ蹴りシーン（_renderFreekickScene）を流用する。
+// 蹴り出し（クロスを上げる）: 中央の直接FKと同じ蹴りシーン（_renderFreekickScene）を流用する。
+//   サイドFK（セットプレー）と オープンプレーのクロス（scenario==='クロス'）の両方で使う共通の「上げる」ビート。
 //   ※ユーザー要望でロフトクロス専用絵を廃し、中央FKと同一の蹴り絵に統一。
 //   キッカー＝crossPos（クロスを上げる選手）の名前で出すため ofsPos を差し替えて委譲。
-//   この後ビートで _renderHeaderScene/_renderVolleyScene の競り合いへ繋がる（_shootSplit が セットプレー を2ビート化）。
+//   この後ビートで _renderHeaderScene/_renderVolleyScene の競り合いへ繋がる（_shootSplit が セットプレー/クロス を2ビート化）。
 // ============================================================
 function _renderFkDeliveryScene(sc) {
   if (sc && sc.crossPos != null && sc.crossPos !== sc.ofsPos) {
