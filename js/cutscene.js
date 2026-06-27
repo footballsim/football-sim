@@ -845,7 +845,7 @@ function _renderFreekickScene(sc) {
   var accent = atkColor;
 
   var mirror = _csAttackRight(sc);   // ネイティブ=左攻め（ボールは左上＝ゴール方向）→ team1 で全体ミラー
-  var sw = 0.42, P = 1800;
+  var sw = 0.28, P = 1800;   // freekick1(蹴る前)→freekick2(蹴った瞬間)の切替点。短めにして早く蹴る
   var kx = 282, kh = 182;            // キッカー中心x・身長
   var bx0 = 348, by0 = ground - 10;  // ボール起点＝右下（添付の赤丸位置）。軸足側へボール1個分(24px)寄せ済(372→348)
   var vx = 2380, vy = 880;           // シュートと同等速度（≈1.4px/ms）・浅い左上へ直進（slope≈0.37）
