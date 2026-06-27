@@ -689,12 +689,13 @@ function _renderShortpassScene(sc, entry) {
   //   pose0 = 従来のプリカラー小スプライト(entry.file) / pose1 = onetwo2(走り) / pose2 = onetwo1(パサー) を実行時リカラー。
   //   ※ onetwo3 は「ボールをトラップ＝③受け手」なのでパス演出に不適 → パサーの onetwo1 を使う。
   //   foot=蹴り足のボール起点(絶対座標)・spriteFlip=pcx中心でスプライトを反転。
-  //   向きは3ポーズともパス方向(左=ボールの進む向き=攻撃方向)へ統一（flipHで攻撃方向に追従）。
-  //   pose0=ネイティブ左→そのまま左／onetwo2,1=ネイティブ右→反転で左。
+  //   向きは3ポーズとも「攻撃方向=ボールの進む向き」を向く（flipHで team1/team2 両対応）。
+  //   pose0=ネイティブ左→spriteFlip無し／onetwo2,1=ネイティブ右→spriteFlipで前者と揃える。
+  //   結果: 表示向き = native XOR spriteFlip XOR flipH が常に攻撃方向（ボールの進む向き）になる。
   var _poses = [
     { img: _loadCutsceneImg(entry.file),   rc: null,  ph: 178, pcx: 318, foot: [300, 160], spriteFlip: false },
-    { img: _loadCutsceneImg(_ONETWO2_SRC), rc: 'ot2', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: false },
-    { img: _loadCutsceneImg(_ONETWO1_SRC), rc: 'ot1', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: false }
+    { img: _loadCutsceneImg(_ONETWO2_SRC), rc: 'ot2', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: true },
+    { img: _loadCutsceneImg(_ONETWO1_SRC), rc: 'ot1', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: true }
   ];
   var _pose = _poses[Math.floor(Math.random() * _poses.length)];
   var ph = _pose.ph, pcx = _pose.pcx, foot = _pose.foot;
