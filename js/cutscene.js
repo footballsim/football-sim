@@ -63,13 +63,15 @@ function _loadCutsceneImg(src) {
 }
 
 var _bgsPreloaded = false;
-// 試合の最初のシーン表示時に、重い背景画像(枠外missgoal 274KB/ゴールgoalnet/ファール/GK/共通)をまとめて先読みする。
-// 表示時に未ロードだと _lpDrawBg が _lpBg() フォールバック(空・観客席ノイズ・芝)で固まる（特に枠外＝早期停止）。
-// その固まりを予防。1試合1回・ブラウザのみ(Image存在時)。_*_SRC は var 巻き上げ済みで呼び出し時には代入済み。
+// 試合の最初のシーン表示時に、重い背景画像(枠外missgoal 274KB/ゴールgoalnet/ファール/GK/共通)と、
+// ショートパスで流用するアニメ調ポーズ(onetwo)をまとめて先読みする。
+// 背景は未ロードだと _lpDrawBg が _lpBg() フォールバック(空・観客席ノイズ・芝)で固まる（特に枠外＝早期停止）。
+// onetwo は最頻出のショートパスで実行時リカラーに使うので、初回の「選手が出ない」を防ぐ。
+// 1試合1回・ブラウザのみ(Image存在時)。_*_SRC は var 巻き上げ済みで呼び出し時には代入済み。
 function _preloadCutsceneBgs() {
   if (_bgsPreloaded || typeof Image === 'undefined') return;
   _bgsPreloaded = true;
-  var list = [_LP_BG_SRC, _GK_BG_SRC, _GOAL_BG_SRC, _MISS_BG_SRC, _FOUL_REF_SRC];
+  var list = [_LP_BG_SRC, _GK_BG_SRC, _GOAL_BG_SRC, _MISS_BG_SRC, _FOUL_REF_SRC, _ONETWO1_SRC, _ONETWO2_SRC, _ONETWO3_SRC];
   for (var i = 0; i < list.length; i++) { if (list[i]) _loadCutsceneImg(list[i]); }
 }
 
@@ -669,7 +671,6 @@ function _renderShortpassScene(sc, entry) {
   canvas.width = W; canvas.height = H;
   canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
   var ctx = canvas.getContext('2d');
-  var passerImg = _loadCutsceneImg(entry.file);
   var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
   var accent = (sc.offence && sc.offence.team_color) || '#1f4fd6';
 
@@ -684,9 +685,17 @@ function _renderShortpassScene(sc, entry) {
   var en = (typeof window !== 'undefined' && window.LANG === 'en');
   var label = en ? 'SHORT PASS' : 'ショートパス';
 
-  var ph = 178, pcx = 318, sprW = ph * (195 / 260);          // 右配置（スプライトは元から左向き）
-  var sx0 = pcx - sprW / 2, sy0 = ground - ph;
-  var foot = [sx0 + sprW * 0.41, sy0 + ph * 0.83];           // 蹴り足ブーツ起点（T1画面でさらに右へ: x~306,y~160・TUNE）
+  // 最頻出のショートパスにバリエーション: 3パターンからランダムに1ポーズ（ユーザー要望）。
+  //   pose0 = 従来のプリカラー小スプライト(entry.file) / pose1,2 = ワンツー用アニメ調(onetwo)を流用し実行時リカラー。
+  //   foot=蹴り足のボール起点(絶対座標)・spriteFlip=pcx中心でスプライトを反転。
+  //   向きは3ポーズとも従来 pose0 に合わせて右向きに統一（pose0=ネイティブ左→反転で右／onetwo=ネイティブ右→そのまま右）。
+  var _poses = [
+    { img: _loadCutsceneImg(entry.file),   rc: null,  ph: 178, pcx: 318, foot: [306, 160], spriteFlip: true },
+    { img: _loadCutsceneImg(_ONETWO2_SRC), rc: 'ot2', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: false },
+    { img: _loadCutsceneImg(_ONETWO3_SRC), rc: 'ot3', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: false }
+  ];
+  var _pose = _poses[Math.floor(Math.random() * _poses.length)];
+  var ph = _pose.ph, pcx = _pose.pcx, foot = _pose.foot;
   var kickP = 0.12, ballSpd = 1300, P = 1500;                // 水平に蹴り出し・少し速め
   var flipH = _csAttackRight(sc);                            // ネイティブ=左攻め → team1(右)で反転
 
@@ -715,7 +724,9 @@ function _renderShortpassScene(sc, entry) {
     var z = 1.0 + Math.min(1, p / 0.7) * 0.08;
     ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(foot[0], foot[1]); ctx.scale(z, z); ctx.translate(-foot[0], -foot[1]);
     ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
-    if (passerImg.complete && passerImg.naturalWidth) { var pw = passerImg.naturalWidth * (ph / passerImg.naturalHeight); ctx.save(); ctx.translate(pcx, 0); ctx.scale(-1, 1); ctx.translate(-pcx, 0); ctx.drawImage(passerImg, pcx - pw / 2, ground - ph, pw, ph); ctx.restore(); }   // スプライトをpcx中心で反転し、ボール方向に向かせる
+    var sprImg = _pose.rc ? (_recolorPostplay(_pose.img, accent, accent, _pose.rc) || _pose.img) : _pose.img;
+    var _snw = sprImg.naturalWidth || sprImg.width, _snh = sprImg.naturalHeight || sprImg.height;   // リカラー後はcanvas(naturalWidth無し)→width
+    if (_snw) { var pw = _snw * (ph / _snh); ctx.save(); if (_pose.spriteFlip) { ctx.translate(pcx, 0); ctx.scale(-1, 1); ctx.translate(-pcx, 0); } ctx.drawImage(sprImg, pcx - pw / 2, ground - ph, pw, ph); ctx.restore(); }   // spriteFlip=pcx中心で反転しボール方向(左)へ向ける
     if (p < kickP) { _lpBall(ctx, foot[0], foot[1], 12, 0); }                                            // 蹴り足で待つ
     else if (onScreen) { _lpBall(ctx, bx, foot[1], 12, (p - kickP) * 80); }                              // 水平に蹴り出し→画面外で消える
     var strike = (p > kickP - 0.02 && p < kickP + 0.08) ? 1 - Math.abs(p - kickP) / 0.08 : 0;
