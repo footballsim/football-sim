@@ -20,7 +20,7 @@
 <div style="display:none">
   <span id="game-time-display">67'</span><span id="score1">2</span><span id="score2">1</span>
 </div>
-<script src="/js/cutscene.js?t=20260626fk2"></script>
+<script src="/js/cutscene.js?t=20260627onetwo5"></script>
 <script>
   // 試合側グローバルのスタブ
   function getTeamName(t){ return t && t.name; }
@@ -44,7 +44,8 @@
     ['⚽ ワンツー 同 (赤)', {action:'ショートパス',result:'成功',area:'MF',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}, {ofsPos:9}],
     ['⚽→ T1右: ワンツー 同', {action:'ショートパス',result:'成功',area:'MF',offence:JPN,defence:NED,ofsPos:9,dfsPos:4}, {ofsPos:9}],
     ['⚽← T2左: ワンツー 同', {action:'ショートパス',result:'成功',area:'MF',offence:NED,defence:JPN,ofsPos:9,dfsPos:4}, {ofsPos:9}],
-    ['🔸 ショートパス 別選手=旧演出 (赤)', {action:'ショートパス',result:'成功',area:'MF',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}, {ofsPos:5}],
+    ['⚽ ワンツー パス交換(次=クロス・別選手でも) (赤)', {action:'ショートパス',result:'成功',area:'FW_L',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}, {ofsPos:5,scenario:'クロス'}],
+    ['🔸 ショートパス 別(次=ドリブル・別選手)=旧演出 (赤)', {action:'ショートパス',result:'成功',area:'MF',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}, {ofsPos:5,scenario:'ドリブル突破'}],
     ['🔸 ショートパス 次シーン無し=旧演出 (赤)', {action:'ショートパス',result:'成功',area:'MF',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}],
     // ===== フリーキック（中央の直接FK）= ①蹴る前→②蹴った瞬間＋ボールが左上(ゴール方向)へ =====
     ['🟢 FK (赤)', {action:'フリーキック',scenario:'シュート',result:'枠を外した！',area:'CR_M',offence:mkTeam('Japan','#c8102e'),defence:NED,ofsPos:9,dfsPos:4}],

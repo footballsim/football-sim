@@ -272,11 +272,15 @@ function renderSceneArt(sc, nextSc) {
       var _lpFail = _pickCutscene('longpass', sc.offence && sc.offence.team_color);
       if (_lpFail && _lpFail.fileA) return _renderLongpassScene(sc, _lpFail);
     }
-    // ワンツーは「同じ攻撃選手が次エリアでも続ける（give-and-go＝テキストの『同』）」時のみ。
-    //   別選手へパスをつなぐ（『別』）／次シーンが無い場合は、従来のショートパス演出に戻す（エンジンの同/別判定 simulate.js:2667 と一致＝ofsPos比較）。
-    var sameAttacker = nextSc && (nextSc.ofsPos === sc.ofsPos);
-    if (sameAttacker) return _renderOnetwoScene(sc);   // ワンツー3カット連結（①与える→②返し→③受け止め）
-    return _renderShortpassScene(sc, entry);            // 別選手へのパス＝従来の単発ショートパス
+    // ワンツーか通常ショートパスかを、エンジンの「同/別」テキスト判定(simulate.js sceneToText 2660-2668)と完全一致させる:
+    //   ・次が クロス/シュート/セットプレー/ミドルシュート = 同/別を付けない＝「味方とのパス交換で突破」＝ワンツー
+    //   ・次がパス/ドリブル系(下記_sfx) かつ 同一選手(ofsPos=) = 「同」＝ワンツー
+    //   ・次がパス/ドリブル系 かつ 別選手(ofsPos≠) = 「別」＝【次の攻撃選手】へつなぐ＝通常ショートパス
+    //   ・次シーン無し = 通常ショートパス
+    var _noSfx = ['クロス', 'シュート', 'セットプレー', 'ミドルシュート'];   // この4つが次なら同/別を付けない（＝パス交換＝ワンツー）
+    var isPlainPass = !nextSc || (_noSfx.indexOf(nextSc.scenario) === -1 && nextSc.ofsPos !== sc.ofsPos);   // 「別」のみ通常パス
+    if (!isPlainPass) return _renderOnetwoScene(sc);   // ワンツー3カット連結（同 or パス交換）
+    return _renderShortpassScene(sc, entry);            // 別選手への通常ショートパス／次シーン無し
   }
   // シュート: 枠外=ニアポスト脇を外す演出、GK防いだ！=GKカット、ブロック=シューター演出。（ゴールは上で処理）
   if (moment === 'shot' && entry.file) {
