@@ -62,6 +62,17 @@ function _loadCutsceneImg(src) {
   return img;
 }
 
+var _bgsPreloaded = false;
+// 試合の最初のシーン表示時に、重い背景画像(枠外missgoal 274KB/ゴールgoalnet/ファール/GK/共通)をまとめて先読みする。
+// 表示時に未ロードだと _lpDrawBg が _lpBg() フォールバック(空・観客席ノイズ・芝)で固まる（特に枠外＝早期停止）。
+// その固まりを予防。1試合1回・ブラウザのみ(Image存在時)。_*_SRC は var 巻き上げ済みで呼び出し時には代入済み。
+function _preloadCutsceneBgs() {
+  if (_bgsPreloaded || typeof Image === 'undefined') return;
+  _bgsPreloaded = true;
+  var list = [_LP_BG_SRC, _GK_BG_SRC, _GOAL_BG_SRC, _MISS_BG_SRC, _FOUL_REF_SRC];
+  for (var i = 0; i < list.length; i++) { if (list[i]) _loadCutsceneImg(list[i]); }
+}
+
 // キット色(hex) → ざっくり色バケツ（近いアセットを選ぶため）
 // 対応色: white/dark/yellow/orange/red/green/skyblue(水色)/blue
 function _colorBucket(hex) {
@@ -214,6 +225,7 @@ function _csAttackRight(sc) {
 function renderShootStep(sc, stepType) {
   var on = SCENE_ART_ENABLED && (typeof window === 'undefined' || window.SCENE_ART_ENABLED !== false);
   if (!on || typeof document === 'undefined' || !sc) return null;
+  _preloadCutsceneBgs();   // 重い背景を先読み（枠外などで _lpBg フォールバックが固まるのを予防）
   if (stepType === 'fkdeliver') return _renderFkDeliveryScene(sc);   // セットプレー/オープンプレーのクロスの「蹴り出し」（クロスを上げる）
   if (stepType === 'spcontest') return renderSceneArt(sc);           // セットプレーの「競り合い」＝ヘディング/ボレー（既存）
   if (stepType === 'result') {
@@ -240,6 +252,7 @@ function renderShootStep(sc, stepType) {
 function renderSceneArt(sc, nextSc) {
   var on = SCENE_ART_ENABLED && (typeof window === 'undefined' || window.SCENE_ART_ENABLED !== false);
   if (!on || typeof document === 'undefined' || !sc) return null;
+  _preloadCutsceneBgs();   // 重い背景を先読み（枠外などで _lpBg フォールバックが固まるのを予防）
   if (sc.result === 'ファール') return _renderFoulScene(sc);   // ファール=主審カット（全アクション共通・recolorなし・笛＆FOUL!）
   if (sc.action === 'ミドルシュート') return _renderMidShotScene(sc);   // 専用ミドル: 成功(抜け)=直進 / ブロック=右上deflect。ゴールでも goal-net でなくミドル演出。
   if (sc.result === 'ゴール！！') return _renderGoalScene(sc);   // 全ゴール=新ゴール演出（旧バイシクル廃止）
@@ -1475,7 +1488,10 @@ function _renderMissScene(sc) {
     if (onScreen) { trail(bx, by, 0.55); _lpBall(ctx, bx, by, bR, cross * 30); }   // ボールはマウスの前（ネットの手前）
     ctx.restore();
     hud();
-    if (!ballGone && p < 1) requestAnimationFrame(frame);
+    // 背景(missgoal 274KB)が未ロードのうちは、ボール横断後(=静止)でも再描画を続け、ロード完了フレームで実画像へ差し替える。
+    //   未ロードのまま rAF を止めると _lpBg() フォールバック(空・観客席ノイズ・芝)で固まるため（546/1242行と同じ保険）。
+    var _bgLoading = !!(bgImg && !bgImg.complete);
+    if ((!ballGone && p < 1) || _bgLoading) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
   return canvas;
