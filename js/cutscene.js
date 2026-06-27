@@ -693,8 +693,8 @@ function _renderShortpassScene(sc, entry) {
   //   pose0=ネイティブ左→そのまま左／onetwo2,1=ネイティブ右→反転で左。
   var _poses = [
     { img: _loadCutsceneImg(entry.file),   rc: null,  ph: 178, pcx: 318, foot: [300, 160], spriteFlip: false },
-    { img: _loadCutsceneImg(_ONETWO2_SRC), rc: 'ot2', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: true },
-    { img: _loadCutsceneImg(_ONETWO1_SRC), rc: 'ot1', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: true }
+    { img: _loadCutsceneImg(_ONETWO2_SRC), rc: 'ot2', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: false },
+    { img: _loadCutsceneImg(_ONETWO1_SRC), rc: 'ot1', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: false }
   ];
   var _pose = _poses[Math.floor(Math.random() * _poses.length)];
   var ph = _pose.ph, pcx = _pose.pcx, foot = _pose.foot;
