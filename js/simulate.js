@@ -2787,8 +2787,11 @@ function renderSceneField(sc, prevSc) {
   const dfName = dfP ? getPlayerName(dfP) : '?';
 
   const flip = !isTeam1Offence;
+  // 攻撃方向(X)を反転する team2 は、左右サイド(Y)も反転＝盤面を180°回転させる。
+  //   エリア名の L/R は「攻撃チームから見た左右」（AREA_COORDS_H は team1 基準で L=上/R=下）。
+  //   team2 は逆方向を向くので左右が入れ替わる→ Y も反転しないとマップの左右がテキストと食い違う。
   const toX = (px) => ((flip ? (100 - px) : px) / 100) * W;
-  const toY = (py) => (py / 100) * H;  // Y軸はフリップしない（横向きフィールド）
+  const toY = (py) => ((flip ? (100 - py) : py) / 100) * H;
 
   const raw = AREA_COORDS_H[sc.area] || { x: 50, y: 50 };
   const cx = toX(raw.x), cy = toY(raw.y);
