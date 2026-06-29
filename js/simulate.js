@@ -3388,6 +3388,12 @@ function _recalcSecondHalf() {
 //   ・ミドル/FK … 構造が異なるため2場面（シュート→結果）。分割不能は null（従来1シーン）。
 function _shootSplit(sc, textHtml, prevSc) {
   if (!sc) return null;
+  // ファール: 「接触（ポストプレー失敗アート流用＝守備が攻撃を倒す）」→「主審の笛（FOUL!）」の2ビートに分割。
+  //   いきなり主審ではなく、まず倒される接触カットを見せてから判定へ。
+  //   定型文（接触＋判定）は接触ビートに全文表示し、主審ビートは画像の FOUL! ラベルに任せる（テキスト空）。
+  if (sc.result === 'ファール') {
+    return { parts: [String(textHtml || ''), ''], steps: ['foulcontact', 'foulref'] };
+  }
   // セットプレー（サイドFK）: 「蹴り出し(クロスを上げる)」→「競り合い(ヘディング/ボレー)」の2ビートに分割。
   //   定型文も2文（…ボールをあげる／…シュート）なので parts と一致する。
   if (sc.scenario === 'セットプレー') {
@@ -3561,10 +3567,13 @@ function nextChance() {
   }
 
   // テキストを追加（分割時はビート単位、通常は全文）
-  const line = document.createElement('div');
-  line.style.cssText = 'margin-bottom:8px';
-  line.innerHTML = _split ? _split.parts[_beat] : res.textScenes[currentSceneIdx];
-  textDiv.appendChild(line);
+  const _beatText = _split ? _split.parts[_beat] : res.textScenes[currentSceneIdx];
+  if (_beatText) {   // 空ビート（例: ファールの主審ビートは画像のみ）は行を追加しない
+    const line = document.createElement('div');
+    line.style.cssText = 'margin-bottom:8px';
+    line.innerHTML = _beatText;
+    textDiv.appendChild(line);
+  }
 
   // ゴール時のスコア更新＆GOAL演出は「結果ビート」で（分割しない場合は従来どおり最終表示時）
   if (sc && sc.result === 'ゴール！！' && _isLastBeat) {

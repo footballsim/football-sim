@@ -71,7 +71,7 @@ var _bgsPreloaded = false;
 function _preloadCutsceneBgs() {
   if (_bgsPreloaded || typeof Image === 'undefined') return;
   _bgsPreloaded = true;
-  var list = [_LP_BG_SRC, _GK_BG_SRC, _GOAL_BG_SRC, _MISS_BG_SRC, _FOUL_REF_SRC, _ONETWO1_SRC, _ONETWO2_SRC, _ONETWO3_SRC];
+  var list = [_LP_BG_SRC, _GK_BG_SRC, _GOAL_BG_SRC, _MISS_BG_SRC, _FOUL_REF_SRC, _POSTPLAY_FAIL_SRC, _ONETWO1_SRC, _ONETWO2_SRC, _ONETWO3_SRC];
   for (var i = 0; i < list.length; i++) { if (list[i]) _loadCutsceneImg(list[i]); }
 }
 
@@ -228,6 +228,8 @@ function renderShootStep(sc, stepType) {
   var on = SCENE_ART_ENABLED && (typeof window === 'undefined' || window.SCENE_ART_ENABLED !== false);
   if (!on || typeof document === 'undefined' || !sc) return null;
   _preloadCutsceneBgs();   // 重い背景を先読み（枠外などで _lpBg フォールバックが固まるのを予防）
+  if (stepType === 'foulcontact') return _renderPostplayScene(sc);   // ファールの接触＝ポストプレー失敗アート流用（守備が攻撃を倒す＝赤:攻撃/緑:守備でファールの加害被害と一致）
+  if (stepType === 'foulref') return _renderFoulScene(sc);           // 主審の笛＋FOUL!
   if (stepType === 'fkdeliver') return _renderFkDeliveryScene(sc);   // セットプレー/オープンプレーのクロスの「蹴り出し」（クロスを上げる）
   if (stepType === 'spcontest') return renderSceneArt(sc);           // セットプレーの「競り合い」＝ヘディング/ボレー（既存）
   if (stepType === 'result') {
@@ -1089,6 +1091,7 @@ function _renderPostplayScene(sc) {
   var atkColor = (sc.offence && sc.offence.team_color) || '#1f4fd6';
   var defColor = (sc.defence && sc.defence.team_color) || '#e36b1f';
   var success = (sc.result === '成功');
+  var foulContact = (sc.result === 'ファール');   // ファール接触ビート: 失敗アート(else枝)を流用しラベル/色/名前のみ差し替え
 
   function dom(id) { var el = (typeof document !== 'undefined') && document.getElementById(id); return el ? el.textContent : ''; }
   var timeTxt = dom('game-time-display');
@@ -1099,9 +1102,9 @@ function _renderPostplayScene(sc) {
   var atkTeamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
   var defTeamNm = (typeof getTeamName === 'function' && sc.defence) ? getTeamName(sc.defence) : '';
   var en = (typeof window !== 'undefined' && window.LANG === 'en');
-  var label = success ? (en ? 'HOLD-UP!' : 'ポストプレー！') : (en ? 'DISPOSSESSED!' : '奪われた！');
-  var labelCol = success ? '#ffe14a' : '#ff5a3c';
-  var accent = success ? atkColor : defColor;
+  var label = foulContact ? (en ? 'BROUGHT DOWN!' : '倒された！') : success ? (en ? 'HOLD-UP!' : 'ポストプレー！') : (en ? 'DISPOSSESSED!' : '奪われた！');
+  var labelCol = foulContact ? '#ffcf33' : success ? '#ffe14a' : '#ff5a3c';
+  var accent = foulContact ? '#ffcf33' : success ? atkColor : defColor;
 
   var postImg = _loadCutsceneImg(_POSTPLAY_SRC);
   var failImg = _loadCutsceneImg(_POSTPLAY_FAIL_SRC);
