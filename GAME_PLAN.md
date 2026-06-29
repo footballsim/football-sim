@@ -5,6 +5,8 @@
 
 このファイルは方針の母艦。実タスクは [BACKLOG.md](BACKLOG.md)、自走チームの規約は [AGENTS.md](AGENTS.md)。
 
+> 上位ビジョン（製品の why/what ＝ 連載 × 監督 × AIの生きた世界）は **[VISION.md](VISION.md)**。本書はその実装方針層。
+
 ---
 
 ## ビジュアル方針 — 漫画的マッチアップ × ドット絵
