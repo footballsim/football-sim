@@ -3383,7 +3383,7 @@ function _recalcSecondHalf() {
 //   ・ヘディング/ボレー … シュート動作は直前のクロス/セットプレー場面。この結果シーンの先頭はGKの反応なので
 //     先頭ビートを「GKダイブ」として扱う（クロス→GKダイブ→結果 の3場面に）。
 //   ・ミドル/FK … 構造が異なるため2場面（シュート→結果）。分割不能は null（従来1シーン）。
-function _shootSplit(sc, textHtml) {
+function _shootSplit(sc, textHtml, prevSc) {
   if (!sc) return null;
   // セットプレー（サイドFK）: 「蹴り出し(クロスを上げる)」→「競り合い(ヘディング/ボレー)」の2ビートに分割。
   //   定型文も2文（…ボールをあげる／…シュート）なので parts と一致する。
@@ -3396,6 +3396,11 @@ function _shootSplit(sc, textHtml) {
   //   定型文も2文（…中央へクロス／…シュート）なので parts と一致する。FKの蹴りカット(fkdeliver)を流用し、
   //   クロス選手の蹴り出し → 受け手の競り合い、という流れをセットプレーと同じ仕組みで見せる。
   if (sc.scenario === 'クロス') {
+    // 直前がサイドクロス成功＝クロスの蹴り出し演出は既に再生済み（_renderCrossScene）。
+    //   ここで2ビート分割すると fkdeliver で同じ選手のクロスがもう一度描かれ「二重クロス」になる。
+    //   よってサイドクロス経由のときは分割せず、競り合い(ヘディング/ボレー)1ビートに留める。
+    //   ※ドリブル/パス経由のクロスは直前に蹴り出しが無いので従来どおり2ビート（蹴り出し→競り合い）。
+    if (prevSc && prevSc.scenario === 'サイドクロス') return null;
     const crParts = String(textHtml || '').split(/(?:　| {2,})/).map(s => s.trim()).filter(Boolean);
     if (crParts.length >= 2) return { parts: [crParts[0], crParts[1]], steps: ['fkdeliver', 'spcontest'] };
     return null;
@@ -3416,7 +3421,13 @@ function _shootSplit(sc, textHtml) {
   // フリーキック（中央の直接FK）: GK を必ず見せる。ゴール=蹴り→GKダイブ(届かない)→ゴール／セーブ=蹴り→GKセーブ／枠外=蹴り→枠外。
   //   FKの定型文は1文のことが多いので、'shot'ビートは補完文(fkShot)・'result'ビートは結果文(last)を使い、結果のネタバレを避ける。
   if (act === 'フリーキック') {
-    const fkShot = (typeof window !== 'undefined' && window.LANG === 'en') ? 'A free kick from a dangerous position!' : '絶好の位置でのフリーキック！';
+    // キッカー＝攻撃側 ofsPos（selectFKKicker で選出）。元の定型文は結果(…ゴールへ！)を含み
+    //   ネタバレになるため shot ビートは汎用文に差し替えるが、キッカー名は必ず明記する
+    //   （差し替えで名前が消え、GOAL演出の得点者表示と食い違うのを防ぐ）。
+    const fkKicker = (typeof coloredName === 'function') ? coloredName(sc.offence, sc.ofsPos) : '';
+    const fkShot = (typeof window !== 'undefined' && window.LANG === 'en')
+      ? (fkKicker ? (fkKicker + ' lines up the free kick in a great position!') : 'A free kick from a dangerous position!')
+      : (fkKicker ? (fkKicker + 'が絶好の位置から直接フリーキックを狙う！') : '絶好の位置でのフリーキック！');
     if (sc.result === 'ゴール！！') return { parts: [fkShot, gkReach, last], steps: ['shot', 'gk', 'result'] };
     return { parts: [fkShot, last], steps: ['shot', 'result'] };   // 枠外=蹴り→枠外 / セーブ=蹴り→GKセーブ
   }
@@ -3514,7 +3525,7 @@ function nextChance() {
   const prevSc = currentSceneIdx > 0 ? res.scenes[currentSceneIdx - 1] : null;
 
   // シュート系シーンは「シュート→GKダイブ→ゴール/枠外」のビートに分割し、1クリック1ビートで見せる。
-  const _split = _shootSplit(sc, res.textScenes[currentSceneIdx]);
+  const _split = _shootSplit(sc, res.textScenes[currentSceneIdx], prevSc);
   const _beat = _split ? _shootSubStep : 0;
   const _isLastBeat = !_split || (_beat >= _split.parts.length - 1);
 
