@@ -14,9 +14,9 @@
 担当: engine-dev / renderer-dev / qa-regression / reviewer ＋ Codex 独立レビュー（三重チェック）。
 
 ### P1 基盤（エンジン無改変の土台）
-- [ ] **T-01** イベント型定義（kickoff/chance/duel/shot/goal/save/foul/card/injury/sub/HT/FT）。→なし
-- [ ] **T-02** simulateChance 出力を Event 列へ正規化するアダプタ（購読層・エンジン無改変）。→T-01
-- [ ] **T-03** イベント列から現行スコア/ログを再現できる検証（回帰緑）。→T-02
+- [x] **T-01** イベント型定義（kickoff/chance/duel/shot/goal/save/foul/card/injury/sub/HT/FT）。→なし ✅ js/events.js `EVENT_TYPES`
+- [x] **T-02** simulateChance 出力を Event 列へ正規化するアダプタ（購読層・エンジン無改変）。→T-01 ✅ js/events.js `matchToEvents`
+- [x] **T-03** イベント列から現行スコア/ログを再現できる検証（回帰緑）。→T-02 ✅ tools/events-reproduce.js（1800/1800一致・回帰緑・三重チェック＋Codex発見P2修正済）
 - [ ] **T-04** 差し替え可能PRNG導入（未シード時は現挙動フォールバック）。→なし
 - [ ] **T-05** simulate.js 全域の Math.random を PRNG 経由へ（独立PR・慎重に）。→T-04
 - [ ] **T-06** 同一シード完全再現＋回帰緑の確認。→T-05,T-03

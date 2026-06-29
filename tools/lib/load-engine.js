@@ -38,7 +38,8 @@ function showWCStats(){}
 `;
 
 // 連結対象（ブラウザのロード順）。ui.js は Firebase 専用なので headless では不要。
-const JS_FILES = ['players.js', 'simulate.js', 'narration.js'];
+// events.js = 試合結果→Event列の正規化アダプタ（購読層・エンジン無改変）。
+const JS_FILES = ['players.js', 'simulate.js', 'events.js', 'narration.js'];
 
 /**
  * エンジンを Node の vm context にロードして主要 API を返す。
@@ -73,7 +74,11 @@ function loadEngine() {
     simulateSilent:   typeof simulateSilent!=='undefined'   ? simulateSilent   : null,
     simulateChance:   typeof simulateChance!=='undefined'   ? simulateChance   : null,
     buildTeam:        typeof buildTeam!=='undefined'        ? buildTeam        : null,
-    getTeamTotalParam:typeof getTeamTotalParam!=='undefined'? getTeamTotalParam: null
+    getTeamTotalParam:typeof getTeamTotalParam!=='undefined'? getTeamTotalParam: null,
+    matchToEvents:    typeof matchToEvents!=='undefined'    ? matchToEvents    : null,
+    sceneToEvents:    typeof sceneToEvents!=='undefined'    ? sceneToEvents    : null,
+    tallyGoals:       typeof tallyGoals!=='undefined'       ? tallyGoals       : null,
+    EVENT_TYPES:      typeof EVENT_TYPES!=='undefined'       ? EVENT_TYPES      : null
   })`, ctx);
 
   const missing = Object.entries(api).filter(([, v]) => v == null).map(([k]) => k);
