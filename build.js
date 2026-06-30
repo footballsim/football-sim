@@ -77,7 +77,7 @@ fs.cpSync(path.join(ROOT, 'img'), path.join(DOCS, 'img'), { recursive: true });
 
 // index.html: アセット ?v= を更新して docs/ へ
 let html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-html = html.replace(/(js\/[a-z]+\.js|css\/style\.css)\?v=[0-9a-zA-Z_]*/g, `$1?v=${BUILD_VER}`);
+html = html.replace(/(js\/[a-z-]+\.js|css\/style\.css)\?v=[0-9a-zA-Z_]*/g, `$1?v=${BUILD_VER}`);
 fs.writeFileSync(path.join(DOCS, 'index.html'), html);
 
 // カスタムドメイン維持

@@ -37,11 +37,51 @@
   var _MV_MAX_SUBS = 5;
   var _mvSubbedOff = null;    // UI用: 退いた選手 index（再出場不可・controller と二重管理しない表示鏡）
   var _mvSelOut = null;       // 交代ピッカーで選択中の OUT（lineup 位置）
+  var _mvUiLang = null;       // 注入 UI を生成した言語（切替時に静的ラベルを作り直す）
 
   function _isEn() { return (typeof window !== 'undefined' && window.LANG === 'en'); }
   function _mvT(ja, en) { return _isEn() ? en : ja; }
+  // 戦術名は i18n の t('tacticsNames')（ja/en 両配列あり）を優先。未取得時のみ日本語固定の
+  // TACTICS_NAMES へフォールバック（既存 simulate.js:1144 と同じパターン）。
+  function _mvTacticName(i) {
+    var arr = (typeof t === 'function') ? t('tacticsNames') : null;
+    return (arr && arr[i]) || TACTICS_NAMES[i] || '-';
+  }
 
   function _mvSpeed() { return _MV_SPEEDS[_mvSpeedIdx]; }
+
+  /* 交代の「過去スコア誤帰属」対策（Codex 指摘 P2-A）──────────────────────
+   * createMatch.applyDecision は home チームの lineup を in-place 変更する（fatigue 継続のため）。
+   * だが過去チャンスの scene は同じ home オブジェクトを sc.offence/sc.defence として参照しており、
+   * 結果画面（narration.js）は `team.players[team.lineup[ofsPos]]` で得点者を再解決する。
+   * よって交代前に lineup を変えると、交代前に決めたゴール/デュエルが控え選手へ誤帰属する。
+   * → 交代の直前に、既計算済み（=過去）の全 scene が参照する home オブジェクトを
+   *    「その時点の lineup を凍結したシャローコピー」へ差し替える。クローンは
+   *    .name/.players/.team_color/メソッド等を保持し lineup だけ凍結するため、
+   *    結果画面の team.name 判定・選手解決・色は正しいまま。過去 scene は既に DOM 描画済みで
+   *    再描画されないので live 表示への影響もない。未計算の将来チャンスは live オブジェクトを
+   *    参照し続け、交代後の新 lineup を読む（controller の遅延実行セマンティクスと一致）。 */
+  function _mvCloneTeamFrozen(team) {
+    var c = {};
+    for (var k in team) { if (Object.prototype.hasOwnProperty.call(team, k)) c[k] = team[k]; }
+    c.lineup = team.lineup.slice();   // ★ この時点の lineup を凍結
+    return c;
+  }
+  function _mvFreezePastScenes() {
+    if (!gameState || !gameState.team1) return;
+    var liveHome = gameState.team1;
+    var frozen = null;   // 同一 era の全 scene で 1 つの凍結クローンを共有
+    for (var ci = 0; ci < chanceResults.length; ci++) {
+      var scs = chanceResults[ci] && chanceResults[ci].scenes;
+      if (!scs) continue;
+      for (var si = 0; si < scs.length; si++) {
+        var sc = scs[si];
+        if (sc.offence === liveHome) { if (!frozen) frozen = _mvCloneTeamFrozen(liveHome); sc.offence = frozen; }
+        if (sc.defence === liveHome) { if (!frozen) frozen = _mvCloneTeamFrozen(liveHome); sc.defence = frozen; }
+      }
+    }
+  }
+
   function _gameActive() {
     var el = document.getElementById('screen-game');
     return el && el.classList.contains('active');
@@ -331,6 +371,9 @@
     var pos = _mvSelOut;
     var team = gameState.team1;
     var outIdx = team.lineup[pos];
+    // ★ lineup を変更する前に過去 scene を凍結（得点者の誤帰属防止・Codex P2-A）。
+    //   applyDecision は検証と変更が一体なので、必ず変更前に凍結する（失敗時も凍結は等価複製で無害）。
+    _mvFreezePastScenes();
     // createMatch コントローラへ介入（lineup を in-place 差し替え＝次チャンス以降に反映）。
     var ok = _mvCtrl.applyDecision({ type: 'sub', side: 'home', pos: pos, 'in': inIdx });
     if (!ok) { _mvToast(_mvT('その交代はできません', 'Substitution not allowed')); return; }
@@ -354,7 +397,7 @@
   function _mvRenderTacticPicker() {
     var body = document.getElementById('mv-picker-body');
     var cur = gameState.team1.tactics;
-    var curName = TACTICS_NAMES[cur] || '-';
+    var curName = _mvTacticName(cur);
     var html = '<div class="mv-pick-head">' + _mvT('戦術変更', 'Change Tactics') +
       ' <span style="font-size:11px;opacity:.7">(' + _mvT('現在: ', 'now: ') + curName + ')</span></div>';
     html += '<div class="mv-pick-grid">';
@@ -362,7 +405,7 @@
     for (var i = 0; i < 4; i++) {
       var sel = (cur === i) ? ' mv-sel' : '';
       html += '<button class="mv-chip mv-chip-wide' + sel + '" onclick="_mvPickTactic(' + i + ')">' +
-        TACTICS_NAMES[i] + (cur === i ? ' ✓' : '') + '</button>';
+        _mvTacticName(i) + (cur === i ? ' ✓' : '') + '</button>';
     }
     html += '</div>';
     html += '<div class="mv-note">' + _mvT('次のチャンスから反映されます', 'Applies from the next chance') + '</div>';
@@ -373,8 +416,8 @@
     if (gameState.team1.tactics === i) return;
     var ok = _mvCtrl.applyDecision({ type: 'tactic', side: 'home', tactics: i });
     if (!ok) { _mvToast(_mvT('戦術を変更できません', 'Cannot change tactics')); return; }
-    _mvToast('📋 ' + _mvT('戦術', 'Tactics') + ': ' + TACTICS_NAMES[i]);
-    _mvLog('📋 ' + _mvT('戦術変更', 'Tactics') + ': ' + TACTICS_NAMES[i]);
+    _mvToast('📋 ' + _mvT('戦術', 'Tactics') + ': ' + _mvTacticName(i));
+    _mvLog('📋 ' + _mvT('戦術変更', 'Tactics') + ': ' + _mvTacticName(i));
     _mvRenderTacticPicker();
   }
 
@@ -422,9 +465,19 @@
   }
 
   function _mvEnsureUI() {
-    if (document.getElementById('mv-controls')) return;
     var host = document.getElementById('screen-game');
     if (!host) return;
+    // 言語が変わっていなければ既存 UI を再利用。変わっていたら静的ラベルを作り直す。
+    var curLang = _isEn() ? 'en' : 'ja';
+    var existing = document.getElementById('mv-controls');
+    if (existing) {
+      if (_mvUiLang === curLang) return;
+      ['mv-controls', 'mv-decision', 'mv-picker', 'mv-toast'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      });
+    }
+    _mvUiLang = curLang;
 
     // スタイル（ダーク基調・既存ゲーム画面に重ねる）。
     if (!document.getElementById('mv-style')) {
