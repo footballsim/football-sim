@@ -259,6 +259,14 @@ function renderSceneArt(sc, nextSc) {
   var on = SCENE_ART_ENABLED && (typeof window === 'undefined' || window.SCENE_ART_ENABLED !== false);
   if (!on || typeof document === 'undefined' || !sc) return null;
   _preloadCutsceneBgs();   // 重い背景を先読み（枠外などで _lpBg フォールバックが固まるのを予防）
+  // コーナーキックは結果に関わらず「ヘディング競り合い」の絵に統一（ユーザー指定）。
+  //   攻撃が競り勝つ(=失敗以外:ゴール/セーブ/枠外)＝成功(ヘディング！) / 守備がクリア(=失敗)＝競り負け。
+  //   ゴール時は別途 showGoalCutscene の GOAL!! テイクオーバーが続く。
+  if (sc.scenario === 'コーナーキック') {
+    var _ck = {}; for (var _ckk in sc) { if (Object.prototype.hasOwnProperty.call(sc, _ckk)) _ck[_ckk] = sc[_ckk]; }
+    _ck.result = (sc.result === '失敗') ? '失敗' : '成功';
+    return _renderHeaderScene(_ck);
+  }
   if (sc.result === 'ファール') return _renderFoulScene(sc);   // ファール=主審カット（全アクション共通・recolorなし・笛＆FOUL!）
   if (sc.action === 'ミドルシュート') return _renderMidShotScene(sc);   // 専用ミドル: 成功(抜け)=直進 / ブロック=右上deflect。ゴールでも goal-net でなくミドル演出。
   if (sc.result === 'ゴール！！') return _renderGoalScene(sc);   // 全ゴール=新ゴール演出（旧バイシクル廃止）

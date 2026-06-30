@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base href="/"><!-- 実アプリ(index.html=root)と同じく相対 img/ を root 起点で解決 -->
+<title>PK / CK カットシーン確認テスト</title>
+<style>
+  body{margin:0;background:#0b1e3a;color:#fff;font-family:system-ui,'Noto Sans JP',sans-serif;padding:16px}
+  h1{font-size:16px;margin:0 0 4px}
+  h2{font-size:14px;margin:20px 0 8px;color:#9fd0ff;border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:4px}
+  p.note{font-size:12px;color:rgba(255,255,255,.7);margin:0 0 8px}
+  .row{display:flex;gap:14px;flex-wrap:wrap}
+  .cell{width:340px;background:#0d1a2b;border-radius:10px;overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.5)}
+  .cap{font-size:12px;padding:6px 10px;color:rgba(255,255,255,.9)}
+  .seq{outline:2px solid #f39c12}
+</style>
+</head>
+<body>
+<h1>⚽ PK / CK カットシーン確認テスト</h1>
+<p class="note">実試合では PK≈3〜4試合に1回・CK≈1試合に1回と稀なため、ここで各ビート/結果を常時確認できます。橙枠＝PKの1連続(左→右の順で1クリックずつ流れる)。</p>
+<!-- HUD が読む実DOM（試合画面相当） -->
+<div style="display:none">
+  <span id="game-time-display">後半 67分</span><span id="score1">1</span><span id="score2">1</span>
+</div>
+<script src="/js/cutscene.js?t=ckpk1"></script>
+<script>
+  // ── 試合側グローバルのスタブ ──
+  function getTeamName(t){ return t && t.name; }
+  function getPlayerName(p){ return p && p.name; }
+  function mkTeam(name, color){
+    var players = {};
+    for (var i=0;i<11;i++){ players['p'+i] = { name: (i+1)+' '+name }; }
+    var lineup = []; for (var j=0;j<11;j++) lineup.push('p'+j);
+    return { name:name, team_color:color, lineup:lineup, players:players };
+  }
+  var JPN = mkTeam('日本', '#c8102e');        // 赤(team1=右攻め)
+  var NED = mkTeam('オランダ', '#f36c21');     // 橙(team2=左攻め)
+  var GRN = mkTeam('GreenFC', '#1f8f3a');     // 緑(守備リカラー確認用)
+  window.gameState = { team1: JPN, team2: NED };
+
+  function pk(off, def, result){ return { scenario:'ペナルティキック', action:'ペナルティキック', result:result, area:'CR_M', offence:off, defence:def, ofsPos:9, dfsPos:0, crossPos:9 }; }
+  function foul(off, def){ return { scenario:'ドリブル突破', action:'ドリブル突破', result:'ファール', area:'CR_M', offence:off, defence:def, ofsPos:9, dfsPos:4 }; }
+  function ck(off, def, result){ return { scenario:'コーナーキック', action:'ヘディングシュート', result:result, area:'CR_R', offence:off, defence:def, ofsPos:9, dfsPos:4, crossPos:6 }; }
+
+  function section(title, note){ var h=document.createElement('h2'); h.textContent=title; document.body.appendChild(h);
+    if(note){ var p=document.createElement('p'); p.className='note'; p.textContent=note; document.body.appendChild(p);}
+    var r=document.createElement('div'); r.className='row'; document.body.appendChild(r); return r; }
+  function add(row, caption, art, seq){ var cell=document.createElement('div'); cell.className='cell'+(seq?' seq':'');
+    if(art) cell.appendChild(art); var cap=document.createElement('div'); cap.className='cap'; cap.textContent=caption; cell.appendChild(cap); row.appendChild(cell); }
+
+  // ── PK: 4ビート分割（PK判定 → 蹴る → GKダイブ → 結果）。先頭に「倒される接触」も。 ──
+  // ゴール例（team1=日本 右攻め）
+  var r1 = section('PK 連続（ゴール）— 日本(赤・右攻め）', 'ファール接触 → PK！！(画面いっぱい) → シュート絵で蹴る → GKダイビング → ゴール');
+  var pkG = pk(JPN, NED, 'ゴール！！');
+  add(r1, '① 倒される（接触）', renderShootStep(foul(JPN,NED), 'foulcontact'), true);
+  add(r1, '② PK判定（PK！！）', renderShootStep(pkG, 'pkref'), true);
+  add(r1, '③ 蹴る（シュート絵）', renderShootStep(pkG, 'shot'), true);
+  add(r1, '④ GKダイビング', renderShootStep(pkG, 'gk'), true);
+  add(r1, '⑤ 結果＝ゴール', renderShootStep(pkG, 'result'), true);
+
+  // セーブ例（team2=オランダ 左攻め）
+  var r2 = section('PK 連続（セーブ）— オランダ(橙・左攻め）', '蹴り絵・PK！！は左攻めで左右反転して描画される');
+  var pkS = pk(NED, JPN, 'GK防いだ！');
+  add(r2, '① PK判定（PK！！）', renderShootStep(pkS, 'pkref'), true);
+  add(r2, '② 蹴る（シュート絵）', renderShootStep(pkS, 'shot'), true);
+  add(r2, '③ GKダイビング', renderShootStep(pkS, 'gk'), true);
+  add(r2, '④ 結果＝GKセーブ', renderShootStep(pkS, 'result'), true);
+
+  // 枠外例
+  var r3 = section('PK 結果バリエーション');
+  add(r3, '結果＝枠を外した（日本）', renderShootStep(pk(JPN, NED, '枠を外した！'), 'result'));
+  add(r3, '結果＝ゴール（日本）', renderShootStep(pk(JPN, NED, 'ゴール！！'), 'result'));
+  add(r3, '結果＝セーブ（日本）', renderShootStep(pk(JPN, NED, 'GK防いだ！'), 'result'));
+  add(r3, 'PK判定 EN', (function(){ window.LANG='en'; var a=renderShootStep(pk(JPN,NED,'ゴール！！'),'pkref'); window.LANG='ja'; return a; })());
+
+  // ── CK: ヘディング競り合いの絵に統一（攻撃が競り勝てば成功＝ヘディング！ / 守備クリア＝競り負け） ──
+  var r4 = section('CK（コーナーキック）— ヘディング競り合い演出', '攻撃=赤→攻撃チーム色 / 守備=緑→守備チーム色 にリカラー。成功=攻撃が競り勝つ / 失敗=守備がクリア');
+  add(r4, 'CK 成功・ゴール（日本赤→オランダ橙GK）', renderSceneArt(ck(JPN, NED, 'ゴール！！')));
+  add(r4, 'CK 成功・セーブ（日本→緑守備）', renderSceneArt(ck(JPN, GRN, 'GK防いだ！')));
+  add(r4, 'CK 成功・枠外（日本→緑守備）', renderSceneArt(ck(JPN, GRN, '枠を外した！')));
+  add(r4, 'CK 失敗・競り負け（日本→緑守備クリア）', renderSceneArt(ck(JPN, GRN, '失敗')));
+  add(r4, '→ T1右: CK成功（日本）', renderSceneArt(ck(JPN, NED, 'ゴール！！')));
+  add(r4, '← T2左: CK成功（オランダ）', renderSceneArt(ck(NED, JPN, 'ゴール！！')));
+  add(r4, '← T2左: CK失敗（オランダ）', renderSceneArt(ck(NED, JPN, '失敗')));
+
+  window.__ready = true;
+</script>
+</body>
+</html>
