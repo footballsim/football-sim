@@ -3,7 +3,8 @@
  *
  * 目的:
  *   「監督として試合を“読む”」観戦モード。試合を自動再生で流し、采配ポイント
- *   （ハーフタイム・ゴール・任意の一時停止）で交代／戦術変更を行う。
+ *   （ハーフタイム・ゴール・任意の一時停止）で采配（システム/戦術/キープレイヤー/
+ *   要注意プレイヤー/交代/ポジション入替）を行う。
  *
  *   ★ 既存エンジン（simulateChance / デュエル式 / select*）には一切触れない。
  *     試合の進行は match.js の createMatch（チャンス逐次実行・遅延計算）が担い、
@@ -14,15 +15,24 @@
  *     simulate.js 側のフックは全て _managerMode ガード済みで、非・監督モードでは
  *     既存挙動とビット同一。
  *
+ * 采配UI（T-11/T-12 ＋ 追加要望）:
+ *   交代・戦術だけでなく「システム/キープレイヤー/要注意/ポジション入替」も行えるよう、
+ *   プリマッチと同じ「設定画面」を監督モードから再利用する。設定画面の各セレクタは
+ *   全て team1State を編集するので、采配を開く時に live チーム → team1State へ同期し、
+ *   閉じる時に team1State → live チームへ適用する（lineup を変える前に過去 scene を凍結）。
+ *
  * 介入が結果に効く仕組み（createMatch の遅延実行）:
  *   従来の後半交代（_recalcSecondHalf）は「残りチャンスを再シミュレート」＝RNG 再抽選＋
  *   チーム再構築（fatigue/chance_counter が消える）で非決定的だった。createMatch は
- *   未計算のチャンスを 1 つずつ計算するため、applyDecision で lineup/tactics を差し替えるだけで
- *   「次チャンス以降」が新入力を読む。再抽選なし・走行中の選手状態を保持・seed 再現可能。
+ *   未計算のチャンスを 1 つずつ計算するため、live チーム（=gameState.team1）の
+ *   system/tactics/keyplayer/marked/lineup を差し替えるだけで「次チャンス以降」が新入力を
+ *   読む。再抽選なし・走行中の選手状態を保持。
+ *   ※ 簡易な交代/戦術は createMatch.applyDecision でも可能だが、本UIは設定画面を再利用して
+ *      全采配を一括反映するため live チームを直接更新する（未シード観戦モードのため決定論
+ *      ログ非依存）。
  *
  * ロード順: players.js → rng.js → simulate.js → events.js → match.js → cutscene.js →
- *           manager-match.js（simulate.js のグローバル _managerMode/_mvCtrl/_mvGoalShown と
- *           createMatch / nextChance / showResult / getPlayerName / showScreen 等を参照）。
+ *           manager-match.js。
  */
 
 (function () {
@@ -31,40 +41,27 @@
   // ── 自動再生の状態（このモジュール内のみ）────────────────────────────
   var _mvPlaying = false;     // 自動再生中か
   var _mvTimer = null;        // setTimeout ハンドル
-  var _MV_SPEEDS = [1300, 750, 420];  // 1x / 2x / 3x（1ビートあたり ms）
+  // 1ビートあたりの待ち(ms)。1× は最長アニメ（ワンツー 2200ms 等）を切らない尺にする。
+  var _MV_SPEEDS = [2400, 1300, 700];  // 1x / 2x / 3x
   var _mvSpeedIdx = 0;        // 現在の速度段（0..2）
-  var _mvSubsMade = 0;        // 行った交代人数（W杯ルール: 最大5）
-  var _MV_MAX_SUBS = 5;
-  var _mvSubbedOff = null;    // UI用: 退いた選手 index（再出場不可・controller と二重管理しない表示鏡）
-  var _mvSelOut = null;       // 交代ピッカーで選択中の OUT（lineup 位置）
   var _mvUiLang = null;       // 注入 UI を生成した言語（切替時に静的ラベルを作り直す）
+  var _mvLastKind = 'manual'; // 直近の采配ポイント種別（采配画面から戻る時に再表示）
 
   function _isEn() { return (typeof window !== 'undefined' && window.LANG === 'en'); }
   function _mvT(ja, en) { return _isEn() ? en : ja; }
-  // 戦術名は i18n の t('tacticsNames')（ja/en 両配列あり）を優先。未取得時のみ日本語固定の
-  // TACTICS_NAMES へフォールバック（既存 simulate.js:1144 と同じパターン）。
-  function _mvTacticName(i) {
-    var arr = (typeof t === 'function') ? t('tacticsNames') : null;
-    return (arr && arr[i]) || TACTICS_NAMES[i] || '-';
-  }
-
   function _mvSpeed() { return _MV_SPEEDS[_mvSpeedIdx]; }
 
-  /* 交代の「過去スコア誤帰属」対策（Codex 指摘 P2-A）──────────────────────
-   * createMatch.applyDecision は home チームの lineup を in-place 変更する（fatigue 継続のため）。
-   * だが過去チャンスの scene は同じ home オブジェクトを sc.offence/sc.defence として参照しており、
-   * 結果画面（narration.js）は `team.players[team.lineup[ofsPos]]` で得点者を再解決する。
-   * よって交代前に lineup を変えると、交代前に決めたゴール/デュエルが控え選手へ誤帰属する。
-   * → 交代の直前に、既計算済み（=過去）の全 scene が参照する home オブジェクトを
-   *    「その時点の lineup を凍結したシャローコピー」へ差し替える。クローンは
-   *    .name/.players/.team_color/メソッド等を保持し lineup だけ凍結するため、
-   *    結果画面の team.name 判定・選手解決・色は正しいまま。過去 scene は既に DOM 描画済みで
-   *    再描画されないので live 表示への影響もない。未計算の将来チャンスは live オブジェクトを
-   *    参照し続け、交代後の新 lineup を読む（controller の遅延実行セマンティクスと一致）。 */
+  /* 交代/入替の「過去スコア誤帰属」対策（Codex 指摘 P2-A）──────────────────
+   * lineup を変えると、過去チャンスの scene（同じ home オブジェクトを sc.offence/defence と
+   * して参照）が結果画面の `team.players[team.lineup[ofsPos]]` で別人に解決され、交代前の
+   * ゴール/デュエルが控えへ誤帰属する。→ lineup を変える直前に、既計算済みの全 scene が
+   * 参照する home オブジェクトを「その時点の lineup を凍結したシャローコピー」へ差し替える。
+   * クローンは .name/.players/.team_color/メソッドを保持し lineup だけ凍結するので、結果画面の
+   * team.name 判定・選手解決・色は正しいまま。過去 scene は描画済みで再描画されない。 */
   function _mvCloneTeamFrozen(team) {
     var c = {};
     for (var k in team) { if (Object.prototype.hasOwnProperty.call(team, k)) c[k] = team[k]; }
-    c.lineup = team.lineup.slice();   // ★ この時点の lineup を凍結
+    c.lineup = team.lineup.slice();
     return c;
   }
   function _mvFreezePastScenes() {
@@ -89,11 +86,8 @@
 
   /* ──────────────────────────────────────────────────────────────────
    * エントリ: startManagerMatch — 監督ビューアで試合を開始する。
-   *   startGame の表示系リセットを踏襲しつつ、事前一括演算の代わりに
-   *   createMatch コントローラを生成して遅延実行に切り替える。
    * ────────────────────────────────────────────────────────────────── */
   function startManagerMatch() {
-    // 延長戦フェーズからは起動しない（通常試合専用）。
     if (typeof wcPhase !== 'undefined' && (wcPhase === 'et_first' || wcPhase === 'et_second')) return;
     if (typeof createMatch !== 'function') { alert('createMatch 未ロード'); return; }
 
@@ -122,19 +116,14 @@
     coachMarkTarget = -1;   // 監督モードはコーチカード非使用（engine 非参照）
 
     // createMatch コントローラ（home=team1 / away=team2）。未シード＝毎回フレッシュな試合。
-    //   tactics 入力レイヤーは {home:team1State, away:team2State}（systemIdx/tactics/lineup/…）。
     _mvCtrl = createMatch(team1Data, team2Data, { home: team1State, away: team2State });
     _managerMode = true;
     _mvGoalShown = false;
     _mvPlaying = false;
     _mvSpeedIdx = 0;
-    _mvSubsMade = 0;
-    _mvSubbedOff = new Set();
-    _mvSelOut = null;
+    _mvLastKind = 'manual';
 
-    // 描画・介入の単一ソースを controller の team オブジェクトに束ねる。
-    //   renderSceneField / sceneToText / cutscene は sc.offence(=_mvCtrl.home) を読み、
-    //   applyDecision は同じ team の lineup/tactics を in-place 更新するため整合する。
+    // 描画・采配の単一ソースを controller の team オブジェクトに束ねる。
     gameState = { team1: _mvCtrl.home, team2: _mvCtrl.away };
 
     var n = _mvCtrl.getState().n;
@@ -152,18 +141,15 @@
     document.getElementById('chance-count').textContent = '0';
     document.getElementById('chance-total').textContent = n;
 
-    // 通常の操作ボタン（次のシーン/一気に/交代）は監督モードでは隠す。
-    _toggleNormalControls(false);
+    _toggleNormalControls(false);   // 通常の次へ/一気に/交代ボタンは隠す
     showScreen('game');
     _mvEnsureUI();
     _mvShowControls(true);
     _mvUpdateControlBar();
 
-    // キックオフ後すぐ自動再生を開始。
-    _mvPlay();
+    _mvPlay();   // キックオフ後すぐ自動再生
   }
 
-  // 通常モードの操作ボタンの表示/非表示。
   function _toggleNormalControls(show) {
     ['next-btn', 'all-btn', 'sub-btn'].forEach(function (id) {
       var el = document.getElementById(id);
@@ -177,20 +163,17 @@
     _mvPlaying = true;
     _mvUpdateControlBar();
     if (_mvTimer) { clearTimeout(_mvTimer); _mvTimer = null; }
-    _mvTimer = setTimeout(_mvTick, 250);   // 開始は軽くタメてから
+    _mvTimer = setTimeout(_mvTick, 250);
   }
-
   function _mvPause() {
     _mvPlaying = false;
     if (_mvTimer) { clearTimeout(_mvTimer); _mvTimer = null; }
     _mvUpdateControlBar();
   }
-
   function _mvTogglePlay() {
     if (_mvPlaying) { _mvPause(); }
     else { _mvHideDecision(); _mvPlay(); }
   }
-
   function _mvCycleSpeed() {
     _mvSpeedIdx = (_mvSpeedIdx + 1) % _MV_SPEEDS.length;
     _mvUpdateControlBar();
@@ -200,17 +183,15 @@
   function _mvTick() {
     _mvTimer = null;
     if (!_managerMode || !_mvPlaying) return;
-    // 画面遷移したら自動停止（タイマー暴走防止）。
-    if (!_gameActive()) { _mvPause(); return; }
+    if (!_gameActive()) { _mvPause(); return; }   // 画面遷移時はタイマー停止
 
-    // 全チャンス表示済み＆コントローラ終了 → 結果へ。
     if (_mvCtrl.isOver() && currentChanceIdx >= chanceResults.length) { _mvFinish(); return; }
 
     _mvGoalShown = false;
     nextChance();                       // 1ビート進める（内部で createMatch から遅延フェッチ）
     _mvSyncHud();
 
-    // ハーフタイム停止（前半ロスタイム完了＝currentChanceIdx===HALF_CHANCES に到達した瞬間・1回のみ）。
+    // ハーフタイム停止（前半ロスタイム完了＝currentChanceIdx===HALF_CHANCES の瞬間・1回のみ）。
     if (currentChanceIdx === HALF_CHANCES && !halfTimeShown && currentSceneIdx === 0 && _shootSubStep === 0) {
       halfTimeShown = true;
       var htRes = chanceResults[HALF_CHANCES - 1] || chanceResults[HALF_CHANCES - 2];
@@ -227,14 +208,12 @@
       return;
     }
 
-    // 終了判定（このビートで末尾に達した）。
     if (_mvCtrl.isOver() && currentChanceIdx >= chanceResults.length) { _mvFinish(); return; }
 
     _mvTimer = setTimeout(_mvTick, _mvSpeed());
   }
 
   function _mvSyncHud() {
-    // スコアは nextChance が更新するが、念のためチャンスカウントを同期。
     var cc = document.getElementById('chance-count');
     if (cc) cc.textContent = Math.min(currentChanceIdx, _mvCtrl.getState().n);
   }
@@ -243,10 +222,7 @@
   function _mvSkipToEnd() {
     _mvPause();
     _mvHideDecision();
-    while (!_mvCtrl.isOver()) {
-      _mvCtrl.nextChance();
-    }
-    // controller の全 chanceResults を取り込む（表示はスキップ）。
+    while (!_mvCtrl.isOver()) { _mvCtrl.nextChance(); }
     var crs = _mvCtrl.result.chanceResults;
     chanceResults = crs.slice();
     currentChanceIdx = chanceResults.length;
@@ -257,7 +233,6 @@
     _mvPause();
     _mvHideDecision();
     _mvShowControls(false);
-    // 結果画面へ（既存 narration.js: showResult が gameState/chanceResults を読む）。
     if (typeof showResult === 'function') showResult();
   }
 
@@ -266,6 +241,7 @@
    * ──────────────────────────────────────────────────────────────── */
   function _mvShowDecisionPoint(kind) {
     _mvEnsureUI();
+    _mvLastKind = kind || 'manual';
     var panel = document.getElementById('mv-decision');
     if (!panel) return;
     var s = gameState ? { t1: gameState.team1.score, t2: gameState.team2.score } : { t1: 0, t2: 0 };
@@ -281,7 +257,7 @@
       contLabel = _mvT('▶ 続ける', '▶ Continue');
     } else {
       title = _mvT('⏸ 采配ポイント', '⏸ Decision Point');
-      sub = _mvT('交代・戦術を調整', 'Make a substitution or change tactics');
+      sub = _mvT('采配を調整', 'Adjust your plan');
       contLabel = _mvT('▶ 続ける', '▶ Continue');
     }
 
@@ -294,134 +270,117 @@
       getTeamName(team2Data) + ' ' + team2Data.flag;
     document.getElementById('mv-dec-continue').textContent = contLabel;
 
-    _mvShowPicker(false);
     panel.style.display = 'flex';
   }
-
   function _mvHideDecision() {
     var panel = document.getElementById('mv-decision');
     if (panel) panel.style.display = 'none';
   }
+  function _mvContinue() {
+    _mvHideDecision();
+    _mvPlay();
+  }
 
-  /* ── 交代ピッカー（T-11）────────────────────────────────────────── */
-  function _mvOpenSub() {
+  /* ── 采配（設定画面を再利用）─ T-11/T-12 ＋ システム/キープレイヤー/要注意/入替 ──
+   * 設定画面の各セレクタ（openFormationSelect/openTacticsSelect/openKeyPlayerSelect/
+   * openMarkedPlayerSelect）とドラッグ操作（renderFormation/renderBench/applyDrop）は
+   * すべて team1State を編集する。采配を開く時に live チーム→team1State へ同期し、
+   * 閉じる時に team1State→live チームへ適用する。 */
+  function _mvOpenSetting() {
     _mvPause();
-    _mvSelOut = null;
-    _mvRenderSubPicker();
-    _mvShowPicker(true);
+    _mvHideDecision();
+    _mvShowControls(false);
+
+    // live チーム → team1State へ同期（設定画面が現在の采配を反映するように）。
+    team1State = {
+      systemIdx: gameState.team1.system,
+      tactics: gameState.team1.tactics,
+      keyplayer: gameState.team1.keyplayer,
+      marked_player: gameState.team1.marked_player,
+      lineup: gameState.team1.lineup.slice()
+    };
+
+    _htMode = true;          // applyDrop に交代枠(最大5)管理＋再出場不可を効かせる
+    htSubsCount = 0;
+
+    renderFormation();
+    renderBench();
+    updateSettingBtnValues();
+    applyLang();
+
+    // キックオフ/多試合/監督ボタンを隠し、ヘッダーに「試合へ戻る」を差し込む（HT流用パターン）。
+    document.getElementById('btn-kickoff-top').style.display = 'none';
+    document.getElementById('btn-kickoff-bottom').closest('div').style.display = 'none';
+    var bmgr = document.getElementById('btn-manager'); if (bmgr) bmgr.style.display = 'none';
+    var bm = document.getElementById('btn-multi'); if (bm) bm.style.display = 'none';
+    var bm100 = document.getElementById('btn-multi100'); if (bm100) bm100.style.display = 'none';
+
+    var header = document.querySelector('#screen-setting .screen-header');
+    if (header) {
+      var origBack = header.querySelector('.back-btn:not(#mv-setting-back)');
+      if (origBack) origBack.style.display = 'none';
+      if (!document.getElementById('mv-setting-back')) {
+        var bb = document.createElement('button');
+        bb.className = 'back-btn';
+        bb.id = 'mv-setting-back';
+        bb.textContent = _mvT('▶ 試合へ戻る', '▶ Back to match');
+        bb.onclick = _mvCloseSetting;
+        header.insertBefore(bb, header.firstChild);
+      }
+    }
+    // 交代枠ラベル（既存 _updateHtSubsLabel を流用）。
+    if (!document.getElementById('ht-subs-label')) {
+      var subLabel = document.createElement('div');
+      subLabel.id = 'ht-subs-label';
+      subLabel.style.cssText = 'font-size:12px;color:#888;text-align:center;padding:4px 0 8px';
+      var benchEl = document.getElementById('bench-list');
+      if (benchEl && benchEl.parentNode) benchEl.parentNode.insertBefore(subLabel, benchEl);
+    }
+    if (typeof _updateHtSubsLabel === 'function') _updateHtSubsLabel();
+
+    showScreen('setting');
   }
 
-  function _mvRenderSubPicker() {
-    var body = document.getElementById('mv-picker-body');
-    var team = gameState.team1;
-    var html = '';
-    html += '<div class="mv-pick-head">' + _mvT('交代', 'Substitution') +
-      ' <span style="font-size:11px;opacity:.7">(' + _mvT('残り', 'left ') +
-      (_MV_MAX_SUBS - _mvSubsMade) + _mvT('人', '') + ')</span></div>';
+  function _mvCloseSetting() {
+    _htMode = false;
 
-    if (_mvSubsMade >= _MV_MAX_SUBS) {
-      html += '<div class="mv-note">' + _mvT('交代枠を使い切りました（最大5人）', 'No substitutions left (max 5)') + '</div>';
-      body.innerHTML = html;
-      return;
-    }
-
-    // OUT: 現在のスタメン（GK=0 を除く 1..10）。
-    html += '<div class="mv-sec-label">' + _mvT('① 退く選手', '① Player OUT') + '</div>';
-    html += '<div class="mv-pick-grid">';
-    for (var pos = 1; pos < team.lineup.length; pos++) {
-      var p = team.players[team.lineup[pos]];
-      if (!p) continue;
-      var sel = (_mvSelOut === pos) ? ' mv-sel' : '';
-      html += '<button class="mv-chip' + sel + '" onclick="_mvPickOut(' + pos + ')">' +
-        '<span class="mv-chip-pos">' + team.getPositionName(pos) + '</span>' +
-        '<span class="mv-chip-name">' + getPlayerName(p) + '</span></button>';
-    }
-    html += '</div>';
-
-    // IN: ベンチ（lineup 外・再出場不可を除く）。OUT 未選択時はグレー表示。
-    html += '<div class="mv-sec-label">' + _mvT('② 入る選手', '② Player IN') + '</div>';
-    html += '<div class="mv-pick-grid">';
-    var inLineup = {};
-    for (var i = 0; i < team.lineup.length; i++) inLineup[team.lineup[i]] = true;
-    var any = false;
-    for (var idx = 0; idx < team.players.length; idx++) {
-      if (inLineup[idx]) continue;
-      if (_mvSubbedOff.has(idx)) continue;
-      any = true;
-      var bp = team.players[idx];
-      var disabled = (_mvSelOut === null) ? ' mv-dis' : '';
-      html += '<button class="mv-chip' + disabled + '" onclick="_mvPickIn(' + idx + ')">' +
-        '<span class="mv-chip-pos">' + (bp.positions && bp.positions[0] ? bp.positions[0] : '') + '</span>' +
-        '<span class="mv-chip-name">' + getPlayerName(bp) + '</span></button>';
-    }
-    if (!any) html += '<div class="mv-note">' + _mvT('交代可能な控えがいません', 'No available substitutes') + '</div>';
-    html += '</div>';
-
-    body.innerHTML = html;
-  }
-
-  function _mvPickOut(pos) {
-    if (_mvSubsMade >= _MV_MAX_SUBS) return;
-    _mvSelOut = pos;
-    _mvRenderSubPicker();
-  }
-
-  function _mvPickIn(inIdx) {
-    if (_mvSelOut === null) return;   // 先に OUT を選ぶ
-    var pos = _mvSelOut;
-    var team = gameState.team1;
-    var outIdx = team.lineup[pos];
-    // ★ lineup を変更する前に過去 scene を凍結（得点者の誤帰属防止・Codex P2-A）。
-    //   applyDecision は検証と変更が一体なので、必ず変更前に凍結する（失敗時も凍結は等価複製で無害）。
+    // ★ lineup を変える前に過去 scene を凍結（得点者の誤帰属防止）。
     _mvFreezePastScenes();
-    // createMatch コントローラへ介入（lineup を in-place 差し替え＝次チャンス以降に反映）。
-    var ok = _mvCtrl.applyDecision({ type: 'sub', side: 'home', pos: pos, 'in': inIdx });
-    if (!ok) { _mvToast(_mvT('その交代はできません', 'Substitution not allowed')); return; }
-    _mvSubbedOff.add(outIdx);
-    _mvSubsMade++;
-    _mvSelOut = null;
-    var inName = getPlayerName(team.players[inIdx]);
-    var outName = getPlayerName(team.players[outIdx]);
-    _mvToast('🔄 ' + outName + ' → ' + inName);
-    _mvLog('🔄 ' + _mvT('交代', 'Sub') + ': ' + outName + ' → ' + inName);
-    _mvRenderSubPicker();
-  }
 
-  /* ── 戦術ピッカー（T-12）────────────────────────────────────────── */
-  function _mvOpenTactic() {
-    _mvPause();
-    _mvRenderTacticPicker();
-    _mvShowPicker(true);
-  }
+    // team1State → live チームへ適用（次チャンス以降に反映）。
+    var home = gameState.team1;
+    home.system = team1State.systemIdx;
+    home.tactics = team1State.tactics;
+    home.keyplayer = team1State.keyplayer;
+    home.marked_player = team1State.marked_player;
+    home.lineup = team1State.lineup.slice();
 
-  function _mvRenderTacticPicker() {
-    var body = document.getElementById('mv-picker-body');
-    var cur = gameState.team1.tactics;
-    var curName = _mvTacticName(cur);
-    var html = '<div class="mv-pick-head">' + _mvT('戦術変更', 'Change Tactics') +
-      ' <span style="font-size:11px;opacity:.7">(' + _mvT('現在: ', 'now: ') + curName + ')</span></div>';
-    html += '<div class="mv-pick-grid">';
-    // 実在4戦術のみ（POSSESSION/PRESS/COUNTER/CATENACCIO = index 0..3）。applyDecision もこの4種だけ許可。
-    for (var i = 0; i < 4; i++) {
-      var sel = (cur === i) ? ' mv-sel' : '';
-      html += '<button class="mv-chip mv-chip-wide' + sel + '" onclick="_mvPickTactic(' + i + ')">' +
-        _mvTacticName(i) + (cur === i ? ' ✓' : '') + '</button>';
+    // 交代枠の消費を反映（表示用）。
+    subsCount += htSubsCount;
+    htSubsCount = 0;
+
+    // 設定画面のクロームを元に戻す。
+    var header = document.querySelector('#screen-setting .screen-header');
+    if (header) {
+      var bb = document.getElementById('mv-setting-back');
+      if (bb) header.removeChild(bb);
+      var origBack = header.querySelector('.back-btn');
+      if (origBack) origBack.style.display = '';
     }
-    html += '</div>';
-    html += '<div class="mv-note">' + _mvT('次のチャンスから反映されます', 'Applies from the next chance') + '</div>';
-    body.innerHTML = html;
+    document.getElementById('btn-kickoff-top').style.display = '';
+    document.getElementById('btn-kickoff-bottom').closest('div').style.display = '';
+    var bmgr = document.getElementById('btn-manager'); if (bmgr) bmgr.style.display = '';
+    var bm = document.getElementById('btn-multi'); if (bm) bm.style.display = '';
+    var bm100 = document.getElementById('btn-multi100'); if (bm100) bm100.style.display = '';
+    var sl = document.getElementById('ht-subs-label'); if (sl && sl.parentNode) sl.parentNode.removeChild(sl);
+
+    // 試合画面へ戻り、采配ポイントパネルを再表示（続ける/後半キックオフ待ち）。
+    showScreen('game');
+    _mvShowControls(true);
+    _mvShowDecisionPoint(_mvLastKind || 'manual');
   }
 
-  function _mvPickTactic(i) {
-    if (gameState.team1.tactics === i) return;
-    var ok = _mvCtrl.applyDecision({ type: 'tactic', side: 'home', tactics: i });
-    if (!ok) { _mvToast(_mvT('戦術を変更できません', 'Cannot change tactics')); return; }
-    _mvToast('📋 ' + _mvT('戦術', 'Tactics') + ': ' + _mvTacticName(i));
-    _mvLog('📋 ' + _mvT('戦術変更', 'Tactics') + ': ' + _mvTacticName(i));
-    _mvRenderTacticPicker();
-  }
-
-  /* ── ログ＆トースト ────────────────────────────────────────────── */
+  /* ── トースト／ログ ────────────────────────────────────────────── */
   function _mvLog(text) {
     var logArea = document.getElementById('log-area');
     if (!logArea) return;
@@ -433,30 +392,11 @@
     requestAnimationFrame(function () { logArea.scrollTop = logArea.scrollHeight; });
   }
 
-  function _mvToast(text) {
-    _mvEnsureUI();
-    var t = document.getElementById('mv-toast');
-    if (!t) return;
-    t.textContent = text;
-    t.style.opacity = '1';
-    t.style.transform = 'translateX(-50%) translateY(0)';
-    clearTimeout(t._hideTimer);
-    t._hideTimer = setTimeout(function () {
-      t.style.opacity = '0';
-      t.style.transform = 'translateX(-50%) translateY(8px)';
-    }, 1600);
-  }
-
-  /* ── UI 注入（コントロールバー／采配パネル／ピッカー／トースト）──── */
+  /* ── UI 注入（コントロールバー／采配パネル）──────────────────────── */
   function _mvShowControls(show) {
     var bar = document.getElementById('mv-controls');
     if (bar) bar.style.display = show ? 'flex' : 'none';
   }
-  function _mvShowPicker(show) {
-    var pk = document.getElementById('mv-picker');
-    if (pk) pk.style.display = show ? 'flex' : 'none';
-  }
-
   function _mvUpdateControlBar() {
     var pp = document.getElementById('mv-pp');
     if (pp) pp.textContent = _mvPlaying ? '⏸' : '▶';
@@ -467,19 +407,18 @@
   function _mvEnsureUI() {
     var host = document.getElementById('screen-game');
     if (!host) return;
-    // 言語が変わっていなければ既存 UI を再利用。変わっていたら静的ラベルを作り直す。
     var curLang = _isEn() ? 'en' : 'ja';
     var existing = document.getElementById('mv-controls');
     if (existing) {
       if (_mvUiLang === curLang) return;
-      ['mv-controls', 'mv-decision', 'mv-picker', 'mv-toast'].forEach(function (id) {
+      // 言語が変わったので静的ラベルを作り直す。
+      ['mv-controls', 'mv-decision'].forEach(function (id) {
         var el = document.getElementById(id);
         if (el && el.parentNode) el.parentNode.removeChild(el);
       });
     }
     _mvUiLang = curLang;
 
-    // スタイル（ダーク基調・既存ゲーム画面に重ねる）。
     if (!document.getElementById('mv-style')) {
       var st = document.createElement('style');
       st.id = 'mv-style';
@@ -498,41 +437,22 @@
         '#mv-dec-title{font-size:22px;font-weight:900;color:#fff;margin-bottom:6px}',
         '#mv-dec-sub{font-size:13px;color:#cfe0ff;margin-bottom:12px}',
         '#mv-dec-score{font-size:15px;color:#fff;margin-bottom:18px;line-height:1.5}',
-        '.mv-dec-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}',
-        '#mv-picker{display:none;position:absolute;inset:0;z-index:50;align-items:flex-end;justify-content:center;background:rgba(2,10,26,.6)}',
-        '.mv-sheet{background:linear-gradient(160deg,#06122c,#0a2a1c);border:1px solid rgba(255,255,255,.16);border-top-left-radius:18px;',
-        'border-top-right-radius:18px;width:100%;max-width:460px;max-height:80%;overflow-y:auto;padding:16px 16px 22px}',
-        '.mv-pick-head{font-size:17px;font-weight:900;color:#fff;margin-bottom:10px}',
-        '.mv-sec-label{font-size:12px;font-weight:800;color:#9fd0ff;margin:12px 0 6px}',
-        '.mv-pick-grid{display:flex;flex-wrap:wrap;gap:8px}',
-        '.mv-chip{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:1px solid rgba(255,255,255,.22);',
-        'background:rgba(255,255,255,.06);color:#fff;border-radius:10px;padding:8px 10px;font-family:inherit;cursor:pointer;min-width:88px}',
-        '.mv-chip-wide{min-width:120px;flex-direction:row;justify-content:center;font-weight:800;padding:12px}',
-        '.mv-chip-pos{font-size:10px;color:#9fd0ff;font-weight:700}',
-        '.mv-chip-name{font-size:13px;font-weight:800}',
-        '.mv-chip.mv-sel{border-color:#f39c12;background:rgba(243,156,18,.22)}',
-        '.mv-chip.mv-dis{opacity:.45}',
-        '.mv-note{font-size:12px;color:#cdd8ee;opacity:.85;margin-top:10px}',
-        '.mv-sheet-foot{display:flex;gap:10px;margin-top:18px}',
-        '#mv-toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%) translateY(8px);z-index:60;',
-        'background:rgba(2,12,30,.95);color:#fff;border:1px solid rgba(243,156,18,.6);border-radius:999px;padding:9px 16px;',
-        'font-size:13px;font-weight:800;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:90%}'
+        '.mv-dec-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}'
       ].join('');
       document.head.appendChild(st);
     }
 
-    // コントロールバー。
+    // コントロールバー（▶/⏸・速度・采配・結果）。
     var bar = document.createElement('div');
     bar.id = 'mv-controls';
     bar.innerHTML =
       '<button class="mv-btn mv-btn-main" id="mv-pp" onclick="_mvTogglePlay()">⏸</button>' +
       '<button class="mv-btn" id="mv-speed" onclick="_mvCycleSpeed()">1×</button>' +
-      '<button class="mv-btn mv-btn-int" onclick="_mvOpenSub()">🔄 ' + _mvT('交代', 'Sub') + '</button>' +
-      '<button class="mv-btn mv-btn-int" onclick="_mvOpenTactic()">📋 ' + _mvT('戦術', 'Tactics') + '</button>' +
+      '<button class="mv-btn mv-btn-int" onclick="_mvOpenSetting()">📋 ' + _mvT('采配', 'Plan') + '</button>' +
       '<button class="mv-btn" onclick="_mvSkipToEnd()">⏭ ' + _mvT('結果', 'Result') + '</button>';
     host.appendChild(bar);
 
-    // 采配パネル。
+    // 采配パネル（采配する／続ける）。
     var dec = document.createElement('div');
     dec.id = 'mv-decision';
     dec.innerHTML =
@@ -541,49 +461,16 @@
       '<div id="mv-dec-sub"></div>' +
       '<div id="mv-dec-score"></div>' +
       '<div class="mv-dec-row">' +
-      '<button class="mv-btn mv-btn-int" onclick="_mvOpenSub()">🔄 ' + _mvT('交代', 'Sub') + '</button>' +
-      '<button class="mv-btn mv-btn-int" onclick="_mvOpenTactic()">📋 ' + _mvT('戦術変更', 'Tactics') + '</button>' +
+      '<button class="mv-btn mv-btn-int" onclick="_mvOpenSetting()">📋 ' + _mvT('采配する', 'Make changes') + '</button>' +
       '<button class="mv-btn mv-btn-main" id="mv-dec-continue" onclick="_mvContinue()">▶</button>' +
       '</div></div>';
     host.appendChild(dec);
-
-    // ピッカー（ボトムシート）。
-    var pk = document.createElement('div');
-    pk.id = 'mv-picker';
-    pk.innerHTML =
-      '<div class="mv-sheet">' +
-      '<div id="mv-picker-body"></div>' +
-      '<div class="mv-sheet-foot">' +
-      '<button class="mv-btn mv-btn-main" style="flex:1" onclick="_mvClosePicker()">' + _mvT('完了', 'Done') + '</button>' +
-      '</div></div>';
-    host.appendChild(pk);
-
-    // トースト。
-    var toast = document.createElement('div');
-    toast.id = 'mv-toast';
-    host.appendChild(toast);
-  }
-
-  // ピッカーを閉じる（采配パネル表示中ならそこへ戻り、なければ再生再開）。
-  function _mvClosePicker() {
-    _mvShowPicker(false);
-    var dec = document.getElementById('mv-decision');
-    if (dec && dec.style.display === 'flex') return;   // 采配パネルに戻る
-    // バーから直接開いた場合は、ユーザーの「再生」操作を待つ（自動再開はしない）。
-    _mvUpdateControlBar();
-  }
-
-  // 采配パネルの「続ける」。
-  function _mvContinue() {
-    _mvHideDecision();
-    _mvPlay();
   }
 
   // startGame からの復帰時の後始末（simulate.js が参照）。
   function _mvTeardownUI() {
     _mvPause();
     _mvHideDecision();
-    _mvShowPicker(false);
     _mvShowControls(false);
     _toggleNormalControls(true);
   }
@@ -593,13 +480,9 @@
   g.startManagerMatch = startManagerMatch;
   g._mvTogglePlay = _mvTogglePlay;
   g._mvCycleSpeed = _mvCycleSpeed;
-  g._mvOpenSub = _mvOpenSub;
-  g._mvOpenTactic = _mvOpenTactic;
+  g._mvOpenSetting = _mvOpenSetting;
+  g._mvCloseSetting = _mvCloseSetting;
   g._mvSkipToEnd = _mvSkipToEnd;
-  g._mvPickOut = _mvPickOut;
-  g._mvPickIn = _mvPickIn;
-  g._mvPickTactic = _mvPickTactic;
-  g._mvClosePicker = _mvClosePicker;
   g._mvContinue = _mvContinue;
   g._mvTeardownUI = _mvTeardownUI;
 })();
