@@ -245,12 +245,12 @@ function renderShootStep(sc, stepType) {
   // 'shot' = シューターの一撃のみ（結果は出さない）。result を中立化して素の蹴り描画にする。
   var shotSc = {}; for (var k in sc) { if (Object.prototype.hasOwnProperty.call(sc, k)) shotSc[k] = sc[k]; }
   shotSc.result = '成功';
-  if (sc.action === 'ペナルティキック') return _renderFreekickScene(shotSc);   // PK=FKの蹴り演出を流用（スポットからの一撃）
+  // ★ PK の蹴りは FK 絵でなく「シュート」絵（shot_<kit>）を使う（ユーザー指定）。下の汎用 shot 経路へ落とす。
   if (sc.action === 'フリーキック') return _renderFreekickScene(shotSc);   // FK=専用2フレーム（蹴る前→蹴った瞬間＋ボール弧）
   if (sc.action === 'ミドルシュート') return _renderMidShotScene(shotSc);
   if (sc.action === 'ボレーシュート') return _renderVolleyScene(shotSc);
   if (sc.action === 'ヘディングシュート') return _renderHeaderScene(shotSc);
-  var entry = _pickCutscene('shot', sc.offence && sc.offence.team_color);
+  var entry = _pickCutscene('shot', sc.offence && sc.offence.team_color);   // ← PK もここ（シュート絵）
   if (entry && entry.file) return _renderShotScene(shotSc, entry);
   return null;
 }
@@ -1805,8 +1805,10 @@ function _renderFoulScene(sc, isPK) {
     // ミニスコア（色チップ＋略称＋スコア）はスコアボードへ集約のため非表示。時間(左上)とラベル/選手名は残す。
     var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
     ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
-    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
-    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = accent; ctx.fillText(label, 12, H - 9);
+    if (!isPK) {   // PK は中央に大きく描く（hud の小ラベルは出さない）
+      ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+      ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = accent; ctx.fillText(label, 12, H - 9);
+    }
     if (atkName) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(atkName + (atkTeamNm ? (' · ' + atkTeamNm) : ''), W - 12, H - 10); }
   }
 
@@ -1833,6 +1835,21 @@ function _renderFoulScene(sc, isPK) {
     ctx.restore();
     if (wf > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (wf * 0.32) + ')'; ctx.fillRect(0, 0, W, H); }
     hud();
+    // PK判定は「PK！！」を画面いっぱいに大きく（GOAL!! と同様の迫力）。スラムイン＋暗幕で強調。
+    if (isPK) {
+      var dim = 0.34 * Math.min(1, p / 0.18);
+      ctx.fillStyle = 'rgba(6,6,14,' + dim + ')'; ctx.fillRect(0, 0, W, H);
+      var fs = 92;
+      ctx.font = '900 ' + fs + 'px "Arial Black",sans-serif';
+      while (ctx.measureText(label).width > W * 0.9 && fs > 32) { fs -= 4; ctx.font = '900 ' + fs + 'px "Arial Black",sans-serif'; }
+      var bp = Math.min(1, p / 0.12), bz = 1.35 - 0.35 * bp;   // 大きく入って定位置へ
+      ctx.save();
+      ctx.translate(W / 2, H * 0.45); ctx.scale(bz, bz);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+      ctx.lineWidth = fs * 0.16; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 0, 0);
+      ctx.fillStyle = accent; ctx.fillText(label, 0, 0);
+      ctx.restore();
+    }
     if (p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
