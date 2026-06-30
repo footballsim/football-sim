@@ -287,6 +287,13 @@
    * すべて team1State を編集する。采配を開く時に live チーム→team1State へ同期し、
    * 閉じる時に team1State→live チームへ適用する。 */
   function _mvOpenSetting() {
+    // 采配パネル経由（HT/ゴール）なら _mvLastKind を維持し閉じた後そのパネルへ戻る。
+    // ツールバーの「采配」から（采配パネル非表示時）は手動停止扱い＝古い停止種別を引き継がない
+    //   （Codex P3: HT/ゴール後にツールバーで開くと閉じた後に誤って「ハーフタイム」等が出る問題）。
+    var decEl = document.getElementById('mv-decision');
+    var fromDecision = decEl && getComputedStyle(decEl).display === 'flex';
+    if (!fromDecision) _mvLastKind = 'manual';
+
     _mvPause();
     _mvHideDecision();
     _mvShowControls(false);
