@@ -3497,13 +3497,32 @@ function _recalcSecondHalf() {
 //   ・ヘディング/ボレー … シュート動作は直前のクロス/セットプレー場面。この結果シーンの先頭はGKの反応なので
 //     先頭ビートを「GKダイブ」として扱う（クロス→GKダイブ→結果 の3場面に）。
 //   ・ミドル/FK … 構造が異なるため2場面（シュート→結果）。分割不能は null（従来1シーン）。
-function _shootSplit(sc, textHtml, prevSc) {
+function _shootSplit(sc, textHtml, prevSc, nextSc) {
   if (!sc) return null;
   // ファール: 「接触（ポストプレー失敗アート流用＝守備が攻撃を倒す）」→「主審の笛（FOUL!）」の2ビートに分割。
   //   いきなり主審ではなく、まず倒される接触カットを見せてから判定へ。
   //   定型文（接触＋判定）は接触ビートに全文表示し、主審ビートは画像の FOUL! ラベルに任せる（テキスト空）。
   if (sc.result === 'ファール') {
+    // 次が PK の場合、主審ビート(FOUL!)は PK 側の「PK判定(PK！！)」に任せて二重に出さない＝接触のみ。
+    if (nextSc && nextSc.scenario === 'ペナルティキック') {
+      return { parts: [String(textHtml || '')], steps: ['foulcontact'] };
+    }
     return { parts: [String(textHtml || ''), ''], steps: ['foulcontact', 'foulref'] };
+  }
+  // ペナルティキック: 「PK判定(PK！！)」→「キッカーが蹴る」→「GKダイビング」→「結果」の4ビート（ユーザー指定）。
+  //   テキストは scenario_data の1ブロックでなく、ここでビート別に生成（FK分割と同方式）。
+  if (sc.scenario === 'ペナルティキック') {
+    const _en = (typeof window !== 'undefined' && window.LANG === 'en');
+    const _kicker = (typeof coloredName === 'function') ? coloredName(sc.offence, sc.ofsPos) : '';
+    const _gkNm = (typeof coloredName === 'function') ? coloredName(sc.defence, 0) : '';
+    const _pkAward = _en ? 'Penalty awarded!' : 'ペナルティの判定——PK！！';
+    const _pkKick = _en ? (_kicker + ' steps up and strikes the spot kick!') : (_kicker + 'がスポットにセット——蹴り込む！');
+    const _pkDive = _en ? 'The keeper flings himself across...' : 'GKが横っ跳びで反応——';
+    let _pkRes;
+    if (sc.result === 'ゴール！！') _pkRes = _en ? '<span style="color:#F00"><b>GOOOOOOOAL!!</b></span>' : '<span style="color:#F00"><b>ゴーーーーーーーーール！！</b></span>';
+    else if (sc.result === 'GK防いだ！') _pkRes = _en ? (_gkNm + ' guesses right and SAVES it! A massive stop!') : (_gkNm + 'が読み切ってストップ！　値千金のセーブだ！');
+    else _pkRes = _en ? 'The spot kick flies off target! A golden chance wasted!' : 'シュートは無情にも枠の外へ！　絶好機を逃した！';
+    return { parts: [_pkAward, _pkKick, _pkDive, _pkRes], steps: ['pkref', 'shot', 'gk', 'result'] };
   }
   // セットプレー（サイドFK）: 「蹴り出し(クロスを上げる)」→「競り合い(ヘディング/ボレー)」の2ビートに分割。
   //   定型文も2文（…ボールをあげる／…シュート）なので parts と一致する。
@@ -3655,7 +3674,8 @@ function nextChance() {
   const prevSc = currentSceneIdx > 0 ? res.scenes[currentSceneIdx - 1] : null;
 
   // シュート系シーンは「シュート→GKダイブ→ゴール/枠外」のビートに分割し、1クリック1ビートで見せる。
-  const _split = _shootSplit(sc, res.textScenes[currentSceneIdx], prevSc);
+  const _nextScForSplit = res.scenes[currentSceneIdx + 1] || null;  // PK直前のファールは主審ビートを重複させない判定用
+  const _split = _shootSplit(sc, res.textScenes[currentSceneIdx], prevSc, _nextScForSplit);
   const _beat = _split ? _shootSubStep : 0;
   const _isLastBeat = !_split || (_beat >= _split.parts.length - 1);
 

@@ -230,6 +230,7 @@ function renderShootStep(sc, stepType) {
   _preloadCutsceneBgs();   // 重い背景を先読み（枠外などで _lpBg フォールバックが固まるのを予防）
   if (stepType === 'foulcontact') return _renderPostplayScene(sc);   // ファールの接触＝ポストプレー失敗アート流用（守備が攻撃を倒す＝赤:攻撃/緑:守備でファールの加害被害と一致）
   if (stepType === 'foulref') return _renderFoulScene(sc);           // 主審の笛＋FOUL!
+  if (stepType === 'pkref') return _renderFoulScene(sc, true);       // PK判定＝主審カット＋「PK！！」（赤ラベル）
   if (stepType === 'fkdeliver') return _renderFkDeliveryScene(sc);   // セットプレー/オープンプレーのクロスの「蹴り出し」（クロスを上げる）
   if (stepType === 'spcontest') return renderSceneArt(sc);           // セットプレーの「競り合い」＝ヘディング/ボレー（既存）
   if (stepType === 'result') {
@@ -244,6 +245,7 @@ function renderShootStep(sc, stepType) {
   // 'shot' = シューターの一撃のみ（結果は出さない）。result を中立化して素の蹴り描画にする。
   var shotSc = {}; for (var k in sc) { if (Object.prototype.hasOwnProperty.call(sc, k)) shotSc[k] = sc[k]; }
   shotSc.result = '成功';
+  if (sc.action === 'ペナルティキック') return _renderFreekickScene(shotSc);   // PK=FKの蹴り演出を流用（スポットからの一撃）
   if (sc.action === 'フリーキック') return _renderFreekickScene(shotSc);   // FK=専用2フレーム（蹴る前→蹴った瞬間＋ボール弧）
   if (sc.action === 'ミドルシュート') return _renderMidShotScene(shotSc);
   if (sc.action === 'ボレーシュート') return _renderVolleyScene(shotSc);
@@ -1772,7 +1774,7 @@ function _renderMidShotScene(sc, opts) {
 //   攻撃方向で主審を左右反転（指す向き＝プレー再開方向）。笛フラッシュ＋FOUL!。元絵 tools/art/cutscenes/foul_ref_src.png。
 // ============================================================
 var _FOUL_REF_SRC = 'img/cutscenes/foul_ref_t_01.png';
-function _renderFoulScene(sc) {
+function _renderFoulScene(sc, isPK) {
   var W = 480, H = 216, ground = 214;
   var canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
@@ -1780,7 +1782,7 @@ function _renderFoulScene(sc) {
   var ctx = canvas.getContext('2d');
   var refImg = _loadCutsceneImg(_FOUL_REF_SRC);
   var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
-  var accent = '#ffcf33';   // 警告色（イエロー）
+  var accent = isPK ? '#ff3b3b' : '#ffcf33';   // PK=赤 / ファール=イエロー（警告色）
 
   var gs = (typeof gameState !== 'undefined' && gameState) ? gameState : {};
   var t1 = gs.team1, t2 = gs.team2;
@@ -1792,7 +1794,7 @@ function _renderFoulScene(sc) {
   var atkName = atkP ? ((typeof getPlayerName === 'function') ? getPlayerName(atkP) : atkP.name) : '';
   var atkTeamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
   var en = (typeof window !== 'undefined' && window.LANG === 'en');
-  var label = en ? 'FOUL!' : 'ファール！';
+  var label = isPK ? (en ? 'PENALTY!' : 'PK！！') : (en ? 'FOUL!' : 'ファール！');
   var flip = !_csAttackRight(sc);   // ネイティブ=右を指す。左攻めは反転して左を指す（再開方向）
   var P = 1500;
 
