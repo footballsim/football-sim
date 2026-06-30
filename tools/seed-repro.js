@@ -1,26 +1,30 @@
 #!/usr/bin/env node
 /**
- * seed-repro.js — T-06 受け入れ②の検証スクリプト（シード完全再現）。
+ * seed-repro.js — T-06/T-07 受け入れ②の検証スクリプト（シード完全再現・本番経路）。
  *
  * 目的:
- *   seedRng(seed) で決定論モードに入れた状態で同一試合を 2 回走らせ、
- *   「イベント列（matchToEvents 出力）とスコアが完全一致」することを機械確認する。
+ *   本番の試合エントリ playMatch(home, away, tactics, seed) を同一 (home,away,tactics,seed)
+ *   で 2 回叩き、「イベント列（matchToEvents 出力）とスコアが完全一致」することを機械確認する。
  *   さらに別 seed では結果が変わることも確認する。これが
- *   「同一シードで試合を完全再現できる」（サーバー検証・名場面の再生/共有の土台）
- *   の証明になる。
+ *   「同一シードで試合を完全再現できる」（サーバー検証・名場面の再生/共有の土台）の証明になる。
+ *
+ * ★ T-07 での変更（Codex 指摘の解消）:
+ *   旧版はこのスクリプトが自前ループ（独自の makeTeam＋手動リセット＋n=rng() の loop）で試合を
+ *   回しており、本番の試合エントリを 1 つも叩いていなかった＝「テストは通るが、本番経路はテストで
+ *   検証されていない」というギャップがあった。T-07 で本番経路 playMatch に n=rng() の決定論境界を
+ *   集約し、本テストもその playMatch を叩く形へ差し替えた＝検証経路＝本番経路に一致させた。
+ *   （補足: n を Math.random で決めて seed 経路から外れるのは simulateSilent=バッチ sim 側であり、
+ *    startGame は T-05 で rng() に置換済み。simulateSilent の決定論化は別タスク。）
  *
  * 重要:
  *   完全再現にはエンジンの乱数が全て seedRng の系列から出る必要がある。
- *   simulate.js は Math.random を rng() へ全置換済み。本テストでは「チャンス数」
- *   （通常 16 or 17）も rng() から決めることで、試合全体を 1 本の seed に従わせる。
- *   既存ハーネス（events-reproduce / regression-harness）が n を Math.random で
- *   決めているのは「未シード＝従来挙動」の確認用途で、再現性検証とは別目的。
+ *   simulate.js は Math.random を rng() へ全置換済み。チャンス数も playMatch 内で rng() から
+ *   決まるため、試合全体が 1 本の seed に従う。
  *
  * 使い方:
- *   node tools/seed-repro.js [seed] [cards]   # 既定 seed=12345 / 全代表カード
+ *   node tools/seed-repro.js [seed]   # 既定 seed=12345 / 全代表カード
  */
 'use strict';
-const vm = require('vm');
 const { loadEngine } = require('./lib/load-engine');
 
 const MATCHUPS = [
@@ -32,53 +36,34 @@ const MATCHUPS = [
   ['spain2026',              'morocco2026'],
 ];
 
-function makeTeam(api, data) {
-  const sysIdx = api.system_data.findIndex(s => s.name === data.default_system);
-  const state = {
-    systemIdx: sysIdx >= 0 ? sysIdx : 0,
-    tactics: data.default_tactics,
-    keyplayer: data.default_keyplayer,
-    marked_player: data.default_marked_player !== undefined ? data.default_marked_player : -1,
-    lineup: [...data.default_lineup.slice(0, 11)]
-  };
-  return api.buildTeam(data, state);
-}
-
-// seed を設定してから 1 試合を回し、{ events, score } を返す。
-// チャンス数も rng() から決める＝seed に完全従属させる（再現性のため）。
+// 本番エントリ playMatch を叩いて 1 試合を回し、比較用の { score, n, sig } を返す。
+// ★ 自前ループは廃止。チャンス数 n も seed 設定も playMatch 内に集約されている（本番経路）。
 function playSeeded(api, d1, d2, seed) {
-  api.seedRng(seed); // 決定論モードに入る（この時点から全 rng() が seed 系列）
-  const t1 = makeTeam(api, d1), t2 = makeTeam(api, d2);
-  [t1, t2].forEach(t => {
-    t.score = 0; t.chanceCounter = 0; t.shootCounter = 0; t.gkSaveCounter = 0;
-    t.players.forEach(p => { p.chance_counter = 0; p.fatigue = 0; });
-  });
-  const gs = { team1: t1, team2: t2 };
-  const n = 16 + (api.rng() < 0.5 ? 1 : 0); // ★ rng() で決定（Math.random ではない）
-  const chanceResults = [];
-  for (let i = 0; i < n; i++) chanceResults.push(api.simulateChance(gs, i));
-  const events = api.matchToEvents(chanceResults, { home: t1, away: t2 });
-  api.clearSeed(); // 後始末（未シードに戻す）
+  const r = api.playMatch(d1, d2, null, seed); // tactics=null（default_* を使用）、seed 指定で決定論
   // 比較しやすいよう、イベントを安定キーへ落とす（型/分/チーム/結果/アクション/得点者）。
-  const sig = events.map(e =>
+  const sig = r.events.map(e =>
     [e.t, e.chance, e.minute, e.team,
      e.result || '', e.action || '',
      e.scorer || '', e.shooter || '',
      e.homeScore !== undefined ? e.homeScore : '',
      e.awayScore !== undefined ? e.awayScore : ''].join('~')
   ).join('|');
-  return { score: `${t1.score}-${t2.score}`, n: events.length, sig };
+  return { score: `${r.result.home}-${r.result.away}`, n: r.events.length, sig };
 }
 
 function main() {
   const seed = parseInt(process.argv[2] || '12345', 10);
   const api = loadEngine();
+  if (typeof api.playMatch !== 'function') {
+    console.error('❌ playMatch がエンジンに見つかりません。js/match.js のロード順（events.js の後）を確認してください。');
+    process.exit(2);
+  }
   if (typeof api.seedRng !== 'function' || typeof api.rng !== 'function' || typeof api.clearSeed !== 'function') {
     console.error('❌ rng API（seedRng/rng/clearSeed）がエンジンに見つかりません。rng.js のロード順を確認してください。');
     process.exit(2);
   }
 
-  console.log(`\nシード再現テスト  (seed=${seed})`);
+  console.log(`\nシード再現テスト（本番 playMatch 経路）  (seed=${seed})`);
   console.log('='.repeat(72));
 
   let sameOk = 0, sameFail = 0, diffOk = 0, diffSame = 0;
@@ -120,7 +105,7 @@ function main() {
     console.log('\n⚠️ 全カードで別seedでも結果が変わりませんでした（seed が効いていない可能性）。');
     process.exit(1);
   }
-  console.log('\n✅ 同一シードで全カード完全再現／別シードで結果が変化。');
+  console.log('\n✅ 同一シードで全カード完全再現／別シードで結果が変化（本番 playMatch 経路）。');
 }
 
 main();

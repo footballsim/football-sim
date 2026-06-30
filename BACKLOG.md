@@ -21,7 +21,9 @@
 - [x] **T-05** simulate.js 全域の Math.random を PRNG 経由へ（独立PR・慎重に）。→T-04 ✅ 36箇所全置換・確率式byte不変（reviewerがbyte一致で実証）
 - [x] **T-06** 同一シード完全再現＋回帰緑の確認。→T-05,T-03 ✅ 未シード回帰緑(挙動同一をビット実証)・seed再現6/6
   - ⚠️ Codex指摘[P2]: 本番の決定論境界は **T-07 playMatch** に集約（seed→rng()でn決定／seed-repro を playMatch 経由に差し替え）。`narration.js` simulateSilent 等の Math.random(5箇所)の決定論化は**別タスク（バッチsim・独立PR）**。
-- [ ] **T-07** playMatch(home,away,tactics,seed) ラッパー。→T-02,T-06
+- [x] **T-07** playMatch(home,away,tactics,seed) ラッパー。→T-02,T-06 ✅ js/match.js（既存エンジンを束ねる本番試合API・判定不変・n決定をrng()に集約・marked_playerをstartGameと同じ非対称初期化に整合）。三重チェック＋Codex発見P2(home marked_player既定)修正済。
+  - 🎉 **P1（基盤）完了**：イベントログ＋シードRNG＋playMatch が揃い、「エンジン無改変・未シード回帰緑・同一シード完全再現」の土台が完成。
+  - 📌 残: `narration.js` simulateSilent（バッチsim）の決定論化は別タスク（独立PR）。in-match逐次実行＝T-08(P2)。
 
 ### P2 試合ビューア（漫画＋采配）
 - [ ] **T-08** playMatch をチャンス逐次実行へ（介入点フック・デュエル式不変）。→T-07
