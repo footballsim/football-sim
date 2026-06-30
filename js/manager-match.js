@@ -345,6 +345,11 @@
     subsCount += htSubsCount; htSubsCount = 0; _htMode = false;
     // 交代ログ（_pendingSubLog → ログ・既存関数）。
     if (typeof _insertSubLog === 'function') _insertSubLog(_mvT('ハーフタイム', 'Half Time'));
+    // ★ _showHalfTimeModal が disabled にした next/all ボタンを再有効化する（Codex P2）。
+    //   通常の closeHalfTimeModal はここで再有効化するが、監督分岐は早期 return で素通りするため、
+    //   放置すると後続の通常試合で all-btn（結果を見る）が無効のまま残る。
+    var _nb = document.getElementById('next-btn'); if (_nb) _nb.disabled = false;
+    var _ab = document.getElementById('all-btn'); if (_ab) _ab.disabled = false;
     _toggleNormalControls(false);
     _mvShowControls(true);
     _mvPlay();
@@ -552,6 +557,10 @@
     _mvHideDecision();
     _mvShowControls(false);
     _toggleNormalControls(true);
+    // HT モーダル経由で disabled のまま抜けた場合に備え再有効化（Codex P2 の保険）。
+    var _nb = document.getElementById('next-btn'); if (_nb) _nb.disabled = false;
+    var _ab = document.getElementById('all-btn'); if (_ab) _ab.disabled = false;
+    var _modal = document.getElementById('halftime-modal'); if (_modal) _modal.style.display = 'none';
   }
 
   // ── グローバル公開（HTML onclick / simulate.js から参照）──────────
