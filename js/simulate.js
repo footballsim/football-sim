@@ -44,6 +44,12 @@ let team1State = {}, team2State = {};
 let gameState = null;
 let chanceResults = [];
 let coachMarkTarget = -1; // 相手がマークする日本選手のポジション（lineup index 0-10）
+// 監督ビューア（P2 / T-09・T-11・T-12）: createMatch を遅延実行で駆動する観戦モード。
+//   本番の通常試合フロー（startGame の事前一括演算）には一切影響しないよう、
+//   下記フラグが false の間は既存挙動とビット同一（nextChance 内のフックは全て _managerMode ガード）。
+let _managerMode = false;  // 監督ビューア中か（true の間だけ nextChance が createMatch から遅延取得）
+let _mvCtrl = null;        // createMatch コントローラ（manager-match.js が生成・破棄）
+let _mvGoalShown = false;  // 直近ビートでゴール演出を出したか（自動再生の余韻制御に使う）
 let _duelScenesCache = [];
 let _duelPlayerCache = {};
 let currentChanceIdx = 0;
@@ -1889,6 +1895,12 @@ function startGame() {
     lineup: [...team2Data.default_lineup.slice(0, 11)]
   };
 
+  // 監督ビューアからの復帰をクリーンに（通常試合は常に非・監督モードで開始）。
+  _managerMode = false;
+  if (_mvCtrl && typeof _mvCtrl.dispose === 'function') { try { _mvCtrl.dispose(); } catch (e) {} }
+  _mvCtrl = null;
+  if (typeof _mvTeardownUI === 'function') _mvTeardownUI();
+
   // Reset game
   chanceResults = [];
   currentChanceIdx = 0;
@@ -3498,6 +3510,16 @@ function nextChance() {
     return;
   }
 
+  // 監督ビューア: 次チャンスが未計算なら createMatch コントローラから1つだけ遅延計算して取り込む。
+  //   createMatch.nextChance() が simulateChance を1回呼び（介入後の lineup/tactics を反映）、
+  //   その結果（startGame の chanceResults と同型 = .scenes/.textScenes 付き）を末尾に積む。
+  //   ★ 通常モード（_managerMode=false）はこのブロックを素通り＝既存挙動と完全同一。
+  if (_managerMode && _mvCtrl && currentChanceIdx >= chanceResults.length && !_mvCtrl.isOver()) {
+    _mvCtrl.nextChance();
+    const _crs = _mvCtrl.result.chanceResults;
+    chanceResults.push(_crs[_crs.length - 1]);
+  }
+
   if (currentChanceIdx >= chanceResults.length) {
     showResult();
     return;
@@ -3587,6 +3609,7 @@ function nextChance() {
 
   // ゴール時のスコア更新＆GOAL演出は「結果ビート」で（分割しない場合は従来どおり最終表示時）
   if (sc && sc.result === 'ゴール！！' && _isLastBeat) {
+    if (_managerMode) _mvGoalShown = true;   // 監督ビューアの自動再生はゴール後に余韻停止する
     // ゴールシーンが画面に出たタイミングでスコアを更新する
     document.getElementById('score1').textContent = res.t1score;
     document.getElementById('score2').textContent = res.t2score;
@@ -3617,31 +3640,37 @@ function nextChance() {
     currentSceneIdx = 0;
     currentEventDiv = null;
     document.getElementById('chance-count').textContent = currentChanceIdx;
-    _maybeInsertCoachCard();
-    // ハーフタイム（currentChanceIdx===HALF_CHANCES = 前半ロスタイム完了後に発火）
-    // chanceNo 0..H-2: 前半通常、H-1: 前半ロスタイム(45+X分)、H..: 後半
-    if (currentChanceIdx === HALF_CHANCES && !halfTimeShown) {
-      halfTimeShown = true;
-      const htRes = chanceResults[HALF_CHANCES - 1] || chanceResults[HALF_CHANCES - 2]; // 前半ロスタイムの最終スコア
-      halfTimeScore = { t1: htRes.t1score, t2: htRes.t2score };
-      // 次のシーンボタンをハーフタイムモーダル表示に差し替え
-      const nextBtn = document.getElementById('next-btn');
-      nextBtn.textContent = window.LANG === 'en' ? '⏸ Half Time' : '⏸ ハーフタイム';
-      nextBtn.onclick = () => {
-        nextBtn.textContent = t('btnNextScene');
-        nextBtn.onclick = nextChance;
-        _showHalfTimeModal();
-      };
-      return;
-    }
-    // 後半・延長戦中：チャンス完了時のみ交代ボタンを表示（後半＝currentChanceIdx > HALF_CHANCES）
-    const _isET = wcPhase === 'et_first' || wcPhase === 'et_second';
-    if ((_isET ? currentChanceIdx > 0 : currentChanceIdx > HALF_CHANCES) && currentChanceIdx < chanceResults.length) {
-      _updateSubBtn();
-    }
-    if (currentChanceIdx >= chanceResults.length) {
-      document.getElementById('next-btn').textContent = t('btnNextArrow');
-      document.getElementById('all-btn').textContent = t('btnSeeResult');
+    // ★ 監督ビューア中は、コーチカード／ハーフタイムのボタン差し替え／後半交代ボタン／終了ボタン
+    //   といった「通常フローの章末処理」を全てスキップする。これらは manager-match.js の
+    //   自動再生ドライバ（_mvTick / _mvShowDecisionPoint）が一手に引き受けるため。
+    //   （_managerMode=false の通常モードは従来どおり全て実行＝挙動同一。）
+    if (!_managerMode) {
+      _maybeInsertCoachCard();
+      // ハーフタイム（currentChanceIdx===HALF_CHANCES = 前半ロスタイム完了後に発火）
+      // chanceNo 0..H-2: 前半通常、H-1: 前半ロスタイム(45+X分)、H..: 後半
+      if (currentChanceIdx === HALF_CHANCES && !halfTimeShown) {
+        halfTimeShown = true;
+        const htRes = chanceResults[HALF_CHANCES - 1] || chanceResults[HALF_CHANCES - 2]; // 前半ロスタイムの最終スコア
+        halfTimeScore = { t1: htRes.t1score, t2: htRes.t2score };
+        // 次のシーンボタンをハーフタイムモーダル表示に差し替え
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.textContent = window.LANG === 'en' ? '⏸ Half Time' : '⏸ ハーフタイム';
+        nextBtn.onclick = () => {
+          nextBtn.textContent = t('btnNextScene');
+          nextBtn.onclick = nextChance;
+          _showHalfTimeModal();
+        };
+        return;
+      }
+      // 後半・延長戦中：チャンス完了時のみ交代ボタンを表示（後半＝currentChanceIdx > HALF_CHANCES）
+      const _isET = wcPhase === 'et_first' || wcPhase === 'et_second';
+      if ((_isET ? currentChanceIdx > 0 : currentChanceIdx > HALF_CHANCES) && currentChanceIdx < chanceResults.length) {
+        _updateSubBtn();
+      }
+      if (currentChanceIdx >= chanceResults.length) {
+        document.getElementById('next-btn').textContent = t('btnNextArrow');
+        document.getElementById('all-btn').textContent = t('btnSeeResult');
+      }
     }
   }
 }

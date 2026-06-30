@@ -130,7 +130,7 @@ const i18n = {
     screenResult: '試合結果', screenMulti: '10試合シミュレーション',
     screenPlayerDetail: '選手データ', screenPlayers: '選手データリスト',
     shareImg: '📷 Save', shareImgSaved: '✅ 保存しました', shareX: 'Share', shareReddit: 'Reddit (Link)',
-    btnBack: '← 戻る', btnDecide: '決定', btnKickoff: '⚽ キックオフ！', btnMulti: '📊 10試合', btnMulti100: '📊 100試合',
+    btnBack: '← 戻る', btnDecide: '決定', btnKickoff: '⚽ キックオフ！', btnManagerMode: '👔 監督モードで観戦', btnMulti: '📊 10試合', btnMulti100: '📊 100試合',
     labelStarting: 'スターティングメンバー', labelDrag: 'ドラッグで選手入れ替え',
     labelBench: '控え', labelSystem: 'システム', labelTactics: '戦術',
     labelKeyplayer: 'キープレイヤー', labelMarked: '要注意プレイヤー',
@@ -326,7 +326,7 @@ const i18n = {
     screenResult: 'Match Result', screenMulti: '10-Match Simulation',
     screenPlayerDetail: 'Player Data', screenPlayers: 'Player Data List',
     shareImg: '📷 Save', shareImgSaved: '✅ Saved!', shareX: 'Share', shareReddit: 'Reddit (Link)',
-    btnBack: '← Back', btnDecide: 'Confirm', btnKickoff: '⚽ Kick Off!', btnMulti: '📊 10', btnMulti100: '📊 100',
+    btnBack: '← Back', btnDecide: 'Confirm', btnKickoff: '⚽ Kick Off!', btnManagerMode: '👔 Manager Mode', btnMulti: '📊 10', btnMulti100: '📊 100',
     labelStarting: 'Starting XI', labelDrag: 'Drag to swap players',
     labelBench: 'Bench', labelSystem: 'Formation', labelTactics: 'Tactics',
     labelKeyplayer: 'Key Player', labelMarked: 'Marked Player',
@@ -562,6 +562,7 @@ function applyLang() {
   _setText('setting-marked-label',    t('labelMarked'));
   _setText('btn-kickoff-top',         t('btnKickoff'));
   _setText('btn-kickoff-bottom',      t('btnKickoff'));
+  _setText('btn-manager',             t('btnManagerMode'));
   _setText('btn-multi',               t('btnMulti'));
   _setText('btn-multi100',            t('btnMulti100'));
   // シングルマッチ チーム選択
