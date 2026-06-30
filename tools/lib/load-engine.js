@@ -79,6 +79,7 @@ function loadEngine() {
     getTeamTotalParam:typeof getTeamTotalParam!=='undefined'? getTeamTotalParam: null,
     matchToEvents:    typeof matchToEvents!=='undefined'    ? matchToEvents    : null,
     playMatch:        typeof playMatch!=='undefined'        ? playMatch        : null,
+    createMatch:      typeof createMatch!=='undefined'      ? createMatch      : null,
     sceneToEvents:    typeof sceneToEvents!=='undefined'    ? sceneToEvents    : null,
     tallyGoals:       typeof tallyGoals!=='undefined'       ? tallyGoals       : null,
     EVENT_TYPES:      typeof EVENT_TYPES!=='undefined'       ? EVENT_TYPES      : null,
@@ -87,7 +88,11 @@ function loadEngine() {
     clearSeed:        typeof clearSeed!=='undefined'        ? clearSeed        : null,
     isRngSeeded:      typeof isRngSeeded!=='undefined'       ? isRngSeeded      : null,
     MATCH_CHANCES:    typeof MATCH_CHANCES!=='undefined'     ? MATCH_CHANCES    : null,
-    HALF_CHANCES:     typeof HALF_CHANCES!=='undefined'      ? HALF_CHANCES     : null
+    HALF_CHANCES:     typeof HALF_CHANCES!=='undefined'      ? HALF_CHANCES     : null,
+    TACTICS_POSSESSION: typeof TACTICS_POSSESSION!=='undefined' ? TACTICS_POSSESSION : null,
+    TACTICS_PRESS:      typeof TACTICS_PRESS!=='undefined'      ? TACTICS_PRESS      : null,
+    TACTICS_COUNTER:    typeof TACTICS_COUNTER!=='undefined'    ? TACTICS_COUNTER    : null,
+    TACTICS_CATENACCIO: typeof TACTICS_CATENACCIO!=='undefined' ? TACTICS_CATENACCIO : null
   })`, ctx);
 
   const missing = Object.entries(api).filter(([, v]) => v == null).map(([k]) => k);

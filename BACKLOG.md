@@ -26,7 +26,7 @@
   - 📌 残: `narration.js` simulateSilent（バッチsim）の決定論化は別タスク（独立PR）。in-match逐次実行＝T-08(P2)。
 
 ### P2 試合ビューア（漫画＋采配）
-- [ ] **T-08** playMatch をチャンス逐次実行へ（介入点フック・デュエル式不変）。→T-07
+- [x] **T-08** playMatch をチャンス逐次実行へ（介入点フック・デュエル式不変）。→T-07 ✅ js/match.js `createMatch`（nextChance/applyDecision・介入=交代/戦術の入力差替のみ・エンジン無改変・同一seed同一介入列で完全再現）。三重チェック＋Codex発見P2×2（進行中FT混入／seed二重起動）修正済。喝/覚醒=morale層の別タスク・UI配線=T-09/11/12。
 - [ ] **T-09** 漫画コマ送りビューア（cutscene.js/renderSceneArt を Event 購読に接続・テンポ）。→T-02,T-08
 - [ ] **T-10** ライブ実況接続（scenario_data テンプレを Event 列に同期）。→T-09
 - [ ] **T-11** 介入点UI＝交代（既存sub機構流用）。→T-08
