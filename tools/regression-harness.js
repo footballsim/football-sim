@@ -72,7 +72,7 @@ function playMatch(api, d1, d2, resultCounts) {
     t.players.forEach(p => { p.chance_counter = 0; p.fatigue = 0; });
   });
   const gs = { team1: t1, team2: t2 };
-  const n = 16 + (Math.random() < 0.5 ? 1 : 0); // simulateSilent と同一
+  const n = api.MATCH_CHANCES + (Math.random() < 0.5 ? 1 : 0); // simulateSilent と同一（エンジン定数に追従）
   for (let i = 0; i < n; i++) {
     const res = api.simulateChance(gs, i);
     for (const sc of res.scenes) {

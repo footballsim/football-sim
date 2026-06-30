@@ -1949,9 +1949,9 @@ function startGame() {
     for (let i = 0; i < 3; i++) chanceResults.push(simulateChance(gameState, i));
     if (rng() < 0.5) chanceResults.push(simulateChance(gameState, 3));
   } else {
-    // 通常: 前半8 + 後半8 + ロスタイム最大1
-    for (let i = 0; i < 16; i++) chanceResults.push(simulateChance(gameState, i));
-    if (rng() < 0.5) chanceResults.push(simulateChance(gameState, 16));
+    // 通常: 前半 HALF_CHANCES + 後半 HALF_CHANCES + ロスタイム最大1
+    for (let i = 0; i < MATCH_CHANCES; i++) chanceResults.push(simulateChance(gameState, i));
+    if (rng() < 0.5) chanceResults.push(simulateChance(gameState, MATCH_CHANCES));
   }
 
   // Update UI
@@ -2226,6 +2226,13 @@ function selectFKKicker(team) {
   return (rng() < 0.7 ? best : second)[0];
 }
 
+// 1試合の通常チャンス数。チャンス＝漫画コマなので試合の長さに直結する。
+// 前後半で折半（HALF_CHANCES ずつ）。最後の1チャンス(=index MATCH_CHANCES)はロスタイムで50%発生。
+// ※実W杯水準の得点/シュート数に近づけるため 16→32 に増量（2026-06-30 エンジン精度改善）。
+//   デュエル解決式・カウントロジックは不変。これはチャンスの「本数」と時間割りのみ。
+const MATCH_CHANCES = 32;
+const HALF_CHANCES = MATCH_CHANCES / 2;
+
 function calcTime(chanceNo) {
   const r = rng();
   // 延長戦：wcPhase に応じて延長前半/後半の実際の時間帯を返す
@@ -2241,11 +2248,14 @@ function calcTime(chanceNo) {
     if (chanceNo === 2) return `${t('etSecond')} ${Math.floor(r*4)+116}${t('minUnit')}`;
     return `${t('etSecond')} 120+${t('minUnit')}`;
   }
-  // 通常90分 (前半8シーン: 0-7, 後半8シーン: 8-15, オプション: 16)
-  if (chanceNo <= 6) return `${t('halfFirst')} ${Math.floor(r*6) + chanceNo*6 + 1}${t('minUnit')}`;
-  if (chanceNo === 7) return `${t('halfFirst')} 45+${Math.floor(r*3)+1}${t('minUnit')}`;
-  if (chanceNo <= 14) return `${t('halfSecond')} ${Math.floor(r*6) + (chanceNo-8)*6 + 46}${t('minUnit')}`;
-  if (chanceNo === 15) return `${t('halfSecond')} 90+${Math.floor(r*3)+1}${t('minUnit')}`;
+  // 通常90分。前半=chanceNo 0..H-1（うち H-1 が前半ロスタイム45+）、
+  //          後半=chanceNo H..2H-1（うち 2H-1 が後半ロスタイム90+）、index 2H=オプションのロスタイム。
+  const H = HALF_CHANCES;
+  const span = 45 / H; // 1チャンスあたりの平均間隔(分)。チャンス数を変えても45分に収まる。
+  if (chanceNo < H - 1) return `${t('halfFirst')} ${Math.floor(r*span) + Math.floor(chanceNo*span) + 1}${t('minUnit')}`;
+  if (chanceNo === H - 1) return `${t('halfFirst')} 45+${Math.floor(r*3)+1}${t('minUnit')}`;
+  if (chanceNo < 2*H - 1) return `${t('halfSecond')} ${Math.floor(r*span) + Math.floor((chanceNo-H)*span) + 46}${t('minUnit')}`;
+  if (chanceNo === 2*H - 1) return `${t('halfSecond')} 90+${Math.floor(r*3)+1}${t('minUnit')}`;
   return t('overtimeLoss');
 }
 
@@ -3015,8 +3025,8 @@ function _runDuelSimBothSides(n) {
     });
     const bgs = { team1: bt1, team2: bt2 };
     const bRes = [];
-    for (let j = 0; j < 16; j++) bRes.push(simulateChance(bgs, j));
-    if (rng() < 0.5) bRes.push(simulateChance(bgs, 16));
+    for (let j = 0; j < MATCH_CHANCES; j++) bRes.push(simulateChance(bgs, j));
+    if (rng() < 0.5) bRes.push(simulateChance(bgs, MATCH_CHANCES));
     bRes.forEach(function(res) {
       if (!res || !res.scenes) return;
       res.scenes.forEach(function(sc) {
@@ -3366,14 +3376,14 @@ function _recalcSecondHalf() {
   gameState = { team1: t1, team2: t2 };
 
   // 現在地点から後半終了まで再計算
-  const startIdx = Math.max(8, currentChanceIdx);
+  const startIdx = Math.max(HALF_CHANCES, currentChanceIdx);
   const firstPart = chanceResults.slice(0, startIdx);
   const newSecond = [];
-  for (let i = startIdx; i < 16; i++) {
+  for (let i = startIdx; i < MATCH_CHANCES; i++) {
     newSecond.push(simulateChance(gameState, i));
   }
-  if (newSecond.length === 8 && rng() < 0.5) {
-    newSecond.push(simulateChance(gameState, 16));
+  if (newSecond.length === HALF_CHANCES && rng() < 0.5) {
+    newSecond.push(simulateChance(gameState, MATCH_CHANCES));
   }
   chanceResults = [...firstPart, ...newSecond];
   document.getElementById('chance-total').textContent = chanceResults.length;
@@ -3608,11 +3618,11 @@ function nextChance() {
     currentEventDiv = null;
     document.getElementById('chance-count').textContent = currentChanceIdx;
     _maybeInsertCoachCard();
-    // ハーフタイム（currentChanceIdx===8 = chanceNo7完了後に発火）
-    // chanceNo 0-6: 前半通常、chanceNo 7: 前半ロスタイム(45+X分)、chanceNo 8-: 後半
-    if (currentChanceIdx === 8 && !halfTimeShown) {
+    // ハーフタイム（currentChanceIdx===HALF_CHANCES = 前半ロスタイム完了後に発火）
+    // chanceNo 0..H-2: 前半通常、H-1: 前半ロスタイム(45+X分)、H..: 後半
+    if (currentChanceIdx === HALF_CHANCES && !halfTimeShown) {
       halfTimeShown = true;
-      const htRes = chanceResults[7] || chanceResults[6]; // chanceNo7(ロスタイム)の最終スコア
+      const htRes = chanceResults[HALF_CHANCES - 1] || chanceResults[HALF_CHANCES - 2]; // 前半ロスタイムの最終スコア
       halfTimeScore = { t1: htRes.t1score, t2: htRes.t2score };
       // 次のシーンボタンをハーフタイムモーダル表示に差し替え
       const nextBtn = document.getElementById('next-btn');

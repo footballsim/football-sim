@@ -31,12 +31,12 @@ function runMultiGame(GAMES) {
     });
     const gs = { team1: t1, team2: t2 };
     const results = [];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < MATCH_CHANCES; i++) {
       results.push(simulateChance(gs, i));
     }
     // ロスタイムは50%で発生
     if (Math.random() < 0.5) {
-      results.push(simulateChance(gs, 16));
+      results.push(simulateChance(gs, MATCH_CHANCES));
     }
 
     const t1s = t1.score, t2s = t2.score;
@@ -899,8 +899,8 @@ function simulateSilent(t1data, t2data, numChances) {
   const gs = { team1: t1, team2: t2 };
   const silentResults = [];
   if (numChances === undefined) {
-    for (let i = 0; i < 16; i++) silentResults.push(simulateChance(gs, i));
-    if (Math.random() < 0.5) silentResults.push(simulateChance(gs, 16));
+    for (let i = 0; i < MATCH_CHANCES; i++) silentResults.push(simulateChance(gs, i));
+    if (Math.random() < 0.5) silentResults.push(simulateChance(gs, MATCH_CHANCES));
   } else {
     for (let i = 0; i < numChances; i++) silentResults.push(simulateChance(gs, i));
   }

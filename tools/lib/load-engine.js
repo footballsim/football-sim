@@ -85,7 +85,9 @@ function loadEngine() {
     rng:              typeof rng!=='undefined'              ? rng              : null,
     seedRng:          typeof seedRng!=='undefined'          ? seedRng          : null,
     clearSeed:        typeof clearSeed!=='undefined'        ? clearSeed        : null,
-    isRngSeeded:      typeof isRngSeeded!=='undefined'       ? isRngSeeded      : null
+    isRngSeeded:      typeof isRngSeeded!=='undefined'       ? isRngSeeded      : null,
+    MATCH_CHANCES:    typeof MATCH_CHANCES!=='undefined'     ? MATCH_CHANCES    : null,
+    HALF_CHANCES:     typeof HALF_CHANCES!=='undefined'      ? HALF_CHANCES     : null
   })`, ctx);
 
   const missing = Object.entries(api).filter(([, v]) => v == null).map(([k]) => k);
