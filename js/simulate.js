@@ -1131,10 +1131,12 @@ function initSettingScreen() {
   // 言語ラベル更新
   applyLang();
 
-  // W杯モード時は多試合ボタンを非表示
+  // W杯モード時は多試合ボタンを非表示。監督モードも単一試合（非W杯）でのみ表示。
   const multiVisible = !isWorldCupMode;
   document.getElementById('btn-multi').style.display    = multiVisible ? '' : 'none';
   document.getElementById('btn-multi100').style.display = multiVisible ? '' : 'none';
+  const _bmgr = document.getElementById('btn-manager');
+  if (_bmgr) _bmgr.style.display = multiVisible ? '' : 'none';
 }
 
 function updateSettingBtnValues() {
@@ -3206,6 +3208,7 @@ function htOpenLineup() {
   // 設定画面のキックオフボタンを非表示、戻るボタンをモーダルに戻るよう差し替え
   document.getElementById('btn-kickoff-top').style.display = 'none';
   document.getElementById('btn-kickoff-bottom').closest('div').style.display = 'none';
+  { var _bmgr = document.getElementById('btn-manager'); if (_bmgr) _bmgr.style.display = 'none'; } // 監督モードボタンを試合中設定で隠す
   const _htBackBtn = document.createElement('button');
   _htBackBtn.className = 'back-btn';
   _htBackBtn.id = 'ht-lineup-back-btn';
@@ -3270,6 +3273,7 @@ function openSecondHalfSub() {
   renderBench();
   document.getElementById('btn-kickoff-top').style.display = 'none';
   document.getElementById('btn-kickoff-bottom').closest('div').style.display = 'none';
+  { var _bmgr = document.getElementById('btn-manager'); if (_bmgr) _bmgr.style.display = 'none'; } // 監督モードボタンを試合中設定で隠す
   // 静的な「← 戻る」ボタンを非表示
   const header = document.querySelector('#screen-setting .screen-header');
   const staticBackBtn = header ? header.querySelector('.back-btn') : null;
@@ -3356,6 +3360,9 @@ function _updateHtSubsLabel() {
 }
 
 function closeHalfTimeModal() {
+  // 監督ビューアでは後半を再シミュレートしない（createMatch の遅延実行のまま継続）。
+  //   team1State→live チーム適用＋交代ログ＋自動再生再開を manager-match.js が担う。
+  if (_managerMode && typeof _mvManagerHTKickoff === 'function') { _mvManagerHTKickoff(); return; }
   document.getElementById('halftime-modal').style.display = 'none';
   _recalcSecondHalf();
   _insertSubLog('HT');
@@ -3640,12 +3647,13 @@ function nextChance() {
     currentSceneIdx = 0;
     currentEventDiv = null;
     document.getElementById('chance-count').textContent = currentChanceIdx;
-    // ★ 監督ビューア中は、コーチカード／ハーフタイムのボタン差し替え／後半交代ボタン／終了ボタン
-    //   といった「通常フローの章末処理」を全てスキップする。これらは manager-match.js の
-    //   自動再生ドライバ（_mvTick / _mvShowDecisionPoint）が一手に引き受けるため。
+    // コーチの指摘（相手キープレイヤー／マーク対象）は両モードで出す（保留→次ビートで表示）。
+    _maybeInsertCoachCard();
+    // ★ 監督ビューア中は、ハーフタイムのボタン差し替え／後半交代ボタン／終了ボタンといった
+    //   「通常フローの章末処理」をスキップする。これらは manager-match.js の自動再生ドライバ
+    //   （_mvTick）が引き受ける（HT は _showHalfTimeModal を再利用）。
     //   （_managerMode=false の通常モードは従来どおり全て実行＝挙動同一。）
     if (!_managerMode) {
-      _maybeInsertCoachCard();
       // ハーフタイム（currentChanceIdx===HALF_CHANCES = 前半ロスタイム完了後に発火）
       // chanceNo 0..H-2: 前半通常、H-1: 前半ロスタイム(45+X分)、H..: 後半
       if (currentChanceIdx === HALF_CHANCES && !halfTimeShown) {

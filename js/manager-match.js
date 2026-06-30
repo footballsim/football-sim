@@ -84,6 +84,32 @@
     return el && el.classList.contains('active');
   }
 
+  // startGame と同じ手順で coachMarkTarget（相手がマークする team1 前線選手の lineup 位置）を決める。
+  function _mvComputeCoachMarkTarget() {
+    coachMarkTarget = -1;
+    var t1 = gameState.team1;
+    var frontTypes = ['CF', 'WG', 'OMF', 'SMF'];
+    var cands = [];
+    for (var pos = 1; pos < 11; pos++) {
+      if (frontTypes.indexOf(t1.getPositionType(pos)) >= 0) {
+        var p = t1.players[t1.lineup[pos]];
+        var of = (PLAYER_EXTRA[p.name] && PLAYER_EXTRA[p.name].of)
+          ? PLAYER_EXTRA[p.name].of
+          : (p.params[11] + p.params[12] + p.params[13] + p.params[17]) / 4;
+        cands.push({ pos: pos, rating: of });
+      }
+    }
+    cands.sort(function (a, b) { return b.rating - a.rating; });
+    var top2 = cands.slice(0, 2);
+    coachMarkTarget = top2.length > 0 ? top2[Math.floor(rng() * top2.length)].pos : 10;
+  }
+
+  // 現在の試合時間ラベル（交代ログ用）。
+  function _mvTimeLabel() {
+    var r = chanceResults[currentChanceIdx - 1] || chanceResults[currentChanceIdx];
+    return (r && r.time) || '';
+  }
+
   /* ──────────────────────────────────────────────────────────────────
    * エントリ: startManagerMatch — 監督ビューアで試合を開始する。
    * ────────────────────────────────────────────────────────────────── */
@@ -113,7 +139,7 @@
     _pendingSubLog = [];
     _shootSubStep = 0;
     _pendingCoachCardEl = null;
-    coachMarkTarget = -1;   // 監督モードはコーチカード非使用（engine 非参照）
+    coachMarkTarget = -1;   // gameState 構築後に startGame 同様セット（コーチの指摘用）
 
     // createMatch コントローラ（home=team1 / away=team2）。未シード＝毎回フレッシュな試合。
     _mvCtrl = createMatch(team1Data, team2Data, { home: team1State, away: team2State });
@@ -125,6 +151,11 @@
 
     // 描画・采配の単一ソースを controller の team オブジェクトに束ねる。
     gameState = { team1: _mvCtrl.home, team2: _mvCtrl.away };
+
+    // コーチの指摘（チャンス4の「相手のマークがキツい team1 選手」）用に coachMarkTarget を
+    // startGame と同じ手順で決める。チャンス2の「相手キープレイヤー」指摘は team2.keyplayer を
+    // 直接読むので別途不要。※未シードのため rng() 消費順は結果に影響しない。
+    _mvComputeCoachMarkTarget();
 
     var n = _mvCtrl.getState().n;
 
@@ -197,7 +228,7 @@
       var htRes = chanceResults[HALF_CHANCES - 1] || chanceResults[HALF_CHANCES - 2];
       if (htRes) halfTimeScore = { t1: htRes.t1score, t2: htRes.t2score };
       _mvPause();
-      setTimeout(function () { if (_managerMode) _mvShowDecisionPoint('ht'); }, 350);
+      setTimeout(function () { if (_managerMode) _mvShowHT(); }, 350);
       return;
     }
 
@@ -278,6 +309,44 @@
   }
   function _mvContinue() {
     _mvHideDecision();
+    _mvPlay();
+  }
+
+  /* ── ハーフタイム: 既存 HT モーダルを再利用（デュエル状況＋コーチ助言＋戦術）──
+   * 戦術ボタン(_buildHtTactics)・設定画面(htOpenLineup)は team1State を編集する。
+   * キックオフ（HTML: ht-btn-kickoff → closeHalfTimeModal → simulate.js の _managerMode 分岐で
+   * _mvManagerHTKickoff に委譲）で team1State を live チームへ適用して後半再開。 */
+  function _mvShowHT() {
+    _mvLastKind = 'ht';
+    // team1State を live team から同期（HT モーダルの戦術/設定編集の基点）。
+    team1State = {
+      systemIdx: gameState.team1.system,
+      tactics: gameState.team1.tactics,
+      keyplayer: gameState.team1.keyplayer,
+      marked_player: gameState.team1.marked_player,
+      lineup: gameState.team1.lineup.slice()
+    };
+    _mvShowControls(false);
+    if (typeof _showHalfTimeModal === 'function') _showHalfTimeModal();
+  }
+
+  // 後半キックオフ（closeHalfTimeModal の _managerMode 分岐から呼ばれる）。
+  function _mvManagerHTKickoff() {
+    var modal = document.getElementById('halftime-modal');
+    if (modal) modal.style.display = 'none';
+    // team1State → live team（lineup を変える前に過去 scene を凍結）。
+    _mvFreezePastScenes();
+    var home = gameState.team1;
+    home.system = team1State.systemIdx;
+    home.tactics = team1State.tactics;
+    home.keyplayer = team1State.keyplayer;
+    home.marked_player = team1State.marked_player;
+    home.lineup = team1State.lineup.slice();
+    subsCount += htSubsCount; htSubsCount = 0; _htMode = false;
+    // 交代ログ（_pendingSubLog → ログ・既存関数）。
+    if (typeof _insertSubLog === 'function') _insertSubLog(_mvT('ハーフタイム', 'Half Time'));
+    _toggleNormalControls(false);
+    _mvShowControls(true);
     _mvPlay();
   }
 
@@ -365,6 +434,9 @@
     // 交代枠の消費を反映（表示用）。
     subsCount += htSubsCount;
     htSubsCount = 0;
+
+    // 交代ログをテキストログへ挿入（_pendingSubLog → ログ・既存関数）。
+    if (typeof _insertSubLog === 'function') _insertSubLog(_mvTimeLabel());
 
     // 設定画面のクロームを元に戻す。
     var header = document.querySelector('#screen-setting .screen-header');
@@ -491,5 +563,6 @@
   g._mvCloseSetting = _mvCloseSetting;
   g._mvSkipToEnd = _mvSkipToEnd;
   g._mvContinue = _mvContinue;
+  g._mvManagerHTKickoff = _mvManagerHTKickoff;
   g._mvTeardownUI = _mvTeardownUI;
 })();
