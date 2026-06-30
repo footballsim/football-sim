@@ -41,8 +41,16 @@ const TOL = {
   wdlPct: 5.0,      // 勝/分/負 の各%（パーセンテージポイント）
   avgGoals: 0.20,   // 平均得点（チーム毎）
   totalGoals: 0.25, // 平均合計得点
-  resultRate: 0.020 // シーン結果種別の発生率（割合、絶対差）
+  resultRate: 0.020,// シーン結果種別の発生率（割合、絶対差）
+  shots: 1.5,       // 平均合計シュート数（本/試合）
+  onTarget: 1.0,    // 平均合計枠内シュート数（本/試合）
+  conversion: 0.05  // 決定率（goals/shots、絶対差）
 };
+
+// 実W杯の参照値（リアルさの物差し用。レポートにギャップを併記する）。
+//   合計得点 ≈ 2.7、合計シュート ≈ 24（枠内 ≈ 8〜9）、決定率 ≈ 0.11。
+//   裾の事例: 2026 ドイツ 7-1 キュラソー = 合計8得点 / シュート34本（枠内14）。
+const REAL_TARGETS = { totalGoals: 2.7, shots: 24, onTarget: 8.5, conversion: 0.11 };
 
 function makeTeam(api, data) {
   const sysIdx = api.system_data.findIndex(s => s.name === data.default_system);
@@ -75,17 +83,40 @@ function playMatch(api, d1, d2, resultCounts) {
   return { t1score: t1.score, t2score: t2.score };
 }
 
-function runMatchup(api, k1, k2, N, resultCounts) {
+// シーン結果カウントからシュート系KPIを導出（シュート＝ゴール+GK防いだ+枠外+ブロック、
+// 枠内＝ゴール+GK防いだ）。1試合あたり平均と決定率(goals/shots)を返す。
+function shotMetrics(rc, nMatches) {
+  const goal  = rc['ゴール！！'] || 0;
+  const save  = rc['GK防いだ！'] || 0;
+  const off   = rc['枠を外した！'] || 0;
+  const block = rc['ブロック'] || 0;
+  const shots = goal + save + off + block;
+  const onTarget = goal + save;
+  return {
+    avgShots:    +(shots / nMatches).toFixed(2),
+    avgOnTarget: +(onTarget / nMatches).toFixed(2),
+    conversion:  shots ? +(goal / shots).toFixed(3) : 0,
+  };
+}
+
+function runMatchup(api, k1, k2, N, globalResultCounts) {
   const d1 = api.TEAM_DATA[k1], d2 = api.TEAM_DATA[k2];
   if (!d1 || !d2) throw new Error(`TEAM_DATA に未定義のカード: ${k1} vs ${k2}`);
-  let w = 0, d = 0, l = 0, g1 = 0, g2 = 0;
+  const rc = { __total: 0 }; // このカード専用のシーン結果カウント
+  let w = 0, d = 0, l = 0, g1 = 0, g2 = 0, blowout = 0, maxTeamGoals = 0;
   for (let i = 0; i < N; i++) {
-    const r = playMatch(api, d1, d2, resultCounts);
+    const r = playMatch(api, d1, d2, rc);
     g1 += r.t1score; g2 += r.t2score;
     if (r.t1score > r.t2score) w++;
     else if (r.t1score === r.t2score) d++;
     else l++;
+    const mx = Math.max(r.t1score, r.t2score);
+    if (mx >= 5) blowout++;           // ドイツ7-1キュラソー型（片チーム≥5）の発生率
+    if (mx > maxTeamGoals) maxTeamGoals = mx;
   }
+  // カード専用カウントを全体カウントへ合算
+  for (const k of Object.keys(rc)) globalResultCounts[k] = (globalResultCounts[k] || 0) + rc[k];
+  const sm = shotMetrics(rc, N);
   return {
     matchup: `${k1} vs ${k2}`,
     n: N,
@@ -95,6 +126,11 @@ function runMatchup(api, k1, k2, N, resultCounts) {
     avgT1Goals: +(g1 / N).toFixed(3),
     avgT2Goals: +(g2 / N).toFixed(3),
     avgTotalGoals: +((g1 + g2) / N).toFixed(3),
+    avgShots: sm.avgShots,
+    avgOnTarget: sm.avgOnTarget,
+    conversion: sm.conversion,
+    blowoutPct: +(blowout / N * 100).toFixed(2),
+    maxTeamGoals,
   };
 }
 
@@ -112,6 +148,8 @@ function run(N) {
     sceneResultRates[k] = +(resultCounts[k] / resultCounts.__total).toFixed(5);
   }
   const totalGoalsAll = matchups.reduce((s, m) => s + m.avgTotalGoals, 0) / matchups.length;
+  // 全体シュートKPIは全カード合算カウントから（試合数＝N×カード数）。
+  const globalShots = shotMetrics(resultCounts, N * matchups.length);
 
   return {
     generatedAt: new Date().toISOString(),
@@ -119,6 +157,10 @@ function run(N) {
     elapsedMs: ms,
     totalScenes: resultCounts.__total,
     globalAvgTotalGoals: +totalGoalsAll.toFixed(3),
+    globalAvgShots: globalShots.avgShots,
+    globalAvgOnTarget: globalShots.avgOnTarget,
+    globalConversion: globalShots.conversion,
+    realTargets: REAL_TARGETS,
     sceneResultRates,
     matchups,
   };
@@ -131,9 +173,18 @@ function printReport(snap) {
     console.log(`  ${m.matchup}`);
     console.log(`     勝${m.winPct}%  分${m.drawPct}%  負${m.lossPct}%  ` +
                 `得点 ${m.avgT1Goals} - ${m.avgT2Goals}  (計 ${m.avgTotalGoals})`);
+    if (m.avgShots !== undefined) {
+      console.log(`     シュート ${m.avgShots}  枠内 ${m.avgOnTarget}  決定率 ${(m.conversion * 100).toFixed(1)}%` +
+                  `  片チーム≥5点 ${m.blowoutPct}%  最大得点 ${m.maxTeamGoals}`);
+    }
   }
   console.log('-'.repeat(72));
   console.log(`  全体 平均合計得点: ${snap.globalAvgTotalGoals}   総シーン数: ${snap.totalScenes}`);
+  if (snap.globalAvgShots !== undefined) {
+    const rt = snap.realTargets || REAL_TARGETS;
+    console.log(`  全体 平均合計シュート: ${snap.globalAvgShots}  枠内: ${snap.globalAvgOnTarget}  決定率: ${(snap.globalConversion * 100).toFixed(1)}%`);
+    console.log(`  ── 実W杯の目安: 得点${rt.totalGoals} / シュート${rt.shots}(枠内${rt.onTarget}) / 決定率${(rt.conversion * 100).toFixed(0)}%`);
+  }
   console.log('  シーン結果種別 発生率:');
   for (const [k, v] of Object.entries(snap.sceneResultRates).sort((a, b) => b[1] - a[1])) {
     console.log(`     ${(v * 100).toFixed(2).padStart(6)}%  ${k}`);
@@ -156,6 +207,12 @@ function compare(base, cur) {
     chk('平均T1得点', m.avgT1Goals, b.avgT1Goals, TOL.avgGoals);
     chk('平均T2得点', m.avgT2Goals, b.avgT2Goals, TOL.avgGoals);
     chk('平均合計得点', m.avgTotalGoals, b.avgTotalGoals, TOL.totalGoals);
+    // シュート系（baseline に存在する場合のみ＝後方互換）
+    if (b.avgShots !== undefined) {
+      chk('平均合計シュート', m.avgShots, b.avgShots, TOL.shots);
+      chk('平均合計枠内', m.avgOnTarget, b.avgOnTarget, TOL.onTarget);
+      chk('決定率', m.conversion, b.conversion, TOL.conversion);
+    }
   }
   // シーン結果種別の発生率（既知の種別のみ。新種別＝怪我/カード追加時は別途許容する）
   for (const [k, bv] of Object.entries(base.sceneResultRates)) {
