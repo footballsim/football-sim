@@ -878,7 +878,7 @@ function startWCMatch(idx) {
 }
 
 // サイレントシミュレーション（UIなしで1試合演算）
-// numChances 指定時はそのチャンス数だけ演算（延長戦などの短時間用）。省略時は通常90分（16〜17チャンス）
+// numChances 指定時はそのチャンス数だけ演算（延長戦などの短時間用）。省略時は通常90分（MATCH_CHANCES〜+1チャンス）
 function simulateSilent(t1data, t2data, numChances) {
   const buildState = (data) => {
     const sysIdx = system_data.findIndex(s => s.name === data.default_system);

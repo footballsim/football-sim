@@ -35,9 +35,10 @@
 (function (global) {
   'use strict';
 
-  // 通常試合のチャンス数: 前半 8 + 後半 8 + ロスタイム最大 1（startGame:1954 と同一の式）。
+  // 通常試合のチャンス数: 前半 HALF_CHANCES + 後半 HALF_CHANCES + ロスタイム最大 1（startGame と同一の式）。
+  // simulate.js のエンジン定数 MATCH_CHANCES に追従させる（startGame/simulateSilent/harness と同一本数を保証）。
   // ★ rng() で決める＝seed に完全従属させる（本番経路の決定論境界をここに集約）。
-  var BASE_CHANCES = 16;
+  var BASE_CHANCES = MATCH_CHANCES;
 
   /**
    * data（TEAM_DATA 形式）＋ override から buildTeam 用の state を組み、チームを構築する。

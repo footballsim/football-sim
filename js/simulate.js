@@ -3634,9 +3634,9 @@ function nextChance() {
       };
       return;
     }
-    // 後半・延長戦中：チャンス完了時のみ交代ボタンを表示
+    // 後半・延長戦中：チャンス完了時のみ交代ボタンを表示（後半＝currentChanceIdx > HALF_CHANCES）
     const _isET = wcPhase === 'et_first' || wcPhase === 'et_second';
-    if ((_isET ? currentChanceIdx > 0 : currentChanceIdx > 8) && currentChanceIdx < chanceResults.length) {
+    if ((_isET ? currentChanceIdx > 0 : currentChanceIdx > HALF_CHANCES) && currentChanceIdx < chanceResults.length) {
       _updateSubBtn();
     }
     if (currentChanceIdx >= chanceResults.length) {
