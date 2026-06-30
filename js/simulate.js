@@ -1925,7 +1925,7 @@ function startGame() {
   _frontCandidates.sort(function(a, b) { return b.rating - a.rating; });
   const _top2front = _frontCandidates.slice(0, 2);
   if (_top2front.length > 0) {
-    coachMarkTarget = _top2front[Math.floor(Math.random() * _top2front.length)].pos;
+    coachMarkTarget = _top2front[Math.floor(rng() * _top2front.length)].pos;
   } else {
     coachMarkTarget = 10;
   }
@@ -1947,11 +1947,11 @@ function startGame() {
     for (let i = 0; i < 3; i++) chanceResults.push(simulateChance(gameState, i));
   } else if (wcPhase === 'et_second') {
     for (let i = 0; i < 3; i++) chanceResults.push(simulateChance(gameState, i));
-    if (Math.random() < 0.5) chanceResults.push(simulateChance(gameState, 3));
+    if (rng() < 0.5) chanceResults.push(simulateChance(gameState, 3));
   } else {
     // 通常: 前半8 + 後半8 + ロスタイム最大1
     for (let i = 0; i < 16; i++) chanceResults.push(simulateChance(gameState, i));
-    if (Math.random() < 0.5) chanceResults.push(simulateChance(gameState, 16));
+    if (rng() < 0.5) chanceResults.push(simulateChance(gameState, 16));
   }
 
   // Update UI
@@ -2094,7 +2094,7 @@ function selectOffencePosition(team, area, exclude) {
     }
     return 1;
   }
-  const r = Math.random();
+  const r = rng();
   for (let i = 0; i < a.length; i++) {
     if (r < a[i][1] / sum) return a[i][0];
   }
@@ -2119,17 +2119,17 @@ function selectDefencePosition(offTeam, defTeam, area, ofsPos, omit) {
   for (let i = 1; i < positions.length; i++) { // GK(0)を除く
     if (i !== omit) fallbackPos.push(i);
   }
-  const fallback = fallbackPos.length > 0 ? fallbackPos[Math.floor(Math.random()*fallbackPos.length)] : 1;
+  const fallback = fallbackPos.length > 0 ? fallbackPos[Math.floor(rng()*fallbackPos.length)] : 1;
 
   if (!p0.length && !p1.length && !p2.length && !p3.length && !p4.length) return fallback;
 
   for (let tries = 0; tries < 100; tries++) {
-    const r = Math.random();
-    if (p0.length > 0 && r < 0.45) return p0[Math.floor(Math.random()*p0.length)];
-    if (p1.length > 0 && r < 0.80) return p1[Math.floor(Math.random()*p1.length)];
-    if (p2.length > 0) return p2[Math.floor(Math.random()*p2.length)];
-    if (p3.length > 0) return p3[Math.floor(Math.random()*p3.length)];
-    if (p4.length > 0) return p4[Math.floor(Math.random()*p4.length)];
+    const r = rng();
+    if (p0.length > 0 && r < 0.45) return p0[Math.floor(rng()*p0.length)];
+    if (p1.length > 0 && r < 0.80) return p1[Math.floor(rng()*p1.length)];
+    if (p2.length > 0) return p2[Math.floor(rng()*p2.length)];
+    if (p3.length > 0) return p3[Math.floor(rng()*p3.length)];
+    if (p4.length > 0) return p4[Math.floor(rng()*p4.length)];
   }
   return fallback;
 }
@@ -2147,7 +2147,7 @@ function selectAction(offTeam, area, pos) {
   }
   if (sum === 0) return a[a.length - 1];
 
-  const r = Math.random();
+  const r = rng();
   for (let i = 0; i < a.length; i++) {
     if (r < p[i] / sum) return a[i];
   }
@@ -2165,7 +2165,7 @@ function selectArea(defTeam) {
   const areas = ['MF_M','MF_L','MF_R','DF_M','DF_L','DF_R'];
   let n = 6;
   if (defTeam.tactics === TACTICS_COUNTER || defTeam.tactics === TACTICS_CATENACCIO) n = 3;
-  return areas[Math.floor(Math.random() * n)];
+  return areas[Math.floor(rng() * n)];
 }
 
 function selectNextArea(lastScene) {
@@ -2192,7 +2192,7 @@ function selectNextArea(lastScene) {
     } else {
       pos = 'FW';
     }
-    const r = Math.random();
+    const r = rng();
     if (side === 'M') {
       if (r < 0.3) side = 'L';
       else if (r < 0.6) side = 'R';
@@ -2212,7 +2212,7 @@ function testCounter(defTeam, area, offTeam) {
   else if (offTeam && offTeam.tactics === TACTICS_POSSESSION) f = 0.1;
   // 前線中央(FW_M)での守備勝利は戦術に関係なく40%
   if (pos === 'FW' && side === 'M') f = 0.4;
-  return Math.random() < f;
+  return rng() < f;
 }
 
 function selectFKKicker(team) {
@@ -2223,11 +2223,11 @@ function selectFKKicker(team) {
     if (n >= best[1]) { second = [...best]; best = [i, n]; }
     else if (n >= second[1]) second = [i, n];
   }
-  return (Math.random() < 0.7 ? best : second)[0];
+  return (rng() < 0.7 ? best : second)[0];
 }
 
 function calcTime(chanceNo) {
-  const r = Math.random();
+  const r = rng();
   // 延長戦：wcPhase に応じて延長前半/後半の実際の時間帯を返す
   if (wcPhase === 'et_first') {
     if (chanceNo === 0) return `${t('etFirst')} ${Math.floor(r*5)+91}${t('minUnit')}`;
@@ -2274,7 +2274,7 @@ function simulateChance(gs, chanceNo) {
   t1point *= (window._wcsimMul1 || 1);
   t2point *= (window._wcsimMul2 || 1);
 
-  let offence = Math.random() < t1point / (t1point + t2point) ? team1 : team2;
+  let offence = rng() < t1point / (t1point + t2point) ? team1 : team2;
   let defence = offence === team1 ? team2 : team1;
 
   const scenes = [];
@@ -2303,7 +2303,7 @@ function simulateChance(gs, chanceNo) {
   if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
   if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
 
-  let result = (function(o,d){var p=o*o/(o*o+d*d);return Math.random()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
+  let result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
   let scene = { offence, defence, area, rawArea, ofsPos, dfsPos, action, scenario: action, result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
   scenes.push(scene);
 
@@ -2400,7 +2400,7 @@ function simulateChance(gs, chanceNo) {
       if (!_allowedMid.includes(_postype)) {
         // ミドルシュートを除いたアクションから再選択
         const _altActions = area_data[area].actions.filter(a => a !== 'ミドルシュート');
-        action = _altActions.length > 0 ? _altActions[Math.floor(Math.random() * _altActions.length)] : 'ショートパス';
+        action = _altActions.length > 0 ? _altActions[Math.floor(rng() * _altActions.length)] : 'ショートパス';
       }
     }
 
@@ -2408,7 +2408,7 @@ function simulateChance(gs, chanceNo) {
     dfsPoint = getActionParam(defence, dfsPos, '対'+action);
     if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
     if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
-    result = (function(o,d){var p=o*o/(o*o+d*d);return Math.random()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
+    result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
 
     // scenario はアクション名をそのまま使うが、'クロス'は CRエリアのクロスシーン専用識別子と
     // 衝突するため、FWエリアでクロスを選んだ場合は区別できる名前にする
@@ -2427,7 +2427,7 @@ function simulateChance(gs, chanceNo) {
     }
     if (result === '成功' && area.substring(0, 2) === 'FW') {
       const fp = (100 - defence.players[defence.lineup[dfsPos]].params[FAIR_PLAY]) / 100;
-      if (Math.random() < fp) {
+      if (rng() < fp) {
         area = 'CR_' + area.substring(area.length-1);
         scene.result = 'ファール';
         break;
@@ -2476,9 +2476,9 @@ function simulateChance(gs, chanceNo) {
       const midOfsPoint = blockOfsPoint * 0.82;
       const midDfsPoint = getActionParam(defence, 0, '対ミドルシュート');
       let midResult;
-      if (Math.random() * 100 > midOfsPoint) {
+      if (rng() * 100 > midOfsPoint) {
         midResult = '枠を外した！';
-      } else if (Math.random() < (midOfsPoint * midOfsPoint) / (midOfsPoint * midOfsPoint + midDfsPoint * midDfsPoint)) {
+      } else if (rng() < (midOfsPoint * midOfsPoint) / (midOfsPoint * midOfsPoint + midDfsPoint * midDfsPoint)) {
         midResult = 'ゴール！！';
         offence.score++;
         goalScored = offence;
@@ -2510,9 +2510,9 @@ function simulateChance(gs, chanceNo) {
     if (defence === team1 && team1.marked_player >= 0 && offence.lineup[shootOfsPos] === team1.marked_player) ofsPoint *= 0.85;
 
     let shootResult;
-    if (Math.random() * 100 > ofsPoint) {
+    if (rng() * 100 > ofsPoint) {
       shootResult = '枠を外した！';
-    } else if (Math.random() < (ofsPoint * ofsPoint) / (ofsPoint * ofsPoint + dfsPoint * dfsPoint)) {
+    } else if (rng() < (ofsPoint * ofsPoint) / (ofsPoint * ofsPoint + dfsPoint * dfsPoint)) {
       shootResult = 'ゴール！！';
       offence.score++;
       goalScored = offence;
@@ -2549,7 +2549,7 @@ function simulateChance(gs, chanceNo) {
         ofsPlayer = offence.players[offence.lineup[ofsPos]];
         // セットプレーもクロスエリアのアクション（ボレー/ヘディング）から選択
         const spActions = area_data[area] ? area_data[area].actions : ['ボレーシュート','ヘディングシュート'];
-        action = spActions[Math.floor(Math.random() * spActions.length)];
+        action = spActions[Math.floor(rng() * spActions.length)];
         ofsPoint = getActionParam(offence, ofsPos, action);
         dfsPos = selectDefencePosition(offence, defence, area, ofsPos,
           scene.result === 'カウンター' ? scene.ofsPos : scene.dfsPos);
@@ -2558,7 +2558,7 @@ function simulateChance(gs, chanceNo) {
         dfsPoint = getActionParam(defence, dfsPos, '対'+action);
         if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
         if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
-        result = (function(o,d){var p=o*o/(o*o+d*d);return Math.random()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
+        result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
         scene = { offence, defence, area, crossPos, ofsPos, dfsPos, action, scenario: 'セットプレー', result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
         scenes.push(scene);
         shootAction = action;
@@ -2577,7 +2577,7 @@ function simulateChance(gs, chanceNo) {
         // （＝同一選手の切れ込みを禁止）。クロス能力で抜けて自分でシュート、という
         // 矛盾（絵=クロス／文=切れ込み）を防ぐため。非クロス系とカウンター直行は従来どおり。
         const allowCutIn = !(scene.scenario === 'サイドクロス' && scene.result === '成功');
-        if (allowCutIn && Math.random() < 0.25) {
+        if (allowCutIn && rng() < 0.25) {
           action = 'サイドからシュート';
           shootAction = 'サイドからシュート';
         } else {
@@ -2597,7 +2597,7 @@ function simulateChance(gs, chanceNo) {
             ofsPlayer = offence.players[offence.lineup[ofsPos]];
             // クロスエリアのアクション（ボレー/ヘディング）から選択
             const crActions = area_data[area] ? area_data[area].actions : ['ボレーシュート','ヘディングシュート'];
-            action = crActions[Math.floor(Math.random() * crActions.length)];
+            action = crActions[Math.floor(rng() * crActions.length)];
             ofsPoint = getActionParam(offence, ofsPos, action);
             dfsPos = selectDefencePosition(offence, defence, area, ofsPos,
               (entryResult === 'カウンター' || scene.result === 'カウンター') ? scene.ofsPos : scene.dfsPos);
@@ -2605,7 +2605,7 @@ function simulateChance(gs, chanceNo) {
             dfsPoint = getActionParam(defence, dfsPos, '対'+action);
             if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
             if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
-            result = (function(o,d){var p=o*o/(o*o+d*d);return Math.random()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
+            result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
             scene = { offence, defence, area, crossPos, ofsPos, dfsPos, action, scenario: 'クロス', result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
             scenes.push(scene);
             shootAction = action;
@@ -2626,9 +2626,9 @@ function simulateChance(gs, chanceNo) {
       if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
 
       let shootResult;
-      if (Math.random() * 100 > ofsPoint) {
+      if (rng() * 100 > ofsPoint) {
         shootResult = '枠を外した！';
-      } else if (Math.random() < (ofsPoint * ofsPoint) / (ofsPoint * ofsPoint + dfsPoint * dfsPoint)) {
+      } else if (rng() < (ofsPoint * ofsPoint) / (ofsPoint * ofsPoint + dfsPoint * dfsPoint)) {
         shootResult = 'ゴール！！';
         offence.score++;
         goalScored = offence;
@@ -2675,7 +2675,7 @@ function sceneToText(scenes, sceneNo, team1, team2) {
   }
 
   let s = getScenarioData()[key];
-  if (Array.isArray(s)) s = s[Math.floor(Math.random() * s.length)];
+  if (Array.isArray(s)) s = s[Math.floor(rng() * s.length)];
 
   // フォールバック: キーが見つからない場合
   if (!s) {
@@ -3016,7 +3016,7 @@ function _runDuelSimBothSides(n) {
     const bgs = { team1: bt1, team2: bt2 };
     const bRes = [];
     for (let j = 0; j < 16; j++) bRes.push(simulateChance(bgs, j));
-    if (Math.random() < 0.5) bRes.push(simulateChance(bgs, 16));
+    if (rng() < 0.5) bRes.push(simulateChance(bgs, 16));
     bRes.forEach(function(res) {
       if (!res || !res.scenes) return;
       res.scenes.forEach(function(sc) {
@@ -3372,7 +3372,7 @@ function _recalcSecondHalf() {
   for (let i = startIdx; i < 16; i++) {
     newSecond.push(simulateChance(gameState, i));
   }
-  if (newSecond.length === 8 && Math.random() < 0.5) {
+  if (newSecond.length === 8 && rng() < 0.5) {
     newSecond.push(simulateChance(gameState, 16));
   }
   chanceResults = [...firstPart, ...newSecond];

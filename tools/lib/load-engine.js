@@ -38,8 +38,9 @@ function showWCStats(){}
 `;
 
 // 連結対象（ブラウザのロード順）。ui.js は Firebase 専用なので headless では不要。
+// rng.js = 差し替え可能 PRNG（未シード時 Math.random フォールバック・simulate.js より前）。
 // events.js = 試合結果→Event列の正規化アダプタ（購読層・エンジン無改変）。
-const JS_FILES = ['players.js', 'simulate.js', 'events.js', 'narration.js'];
+const JS_FILES = ['players.js', 'rng.js', 'simulate.js', 'events.js', 'narration.js'];
 
 /**
  * エンジンを Node の vm context にロードして主要 API を返す。
@@ -78,7 +79,11 @@ function loadEngine() {
     matchToEvents:    typeof matchToEvents!=='undefined'    ? matchToEvents    : null,
     sceneToEvents:    typeof sceneToEvents!=='undefined'    ? sceneToEvents    : null,
     tallyGoals:       typeof tallyGoals!=='undefined'       ? tallyGoals       : null,
-    EVENT_TYPES:      typeof EVENT_TYPES!=='undefined'       ? EVENT_TYPES      : null
+    EVENT_TYPES:      typeof EVENT_TYPES!=='undefined'       ? EVENT_TYPES      : null,
+    rng:              typeof rng!=='undefined'              ? rng              : null,
+    seedRng:          typeof seedRng!=='undefined'          ? seedRng          : null,
+    clearSeed:        typeof clearSeed!=='undefined'        ? clearSeed        : null,
+    isRngSeeded:      typeof isRngSeeded!=='undefined'       ? isRngSeeded      : null
   })`, ctx);
 
   const missing = Object.entries(api).filter(([, v]) => v == null).map(([k]) => k);

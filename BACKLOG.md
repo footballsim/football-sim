@@ -17,9 +17,10 @@
 - [x] **T-01** イベント型定義（kickoff/chance/duel/shot/goal/save/foul/card/injury/sub/HT/FT）。→なし ✅ js/events.js `EVENT_TYPES`
 - [x] **T-02** simulateChance 出力を Event 列へ正規化するアダプタ（購読層・エンジン無改変）。→T-01 ✅ js/events.js `matchToEvents`
 - [x] **T-03** イベント列から現行スコア/ログを再現できる検証（回帰緑）。→T-02 ✅ tools/events-reproduce.js（1800/1800一致・回帰緑・三重チェック＋Codex発見P2修正済）
-- [ ] **T-04** 差し替え可能PRNG導入（未シード時は現挙動フォールバック）。→なし
-- [ ] **T-05** simulate.js 全域の Math.random を PRNG 経由へ（独立PR・慎重に）。→T-04
-- [ ] **T-06** 同一シード完全再現＋回帰緑の確認。→T-05,T-03
+- [x] **T-04** 差し替え可能PRNG導入（未シード時は現挙動フォールバック）。→なし ✅ js/rng.js（mulberry32・未シード=Math.random素通し）
+- [x] **T-05** simulate.js 全域の Math.random を PRNG 経由へ（独立PR・慎重に）。→T-04 ✅ 36箇所全置換・確率式byte不変（reviewerがbyte一致で実証）
+- [x] **T-06** 同一シード完全再現＋回帰緑の確認。→T-05,T-03 ✅ 未シード回帰緑(挙動同一をビット実証)・seed再現6/6
+  - ⚠️ Codex指摘[P2]: 本番の決定論境界は **T-07 playMatch** に集約（seed→rng()でn決定／seed-repro を playMatch 経由に差し替え）。`narration.js` simulateSilent 等の Math.random(5箇所)の決定論化は**別タスク（バッチsim・独立PR）**。
 - [ ] **T-07** playMatch(home,away,tactics,seed) ラッパー。→T-02,T-06
 
 ### P2 試合ビューア（漫画＋采配）

@@ -26,7 +26,7 @@ const now = new Date();
 const pad = n => String(n).padStart(2, '0');
 const BUILD_VER = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
 
-const JS_FILES = ['players.js', 'simulate.js', 'events.js', 'cutscene.js', 'narration.js', 'ui.js', 'tournament.js', 'japanwc.js'];
+const JS_FILES = ['players.js', 'rng.js', 'simulate.js', 'events.js', 'cutscene.js', 'narration.js', 'ui.js', 'tournament.js', 'japanwc.js'];
 
 // 試合エンジン系: 最小化＋軽難読化
 const LOGIC_OPTS = {
