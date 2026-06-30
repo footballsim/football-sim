@@ -3515,14 +3515,14 @@ function _shootSplit(sc, textHtml, prevSc, nextSc) {
     const _en = (typeof window !== 'undefined' && window.LANG === 'en');
     const _kicker = (typeof coloredName === 'function') ? coloredName(sc.offence, sc.ofsPos) : '';
     const _gkNm = (typeof coloredName === 'function') ? coloredName(sc.defence, 0) : '';
-    const _pkAward = _en ? 'Penalty awarded!' : 'ペナルティの判定——PK！！';
+    const _pkAward = _en ? 'Penalty awarded!' : 'ペナルティの判定！';
     const _pkKick = _en ? (_kicker + ' steps up and strikes the spot kick!') : (_kicker + 'がスポットにセット——蹴り込む！');
-    const _pkDive = _en ? 'The keeper flings himself across...' : 'GKが横っ跳びで反応——';
     let _pkRes;
     if (sc.result === 'ゴール！！') _pkRes = _en ? '<span style="color:#F00"><b>GOOOOOOOAL!!</b></span>' : '<span style="color:#F00"><b>ゴーーーーーーーーール！！</b></span>';
     else if (sc.result === 'GK防いだ！') _pkRes = _en ? (_gkNm + ' guesses right and SAVES it! A massive stop!') : (_gkNm + 'が読み切ってストップ！　値千金のセーブだ！');
     else _pkRes = _en ? 'The spot kick flies off target! A golden chance wasted!' : 'シュートは無情にも枠の外へ！　絶好機を逃した！';
-    return { parts: [_pkAward, _pkKick, _pkDive, _pkRes], steps: ['pkref', 'shot', 'gk', 'result'] };
+    // GKダイブ(中間サスペンス)は PK では削除（結果ビートの「セーブ」絵が GK を見せる）。3ビート構成。
+    return { parts: [_pkAward, _pkKick, _pkRes], steps: ['pkref', 'shot', 'result'] };
   }
   // セットプレー（サイドFK）: 「蹴り出し(クロスを上げる)」→「競り合い(ヘディング/ボレー)」の2ビートに分割。
   //   定型文も2文（…ボールをあげる／…シュート）なので parts と一致する。

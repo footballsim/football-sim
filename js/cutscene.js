@@ -1802,7 +1802,7 @@ function _renderFoulScene(sc, isPK) {
   var atkName = atkP ? ((typeof getPlayerName === 'function') ? getPlayerName(atkP) : atkP.name) : '';
   var atkTeamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
   var en = (typeof window !== 'undefined' && window.LANG === 'en');
-  var label = isPK ? (en ? 'PENALTY!' : 'PK！！') : (en ? 'FOUL!' : 'ファール！');
+  var label = isPK ? 'PENALTY!' : (en ? 'FOUL!' : 'ファール！');   // PK は日英とも「PENALTY!」表記（ユーザー指定）
   var flip = !_csAttackRight(sc);   // ネイティブ=右を指す。左攻めは反転して左を指す（再開方向）
   var P = 1500;
 

@@ -51,21 +51,19 @@
 
   // ── PK: 4ビート分割（PK判定 → 蹴る → GKダイブ → 結果）。先頭に「倒される接触」も。 ──
   // ゴール例（team1=日本 右攻め）
-  var r1 = section('PK 連続（ゴール）— 日本(赤・右攻め）', 'ファール接触 → PK！！(画面いっぱい) → シュート絵で蹴る → GKダイビング → ゴール');
+  var r1 = section('PK 連続（ゴール）— 日本(赤・右攻め）', 'ファール接触 → PENALTY!(画面いっぱい) → シュート絵で蹴る → ゴール（GKダイブの中間ビートは削除＝3ビート）');
   var pkG = pk(JPN, NED, 'ゴール！！');
   add(r1, '① 倒される（接触）', renderShootStep(foul(JPN,NED), 'foulcontact'), true);
-  add(r1, '② PK判定（PK！！）', renderShootStep(pkG, 'pkref'), true);
+  add(r1, '② PK判定（PENALTY!）', renderShootStep(pkG, 'pkref'), true);
   add(r1, '③ 蹴る（シュート絵）', renderShootStep(pkG, 'shot'), true);
-  add(r1, '④ GKダイビング', renderShootStep(pkG, 'gk'), true);
-  add(r1, '⑤ 結果＝ゴール', renderShootStep(pkG, 'result'), true);
+  add(r1, '④ 結果＝ゴール', renderShootStep(pkG, 'result'), true);
 
   // セーブ例（team2=オランダ 左攻め）
-  var r2 = section('PK 連続（セーブ）— オランダ(橙・左攻め）', '蹴り絵・PK！！は左攻めで左右反転して描画される');
+  var r2 = section('PK 連続（セーブ）— オランダ(橙・左攻め）', '蹴り絵・PENALTY!は左攻めで左右反転して描画される');
   var pkS = pk(NED, JPN, 'GK防いだ！');
-  add(r2, '① PK判定（PK！！）', renderShootStep(pkS, 'pkref'), true);
+  add(r2, '① PK判定（PENALTY!）', renderShootStep(pkS, 'pkref'), true);
   add(r2, '② 蹴る（シュート絵）', renderShootStep(pkS, 'shot'), true);
-  add(r2, '③ GKダイビング', renderShootStep(pkS, 'gk'), true);
-  add(r2, '④ 結果＝GKセーブ', renderShootStep(pkS, 'result'), true);
+  add(r2, '③ 結果＝GKセーブ', renderShootStep(pkS, 'result'), true);
 
   // 枠外例
   var r3 = section('PK 結果バリエーション');
