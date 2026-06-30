@@ -2247,6 +2247,16 @@ function selectFKKicker(team) {
 const MATCH_CHANCES = 32;
 const HALF_CHANCES = MATCH_CHANCES / 2;
 
+// CK / PK（リアル要素・2026-06-30）。★ デュエル解決式・カウントロジックは不変。
+//   既存の result（ファール／被セーブ／ブロック）に「フックして」シーンと専用解決を加算するのみ。
+//   発生率は回帰ハーネスで実測し現実値（PK ≈ 0.2〜0.3/試合・CK は少数=テンポ優先）へ調整するノブ。
+const PK_FROM_BOX_FOUL_M  = 0.20; // 中央(FW_M)のボックス内ファールが PK になる確率（実測 PK≈0.28/試合）
+const PK_FROM_BOX_FOUL_LR = 0.08; // サイド(FW_L/R)のボックス内ファールが PK になる確率
+const CK_FROM_SAVE  = 0.30;       // 被セーブから CK が生じる確率（CK≈1本/試合・テンポ優先）
+const CK_FROM_BLOCK = 0.22;       // ブロックから CK が生じる確率
+const CK_DEF_EDGE   = 1.5;        // CK の競り合いは守備有利（ボックスに守備が密集）→ 守備ポイント増
+const CK_SHOT_MUL   = 0.6;        // CK の合わせは体勢が悪く低質 → GK 対決のシュートポイント減（決定率を現実域 ~3-5% へ）
+
 function calcTime(chanceNo) {
   const r = rng();
   // 延長戦：wcPhase に応じて延長前半/後半の実際の時間帯を返す
@@ -2304,6 +2314,7 @@ function simulateChance(gs, chanceNo) {
   const scenes = [];
   let inCounter = false;
   let fwChanceCounted = false;
+  let pkPending = false;   // ボックス内ファールが PK になったフラグ（CR ファール処理で PK 解決に分岐）
 
   // Scene 1
   // team2攻撃時はエリアのL/Rを反転（team2の左右はteam1基準と逆）
@@ -2452,7 +2463,13 @@ function simulateChance(gs, chanceNo) {
     if (result === '成功' && area.substring(0, 2) === 'FW') {
       const fp = (100 - defence.players[defence.lineup[dfsPos]].params[FAIR_PLAY]) / 100;
       if (rng() < fp) {
-        area = 'CR_' + area.substring(area.length-1);
+        const _suffix = area.substring(area.length-1);
+        // ペナルティエリア内（FW=ボックス）のファール → 一定確率で PK（中央ほど高い）。
+        //   PK 判定で rng() を必ず1回消費（フラグ無関係に消費順を固定）。
+        const _pkRoll = rng();
+        const _pkRate = _suffix === 'M' ? PK_FROM_BOX_FOUL_M : PK_FROM_BOX_FOUL_LR;
+        if (_pkRoll < _pkRate) pkPending = true;
+        area = 'CR_' + _suffix;
         scene.result = 'ファール';
         break;
       }
@@ -2549,11 +2566,34 @@ function simulateChance(gs, chanceNo) {
 
   } else if (area.substring(0, 2) === 'CR') {
     let crossPos, crossPlayer, shootAction;
+    let pkResolved = false;   // PK を自己完結で解決した（後段のシュート処理をスキップ）
 
     // カウンター状態でCRエリアに入った場合はファール扱いではなく通常クロスとして処理
     const entryResult = scene.result === 'カウンター' ? '成功' : scene.result;
 
-    if (entryResult === 'ファール') {
+    if (entryResult === 'ファール' && pkPending) {
+      // ===== ペナルティキック（専用解決・既存 wcsimPenaltyShootout の成功率式を流用）=====
+      //   ★ デュエル式は使わず、PK 専用の成功率 0.75 + (シュート精度 - セービング)*0.004（55〜92%）。
+      //   キッカー = スタメン中シュート精度(idx11)最良。GK = 守備側 lineup[0]。
+      let pkKicker = 1, pkBest = -1;
+      for (let _k = 1; _k < 11; _k++) {
+        const _v = offence.players[offence.lineup[_k]].params[11];
+        if (_v > pkBest) { pkBest = _v; pkKicker = _k; }
+      }
+      const _shootP = offence.players[offence.lineup[pkKicker]].params[11];
+      const _gkP = defence.players[defence.lineup[0]].params[23];
+      const _pkSucc = Math.min(0.92, Math.max(0.55, 0.75 + (_shootP - _gkP) * 0.004));
+      offence.shootCounter++;
+      let _pkResult;
+      if (rng() < _pkSucc) { _pkResult = 'ゴール！！'; offence.score++; goalScored = offence; }
+      else if (rng() < 0.7) { _pkResult = 'GK防いだ！'; defence.gkSaveCounter++; }
+      else { _pkResult = '枠を外した！'; }
+      scene = { offence, defence, area, crossPos: pkKicker, ofsPos: pkKicker, dfsPos: 0,
+        action: 'ペナルティキック', scenario: 'ペナルティキック', result: _pkResult,
+        ofsPoint: Math.round(_shootP), dfsPoint: Math.round(_gkP), dfsAction: '対ペナルティキック' };
+      scenes.push(scene);
+      pkResolved = true;
+    } else if (entryResult === 'ファール') {
       if (area.substring(area.length-1) === 'M') {
         ofsPos = selectFKKicker(offence);
         ofsPlayer = offence.players[offence.lineup[ofsPos]];
@@ -2638,8 +2678,8 @@ function simulateChance(gs, chanceNo) {
       }
     }
 
-    // Shoot scene
-    if (scene.result !== '失敗') {
+    // Shoot scene（PK は上で自己完結済みなのでスキップ）
+    if (scene.result !== '失敗' && !pkResolved) {
       if (!fwChanceCounted) { offence.chanceCounter++; fwChanceCounted = true; } // FW未経由（カウンター直行等）でもチャンス計上
       offence.shootCounter++;
       dfsPos = 0; // GK
@@ -2663,6 +2703,48 @@ function simulateChance(gs, chanceNo) {
 
       scene = { offence, defence, area, crossPos: scene.crossPos||ofsPos, ofsPos, dfsPos:0, action: shootAction, scenario: 'シュート', result: shootResult, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+shootAction };
       scenes.push(scene);
+    }
+  }
+
+  // ===== コーナーキック（リアル要素・result-hook）=====
+  //   直近シーンが「被セーブ／ブロック」なら一定確率でコーナー1本を生成（テンポ優先で最大1本）。
+  //   競り合いは既存デュエル式（o²/(o²+d²)）を流用、決定率は低め（実際のCK同様）。スコア加算は既存経路と同形。
+  {
+    const _lastSc = scenes[scenes.length - 1];
+    if (_lastSc && (_lastSc.result === 'GK防いだ！' || _lastSc.result === 'ブロック')) {
+      const _ckRate = _lastSc.result === 'GK防いだ！' ? CK_FROM_SAVE : CK_FROM_BLOCK;
+      if (rng() < _ckRate) {
+        const _ckOff = _lastSc.offence, _ckDef = _lastSc.defence;
+        // CR_L/R を起点に（直近がCRならそれ、無ければ左右ランダム）。
+        const _ckArea = (_lastSc.area && _lastSc.area.substring(0, 2) === 'CR' && _lastSc.area.substring(_lastSc.area.length - 1) !== 'M')
+          ? _lastSc.area : ('CR_' + (rng() < 0.5 ? 'L' : 'R'));
+        const _ckTaker = selectFKKicker(_ckOff);     // キッカー（FK精度上位）
+        let _ckShooter = selectOffencePosition(_ckOff, _ckArea, _ckTaker);  // 競り合う選手（キッカー以外）
+        if (_ckShooter === _ckTaker || _ckShooter === undefined) {
+          for (let _i = 1; _i < 11; _i++) { if (_i !== _ckTaker) { _ckShooter = _i; break; } }
+        }
+        const _ckActions = area_data[_ckArea] ? area_data[_ckArea].actions : ['ヘディングシュート', 'ボレーシュート'];
+        const _ckAction = _ckActions[Math.floor(rng() * _ckActions.length)];
+        const _ckO = getActionParam(_ckOff, _ckShooter, _ckAction);
+        const _ckDfsPos = selectDefencePosition(_ckOff, _ckDef, _ckArea, _ckShooter, _lastSc.dfsPos);
+        const _ckD = getActionParam(_ckDef, _ckDfsPos, '対' + _ckAction) * CK_DEF_EDGE;  // 守備密集で守備有利
+        // 競り合い（既存デュエル式・不変）→ 勝てばGK対決。合わせは低質(CK_SHOT_MUL)＝決定率は現実域。
+        const _contest = (function (o, d) { var p = o * o / (o * o + d * d); return rng() < p ? '成功' : '失敗'; })(_ckO, _ckD);
+        let _ckResult;
+        if (_contest === '失敗') {
+          _ckResult = '失敗';   // クリアされた／合わせきれず
+        } else {
+          _ckOff.shootCounter++;
+          const _ckShot = _ckO * CK_SHOT_MUL;
+          const _ckGkP = getActionParam(_ckDef, 0, '対' + _ckAction);
+          if (rng() * 100 > _ckShot) _ckResult = '枠を外した！';
+          else if (rng() < (_ckShot * _ckShot) / (_ckShot * _ckShot + _ckGkP * _ckGkP)) { _ckResult = 'ゴール！！'; _ckOff.score++; goalScored = _ckOff; }
+          else { _ckResult = 'GK防いだ！'; _ckDef.gkSaveCounter++; }
+        }
+        scenes.push({ offence: _ckOff, defence: _ckDef, area: _ckArea, crossPos: _ckTaker, ofsPos: _ckShooter,
+          dfsPos: _ckDfsPos, action: _ckAction, scenario: 'コーナーキック', result: _ckResult,
+          ofsPoint: Math.round(_ckO), dfsPoint: Math.round(_ckD), dfsAction: '対' + _ckAction });
+      }
     }
   }
 

@@ -2524,7 +2524,16 @@ const scenario_data_ja = {
   "セットプレー|失敗|ヘディングシュート":"ボールを置いた【クロス選手】がゴール前にボールを送る！  【守備選手】が【シュート選手】に競り勝ちヘディングでクリア！",
   'シュート|ゴール！！|フリーキック':'絶好の位置でのフリーキック。ボールをセットした【シュート選手】が放ったシュートは弧を描きゴールへ！  <span style="color:#F00"><b>ゴーーーーーーーーール！！</b></span>',
   "シュート|GK防いだ！|フリーキック":"絶好の位置でのフリーキック。ボールをセットした【シュート選手】が放ったシュートは弧を描くがしかし【守備選手】がスーパーセーブ！",
-  "シュート|枠を外した！|フリーキック":"絶好の位置でのフリーキック。ボールをセットした【シュート選手】が放ったシュートは惜しくも枠を外れた。"
+  "シュート|枠を外した！|フリーキック":"絶好の位置でのフリーキック。ボールをセットした【シュート選手】が放ったシュートは惜しくも枠を外れた。",
+  // ペナルティキック（試合中の単発PK）
+  "ペナルティキック|ゴール！！":"ペナルティキック！  キッカーは【シュート選手】。  助走から落ち着いて流し込んだ——【GK選手】も届かない！  <span style=\"color:#F00\"><b>ゴーーーーーーーーール！！</b></span>",
+  "ペナルティキック|GK防いだ！":"ペナルティキック！  【シュート選手】が蹴る——しかし【GK選手】が読み切ってストップ！  値千金のセーブだ！",
+  "ペナルティキック|枠を外した！":"ペナルティキック！  【シュート選手】のシュートは——無情にも枠の外へ！  絶好機を逃した！",
+  // コーナーキック
+  "コーナーキック|ゴール！！":"コーナーキック。  【クロス選手】が上げたボールに【シュート選手】が完璧に合わせた——  <span style=\"color:#F00\"><b>ゴーーーーーーーーール！！</b></span>",
+  "コーナーキック|GK防いだ！":"コーナーキック。  【クロス選手】のボールに【シュート選手】が合わせる！  しかし【GK選手】がセーブ！",
+  "コーナーキック|枠を外した！":"コーナーキック。  【クロス選手】のクロスに【シュート選手】が合わせるが——枠の外！",
+  "コーナーキック|失敗":"コーナーキック。  【クロス選手】が上げるが、【守備選手】がしっかり跳ね返してクリア！"
 };
 
 
@@ -2678,7 +2687,16 @@ const scenario_data_en = {
   "セットプレー|失敗|ヘディングシュート":"【クロス選手】 delivers the set-piece into the box!  But 【守備選手】 wins the header against 【シュート選手】 and clears!",
   "シュート|ゴール！！|フリーキック":"A free kick in a great position. 【シュート選手】 steps up and bends it perfectly into the goal!  <span style=\"color:#F00\"><b>GOOOOOOOAL!!</b></span>",
   "シュート|GK防いだ！|フリーキック":"A free kick in a great position. 【シュート選手】 bends it toward goal — but 【守備選手】 pulls off a superb save!",
-  "シュート|枠を外した！|フリーキック":"A free kick in a great position. 【シュート選手】's curling effort just misses the target."
+  "シュート|枠を外した！|フリーキック":"A free kick in a great position. 【シュート選手】's curling effort just misses the target.",
+  // Penalty kick (in-match)
+  "ペナルティキック|ゴール！！":"Penalty! 【シュート選手】 steps up — and slots it home coolly! 【GK選手】 has no chance!  <span style=\"color:#F00\"><b>GOOOOOOOAL!!</b></span>",
+  "ペナルティキック|GK防いだ！":"Penalty! 【シュート選手】 takes it — but 【GK選手】 guesses right and saves it! A massive stop!",
+  "ペナルティキック|枠を外した！":"Penalty! 【シュート選手】's spot kick — flies off target! A golden chance wasted!",
+  // Corner kick
+  "コーナーキック|ゴール！！":"Corner. 【クロス選手】 swings it in and 【シュート選手】 meets it perfectly —  <span style=\"color:#F00\"><b>GOOOOOOOAL!!</b></span>",
+  "コーナーキック|GK防いだ！":"Corner. 【クロス選手】 delivers, 【シュート選手】 gets on the end of it — but 【GK選手】 saves!",
+  "コーナーキック|枠を外した！":"Corner. 【クロス選手】 whips it in, 【シュート選手】 connects — but it's off target!",
+  "コーナーキック|失敗":"Corner. 【クロス選手】 delivers, but 【守備選手】 rises highest and clears it away!"
 };
 
 function getScenarioData() {

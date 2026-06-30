@@ -127,9 +127,14 @@ function sceneToEvents(scene, meta) {
   const ofsP = _ofsPlayer(scene);
   const dfsP = _dfsPlayer(scene);
 
+  // PK は常にシュート（ゴール/セーブ/枠外）。CK は「合わせた」時だけシュート（クリア=失敗は duel）。
+  const _shotResults = scene.result === _RESULT.GOAL || scene.result === _RESULT.SAVE ||
+    scene.result === _RESULT.OFF_TARGET || scene.result === _RESULT.BLOCK;
   const isShotScene =
     scene.scenario === 'シュート' ||
-    scene.scenario === 'ミドルシュート';
+    scene.scenario === 'ミドルシュート' ||
+    scene.scenario === 'ペナルティキック' ||
+    (scene.scenario === 'コーナーキック' && _shotResults);
   const isMidBlock = scene.scenario === 'ミドルシュート' && scene.result === _RESULT.BLOCK;
 
   // (a) duel — 攻守の解決。シュートシーンの最終解決（ゴール/セーブ/枠外）は
