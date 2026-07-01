@@ -7,6 +7,18 @@
 
 ---
 
+## UI/レイアウト作法（2026-06-30 追加・Steam横化への"安い保険"）
+
+画面向きは **縦長(portrait)を MVP の正系として維持**（VISION のモバイルWebファースト＋デイリー＋漫画を"読む"が核）。Steam は P10（12月以降）の販路拡張で、向きの最終決定は **9月の合否判定(D7/D30)まで凍結**。横化は「今やる」のではなく「将来安く移行できる作り方」を全UIで徹底する。担当 = ui-designer（Canvasの外）。
+
+**新規UI・リデザインで必ず守る2点（横3ゾーン化への布石）:**
+1. **固定px禁止 → 相対単位/レスポンシブ**（%, vw/vh, clamp, flex/grid, minmax）。`height:822px` のような決め打ちをしない。
+2. **「中央コンテンツ＋左サイド＋右サイド」に分離できる DOM/CSS 構造**にする。縦では縦スタック、横では中央=縦の漫画ビューア／左右=順位・SNS・選手情報パネル、へ後から reflow できる土台に。
+
+**将来の段階移行（P10）**: ①framed portrait（縦UI中央＋左右をクラブカラー/エンブレムの装飾アートで16:9化・pillarbox黒帯を額縁演出へ）→ ②売上が立てば横3ゾーン化。根拠＝gtm-strategist 調査（Steam資産は16:9強制／近接ジャンル Reigns・FM・VN は皆PCで横UIに作り直し／Steam Deck は横16:10）。詳細 [DECISIONS.md](DECISIONS.md) 2026-06-30。
+
+---
+
 ## ゲーム化ロードマップ P1〜P3（VISION.md 連動・2026-06-29 追加）
 
 [VISION.md](VISION.md) の MVP 最短経路。各タスク末尾で QAゲート（`node --check` ＋ `regression-harness check 1500` ＋ preview 5174）。

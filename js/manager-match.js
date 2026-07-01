@@ -182,7 +182,10 @@
   }
 
   function _toggleNormalControls(show) {
-    ['next-btn', 'all-btn', 'sub-btn'].forEach(function (id) {
+    // 手動シーン送りの操作群。監督モードでは #mv-controls が采配/再生/結果を担うため全て隠す。
+    // redesign 済み screen-game は tactics-btn（采配 ＝ openSecondHalfSub）を game-controls-row に
+    // 持つので、これも隠さないと #mv-controls の采配ボタンと二重表示になる（Engine 配線）。
+    ['next-btn', 'all-btn', 'sub-btn', 'tactics-btn'].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.style.display = show ? '' : 'none';
     });
@@ -507,21 +510,70 @@
       var st = document.createElement('style');
       st.id = 'mv-style';
       st.textContent = [
-        '#mv-controls{position:sticky;bottom:0;left:0;right:0;display:none;gap:8px;align-items:center;justify-content:center;',
-        'padding:10px 8px;background:linear-gradient(0deg,rgba(2,12,30,.96),rgba(2,12,30,.82));border-top:1px solid rgba(255,255,255,.12);z-index:30}',
-        '.mv-btn{appearance:none;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;',
-        'font-family:inherit;font-weight:800;border-radius:10px;padding:10px 12px;font-size:14px;cursor:pointer;min-width:46px}',
-        '.mv-btn:active{transform:scale(.96)}',
-        '.mv-btn-main{background:#1a7a3a;border-color:#1a7a3a;min-width:54px;font-size:16px}',
-        '.mv-btn-int{background:rgba(243,156,18,.16);border-color:rgba(243,156,18,.6)}',
-        '#mv-decision{display:none;position:absolute;inset:0;z-index:40;flex-direction:column;align-items:center;justify-content:center;',
-        'background:rgba(2,10,26,.82);backdrop-filter:blur(3px);padding:20px;text-align:center}',
-        '.mv-card{background:linear-gradient(160deg,#03245e,#0a3a22);border:1px solid rgba(255,255,255,.18);border-radius:18px;',
-        'padding:22px 20px;max-width:380px;width:92%;box-shadow:0 18px 50px rgba(0,0,0,.5)}',
-        '#mv-dec-title{font-size:22px;font-weight:900;color:#fff;margin-bottom:6px}',
-        '#mv-dec-sub{font-size:13px;color:#cfe0ff;margin-bottom:12px}',
-        '#mv-dec-score{font-size:15px;color:#fff;margin-bottom:18px;line-height:1.5}',
-        '.mv-dec-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}'
+        /* ── コントロールバー＝下端の"操作シェルフ"（作り込まれたモバイルゲームHUDと同質感）── */
+        '#mv-controls{position:sticky;bottom:0;left:0;right:0;display:none;',
+        'gap:clamp(7px,2.2vw,11px);align-items:stretch;justify-content:center;z-index:30;',
+        'padding:clamp(9px,2.6vw,13px) clamp(11px,3.6vw,18px) calc(clamp(9px,2.6vw,13px) + env(safe-area-inset-bottom,0px));',
+        'background:linear-gradient(0deg,#050a14 0%,rgba(6,11,22,.96) 62%,rgba(6,11,22,.72) 100%);',
+        'border-top:1px solid rgba(255,255,255,.10);box-shadow:0 -10px 28px rgba(0,0,0,.5)}',
+        /* 共通ボタン：ピル状・44px 以上・内側ハイライト＋下影で立体感 */
+        '.mv-btn{appearance:none;-webkit-appearance:none;box-sizing:border-box;',
+        'display:flex;align-items:center;justify-content:center;gap:.4em;',
+        'border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.03));',
+        'color:#eaf1ff;font-family:inherit;font-weight:800;letter-spacing:.02em;',
+        'border-radius:14px;padding:0 clamp(11px,3.4vw,16px);min-height:clamp(46px,12.6vw,52px);',
+        'font-size:clamp(13px,3.6vw,15px);line-height:1;cursor:pointer;white-space:nowrap;',
+        'box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 2px 6px rgba(0,0,0,.32);',
+        'transition:transform .08s ease,filter .12s ease}',
+        '.mv-btn:active{transform:translateY(1px) scale(.985);filter:brightness(.94)}',
+        /* ▶/⏸ ＝主役：緑グラデ＋発光、幅を持たせて構図の重心に */
+        '.mv-btn-main{flex:0 0 auto;min-width:clamp(66px,20vw,88px);',
+        'font-size:clamp(18px,5.2vw,22px);color:#fff;',
+        'background:linear-gradient(180deg,#25a355,#178040);border-color:rgba(255,255,255,.28);',
+        'box-shadow:inset 0 1px 0 rgba(255,255,255,.34),0 4px 14px rgba(23,128,64,.45)}',
+        /* 速度＝トグル感（内側に沈んだ地＋数字を明るく） */
+        '.mv-btn-speed{flex:0 0 auto;min-width:clamp(48px,13vw,58px);color:#9fe0ff;',
+        'font-size:clamp(15px,4.2vw,17px);font-weight:900;font-variant-numeric:tabular-nums;',
+        'background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));',
+        'box-shadow:inset 0 2px 5px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}',
+        /* 采配＝アクセント（琥珀） */
+        '.mv-btn-int{flex:0 1 auto;color:#ffdf9e;',
+        'background:linear-gradient(180deg,rgba(243,156,18,.24),rgba(243,156,18,.10));',
+        'border-color:rgba(243,156,18,.55);',
+        'box-shadow:inset 0 1px 0 rgba(255,224,150,.22),0 2px 8px rgba(243,156,18,.22)}',
+        /* 結果＝控えめ（地に沈める） */
+        '.mv-btn-ghost{flex:0 1 auto;color:#9fb0c9;border-color:rgba(255,255,255,.10);',
+        'background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));box-shadow:none}',
+        '.mv-btn-ic{font-size:1.05em;opacity:.95}',
+        /* ── 采配ポイント・モーダル（角丸パネル／上質な奥行き／タイポ階層）── */
+        '#mv-decision{display:none;position:absolute;inset:0;z-index:40;flex-direction:column;',
+        'align-items:center;justify-content:center;',
+        'background:radial-gradient(120% 90% at 50% 40%,rgba(3,8,20,.78),rgba(2,6,16,.9));',
+        '-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);',
+        'padding:clamp(18px,5vw,26px);text-align:center;animation:mvDecIn .28s ease}',
+        '@keyframes mvDecIn{from{opacity:0}to{opacity:1}}',
+        '.mv-card{position:relative;box-sizing:border-box;width:min(92%,392px);',
+        'padding:clamp(20px,5.6vw,28px) clamp(18px,5vw,24px) clamp(16px,4.4vw,22px);',
+        'border-radius:clamp(18px,4.8vw,22px);',
+        'background:linear-gradient(165deg,#0b2a54 0%,#0a2340 46%,#0b3324 100%);',
+        'border:1px solid rgba(255,255,255,.14);',
+        'box-shadow:0 24px 60px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.12);',
+        'animation:mvCardIn .32s cubic-bezier(.2,.9,.3,1.1)}',
+        '@keyframes mvCardIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}',
+        /* カード上端のアクセントライン（額縁の"きらめき"） */
+        '.mv-card::before{content:"";position:absolute;left:clamp(18px,5vw,24px);right:clamp(18px,5vw,24px);top:0;height:2px;',
+        'background:linear-gradient(90deg,transparent,rgba(143,211,255,.7),rgba(255,223,158,.7),transparent);border-radius:2px}',
+        '#mv-dec-title{font-size:clamp(21px,6vw,25px);font-weight:900;color:#fff;line-height:1.15;',
+        'margin-bottom:clamp(4px,1.4vw,7px);letter-spacing:.01em;text-shadow:0 2px 10px rgba(0,0,0,.4)}',
+        '#mv-dec-sub{font-size:clamp(12px,3.4vw,13.5px);color:#b9cdf0;margin-bottom:clamp(12px,3.4vw,16px);line-height:1.4}',
+        /* スコアは"帯"に載せて情報を締める */
+        '#mv-dec-score{display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.5em;',
+        'font-size:clamp(13px,3.8vw,15px);color:#eaf1ff;line-height:1.4;',
+        'margin:0 auto clamp(16px,4.4vw,20px);padding:clamp(8px,2.4vw,11px) clamp(12px,3.4vw,16px);',
+        'background:rgba(3,8,18,.5);border:1px solid rgba(255,255,255,.10);border-radius:12px}',
+        '#mv-dec-score b{font-size:1.24em;font-weight:900}',
+        '.mv-dec-row{display:flex;gap:clamp(8px,2.6vw,11px);justify-content:center;align-items:stretch}',
+        '.mv-dec-row .mv-btn-main{min-width:clamp(60px,18vw,74px)}'
       ].join('');
       document.head.appendChild(st);
     }
@@ -530,10 +582,10 @@
     var bar = document.createElement('div');
     bar.id = 'mv-controls';
     bar.innerHTML =
-      '<button class="mv-btn mv-btn-main" id="mv-pp" onclick="_mvTogglePlay()">⏸</button>' +
-      '<button class="mv-btn" id="mv-speed" onclick="_mvCycleSpeed()">1×</button>' +
-      '<button class="mv-btn mv-btn-int" onclick="_mvOpenSetting()">📋 ' + _mvT('采配', 'Plan') + '</button>' +
-      '<button class="mv-btn" onclick="_mvSkipToEnd()">⏭ ' + _mvT('結果', 'Result') + '</button>';
+      '<button class="mv-btn mv-btn-main" id="mv-pp" onclick="_mvTogglePlay()" aria-label="' + _mvT('再生／一時停止', 'Play / Pause') + '">⏸</button>' +
+      '<button class="mv-btn mv-btn-speed" id="mv-speed" onclick="_mvCycleSpeed()" aria-label="' + _mvT('再生速度', 'Playback speed') + '">1×</button>' +
+      '<button class="mv-btn mv-btn-int" onclick="_mvOpenSetting()"><span class="mv-btn-ic">📋</span>' + _mvT('采配', 'Plan') + '</button>' +
+      '<button class="mv-btn mv-btn-ghost" onclick="_mvSkipToEnd()"><span class="mv-btn-ic">⏭</span>' + _mvT('結果', 'Result') + '</button>';
     host.appendChild(bar);
 
     // 采配パネル（采配する／続ける）。

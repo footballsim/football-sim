@@ -754,100 +754,293 @@ body {
 
 /* ===== GAME SCREEN ===== */
 #screen-game {
-  background: var(--dark);
+  /* 統一余白スケール（試合画面ローカル）。HUD→主役→実況→操作 を一貫リズムで配置。
+     --gap-band: ゾーン間の呼吸。--pad-x: 画面横の安全マージン。 */
+  --gap-band: clamp(8px, 2.4vw, 13px);
+  --pad-x: clamp(11px, 3.6vw, 18px);
+  --panel-radius: clamp(12px, 3.4vw, 16px);
+  --hairline: rgba(255,255,255,0.08);
+  background: radial-gradient(120% 80% at 50% 0%, #10192b 0%, #0b1320 48%, #081410 100%);
+  color: #fff;
   /* ボタンを常にファーストビューに固定するため、画面高さを100dvhで固定する。
      dvh = dynamic viewport height（SafariのツールバーUI変化に対応）。
      .screen の min-height:100vh を上書きする。 */
   height: 100dvh;
   min-height: 0;
+  /* 縦スタックのまま 3ゾーン構造を内側 .match が担う */
+  padding: 0;
 }
 
-/* ===== LIVE FIELD（案A: フォーカスモードフィールド）===== */
-#live-field-wrap {
-  width: 100%;
-  max-width: 520px;
-  margin: 0 auto;
-  overflow: hidden;
+/* ===== 没入レイアウト（Variant B 改）＝カットインを画面幅いっぱいの主役バンドに、HUD/実況/操作を重ねる =====
+   現状アートは横長 480×216。縦長端末を全面で埋められないため、画面を「連続した中央コラム」
+   （HUD → 主役バンド → 実況 → 操作）として上下を詰め、余白は画面上下端のシネマ・マット帯に集約する。
+   ＝中間にデッドスペースを作らず、上下端の対称マットだけが"意図したレターボックス"として残る構図。
+   ★将来：縦長アートが来たら stage-bg を inset:0 のフルブリード背景＋HUD/実況を absolute 重ねへ戻すだけ。
+   DOM論理（HUD/カットイン/実況/操作）はそのまま＝将来の横reflowの土台。 */
+.match--immersive {
   position: relative;
-  border-bottom: 2px solid rgba(255,255,255,0.08);
-  flex-shrink: 0;
-}
-#live-field-wrap svg {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   /* 中央コラムを縦中央へ＝上下端のマットが対称になる */
+  height: 100%;
   width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow: hidden;
+  /* 全面のシネマ・マット（無地ダーク＋ごく薄い上スタンド光／下ピッチ光）。バンド上下の帯が意図的に見える地。 */
+  background:
+    radial-gradient(120% 42% at 50% 0%, rgba(40,58,96,0.22), transparent 62%),
+    radial-gradient(120% 38% at 50% 100%, rgba(26,70,46,0.18), transparent 60%),
+    #05080f;
 }
-/* 簡易フィールド図（カットインの下に常時表示・どのエリアでマッチアップかだけ示す） */
-#mini-field-wrap {
+
+/* --- カットイン＝中央の主役バンド（画面幅フルブリード）--- */
+.zone-center.stage-bg {
+  position: relative;
+  z-index: 1;
+  order: 2;                  /* 中央コラムの並び：HUD(1) → バンド(2) → 実況/操作(3) */
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  max-width: 220px;
-  margin: 8px auto 0;
-  flex-shrink: 0;
+  min-height: 0;
 }
-#mini-field-wrap svg {
-  display: block;
-  width: 100%;
-  border-radius: 6px;
+
+/* --- 上下スクリム＝画面端のマット帯（HUD/操作の可読性＋シネマのレターボックス感）--- */
+.scrim { position: absolute; left: 0; right: 0; z-index: 2; pointer-events: none; }
+.scrim-top {
+  top: 0;
+  height: clamp(120px, 22vh, 190px);
+  background: linear-gradient(180deg, rgba(4,8,16,0.92) 0%, rgba(4,8,16,0.55) 55%, transparent 100%);
+}
+.scrim-bottom {
+  bottom: 0;
+  height: clamp(300px, 46vh, 430px);
+  background: linear-gradient(0deg, rgba(4,8,16,0.96) 0%, rgba(4,8,16,0.82) 48%, rgba(4,8,16,0.34) 78%, transparent 100%);
+}
+
+/* --- ゾーン＝中央コラム内のUIレイヤー（flow＋スクリムの上）--- */
+.zone-top {
+  position: relative;
+  z-index: 3;
+  order: 1;                  /* HUD は中央コラムの最上段 */
+  flex: 0 0 auto;
+  padding: calc(var(--gap-band) + env(safe-area-inset-top, 0px)) var(--pad-x) var(--gap-band);
+}
+.zone-bottom {
+  position: relative;
+  z-index: 3;
+  order: 3;                  /* 実況＋操作は最下段 */
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--gap-band) var(--pad-x) calc(var(--gap-band) + env(safe-area-inset-bottom, 0px));
+  gap: var(--gap-band);
+}
+
+/* ===== ZONE TOP: HUD（スクリム上に重なる中継スコアバグ）=====
+   没入レイアウトでは HUD 自体のパネル地は薄く（スクリムが地を作る）。スコアバグだけ質感を残す。 */
+.hud {
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .scoreboard {
-  background: linear-gradient(90deg, #003087, #001f6e, #003087);
-  padding: 12px 20px;
+  position: relative;
   display: flex;
-  align-items: flex-end;       /* スコア数字とコロンを下端(同じ高さ)で揃える */
-  justify-content: center;     /* 両チームを離さず中央クラスタに */
-  gap: 26px;                   /* チーム / : / チーム の間隔 */
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  align-items: stretch;
+  justify-content: center;
+  gap: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  /* 半透明ガラスのスコアバグ＝スクリム上で浮かず、絵を透かして見せる */
+  background: rgba(16,22,34,0.5);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+  -webkit-backdrop-filter: blur(8px) saturate(1.1);
+  backdrop-filter: blur(8px) saturate(1.1);
   width: 100%;
-  max-width: 520px;       /* 全幅をやめて細く・中央寄せ（画面で微調整可） */
-  margin: 0 auto;
   box-sizing: border-box;
 }
 
 .team-score {
+  flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  min-width: 64px;
+  gap: clamp(5px, 1.6vw, 9px);
+  padding: clamp(7px, 2.2vw, 11px) clamp(10px, 3vw, 16px);
+  background: transparent;
+  min-width: 0;
+}
+.team-score.side-r { justify-content: flex-end; }
+
+.team-chip {
+  width: 5px;
+  height: 1.6em;
+  border-radius: 3px;
+  flex: 0 0 auto;
+  background: #888;          /* JS が team_color をセット */
 }
 
 .team-flag-name {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: clamp(12px, 3.4vw, 15px);
   font-weight: 700;
-  color: #fff;            /* 国名を白に（紺背景で読めるよう明示） */
+  color: #fff;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.score-divider {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: clamp(4px, 1.4vw, 8px);
+  padding: 0 clamp(10px, 3vw, 16px);
+  background: rgba(6,10,18,0.55);
 }
 
 .score-num {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 34px;        /* 48px から縮小 */
+  font-size: clamp(22px, 6.4vw, 30px);
   line-height: 1;
-  color: white;
-}
-
-.score-divider {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  color: #fff;
+  min-width: 0.7em;
+  text-align: center;
 }
 
 .score-colon {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 34px;        /* スコア数字と同じ高さに合わせる */
+  font-size: clamp(20px, 5.6vw, 26px);
   line-height: 1;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.35);
 }
 
+/* HUD隅の早送り（旧 一気に試合終了）= 小アイコン */
+.skip-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 3;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: rgba(8,12,20,0.55);
+  color: rgba(255,255,255,0.75);
+  cursor: pointer;
+  font-size: 0;                 /* JS の textContent 書き換えを隠す */
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.skip-btn::before {
+  content: "⏭";
+  font-size: 12px;
+  line-height: 1;
+}
+.skip-btn:hover { background: rgba(8,12,20,0.85); color: #fff; }
+.skip-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* HUD meta: 試合時計 ＋ ポゼッションバー */
+.hud-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 2.5vw, 12px);
+  margin-top: clamp(5px, 1.8vw, 9px);
+}
 .game-time {
-  /* スコアボード内の時間表示は非表示（時間はカットイン左上に集約）。
-     要素は残す＝ゲームループが値をセットし、cutscene.js が textContent を読む。 */
-  display: none;
-  font-size: 11px;
-  color: var(--gold);
-  letter-spacing: 1px;
+  display: inline-block;        /* 旧 display:none を解除＝HUDに常時表示 */
+  font-size: clamp(11px, 3vw, 13px);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.poss-bar {
+  display: flex;
+  height: 5px;
+  width: clamp(120px, 46%, 220px);
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.12);
+}
+.poss-bar i { display: block; height: 100%; }
+.poss-bar .poss-h { width: 50%; background: #ef4444; }
+.poss-bar .poss-a { width: 50%; background: #3b82f6; }
+
+/* ===== ZONE CENTER: カットイン＝主役バンド（没入レイアウト）=====
+   カットイン native は現状まだ横長 480×216（2.22:1）。ラップ自身を 16:9 の帯にして画面幅いっぱいに広げ、
+   canvas は cover で帯にぴったり収める（左右をごく僅かクロップ＝中央の選手は保持、観客席占拠は回避）。
+   こうすると「透明なデッドキャンバス」が生じず、帯の上下は .match のシネマ・マット帯になる。
+   ★将来：参考画像級の縦長アートが来たら aspect-ratio 行を外し、wrap を inset:0 + height:100% の
+     フルブリード背景に戻す＋下の object-fit を絵に合わせて選ぶ（"OBJECT-FIT 切替点" 参照）。 */
+#live-field-wrap {
+  position: relative;
+  width: 100%;
+  /* 横長アート期の主役バンド。16:9（アートより縦に伸ばし cover で左右を僅かクロップ）でマットを最小化。
+     縦長アート差替え時はこの aspect-ratio 行を外す。 */
+  aspect-ratio: 16 / 9;
+  height: auto;
+  max-height: min(52vh, 320px);   /* 中央コラムを圧迫しない上限。実況/操作の空間を確保 */
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #070b13;
+  /* 帯の上下端をマットへソフトに溶かす（ハードな額縁にせず没入感を保つ）。左右はフルブリードのまま。 */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  box-shadow: 0 0 60px rgba(0,0,0,0.55);
+}
+/* カットイン本体（canvas / フォールバックsvg）。インライン style="width:100%" を上書きするため !important。 */
+#live-field-wrap > canvas,
+#live-field-wrap > svg {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  /* ===== OBJECT-FIT 切替点 ===== 横長アート期は帯にちょうど収まるので cover で隙間なく充填。
+     縦長アート差替え後は wrap を全画面化し、ここは contain/cover を絵に合わせて選ぶ。 */
+  object-fit: cover;
+  object-position: 50% 44%;
+  image-rendering: pixelated; /* ピクセルアートを拡大してもくっきり */
+  image-rendering: crisp-edges;
+}
+/* ミニフィールド = 主役バンド右上隅の小さなタクティカル・インセット（中継風に重ねる） */
+#mini-field-wrap {
+  position: absolute;
+  right: clamp(8px, 2.4vw, 14px);
+  top: clamp(8px, 2.4vw, 14px);
+  z-index: 4;
+  width: clamp(78px, 22vw, 112px);
+  margin: 0;
+  padding: 2px;
+  border-radius: 7px;
+  background: rgba(8,12,20,0.62);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.12) inset;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+#mini-field-wrap svg {
+  display: block;
+  width: 100%;
+  border-radius: 5px;
+  opacity: 0.95;
 }
 
 /* GAME LOG */
@@ -856,11 +1049,12 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 16px;
-  gap: 12px;
-  max-width: 700px;
-  margin: 0 auto;
+  padding: 0;
+  gap: var(--gap-band);
   width: 100%;
+  box-sizing: border-box;
+  min-height: 0;
+  flex: 0 1 auto;           /* 内容サイズ。実況＋操作は下端に積む（zone-bottom の justify-end で下寄せ）。 */
 }
 
 .chance-counter-display {
@@ -874,26 +1068,70 @@ body {
   color: var(--text-dim);
 }
 
+/* 実況ログ＝漫画のネーム（黒帯＋白縁＋ドロップシャドウ）。
+   暗背景に溶け込むダークコンテナ＋各シーンを黒帯キャプションで表示。 */
+/* 実況パネル＝1枚の読み物エリア（フレーム直下の中継テロップ欄）。
+   微かな段差・内側シャドウで"地"を作り、中身が少なくても空のボーダー枠が浮かない。
+   通常フロー（上→下）＋ overflow:auto。JS の scrollTop=scrollHeight で最新が常に見える。
+   flex-end は使わない（coach-card 混在＋逐次追記でスクロール計算が壊れるため）。 */
+/* 没入レイアウト：実況ログは「地」を持たない（下端スクリムが地）。漫画ネームのキャプションだけが浮く。
+   高さは内容に応じて伸縮するが max-height で上限を切り、主役カットインの上半身を隠さない。 */
 .log-area {
-  flex: 1;
-  background: var(--surface);
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.1);
-  padding: 16px;
-  overflow-y: auto;
-  /* min-height/max-height は削除。flex:1 で残り高さをすべて占有し、
-     その範囲内でスクロールする。ボタンは常にビューポート内に収まる。 */
+  /* 監督モード＝自動再生では実況が溜まらないよう「直近1コマのみ」を表示する（下記 :not(:last-child) で過去を畳む）。
+     容器自体は伸縮せず、常に最新1枚ぶんの高さに収まる＝バンド下端〜操作の間にデッドスペースを作らない。 */
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;   /* 最新1枚を下端＝操作ボタンの直上に接地させる（浮かせない） */
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  overflow: visible;
+  min-height: 0;
 }
 
+/* 実況ログ latest-only：過去のコマ（漫画ネーム／コーチカード）は畳んで見せない。
+   最新の1件（＝パネル末尾の子要素）だけを主役として1枚提示する。
+   ★scrollTop=scrollHeight のロジックは残るが overflow:visible なので副作用なし。 */
+.log-area > *:not(:last-child) {
+  display: none !important;
+}
+
+/* さらに「最新の1文だけ」に絞る：自動再生では 1ビートごとに .log-text 末尾へ文(div)が追記される。
+   最新チャンス(.log-event:last-child)内の .log-text の最後の div だけ残し、過去の文は畳む。
+   ＝現在のカットインに同期した1文だけが漫画1コマとして読める。.log-time(前半◯分)は残す。
+   JS(append)は不変。CSS で見せ方だけ最新1文に絞る。 */
+.log-area > .log-event:last-child .log-text > *:not(:last-child) {
+  display: none !important;
+}
+.log-area > .log-event:last-child .log-text > *:last-child {
+  margin-bottom: 0 !important;   /* 末尾1文は下マージン不要（パネルを1文高さに締める） */
+}
+
+/* 実況シーン＝漫画ネーム（黒帯＋白2px縁＋ドロップシャドウ）。各シーンを1枚のキャプションとして提示。
+   過去シーンは少し減光して沈め、最新（パネル末尾＝スクロール到達点）に視線が向く。
+   最新の厳密な選択は coach-card 混在で CSS 単独では不安定なため、全シーンを同一様式で統一し、
+   "最新がパネル最下部に来る（scroll-to-bottom）"ことで主役性を担保する。 */
 .log-event {
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  border-radius: 8px;
-  font-size: 13px;
-  line-height: 1.7;
-  border-left: 3px solid transparent;
+  position: relative;
+  padding: clamp(11px, 3.2vw, 15px) clamp(13px, 3.8vw, 17px);
+  margin: 0;                 /* latest-only：1枚のみ表示のため縦マージン不要 */
+  font-size: clamp(12px, 3.4vw, 13.5px);
+  line-height: 1.55;
+  font-weight: 600;
+  color: #fff;
+  /* 没入レイアウト：半透明ダーク背景＋白縁の漫画ネーム枠（絵を透かしつつ文字を読ませる） */
+  background: rgba(12,16,24,0.78);
+  border: 2px solid rgba(255,255,255,0.92);
+  border-radius: 3px;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
   animation: fadeIn 0.4s ease;
 }
+/* latest-only：表示される最新1枚は margin ゼロで下端＝操作直上に接地。 */
+.log-area > *:last-child { margin: 0; }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -901,33 +1139,37 @@ body {
 }
 
 .log-event.goal {
-  background: rgba(184,134,11,0.1);
-  border-left-color: var(--gold);
+  background: linear-gradient(135deg, #2a1d05, #1a1205);
+  border-color: var(--gold);
+  box-shadow: 4px 4px 0 rgba(184,134,11,0.4);
 }
-
-.log-event.normal {
-  background: rgba(0,0,0,0.04);
-  border-left-color: rgba(0,0,0,0.15);
-}
-
+.log-event.normal { background: #11151d; }
 .log-event.counter {
-  background: rgba(188,0,45,0.08);
-  border-left-color: var(--japan-red);
+  background: linear-gradient(135deg, #2a0a13, #15141d);
+  border-color: var(--japan-red);
+  box-shadow: 4px 4px 0 rgba(188,0,45,0.45);
 }
 
 .log-time {
-  font-size: 11px;
+  font-size: clamp(10px, 2.8vw, 11.5px);
   color: var(--gold);
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 0.5px;
   margin-bottom: 4px;
 }
 
 .log-text {
-  color: var(--text);
+  color: #fff;
+}
+/* 漫画ネーム: 選手名は黄色アクセント側へ寄せて視認性を確保（エンジンの team_color インライン名にも縁取りで"熱"を出す） */
+.log-text b,
+.log-text span[style*="font-weight"] {
+  text-shadow: 0 0 1px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,0.7);
+  filter: brightness(1.55) saturate(1.1);
 }
 .coach-card {
-  margin: 6px 0;
-  padding: 10px 14px;
+  margin: 0;                 /* latest-only：1枚表示のため縦マージン不要 */
+  padding: 12px 15px;
   background: linear-gradient(135deg, #0a2a5c 0%, #0d4a28 100%);
   border-left: 4px solid #f39c12;
   border-radius: 8px;
@@ -948,46 +1190,102 @@ body {
 .coach-card-body  { font-size: 12px; }
 .coach-card-body b { color: #ffe066; }
 
+/* ===== 監督モード（自動再生）レイアウト補正 =====================================
+   #mv-controls（監督コントロールバー）が存在＝監督モード。latest-only で実況が1枚に締まると
+   中央寄せ構図では上下に大きなデッドスペースが生まれる。監督モードでは：
+   ・#screen-game を縦 flex にして .match--immersive を伸縮させ、#mv-controls を末尾フローに接地
+   ・中央コラムは上寄せ（HUD→カットイン→実況を上部に密集）＝下端の余白は操作バーが吸収
+   ・カットイン主役バンドの上限を引き上げ、実況1枚と合わせて画面を埋める
+   :has() 非対応ブラウザは従来の中央寄せにフォールバック（破綻はしない）。 */
+#screen-game:has(> #mv-controls) {
+  display: flex;
+  flex-direction: column;
+}
+#screen-game:has(> #mv-controls) .match--immersive {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  justify-content: center;   /* HUD→カットイン→実況の塊を縦中央に置き、残りを上下の小さなマットへ均等配分 */
+}
+/* ステージは art サイズ（伸ばさない）＝帯内に空きを作らない。残余は .match の中央寄せが上下マットへ配分。
+   art の描画が間に合わない瞬間もレイアウトが跳ねないよう min-height で帯高さを予約する。 */
+#screen-game:has(> #mv-controls) .zone-center.stage-bg {
+  flex: 0 0 auto;
+  min-height: min(56vh, 430px);
+}
+#screen-game:has(> #mv-controls) #live-field-wrap {
+  /* 監督モードの主役帯：art で帯を隙間なく満たす（stage の予約高＝帯高と一致させ、帯内の空きを消す）。
+     縦に伸びた分は object-fit:cover が充填（左右は元々フルブリード）＝中央の選手を保持。 */
+  aspect-ratio: auto;
+  height: 100%;
+  max-height: none;
+}
+/* 実況（latest-only 1枚）はカットイン直下に接地。zone-bottom は伸びず内容サイズ。 */
+#screen-game:has(> #mv-controls) .zone-bottom {
+  flex: 0 0 auto;
+}
+/* #mv-controls は末尾フローに接地（sticky の宙吊りを解消）。JS の :not(:last-child) 等は不変。 */
+#screen-game:has(> #mv-controls) #mv-controls {
+  position: relative;
+}
+
 /* GAME CONTROLS */
 .game-controls {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  flex-shrink: 0; /* 絶対に縮まないようにする */
-  padding-bottom: env(safe-area-inset-bottom, 8px); /* iPhoneホームインジケーター対応 */
+  gap: var(--gap-band);
+  flex-shrink: 0; /* 絶対に縮まないようにする（操作は常時可視）。安全領域は .match 側で確保。 */
 }
 .game-controls-row {
   display: flex;
-  gap: 10px;
+  gap: clamp(7px, 2.4vw, 12px);
 }
 
-.next-btn, .all-btn {
-  flex: 1;
-  padding: 14px;
+.next-btn, .tactics-btn, .sub-btn {
+  padding: clamp(12px, 3.6vw, 15px);
   border: none;
-  border-radius: 10px;
+  border-radius: 26px;
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 14px;
+  font-size: clamp(13px, 3.6vw, 14.5px);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
 }
 
+/* 主操作: 次のシーン（中継風ピル・青）*/
 .next-btn {
-  background: var(--japan-blue);
-  color: white;
+  flex: 1;
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(59,130,246,0.35);
 }
+.next-btn:hover { background: #2f6fe0; }
+.next-btn:disabled { background: #2a3445; color: #6b7588; cursor: not-allowed; box-shadow: none; }
 
-.next-btn:hover { background: #0050cc; }
-.next-btn:disabled { background: #ccc; color: #888; cursor: not-allowed; }
-
-.all-btn {
-  background: var(--surface2);
-  color: var(--text-dim);
-  border: 1px solid rgba(0,0,0,0.15);
+/* 副操作: 采配（緑アクセント枠）*/
+.tactics-btn {
+  flex: 0 0 38%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: #13210f;
+  color: #bfe6a8;
+  border: 1.5px solid #2f7d2a;
 }
+.tactics-btn:hover { background: #1a2e14; color: #d7f3c4; }
+.tactics-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.tactics-btn .tactics-ic { font-size: 1.05em; }
 
-.all-btn:hover { background: #d0ddd0; color: var(--text); }
+/* 後半交代ボタン（全幅・緑系）*/
+.sub-btn {
+  width: 100%;
+  background: #13210f;
+  color: #bfe6a8;
+  border: 1.5px solid #2f7d2a;
+  font-weight: 700;
+}
+.sub-btn:hover { background: #1a2e14; color: #d7f3c4; }
 
 /* ===== RESULT SCREEN ===== */
 #screen-result {

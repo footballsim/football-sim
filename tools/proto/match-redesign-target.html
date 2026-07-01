@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>試合パート リデザイン — 確定ターゲット（B中継 ＋ A実況ネーム）</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ background:#1c1c22; font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif; color:#fff; padding:24px 16px 56px; }
+  .head{ text-align:center; margin-bottom:18px; }
+  .head h1{ font-size:15px; font-weight:700; }
+  .head p{ font-size:11.5px; color:#8b909c; margin-top:4px; }
+  .stage{ display:flex; gap:30px; justify-content:center; align-items:flex-start; flex-wrap:wrap; }
+
+  /* phone frame — 相対単位ベース(縦vh/横%)・固定pxは枠だけ */
+  .phone{
+    width:min(380px,92vw); aspect-ratio:9/19.2; border-radius:30px; overflow:hidden;
+    border:6px solid #000; background:#0e131c; box-shadow:0 18px 44px rgba(0,0,0,.55);
+    display:flex; flex-direction:column;
+  }
+  /* === 3ゾーン分離可能な構造（縦=スタック / 将来 横=中央+左右へ reflow）=== */
+  .match{ display:flex; flex-direction:column; height:100%; }
+  .zone-top{ flex:0 0 auto; }       /* HUD */
+  .zone-center{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; } /* 漫画ビューア(将来は中央列) */
+  .zone-bottom{ flex:0 0 auto; }    /* 実況＋操作(将来は右サイド列へ移せる) */
+
+  /* --- HUD: TV中継スコアバグ --- */
+  .hud{ padding:2.2% 3.5% 1.6%; background:linear-gradient(180deg,#141b29,#0e131c); }
+  .scorebug{ display:flex; align-items:stretch; border-radius:8px; overflow:hidden; box-shadow:0 4px 14px rgba(0,0,0,.4); }
+  .side{ flex:1; display:flex; align-items:center; gap:2.5%; padding:3% 4%; background:#1a2230; min-width:0; }
+  .side.r{ justify-content:flex-end; }
+  .chip{ width:5px; height:1.5em; border-radius:3px; flex:0 0 auto; }
+  .chip.red{background:#ef4444;} .chip.blue{background:#3b82f6;}
+  .nm{ font-weight:700; font-size:clamp(12px,3.7vw,15px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .num{ background:#0b1018; padding:3% 5%; display:flex; align-items:center; font-weight:800; font-size:clamp(18px,6vw,24px); }
+  .num small{ color:#5b6577; padding:0 5px; }
+  .meta{ display:flex; align-items:center; justify-content:center; gap:10px; margin-top:2.5%; }
+  .clock{ font-size:12px; color:#8a98ae; letter-spacing:1px; } .clock b{ color:#fff; }
+  .poss{ display:flex; height:5px; width:46%; border-radius:3px; overflow:hidden; }
+  .poss i{ display:block; height:100%; } .poss .h{ width:58%; background:#ef4444; } .poss .a{ width:42%; background:#3b82f6; }
+
+  /* --- 中央: 漫画コマ（カットイン）--- */
+  .viewer{ flex:1; min-height:0; padding:0 3%; position:relative; }
+  .panel{ width:100%; height:100%; border-radius:14px; overflow:hidden; position:relative; }
+  .toon{ width:100%; height:100%;
+    background:
+      radial-gradient(circle at 32% 34%, rgba(255,255,255,.07), transparent 42%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,.022) 0 2px, transparent 2px 7px),
+      linear-gradient(160deg,#1d3a6e,#14306b 45%,#1a5a37);
+    display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.5); font-size:12px; letter-spacing:1px; }
+  .toon span{ border:1px dashed rgba(255,255,255,.3); padding:6px 12px; border-radius:4px; }
+  .panel::after{ content:""; position:absolute; inset:0; box-shadow:inset 0 0 70px rgba(0,0,0,.5); border-radius:14px; pointer-events:none; }
+  /* 中継スコアバグ(コマ隅) */
+  .bug{ position:absolute; left:4%; top:5%; z-index:3; background:rgba(8,12,20,.82); border-radius:7px; padding:5px 9px; font-size:11.5px; font-weight:700; display:flex; gap:7px; align-items:center; }
+  .bug .d{ width:4px; height:13px; background:#ef4444; border-radius:2px; }
+
+  /* --- 下: A漫画ネーム(キャプション) ＋ 操作 --- */
+  .zone-bottom{ padding:3% 3% 4.5%; }
+  .caption{ position:relative; background:#000; border:2px solid #fff; padding:3.4% 4%; font-size:clamp(12px,3.5vw,13.5px); line-height:1.5; font-weight:600; box-shadow:4px 4px 0 rgba(0,0,0,.55); margin-bottom:3.4%; }
+  .caption .mic{ color:#7fb2ff; margin-right:4px; }
+  .caption b{ color:#ffd23b; }     /* 選手名は黄色アクセント(漫画ネーム) */
+  .ctrl{ display:flex; gap:3%; }
+  .ctrl button{ flex:1; border:none; padding:4% ; border-radius:26px; font-size:clamp(12px,3.6vw,13.5px); font-weight:700; cursor:pointer; }
+  .b1{ background:#3b82f6; color:#fff; } .b2{ background:#13210f; color:#bfe6a8; border:1.5px solid #2f7d2a; flex:0 0 36%; }
+  .b2 .ic{ margin-right:5px; }
+
+  .note{ width:min(380px,92vw); font-size:11px; color:#aab; line-height:1.75; }
+  .note h3{ font-size:12.5px; color:#fff; margin-bottom:6px; }
+  .note b{ color:#fff; font-weight:700; }
+  .tag{ display:inline-block; background:#222c3a; color:#9fd0ff; font-size:10px; padding:2px 7px; border-radius:10px; margin-right:5px; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <h1>⚽ 試合パート リデザイン — 確定ターゲット</h1>
+    <p>B（TV中継）を核 ＋ 実況テキスト枠だけ A（週刊漫画のネーム）／縦長・相対単位・3ゾーン分離構造</p>
+  </div>
+
+  <div class="stage">
+    <div class="phone">
+      <div class="match">
+        <div class="zone-top">
+          <div class="hud">
+            <div class="scorebug">
+              <div class="side"><span class="chip red"></span><span class="nm">ブラジル</span></div>
+              <div class="num">1<small>:</small>1</div>
+              <div class="side r"><span class="nm">日本</span><span class="chip blue"></span></div>
+            </div>
+            <div class="meta">
+              <span class="clock">前半 <b>23'</b></span>
+              <span class="poss"><i class="h"></i><i class="a"></i></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="zone-center">
+          <div class="viewer">
+            <div class="panel">
+              <div class="toon"><span>カットイン演出（Canvasの中＝renderer-dev）</span></div>
+              <div class="bug"><span class="d"></span>BRA 1 - 1 JPN · 23'</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="zone-bottom">
+          <div class="caption"><span class="mic">🎙</span><b>南野</b>、右サイドを切り裂く——ゴールはもう、目の前だ！</div>
+          <div class="ctrl">
+            <button class="b1">次のシーン ▶</button>
+            <button class="b2"><span class="ic">👔</span>采配</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h3>この案の構成</h3>
+      <p><span class="tag">HUD</span>TV中継のスコアバグ＝チームカラーのチップ＋名前＋スコア、下に <b>試合時計</b>と<b>ポゼッションバー</b>。権威性・没入感。</p>
+      <p><span class="tag">中央</span>カットイン演出（あなたの既存資産＝renderer-dev）。隅に中継風スコアバグを小さく重ねる。</p>
+      <p><span class="tag">実況</span><b>漫画のネーム（黒帯＋白縁＋ドロップシャドウ）</b>。選手名は<b style="color:#ffd23b">黄色アクセント</b>で"熱"を出す。中継テロップでなくここだけ漫画。</p>
+      <p><span class="tag">操作</span>主＝<b>次のシーン ▶</b>、副＝<b>采配</b>（早送りを置換）。采配＝既存の設定画面(システム/戦術/交代…)を開き次チャンス以降に反映＝VISIONの介入を常設導線に。</p>
+      <h3 style="margin-top:12px">Steam横化への保険（今から内包）</h3>
+      <p>固定pxを使わず <b>相対単位/clamp</b>。DOMは <b>zone-top / zone-center / zone-bottom</b> に分離済み＝将来 横では「中央=漫画ビューア／左右=順位・実況・選手情報」へ <b>reflow</b> できる。</p>
+    </div>
+  </div>
+</body>
+</html>

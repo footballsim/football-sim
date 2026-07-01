@@ -1135,8 +1135,10 @@ function initSettingScreen() {
   const multiVisible = !isWorldCupMode;
   document.getElementById('btn-multi').style.display    = multiVisible ? '' : 'none';
   document.getElementById('btn-multi100').style.display = multiVisible ? '' : 'none';
+  // 「👔 監督モードで観戦」ボタンは常時非表示。シングルマッチのキックオフが監督モードに委譲済み
+  // （startGame → startManagerMatch）で導線が重複するため、単一の「キックオフ」を主導線に統一する。
   const _bmgr = document.getElementById('btn-manager');
-  if (_bmgr) _bmgr.style.display = multiVisible ? '' : 'none';
+  if (_bmgr) _bmgr.style.display = 'none';
 }
 
 function updateSettingBtnValues() {
@@ -1887,6 +1889,15 @@ function startGame() {
   // 延長戦は _runWCETPhase() で処理するため setting 画面からは実行しない
   if (wcPhase === 'et_first' || wcPhase === 'et_second') return;
 
+  // ★ 監督モードをシングルマッチのデフォルト体験にする（ユーザー確定方針・VISION「監督として読む」）。
+  //   W杯モード（group/knockout）は現状維持＝従来の手動シーン送りで進める。
+  //   isWorldCupMode は startWCMatch/knockout 開始で true、シングルマッチ導線では false。
+  //   startManagerMatch は判定不変の createMatch 経由（デュエル式・カウント・乱数消費に非干渉）。
+  if (!isWorldCupMode && typeof startManagerMatch === 'function') {
+    startManagerMatch();
+    return;
+  }
+
   // Setup opponent state
   const t2sys = system_data.findIndex(s => s.name === team2Data.default_system);
   team2State = {
@@ -1975,6 +1986,16 @@ function startGame() {
   document.getElementById('score-name2').textContent = getTeamName(team2Data);
   document.getElementById('score1').textContent = '0';
   document.getElementById('score2').textContent = '0';
+  // 表示のみ: HUD のチームカラーチップ＆ポゼッションバーをチーム色で着色（IP安全＝名前＋色で同定）。
+  // ポゼッションはエンジン未追跡のため暫定 50/50（engine-dev でポゼッション露出が必要）。
+  {
+    const _c1 = team1Data.team_color || '#ef4444';
+    const _c2 = team2Data.team_color || '#3b82f6';
+    const _chip1 = document.getElementById('score-chip1'); if (_chip1) _chip1.style.background = _c1;
+    const _chip2 = document.getElementById('score-chip2'); if (_chip2) _chip2.style.background = _c2;
+    const _possH = document.getElementById('poss-h'); if (_possH) { _possH.style.background = _c1; _possH.style.width = '50%'; }
+    const _possA = document.getElementById('poss-a'); if (_possA) { _possA.style.background = _c2; _possA.style.width = '50%'; }
+  }
   document.getElementById('log-area').innerHTML = '';
   _pendingCoachCardEl = null; // コーチカード保留をリセット
   // 案A: ライブフィールドをリセット

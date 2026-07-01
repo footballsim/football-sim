@@ -125,7 +125,7 @@
         <span id="x-follow-label">@footballsim_ai をフォロー</span>
       </a>
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v2.5.0</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v2.6.0</div>
     <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;letter-spacing:0.5px">© 2026 footballsim · All rights reserved</div>
   </div>
 </div>
@@ -538,43 +538,73 @@
 
 <!-- GAME SCREEN -->
 <div id="screen-game" class="screen">
-  <div class="scoreboard">
-    <div class="team-score">
-      <div class="team-flag-name">
-        <span id="score-flag1">🇯🇵</span>
-        <span id="score-name1">日本</span>
-      </div>
-      <div class="score-num" id="score1">0</div>
-    </div>
-    <div class="score-divider">
-      <div class="score-colon">:</div>
-      <div class="game-time" id="game-time-display">-</div>
-    </div>
-    <div class="team-score">
-      <div class="team-flag-name">
-        <span id="score-name2">相手</span>
-        <span id="score-flag2">🇳🇱</span>
-      </div>
-      <div class="score-num" id="score2">0</div>
-    </div>
-  </div>
-  <!-- LIVE FIELD: 案A フォーカスモードフィールド -->
-  <div id="live-field-wrap" style="display:none"></div>
-  <!-- 簡易フィールド図（カットインの下に常時表示・どのエリアでマッチアップかだけ示す） -->
-  <div id="mini-field-wrap" style="display:none"></div>
+  <!-- ===== 没入レイアウト（Variant B）：カットインを全画面の背景に、HUD/実況/操作を半透明スクリムで重ねる =====
+       DOM論理構造は HUD / カットイン / 実況 / 操作 を分離（将来の横reflowの土台）。
+       既存 element ID・onclick は全保持（simulate.js が書き込む先）。 -->
+  <div class="match match--immersive">
 
-  <div class="game-content">
-    <div class="chance-counter-display">
-      <span id="chance-label-text">チャンス: </span><span id="chance-count">0</span>/<span id="chance-total">10</span></span>
-      <span id="chance-team-label">-</span>
-      <span id="game-in-progress-label">試合進行中</span>
+    <!-- === カットイン演出＝フルブリード背景（Canvasの中＝renderer-dev / 外側の額装のみ担当）=== -->
+    <div class="zone-center stage-bg">
+      <!-- LIVE FIELD: カットイン本体 -->
+      <div id="live-field-wrap" style="display:none"></div>
+      <!-- 簡易フィールド図（隅インセット・重ね） -->
+      <div id="mini-field-wrap" style="display:none"></div>
     </div>
-    <div class="log-area" id="log-area"></div>
-    <div class="game-controls">
-      <button class="all-btn" id="sub-btn" onclick="openSecondHalfSub()" style="display:none;background:#1a3a6b;color:white;font-weight:700"></button>
-      <div class="game-controls-row">
-        <button class="next-btn" id="next-btn" onclick="nextChance()">次のシーン ▶</button>
-        <button class="all-btn" id="all-btn" onclick="allChances()">一気に試合終了</button>
+
+    <!-- 上端スクリム（HUDの可読性を担保） -->
+    <div class="scrim scrim-top" aria-hidden="true"></div>
+    <!-- 下端スクリム（実況＋操作の可読性を担保） -->
+    <div class="scrim scrim-bottom" aria-hidden="true"></div>
+
+    <!-- ===== ZONE TOP: TV中継スコアバグ ＋ 試合時計 ＋ ポゼッション（重ね）===== -->
+    <div class="zone-top">
+      <div class="hud">
+        <div class="scoreboard">
+          <div class="team-score side-l">
+            <span class="team-chip" id="score-chip1"></span>
+            <div class="team-flag-name">
+              <span id="score-flag1">🇯🇵</span>
+              <span id="score-name1">日本</span>
+            </div>
+          </div>
+          <div class="score-divider">
+            <span class="score-num" id="score1">0</span>
+            <span class="score-colon">:</span>
+            <span class="score-num" id="score2">0</span>
+          </div>
+          <div class="team-score side-r">
+            <div class="team-flag-name">
+              <span id="score-name2">相手</span>
+              <span id="score-flag2">🇳🇱</span>
+            </div>
+            <span class="team-chip" id="score-chip2"></span>
+          </div>
+          <!-- 早送り（旧 一気に試合終了 = allChances）を退避: HUD隅の小アイコン -->
+          <button id="all-btn" class="skip-btn" onclick="allChances()" aria-label="一気に試合終了" title="一気に試合終了"></button>
+        </div>
+        <div class="hud-meta">
+          <span class="game-time" id="game-time-display">-</span>
+          <span class="poss-bar" aria-hidden="true"><i class="poss-h" id="poss-h"></i><i class="poss-a" id="poss-a"></i></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ZONE BOTTOM: 実況ネーム ＋ 操作（重ね）===== -->
+    <div class="zone-bottom">
+      <div class="game-content">
+        <div class="chance-counter-display">
+          <span id="chance-label-text">チャンス: </span><span id="chance-count">0</span>/<span id="chance-total">10</span></span>
+          <span id="chance-team-label">-</span>
+          <span id="game-in-progress-label">試合進行中</span>
+        </div>
+        <div class="log-area" id="log-area"></div>
+        <div class="game-controls">
+          <button class="sub-btn" id="sub-btn" onclick="openSecondHalfSub()" style="display:none"></button>
+          <div class="game-controls-row">
+            <button class="next-btn" id="next-btn" onclick="nextChance()">次のシーン ▶</button>
+            <button class="tactics-btn" id="tactics-btn" onclick="openSecondHalfSub()"><span class="tactics-ic">👔</span><span id="tactics-btn-label">采配</span></button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

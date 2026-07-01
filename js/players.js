@@ -135,7 +135,7 @@ const i18n = {
     labelBench: '控え', labelSystem: 'システム', labelTactics: '戦術',
     labelKeyplayer: 'キープレイヤー', labelMarked: '要注意プレイヤー',
     chanceLabel: 'チャンス:', gameInProgress: '試合進行中',
-    btnNextScene: '次のシーン ▶', btnAllEnd: '一気に試合終了',
+    btnNextScene: '次のシーン ▶', btnAllEnd: '一気に試合終了', btnTactics: '采配',
     btnNextArrow: '次へ →', btnSeeResult: '結果を見る', attackLabel: '攻撃:',
     halfFirst: '前半', halfSecond: '後半', halftimeLoss: '前半ロスタイム', overtimeLoss: '後半ロスタイム', minUnit: '分',
     etFirst: '延長前半', etSecond: '延長後半',
@@ -331,7 +331,7 @@ const i18n = {
     labelBench: 'Bench', labelSystem: 'Formation', labelTactics: 'Tactics',
     labelKeyplayer: 'Key Player', labelMarked: 'Marked Player',
     chanceLabel: 'Chance:', gameInProgress: 'Match in progress',
-    btnNextScene: 'Next Scene ▶', btnAllEnd: 'Skip to Full Time',
+    btnNextScene: 'Next Scene ▶', btnAllEnd: 'Skip to Full Time', btnTactics: 'Tactics',
     btnNextArrow: 'Next →', btnSeeResult: 'See Result', attackLabel: 'Attack:',
     halfFirst: '1st', halfSecond: '2nd', halftimeLoss: '1st Stoppage', overtimeLoss: '2nd Stoppage', minUnit: 'min',
     etFirst: 'ET 1st', etSecond: 'ET 2nd',
@@ -544,7 +544,8 @@ function applyLang() {
   var retryBtn=document.querySelector('.retry-btn'); if(retryBtn) retryBtn.textContent=t('btnRetry');
   var homeBtn=document.querySelector('.home-btn'); if(homeBtn) homeBtn.textContent=t('btnHome');
   var nextBtn=document.getElementById('next-btn'); if(nextBtn) nextBtn.textContent=t('btnNextScene');
-  var allBtn=document.getElementById('all-btn'); if(allBtn) allBtn.textContent=t('btnAllEnd');
+  var allBtn=document.getElementById('all-btn'); if(allBtn){ allBtn.setAttribute('aria-label', t('btnAllEnd')); allBtn.setAttribute('title', t('btnAllEnd')); }
+  var tacBtn=document.getElementById('tactics-btn-label'); if(tacBtn) tacBtn.textContent=t('btnTactics');
   var sumBtn=document.getElementById('summary-btn'); if(sumBtn && sumBtn.textContent.indexOf('✨')>=0) sumBtn.textContent=t('btnGenerate');
   var sc=document.getElementById('summary-content');
   if(sc && !sc.querySelector('div')) sc.innerHTML='<span style="color:var(--text-dim);font-size:12px">'+t('summaryPlaceholder')+'</span>';

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>試合画面 縦長カットイン — レイアウト3案</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ background:#1c1c22; font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif; color:#fff; padding:24px 16px 56px; }
+  .head{ text-align:center; margin-bottom:18px; }
+  .head h1{ font-size:15px; } .head p{ font-size:11.5px; color:#8b909c; margin-top:4px; }
+  .stage{ display:flex; gap:30px; justify-content:center; align-items:flex-start; flex-wrap:wrap; }
+  .col{ width:330px; }
+  .lbl{ text-align:center; font-size:13px; font-weight:700; margin-bottom:3px; }
+  .sub{ text-align:center; font-size:11px; color:#8b909c; margin-bottom:11px; min-height:28px; }
+  .phone{ width:330px; height:660px; border-radius:28px; overflow:hidden; border:6px solid #000; background:#0c111a; position:relative; box-shadow:0 16px 38px rgba(0,0,0,.5); }
+
+  /* placeholder 縦長カットイン（迫力アートが入る） */
+  .toon{ position:relative; width:100%; height:100%; overflow:hidden;
+    background:
+      radial-gradient(120% 80% at 50% 12%, rgba(120,150,210,.18), transparent 55%),
+      repeating-linear-gradient(180deg, rgba(255,255,255,.03) 0 2px, transparent 2px 6px),
+      linear-gradient(180deg,#16233f 0%,#1b2c4d 42%,#1f7a3f 64%,#2a8f49 100%); }
+  .toon .pl{ position:absolute; left:50%; top:44%; transform:translate(-50%,-50%); width:46%; height:62%;
+    background:linear-gradient(180deg,#0e1726,#0a1018); border-radius:46% 46% 30% 30%/55% 55% 30% 30%;
+    box-shadow:inset 0 0 24px rgba(0,0,0,.6); opacity:.85; }
+  .toon .sfx{ position:absolute; left:6%; bottom:24%; font-style:italic; font-weight:900; font-size:34px; color:#ff3b3b;
+    -webkit-text-stroke:2px #fff; transform:skewX(-8deg) rotate(-6deg); text-shadow:3px 3px 0 rgba(0,0,0,.5); letter-spacing:1px; }
+  .toon .ball{ position:absolute; left:30%; bottom:15%; width:18px; height:18px; border-radius:50%; background:#ffe14d; box-shadow:0 0 12px #ffe14d; }
+  .toon .ph{ position:absolute; left:0; right:0; bottom:7%; text-align:center; font-size:10px; color:rgba(255,255,255,.35); letter-spacing:1px; }
+
+  /* shared chrome bits */
+  .chip{ width:5px; border-radius:3px; } .chip.r{background:#ef4444;} .chip.b{background:#3b82f6;}
+  .poss{ display:flex; height:5px; border-radius:3px; overflow:hidden; }
+  .poss i{display:block;height:100%;} .poss .h{width:58%;background:#ef4444;} .poss .a{width:42%;background:#3b82f6;}
+  .cap{ background:#11151d; border:2px solid #fff; box-shadow:3px 3px 0 rgba(0,0,0,.5); padding:9px 11px; font-size:12.5px; line-height:1.5; font-weight:600; }
+  .cap b{ color:#ffd23b; } .cap .t{ color:#ffd23b; font-size:10.5px; display:block; margin-bottom:2px; }
+  .btns{ display:flex; gap:8px; }
+  .btns button{ border:none; border-radius:22px; padding:12px; font-size:12.5px; font-weight:700; cursor:pointer; }
+  .b1{ background:#3b82f6; color:#fff; flex:1; } .b2{ background:#13210f; color:#bfe6a8; border:1.5px solid #2f7d2a; flex:0 0 34%; }
+
+  /* ===== A: 3:4 framed panel (stacked bands) ===== */
+  .A{ display:flex; flex-direction:column; }
+  .A .hud{ padding:9px 11px; background:#121a28; border-bottom:1px solid #243characters; }
+  .A .hud{ border-bottom:1px solid #243149; }
+  .A .sb{ display:flex; align-items:stretch; border-radius:8px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,.4); }
+  .A .sd{ flex:1; display:flex; align-items:center; gap:7px; padding:7px 10px; background:#1a2333; }
+  .A .sd.r{ justify-content:flex-end; } .A .sd .chip{ height:22px; }
+  .A .nm{ font-weight:700; font-size:13px; } .A .nu{ background:#0b1018; padding:7px 12px; display:flex; align-items:center; font-weight:800; font-size:20px; }
+  .A .nu small{color:#5b6577;padding:0 4px;}
+  .A .meta{ display:flex; align-items:center; justify-content:center; gap:9px; margin-top:7px; }
+  .A .meta .ck{font-size:11px;color:#8a98ae;} .A .meta .ck b{color:#fff;} .A .meta .poss{width:42%;}
+  .A .ctr{ flex:1; min-height:0; padding:9px 11px 0; display:flex; flex-direction:column; }
+  .A .frame{ flex:1; min-height:0; border-radius:12px; overflow:hidden; position:relative; border:1px solid #2a3550; box-shadow:inset 0 0 50px rgba(0,0,0,.45); }
+  .A .mini{ position:absolute; right:5%; bottom:4%; width:30%; height:13%; background:#0c130d; border:1px solid #2a3a2c; border-radius:6px; }
+  .A .bot{ padding:9px 11px 13px; } .A .cap{ margin-bottom:9px; }
+
+  /* ===== B: full-bleed immersive overlay ===== */
+  .B .scrim-t{ position:absolute; left:0;right:0;top:0; height:24%; background:linear-gradient(180deg,rgba(4,8,16,.85),transparent); z-index:2; }
+  .B .scrim-b{ position:absolute; left:0;right:0;bottom:0; height:42%; background:linear-gradient(0deg,rgba(4,8,16,.92) 40%,transparent); z-index:2; }
+  .B .hud{ position:absolute; left:0;right:0;top:0; z-index:3; padding:11px 12px; }
+  .B .sb{ display:flex; align-items:center; gap:8px; }
+  .B .sd{ display:flex; align-items:center; gap:6px; } .B .sd .chip{height:18px;} .B .nm{font-weight:700;font-size:13px;}
+  .B .nu{ font-weight:800; font-size:19px; margin:0 4px; } .B .nu small{color:#9fb0c8;}
+  .B .ck{ margin-left:auto; font-size:11px; color:#cdd8ea; } .B .ck b{color:#fff;}
+  .B .possw{ position:absolute; left:12px; right:12px; top:42px; z-index:3; }
+  .B .mini{ position:absolute; right:5%; top:14%; width:26%; height:10%; background:rgba(10,17,12,.8); border:1px solid #2a3a2c; border-radius:6px; z-index:3; }
+  .B .bot{ position:absolute; left:0;right:0;bottom:0; z-index:4; padding:0 12px 14px; }
+  .B .cap{ margin-bottom:10px; background:rgba(12,16,24,.78); border-color:rgba(255,255,255,.9); }
+
+  /* ===== C: 4:5 large framed (middle) ===== */
+  .C{ display:flex; flex-direction:column; }
+  .C .hud{ padding:8px 11px; background:#121a28; }
+  .C .sb{ display:flex; align-items:stretch; border-radius:8px; overflow:hidden; }
+  .C .sd{ flex:1; display:flex; align-items:center; gap:7px; padding:6px 10px; background:#1a2333; } .C .sd.r{justify-content:flex-end;} .C .sd .chip{height:20px;}
+  .C .nm{font-weight:700;font-size:12.5px;} .C .nu{background:#0b1018;padding:6px 11px;display:flex;align-items:center;font-weight:800;font-size:19px;} .C .nu small{color:#5b6577;padding:0 4px;}
+  .C .meta{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:6px;} .C .ck{font-size:11px;color:#8a98ae;} .C .ck b{color:#fff;} .C .meta .poss{width:42%;}
+  .C .ctr{ flex:1; min-height:0; padding:9px 11px 0; display:flex; flex-direction:column; }
+  .C .frame{ flex:1; min-height:0; border-radius:12px; overflow:hidden; position:relative; border:1px solid #2a3550; }
+  .C .mini{ position:absolute; right:5%; bottom:5%; width:28%; height:12%; background:#0c130d; border:1px solid #2a3a2c; border-radius:6px; }
+  .C .bot{ padding:8px 11px 12px; } .C .cap{ font-size:11.5px; padding:7px 10px; }
+
+  .note{ width:330px; font-size:11px; color:#aeb6c4; line-height:1.7; }
+  .note b{ color:#fff; }
+</style>
+</head>
+<body>
+<div class="head"><h1>⚽ 試合画面 — 縦長カットイン前提の レイアウト3案</h1><p>カットインは仮プレースホルダ（参考画像のような迫力アートが入る想定）</p></div>
+<div class="stage">
+
+  <!-- A -->
+  <div class="col">
+    <div class="lbl">A. 3:4 枠で囲む（バンド構成）</div>
+    <div class="sub">カットインを枠付きパネルの主役に。HUD/実況/操作は独立した帯。情報が明快。</div>
+    <div class="phone A">
+      <div class="hud">
+        <div class="sb">
+          <div class="sd"><span class="chip r"></span><span class="nm">ブラジル</span></div>
+          <div class="nu">1<small>:</small>1</div>
+          <div class="sd r"><span class="nm">日本</span><span class="chip b"></span></div>
+        </div>
+        <div class="meta"><span class="ck">前半 <b>23'</b></span><span class="poss"><i class="h"></i><i class="a"></i></span></div>
+      </div>
+      <div class="ctr">
+        <div class="frame">
+          <div class="toon"><div class="pl"></div><div class="sfx">パシッ</div><div class="ball"></div><div class="ph">縦長カットイン（3:4）</div></div>
+          <div class="mini"></div>
+        </div>
+      </div>
+      <div class="bot">
+        <div class="cap"><span class="t">前半 23'</span><b>南野</b>、右を切り裂く——ゴールはもう目の前だ！</div>
+        <div class="btns"><button class="b1">次のシーン ▶</button><button class="b2">👔 采配</button></div>
+      </div>
+    </div>
+    <div class="note"><b>長所</b>: 絵が常に全部見える・情報が明快・実装が堅い。<b>短所</b>: 全画面の没入感はBより一段下。</div>
+  </div>
+
+  <!-- B -->
+  <div class="col">
+    <div class="lbl">B. 全画面に被せる（没入）</div>
+    <div class="sub">カットインが画面いっぱい。HUDと実況は半透明スクリムで上に重ねる。最も迫力・参考画像に近い。</div>
+    <div class="phone B">
+      <div class="toon"><div class="pl"></div><div class="sfx">パシッ</div><div class="ball"></div><div class="ph">縦長カットイン（全画面）</div></div>
+      <div class="scrim-t"></div><div class="scrim-b"></div>
+      <div class="hud">
+        <div class="sb">
+          <div class="sd"><span class="chip r"></span><span class="nm">ブラジル</span></div>
+          <div class="nu">1<small>:</small>1</div>
+          <div class="sd"><span class="nm">日本</span><span class="chip b"></span></div>
+          <span class="ck">前半 <b>23'</b></span>
+        </div>
+      </div>
+      <div class="possw"><span class="poss"><i class="h"></i><i class="a"></i></span></div>
+      <div class="mini"></div>
+      <div class="bot">
+        <div class="cap"><span class="t">前半 23'</span><b>南野</b>、右を切り裂く——ゴールはもう目の前だ！</div>
+        <div class="btns"><button class="b1">次のシーン ▶</button><button class="b2">👔 采配</button></div>
+      </div>
+    </div>
+    <div class="note"><b>長所</b>: 最大の迫力・没入・"作り込まれたゲーム"感。参考画像の世界観に最も近い。<b>短所</b>: 文字の視認性にスクリム必須・絵の一部が実況/操作に隠れる。</div>
+  </div>
+
+  <!-- C -->
+  <div class="col">
+    <div class="lbl">C. 4:5 大きめ枠（中間）</div>
+    <div class="sub">Aより大きい枠＋実況は1行スリム。迫力と明快さの折衷。</div>
+    <div class="phone C">
+      <div class="hud">
+        <div class="sb">
+          <div class="sd"><span class="chip r"></span><span class="nm">ブラジル</span></div>
+          <div class="nu">1<small>:</small>1</div>
+          <div class="sd r"><span class="nm">日本</span><span class="chip b"></span></div>
+        </div>
+        <div class="meta"><span class="ck">前半 <b>23'</b></span><span class="poss"><i class="h"></i><i class="a"></i></span></div>
+      </div>
+      <div class="ctr">
+        <div class="frame">
+          <div class="toon"><div class="pl"></div><div class="sfx">パシッ</div><div class="ball"></div><div class="ph">縦長カットイン（4:5）</div></div>
+          <div class="mini"></div>
+        </div>
+      </div>
+      <div class="bot">
+        <div class="cap"><b>南野</b>が右を切り裂く——ゴールはもう目の前だ！</div>
+        <div class="btns"><button class="b1">次のシーン ▶</button><button class="b2">👔 采配</button></div>
+      </div>
+    </div>
+    <div class="note"><b>長所</b>: 迫力と明快さの折衷・実装も素直。<b>短所</b>: どっちつかずになりやすい（振り切るならA/B）。</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>試合パート リデザイン方向性 — 3案</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #1c1c22;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    color: #fff;
+    padding: 28px 18px 60px;
+  }
+  .page-title { text-align: center; font-size: 15px; color: #9aa0ad; margin-bottom: 24px; letter-spacing: .5px; }
+  .row { display: flex; gap: 26px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+  .col { width: 360px; }
+  .col-label { text-align: center; font-size: 13px; font-weight: 700; margin-bottom: 4px; letter-spacing: .5px; }
+  .col-sub { text-align: center; font-size: 11px; color: #8b909c; margin-bottom: 12px; }
+  .phone {
+    width: 360px; height: 720px; border-radius: 30px; overflow: hidden;
+    border: 6px solid #000; position: relative; background: #000;
+    box-shadow: 0 18px 40px rgba(0,0,0,.5);
+  }
+  .scene-ph { position: relative; display: flex; align-items: center; justify-content: center; color: #444; font-size: 12px; }
+  /* placeholder "cutscene" tile */
+  .toon {
+    width: 100%; height: 100%;
+    background:
+      radial-gradient(circle at 30% 35%, rgba(255,255,255,.06), transparent 40%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,.025) 0 2px, transparent 2px 7px),
+      linear-gradient(160deg, #1d3a6e, #14306b 45%, #1a5a37);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.5); font-size: 12px; letter-spacing: 1px;
+  }
+  .toon span { border: 1px dashed rgba(255,255,255,.3); padding: 6px 12px; border-radius: 4px; }
+  .btnrow { display: flex; gap: 10px; }
+  .note { font-size: 10.5px; color: #aab; line-height: 1.7; margin-top: 12px; padding: 0 4px; }
+  .note b { color: #fff; font-weight: 700; }
+
+  /* ============ A. 週刊サッカー漫画 ============ */
+  .A { background: #0c0c11; display: flex; flex-direction: column; }
+  .A .hud {
+    background: #000; padding: 10px 14px 12px; position: relative;
+    border-bottom: 3px solid #fff;
+  }
+  .A .hud::after { content:""; position:absolute; left:0; right:0; bottom:-3px; height:3px;
+    background: repeating-linear-gradient(90deg,#e23b3b 0 16px,#000 16px 20px,#1f6fe0 20px 36px,#000 36px 40px); opacity:.9; }
+  .A .teams { display:flex; align-items:center; justify-content:space-between; }
+  .A .tnm { font-style: italic; font-weight: 800; font-size: 15px; transform: skewX(-7deg); }
+  .A .tnm.r { text-align:right; }
+  .A .acc-l { color:#ff5a5a; } .A .acc-r { color:#6aa6ff; }
+  .A .score { font-style:italic; font-weight:900; font-size:34px; letter-spacing:1px; transform: skewX(-7deg); }
+  .A .score small { font-size:16px; color:#888; }
+  .A .scene { flex:1; padding: 8px; }
+  .A .panel {
+    width:100%; height:100%; border:4px solid #fff; border-radius:2px; position:relative;
+    overflow:hidden; box-shadow: 5px 5px 0 rgba(255,255,255,.12);
+  }
+  .A .panel::before { content:""; position:absolute; inset:0;
+    background-image: radial-gradient(rgba(0,0,0,.28) 1px, transparent 1.4px); background-size:6px 6px; opacity:.25; pointer-events:none; z-index:2; }
+  .A .speed { position:absolute; top:0; right:0; width:60%; height:100%; z-index:1; pointer-events:none;
+    background: repeating-linear-gradient(72deg, rgba(255,255,255,.16) 0 1px, transparent 1px 7px); mask:linear-gradient(90deg,transparent,#000); }
+  .A .caption {
+    position:absolute; left:8px; bottom:10px; right:38px; z-index:3;
+    background:#000; border:2px solid #fff; padding:7px 10px; font-size:12.5px; line-height:1.45; font-weight:600;
+    box-shadow: 3px 3px 0 rgba(0,0,0,.6);
+  }
+  .A .caption b { color:#ffd23b; }
+  .A .ctrl { padding:10px 12px 14px; background:#000; }
+  .A .ctrl .btnrow button {
+    flex:1; font-style:italic; font-weight:800; transform:skewX(-6deg); border:none; padding:12px; font-size:14px; border-radius:2px; cursor:pointer;
+  }
+  .A .b1 { background:#ffd23b; color:#000; box-shadow:3px 3px 0 #7a6200; }
+  .A .b2 { background:#222; color:#fff; border:2px solid #555 !important; }
+
+  /* ============ B. TV中継 / Broadcast ============ */
+  .B { background:#0e131c; display:flex; flex-direction:column; }
+  .B .hud { padding:12px 14px 10px; background:linear-gradient(180deg,#141b29,#0e131c); }
+  .B .scorebug { display:flex; align-items:stretch; border-radius:8px; overflow:hidden; box-shadow:0 4px 14px rgba(0,0,0,.4); }
+  .B .side { flex:1; display:flex; align-items:center; gap:8px; padding:9px 12px; background:#1a2230; }
+  .B .side.r { justify-content:flex-end; }
+  .B .chip { width:5px; height:26px; border-radius:3px; }
+  .B .chip.red{background:#ef4444;} .B .chip.blue{background:#3b82f6;}
+  .B .nm { font-weight:700; font-size:14px; }
+  .B .num { background:#0b1018; padding:9px 14px; display:flex; align-items:center; font-weight:800; font-size:22px; }
+  .B .num small{ color:#5b6577; padding:0 4px; }
+  .B .clock { text-align:center; margin-top:8px; font-size:12px; color:#7c8aa0; letter-spacing:1px; }
+  .B .clock b{ color:#fff; }
+  .B .poss { display:flex; height:5px; border-radius:3px; overflow:hidden; margin-top:8px; }
+  .B .poss i{ display:block; height:100%; } .B .poss .h{ width:58%; background:#ef4444; } .B .poss .a{ width:42%; background:#3b82f6; }
+  .B .scene{ flex:1; padding:0 10px; }
+  .B .panel{ width:100%; height:100%; border-radius:12px; overflow:hidden; position:relative; }
+  .B .panel::after{ content:""; position:absolute; inset:0; box-shadow: inset 0 0 80px rgba(0,0,0,.55); border-radius:12px; pointer-events:none; }
+  .B .bug{ position:absolute; left:12px; top:12px; z-index:3; background:rgba(8,12,20,.82); backdrop-filter:blur(4px); border-radius:7px; padding:6px 10px; font-size:12px; font-weight:700; display:flex; gap:8px; align-items:center; }
+  .B .bug .d{ width:4px; height:14px; background:#ef4444; border-radius:2px; }
+  .B .ticker{ margin:10px; background:rgba(10,15,24,.9); border-left:3px solid #3b82f6; border-radius:0 6px 6px 0; padding:9px 12px; font-size:12.5px; line-height:1.5; color:#dfe6f2; }
+  .B .ticker b{ color:#7fb2ff; }
+  .B .ctrl{ padding:4px 12px 16px; }
+  .B .ctrl button{ flex:1; border:none; padding:13px; border-radius:24px; font-size:13.5px; font-weight:700; cursor:pointer; }
+  .B .b1{ background:#3b82f6; color:#fff; } .B .b2{ background:#1a2230; color:#aebacb; }
+
+  /* ============ C. 監督の戦術ビュー ============ */
+  .C { background:#080d09; display:flex; flex-direction:column; }
+  .C .hud{ padding:10px 12px; background:#0c130d; border-bottom:1px solid #1d2a1f; }
+  .C .top{ display:flex; align-items:center; justify-content:space-between; }
+  .C .tnm{ font-size:13px; font-weight:700; display:flex; align-items:center; gap:6px; }
+  .C .dot{ width:9px; height:9px; border-radius:50%; } .C .dot.r{background:#e0584f;} .C .dot.b{background:#4f8be0;}
+  .C .score{ font-family:"SF Mono",ui-monospace,monospace; font-weight:700; font-size:26px; }
+  .C .metrics{ display:flex; gap:8px; margin-top:9px; }
+  .C .m{ flex:1; background:#0f1810; border:1px solid #1d2a1f; border-radius:6px; padding:5px 7px; }
+  .C .m .k{ font-size:9px; color:#5e7a63; letter-spacing:.5px; text-transform:uppercase; }
+  .C .m .v{ font-family:"SF Mono",ui-monospace,monospace; font-size:14px; font-weight:700; margin-top:1px; }
+  .C .mom{ display:flex; height:4px; margin-top:8px; border-radius:2px; overflow:hidden; background:#13201500; }
+  .C .mom i{ display:block; height:100%; } .C .mom .h{width:62%;background:#e0584f;} .C .mom .a{width:38%;background:#4f8be0;}
+  .C .scene{ flex:1; display:flex; padding:8px; gap:8px; }
+  .C .panel{ flex:1; border:1px solid #25382a; border-radius:8px; overflow:hidden; position:relative; }
+  .C .pitch{ width:34px; border:1px solid #25382a; border-radius:8px; position:relative; background:#0b130c; }
+  .C .pitch::before{ content:""; position:absolute; left:4px; right:4px; top:50%; height:1px; background:#25382a; }
+  .C .pitch .ball{ position:absolute; width:8px; height:8px; border-radius:50%; background:#ffd23b; left:13px; top:30%; box-shadow:0 0 8px #ffd23b; }
+  .C .zone{ position:absolute; left:3px; right:3px; top:22%; height:18%; border:1px dashed #e0584f88; border-radius:3px; }
+  .C .feed{ margin:8px; background:#0c130d; border:1px solid #1d2a1f; border-radius:6px; padding:9px 11px; font-size:12px; line-height:1.5; color:#bcd1c0; font-family:"SF Mono",ui-monospace,monospace; }
+  .C .feed b{ color:#7ee08a; }
+  .C .ctrl{ padding:2px 12px 14px; }
+  .C .intv{ background:#15240f; border:1px solid #ffd23b66; border-radius:7px; padding:8px 11px; font-size:11.5px; color:#ffe9a0; margin-bottom:9px; display:flex; align-items:center; gap:8px; }
+  .C .intv .tag{ background:#ffd23b; color:#000; font-weight:800; font-size:10px; padding:2px 6px; border-radius:3px; }
+  .C .ctrl button{ flex:1; border:1px solid #25382a; background:#0f1810; color:#cfe6d3; padding:12px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; font-family:"SF Mono",ui-monospace,monospace; }
+  .C .b1{ background:#1d9e75 !important; color:#04140d !important; border-color:#1d9e75 !important; font-weight:800; }
+</style>
+</head>
+<body>
+<div class="page-title">⚽ 試合パート リデザイン — 方向性3案（モバイル想定 / ダーク）</div>
+<div class="row">
+
+  <!-- A -->
+  <div class="col">
+    <div class="col-label">A. 週刊サッカー漫画</div>
+    <div class="col-sub">漫画演出 — インク・スクリーントーン・コマ割り</div>
+    <div class="phone A">
+      <div class="hud">
+        <div class="teams">
+          <div class="tnm"><span class="acc-l">●</span> ブラジル</div>
+          <div class="tnm r">日本 <span class="acc-r">●</span></div>
+        </div>
+        <div style="display:flex;justify-content:center;align-items:baseline;gap:14px;margin-top:2px">
+          <div class="score">1</div><div class="score"><small>:</small></div><div class="score">1</div>
+        </div>
+      </div>
+      <div class="scene">
+        <div class="panel">
+          <div class="toon"><span>カットイン演出</span></div>
+          <div class="speed"></div>
+          <div class="caption"><b>南野</b>、右を切り裂く——ゴールはもう、目の前だ！</div>
+        </div>
+      </div>
+      <div class="ctrl">
+        <div class="btnrow"><button class="b1">次のシーン ▶</button><button class="b2">一気に</button></div>
+      </div>
+    </div>
+    <div class="note"><b>狙い：</b>VISION「週刊連載のサッカー漫画」を最も体現。コマ枠・ネーム（キャプション）・効果線で1コマ1コマが"読み物"に。<b>最も独自性が高い。</b></div>
+  </div>
+
+  <!-- B -->
+  <div class="col">
+    <div class="col-label">B. TV中継 / Broadcast</div>
+    <div class="col-sub">本物のスポーツ中継のような高級感</div>
+    <div class="phone B">
+      <div class="hud">
+        <div class="scorebug">
+          <div class="side"><span class="chip red"></span><span class="nm">ブラジル</span></div>
+          <div class="num">1<small>:</small>1</div>
+          <div class="side r"><span class="nm">日本</span><span class="chip blue"></span></div>
+        </div>
+        <div class="clock">前半 <b>23'</b></div>
+        <div class="poss"><i class="h"></i><i class="a"></i></div>
+      </div>
+      <div class="scene">
+        <div class="panel">
+          <div class="toon"><span>カットイン演出</span></div>
+          <div class="bug"><span class="d"></span>BRA 1 - 1 JPN · 23'</div>
+        </div>
+      </div>
+      <div class="ticker">🎙 <b>南野</b>が右サイドを抜け出した！絶好機——</div>
+      <div class="ctrl">
+        <div class="btnrow"><button class="b1">次のシーン ▶</button><button class="b2">一気に終了</button></div>
+      </div>
+    </div>
+    <div class="note"><b>狙い：</b>"本物の確率エンジン"を信頼させる権威性。実況テロップ・試合時計・ポゼッションバーで没入。<b>最も万人受け・モダン。</b></div>
+  </div>
+
+  <!-- C -->
+  <div class="col">
+    <div class="col-label">C. 監督の戦術ビュー</div>
+    <div class="col-sub">"読んで・考えて・決める"を前面に</div>
+    <div class="phone C">
+      <div class="hud">
+        <div class="top">
+          <div class="tnm"><span class="dot r"></span>ブラジル</div>
+          <div class="score">1 : 1</div>
+          <div class="tnm">日本<span class="dot b"></span></div>
+        </div>
+        <div class="metrics">
+          <div class="m"><div class="k">xG</div><div class="v">0.8 : 0.6</div></div>
+          <div class="m"><div class="k">勢い</div><div class="v">BRA ▲</div></div>
+          <div class="m"><div class="k">時間</div><div class="v">23'</div></div>
+        </div>
+        <div class="mom"><i class="h"></i><i class="a"></i></div>
+      </div>
+      <div class="scene">
+        <div class="panel"><div class="toon"><span>カットイン演出</span></div></div>
+        <div class="pitch"><div class="zone"></div><div class="ball"></div></div>
+      </div>
+      <div class="feed">&gt; <b>南野</b> 右サイド突破 / DF裏のスペース</div>
+      <div class="ctrl">
+        <div class="intv"><span class="tag">介入</span>ここで指示を出せる — 押し上げる？</div>
+        <div class="btnrow"><button class="b1">次のシーン ▶</button><button>采配</button></div>
+      </div>
+    </div>
+    <div class="note"><b>狙い：</b>VISION「監督として読む」のUSP直撃。xG・勢い・盤面・介入ポイントで"脳を使う"体験。<b>最もゲーム性・差別化が深い。</b></div>
+  </div>
+
+</div>
+</body>
+</html>
