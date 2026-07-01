@@ -1041,9 +1041,9 @@ body {
   margin: 0;
   padding: 2px;
   border-radius: 7px;
-  /* 芝の上でも沈まないよう、パネルを暗め・不透明寄せ＋明るい細枠で締める（左下位置・サイズは維持）。 */
-  background: rgba(6,10,18,0.82);
-  box-shadow: 0 4px 14px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.42) inset;
+  /* 芝の上でも沈まないよう、パネルをやや明るいダーク＋不透明＋明るい細枠で締める（左下位置・サイズは維持）。 */
+  background: rgba(14,22,34,0.9);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.5) inset;
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   pointer-events: none;
@@ -1054,8 +1054,9 @@ body {
   border-radius: 5px;
   opacity: 1;
   /* SVG 内のピッチ緑・白ライン・ゾーン色・ラベルはエンジン(simulate.js)生成で暗いので、
-     表示層で一括して明るさ・彩度・コントラストを持ち上げ「はっきり見える」ようにする。 */
-  filter: brightness(1.55) saturate(1.35) contrast(1.08);
+     表示層で一括して明るさ・彩度・コントラストを大きく持ち上げ「はっきり見える」ようにする。
+     ⚠️ 実サイズ(約68px)で判断すること。1.55では小さく暗く沈むため 2.5 まで上げた。 */
+  filter: brightness(2.5) saturate(1.5) contrast(1.12);
 }
 
 /* GAME LOG */
