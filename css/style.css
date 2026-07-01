@@ -1212,8 +1212,11 @@ body {
    ・#screen-game を縦 flex にして .match--immersive を伸縮させ、#mv-controls を末尾フローに接地
    ・中央コラムは上寄せ（HUD→カットイン→実況を上部に密集）＝下端の余白は操作バーが吸収
    ・カットイン主役バンドの上限を引き上げ、実況1枚と合わせて画面を埋める
-   :has() 非対応ブラウザは従来の中央寄せにフォールバック（破綻はしない）。 */
-#screen-game:has(> #mv-controls) {
+   :has() 非対応ブラウザは従来の中央寄せにフォールバック（破綻はしない）。
+   ⚠️ 必ず .active 限定にすること：#mv-controls は試合後も DOM に残る（display:none だが存在）ため
+   `:has(> #mv-controls)` は常時マッチする。.active を付けないと詳細度(2,0,0)で .screen:not(.active) の
+   display:none を上書きし、結果画面へ遷移しても screen-game が消えず最後のシーンが残る（v2.6.3のバグ）。 */
+#screen-game.active:has(> #mv-controls) {
   display: flex;
   flex-direction: column;
 }
