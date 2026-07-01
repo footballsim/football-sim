@@ -225,6 +225,25 @@ function _csAttackRight(sc) {
   return !!(sc && sc.offence === gs.team1);
 }
 
+// ── 没入UI（監督モード）カットイン主役の見切れ対策 ──────────────────────────
+// live-field-wrap は 16:9 かつ監督モードでは 360×430 前後の縦長帯。canvas(480×216) を
+// object-fit:cover で充填すると水平方向は中央~38%しか見えず（scale は高さ律速）、
+// pcx≈326（右1/3）に主役を描くロングパス/シュート/ショートパスは、既定 object-position:50%
+// では帯の左右端で主役が半分切れる。ポーズ別に「キャンバス内の主役の横中心（0..1）」を渡し、
+// フリップ後の実効位置を object-position の X% にして主役を可視窓の中央へ寄せる。
+//   subjFrac : pre-flip の主役横中心（0=左端 / 1=右端）。既定描画は 480px 座標系。
+//   flipH    : そのシーンで ctx が水平反転しているか（反転すると主役は 1-subjFrac へ移る）。
+// 縦(44%)は現状踏襲。中央ポーズ（デュエル等）は 0.5 → 50% で従来同等。
+// contain 系（cs-fullframe: GOAL!!/PENALTY!）はこの対象外なので付けない。
+function _csCenterSubject(canvas, subjFrac, flipH) {
+  if (!canvas || canvas.className === 'cs-fullframe') return canvas;
+  var f = flipH ? (1 - subjFrac) : subjFrac;
+  // 端に寄せすぎて背景の空白側が見えないよう、可視窓の外へは出さない範囲に軽くクランプ。
+  if (f < 0.16) f = 0.16; else if (f > 0.84) f = 0.84;
+  canvas.style.objectPosition = Math.round(f * 100) + '% 44%';
+  return canvas;
+}
+
 // 試合表示の「シュート3分割」用（simulate.js nextChance から段階別に呼ぶ）。
 //   stepType: 'shot'=シューターの一撃 / 'gk'=GKダイブ（抜かれ/セーブ）/ 'result'=ゴール・枠外・セーブの結末。
 //   エンジン無改変・プレゼンのみ。SCENE_ART無効/未対応は null（呼び出し側が従来SVGにフォールバック）。
@@ -580,7 +599,8 @@ function _renderLongpassScene(sc, entry, opts) {
     if (p < 1 || (fail && failBase && !failBase.complete)) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return canvas;
+  // 成功=蹴り手が pcx=326（右1/3・0.68）／失敗=2人タブローは中央（~0.5）。フリップ込みで主役を可視窓中央へ。
+  return _csCenterSubject(canvas, fail ? 0.50 : (pcx / W), flipH);
 }
 
 // GKのキット色を選ぶ: 両チーム（攻撃/守備）と別色＋「GKらしい色」優先（黄/暗/白）。
@@ -678,7 +698,8 @@ function _renderShotScene(sc, entry) {
     if (p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return canvas;
+  // シューターが pcx=326（右1/3・0.68）。セーブでもシューターが主役なので同じく主役中央へ寄せる。
+  return _csCenterSubject(canvas, pcx / W, flipH);
 }
 
 // ============================================================
@@ -764,7 +785,8 @@ function _renderShortpassScene(sc, entry) {
     if (!ballGone && p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return canvas;
+  // パサーが pcx≈318（右1/3・0.66）。フリップ込みで主役を可視窓中央へ。
+  return _csCenterSubject(canvas, pcx / W, flipH);
 }
 
 // ============================================================
@@ -958,7 +980,8 @@ function _renderFreekickScene(sc) {
     if (p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return canvas;
+  // キッカーが kx=282（やや右・0.59）。mirror 込みで主役を可視窓中央へ。
+  return _csCenterSubject(canvas, kx / W, mirror);
 }
 
 // ============================================================
@@ -1299,7 +1322,8 @@ function _renderRunInScene(sc) {
     if (p < 1 || (!success && failBase && !failBase.complete)) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return canvas;
+  // 飛び出し=ランナー/タブローとも概ね中央（0.5）。既定 50% と同等だが明示。
+  return _csCenterSubject(canvas, 0.5, false);
 }
 
 // ============================================================
@@ -1399,7 +1423,8 @@ function _renderGkScene(sc, mode) {
     if (!ballGone && p < 1) requestAnimationFrame(frame);     // ボールが消えたらGK停止＝アニメ終了（静止）
   }
   requestAnimationFrame(frame);
-  return canvas;
+  // GK は gkX 8→92・幅300＝中心 ~0.42（やや左）。flipH 込みで主役(GK)を可視窓中央へ。
+  return _csCenterSubject(canvas, (gkX0 + gkW / 2 + (gkX1 - gkX0) / 2) / W, flipH);
 }
 
 // ============================================================
@@ -1795,7 +1820,8 @@ function _renderMidShotScene(sc, opts) {
     if (p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return canvas;
+  // シューターは sx=86＋幅≈192＝中心 ~0.4（やや左）。flip 込みで主役を可視窓中央へ。
+  return _csCenterSubject(canvas, 0.4, flip);
 }
 
 // ============================================================
@@ -1887,5 +1913,6 @@ function _renderFoulScene(sc, isPK) {
     if (p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return canvas;
+  // 主審は W*0.40（0.40）中心。flip 込みで主役を可視窓中央へ（PK=cs-fullframe はヘルパー側でスキップ）。
+  return _csCenterSubject(canvas, 0.4, flip);
 }

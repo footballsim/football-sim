@@ -1027,17 +1027,21 @@ body {
   object-fit: contain !important;
   object-position: center !important;
 }
-/* ミニフィールド = 主役バンド右上隅の小さなタクティカル・インセット（中継風に重ねる） */
+/* ミニフィールド = 主役バンド“左下隅”の小さなタクティカル・インセット（中継風に重ねる）。
+   ★配置: かつては右上だったが、主役（GKのダイブ手・背の高い選手の頭・右1/3のキッカー）と
+     頻繁に重なった。主役は _csCenterSubject で横中央へ寄せ、縦は接地ライン(≈0.88H)より下＝
+     芝ストリップが空く。そこで左下隅（芝・主役の足元がまれに来るだけ）へ移し、小さめ＋控えめ透過で
+     主役に被らせない。ゾーン情報は実況テキストにも出るので機能は損なわない。 */
 #mini-field-wrap {
   position: absolute;
-  right: clamp(8px, 2.4vw, 14px);
-  top: clamp(8px, 2.4vw, 14px);
+  left: clamp(6px, 2vw, 12px);
+  bottom: clamp(6px, 2vw, 12px);
   z-index: 4;
-  width: clamp(78px, 22vw, 112px);
+  width: clamp(66px, 18vw, 92px);
   margin: 0;
   padding: 2px;
   border-radius: 7px;
-  background: rgba(8,12,20,0.62);
+  background: rgba(8,12,20,0.6);
   box-shadow: 0 4px 12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.12) inset;
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
@@ -1047,7 +1051,7 @@ body {
   display: block;
   width: 100%;
   border-radius: 5px;
-  opacity: 0.95;
+  opacity: 0.92;
 }
 
 /* GAME LOG */
