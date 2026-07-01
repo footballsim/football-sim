@@ -892,7 +892,10 @@ function _renderOnetwoScene(sc) {
     if (p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return canvas;
+  // ワンツーは3カットで主役が左右に振れる（①giver xA=348 / ②wall xB=132 / ③receiver xR=300）。
+  //   物語の主役＝give-and-go する A（①→③, 平均 ≈324）。可視窓(cover)の中央へ寄せて左右の見切れを防ぐ。
+  //   mirror（team1=右攻めで全体反転）を flipH として渡す（②壁役は反対側に出るが、A中心で最も破綻が少ない）。
+  return _csCenterSubject(canvas, 324 / W, mirror);
 }
 
 // ============================================================
@@ -1087,7 +1090,9 @@ function _renderDribbleScene(sc) {
     if (p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return canvas;
+  // ドリブルは守備(defX=265)とドリブラー(196→346成功)のデュエル。デュエル中心 ≈265 を可視窓中央へ。
+  //   flipH（=!_csAttackRight, 描画側と同じ）を渡してフリップ後の実効位置で寄せる。
+  return _csCenterSubject(canvas, 265 / W, flipH);
 }
 
 // ============================================================
@@ -1221,7 +1226,9 @@ function _renderPostplayScene(sc) {
     if (p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return canvas;
+  // ポストプレーは前半のホールドアップ・タブロー(244, !flipH で描画)が主。タブロー中心を可視窓中央へ。
+  //   タブローは withFlip(!flipH) なので、ヘルパーには flipH=!flipH を渡してフリップ後実効位置を合わせる。
+  return _csCenterSubject(canvas, 244 / W, !flipH);
 }
 
 // ============================================================
