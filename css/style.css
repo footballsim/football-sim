@@ -1027,36 +1027,31 @@ body {
   object-fit: contain !important;
   object-position: center !important;
 }
-/* ミニフィールド = 主役バンド“左下隅”の小さなタクティカル・インセット（中継風に重ねる）。
-   ★配置: かつては右上だったが、主役（GKのダイブ手・背の高い選手の頭・右1/3のキッカー）と
-     頻繁に重なった。主役は _csCenterSubject で横中央へ寄せ、縦は接地ライン(≈0.88H)より下＝
-     芝ストリップが空く。そこで左下隅（芝・主役の足元がまれに来るだけ）へ移し、小さめ＋控えめ透過で
-     主役に被らせない。ゾーン情報は実況テキストにも出るので機能は損なわない。 */
+/* ミニフィールド = カットシーン“直下”の独立バンド（暫定対応）。
+   ★配置変更(2026-07-01): 従来はカットインに absolute で重ねていたが、暗い芝の上では
+     brightness を上げても沈んで見えなかった。そこで zone-bottom の実況直前に独立した行として
+     通常フローで置き、ダークUI地の上（芝でない）に載せる＝はっきり視認できる。
+     縦順序は HUD → カットイン → ミニフィールド → 実況 → 操作。中央寄せ・小型は維持。 */
 #mini-field-wrap {
-  position: absolute;
-  left: clamp(6px, 2vw, 12px);
-  bottom: clamp(6px, 2vw, 12px);
-  z-index: 4;
-  width: clamp(66px, 18vw, 92px);
-  margin: 0;
-  padding: 2px;
-  border-radius: 7px;
-  /* 芝の上でも沈まないよう、パネルをやや明るいダーク＋不透明＋明るい細枠で締める（左下位置・サイズは維持）。 */
-  background: rgba(14,22,34,0.9);
-  box-shadow: 0 4px 14px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.5) inset;
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
+  position: relative;
+  z-index: 3;
+  width: clamp(96px, 26vw, 132px);
+  margin: 0 auto;             /* バンド内で中央寄せ＝構図の重心を保つ */
+  padding: 3px;
+  border-radius: 8px;
+  /* ダークUI地の上に載る控えめなパネル。周辺（実況カード）と同系のダーク＋細枠で馴染ませる。 */
+  background: rgba(14,22,34,0.72);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.10) inset;
   pointer-events: none;
 }
 #mini-field-wrap svg {
   display: block;
   width: 100%;
-  border-radius: 5px;
+  border-radius: 6px;
   opacity: 1;
   /* SVG 内のピッチ緑・白ライン・ゾーン色・ラベルはエンジン(simulate.js)生成で暗いので、
-     表示層で一括して明るさ・彩度・コントラストを大きく持ち上げ「はっきり見える」ようにする。
-     ⚠️ 実サイズ(約68px)で判断すること。1.55/2.5 でも暗く沈むため 3.6 まで上げた。 */
-  filter: brightness(3.6) saturate(1.6) contrast(1.15);
+     表示層で明るさ・彩度・コントラストを持ち上げる。ダーク地の上なので過剰に上げず自然に。 */
+  filter: brightness(2.05) saturate(1.35) contrast(1.08);
 }
 
 /* GAME LOG */

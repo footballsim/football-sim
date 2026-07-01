@@ -125,7 +125,7 @@
         <span id="x-follow-label">@footballsim_ai をフォロー</span>
       </a>
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v2.6.7</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v2.6.8</div>
     <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;letter-spacing:0.5px">© 2026 footballsim · All rights reserved</div>
   </div>
 </div>
@@ -547,8 +547,6 @@
     <div class="zone-center stage-bg">
       <!-- LIVE FIELD: カットイン本体 -->
       <div id="live-field-wrap" style="display:none"></div>
-      <!-- 簡易フィールド図（隅インセット・重ね） -->
-      <div id="mini-field-wrap" style="display:none"></div>
     </div>
 
     <!-- 上端スクリム（HUDの可読性を担保） -->
@@ -597,6 +595,8 @@
           <span id="chance-team-label">-</span>
           <span id="game-in-progress-label">試合進行中</span>
         </div>
+        <!-- 簡易フィールド図（カットシーン直下の独立バンド・ダーク背景の上＝はっきり見える） -->
+        <div id="mini-field-wrap" style="display:none"></div>
         <div class="log-area" id="log-area"></div>
         <div class="game-controls">
           <button class="sub-btn" id="sub-btn" onclick="openSecondHalfSub()" style="display:none"></button>
