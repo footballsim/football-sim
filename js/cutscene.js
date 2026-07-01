@@ -1414,6 +1414,8 @@ function _renderGoalScene(sc) {
   var canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  // 画面いっぱいの中央大ラベル「GOAL!!」を焼くので cover だと左右が欠ける → contain へ上書き（cs-fullframe）。
+  canvas.className = 'cs-fullframe';
   var ctx = canvas.getContext('2d');
   var bgImg = _loadCutsceneImg(_GOAL_BG_SRC), bgFallback = _lpBg();   // 差し替えゴール画像（ネットに刺さったボール）
   var accent = (sc.offence && sc.offence.team_color) || '#1f4fd6';   // 得点＝攻撃側色
@@ -1806,6 +1808,10 @@ function _renderFoulScene(sc, isPK) {
   var canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  // PK判定は画面いっぱいの中央大ラベル「PENALTY!」を焼くので、wrap の object-fit:cover だと
+  //   左右が切れて P…Y! が欠ける。cs-fullframe で contain へ上書き（全文表示・上下は暗マット）。
+  //   ※通常のファール絵（isPKなし）はラベル小＝cover のままで良いのでクラスは付けない。
+  if (isPK) canvas.className = 'cs-fullframe';
   var ctx = canvas.getContext('2d');
   var refImg = _loadCutsceneImg(_FOUL_REF_SRC);
   var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();

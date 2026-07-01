@@ -1020,6 +1020,13 @@ body {
   image-rendering: pixelated; /* ピクセルアートを拡大してもくっきり */
   image-rendering: crisp-edges;
 }
+/* 中央大ラベル演出（GOAL!! / PENALTY! 等・画面いっぱいの全幅テキストを焼くシーン）は
+   cover だと左右がクロップされ P…Y! が欠ける。cs-fullframe を付けた canvas だけ contain へ上書きし、
+   絵全体を歪みなく表示（上下はマット＝シネマ的で可）。通常アクション絵は cover のまま=選手が大きい表示を維持。 */
+#live-field-wrap canvas.cs-fullframe {
+  object-fit: contain !important;
+  object-position: center !important;
+}
 /* ミニフィールド = 主役バンド右上隅の小さなタクティカル・インセット（中継風に重ねる） */
 #mini-field-wrap {
   position: absolute;
