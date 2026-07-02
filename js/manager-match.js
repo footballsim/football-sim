@@ -135,6 +135,7 @@
     halfTimeShown = false;
     halfTimeScore = { t1: 0, t2: 0 };
     subsCount = 0; subsUsed = 0; htSubsCount = 0; _htMode = false;
+    _mvOppSubCount = 0; _mvOppOff = {}; _mvLateChecked = false;   // 相手監督AIの交代状態をリセット
     _subbedOff = new Set();
     _pendingSubLog = [];
     _shootSubStep = 0;
@@ -230,15 +231,21 @@
       halfTimeShown = true;
       var htRes = chanceResults[HALF_CHANCES - 1] || chanceResults[HALF_CHANCES - 2];
       if (htRes) halfTimeScore = { t1: htRes.t1score, t2: htRes.t2score };
-      _mvOpponentReact();   // 相手監督のハーフタイム采配
+      _mvOpponentDecide(true);   // 相手監督のハーフタイム采配（戦術＋交代）
       _mvPause();
       setTimeout(function () { if (_managerMode) _mvShowHT(); }, 350);
       return;
     }
 
+    // 後半終盤（beat24≒後半25分）の単発チェック＝得点が無い展開でもリード守り/追撃を判断。
+    if (typeof MATCH_CHANCES !== 'undefined' && currentChanceIdx >= Math.floor(MATCH_CHANCES * 0.75) && !_mvLateChecked) {
+      _mvLateChecked = true;
+      _mvOpponentDecide(false);
+    }
+
     // ゴール停止（カットシーンの余韻を見せてから采配パネル）。
     if (_mvGoalShown) {
-      _mvOpponentReact();   // 相手監督が失点/得点に反応
+      _mvOpponentDecide(false);   // 相手監督が失点/得点に反応（戦術＋交代）
       _mvPause();
       setTimeout(function () { if (_managerMode) _mvShowDecisionPoint('goal'); }, 3300);
       return;
@@ -318,6 +325,109 @@
     clearTimeout(el._t);
     el._t = setTimeout(function () { el.style.opacity = '0'; }, 3200);
   }
+
+  /* ── 相手監督AI（選手交代）──────────────────────────────────────────
+   * シチュエーション別ルール。既存 applyDecision(type:'sub') 経由（デュエル式不可侵）。
+   * ⚠️ fatigue はエンジンの能力計算に未使用＝交代の実効果は「スロットの選手が別の
+   *   params 選手に替わる」ことのみ。控えは通常先発より弱い → 能力差ガードで弱体化を防ぐ。
+   * 調整可能な定数（しきい値）は下記。 */
+  var OPP_MAX_SUBS = 3;              // 相手の交代人数上限
+  var OPP_SUB_ATT_DOWNGRADE = 10;   // A 攻撃投入時の許容能力差（IN >= OUT - これ）
+  var OPP_SUB_DEF_DOWNGRADE = 8;    // B 守備固め時
+  var OPP_SUB_FRESH_DOWNGRADE = 6;  // C リフレッシュ時（ほぼ同格のみ）
+  var OPP_FATIGUE_MIN = 6;          // C 発火に要する稼働量
+  var _mvOppSubCount = 0;           // この試合で相手が使った交代人数
+  var _mvOppOff = {};               // 相手が交代で退けた players index（再選出しない）
+  var _mvLateChecked = false;       // 後半終盤の単発チェック済みフラグ
+
+  function _mvRating(p) { if (!p || !p.params) return 0; var s = 0; for (var i = 0; i < p.params.length; i++) s += p.params[i]; return s / p.params.length; }
+  function _mvPosCat(role) {
+    if (!role) return 'MF';
+    if (role === 'GK') return 'GK';
+    if (/CB|SB|SW/.test(role)) return 'DF';
+    if (/WG|CF|FW/.test(role)) return 'FW';
+    return 'MF';
+  }
+  function _mvSlotCat(team, pos) {
+    var arr = (typeof system_data !== 'undefined' && system_data[team.system]) ? system_data[team.system].positions : null;
+    return _mvPosCat(arr ? arr[pos] : '');
+  }
+  function _mvPlayerCats(p) { var c = {}; (p.positions || []).forEach(function (r) { c[_mvPosCat(r)] = true; }); return c; }
+  function _mvBench(team) {
+    var on = {}; team.lineup.forEach(function (idx) { on[idx] = true; });
+    var res = [];
+    for (var i = 0; i < team.players.length; i++) {
+      if (on[i] || _mvOppOff[i]) continue;
+      res.push({ idx: i, p: team.players[i], r: _mvRating(team.players[i]) });
+    }
+    return res;
+  }
+  function _mvName(p) { return (typeof getPlayerName === 'function') ? getPlayerName(p) : (p.name || ''); }
+
+  // 相手(away)の選手交代を1件だけ評価・適用（A→B→C の優先）。atHT=ハーフタイム。
+  function _mvOpponentSub(atHT) {
+    if (!_mvOpponentAI || !_mvCtrl || !gameState || !gameState.team2) return false;
+    if (_mvOppSubCount >= OPP_MAX_SUBS) return false;
+    var team = gameState.team2;
+    var diff = team.score - gameState.team1.score;                 // 相手(away)視点の点差
+    var prog = (typeof MATCH_CHANCES !== 'undefined') ? currentChanceIdx / MATCH_CHANCES : 0;
+
+    var slots = [];   // 出場中の非GKスロット
+    for (var pos = 0; pos < team.lineup.length; pos++) {
+      var cat = _mvSlotCat(team, pos); if (cat === 'GK') continue;
+      var idx = team.lineup[pos], p = team.players[idx];
+      if (!p) continue;
+      slots.push({ pos: pos, idx: idx, p: p, r: _mvRating(p), cat: cat, fatigue: p.fatigue || 0 });
+    }
+    var bench = _mvBench(team);
+    if (!slots.length || !bench.length) return false;
+    function lowestOf(cat) { return slots.filter(function (s) { return s.cat === cat; }).sort(function (a, b) { return a.r - b.r; })[0]; }
+    function bestBench(pred) { return bench.filter(pred).sort(function (a, b) { return b.r - a.r; })[0]; }
+
+    var plan = null;
+
+    // A. ビハインド → 攻撃投入
+    var behind = (diff <= -2 && (atHT || prog >= 0.55)) || (diff === -1 && (atHT || prog >= 0.65));
+    if (behind) {
+      var att = bestBench(function (b) { return _mvPlayerCats(b.p)['FW']; });
+      var out = (diff <= -2 && prog >= 0.75) ? lowestOf('DF') : lowestOf('FW');
+      if (!out) out = slots.slice().sort(function (a, b) { return a.r - b.r; })[0];  // fallback: 最弱
+      if (att && out && att.r >= out.r - OPP_SUB_ATT_DOWNGRADE) {
+        plan = { out: out, in: att, label: _mvT('攻撃の駒を投入', 'attacking change') };
+      }
+    }
+    // B. リード → 守備固め
+    if (!plan) {
+      var lead = (diff >= 2 && prog >= 0.70) || (diff === 1 && prog >= 0.75);
+      if (lead) {
+        var def = bestBench(function (b) { var c = _mvPlayerCats(b.p); return c['DF'] || c['MF']; });
+        var outFw = lowestOf('FW');
+        if (def && outFw && def.r >= outFw.r - OPP_SUB_DEF_DOWNGRADE) {
+          plan = { out: outFw, in: def, label: _mvT('守備を厚くする', 'shoring up') };
+        }
+      }
+    }
+    // C. 均衡/リフレッシュ（最も稼働した選手を同ポジで）
+    if (!plan && (atHT || prog >= 0.60)) {
+      var tired = slots.slice().sort(function (a, b) { return b.fatigue - a.fatigue; })[0];
+      if (tired && tired.fatigue >= OPP_FATIGUE_MIN) {
+        var same = bestBench(function (b) { return _mvPlayerCats(b.p)[tired.cat]; });
+        if (same && same.r >= tired.r - OPP_SUB_FRESH_DOWNGRADE) {
+          plan = { out: tired, in: same, label: _mvT('新しい脚を投入', 'fresh legs') };
+        }
+      }
+    }
+
+    if (!plan) return false;
+    if (!_mvCtrl.applyDecision({ type: 'sub', side: 'away', pos: plan.out.pos, 'in': plan.in.idx })) return false;
+    _mvOppSubCount++;
+    _mvOppOff[plan.out.idx] = true;
+    _mvToast('🔁 ' + _mvT('相手交代', 'Rival sub') + '：' + _mvName(plan.out.p) + ' → ' + _mvName(plan.in.p) + '（' + plan.label + '）');
+    return true;
+  }
+
+  // 相手監督の1停止点ぶんの判断（戦術＋交代）。
+  function _mvOpponentDecide(atHT) { _mvOpponentReact(); _mvOpponentSub(!!atHT); }
 
   /* ── 采配ポイント（停止時パネル）──────────────────────────────────
    * kind: 'ht'（ハーフタイム）/ 'goal'（得点直後）/ 'manual'（任意停止）
@@ -676,4 +786,5 @@
   g._mvManagerHTKickoff = _mvManagerHTKickoff;
   g._mvTeardownUI = _mvTeardownUI;
   g._mvOpponentReact = _mvOpponentReact;   // デバッグ/検証用ハンドル
+  g._mvOpponentSub = _mvOpponentSub;       // デバッグ/検証用ハンドル
 })();
