@@ -118,7 +118,7 @@ fs.cpSync(path.join(ROOT, 'img'), path.join(LAB, 'img'), { recursive: true });
 let labHtml = fs.readFileSync(path.join(DOCS, 'index.html'), 'utf8');
 const labInject =
   `<script src="js/league.js?v=${BUILD_VER}"></script>\n` +
-  `<script>(function(){function boot(){var tm=document.querySelector('.top-menu');if(tm)tm.style.display='none';` +
+  `<script>window.LEAGUE_TEST_MODE=true;(function(){function boot(){var tm=document.querySelector('.top-menu');if(tm)tm.style.display='none';` +
   `if(typeof showLeague==='function')showLeague();}` +
   `if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',boot);else boot();})();</script>\n`;
 labHtml = labHtml.replace('</body>', labInject + '</body>');

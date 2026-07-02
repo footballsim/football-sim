@@ -188,7 +188,10 @@
     return null;
   }
 
+  // テストビルド(lab)でのみ有効な「1日1回」バイパス（背骨なので本番では出さない）
+  function _testMode() { return typeof window !== 'undefined' && window.LEAGUE_TEST_MODE === true; }
   function _lockedToday() {
+    if (_testMode() && _state && _state.testUnlock) return false;   // テスト：制限OFF
     return !!(_state && _state.lastPlayedDate === _todayStr());
   }
 
@@ -562,6 +565,15 @@
     html += '<div class="lg-h">' + _t('順位表', 'Standings') + '</div>';
     html += _standingsTableHTML(rows, myId);
 
+    // テスト用（lab限定）：1日1回制限のON/OFFトグル
+    if (_testMode()) {
+      var tOn = !!(_state && _state.testUnlock);
+      var tl = tOn ? _t('🔓 テスト：1日1回制限 OFF（毎回プレイ可）', '🔓 TEST: daily limit OFF (replay anytime)')
+                   : _t('🔒 テスト：1日1回制限 ON（タップで解除）', '🔒 TEST: daily limit ON (tap to disable)');
+      html += '<button class="lg-btn sec" style="border:1px dashed rgba(255,255,255,0.35);font-size:12px;' +
+        (tOn ? 'color:#ffd479' : '') + '" onclick="leagueToggleTestLock()">' + tl + '</button>';
+    }
+
     html += '<button class="lg-btn sec" onclick="leagueBackToTitle()">' + _t('← タイトルへ戻る', '← Back to title') + '</button>';
     html += '</div>';
     _body().innerHTML = html;
@@ -620,4 +632,6 @@
   };
   // デバッグ: ?debug=1 時、当日ロックを解除して連続プレイ可
   window.leagueDebugUnlock = function () { if (_state) { _state.lastPlayedDate = null; _save(); _renderHub(false); } };
+  // テスト用（lab限定）：1日1回制限のON/OFFトグル（毎回プレイ可にする）
+  window.leagueToggleTestLock = function () { if (_state) { _state.testUnlock = !_state.testUnlock; _save(); _renderHub(false); } };
 })();
