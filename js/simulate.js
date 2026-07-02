@@ -1256,9 +1256,11 @@ function openMarkedPlayerSelect() {
   const content = document.getElementById('marked-select-content');
   content.innerHTML = '';
 
-  const t2sys = system_data.findIndex(s => s.name === team2Data.default_system);
+  // 監督モードでは相手のライブ布陣（AIの交代・戦術変更を反映）を、それ以外はデフォルトを表示。
+  const _liveT2 = (_managerMode && gameState && gameState.team2) ? gameState.team2 : null;
+  const t2sys = _liveT2 ? _liveT2.system : system_data.findIndex(s => s.name === team2Data.default_system);
   const sys2 = system_data[t2sys >= 0 ? t2sys : 0];
-  const lineup2 = team2Data.default_lineup.slice(0, 11);
+  const lineup2 = _liveT2 ? _liveT2.lineup.slice(0, 11) : team2Data.default_lineup.slice(0, 11);
 
   // 説明文
   const desc = document.createElement('div');

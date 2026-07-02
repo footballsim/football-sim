@@ -241,6 +241,41 @@
     return { scorers: scorers, mom: mom };
   }
 
+  /* ── 実況テキストログ（試合後に見直す） ─────────────────────────────
+   * 各チャンス res.textScenes（simulateChance が生成済み）を時刻付きで連結。 */
+  function _buildMatchLog() {
+    var out = [];
+    if (typeof chanceResults === 'undefined' || !chanceResults) return out;
+    chanceResults.forEach(function (res) {
+      if (!res || !res.textScenes) return;
+      res.textScenes.forEach(function (tx) {
+        if (tx && String(tx).replace(/<[^>]*>/g, '').trim()) out.push({ t: res.time || '', x: tx });
+      });
+    });
+    return out;
+  }
+  function _showMatchLog() {
+    var lr = _state && _state.lastResult;
+    if (!lr || !lr.log || !lr.log.length) return;
+    _ensureStyle();
+    var old = document.getElementById('lg-log-ov'); if (old) old.parentNode.removeChild(old);
+    var myD = _clubDef(lr.mine.me), opD = _clubDef(lr.mine.opp);
+    var rows = '', lastT = null;
+    lr.log.forEach(function (l) {
+      var tcell = (l.t !== lastT) ? l.t : ''; lastT = l.t;
+      rows += '<div class="lg-logrow"><span class="lg-logtime">' + tcell + '</span><span class="lg-logtxt">' + l.x + '</span></div>';
+    });
+    var ov = document.createElement('div');
+    ov.id = 'lg-log-ov'; ov.className = 'lg-logov';
+    ov.innerHTML =
+      '<div class="lg-loghead">' +
+        '<div style="font-weight:800;font-size:14px">' + myD.crest + ' ' + _clubName(lr.mine.me) + ' <b>' + lr.mine.ms + ' - ' + lr.mine.os + '</b> ' + _clubName(lr.mine.opp) + ' ' + opD.crest + '</div>' +
+        '<button class="lg-logclose" onclick="leagueCloseLog()">✕</button>' +
+      '</div>' +
+      '<div class="lg-logbody">' + rows + '</div>';
+    (document.getElementById('screen-home') || document.body).appendChild(ov);
+  }
+
   /* ── 試合後の"見出し・短評"（表示時に現在LANGで生成） ───────────────── */
   function _headlineText(lr) {
     var my = _clubName(lr.mine.me), op = _clubName(lr.mine.opp), diff = lr.mine.ms - lr.mine.os;
@@ -341,6 +376,7 @@
 
     // 試合後レポート素材は結果適用の前に採取（chanceResults=この試合・順位は適用前）
     var report = _collectMyStats();
+    var matchLog = _buildMatchLog();
     var posBefore = _position(myId);
 
     // 順位表はホーム/アウェイの実カードで記録
@@ -373,7 +409,8 @@
         rival: _isRival(oppId), posBefore: posBefore, posAfter: _position(myId),
         mom: report.mom, scorers: report.scorers
       },
-      others: others
+      others: others,
+      log: matchLog   // 実況テキストログ（試合後に見直す用）
     };
     _state.round++;
     _state.lastPlayedDate = _todayStr();
@@ -425,7 +462,14 @@
       '.lg-pick .pc .pn{font-size:13px;font-weight:800;margin-top:4px}',
       '.lg-pick .pc .pr{font-size:10px;color:rgba(255,255,255,0.55);margin-top:2px}',
       '.lg-resbadge{font-family:"Bebas Neue";font-size:30px;font-weight:700;letter-spacing:1px}',
-      '.lg-mini{font-size:11px;color:rgba(255,255,255,0.7);line-height:1.7}'
+      '.lg-mini{font-size:11px;color:rgba(255,255,255,0.7);line-height:1.7}',
+      '.lg-logov{position:fixed;inset:0;z-index:200;background:rgba(6,12,24,0.98);display:flex;flex-direction:column;color:#fff}',
+      '.lg-loghead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.12);flex-shrink:0}',
+      '.lg-logclose{background:rgba(255,255,255,0.14);border:none;color:#fff;width:34px;height:34px;border-radius:9px;font-size:15px;cursor:pointer;flex-shrink:0}',
+      '.lg-logbody{flex:1;overflow-y:auto;padding:8px 14px 48px;max-width:520px;margin:0 auto;width:100%;box-sizing:border-box}',
+      '.lg-logrow{display:flex;gap:10px;padding:7px 2px;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;line-height:1.55}',
+      '.lg-logtime{flex-shrink:0;width:44px;color:rgba(255,255,255,0.4);font-size:11px;font-weight:700;text-align:right;padding-top:2px}',
+      '.lg-logtxt{flex:1;color:#e8eefc}'
     ].join('\n');
     document.head.appendChild(st);
   }
@@ -561,6 +605,11 @@
       }
     }
 
+    // 前回試合の実況テキストログ
+    if (_state.lastResult && _state.lastResult.log && _state.lastResult.log.length) {
+      html += '<button class="lg-btn sec" onclick="leagueShowLog()">📜 ' + _t('前回の試合ログ（実況）を見る', 'View match commentary log') + '</button>';
+    }
+
     // ミニ順位表
     html += '<div class="lg-h">' + _t('順位表', 'Standings') + '</div>';
     html += _standingsTableHTML(rows, myId);
@@ -634,4 +683,7 @@
   window.leagueDebugUnlock = function () { if (_state) { _state.lastPlayedDate = null; _save(); _renderHub(false); } };
   // テスト用（lab限定）：1日1回制限のON/OFFトグル（毎回プレイ可にする）
   window.leagueToggleTestLock = function () { if (_state) { _state.testUnlock = !_state.testUnlock; _save(); _renderHub(false); } };
+  // 実況テキストログの表示/閉じる
+  window.leagueShowLog = function () { _showMatchLog(); };
+  window.leagueCloseLog = function () { var ov = document.getElementById('lg-log-ov'); if (ov) ov.parentNode.removeChild(ov); };
 })();
