@@ -149,15 +149,49 @@
     _state = {
       version: 1,
       myClub: myClubId,
+      rival: _computeRival(myClubId),   // 宿敵＝実力が最も近いクラブ（因縁の相手）
       clubs: ids,
       fixtures: _makeFixtures(ids),
       standings: standings,
       round: 0,
       lastPlayedDate: null,
-      lastResult: null,   // { round, mine:{me,opp,ms,os,res}, others:[{home,away,hs,as}] }
+      lastResult: null,   // { round, mine:{me,opp,ms,os,res,rival,posBefore,posAfter,mom,scorers}, others:[...] }
       finished: false
     };
     _save();
+  }
+
+  // 宿敵＝自クラブと総合力が最も近い他クラブ（決定論・因縁の相手）
+  function _computeRival(myId) {
+    var myStr = _clubStrength(myId), best = null, bestDiff = Infinity;
+    CLUB_DEFS.forEach(function (d) {
+      if (d.id === myId) return;
+      var diff = Math.abs(_clubStrength(d.id) - myStr);
+      if (diff < bestDiff) { bestDiff = diff; best = d.id; }
+    });
+    return best;
+  }
+  function _isRival(id) { return !!(_state && _state.rival && id === _state.rival); }
+
+  // 全fixturesから a vs b の played カードを a視点で集計（宿敵通算成績）
+  function _h2h(aId, bId) {
+    var w = 0, d = 0, l = 0;
+    _state.fixtures.forEach(function (round) {
+      round.forEach(function (m) {
+        if (!m.played) return;
+        if (!((m.home === aId && m.away === bId) || (m.home === bId && m.away === aId))) return;
+        var af = (m.home === aId) ? m.hs : m.as;
+        var bf = (m.home === aId) ? m.as : m.hs;
+        if (af > bf) w++; else if (af < bf) l++; else d++;
+      });
+    });
+    return { w: w, d: d, l: l };
+  }
+
+  function _position(id) {
+    var rows = _sortedStandings();
+    for (var i = 0; i < rows.length; i++) if (rows[i].id === id) return i + 1;
+    return rows.length;
   }
 
   function _save() { try { localStorage.setItem(LS_KEY, JSON.stringify(_state)); } catch (e) { console.warn('[league] save failed', e); } }
@@ -168,6 +202,7 @@
       var s = JSON.parse(raw);
       if (!s || s.version !== 1 || !s.fixtures) { _state = null; return; }
       _state = s;
+      if (!_state.rival) { _state.rival = _computeRival(_state.myClub); _save(); }  // 旧セーブへ宿敵を補完
     } catch (e) { _state = null; }
   }
 
@@ -204,6 +239,112 @@
 
   function _lockedToday() {
     return !!(_state && _state.lastPlayedDate === _todayStr());
+  }
+
+  /* ── 試合後レポート用: 自チームの得点者・アシスト・MOM を sim 結果から抽出 ───
+   * 既存WCモードと同一方式（scene: result==='ゴール！！' / 得点=ofsPos / 助=crossPos）。
+   * 自チーム＝ sc.offence === gameState.team1（league は team1 に自クラブをセット）。 */
+  function _collectMyStats() {
+    var empty = { scorers: [], mom: null };
+    if (typeof chanceResults === 'undefined' || !chanceResults) return empty;
+    if (typeof gameState === 'undefined' || !gameState || !gameState.team1) return empty;
+    var t1 = gameState.team1, stats = {};
+    chanceResults.forEach(function (res) {
+      if (!res || !res.scenes) return;
+      res.scenes.forEach(function (sc) {
+        if (sc.offence !== t1) return;
+        var isGoal = sc.result === 'ゴール！！';
+        var credit = isGoal || sc.result === '成功' || sc.result === 'ファール';
+        var lineup = sc.offence.lineup, players = sc.offence.players;
+        if (!lineup || !players) return;
+        var p = players[lineup[sc.ofsPos]];
+        if (!p) return;
+        if (!stats[p.name]) stats[p.name] = { goals: 0, assists: 0, duelWins: 0 };
+        if (credit) stats[p.name].duelWins++;
+        if (isGoal) {
+          stats[p.name].goals++;
+          if (sc.crossPos !== undefined && sc.crossPos !== sc.ofsPos) {
+            var ap = players[lineup[sc.crossPos]];
+            if (ap) { if (!stats[ap.name]) stats[ap.name] = { goals: 0, assists: 0, duelWins: 0 }; stats[ap.name].assists++; }
+          }
+        }
+      });
+    });
+    var names = Object.keys(stats);
+    var scorers = names.filter(function (n) { return stats[n].goals > 0; })
+      .map(function (n) { return { name: n, goals: stats[n].goals, assists: stats[n].assists }; })
+      .sort(function (a, b) { return (b.goals * 10 + b.assists) - (a.goals * 10 + a.assists); });
+    var mom = null, best = -1;
+    names.forEach(function (n) {
+      var s = stats[n], sc = s.goals * 3 + s.assists * 2 + s.duelWins * 0.2;
+      if (sc > best) { best = sc; mom = { name: n, goals: s.goals, assists: s.assists }; }
+    });
+    if (!mom) {  // 誰も記録なし（0-0等）→ キープレイヤー/先発GKを立てる
+      var td = _clubData(_state.myClub);
+      var kp = td.players[td.default_keyplayer] || td.players[0];
+      if (kp) mom = { name: kp.name, goals: 0, assists: 0 };
+    }
+    return { scorers: scorers, mom: mom };
+  }
+
+  /* ── 試合後の"見出し・短評"（表示時に現在LANGで生成） ───────────────── */
+  function _headlineText(lr) {
+    var my = _clubName(lr.mine.me), op = _clubName(lr.mine.opp), diff = lr.mine.ms - lr.mine.os;
+    var pre = lr.mine.rival ? _t('宿敵決戦｜', 'Derby｜') : '';
+    var s;
+    if (lr.mine.res === 'W') s = diff >= 3 ? _t(op + 'を粉砕！', op + ' crushed!') : (diff === 1 ? _t('競り勝ち', 'Edged it') : _t(op + '撃破', op + ' beaten'));
+    else if (lr.mine.res === 'D') s = _t('痛み分け', 'Honours even');
+    else s = diff <= -3 ? _t(op + 'に完敗', 'Hammered by ' + op) : (diff === -1 ? _t('惜敗', 'Fell just short') : _t(op + 'に敗戦', 'Beaten by ' + op));
+    return pre + my + _t('、', ' — ') + s;
+  }
+  function _reviewText(lr) {
+    var pa = lr.mine.posAfter, pb = lr.mine.posBefore, move = '';
+    if (pb && pa) {
+      if (pa < pb) move = _t('（' + pb + '位→' + pa + '位に浮上）', ' (up ' + pb + '→' + pa + ')');
+      else if (pa > pb) move = _t('（' + pb + '位→' + pa + '位に後退）', ' (down ' + pb + '→' + pa + ')');
+      else move = _t('（' + pa + '位キープ）', ' (' + pa + ' held)');
+    }
+    var base = _t('リーグ' + pa + '位', 'League #' + pa) + move;
+    if (lr.mine.rival) { var h = _h2h(lr.mine.me, lr.mine.opp); base += _t('　宿敵通算 ' + h.w + '勝' + h.d + '分' + h.l + '敗', '　vs rival ' + h.w + '-' + h.d + '-' + h.l); }
+    return base;
+  }
+  function _reportRowsHTML(lr) {
+    var out = [];
+    if (lr.mine.mom) {
+      var m = lr.mine.mom;
+      var stat = m.goals > 0 ? (m.goals + _t('ゴール', 'G') + (m.assists > 0 ? ' ' + m.assists + _t('アシスト', 'A') : '')) : _t('攻守に奮闘', 'all-round display');
+      out.push('🌟 <b>MOM</b> ' + m.name + '（' + stat + '）');
+    }
+    if (lr.mine.scorers && lr.mine.scorers.length) {
+      out.push('⚽ ' + lr.mine.scorers.map(function (s) { return s.name + (s.goals > 1 ? '×' + s.goals : ''); }).join('、'));
+    }
+    out.push(_reviewText(lr));
+    return out.join('<br>');
+  }
+
+  /* ── 次回予告（クリフハンガー） ─────────────────────────────────────── */
+  function _nextPreview() {
+    if (!_state || _state.finished) return null;
+    var fx = _myFixtureThisRound(); if (!fx) return null;
+    var myId = _state.myClub, oppId = (fx.home === myId) ? fx.away : fx.home;
+    var rounds = _state.fixtures.length, rd = _state.round, hook;
+    if (_isRival(oppId)) hook = _t('🔥 宿敵' + _clubName(oppId) + 'と再戦', '🔥 Rematch vs rival ' + _clubName(oppId));
+    else if (rd === rounds - 1) hook = _t('🏁 最終節・運命の一戦', '🏁 Final round — decisive');
+    else {
+      var rows = _sortedStandings(), myPts = _state.standings[myId].pts;
+      if (rd >= Math.floor(rounds * 0.55) && _position(myId) <= 3 && (rows[0].pts - myPts) <= 3)
+        hook = _t('👑 首位攻防', '👑 Title race');
+      else hook = _t('第' + (rd + 1) + '節 vs ' + _clubName(oppId), 'Round ' + (rd + 1) + ' vs ' + _clubName(oppId));
+    }
+    return { oppId: oppId, hook: hook, iAmHome: (fx.home === myId) };
+  }
+  function _previewHTML() {
+    var p = _nextPreview(); if (!p) return '';
+    return '<div class="lg-card" style="padding:11px 13px;border-color:rgba(255,255,255,0.18)">' +
+      '<div style="font-size:10px;color:rgba(255,255,255,0.5);font-weight:700;letter-spacing:1px">' + _t('▶ 次回予告', '▶ NEXT EPISODE') + '</div>' +
+      '<div style="font-size:14px;font-weight:800;margin-top:4px">' + p.hook + '</div>' +
+      '<div class="lg-mini" style="margin-top:2px">' + (p.iAmHome ? _t('ホーム', 'Home') : _t('アウェイ', 'Away')) + ' vs ' + _clubDef(p.oppId).crest + ' ' + _clubName(p.oppId) + '</div>' +
+      '</div>';
   }
 
   /* ── 試合起動（自チーム = 監督ビューア） ─────────────────────────────── */
@@ -244,6 +385,10 @@
     var myScore = (gameState && gameState.team1) ? gameState.team1.score : 0;
     var oppScore = (gameState && gameState.team2) ? gameState.team2.score : 0;
 
+    // 試合後レポート素材は結果適用の前に採取（chanceResults=この試合・順位は適用前）
+    var report = _collectMyStats();
+    var posBefore = _position(myId);
+
     // 順位表はホーム/アウェイの実カードで記録
     var hs = iAmHome ? myScore : oppScore;
     var as = iAmHome ? oppScore : myScore;
@@ -269,7 +414,11 @@
     var res = (myScore > oppScore) ? 'W' : (myScore < oppScore) ? 'L' : 'D';
     _state.lastResult = {
       round: _state.round,
-      mine: { me: myId, opp: oppId, ms: myScore, os: oppScore, res: res, home: iAmHome },
+      mine: {
+        me: myId, opp: oppId, ms: myScore, os: oppScore, res: res, home: iAmHome,
+        rival: _isRival(oppId), posBefore: posBefore, posAfter: _position(myId),
+        mom: report.mom, scorers: report.scorers
+      },
       others: others
     };
     _state.round++;
@@ -394,6 +543,9 @@
           '<div class="mid">' + lr.mine.ms + ' - ' + lr.mine.os + '</div>' +
           '<div class="side"><div class="crest">' + oppDef.crest + '</div><div class="nm">' + _clubName(lr.mine.opp) + '</div></div>' +
         '</div>';
+      // 見出し＋MOM＋得点者＋順位変動（試合後レポート）
+      html += '<div style="text-align:center;font-weight:800;font-size:14px;margin:10px 4px 4px">' + _headlineText(lr) + '</div>' +
+        '<div class="lg-mini" style="text-align:center;line-height:1.7">' + _reportRowsHTML(lr) + '</div>';
       if (lr.others && lr.others.length) {
         var ot = lr.others.map(function (o) {
           return _clubName(o.home) + ' <b>' + o.hs + '-' + o.as + '</b> ' + _clubName(o.away);
@@ -402,14 +554,19 @@
           '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px">' + _t('他会場', 'Other results') + '</div>' + ot + '</div>';
       }
       html += '</div>';
+      html += _previewHTML();   // 次回予告
     }
 
     // 自クラブヘッダー
+    var rivalId = _state.rival;
+    var rivalLine = rivalId ? '<div class="lg-sub" style="margin-top:3px">' + _t('宿敵', 'Rival') + '：' +
+      _clubDef(rivalId).crest + ' <span style="color:#e8776f;font-weight:700">' + _clubName(rivalId) + '</span></div>' : '';
     html += '<div class="lg-card"><div class="lg-club">' +
       '<div class="lg-crest" style="background:' + myDef.color + '33;border:1px solid ' + myDef.color + '">' + myDef.crest + '</div>' +
       '<div style="flex:1"><div class="lg-clubname">' + _clubName(myId) + '</div>' +
       '<div class="lg-sub">' + _t('現在', 'Position') + ' <b style="color:#fff">' + myPos + _t('位', '') + '</b>' +
-      '　' + myRow.pts + _t('pt', ' pts') + '　' + myRow.w + _t('勝', 'W') + myRow.d + _t('分', 'D') + myRow.l + _t('敗', 'L') + '</div></div>' +
+      '　' + myRow.pts + _t('pt', ' pts') + '　' + myRow.w + _t('勝', 'W') + myRow.d + _t('分', 'D') + myRow.l + _t('敗', 'L') + '</div>' +
+      rivalLine + '</div>' +
       '</div></div>';
 
     // 本日の試合 or シーズン終了
@@ -430,9 +587,13 @@
       var oppDef2 = _clubDef(oppId);
       var iAmHome = (fx.home === myId);
       var haBadge = iAmHome ? _t('HOME', 'HOME') : _t('AWAY', 'AWAY');
+      var oppIsRival = _isRival(oppId);
+      var rivalBadge = oppIsRival ? '<span class="lg-badge" style="background:#c0392b">' + _t('宿敵', 'RIVAL') + '</span>' : '';
       html += '<div class="lg-h">' + _t('第' + (_state.round + 1) + '節 / 14', 'Round ' + (_state.round + 1) + ' / 14') +
-        '<span class="lg-badge">' + haBadge + '</span></div>';
-      html += '<div class="lg-hero" style="background:linear-gradient(135deg,' + myDef.color + '33,' + oppDef2.color + '33)">' +
+        '<span class="lg-badge">' + haBadge + '</span>' + rivalBadge + '</div>';
+      html += '<div class="lg-hero" style="background:linear-gradient(135deg,' + myDef.color + '33,' + oppDef2.color + '33)' +
+        (oppIsRival ? ';border:1px solid #c0392b99' : '') + '">' +
+        (oppIsRival ? '<div style="text-align:center;color:#e8776f;font-weight:800;font-size:12px;margin-bottom:4px">🔥 ' + _t('宿敵対決', 'RIVALRY') + '　' + (function () { var h = _h2h(myId, oppId); return _t('通算 ' + h.w + '勝' + h.d + '分' + h.l + '敗', h.w + '-' + h.d + '-' + h.l); })() + '</div>' : '') +
         '<div class="lg-vs">' +
           '<div class="side"><div class="crest">' + myDef.crest + '</div><div class="nm">' + _clubName(myId) + '</div></div>' +
           '<div class="mid">VS</div>' +
