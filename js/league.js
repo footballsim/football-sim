@@ -27,77 +27,28 @@
   function _isEn() { return (typeof window !== 'undefined' && window.LANG === 'en'); }
   function _t(ja, en) { return _isEn() ? en : ja; }
 
-  /* ── 架空クラブの識別情報（source = 流用元 TEAM_DATA キー） ─────────────── */
-  var CLUB_DEFS = [
-    { id: 'guren',   ja: '紅蓮ユナイテッド', en: 'Crimson United',   color: '#c0392b', crest: '🔥', source: 'brazil2026' },
-    { id: 'soukai',  ja: '蒼海フットボール', en: 'Azure FC',         color: '#1f6fb2', crest: '🌊', source: 'france2026' },
-    { id: 'kurogane',ja: '黒鉄シティ',       en: 'Ironclad City',    color: '#34495e', crest: '⚙️', source: 'spain2026' },
-    { id: 'kinjishi',ja: '金獅子SC',         en: 'Golden Lions SC',  color: '#d4a017', crest: '🦁', source: 'england2026' },
-    { id: 'suiran',  ja: '翠嵐アスレチック', en: 'Verdant Athletic', color: '#1e8449', crest: '🌿', source: 'netherlands2026' },
-    { id: 'ginrou',  ja: '銀狼ローヴァーズ', en: 'Silver Wolves',    color: '#7f8c8d', crest: '🐺', source: 'usa2026' },
-    { id: 'shiden',  ja: '紫電クラブ',       en: 'Violet Club',      color: '#8e44ad', crest: '⚡', source: 'morocco2026' },
-    { id: 'touka',   ja: '橙火FC',           en: 'Amber FC',         color: '#e67e22', crest: '🔶', source: 'norway2026' }
+  /* ── 参加クラブ ＝ シミュレータ既存チームの「チーム力上位8」（テスト段階：架空でなく実チーム）
+   * チーム力（先発11のパラメータ平均）で算出した上位。id は TEAM_DATA のキーをそのまま使う。 */
+  var LEAGUE_TEAM_KEYS = [
+    'england2026',     // イングランド 76.2
+    'netherlands2026', // オランダ     74.7
+    'spain2026',       // スペイン     74.2
+    'france2026',      // フランス     73.1
+    'argentina2026',   // アルゼンチン 73.1
+    'italy2026',       // イタリア     72.7
+    'brazil2026',      // ブラジル     72.4
+    'belgium2026'      // ベルギー     72.4
   ];
 
-  /* ── 架空選手名の決定論生成（音節合成・JA/EN 整合） ───────────────────── */
-  var SYL1 = [['ラ','Ra'],['ロ','Ro'],['レ','Re'],['ヴァ','Va'],['ヴェ','Ve'],['ヴォ','Vo'],['ガ','Ga'],['ゴ','Go'],
-              ['ザ','Za'],['ゾ','Zo'],['ダ','Da'],['ド','Do'],['バ','Ba'],['ボ','Bo'],['ブ','Bu'],['カ','Ka'],
-              ['コ','Ko'],['サ','Sa'],['ソ','So'],['タ','Ta'],['ト','To'],['ナ','Na'],['ノ','No'],['ハ','Ha'],
-              ['ホ','Ho'],['マ','Ma'],['モ','Mo'],['パ','Pa'],['ポ','Po'],['フェ','Fe'],['グ','Gu'],['ク','Ku']];
-  var SYL2 = [['ル','ru'],['ン','n'],['ス','s'],['ノ','no'],['レ','re'],['リ','ri'],['ロ','ro'],['ラ','ra'],
-              ['ド','do'],['ト','to'],['ニ','ni'],['ミ','mi'],['ゴ','go'],['ザ','za'],['ヴィ','vi'],['ッチ','cci'],
-              ['スキ','ski'],['ノフ','nov'],['マン','man'],['ソン','son'],['ベル','ber'],['ダル','dal']];
+  // クラブ識別情報（id/名前/色/エンブレム）を実 TEAM_DATA から生成。名前・色・国旗・選手はすべて実データ。
+  var CLUB_DEFS = LEAGUE_TEAM_KEYS.map(function (key) {
+    var td = (typeof TEAM_DATA !== 'undefined') ? TEAM_DATA[key] : null;
+    return td
+      ? { id: key, ja: td.name, en: td.en_name, color: td.team_color, crest: td.flag }
+      : { id: key, ja: key, en: key, color: '#888888', crest: '⚽' };
+  });
 
-  function _makeName(clubIdx, playerIdx, used) {
-    // 決定論ハッシュ → 音節。前後の音節を別系列で回し、隣接選手が韻を踏まないようにする。
-    var baseA = playerIdx * 5 + clubIdx * 11 + 3;
-    var baseB = playerIdx * 3 + clubIdx * 7 + 1;
-    for (var tries = 0; tries < SYL1.length * SYL2.length; tries++) {
-      var av = baseA + tries;
-      var a = av % SYL1.length;
-      var b = (baseB + Math.floor(av / SYL1.length)) % SYL2.length;
-      var ja = SYL1[a][0] + SYL2[b][0];
-      if (!used[ja]) {
-        used[ja] = true;
-        var en = SYL1[a][1] + SYL2[b][1];
-        return { ja: ja, en: en.charAt(0).toUpperCase() + en.slice(1) };
-      }
-    }
-    return { ja: '選手' + playerIdx, en: 'Player' + playerIdx };
-  }
-
-  /* ── クラブ実体（TEAM_DATA 互換）を生成 ──────────────────────────────── */
-  var _clubs = null; // { id: teamData } — teamData は TEAM_DATA と同形
-
-  function _deepClone(o) { return JSON.parse(JSON.stringify(o)); }
-
-  function _buildClubs() {
-    if (_clubs) return _clubs;
-    _clubs = {};
-    for (var c = 0; c < CLUB_DEFS.length; c++) {
-      var def = CLUB_DEFS[c];
-      var src = (typeof TEAM_DATA !== 'undefined') ? TEAM_DATA[def.source] : null;
-      if (!src) { console.warn('[league] source squad not found:', def.source); continue; }
-      var td = _deepClone(src);
-      td.name = def.ja;
-      td.en_name = def.en;
-      td.team_color = def.color;
-      td.flag = def.crest;
-      td.club_id = def.id;
-      // 選手名を架空へ（params/positions は流用）
-      var used = {};
-      for (var i = 0; i < td.players.length; i++) {
-        var nm = _makeName(c, i, used);
-        td.players[i].name = nm.ja;
-        td.players[i].en_name = nm.en;
-        td.players[i].long_name = nm.ja;
-      }
-      _clubs[def.id] = td;
-    }
-    return _clubs;
-  }
-
-  function _clubData(id) { return _buildClubs()[id]; }
+  function _clubData(id) { return (typeof TEAM_DATA !== 'undefined') ? TEAM_DATA[id] : null; }
   function _clubDef(id) { for (var i = 0; i < CLUB_DEFS.length; i++) if (CLUB_DEFS[i].id === id) return CLUB_DEFS[i]; return null; }
   function _clubName(id) { var td = _clubData(id); return td ? (_isEn() ? td.en_name : td.name) : id; }
 
@@ -147,7 +98,7 @@
     var standings = {};
     ids.forEach(function (id) { standings[id] = _emptyStanding(); });
     _state = {
-      version: 1,
+      version: 2,   // v2: 参加クラブを実チーム(上位8)へ切替（旧v1=架空クラブのセーブは無効化）
       myClub: myClubId,
       rival: _computeRival(myClubId),   // 宿敵＝実力が最も近いクラブ（因縁の相手）
       clubs: ids,
@@ -200,7 +151,7 @@
       var raw = localStorage.getItem(LS_KEY);
       if (!raw) { _state = null; return; }
       var s = JSON.parse(raw);
-      if (!s || s.version !== 1 || !s.fixtures) { _state = null; return; }
+      if (!s || s.version !== 2 || !s.fixtures) { _state = null; return; }   // 旧版セーブは破棄
       _state = s;
       if (!_state.rival) { _state.rival = _computeRival(_state.myClub); _save(); }  // 旧セーブへ宿敵を補完
     } catch (e) { _state = null; }
