@@ -230,6 +230,7 @@
       halfTimeShown = true;
       var htRes = chanceResults[HALF_CHANCES - 1] || chanceResults[HALF_CHANCES - 2];
       if (htRes) halfTimeScore = { t1: htRes.t1score, t2: htRes.t2score };
+      _mvOpponentReact();   // 相手監督のハーフタイム采配
       _mvPause();
       setTimeout(function () { if (_managerMode) _mvShowHT(); }, 350);
       return;
@@ -237,6 +238,7 @@
 
     // ゴール停止（カットシーンの余韻を見せてから采配パネル）。
     if (_mvGoalShown) {
+      _mvOpponentReact();   // 相手監督が失点/得点に反応
       _mvPause();
       setTimeout(function () { if (_managerMode) _mvShowDecisionPoint('goal'); }, 3300);
       return;
@@ -274,6 +276,47 @@
       return;
     }
     if (typeof showResult === 'function') showResult();
+  }
+
+  /* ── 相手監督AI（アダプティブ采配）────────────────────────────────
+   * 相手（team2 = away）がスコアと時間帯に応じて戦術を変更する。
+   * 既存の createMatch.applyDecision（プレイヤーの采配と同じサンクション済みAPI）経由で、
+   * デュエル解決式には一切触れない（tactics は既存パラメータ）。HT/得点時に評価。
+   * ──────────────────────────────────────────────────────────────── */
+  var _mvOpponentAI = true;
+  function _mvTacName(idx) {
+    if (typeof t === 'function') { var arr = t('tacticsNames'); if (arr && arr[idx]) return arr[idx]; }
+    return (typeof TACTICS_NAMES !== 'undefined') ? TACTICS_NAMES[idx] : '';
+  }
+  function _mvOpponentReact() {
+    if (!_mvOpponentAI || !_mvCtrl || !gameState || !gameState.team2) return;
+    var diff = gameState.team2.score - gameState.team1.score;   // 相手(away)視点の点差
+    var prog = (typeof MATCH_CHANCES !== 'undefined') ? currentChanceIdx / MATCH_CHANCES : 0;
+    var cur = gameState.team2.tactics, target = null, label = '';
+    if (diff <= -2) { target = TACTICS_PRESS; label = _mvT('前がかりに総攻撃', 'all-out attack'); }
+    else if (diff === -1 && prog >= 0.45) { target = TACTICS_PRESS; label = _mvT('攻勢を強める', 'pushing forward'); }
+    else if (diff >= 2 && prog >= 0.6) { target = TACTICS_CATENACCIO; label = _mvT('守備を固める', 'locking it down'); }
+    else if (diff >= 1 && prog >= 0.8) { target = TACTICS_COUNTER; label = _mvT('逃げ切りを図る', 'game-managing'); }
+    if (target == null || target === cur) return;
+    if (_mvCtrl.applyDecision({ type: 'tactic', side: 'away', tactics: target })) {
+      _mvToast('🧠 ' + _mvT('相手監督', 'Rival manager') + '：' + label + '（' + _mvTacName(target) + '）');
+    }
+  }
+  function _mvToast(msg) {
+    var host = document.getElementById('screen-game'); if (!host) return;
+    var el = document.getElementById('mv-toast');
+    if (!el) {
+      el = document.createElement('div'); el.id = 'mv-toast';
+      el.style.cssText = 'position:absolute;top:70px;left:50%;transform:translateX(-50%);z-index:60;' +
+        'background:rgba(15,20,32,0.92);border:1px solid rgba(232,119,111,0.6);color:#fff;' +
+        'font-size:12px;font-weight:700;padding:8px 14px;border-radius:20px;max-width:90%;' +
+        'box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:opacity .35s;pointer-events:none;white-space:nowrap';
+      host.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.opacity = '1';
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.style.opacity = '0'; }, 3200);
   }
 
   /* ── 采配ポイント（停止時パネル）──────────────────────────────────
@@ -632,4 +675,5 @@
   g._mvContinue = _mvContinue;
   g._mvManagerHTKickoff = _mvManagerHTKickoff;
   g._mvTeardownUI = _mvTeardownUI;
+  g._mvOpponentReact = _mvOpponentReact;   // デバッグ/検証用ハンドル
 })();
