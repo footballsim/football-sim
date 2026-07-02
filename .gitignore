@@ -5,3 +5,6 @@ tools/art/cutscenes/
 ui-mockup.html
 ui-mockup-v2.html
 cutscene-demo.html
+
+# 非公開lab配信ビルド（Cloudflare Pagesへ直接デプロイ）
+dist-lab/

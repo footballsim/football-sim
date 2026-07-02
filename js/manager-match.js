@@ -267,6 +267,12 @@
     _mvPause();
     _mvHideDecision();
     _mvShowControls(false);
+    // デイリーリーグ（league.js）が試合を起動していれば、専用の後処理へ委譲（WC結果画面は出さない）。
+    if (typeof window !== 'undefined' && typeof window._leagueOnMatchFinish === 'function') {
+      _managerMode = false;
+      window._leagueOnMatchFinish();
+      return;
+    }
     if (typeof showResult === 'function') showResult();
   }
 
