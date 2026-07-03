@@ -2344,6 +2344,18 @@ function _dbgSnapTotals(scene, team1, team2) {
   return scene;
 }
 
+// ── デュエル解決のコントラスト指数（2026-07-03 ユーザー決定・DECISIONS.md）──────
+//   勝率 = o^k / (o^k + d^k)。k=2 が旧来の2乗式。k=2.7 で「90 vs 53.7」の
+//   番狂わせが 26.3% → 20.0%（約5回に1回）。互角(o=d)は k に依らず常に50%。
+//   全デュエル系解決（通常/競り合い/シュートvsGK/CK）がこの関数を共通使用。
+//   ⚠️ PK専用解決（0.75+(shoot-gk)*0.004）とチャンス配分式 t1/(t1+t2) は別系・対象外。
+const DUEL_EXPONENT = 2.7;
+function duelWinProb(o, d) {
+  const ok = Math.pow(Math.max(o, 0), DUEL_EXPONENT);
+  const dk = Math.pow(Math.max(d, 0), DUEL_EXPONENT);
+  return ok / (ok + dk);
+}
+
 function simulateChance(gs, chanceNo) {
   const {team1, team2} = gs;
   const time = calcTime(chanceNo);
@@ -2402,7 +2414,7 @@ function simulateChance(gs, chanceNo) {
 
   // lab限定デバッグ: デュエル投入値を捕捉（DBG-01・mentalOnDuel で morale が動く前）
   const _dbg1 = _mkSceneDbg(offence, ofsPlayer, defence, dfsPlayer, action, ofsPoint, dfsPoint);
-  let result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
+  let result = (rng() < duelWinProb(ofsPoint, dfsPoint) ? '成功' : '失敗');
   // メンタル: デュエル結果を心理状態へ反映（PS-04・判定そのものは不変の result-hook）
   if (typeof mentalOnDuel === 'function') mentalOnDuel(ofsPlayer, dfsPlayer, result === '成功');
   let scene = { offence, defence, area, rawArea, ofsPos, dfsPos, action, scenario: action, result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
@@ -2512,7 +2524,7 @@ function simulateChance(gs, chanceNo) {
     if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
     // lab限定デバッグ: デュエル投入値を捕捉（DBG-01・mentalOnDuel で morale が動く前）
     const _dbgW = _mkSceneDbg(offence, ofsPlayer, defence, dfsPlayer, action, ofsPoint, dfsPoint);
-    result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
+    result = (rng() < duelWinProb(ofsPoint, dfsPoint) ? '成功' : '失敗');
     // メンタル: デュエル結果を心理状態へ反映（PS-04）
     if (typeof mentalOnDuel === 'function') mentalOnDuel(ofsPlayer, dfsPlayer, result === '成功');
 
@@ -2598,7 +2610,7 @@ function simulateChance(gs, chanceNo) {
       let midResult;
       if (rng() * 100 > midOfsPoint) {
         midResult = '枠を外した！';
-      } else if (rng() < (midOfsPoint * midOfsPoint) / (midOfsPoint * midOfsPoint + midDfsPoint * midDfsPoint)) {
+      } else if (rng() < duelWinProb(midOfsPoint, midDfsPoint)) {
         midResult = 'ゴール！！';
         offence.score++;
         goalScored = offence;
@@ -2641,7 +2653,7 @@ function simulateChance(gs, chanceNo) {
     let shootResult;
     if (rng() * 100 > ofsPoint) {
       shootResult = '枠を外した！';
-    } else if (rng() < (ofsPoint * ofsPoint) / (ofsPoint * ofsPoint + dfsPoint * dfsPoint)) {
+    } else if (rng() < duelWinProb(ofsPoint, dfsPoint)) {
       shootResult = 'ゴール！！';
       offence.score++;
       goalScored = offence;
@@ -2725,7 +2737,7 @@ function simulateChance(gs, chanceNo) {
         if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
         // lab限定デバッグ: セットプレー競り合い投入値を捕捉（DBG-01）
         const _dbgSP = _mkSceneDbg(offence, ofsPlayer, defence, dfsPlayer, action, ofsPoint, dfsPoint);
-        result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
+        result = (rng() < duelWinProb(ofsPoint, dfsPoint) ? '成功' : '失敗');
         scene = { offence, defence, area, crossPos, ofsPos, dfsPos, action, scenario: 'セットプレー', result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
         if (_dbgSP) scene.dbg = _dbgSP;
         scenes.push(_dbgSnapTotals(scene, team1, team2));
@@ -2775,7 +2787,7 @@ function simulateChance(gs, chanceNo) {
             if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
             // lab限定デバッグ: クロス競り合い投入値を捕捉（DBG-01）
             const _dbgCR = _mkSceneDbg(offence, ofsPlayer, defence, dfsPlayer, action, ofsPoint, dfsPoint);
-            result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
+            result = (rng() < duelWinProb(ofsPoint, dfsPoint) ? '成功' : '失敗');
             scene = { offence, defence, area, crossPos, ofsPos, dfsPos, action, scenario: 'クロス', result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
             if (_dbgCR) scene.dbg = _dbgCR;
             scenes.push(_dbgSnapTotals(scene, team1, team2));
@@ -2801,7 +2813,7 @@ function simulateChance(gs, chanceNo) {
       let shootResult;
       if (rng() * 100 > ofsPoint) {
         shootResult = '枠を外した！';
-      } else if (rng() < (ofsPoint * ofsPoint) / (ofsPoint * ofsPoint + dfsPoint * dfsPoint)) {
+      } else if (rng() < duelWinProb(ofsPoint, dfsPoint)) {
         shootResult = 'ゴール！！';
         offence.score++;
         goalScored = offence;
@@ -2844,7 +2856,7 @@ function simulateChance(gs, chanceNo) {
         const _ckDfsPos = selectDefencePosition(_ckOff, _ckDef, _ckArea, _ckShooter, _lastSc.dfsPos);
         const _ckD = getActionParam(_ckDef, _ckDfsPos, '対' + _ckAction) * CK_DEF_EDGE;  // 守備密集で守備有利
         // 競り合い（既存デュエル式・不変）→ 勝てばGK対決。合わせは低質(CK_SHOT_MUL)＝決定率は現実域。
-        const _contest = (function (o, d) { var p = o * o / (o * o + d * d); return rng() < p ? '成功' : '失敗'; })(_ckO, _ckD);
+        const _contest = (rng() < duelWinProb(_ckO, _ckD) ? '成功' : '失敗');
         let _ckResult;
         if (_contest === '失敗') {
           _ckResult = '失敗';   // クリアされた／合わせきれず
@@ -2853,7 +2865,7 @@ function simulateChance(gs, chanceNo) {
           const _ckShot = _ckO * CK_SHOT_MUL;
           const _ckGkP = getActionParam(_ckDef, 0, '対' + _ckAction);
           if (rng() * 100 > _ckShot) _ckResult = '枠を外した！';
-          else if (rng() < (_ckShot * _ckShot) / (_ckShot * _ckShot + _ckGkP * _ckGkP)) {
+          else if (rng() < duelWinProb(_ckShot, _ckGkP)) {
             _ckResult = 'ゴール！！'; _ckOff.score++; goalScored = _ckOff;
             // メンタル: 得点/失点の心理反映＋スキル発動判定（PS-04・コーナーキック得点）
             if (typeof mentalOnGoal === 'function') {
