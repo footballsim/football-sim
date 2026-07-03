@@ -285,9 +285,11 @@
     _mvPause();
     _mvHideDecision();
     _mvShowControls(false);
+    // 試合終了＝監督モード解除（リーグ経路だけでなく通常経路も）。true のまま残すと、
+    // 次のプリマッチ設定画面が前試合の gameState（相手のライブ布陣）を誤参照する。
+    _managerMode = false;
     // デイリーリーグ（league.js）が試合を起動していれば、専用の後処理へ委譲（WC結果画面は出さない）。
     if (typeof window !== 'undefined' && typeof window._leagueOnMatchFinish === 'function') {
-      _managerMode = false;
       window._leagueOnMatchFinish();
       return;
     }
