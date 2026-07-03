@@ -34,8 +34,8 @@ const EVENT_TYPES = Object.freeze({
   GOAL:    'goal',    // 得点
   SAVE:    'save',    // GK セーブ
   FOUL:    'foul',    // ファウル（→ セットプレー）
-  CARD:    'card',    // カード（※現エンジン未発生・emit しない）
-  INJURY:  'injury',  // 負傷（※現エンジン未発生・emit しない）
+  CARD:    'card',    // カード（Sprint 2・res.disciplineEvents 由来。discipline.js 非同梱では発生しない）
+  INJURY:  'injury',  // 負傷（Sprint 2・res.disciplineEvents 由来。同上）
   SUB:     'sub',     // 交代（※ライブ交代は別機構。matchToEvents では emit しない）
   HT:      'ht',      // ハーフタイム
   FT:      'ft',      // 試合終了
@@ -291,6 +291,27 @@ function matchToEvents(chanceResults, opts) {
           playerEn: me.playerEn || null,
           skill: me.skill || null,
           detail: me.detail || null,
+        });
+      }
+    }
+
+    // カード/退場/負傷イベント（Sprint 2）: エンジンが res.disciplineEvents に「追記」した記録を
+    // Event 化してシーン列の後に差し込む（mentalEvents と同じ位置・時系列＝トリガー(foul)→カード/負傷）。
+    // discipline.js 非同梱の公開ビルドでは disciplineEvents 自体が存在しない＝従来と同一の列。
+    if (Array.isArray(res.disciplineEvents)) {
+      for (const de of res.disciplineEvents) {
+        events.push({
+          t: de.type === 'card' ? EVENT_TYPES.CARD : EVENT_TYPES.INJURY,
+          chance: ci,
+          minute,
+          team: de.team === 1 ? 'home' : de.team === 2 ? 'away' : null,
+          player: de.player || null,
+          playerEn: de.playerEn || null,
+          card: de.card || null,          // 'yellow' | 'second_yellow' | 'red'（injury は null）
+          sentOff: !!de.sentOff,          // カードによる退場（injury は false）
+          subIn: de.subIn || null,        // 負傷交代の投入選手（null=枠切れ/ベンチ無し→10人続行）
+          subInEn: de.subInEn || null,
+          pos: (typeof de.pos === 'number') ? de.pos : null,
         });
       }
     }

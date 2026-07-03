@@ -44,7 +44,11 @@ const TOL = {
   resultRate: 0.020,// シーン結果種別の発生率（割合、絶対差）
   shots: 1.5,       // 平均合計シュート数（本/試合）
   onTarget: 1.0,    // 平均合計枠内シュート数（本/試合）
-  conversion: 0.05  // 決定率（goals/shots、絶対差）
+  conversion: 0.05, // 決定率（goals/shots、絶対差）
+  // 規律KPI（Sprint 2・discipline.js 由来）/試合。baseline に項目が無い間は比較スキップ（後方互換）
+  yellowPerMatch: 0.10, // イエロー提示（実測≈0.89・N=1500 の 3σ≈0.07）
+  redPerMatch:    0.03, // レッド退場（実測≈0.07・3σ≈0.02）
+  injuryPerMatch: 0.06  // 怪我（実測≈0.23・3σ≈0.04）
 };
 
 // 実W杯の参照値（リアルさの物差し用。レポートにギャップを併記する）。
@@ -65,7 +69,8 @@ function makeTeam(api, data) {
 }
 
 // simulateSilent と同じ手順で 1 試合回し、スコアと生シーンを返す。
-function playMatch(api, d1, d2, resultCounts) {
+// disc = 規律イベント集計（Sprint 2: イエロー/レッド退場/怪我。discipline.js 非同梱なら常に 0）。
+function playMatch(api, d1, d2, resultCounts, disc) {
   const t1 = makeTeam(api, d1), t2 = makeTeam(api, d2);
   [t1, t2].forEach(t => {
     t.score = 0; t.chanceCounter = 0; t.shootCounter = 0; t.gkSaveCounter = 0;
@@ -78,6 +83,17 @@ function playMatch(api, d1, d2, resultCounts) {
     for (const sc of res.scenes) {
       resultCounts[sc.result] = (resultCounts[sc.result] || 0) + 1;
       resultCounts.__total++;
+    }
+    // 規律イベント（res.disciplineEvents は「追記」フィールド・無ければ従来形状）
+    if (disc && Array.isArray(res.disciplineEvents)) {
+      for (const de of res.disciplineEvents) {
+        if (de.type === 'card') {
+          if (de.card === 'yellow' || de.card === 'second_yellow') disc.yellow++;
+          if (de.sentOff) disc.red++;   // 一発レッド＋2枚目イエロー＝退場
+        } else if (de.type === 'injury') {
+          disc.injury++;
+        }
+      }
     }
   }
   return { t1score: t1.score, t2score: t2.score };
@@ -103,9 +119,10 @@ function runMatchup(api, k1, k2, N, globalResultCounts) {
   const d1 = api.TEAM_DATA[k1], d2 = api.TEAM_DATA[k2];
   if (!d1 || !d2) throw new Error(`TEAM_DATA に未定義のカード: ${k1} vs ${k2}`);
   const rc = { __total: 0 }; // このカード専用のシーン結果カウント
+  const disc = { yellow: 0, red: 0, injury: 0 }; // 規律イベント（Sprint 2）
   let w = 0, d = 0, l = 0, g1 = 0, g2 = 0, blowout = 0, maxTeamGoals = 0;
   for (let i = 0; i < N; i++) {
-    const r = playMatch(api, d1, d2, rc);
+    const r = playMatch(api, d1, d2, rc, disc);
     g1 += r.t1score; g2 += r.t2score;
     if (r.t1score > r.t2score) w++;
     else if (r.t1score === r.t2score) d++;
@@ -131,6 +148,10 @@ function runMatchup(api, k1, k2, N, globalResultCounts) {
     conversion: sm.conversion,
     blowoutPct: +(blowout / N * 100).toFixed(2),
     maxTeamGoals,
+    // 規律KPI/試合（Sprint 2。discipline.js 非同梱環境では 0）
+    yellowPerMatch: +(disc.yellow / N).toFixed(3),
+    redPerMatch:    +(disc.red / N).toFixed(3),
+    injuryPerMatch: +(disc.injury / N).toFixed(3),
   };
 }
 
@@ -150,6 +171,8 @@ function run(N) {
   const totalGoalsAll = matchups.reduce((s, m) => s + m.avgTotalGoals, 0) / matchups.length;
   // 全体シュートKPIは全カード合算カウントから（試合数＝N×カード数）。
   const globalShots = shotMetrics(resultCounts, N * matchups.length);
+  // 全体規律KPI（各カード同数 N なので単純平均＝全試合平均）
+  const gAvg = key => +(matchups.reduce((s, m) => s + (m[key] || 0), 0) / matchups.length).toFixed(3);
 
   return {
     generatedAt: new Date().toISOString(),
@@ -160,6 +183,9 @@ function run(N) {
     globalAvgShots: globalShots.avgShots,
     globalAvgOnTarget: globalShots.avgOnTarget,
     globalConversion: globalShots.conversion,
+    globalYellowPerMatch: gAvg('yellowPerMatch'),
+    globalRedPerMatch:    gAvg('redPerMatch'),
+    globalInjuryPerMatch: gAvg('injuryPerMatch'),
     realTargets: REAL_TARGETS,
     sceneResultRates,
     matchups,
@@ -177,6 +203,9 @@ function printReport(snap) {
       console.log(`     シュート ${m.avgShots}  枠内 ${m.avgOnTarget}  決定率 ${(m.conversion * 100).toFixed(1)}%` +
                   `  片チーム≥5点 ${m.blowoutPct}%  最大得点 ${m.maxTeamGoals}`);
     }
+    if (m.yellowPerMatch !== undefined) {
+      console.log(`     イエロー/試合 ${m.yellowPerMatch}  レッド退場/試合 ${m.redPerMatch}  怪我/試合 ${m.injuryPerMatch}`);
+    }
   }
   console.log('-'.repeat(72));
   console.log(`  全体 平均合計得点: ${snap.globalAvgTotalGoals}   総シーン数: ${snap.totalScenes}`);
@@ -184,6 +213,10 @@ function printReport(snap) {
     const rt = snap.realTargets || REAL_TARGETS;
     console.log(`  全体 平均合計シュート: ${snap.globalAvgShots}  枠内: ${snap.globalAvgOnTarget}  決定率: ${(snap.globalConversion * 100).toFixed(1)}%`);
     console.log(`  ── 実W杯の目安: 得点${rt.totalGoals} / シュート${rt.shots}(枠内${rt.onTarget}) / 決定率${(rt.conversion * 100).toFixed(0)}%`);
+  }
+  if (snap.globalYellowPerMatch !== undefined) {
+    console.log(`  全体 規律/試合: イエロー ${snap.globalYellowPerMatch}  レッド退場 ${snap.globalRedPerMatch}  怪我 ${snap.globalInjuryPerMatch}` +
+                `  ── 目安: イエロー0.8〜1.2 / レッド0.03〜0.08（Sprint 2・discipline.js 非同梱なら全て0）`);
   }
   console.log('  シーン結果種別 発生率:');
   for (const [k, v] of Object.entries(snap.sceneResultRates).sort((a, b) => b[1] - a[1])) {
@@ -212,6 +245,12 @@ function compare(base, cur) {
       chk('平均合計シュート', m.avgShots, b.avgShots, TOL.shots);
       chk('平均合計枠内', m.avgOnTarget, b.avgOnTarget, TOL.onTarget);
       chk('決定率', m.conversion, b.conversion, TOL.conversion);
+    }
+    // 規律KPI（Sprint 2。baseline 未採取の間はスキップ＝次回のユーザー承認つき再採取で有効化）
+    if (b.yellowPerMatch !== undefined) {
+      chk('イエロー/試合', m.yellowPerMatch, b.yellowPerMatch, TOL.yellowPerMatch);
+      chk('レッド退場/試合', m.redPerMatch, b.redPerMatch, TOL.redPerMatch);
+      chk('怪我/試合', m.injuryPerMatch, b.injuryPerMatch, TOL.injuryPerMatch);
     }
   }
   // シーン結果種別の発生率（既知の種別のみ。新種別＝怪我/カード追加時は別途許容する）

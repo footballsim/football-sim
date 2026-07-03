@@ -40,9 +40,10 @@ function showWCStats(){}
 // 連結対象（ブラウザのロード順）。ui.js は Firebase 専用なので headless では不要。
 // rng.js = 差し替え可能 PRNG（未シード時 Math.random フォールバック・simulate.js より前）。
 // mental.js = 個性・メンタル・スキル層（PS-02〜04・lab 限定。harness は lab 相当＝mental 有効で計測）。
+// discipline.js = カード・退場・怪我層（Sprint 2・lab 限定。mental.js の後）。
 // events.js = 試合結果→Event列の正規化アダプタ（購読層・エンジン無改変）。
 // match.js  = playMatch（本番の試合エントリ。buildTeam/simulateChance/matchToEvents を束ねる・events.js の後）。
-const JS_FILES = ['players.js', 'rng.js', 'mental.js', 'simulate.js', 'events.js', 'match.js', 'narration.js'];
+const JS_FILES = ['players.js', 'rng.js', 'mental.js', 'discipline.js', 'simulate.js', 'events.js', 'match.js', 'narration.js'];
 
 /**
  * エンジンを Node の vm context にロードして主要 API を返す。

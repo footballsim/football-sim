@@ -1974,6 +1974,8 @@ function startGame() {
     });
     // 心理状態リセット（PS-03・fatigue リセットに相乗り）
     if (typeof mentalResetTeam === 'function') mentalResetTeam(t);
+    // 規律状態リセット（Sprint 2・カード/退場/負傷。discipline.js 非同梱では no-op）
+    if (typeof disciplineResetTeam === 'function') disciplineResetTeam(t);
   });
 
   // Pre-simulate chances（延長戦はシーン数を削減）
@@ -2116,6 +2118,8 @@ function getActionParam(team, pos, action) {
 function getTeamTotalParam(team) {
   let total = 0;
   for (let pos = 0; pos < 11; pos++) {
+    // 規律: 退場スロットは総合力から除外＝チャンス配分 t1/(t1+t2) が自然に下がる（Sprint 2・lab限定）
+    if (typeof disciplineIsOut === 'function' && disciplineIsOut(team, pos)) continue;
     const p = team.players[team.lineup[pos]];
     p.params.forEach(v => total += v);
   }
@@ -2131,6 +2135,8 @@ function selectOffencePosition(team, area, exclude) {
     const j = positions.indexOf(offences[i][0]);
     if (j >= 0) {
       if (exclude !== undefined && j === exclude) continue; // 除外ポジション
+      // 規律: 退場スロットは選ばない（Sprint 2・keyplayer×2.5 と同列の選抜拡張点。公開ビルドは no-op）
+      if (typeof disciplineIsOut === 'function' && disciplineIsOut(team, j)) continue;
       let rate = offences[i][1];
       if (j === team.keyplayer) rate *= 2.5;
       sum += rate;
@@ -2140,6 +2146,7 @@ function selectOffencePosition(team, area, exclude) {
   if (a.length === 0) {
     // GKを除くフィールド選手からランダム選択
     for (let i = 1; i < positions.length; i++) {
+      if (typeof disciplineIsOut === 'function' && disciplineIsOut(team, i)) continue; // 退場スロット除外（Sprint 2）
       if (exclude === undefined || i !== exclude) return i;
     }
     return 1;
@@ -2157,17 +2164,21 @@ function selectDefencePosition(offTeam, defTeam, area, ofsPos, omit) {
   const positions = system_data[defTeam.system].positions;
   const p0=[],p1=[],p2=[],p3=[],p4=[];
 
+  // 規律: 退場スロットは守備選抜からも除外（Sprint 2・lab限定。公開ビルドは no-op）
+  const _discOutDef = (typeof disciplineIsOut === 'function')
+    ? (i => disciplineIsOut(defTeam, i)) : null;
+
   [p0,p1,p2,p3,p4].forEach((arr,i) => {
     (a[i]||[]).forEach(name => {
       const idx = positions.indexOf(name);
-      if (idx >= 0 && idx !== omit) arr.push(idx);
+      if (idx >= 0 && idx !== omit && !(_discOutDef && _discOutDef(idx))) arr.push(idx);
     });
   });
 
   // matchupに該当ポジションがない場合はGKを除くフィールド選手からランダム選択
   const fallbackPos = [];
   for (let i = 1; i < positions.length; i++) { // GK(0)を除く
-    if (i !== omit) fallbackPos.push(i);
+    if (i !== omit && !(_discOutDef && _discOutDef(i))) fallbackPos.push(i);
   }
   const fallback = fallbackPos.length > 0 ? fallbackPos[Math.floor(rng()*fallbackPos.length)] : 1;
 
@@ -2266,10 +2277,15 @@ function testCounter(defTeam, area, offTeam) {
 }
 
 function selectFKKicker(team) {
-  let best = [0, getActionParam(team, 0, 'フリーキック')];
-  let second = [1, getActionParam(team, 1, 'フリーキック')];
+  // 規律: 退場/負傷除外スロットは -Infinity 扱いで候補から外す（Sprint 2・lab限定。
+  //   discipline.js 非同梱では _fkP === getActionParam ＝ 従来と完全同一）。
+  const _fkP = (typeof disciplineIsOut === 'function')
+    ? (i => disciplineIsOut(team, i) ? -Infinity : getActionParam(team, i, 'フリーキック'))
+    : (i => getActionParam(team, i, 'フリーキック'));
+  let best = [0, _fkP(0)];
+  let second = [1, _fkP(1)];
   for (let i = 2; i < 11; i++) {
-    const n = getActionParam(team, i, 'フリーキック');
+    const n = _fkP(i);
     if (n >= best[1]) { second = [...best]; best = [i, n]; }
     else if (n >= second[1]) second = [i, n];
   }
@@ -2394,6 +2410,7 @@ function simulateChance(gs, chanceNo) {
   let fwChanceCounted = false;
   let pkPending = false;   // ボックス内ファールが PK になったフラグ（CR ファール処理で PK 解決に分岐）
   const _mentalEvents = []; // メンタル/スキル発動の記録（PS-04・結果へ「追記」するだけ）
+  const _disciplineEvents = []; // カード/退場/負傷の記録（Sprint 2・結果へ「追記」するだけ）
 
   // Scene 1
   // team2攻撃時はエリアのL/Rを反転（team2の左右はteam1基準と逆）
@@ -2564,6 +2581,15 @@ function simulateChance(gs, chanceNo) {
         scene.result = 'ファール';
         // メンタル: 倒された攻撃選手の frustration 蓄積（PS-04）
         if (typeof mentalOnFoul === 'function') mentalOnFoul(ofsPlayer);
+        // 規律: カード段階化＋負傷ロール（Sprint 2・result-hook。ファール判定そのもの/カウントは不変。
+        //   discipline.js 非同梱の公開ビルドでは typeof ガードで完全 no-op＝rng も消費しない）
+        if (typeof disciplineOnFoul === 'function') {
+          const _de = disciplineOnFoul({
+            offence, defence, ofsPos, dfsPos, ofsPlayer, dfsPlayer, scene,
+            offenceNo: offence === team1 ? 1 : 2,
+          });
+          if (_de) _disciplineEvents.push.apply(_disciplineEvents, _de);
+        }
         break;
       }
     } else if (result === '失敗' && !inCounter && testCounter(defence, area, offence)) {
@@ -2688,6 +2714,8 @@ function simulateChance(gs, chanceNo) {
       //   キッカー = スタメン中シュート精度(idx11)最良。GK = 守備側 lineup[0]。
       let pkKicker = 1, pkBest = -1;
       for (let _k = 1; _k < 11; _k++) {
+        // 規律: 退場/負傷除外スロットは PK キッカー候補から外す（Sprint 2・公開ビルドは no-op）
+        if (typeof disciplineIsOut === 'function' && disciplineIsOut(offence, _k)) continue;
         const _v = offence.players[offence.lineup[_k]].params[11];
         if (_v > pkBest) { pkBest = _v; pkKicker = _k; }
       }
@@ -2897,9 +2925,15 @@ function simulateChance(gs, chanceNo) {
     textScenes.push(sceneToText(scenes, i, team1, team2));
   }
 
+  // 規律: 保留中の負傷交代/スロット除外を適用（Sprint 2・「次チャンス以降の入力」だけを変える。
+  //   ★ textScenes 生成後＝当該チャンスの名前解決を壊さない。rng 消費ゼロ・公開ビルドは no-op）
+  if (typeof disciplineOnChanceEnd === 'function') disciplineOnChanceEnd(team1, team2);
+
   const _chanceRes = { time, scenes, textScenes, goalScored, t1score: team1.score, t2score: team2.score };
   // メンタル: 発動記録があれば結果へ「追記」（既存フィールド不変・無ければ従来と同一形状）
   if (_mentalEvents.length) _chanceRes.mentalEvents = _mentalEvents;
+  // 規律: カード/負傷の記録があれば結果へ「追記」（Sprint 2・同上）
+  if (_disciplineEvents.length) _chanceRes.disciplineEvents = _disciplineEvents;
   // lab限定デバッグ: 両チームの現在総合力（先発11人×29param合計×現在メンタル係数）を「追記」
   //   （DBG-01・公開ビルド＝mental.js 非同梱では typeof ガードで完全 no-op）
   if (typeof mentalTeamDebugTotal === 'function') {
@@ -3270,6 +3304,7 @@ function _runDuelSimBothSides(n) {
       t.score = 0; t.chanceCounter = 0; t.shootCounter = 0; t.gkSaveCounter = 0;
       t.players.forEach(function(p) { p.chance_counter = 0; p.fatigue = 0; });
       if (typeof mentalResetTeam === 'function') mentalResetTeam(t); // 心理状態リセット（PS-03）
+      if (typeof disciplineResetTeam === 'function') disciplineResetTeam(t); // 規律リセット（Sprint 2）
     });
     const bgs = { team1: bt1, team2: bt2 };
     const bRes = [];
@@ -3628,6 +3663,8 @@ function _recalcSecondHalf() {
   t2.players.forEach(p => { p.chance_counter = 0; p.fatigue = 0; });
   // 心理状態リセット（PS-03・後半再計算もチーム再構築のためゼロから）
   if (typeof mentalResetTeam === 'function') { mentalResetTeam(t1); mentalResetTeam(t2); }
+  // 規律リセット（Sprint 2・再構築チームは前半のカード/負傷を持たない＝メンタル層と同じ既知の制約）
+  if (typeof disciplineResetTeam === 'function') { disciplineResetTeam(t1); disciplineResetTeam(t2); }
   gameState = { team1: t1, team2: t2 };
 
   // 現在地点から後半終了まで再計算

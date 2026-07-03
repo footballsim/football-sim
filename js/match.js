@@ -103,6 +103,8 @@
     }
     // 心理状態リセット（PS-03・fatigue リセットに相乗り。mental.js 不在時は no-op）
     if (typeof mentalResetTeam === 'function') mentalResetTeam(t);
+    // 規律リセット（Sprint 2・discipline.js 不在時は no-op）
+    if (typeof disciplineResetTeam === 'function') disciplineResetTeam(t);
   }
 
   /**

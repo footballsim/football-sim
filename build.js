@@ -31,8 +31,9 @@ const BUILD_VER = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDa
 const JS_FILES = ['players.js', 'rng.js', 'simulate.js', 'events.js', 'match.js', 'cutscene.js', 'manager-match.js', 'narration.js', 'ui.js', 'tournament.js', 'japanwc.js'];
 // 非公開の lab ビルドにだけ追加で載せる JS。
 // ★ mental.js（個性・メンタル・スキル層 PS-02〜04）も lab 限定＝公開版には非同梱。
-//   simulate.js のフックは typeof ガード付きなので、mental.js 不在の公開版では完全 no-op（公開挙動不変）。
-const LAB_ONLY_JS = ['mental.js', 'league.js'];
+// ★ discipline.js（カード・退場・怪我 Sprint 2）も同方式で lab 限定。
+//   simulate.js のフックは typeof ガード付きなので、不在の公開版では完全 no-op（公開挙動不変）。
+const LAB_ONLY_JS = ['mental.js', 'discipline.js', 'league.js'];
 
 // 試合エンジン系: 最小化＋軽難読化
 const LOGIC_OPTS = {
@@ -124,6 +125,7 @@ fs.cpSync(path.join(ROOT, 'img'), path.join(LAB, 'img'), { recursive: true });
 let labHtml = fs.readFileSync(path.join(DOCS, 'index.html'), 'utf8');
 const labInject =
   `<script src="js/mental.js?v=${BUILD_VER}"></script>\n` +
+  `<script src="js/discipline.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/league.js?v=${BUILD_VER}"></script>\n` +
   `<script>window.LEAGUE_TEST_MODE=true;(function(){function boot(){var tm=document.querySelector('.top-menu');if(tm)tm.style.display='none';` +
   `if(typeof showLeague==='function')showLeague();}` +
