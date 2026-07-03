@@ -2059,6 +2059,8 @@ function getActionParam(team, pos, action) {
 
   // メンタル: morale → 攻守 param 係数（PS-03・戦術補正と同列の係数 seam。clamp[0.90,1.10] は mental.js 側）
   if (typeof mentalParamFactor === 'function') f *= mentalParamFactor(team, p);
+  // 疲労: 出場時間×スタミナ → 逓減係数（DEV_NOTES①・mental.js 4b。GK/フレッシュは1.0・floor 0.80）
+  if (typeof fatigueParamFactor === 'function') f *= fatigueParamFactor(team, p);
 
   const adjusted = params.map(v => v * Math.max(f, 0.01));
 
@@ -2325,11 +2327,14 @@ function calcTime(chanceNo) {
 //   ★ 公開ビルド（mental.js 非同梱）では typeof ガードで null ＝ dbg は一切記録されない。
 function _mkSceneDbg(offTeam, offP, defTeam, defP, action, ofsVal, dfsVal) {
   if (typeof mentalParamFactor !== 'function') return null;
+  // 開始値の逆算はメンタル×疲労の合成係数（labParamFactor）で。疲労層導入後に
+  // mentalParamFactor だけで割ると「開始値」に疲労分が混入して基準がずれる。
+  const _fac = (typeof labParamFactor === 'function') ? labParamFactor : mentalParamFactor;
   return {
     action, defAction: '対' + action,
     ofsVal, dfsVal,
-    ofsBase: ofsVal / mentalParamFactor(offTeam, offP),
-    dfsBase: dfsVal / mentalParamFactor(defTeam, defP),
+    ofsBase: ofsVal / _fac(offTeam, offP),
+    dfsBase: dfsVal / _fac(defTeam, defP),
   };
 }
 
@@ -2884,6 +2889,7 @@ function simulateChance(gs, chanceNo) {
 
   // メンタル: チャンス末尾フック（劣勢継続＋減衰。PS-04・rng 消費ゼロ）
   if (typeof mentalOnChanceEnd === 'function') mentalOnChanceEnd(team1, team2);
+  if (typeof fatigueOnChanceEnd === 'function') fatigueOnChanceEnd(team1, team2);   // 疲労: 出場経過を加算（MENTAL_ENABLEDと独立）
 
   // Convert scenes to text
   const textScenes = [];

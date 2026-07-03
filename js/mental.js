@@ -194,6 +194,7 @@ function mentalResetTeam(t) {
   for (let i = 0; i < t.players.length; i++) {
     t.players[i].morale = 0;
     t.players[i].frustration = 0;
+    t.players[i]._pitchChances = 0;   // 疲労層（4b）: 出場経過もリセット
   }
   _mentalCaptainIdx(t);   // スタメン時点でキャプテン確定
 }
@@ -326,6 +327,70 @@ function mentalFoulFactor(dfsPlayer) {
   return 1 + MENTAL_TUNING.FOUL_FRUSTRATION_COEF * ((dfsPlayer && dfsPlayer.frustration) || 0);
 }
 
+/* ── 4b. 体力消費（疲労）層 — DEV_NOTES①・2026-07-03 ユーザー指示 ──────────
+ * 「デュエル参加ごと」ではなく【時間の経過】で全出場選手の能力が低下する。
+ *   低下率 = MAX_DROP × (100-スタミナ)/100 × (出場経過)^CURVE_EXP
+ *   ・スタミナ100 → 90分間まったく落ちない（ユーザー仕様）
+ *   ・スタミナ50 → 90分で -15%（相対）。当初案の「-50(絶対値≒-65%)」は
+ *     実サッカー（終盤の高強度ラン低下20-40%・技術実効値の低下は数%〜15%）に
+ *     照らして過大＝デュエル式k=2.7の増幅で95:5になりゲーム崩壊のため縮小。
+ *   ・カーブは2乗＝前半ほぼ無傷（45分で最大値の25%）→60分以降に効く
+ *     ＝実際の交代適期（60-75分）と一致。延長は PROG_CAP まで深まる。
+ *   ・経過は【選手ごとの出場チャンス数】（fatigueOnChanceEnd で加算）
+ *     ＝途中出場のフレッシュな選手は減衰ゼロから始まる → 交代に実効果。
+ *   ・GKは対象外（走行負荷が小さい＋内部スタミナ50固定のため）。
+ *   ・既存の p.fatigue（デュエル参加カウント・AI交代の目安）とは独立。
+ * キルスイッチ: window.FATIGUE_ENABLED = false（既定は有効・メンタル層と独立）。
+ */
+const FATIGUE_TUNING = {
+  MAX_DROP:  0.30,   // スタミナ0の理論最大低下率（実用域: スタミナ50→90分-15%）
+  CURVE_EXP: 2,      // 時間カーブ（2=前半温存・終盤加速）
+  PROG_CAP:  1.2,    // 出場経過の上限（延長で効きすぎない）
+  FLOOR:     0.80,   // 係数下限（最大-20%）
+};
+
+function _fatigueEnabled() {
+  return !(typeof window !== 'undefined' && window && window.FATIGUE_ENABLED === false);
+}
+
+/**
+ * チャンス末尾フック: 出場中（lineup 0-10）の選手の出場経過を加算。
+ * mentalOnChanceEnd と独立（MENTAL_ENABLED に巻き込まれない）。
+ */
+function fatigueOnChanceEnd(team1, team2) {
+  const teams = [team1, team2];
+  for (let ti = 0; ti < 2; ti++) {
+    const t = teams[ti];
+    if (!t || !t.players || !t.lineup) continue;
+    for (let pos = 0; pos < 11 && pos < t.lineup.length; pos++) {
+      const p = t.players[t.lineup[pos]];
+      if (p) p._pitchChances = (p._pitchChances || 0) + 1;
+    }
+  }
+}
+
+/**
+ * 疲労の param 係数（getActionParam の f へ乗算・メンタル係数と同seam）。
+ * @returns {number} 係数（無効時/GK/フレッシュは 1.0）
+ */
+function fatigueParamFactor(team, p) {
+  if (!_fatigueEnabled() || !p || !p.params) return 1.0;
+  if (p.positions && p.positions.indexOf('GK') >= 0) return 1.0;   // GK対象外
+  const T = FATIGUE_TUNING;
+  const st = p.params[typeof STAMINA !== 'undefined' ? STAMINA : 1];   // 素のスタミナ（低下対象外）
+  const lack = Math.max(0, (100 - st) / 100);
+  if (!lack) return 1.0;
+  const mc = (typeof MATCH_CHANCES !== 'undefined') ? MATCH_CHANCES : 32;
+  const prog = Math.min((p._pitchChances || 0) / mc, T.PROG_CAP);
+  if (!prog) return 1.0;
+  return Math.max(1 - T.MAX_DROP * lack * Math.pow(prog, T.CURVE_EXP), T.FLOOR);
+}
+
+// lab デバッグ用: メンタル×疲労の合成係数（dbg の「開始値」逆算と総合力表示が使用）。
+function labParamFactor(team, p) {
+  return mentalParamFactor(team, p) * fatigueParamFactor(team, p);
+}
+
 /* ── 5. lab限定デバッグ表示（DBG-01・公開ビルドには mental.js ごと非同梱） ──
  * ユーザー（ゲームデザイナー）がメンタル変動の影響を試合画面で目視するための数値バンド。
  *   ①両チームの現在総合力（先発11人×29param合計×現在メンタル係数）
@@ -348,7 +413,7 @@ function mentalTeamDebugTotal(team) {
     let s = 0;
     for (let i = 0; i < p.params.length; i++) s += p.params[i];
     out.base += s;
-    out.cur += s * mentalParamFactor(team, p);
+    out.cur += s * labParamFactor(team, p);   // メンタル×疲労の合成（時間経過で総合力が沈むのが見える）
   }
   out.cur = Math.round(out.cur);
   out.base = Math.round(out.base);
@@ -474,6 +539,7 @@ if (typeof module !== 'undefined' && module.exports) {
     mentalHash, mentalPersonality, mentalResetTeam,
     mentalOnDuel, mentalOnGoal, mentalOnFoul, mentalOnChanceEnd,
     mentalParamFactor, mentalFoulFactor,
+    FATIGUE_TUNING, fatigueOnChanceEnd, fatigueParamFactor, labParamFactor,
     mentalTeamDebugTotal, mentalRenderDebugBand,
   };
 }
