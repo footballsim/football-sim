@@ -86,6 +86,8 @@ fs.writeFileSync(path.join(DOCS, 'index.html'), html);
 
 // カスタムドメイン維持
 fs.writeFileSync(path.join(DOCS, 'CNAME'), 'football-sim.com\n');
+// Jekyll 処理をスキップ（静的成果物をそのまま配信＝Liquid誤処理でのビルド失敗を防ぐ）
+fs.writeFileSync(path.join(DOCS, '.nojekyll'), '');
 
 console.log(`Done (public docs/). asset version = ?v=${BUILD_VER}`);
 
