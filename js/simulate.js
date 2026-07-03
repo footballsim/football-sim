@@ -1969,6 +1969,8 @@ function startGame() {
       p.chance_counter = 0;
       p.fatigue = 0;
     });
+    // 心理状態リセット（PS-03・fatigue リセットに相乗り）
+    if (typeof mentalResetTeam === 'function') mentalResetTeam(t);
   });
 
   // Pre-simulate chances（延長戦はシーン数を削減）
@@ -2024,6 +2026,7 @@ function buildTeam(data, state) {
     tactics: state.tactics,
     keyplayer: state.keyplayer,
     marked_player: state.marked_player !== undefined ? state.marked_player : -1,
+    captain: data.captain !== undefined ? data.captain : -1, // キャプテン指名（PS-02・TEAM_DATA.captain を読むだけ。無指定は mental.js が決定論フォールバック）
     score: 0,
     chanceCounter: 0,
     shootCounter: 0,
@@ -2050,6 +2053,9 @@ function getActionParam(team, pos, action) {
   // 得意ポジション以外に配置された場合 -5%（左右含めて判定）
   const fieldPosName = team.getPositionName(pos); // 例:「右SMF」
   if (!positions.includes(fieldPosName) && !positions.includes(postype)) f -= 0.05;
+
+  // メンタル: morale → 攻守 param 係数（PS-03・戦術補正と同列の係数 seam。clamp[0.90,1.10] は mental.js 側）
+  if (typeof mentalParamFactor === 'function') f *= mentalParamFactor(team, p);
 
   const adjusted = params.map(v => v * Math.max(f, 0.01));
 
@@ -2340,6 +2346,7 @@ function simulateChance(gs, chanceNo) {
   let inCounter = false;
   let fwChanceCounted = false;
   let pkPending = false;   // ボックス内ファールが PK になったフラグ（CR ファール処理で PK 解決に分岐）
+  const _mentalEvents = []; // メンタル/スキル発動の記録（PS-04・結果へ「追記」するだけ）
 
   // Scene 1
   // team2攻撃時はエリアのL/Rを反転（team2の左右はteam1基準と逆）
@@ -2364,6 +2371,8 @@ function simulateChance(gs, chanceNo) {
   if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
 
   let result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
+  // メンタル: デュエル結果を心理状態へ反映（PS-04・判定そのものは不変の result-hook）
+  if (typeof mentalOnDuel === 'function') mentalOnDuel(ofsPlayer, dfsPlayer, result === '成功');
   let scene = { offence, defence, area, rawArea, ofsPos, dfsPos, action, scenario: action, result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
   scenes.push(scene);
 
@@ -2469,6 +2478,8 @@ function simulateChance(gs, chanceNo) {
     if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
     if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
     result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
+    // メンタル: デュエル結果を心理状態へ反映（PS-04）
+    if (typeof mentalOnDuel === 'function') mentalOnDuel(ofsPlayer, dfsPlayer, result === '成功');
 
     // scenario はアクション名をそのまま使うが、'クロス'は CRエリアのクロスシーン専用識別子と
     // 衝突するため、FWエリアでクロスを選んだ場合は区別できる名前にする
@@ -2486,7 +2497,9 @@ function simulateChance(gs, chanceNo) {
       fwChanceCounted = true;
     }
     if (result === '成功' && area.substring(0, 2) === 'FW') {
-      const fp = (100 - defence.players[defence.lineup[dfsPos]].params[FAIR_PLAY]) / 100;
+      let fp = (100 - defence.players[defence.lineup[dfsPos]].params[FAIR_PLAY]) / 100;
+      // メンタル: イライラした守備選手はファールしやすい（PS-04・fp への乗算のみ/rng判定は不変）
+      if (typeof mentalFoulFactor === 'function' && typeof MENTAL_TUNING !== 'undefined') fp = Math.min(fp * mentalFoulFactor(dfsPlayer), MENTAL_TUNING.FOUL_PROB_CAP);
       if (rng() < fp) {
         const _suffix = area.substring(area.length-1);
         // ペナルティエリア内（FW=ボックス）のファール → 一定確率で PK（中央ほど高い）。
@@ -2496,6 +2509,8 @@ function simulateChance(gs, chanceNo) {
         if (_pkRoll < _pkRate) pkPending = true;
         area = 'CR_' + _suffix;
         scene.result = 'ファール';
+        // メンタル: 倒された攻撃選手の frustration 蓄積（PS-04）
+        if (typeof mentalOnFoul === 'function') mentalOnFoul(ofsPlayer);
         break;
       }
     } else if (result === '失敗' && !inCounter && testCounter(defence, area, offence)) {
@@ -2548,6 +2563,11 @@ function simulateChance(gs, chanceNo) {
         midResult = 'ゴール！！';
         offence.score++;
         goalScored = offence;
+        // メンタル: 得点/失点の心理反映＋スキル発動判定（PS-04・ミドルシュート得点）
+        if (typeof mentalOnGoal === 'function') {
+          const _me = mentalOnGoal(offence, defence, offence.players[offence.lineup[midOfsPos]], defence === team1 ? 1 : 2);
+          if (_me) _mentalEvents.push.apply(_mentalEvents, _me);
+        }
       } else {
         midResult = 'GK防いだ！';
         defence.gkSaveCounter++;
@@ -2582,6 +2602,11 @@ function simulateChance(gs, chanceNo) {
       shootResult = 'ゴール！！';
       offence.score++;
       goalScored = offence;
+      // メンタル: 得点/失点の心理反映＋スキル発動判定（PS-04・中央シュート得点）
+      if (typeof mentalOnGoal === 'function') {
+        const _me = mentalOnGoal(offence, defence, offence.players[offence.lineup[shootOfsPos]], defence === team1 ? 1 : 2);
+        if (_me) _mentalEvents.push.apply(_mentalEvents, _me);
+      }
     } else {
       shootResult = 'GK防いだ！';
       defence.gkSaveCounter++;
@@ -2610,7 +2635,14 @@ function simulateChance(gs, chanceNo) {
       const _pkSucc = Math.min(0.92, Math.max(0.55, 0.75 + (_shootP - _gkP) * 0.004));
       offence.shootCounter++;
       let _pkResult;
-      if (rng() < _pkSucc) { _pkResult = 'ゴール！！'; offence.score++; goalScored = offence; }
+      if (rng() < _pkSucc) {
+        _pkResult = 'ゴール！！'; offence.score++; goalScored = offence;
+        // メンタル: 得点/失点の心理反映＋スキル発動判定（PS-04・PK得点）
+        if (typeof mentalOnGoal === 'function') {
+          const _me = mentalOnGoal(offence, defence, offence.players[offence.lineup[pkKicker]], defence === team1 ? 1 : 2);
+          if (_me) _mentalEvents.push.apply(_mentalEvents, _me);
+        }
+      }
       else if (rng() < 0.7) { _pkResult = 'GK防いだ！'; defence.gkSaveCounter++; }
       else { _pkResult = '枠を外した！'; }
       scene = { offence, defence, area, crossPos: pkKicker, ofsPos: pkKicker, dfsPos: 0,
@@ -2721,6 +2753,11 @@ function simulateChance(gs, chanceNo) {
         shootResult = 'ゴール！！';
         offence.score++;
         goalScored = offence;
+        // メンタル: 得点/失点の心理反映＋スキル発動判定（PS-04・クロス/セットプレー得点）
+        if (typeof mentalOnGoal === 'function') {
+          const _me = mentalOnGoal(offence, defence, offence.players[offence.lineup[ofsPos]], defence === team1 ? 1 : 2);
+          if (_me) _mentalEvents.push.apply(_mentalEvents, _me);
+        }
       } else {
         shootResult = 'GK防いだ！';
         defence.gkSaveCounter++;
@@ -2763,7 +2800,14 @@ function simulateChance(gs, chanceNo) {
           const _ckShot = _ckO * CK_SHOT_MUL;
           const _ckGkP = getActionParam(_ckDef, 0, '対' + _ckAction);
           if (rng() * 100 > _ckShot) _ckResult = '枠を外した！';
-          else if (rng() < (_ckShot * _ckShot) / (_ckShot * _ckShot + _ckGkP * _ckGkP)) { _ckResult = 'ゴール！！'; _ckOff.score++; goalScored = _ckOff; }
+          else if (rng() < (_ckShot * _ckShot) / (_ckShot * _ckShot + _ckGkP * _ckGkP)) {
+            _ckResult = 'ゴール！！'; _ckOff.score++; goalScored = _ckOff;
+            // メンタル: 得点/失点の心理反映＋スキル発動判定（PS-04・コーナーキック得点）
+            if (typeof mentalOnGoal === 'function') {
+              const _me = mentalOnGoal(_ckOff, _ckDef, _ckOff.players[_ckOff.lineup[_ckShooter]], _ckDef === team1 ? 1 : 2);
+              if (_me) _mentalEvents.push.apply(_mentalEvents, _me);
+            }
+          }
           else { _ckResult = 'GK防いだ！'; _ckDef.gkSaveCounter++; }
         }
         scenes.push({ offence: _ckOff, defence: _ckDef, area: _ckArea, crossPos: _ckTaker, ofsPos: _ckShooter,
@@ -2773,13 +2817,19 @@ function simulateChance(gs, chanceNo) {
     }
   }
 
+  // メンタル: チャンス末尾フック（劣勢継続＋減衰。PS-04・rng 消費ゼロ）
+  if (typeof mentalOnChanceEnd === 'function') mentalOnChanceEnd(team1, team2);
+
   // Convert scenes to text
   const textScenes = [];
   for (let i = 0; i < scenes.length; i++) {
     textScenes.push(sceneToText(scenes, i, team1, team2));
   }
 
-  return { time, scenes, textScenes, goalScored, t1score: team1.score, t2score: team2.score };
+  const _chanceRes = { time, scenes, textScenes, goalScored, t1score: team1.score, t2score: team2.score };
+  // メンタル: 発動記録があれば結果へ「追記」（既存フィールド不変・無ければ従来と同一形状）
+  if (_mentalEvents.length) _chanceRes.mentalEvents = _mentalEvents;
+  return _chanceRes;
 }
 
 function sceneToText(scenes, sceneNo, team1, team2) {
@@ -3143,6 +3193,7 @@ function _runDuelSimBothSides(n) {
     [bt1, bt2].forEach(function(t) {
       t.score = 0; t.chanceCounter = 0; t.shootCounter = 0; t.gkSaveCounter = 0;
       t.players.forEach(function(p) { p.chance_counter = 0; p.fatigue = 0; });
+      if (typeof mentalResetTeam === 'function') mentalResetTeam(t); // 心理状態リセット（PS-03）
     });
     const bgs = { team1: bt1, team2: bt2 };
     const bRes = [];
@@ -3499,6 +3550,8 @@ function _recalcSecondHalf() {
   t1.gkSaveCounter = 0; t2.gkSaveCounter = 0;
   t1.players.forEach(p => { p.chance_counter = 0; p.fatigue = 0; });
   t2.players.forEach(p => { p.chance_counter = 0; p.fatigue = 0; });
+  // 心理状態リセット（PS-03・後半再計算もチーム再構築のためゼロから）
+  if (typeof mentalResetTeam === 'function') { mentalResetTeam(t1); mentalResetTeam(t2); }
   gameState = { team1: t1, team2: t2 };
 
   // 現在地点から後半終了まで再計算

@@ -39,6 +39,8 @@ const EVENT_TYPES = Object.freeze({
   SUB:     'sub',     // 交代（※ライブ交代は別機構。matchToEvents では emit しない）
   HT:      'ht',      // ハーフタイム
   FT:      'ft',      // 試合終了
+  MENTAL:  'mental',           // 心理状態の大きな変化（PS-03 語彙・将来用）
+  SKILL_ACTIVATE: 'skill_activate', // スキル発動（例: キャプテンシー。res.mentalEvents 由来）
 });
 
 // scene.result の値（現エンジンの語彙）。emit 側の分類で使用。
@@ -271,6 +273,25 @@ function matchToEvents(chanceResults, opts) {
       for (const scene of res.scenes) {
         const evs = sceneToEvents(scene, { chance: ci, minute, home, away });
         for (const e of evs) events.push(e);
+      }
+    }
+
+    // メンタル/スキル発動イベント（PS-04）: エンジンが res.mentalEvents に「追記」した記録を
+    // Event 化してこのチャンスのシーン列の後に差し込む（無ければ何も出ない＝従来と同一の列）。
+    // ⚠️ シーン列より前に置くと「鼓舞」がトリガーの失点ゴールより先に並び、購読側の
+    // 演出/ログが逆順発火する（Codexレビュー指摘・時系列＝トリガー→発動を保証）。
+    if (Array.isArray(res.mentalEvents)) {
+      for (const me of res.mentalEvents) {
+        events.push({
+          t: me.type === 'skill_activate' ? EVENT_TYPES.SKILL_ACTIVATE : EVENT_TYPES.MENTAL,
+          chance: ci,
+          minute,
+          team: me.team === 1 ? 'home' : me.team === 2 ? 'away' : null,
+          player: me.player || null,
+          playerEn: me.playerEn || null,
+          skill: me.skill || null,
+          detail: me.detail || null,
+        });
       }
     }
 

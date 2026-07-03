@@ -101,6 +101,8 @@
       t.players[i].chance_counter = 0;
       t.players[i].fatigue = 0;
     }
+    // 心理状態リセット（PS-03・fatigue リセットに相乗り。mental.js 不在時は no-op）
+    if (typeof mentalResetTeam === 'function') mentalResetTeam(t);
   }
 
   /**

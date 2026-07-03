@@ -30,7 +30,9 @@ const BUILD_VER = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDa
 // 公開サイト（football-sim.com / docs）に載せる JS。★ league.js は含めない（未完成のリーグを一般公開しない）。
 const JS_FILES = ['players.js', 'rng.js', 'simulate.js', 'events.js', 'match.js', 'cutscene.js', 'manager-match.js', 'narration.js', 'ui.js', 'tournament.js', 'japanwc.js'];
 // 非公開の lab ビルドにだけ追加で載せる JS。
-const LAB_ONLY_JS = ['league.js'];
+// ★ mental.js（個性・メンタル・スキル層 PS-02〜04）も lab 限定＝公開版には非同梱。
+//   simulate.js のフックは typeof ガード付きなので、mental.js 不在の公開版では完全 no-op（公開挙動不変）。
+const LAB_ONLY_JS = ['mental.js', 'league.js'];
 
 // 試合エンジン系: 最小化＋軽難読化
 const LOGIC_OPTS = {
@@ -106,7 +108,7 @@ fs.mkdirSync(path.join(LAB, 'js'), { recursive: true });
 for (const name of JS_FILES) {
   fs.copyFileSync(path.join(DOCS, 'js', name), path.join(LAB, 'js', name));
 }
-// lab 限定 js（league.js）を難読化して追加
+// lab 限定 js（mental.js / league.js）を難読化して追加
 for (const name of LAB_ONLY_JS) {
   const code = fs.readFileSync(path.join(ROOT, 'js', name), 'utf8');
   const out = JavaScriptObfuscator.obfuscate(code, LOGIC_OPTS).getObfuscatedCode();
@@ -116,9 +118,12 @@ for (const name of LAB_ONLY_JS) {
 fs.cpSync(path.join(ROOT, 'css'), path.join(LAB, 'css'), { recursive: true });
 fs.cpSync(path.join(ROOT, 'img'), path.join(LAB, 'img'), { recursive: true });
 
-// lab の index.html = docs/index.html + league.js + ブートストラップ（CNAME は付けない）
+// lab の index.html = docs/index.html + mental.js + league.js + ブートストラップ（CNAME は付けない）
+//   mental.js は league.js より前（スクリプト実行はユーザー操作より前に完了するため、
+//   simulate.js の typeof ガード付きフックは試合実行時に有効化される）。
 let labHtml = fs.readFileSync(path.join(DOCS, 'index.html'), 'utf8');
 const labInject =
+  `<script src="js/mental.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/league.js?v=${BUILD_VER}"></script>\n` +
   `<script>window.LEAGUE_TEST_MODE=true;(function(){function boot(){var tm=document.querySelector('.top-menu');if(tm)tm.style.display='none';` +
   `if(typeof showLeague==='function')showLeague();}` +
