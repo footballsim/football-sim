@@ -137,6 +137,7 @@
     subsCount = 0; subsUsed = 0; htSubsCount = 0; _htMode = false;
     _mvOppSubCount = 0; _mvOppOff = {}; _mvLateChecked = false;   // 相手監督AIの交代状態をリセット
     window._mvMatchSubs = [];   // 全交代（自/相手）のログ記録をリセット
+    _mvSubCutQueue = [];   // 交代カットシーン待ち行列をリセット
     _subbedOff = new Set();
     _pendingSubLog = [];
     _shootSubStep = 0;
@@ -234,7 +235,10 @@
       if (htRes) halfTimeScore = { t1: htRes.t1score, t2: htRes.t2score };
       _mvOpponentDecide(true);   // 相手監督のハーフタイム采配（戦術＋交代）
       _mvPause();
-      setTimeout(function () { if (_managerMode) _mvShowHT(); }, 350);
+      setTimeout(function () {
+        if (!_managerMode) return;
+        _mvPlaySubCutscenes(function () { if (_managerMode) _mvShowHT(); });   // 交代あれば先にカット
+      }, 350);
       return;
     }
 
@@ -242,13 +246,17 @@
     if (typeof MATCH_CHANCES !== 'undefined' && currentChanceIdx >= Math.floor(MATCH_CHANCES * 0.75) && !_mvLateChecked) {
       _mvLateChecked = true;
       _mvOpponentDecide(false);
+      if (_mvSubCutQueue.length) { _mvPause(); _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); }); return; }
     }
 
     // ゴール停止（カットシーンの余韻を見せてから采配パネル）。
     if (_mvGoalShown) {
       _mvOpponentDecide(false);   // 相手監督が失点/得点に反応（戦術＋交代）
       _mvPause();
-      setTimeout(function () { if (_managerMode) _mvShowDecisionPoint('goal'); }, 3300);
+      setTimeout(function () {
+        if (!_managerMode) return;
+        _mvPlaySubCutscenes(function () { if (_managerMode) _mvShowDecisionPoint('goal'); });   // 交代あれば先にカット
+      }, 3300);
       return;
     }
 
@@ -340,6 +348,7 @@
   var _mvOppSubCount = 0;           // この試合で相手が使った交代人数
   var _mvOppOff = {};               // 相手が交代で退けた players index（再選出しない）
   var _mvLateChecked = false;       // 後半終盤の単発チェック済みフラグ
+  var _mvSubCutQueue = [];          // 交代カットシーン待ち行列 {out,in,teamColor,teamName,label}
 
   function _mvRating(p) { if (!p || !p.params) return 0; var s = 0; for (var i = 0; i < p.params.length; i++) s += p.params[i]; return s / p.params.length; }
   function _mvPosCat(role) {
@@ -428,6 +437,7 @@
       chanceIdx: currentChanceIdx, time: _mvTimeLabel(),
       text: '🔁 ' + _mvT('交代', 'Sub') + '（' + getTeamName(team2Data) + '・' + plan.label + '）：' + _mvName(plan.out.p) + ' → ' + _mvName(plan.in.p)
     });
+    _mvSubCutQueue.push({ out: _mvName(plan.out.p), in: _mvName(plan.in.p), teamColor: team2Data.team_color, teamName: getTeamName(team2Data), label: plan.label });
     return true;
   }
 
@@ -442,7 +452,45 @@
         chanceIdx: currentChanceIdx, time: timeLabel,
         text: '🔁 ' + _mvT('交代', 'Sub') + '（' + getTeamName(team1Data) + '）：' + o + ' → ' + i
       });
+      _mvSubCutQueue.push({ out: o, in: i, teamColor: team1Data.team_color, teamName: getTeamName(team1Data), label: '' });
     });
+  }
+
+  /* ── 交代カットシーン（画像なし・手続き描画。画像が来たら差し替え） ────────
+   * 交代が適用された停止点で全画面オーバーレイを ~2s 表示 → done() で続行。
+   * 素材PNGは未使用（SUB_CUTSCENE_PLAN.md）。届いたら背景画像＋名前オーバーレイへ拡張。 */
+  function _mvRenderSubCutscene(batch) {
+    var host = document.getElementById('screen-game'); if (!host) return;
+    var el = document.getElementById('mv-subcut');
+    if (!el) {
+      el = document.createElement('div'); el.id = 'mv-subcut';
+      el.style.cssText = 'position:absolute;inset:0;z-index:66;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;' +
+        'background:radial-gradient(ellipse at center,rgba(10,20,42,0.94),rgba(3,7,15,0.98));opacity:0;transition:opacity .3s;pointer-events:none;padding:24px;box-sizing:border-box';
+      host.appendChild(el);
+    }
+    var head = '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:clamp(22px,7vw,30px);letter-spacing:3px;color:#cfe0ff;font-weight:700">🔁 ' + _mvT('選手交代', 'SUBSTITUTION') + '</div>';
+    var cards = batch.map(function (s) {
+      var col = s.teamColor || '#8899aa';
+      return '<div style="background:rgba(255,255,255,0.06);border:1px solid ' + col + ';border-left:5px solid ' + col + ';border-radius:12px;padding:14px 22px;min-width:min(280px,86vw);text-align:center;box-shadow:0 6px 22px rgba(0,0,0,0.4)">' +
+        '<div style="font-size:12px;font-weight:700;color:' + col + ';margin-bottom:9px;letter-spacing:1px">' + (s.teamName || '') + (s.label ? ' ・ ' + s.label : '') + '</div>' +
+        '<div style="font-size:clamp(15px,4.6vw,18px);font-weight:800;color:#ff6b6b;margin:3px 0">⬇ ' + s.out + '</div>' +
+        '<div style="font-size:clamp(15px,4.6vw,18px);font-weight:800;color:#51e08a;margin:3px 0">⬆ ' + s.in + '</div>' +
+        '</div>';
+    }).join('');
+    el.innerHTML = head + cards;
+    el.getBoundingClientRect();   // reflow → フェードイン
+    el.style.opacity = '1';
+  }
+  function _mvHideSubCutscene() { var el = document.getElementById('mv-subcut'); if (el) el.style.opacity = '0'; }
+  // 待ち行列があれば ~2s 表示して done()。無ければ即 done()。
+  function _mvPlaySubCutscenes(done) {
+    if (!_mvSubCutQueue.length) { if (done) done(); return; }
+    var batch = _mvSubCutQueue.slice(); _mvSubCutQueue = [];
+    _mvRenderSubCutscene(batch);
+    setTimeout(function () {
+      _mvHideSubCutscene();
+      setTimeout(function () { if (done) done(); }, 320);
+    }, 2000);
   }
 
   // 相手監督の1停止点ぶんの判断（戦術＋交代）。
@@ -534,7 +582,8 @@
     var _ab = document.getElementById('all-btn'); if (_ab) _ab.disabled = false;
     _toggleNormalControls(false);
     _mvShowControls(true);
-    _mvPlay();
+    if (_mvSubCutQueue.length) _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); });   // 自チーム交代のカット
+    else _mvPlay();
   }
 
   /* ── 采配（設定画面を再利用）─ T-11/T-12 ＋ システム/キープレイヤー/要注意/入替 ──
@@ -644,7 +693,8 @@
     // 試合画面へ戻り、采配ポイントパネルを再表示（続ける/後半キックオフ待ち）。
     showScreen('game');
     _mvShowControls(true);
-    _mvShowDecisionPoint(_mvLastKind || 'manual');
+    if (_mvSubCutQueue.length) _mvPlaySubCutscenes(function () { if (_managerMode) _mvShowDecisionPoint(_mvLastKind || 'manual'); });   // 自チーム交代のカット
+    else _mvShowDecisionPoint(_mvLastKind || 'manual');
   }
 
   /* ── トースト／ログ ────────────────────────────────────────────── */
@@ -808,4 +858,6 @@
   g._mvTeardownUI = _mvTeardownUI;
   g._mvOpponentReact = _mvOpponentReact;   // デバッグ/検証用ハンドル
   g._mvOpponentSub = _mvOpponentSub;       // デバッグ/検証用ハンドル
+  g._mvRenderSubCutscene = _mvRenderSubCutscene;   // デバッグ/検証用ハンドル
+  g._mvPlaySubCutscenes = _mvPlaySubCutscenes;     // デバッグ/検証用ハンドル
 })();
