@@ -2333,6 +2333,17 @@ function _mkSceneDbg(offTeam, offP, defTeam, defP, action, ofsVal, dfsVal) {
   };
 }
 
+// lab限定デバッグ: シーン確定時点の両チーム総合力をシーンへスナップショット（DBG-02）。
+//   各 scenes.push() を包む＝そのシーンのメンタル更新（mentalOnDuel/mentalOnGoal）適用後の
+//   「いまこの瞬間」の値。バンドの行1がシーン送りと同期して動く。scene をそのまま返すだけで
+//   判定・カウント・rng には一切影響しない。公開ビルド（mental.js 非同梱）では素通し。
+function _dbgSnapTotals(scene, team1, team2) {
+  if (scene && typeof mentalTeamDebugTotal === 'function') {
+    scene.dbgTotals = { t1: mentalTeamDebugTotal(team1), t2: mentalTeamDebugTotal(team2) };
+  }
+  return scene;
+}
+
 function simulateChance(gs, chanceNo) {
   const {team1, team2} = gs;
   const time = calcTime(chanceNo);
@@ -2396,7 +2407,7 @@ function simulateChance(gs, chanceNo) {
   if (typeof mentalOnDuel === 'function') mentalOnDuel(ofsPlayer, dfsPlayer, result === '成功');
   let scene = { offence, defence, area, rawArea, ofsPos, dfsPos, action, scenario: action, result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
   if (_dbg1) scene.dbg = _dbg1;
-  scenes.push(scene);
+  scenes.push(_dbgSnapTotals(scene, team1, team2));
 
   if (result === '失敗' && !inCounter && testCounter(defence, area, offence)) {
     inCounter = true;
@@ -2510,7 +2521,7 @@ function simulateChance(gs, chanceNo) {
     const scenarioName = action === 'クロス' ? 'サイドクロス' : action;
     scene = { offence, defence, area, rawArea, ofsPos, dfsPos, action, scenario: scenarioName, result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
     if (_dbgW) scene.dbg = _dbgW;
-    scenes.push(scene);
+    scenes.push(_dbgSnapTotals(scene, team1, team2));
 
     // ミドルシュートが選ばれたらwhileを抜けて後処理へ
     if (action === 'ミドルシュート') {
@@ -2609,7 +2620,7 @@ function simulateChance(gs, chanceNo) {
         dfsAction: '対ミドルシュート'
       };
       if (_dbgMid) midScene.dbg = _dbgMid;
-      scenes.push(midScene);
+      scenes.push(_dbgSnapTotals(midScene, team1, team2));
     }
     finalArea = area;
   } else if (area === 'SHOOT_M') {
@@ -2645,7 +2656,7 @@ function simulateChance(gs, chanceNo) {
     }
     scene = { offence, defence, area: shootArea, crossPos: shootOfsPos, ofsPos: shootOfsPos, dfsPos: 0, action: '中央からシュート', scenario: 'シュート', result: shootResult, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対中央からシュート' };
     if (_dbgSM) scene.dbg = _dbgSM;
-    scenes.push(scene);
+    scenes.push(_dbgSnapTotals(scene, team1, team2));
 
   } else if (area.substring(0, 2) === 'CR') {
     let crossPos, crossPlayer, shootAction;
@@ -2681,7 +2692,7 @@ function simulateChance(gs, chanceNo) {
       scene = { offence, defence, area, crossPos: pkKicker, ofsPos: pkKicker, dfsPos: 0,
         action: 'ペナルティキック', scenario: 'ペナルティキック', result: _pkResult,
         ofsPoint: Math.round(_shootP), dfsPoint: Math.round(_gkP), dfsAction: '対ペナルティキック' };
-      scenes.push(scene);
+      scenes.push(_dbgSnapTotals(scene, team1, team2));
       pkResolved = true;
     } else if (entryResult === 'ファール') {
       if (area.substring(area.length-1) === 'M') {
@@ -2717,7 +2728,7 @@ function simulateChance(gs, chanceNo) {
         result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
         scene = { offence, defence, area, crossPos, ofsPos, dfsPos, action, scenario: 'セットプレー', result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
         if (_dbgSP) scene.dbg = _dbgSP;
-        scenes.push(scene);
+        scenes.push(_dbgSnapTotals(scene, team1, team2));
         shootAction = action;
       }
     } else {
@@ -2767,7 +2778,7 @@ function simulateChance(gs, chanceNo) {
             result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
             scene = { offence, defence, area, crossPos, ofsPos, dfsPos, action, scenario: 'クロス', result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
             if (_dbgCR) scene.dbg = _dbgCR;
-            scenes.push(scene);
+            scenes.push(_dbgSnapTotals(scene, team1, team2));
             shootAction = action;
           }
         }
@@ -2806,7 +2817,7 @@ function simulateChance(gs, chanceNo) {
 
       scene = { offence, defence, area, crossPos: scene.crossPos||ofsPos, ofsPos, dfsPos:0, action: shootAction, scenario: 'シュート', result: shootResult, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+shootAction };
       if (_dbgSh) scene.dbg = _dbgSh;
-      scenes.push(scene);
+      scenes.push(_dbgSnapTotals(scene, team1, team2));
     }
   }
 
@@ -2852,9 +2863,9 @@ function simulateChance(gs, chanceNo) {
           }
           else { _ckResult = 'GK防いだ！'; _ckDef.gkSaveCounter++; }
         }
-        scenes.push({ offence: _ckOff, defence: _ckDef, area: _ckArea, crossPos: _ckTaker, ofsPos: _ckShooter,
+        scenes.push(_dbgSnapTotals({ offence: _ckOff, defence: _ckDef, area: _ckArea, crossPos: _ckTaker, ofsPos: _ckShooter,
           dfsPos: _ckDfsPos, action: _ckAction, scenario: 'コーナーキック', result: _ckResult,
-          ofsPoint: Math.round(_ckO), dfsPoint: Math.round(_ckD), dfsAction: '対' + _ckAction });
+          ofsPoint: Math.round(_ckO), dfsPoint: Math.round(_ckD), dfsAction: '対' + _ckAction }, team1, team2));
       }
     }
   }

@@ -394,33 +394,50 @@ function mentalRenderDebugBand(sc, res) {
   if (!band) {
     band = document.createElement('div');
     band.id = 'mental-debug-band';
-    band.style.cssText =
-      'margin:0 0 6px;padding:4px 10px;background:rgba(0,0,0,0.55);' +
-      'border:1px solid rgba(255,255,255,0.15);border-radius:8px;' +
-      'color:#e5e7eb;font-size:11px;line-height:1.55;text-align:left;' +
-      'font-variant-numeric:tabular-nums;pointer-events:none;';
-    logArea.parentNode.insertBefore(band, logArea);   // カットシーン直下・実況の直前
+  }
+  // 共通スタイル。1行=1情報（label / チームA / vs / チームB）で改行し、行内は折り返さない。
+  const baseCss =
+    'box-sizing:border-box;padding:8px 14px;background:rgba(0,0,0,0.78);' +
+    'border:1px solid rgba(255,255,255,0.18);border-radius:8px;' +
+    'color:#e5e7eb;line-height:1.65;text-align:left;' +
+    'font-variant-numeric:tabular-nums;pointer-events:none;white-space:nowrap;z-index:60;';
+  // PC（広い画面）＝ゲームカラム横の空きスペースへ固定ドッキング（親の overflow:hidden の外）。
+  // スマホ幅＝従来どおりカットシーン直下・実況の直前に in-flow 挿入。
+  const vw = (document.documentElement && document.documentElement.clientWidth) || window.innerWidth || 0;
+  const wide = vw >= 700;
+  if (wide) {
+    if (band.parentNode !== document.body) document.body.appendChild(band);
+    band.style.cssText = baseCss +
+      'position:fixed;right:16px;top:90px;width:auto;max-width:44vw;font-size:13px;';
+  } else {
+    if (band.parentNode !== logArea.parentNode) logArea.parentNode.insertBefore(band, logArea);
+    band.style.cssText = baseCss +
+      'margin:0 0 6px;width:100%;font-size:11px;overflow-x:hidden;';
   }
   band.style.display = '';
 
-  const rows = [];
+  const blocks = [];
+  const vsLine = '<span style="color:#6b7280">vs</span>';
 
-  // 行1: 両チーム現在総合力（team1=画面左 / team2=画面右。gameState は simulate.js グローバル）
+  // ブロック1: 両チーム現在総合力（シーン毎スナップショット優先・無ければチャンス末尾値）
   const gs = (typeof gameState !== 'undefined' && gameState) ? gameState : null;
-  if (res.dbgTotals && gs && gs.team1 && gs.team2) {
+  const totals = sc.dbgTotals || res.dbgTotals;
+  if (totals && gs && gs.team1 && gs.team2) {
     const nameOf = t => (typeof getTeamName === 'function' ? getTeamName(t) : t.name);
     const side = (t, tot) =>
       _mdbgChip(t.team_color) + '<b>' + _mdbgEsc(nameOf(t)) + '</b> ' +
       tot.cur.toLocaleString('en-US') +
       ' <span style="color:#9ca3af">(開始' + tot.base.toLocaleString('en-US') + '</span> ' +
       _mdbgDelta(tot.cur, tot.base, 0) + '<span style="color:#9ca3af">)</span>';
-    rows.push('<span style="color:#9ca3af">総合力</span> ' +
-      side(gs.team1, res.dbgTotals.t1) +
-      ' <span style="color:#6b7280">vs</span> ' +
-      side(gs.team2, res.dbgTotals.t2));
+    blocks.push([
+      '<span style="color:#9ca3af">総合力</span>',
+      side(gs.team1, totals.t1),
+      vsLine,
+      side(gs.team2, totals.t2),
+    ].join('<br>'));
   }
 
-  // 行2: マッチアップ投入値（dbg があるシーンのみ。開始値=メンタル係数を除した値）
+  // ブロック2: マッチアップ投入値（dbg があるシーンのみ。開始値=メンタル係数を除した値）
   if (sc.dbg && sc.offence && sc.defence) {
     const d = sc.dbg;
     const op = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
@@ -430,14 +447,16 @@ function mentalRenderDebugBand(sc, res) {
       '<b>' + val.toFixed(1) + '</b>' +
       ' <span style="color:#9ca3af">(開始' + base.toFixed(1) + '</span> ' +
       _mdbgDelta(val, base, 1) + '<span style="color:#9ca3af">)</span>';
-    rows.push('<span style="color:#9ca3af">⚔</span> ' +
-      side(sc.offence.team_color, op ? op.name : '?', d.action, d.ofsVal, d.ofsBase) +
-      ' <span style="color:#6b7280">vs</span> ' +
-      side(sc.defence.team_color, dp ? dp.name : '?', d.defAction, d.dfsVal, d.dfsBase));
+    blocks.push([
+      '<span style="color:#9ca3af">⚔</span>',
+      side(sc.offence.team_color, op ? op.name : '?', d.action, d.ofsVal, d.ofsBase),
+      vsLine,
+      side(sc.defence.team_color, dp ? dp.name : '?', d.defAction, d.dfsVal, d.dfsBase),
+    ].join('<br>'));
   }
 
-  if (!rows.length) { band.style.display = 'none'; return; }
-  band.innerHTML = rows.join('<br>');
+  if (!blocks.length) { band.style.display = 'none'; return; }
+  band.innerHTML = blocks.join('<br><br>');   // ブロック間は空行
 }
 
 // Node（vm context / 連結ロード）でも参照できるよう、存在すれば module.exports にも載せる。
