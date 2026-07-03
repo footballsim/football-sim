@@ -401,14 +401,22 @@ function mentalRenderDebugBand(sc, res) {
     'border:1px solid rgba(255,255,255,0.18);border-radius:8px;' +
     'color:#e5e7eb;line-height:1.65;text-align:left;' +
     'font-variant-numeric:tabular-nums;pointer-events:none;white-space:nowrap;z-index:60;';
-  // PC（広い画面）＝ゲームカラム横の空きスペースへ固定ドッキング（親の overflow:hidden の外）。
+  // PC（広い画面）＝カットシーンの右端に密着させて固定ドッキング（親の overflow:hidden の外）。
+  //   アンカー＝カットシーン枠（#live-field-wrap）。無ければゲームカラム（.match--immersive）。
+  //   毎シーン測るのでリサイズにも追従（デバッグ用途なので厳密なリサイズ監視は不要）。
   // スマホ幅＝従来どおりカットシーン直下・実況の直前に in-flow 挿入。
   const vw = (document.documentElement && document.documentElement.clientWidth) || window.innerWidth || 0;
   const wide = vw >= 700;
-  if (wide) {
+  const anchor = document.getElementById('live-field-wrap') || document.querySelector('.match--immersive');
+  if (wide && anchor) {
     if (band.parentNode !== document.body) document.body.appendChild(band);
+    const r = anchor.getBoundingClientRect();
+    const gap = 12;
+    const left = Math.round(r.right + gap);
+    const maxW = Math.max(180, Math.round(vw - left - 12));   // 右端までの空き（最低180px確保）
     band.style.cssText = baseCss +
-      'position:fixed;right:16px;top:90px;width:auto;max-width:44vw;font-size:13px;';
+      'position:fixed;left:' + left + 'px;top:' + Math.round(r.top) + 'px;' +
+      'width:auto;max-width:' + maxW + 'px;font-size:13px;overflow-x:auto;';
   } else {
     if (band.parentNode !== logArea.parentNode) logArea.parentNode.insertBefore(band, logArea);
     band.style.cssText = baseCss +
