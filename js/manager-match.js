@@ -135,7 +135,7 @@
     halfTimeShown = false;
     halfTimeScore = { t1: 0, t2: 0 };
     subsCount = 0; subsUsed = 0; htSubsCount = 0; _htMode = false;
-    _mvOppSubCount = 0; _mvOppOff = {}; _mvLateChecked = false;   // 相手監督AIの交代状態をリセット
+    _mvOppSubCount = 0; _mvOppOff = {}; _mvOppIn = {}; _mvLateChecked = false;   // 相手監督AIの交代状態をリセット
     window._mvMatchSubs = [];   // 全交代（自/相手）のログ記録をリセット
     _mvSubCutQueue = [];   // 交代カットシーン待ち行列をリセット
     _subbedOff = new Set();
@@ -348,6 +348,7 @@
   var OPP_FATIGUE_MIN = 6;          // C 発火に要する稼働量
   var _mvOppSubCount = 0;           // この試合で相手が使った交代人数
   var _mvOppOff = {};               // 相手が交代で退けた players index（再選出しない）
+  var _mvOppIn = {};                // 相手が交代で投入した players index（＝再び交代でOUTしない）
   var _mvLateChecked = false;       // 後半終盤の単発チェック済みフラグ
   var _mvSubCutQueue = [];          // 交代カットシーン待ち行列 {out,in,teamColor,teamName,label}
 
@@ -388,6 +389,7 @@
       var cat = _mvSlotCat(team, pos); if (cat === 'GK') continue;
       var idx = team.lineup[pos], p = team.players[idx];
       if (!p) continue;
+      if (_mvOppIn[idx]) continue;   // 交代で入った選手は再びOUTにしない（現実的に稀）
       slots.push({ pos: pos, idx: idx, p: p, r: _mvRating(p), cat: cat, fatigue: p.fatigue || 0 });
     }
     var bench = _mvBench(team);
@@ -433,6 +435,7 @@
     if (!_mvCtrl.applyDecision({ type: 'sub', side: 'away', pos: plan.out.pos, 'in': plan.in.idx })) return false;
     _mvOppSubCount++;
     _mvOppOff[plan.out.idx] = true;
+    _mvOppIn[plan.in.idx] = true;   // 投入した選手を記録＝以後の交代でOUT候補から除外
     _mvToast('🔁 ' + _mvT('相手交代', 'Rival sub') + '：' + _mvName(plan.out.p) + ' → ' + _mvName(plan.in.p) + '（' + plan.label + '）');
     if (window._mvMatchSubs) window._mvMatchSubs.push({
       chanceIdx: currentChanceIdx, time: _mvTimeLabel(),
@@ -691,11 +694,11 @@
     var bm100 = document.getElementById('btn-multi100'); if (bm100) bm100.style.display = '';
     var sl = document.getElementById('ht-subs-label'); if (sl && sl.parentNode) sl.parentNode.removeChild(sl);
 
-    // 試合画面へ戻り、采配ポイントパネルを再表示（続ける/後半キックオフ待ち）。
+    // 試合画面へ戻り、そのまま自動再生を再開（采配ポイントの確認パネルは廃止＝余計な1クリック削減）。
     showScreen('game');
     _mvShowControls(true);
-    if (_mvSubCutQueue.length) _mvPlaySubCutscenes(function () { if (_managerMode) _mvShowDecisionPoint(_mvLastKind || 'manual'); });   // 自チーム交代のカット
-    else _mvShowDecisionPoint(_mvLastKind || 'manual');
+    if (_mvSubCutQueue.length) _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); });   // 自チーム交代のカット → 続行
+    else _mvPlay();
   }
 
   /* ── トースト／ログ ────────────────────────────────────────────── */
