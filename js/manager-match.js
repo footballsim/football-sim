@@ -249,13 +249,14 @@
       if (_mvSubCutQueue.length) { _mvPause(); _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); }); return; }
     }
 
-    // ゴール停止（カットシーンの余韻を見せてから采配パネル）。
+    // ゴール停止（カットシーンの余韻＋交代カットを見せてから自動再生を続行）。
+    //   ※ ゴール後の采配ポップアップは廃止（割り込み過多・采配はコントロールバー/HTで可能）。
     if (_mvGoalShown) {
       _mvOpponentDecide(false);   // 相手監督が失点/得点に反応（戦術＋交代）
       _mvPause();
       setTimeout(function () {
         if (!_managerMode) return;
-        _mvPlaySubCutscenes(function () { if (_managerMode) _mvShowDecisionPoint('goal'); });   // 交代あれば先にカット
+        _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); });   // 交代あれば先にカット → 続行
       }, 3300);
       return;
     }
