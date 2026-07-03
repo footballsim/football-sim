@@ -234,11 +234,10 @@
       var htRes = chanceResults[HALF_CHANCES - 1] || chanceResults[HALF_CHANCES - 2];
       if (htRes) halfTimeScore = { t1: htRes.t1score, t2: htRes.t2score };
       _mvOpponentDecide(true);   // 相手監督のハーフタイム采配（戦術＋交代）
+      // ※ HTの交代カットは前半終了直後には出さず、待ち行列に積んだまま後半キックオフ時
+      //    （_mvManagerHTKickoff）に表示＝「前半での交代」に見えないようにする。
       _mvPause();
-      setTimeout(function () {
-        if (!_managerMode) return;
-        _mvPlaySubCutscenes(function () { if (_managerMode) _mvShowHT(); });   // 交代あれば先にカット
-      }, 350);
+      setTimeout(function () { if (_managerMode) _mvShowHT(); }, 350);
       return;
     }
 
@@ -380,6 +379,8 @@
   function _mvOpponentSub(atHT) {
     if (!_mvOpponentAI || !_mvCtrl || !gameState || !gameState.team2) return false;
     if (_mvOppSubCount >= OPP_MAX_SUBS) return false;
+    // 前半のプレー中は交代しない（現実的に稀）。交代はハーフタイム以降のみ。
+    if (!atHT && typeof HALF_CHANCES !== 'undefined' && currentChanceIdx < HALF_CHANCES) return false;
     var team = gameState.team2;
     var diff = team.score - gameState.team1.score;                 // 相手(away)視点の点差
     var prog = (typeof MATCH_CHANCES !== 'undefined') ? currentChanceIdx / MATCH_CHANCES : 0;
