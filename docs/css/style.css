@@ -991,21 +991,19 @@ body {
 #live-field-wrap {
   position: relative;
   width: 100%;
-  /* 横長アート期の主役バンド。16:9（アートより縦に伸ばし cover で左右を僅かクロップ）でマットを最小化。
-     縦長アート差替え時はこの aspect-ratio 行を外す。 */
-  aspect-ratio: 16 / 9;
+  /* 従来表示：カットイン native（480×216＝2.22:1 横長）の自然な帯。引き伸ばさず等倍寄りで表示し
+     画像の粗さを抑える（縦長アート導入時はここを全画面化する＝旧設計メモ参照）。 */
+  max-width: 520px;
+  aspect-ratio: 480 / 216;
   height: auto;
-  max-height: min(52vh, 320px);   /* 中央コラムを圧迫しない上限。実況/操作の空間を確保 */
+  max-height: min(42vh, 250px);
   margin: 0 auto;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #070b13;
-  /* 帯の上下端をマットへソフトに溶かす（ハードな額縁にせず没入感を保つ）。左右はフルブリードのまま。 */
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
-  box-shadow: 0 0 60px rgba(0,0,0,0.55);
+  box-shadow: 0 0 36px rgba(0,0,0,0.45);
 }
 /* カットイン本体（canvas / フォールバックsvg）。インライン style="width:100%" を上書きするため !important。 */
 #live-field-wrap > canvas,
@@ -1013,10 +1011,9 @@ body {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
-  /* ===== OBJECT-FIT 切替点 ===== 横長アート期は帯にちょうど収まるので cover で隙間なく充填。
-     縦長アート差替え後は wrap を全画面化し、ここは contain/cover を絵に合わせて選ぶ。 */
-  object-fit: cover;
-  object-position: 50% 44%;
+  /* 従来表示：絵全体を歪みなく（横長アートをそのまま）。cover で拡大クロップしない。 */
+  object-fit: contain;
+  object-position: center;
   image-rendering: pixelated; /* ピクセルアートを拡大してもくっきり */
   image-rendering: crisp-edges;
 }
@@ -1229,16 +1226,11 @@ body {
 /* ステージは art サイズ（伸ばさない）＝帯内に空きを作らない。残余は .match の中央寄せが上下マットへ配分。
    art の描画が間に合わない瞬間もレイアウトが跳ねないよう min-height で帯高さを予約する。 */
 #screen-game:has(> #mv-controls) .zone-center.stage-bg {
+  /* 従来表示に合わせ、中央ゾーンは縦長予約をせず内容（横長カットイン帯）サイズに。 */
   flex: 0 0 auto;
-  min-height: min(56vh, 430px);
+  min-height: 0;
 }
-#screen-game:has(> #mv-controls) #live-field-wrap {
-  /* 監督モードの主役帯：art で帯を隙間なく満たす（stage の予約高＝帯高と一致させ、帯内の空きを消す）。
-     縦に伸びた分は object-fit:cover が充填（左右は元々フルブリード）＝中央の選手を保持。 */
-  aspect-ratio: auto;
-  height: 100%;
-  max-height: none;
-}
+/* （旧）監督モードで #live-field-wrap を縦長へ引き伸ばす上書きは廃止＝ベースの横長帯を使う。 */
 /* 実況（latest-only 1枚）はカットイン直下に接地。zone-bottom は伸びず内容サイズ。 */
 #screen-game:has(> #mv-controls) .zone-bottom {
   flex: 0 0 auto;

@@ -489,9 +489,12 @@
     el.style.opacity = '1';
   }
   function _mvHideSubCutscene() { var el = document.getElementById('mv-subcut'); if (el) el.style.opacity = '0'; }
-  // 待ち行列があれば ~2s 表示して done()。無ければ即 done()。
+  // 交代カットは「画像なしの仮版」のため当面ラボ限定（LEAGUE_TEST_MODE）。公開(football-sim.com)
+  // では非表示＝交代自体/トースト/ログは出るがカットは出さない。実画像導入後にこのゲートを外す。
+  function _mvSubCutEnabled() { return typeof window !== 'undefined' && window.LEAGUE_TEST_MODE === true; }
+  // 待ち行列があれば ~2s 表示して done()。無ければ（or 公開では）即 done()。
   function _mvPlaySubCutscenes(done) {
-    if (!_mvSubCutQueue.length) { if (done) done(); return; }
+    if (!_mvSubCutQueue.length || !_mvSubCutEnabled()) { _mvSubCutQueue = []; if (done) done(); return; }
     var batch = _mvSubCutQueue.slice(); _mvSubCutQueue = [];
     _mvRenderSubCutscene(batch);
     setTimeout(function () {
