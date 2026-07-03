@@ -136,6 +136,7 @@
     halfTimeScore = { t1: 0, t2: 0 };
     subsCount = 0; subsUsed = 0; htSubsCount = 0; _htMode = false;
     _mvOppSubCount = 0; _mvOppOff = {}; _mvLateChecked = false;   // 相手監督AIの交代状態をリセット
+    window._mvMatchSubs = [];   // 全交代（自/相手）のログ記録をリセット
     _subbedOff = new Set();
     _pendingSubLog = [];
     _shootSubStep = 0;
@@ -423,7 +424,25 @@
     _mvOppSubCount++;
     _mvOppOff[plan.out.idx] = true;
     _mvToast('🔁 ' + _mvT('相手交代', 'Rival sub') + '：' + _mvName(plan.out.p) + ' → ' + _mvName(plan.in.p) + '（' + plan.label + '）');
+    if (window._mvMatchSubs) window._mvMatchSubs.push({
+      chanceIdx: currentChanceIdx, time: _mvTimeLabel(),
+      text: '🔁 ' + _mvT('交代', 'Sub') + '（' + getTeamName(team2Data) + '・' + plan.label + '）：' + _mvName(plan.out.p) + ' → ' + _mvName(plan.in.p)
+    });
     return true;
+  }
+
+  // 自チーム交代（_pendingSubLog）をテキストログ用に記録（_insertSubLog の直前に呼ぶ）。
+  function _mvRecordPlayerSubs(timeLabel) {
+    if (typeof _pendingSubLog === 'undefined' || !_pendingSubLog || !_pendingSubLog.length) return;
+    if (!window._mvMatchSubs) window._mvMatchSubs = [];
+    _pendingSubLog.forEach(function (s) {
+      var o = (_isEn() && s.outEn) ? s.outEn : s.out;
+      var i = (_isEn() && s.inEn) ? s.inEn : s.in;
+      window._mvMatchSubs.push({
+        chanceIdx: currentChanceIdx, time: timeLabel,
+        text: '🔁 ' + _mvT('交代', 'Sub') + '（' + getTeamName(team1Data) + '）：' + o + ' → ' + i
+      });
+    });
   }
 
   // 相手監督の1停止点ぶんの判断（戦術＋交代）。
@@ -506,6 +525,7 @@
     home.lineup = team1State.lineup.slice();
     subsCount += htSubsCount; htSubsCount = 0; _htMode = false;
     // 交代ログ（_pendingSubLog → ログ・既存関数）。
+    _mvRecordPlayerSubs(_mvT('ハーフタイム', 'Half Time'));   // テキストログ用に交代を記録
     if (typeof _insertSubLog === 'function') _insertSubLog(_mvT('ハーフタイム', 'Half Time'));
     // ★ _showHalfTimeModal が disabled にした next/all ボタンを再有効化する（Codex P2）。
     //   通常の closeHalfTimeModal はここで再有効化するが、監督分岐は早期 return で素通りするため、
@@ -603,6 +623,7 @@
     htSubsCount = 0;
 
     // 交代ログをテキストログへ挿入（_pendingSubLog → ログ・既存関数）。
+    _mvRecordPlayerSubs(_mvTimeLabel());   // テキストログ用に交代を記録
     if (typeof _insertSubLog === 'function') _insertSubLog(_mvTimeLabel());
 
     // 設定画面のクロームを元に戻す。

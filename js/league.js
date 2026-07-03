@@ -246,12 +246,16 @@
   function _buildMatchLog() {
     var out = [];
     if (typeof chanceResults === 'undefined' || !chanceResults) return out;
-    chanceResults.forEach(function (res) {
-      if (!res || !res.textScenes) return;
-      res.textScenes.forEach(function (tx) {
+    var subs = (typeof window !== 'undefined' && window._mvMatchSubs) ? window._mvMatchSubs.slice() : [];
+    chanceResults.forEach(function (res, i) {
+      if (res && res.textScenes) res.textScenes.forEach(function (tx) {
         if (tx && String(tx).replace(/<[^>]*>/g, '').trim()) out.push({ t: res.time || '', x: tx });
       });
+      // このチャンス消化直後(=currentChanceIdx が i+1 の時点)に起きた交代を差し込む
+      subs.filter(function (s) { return s.chanceIdx === i + 1; }).forEach(function (s) { out.push({ t: s.time || (res && res.time) || '', x: s.text, sub: true }); });
     });
+    // 全チャンス後(終盤)の交代を末尾に
+    subs.filter(function (s) { return s.chanceIdx > chanceResults.length; }).forEach(function (s) { out.push({ t: s.time, x: s.text, sub: true }); });
     return out;
   }
   function _showMatchLog() {
@@ -263,7 +267,7 @@
     var rows = '', lastT = null;
     lr.log.forEach(function (l) {
       var tcell = (l.t !== lastT) ? l.t : ''; lastT = l.t;
-      rows += '<div class="lg-logrow"><span class="lg-logtime">' + tcell + '</span><span class="lg-logtxt">' + l.x + '</span></div>';
+      rows += '<div class="lg-logrow' + (l.sub ? ' sub' : '') + '"><span class="lg-logtime">' + tcell + '</span><span class="lg-logtxt">' + l.x + '</span></div>';
     });
     var ov = document.createElement('div');
     ov.id = 'lg-log-ov'; ov.className = 'lg-logov';
@@ -469,7 +473,9 @@
       '.lg-logbody{flex:1;overflow-y:auto;padding:8px 14px 48px;max-width:520px;margin:0 auto;width:100%;box-sizing:border-box}',
       '.lg-logrow{display:flex;gap:10px;padding:7px 2px;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;line-height:1.55}',
       '.lg-logtime{flex-shrink:0;width:44px;color:rgba(255,255,255,0.4);font-size:11px;font-weight:700;text-align:right;padding-top:2px}',
-      '.lg-logtxt{flex:1;color:#e8eefc}'
+      '.lg-logtxt{flex:1;color:#e8eefc}',
+      '.lg-logrow.sub{background:rgba(46,204,113,0.10);border-left:3px solid #2ecc71;border-radius:4px;padding-left:8px}',
+      '.lg-logrow.sub .lg-logtxt{color:#8ef0b0;font-weight:700}'
     ].join('\n');
     document.head.appendChild(st);
   }
