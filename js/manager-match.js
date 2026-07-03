@@ -216,6 +216,14 @@
     _mvUpdateControlBar();
   }
 
+  // 再生ウォッチドッグ（P1凍結対策・2026-07-04）: 「再生中なのに何も進まない」を検出して
+  // 回復可能な一時停止へ変換する。2026-07-04 に HT重複負傷の解決後で1度だけ発生した
+  // 無言フリーズ（再現条件未特定）が再発しても、ユーザーは ▶ で再開でき、原因が
+  // window._mvLastError / コンソールに残る。
+  var _mvProgKey = '';
+  var _mvStallCount = 0;
+  var _MV_STALL_LIMIT = 10;   // 10ティック連続無進行で異常とみなす（HT/ゴール停止はタイマー停止なので誤検知しない）
+
   // 1ティック = 1ビート進める。HT/ゴール/終了で自動停止。
   function _mvTick() {
     _mvTimer = null;
@@ -225,7 +233,29 @@
     if (_mvCtrl.isOver() && currentChanceIdx >= chanceResults.length) { _mvFinish(); return; }
 
     _mvGoalShown = false;
-    nextChance();                       // 1ビート進める（内部で createMatch から遅延フェッチ）
+    try {
+      nextChance();                     // 1ビート進める（内部で createMatch から遅延フェッチ）
+    } catch (e) {
+      // 例外でタイマーが死ぬと「⏸のまま永久停止」になる（2026-07-04 実観測の症状と同型）。
+      // 一時停止に変換してエラーを可視化し、▶ で再試行できるようにする。
+      window._mvLastError = { msg: e && e.message, stack: e && e.stack, at: 'nextChance' };
+      if (typeof console !== 'undefined') console.error('[manager] nextChance failed:', e);
+      _mvPause();
+      _mvToast('⚠️ ' + _mvT('再生エラー：一時停止しました', 'Playback error — paused'));
+      return;
+    }
+    // 無進行検出: チャンス/シーン/分割ステップのどれも動いていないティックが連続したら停止。
+    var _pk = currentChanceIdx + ':' + currentSceneIdx + ':' + _shootSubStep + ':' + chanceResults.length;
+    if (_pk === _mvProgKey) {
+      if (++_mvStallCount >= _MV_STALL_LIMIT) {
+        window._mvLastError = { msg: 'playback stalled (no progress ' + _MV_STALL_LIMIT + ' ticks)', at: _pk };
+        if (typeof console !== 'undefined') console.error('[manager] playback stalled at', _pk);
+        _mvStallCount = 0;
+        _mvPause();
+        _mvToast('⚠️ ' + _mvT('再生が進まないため一時停止しました', 'Playback stalled — paused'));
+        return;
+      }
+    } else { _mvProgKey = _pk; _mvStallCount = 0; }
     _mvSyncHud();
 
     // ハーフタイム停止（前半ロスタイム完了＝currentChanceIdx===HALF_CHANCES の瞬間・1回のみ）。
@@ -262,6 +292,21 @@
 
     if (_mvCtrl.isOver() && currentChanceIdx >= chanceResults.length) { _mvFinish(); return; }
 
+    // 負傷交代（重症・自チーム・Sprint 2b）: チャンス境界（次チャンス未計算のタイミング）で
+    // 停止し、交代画面を即時に開く。エンジンは采配待ちの間チャンスを計算しないので、
+    // 負傷選手が次チャンスを踏むことはない。解決は _mvCloseSetting / _mvManagerHTKickoff。
+    if (currentSceneIdx === 0 && _shootSubStep === 0 &&
+        typeof disciplinePendingUserSub === 'function' && gameState && gameState.team1 &&
+        disciplinePendingUserSub(gameState.team1)) {
+      _mvPause();
+      var _injReq = disciplinePendingUserSub(gameState.team1);
+      var _injP = gameState.team1.players[_injReq.outIdx];
+      _mvToast('🚑 ' + _mvT('負傷交代が必要', 'Injury — substitution needed') +
+               (_injP ? '：' + _mvName(_injP) : ''));
+      setTimeout(function () { if (_managerMode) _mvOpenSetting(); }, 900);
+      return;
+    }
+
     _mvTimer = setTimeout(_mvTick, _mvSpeed());
   }
 
@@ -274,7 +319,14 @@
   function _mvSkipToEnd() {
     _mvPause();
     _mvHideDecision();
+    // 負傷交代（Sprint 2b）: スキップ中はユーザー采配を待てないので自動交代へフォールバック。
+    //   保留中の要求も自動解決してから残りを計算する（負傷選手が残り試合を踏まないように）。
+    if (typeof disciplineResolveUserSub === 'function' && gameState && gameState.team1) {
+      disciplineResolveUserSub(gameState.team1, { auto: true });
+    }
+    if (typeof window !== 'undefined') window._mvSkipAutoInjury = true;
     while (!_mvCtrl.isOver()) { _mvCtrl.nextChance(); }
+    if (typeof window !== 'undefined') window._mvSkipAutoInjury = false;
     var crs = _mvCtrl.result.chanceResults;
     chanceResults = crs.slice();
     currentChanceIdx = chanceResults.length;
@@ -373,7 +425,11 @@
     var res = [];
     for (var i = 0; i < team.players.length; i++) {
       if (on[i] || _mvOppOff[i]) continue;
-      res.push({ idx: i, p: team.players[i], r: _mvRating(team.players[i]) });
+      var bp = team.players[i];
+      // 規律（Sprint 2）: 退場/負傷退出した選手は再投入不可（フラグは discipline.js 同梱時のみ付く）。
+      if (bp && (bp._sentOff || bp._injured)) continue;
+      if (team._discOff && team._discOff[i]) continue;
+      res.push({ idx: i, p: bp, r: _mvRating(bp) });
     }
     return res;
   }
@@ -392,6 +448,8 @@
     var slots = [];   // 出場中の非GKスロット
     for (var pos = 0; pos < team.lineup.length; pos++) {
       var cat = _mvSlotCat(team, pos); if (cat === 'GK') continue;
+      // 規律（Sprint 2）: 退場/負傷除外スロットは交代で埋められない（AIのOUT候補から除外）。
+      if (typeof disciplineIsOut === 'function' && disciplineIsOut(team, pos)) continue;
       var idx = team.lineup[pos], p = team.players[idx];
       if (!p) continue;
       if (_mvOppIn[idx]) continue;   // 交代で入った選手は再びOUTにしない（現実的に稀）
@@ -590,6 +648,13 @@
     home.marked_player = team1State.marked_player;
     home.lineup = team1State.lineup.slice();
     subsCount += htSubsCount; htSubsCount = 0; _htMode = false;
+    // 負傷交代の解決（Sprint 2b）: HT画面で交代済みなら続行、未交代なら10人で続行。
+    if (typeof disciplineResolveUserSub === 'function' && gameState && gameState.team1) {
+      var _rsHT = disciplineResolveUserSub(gameState.team1);
+      if (_rsHT && _rsHT.resolved === 'excluded') {
+        _mvToast('🚑 ' + _mvT('交代なし＝10人で続行', 'No sub — playing with 10'));
+      }
+    }
     // 交代ログ（_pendingSubLog → ログ・既存関数）。
     _mvRecordPlayerSubs(_mvT('ハーフタイム', 'Half Time'));   // テキストログ用に交代を記録
     if (typeof _insertSubLog === 'function') _insertSubLog(_mvT('ハーフタイム', 'Half Time'));
@@ -688,6 +753,15 @@
     // 交代枠の消費を反映（表示用）。
     subsCount += htSubsCount;
     htSubsCount = 0;
+
+    // 負傷交代の解決（Sprint 2b）: 交代画面でユーザーが交代済みなら続行、
+    // 未交代（枠切れ/選択せず）なら退場と同じ除外＝10人で続行。
+    if (typeof disciplineResolveUserSub === 'function' && gameState && gameState.team1) {
+      var _rs = disciplineResolveUserSub(gameState.team1);
+      if (_rs && _rs.resolved === 'excluded') {
+        _mvToast('🚑 ' + _mvT('交代なし＝10人で続行', 'No sub — playing with 10'));
+      }
+    }
 
     // 交代ログをテキストログへ挿入（_pendingSubLog → ログ・既存関数）。
     _mvRecordPlayerSubs(_mvTimeLabel());   // テキストログ用に交代を記録

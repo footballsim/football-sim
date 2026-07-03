@@ -312,6 +312,13 @@
         if (inIdx === outIdx) return false;                 // 同一選手の指名は無効
         if (subbedOff[side][inIdx]) return false;           // 一度退いた選手は再出場不可
         if (team.lineup.indexOf(inIdx) >= 0) return false;  // 既に出場中の選手は不可
+        // 規律（Sprint 2・discipline.js 同梱時のみ）: 退場/負傷除外スロットへの補充＝11人回復は不可。
+        //   退場/負傷退出済み選手（_sentOff/_injured/_discOff）の再投入も不可。
+        //   公開ビルドでは関数/フラグが存在せず全て素通り（挙動不変）。
+        if (typeof disciplineIsOut === 'function' && disciplineIsOut(team, pos)) return false;
+        if (team._discOff && team._discOff[inIdx]) return false;
+        var _inP = team.players[inIdx];
+        if (_inP && (_inP._sentOff || _inP._injured)) return false;
         // 退く選手を「再出場不可」に記録 → lineup を差し替え（既存 applyDrop と同セマンティクス）。
         subbedOff[side][outIdx] = true;
         team.lineup[pos] = inIdx;

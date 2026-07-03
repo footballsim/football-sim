@@ -45,6 +45,9 @@ const DISCIPLINE_TUNING = {
   INJURY_FATIGUE_COEF: 1.0,    // ×出場消耗度 prog（_pitchChances/MATCH_CHANCES・疲労層と同じ物差し）
   INJURY_PROG_CAP:     1.2,    // prog の上限（延長で効きすぎない・FATIGUE_TUNING.PROG_CAP と同値）
   INJURY_PROB_CAP:     0.5,    // 負傷確率の安全上限
+  // 重症度分岐（Sprint 2b）: 軽傷=続行可・残り時間の param 減 ／ 重症=続行不可（強制交代）
+  INJURY_MINOR_RATIO:  0.6,    // 負傷のうち軽傷の割合（重症=残り 0.4）。総発生率は INJURY_BASE 系で不変
+  INJURY_MINOR_FACTOR: 0.85,   // 軽傷選手の param 係数（getActionParam seam・残り時間ずっと）
   // 交代枠（W杯ルール5枚。負傷強制交代も同じ枠を消費）
   MAX_SUBS:            5,
 };
@@ -105,10 +108,13 @@ function _discExternalSubs(team) {
   return n;
 }
 
-// 退場/除外スロットのマーク（team._sentOffPos）＋退いた選手のマーク。
-function _discMarkSlotOut(team, pos) {
-  if (!team._sentOffPos) team._sentOffPos = {};
-  team._sentOffPos[pos] = true;
+// 負傷（枠切れ/未交代）でピッチ外扱いにする選手のマーク。
+//   ★ 除外は「選手フラグ」基準（Sprint 2b で位置基準 _sentOffPos から変更）:
+//   ユーザーが采配/HT画面でポジション入替（starter↔starter）をすると lineup の並びが変わるため、
+//   位置基準だと無実の選手を除外し退場選手が復帰してしまう。選手基準なら入替に追従する。
+function _discMarkPlayerOut(team, pos) {
+  const p = team.players[team.lineup[pos]];
+  if (p) p._discExcluded = true;
 }
 
 /**
@@ -150,24 +156,39 @@ function _discPlanInjurySub(team, pos) {
  */
 function disciplineResetTeam(t) {
   if (!t || !t.players) return;
-  t._sentOffPos = {};
   t._discOff = {};
   t._discSubsUsed = 0;
   t._discPending = [];
+  t._discUserSubReq = null;
   for (let i = 0; i < t.players.length; i++) {
     const p = t.players[i];
     p._yellowCards = 0;
     p._sentOff = false;
     p._injured = false;
+    p._injuredMinor = false;
+    p._injurySeverity = null;
+    p._discExcluded = false;
   }
 }
 
 /**
  * 退場/負傷除外スロットか（selectOffencePosition/selectDefencePosition/
  * getTeamTotalParam/selectFKKicker/PKキッカー選抜のスキップ判定に使う。超軽量）。
+ * 判定は「そのスロットの現占有選手」のフラグ基準（ポジション入替に追従・Sprint 2b）。
  */
 function disciplineIsOut(team, pos) {
-  return !!(team && team._sentOffPos && team._sentOffPos[pos]);
+  if (!team || !team.players || !team.lineup) return false;
+  const p = team.players[team.lineup[pos]];
+  return !!(p && (p._sentOff || p._discExcluded));
+}
+
+/**
+ * 軽傷（続行可）の param 係数（getActionParam seam・メンタル/疲労と同列。Sprint 2b）。
+ * @returns {number} 軽傷マーカー保持者は INJURY_MINOR_FACTOR、それ以外/無効時は 1.0
+ */
+function injuryParamFactor(team, p) {
+  if (!_disciplineEnabled()) return 1.0;
+  return (p && p._injuredMinor) ? DISCIPLINE_TUNING.INJURY_MINOR_FACTOR : 1.0;
 }
 
 /**
@@ -214,9 +235,8 @@ function disciplineOnFoul(ctx) {
       if (dfsP._yellowCards >= 2) { cardType = 'second_yellow'; sentOff = true; } // 2枚目=レッド
     }
     if (sentOff) {
-      // 退場: スロット除外マーカーのみ（lineup は不変＝過去シーンの名前解決を壊さない）。
-      //   選抜除外(b)＋総合力除外(c)で数的不利、交代で埋められない(d)は _discOff で保証。
-      _discMarkSlotOut(ctx.defence, ctx.dfsPos);
+      // 退場: 選手フラグのみ（lineup は不変＝過去シーンの名前解決を壊さない。disciplineIsOut が読む）。
+      //   選抜除外(b)＋総合力除外(c)で数的不利、交代で埋められない(d)は _discOff＋applyDecision ガードで保証。
       dfsP._sentOff = true;
       if (!ctx.defence._discOff) ctx.defence._discOff = {};
       ctx.defence._discOff[ctx.defence.lineup[ctx.dfsPos]] = true;
@@ -234,32 +254,55 @@ function disciplineOnFoul(ctx) {
     });
   }
 
-  /* (2) 負傷: 被ファール選手（攻撃側）。疲労（出場消耗度）で増幅 */
+  /* (2) 負傷: 被ファール選手（攻撃側）。疲労（出場消耗度）で増幅。
+   *     重症度は同じ injuryRoll の区間分割で決定（軽傷 60% / 重症 40%・rng 追加消費なし）。 */
   const ofsP = ctx.ofsPlayer;
   const mc = (typeof MATCH_CHANCES !== 'undefined') ? MATCH_CHANCES : 32;
   const prog = Math.min((ofsP._pitchChances || 0) / mc, T.INJURY_PROG_CAP);
   const pInj = Math.min(T.INJURY_BASE * (1 + T.INJURY_FATIGUE_COEF * prog), T.INJURY_PROB_CAP);
   if (injuryRoll < pInj) {
+    const severity = (injuryRoll < pInj * T.INJURY_MINOR_RATIO) ? 'minor' : 'severe';
     ofsP._injured = true;                // 持ち越しマーカー（SN-01・リーグが読む）
-    if (ctx.scene) ctx.scene.injury = true;
-    // 強制交代プランはここで確定（同一チャンス内でベンチは変わらない）、
-    // 適用はチャンス末尾（disciplineOnChanceEnd）＝次チャンス以降の入力だけを変える。
-    const outIdx = ctx.offence.lineup[ctx.ofsPos];
-    const plan = (ctx.ofsPos === 0) ? null : _discPlanInjurySub(ctx.offence, ctx.ofsPos);
-    if (!ctx.offence._discPending) ctx.offence._discPending = [];
-    ctx.offence._discPending.push({
-      pos: ctx.ofsPos, outIdx: outIdx, inIdx: plan ? plan.inIdx : null,
-    });
-    const inP = plan ? ctx.offence.players[plan.inIdx] : null;
-    events.push({
+    ofsP._injurySeverity = severity;     // 持ち越しの重み付け用（SN-01 が読む・将来）
+    if (ctx.scene) { ctx.scene.injury = true; ctx.scene.injurySeverity = severity; }
+    const ev = {
       type: 'injury',
+      severity: severity,                // 'minor' | 'severe'
       team: ctx.offenceNo,               // 負傷は攻撃側（倒された選手）
       player: ofsP.name || null,
       playerEn: ofsP.en_name || ofsP.name || null,
       pos: ctx.ofsPos,
-      subIn: inP ? (inP.name || null) : null,       // null = 枠切れ/ベンチ無し→10人続行
-      subInEn: inP ? (inP.en_name || inP.name || null) : null,
-    });
+      subIn: null,                       // minor / ユーザー采配待ち / 枠切れは null
+      subInEn: null,
+    };
+    if (severity === 'minor') {
+      // 軽傷: ピッチに残るが残り時間 param 減（injuryParamFactor が読む）。交代なし。
+      ofsP._injuredMinor = true;
+    } else if (ctx.ofsPos !== 0) {
+      // 重症: 続行不可。適用はチャンス末尾（disciplineOnChanceEnd）＝次チャンス以降の入力だけを変える。
+      const outIdx = ctx.offence.lineup[ctx.ofsPos];
+      if (!ctx.offence._discPending) ctx.offence._discPending = [];
+      // 監督モード中の自チーム（team1）は自動交代せず、ユーザーの交代采配を待つ
+      //   （manager-match.js が disciplinePendingUserSub を読んで停止→交代画面。
+      //    「結果まで一気に」中は window._mvSkipAutoInjury で自動交代へフォールバック）。
+      const managed = _discIsInteractiveTeam1(ctx.offence) &&
+        typeof _managerMode !== 'undefined' && _managerMode === true &&
+        !(typeof window !== 'undefined' && window && window._mvSkipAutoInjury);
+      if (managed) {
+        ctx.offence._discPending.push({ pos: ctx.ofsPos, outIdx: outIdx, inIdx: null, userSub: true });
+        ev.userSub = true;               // 采配待ち（renderer/manager が読む）
+      } else {
+        // 自動交代プランはここで確定（同一チャンス内でベンチは変わらない）。
+        const plan = _discPlanInjurySub(ctx.offence, ctx.ofsPos);
+        ctx.offence._discPending.push({
+          pos: ctx.ofsPos, outIdx: outIdx, inIdx: plan ? plan.inIdx : null,
+        });
+        const inP = plan ? ctx.offence.players[plan.inIdx] : null;
+        ev.subIn = inP ? (inP.name || null) : null;       // null = 枠切れ/ベンチ無し→10人続行
+        ev.subInEn = inP ? (inP.en_name || inP.name || null) : null;
+      }
+    }
+    events.push(ev);
   }
 
   return events.length ? events : null;
@@ -279,6 +322,17 @@ function disciplineOnChanceEnd(team1, team2) {
       const pd = t._discPending[k];
       if (!t._discOff) t._discOff = {};
       t._discOff[pd.outIdx] = true;                        // 退いた選手は再出場不可
+      if (pd.userSub) {
+        // 監督モード自チームの重症: 交代はユーザーの采配（manager-match.js が停止→交代画面）。
+        //   ここでは要求を記録するだけ（lineup 不変・除外もまだ）。再生は次チャンス計算前に
+        //   停止するため、負傷選手が次チャンスを踏むことはない。再出場だけ先に封じる。
+        t._discUserSubReq = { pos: pd.pos, outIdx: pd.outIdx };
+        if (_discIsInteractiveTeam1(t) &&
+            typeof _subbedOff !== 'undefined' && _subbedOff && typeof _subbedOff.add === 'function') {
+          _subbedOff.add(pd.outIdx);
+        }
+        continue;
+      }
       if (pd.inIdx != null && t.lineup[pd.pos] === pd.outIdx) {
         t.lineup[pd.pos] = pd.inIdx;                       // 強制交代（次チャンスから有効）
         // 枠消費の「真実の源」は1つだけ（Codex P2-1: 二重カウント防止）。
@@ -295,11 +349,48 @@ function disciplineOnChanceEnd(team1, team2) {
           t._discSubsUsed = (t._discSubsUsed || 0) + 1;
         }
       } else if (pd.pos !== 0) {
-        _discMarkSlotOut(t, pd.pos);                       // 枠切れ→退場と同じスロット除外（10人）
+        _discMarkPlayerOut(t, pd.pos);                     // 枠切れ→退場と同じ除外（10人・選手フラグ）
       }
     }
     t._discPending = [];
   }
+}
+
+/* ── 3. 監督モードのユーザー采配交代 API（Sprint 2b・manager-match.js が呼ぶ） ── */
+
+/**
+ * 采配待ちの負傷交代要求（{pos, outIdx}）。無ければ null。
+ * manager-match.js の再生ループがチャンス境界で読み、停止→交代画面を開く。
+ */
+function disciplinePendingUserSub(team) {
+  return (team && team._discUserSubReq) || null;
+}
+
+/**
+ * 采配待ちの負傷交代を解決する（交代画面を閉じた時／HTキックオフ時／スキップ時に呼ぶ）。
+ *   - 負傷選手が lineup にいない → ユーザーが交代済み（枠消費は UI 側の既存処理=htSubsCount）。
+ *   - まだ lineup にいる ＆ opts.auto → 自動交代（headless と同じプラン。「結果まで一気に」用）。
+ *   - まだ lineup にいる ＆ 交代なし → 除外＝10人で続行（交代枠は消費しない）。
+ * @returns {{resolved:'subbed'|'auto'|'excluded', pos:number, inIdx?:number}|null}
+ */
+function disciplineResolveUserSub(team, opts) {
+  const req = team && team._discUserSubReq;
+  if (!req) return null;
+  team._discUserSubReq = null;
+  const at = team.lineup.indexOf(req.outIdx);   // 入替で位置が動いていても選手基準で追跡
+  if (at < 0) return { resolved: 'subbed', pos: req.pos };
+  if (opts && opts.auto) {
+    const plan = _discPlanInjurySub(team, at);
+    if (plan) {
+      team.lineup[at] = plan.inIdx;
+      // 枠消費（P2-1 と同じ排他: 対話モード team1=subsCount／それ以外=_discSubsUsed）
+      if (_discIsInteractiveTeam1(team) && typeof subsCount === 'number') subsCount++;
+      else team._discSubsUsed = (team._discSubsUsed || 0) + 1;
+      return { resolved: 'auto', pos: at, inIdx: plan.inIdx };
+    }
+  }
+  _discMarkPlayerOut(team, at);                 // 交代なし → 10人で続行
+  return { resolved: 'excluded', pos: at };
 }
 
 // Node（vm context / 連結ロード）でも参照できるよう、存在すれば module.exports にも載せる。
@@ -307,5 +398,6 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     DISCIPLINE_TUNING,
     disciplineResetTeam, disciplineIsOut, disciplineOnFoul, disciplineOnChanceEnd,
+    injuryParamFactor, disciplinePendingUserSub, disciplineResolveUserSub,
   };
 }

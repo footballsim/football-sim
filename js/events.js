@@ -309,8 +309,10 @@ function matchToEvents(chanceResults, opts) {
           playerEn: de.playerEn || null,
           card: de.card || null,          // 'yellow' | 'second_yellow' | 'red'（injury は null）
           sentOff: !!de.sentOff,          // カードによる退場（injury は false）
-          subIn: de.subIn || null,        // 負傷交代の投入選手（null=枠切れ/ベンチ無し→10人続行）
+          severity: de.severity || null,  // injury: 'minor'（続行・能力減）| 'severe'（続行不可）
+          subIn: de.subIn || null,        // 負傷交代の投入選手（null=軽傷/采配待ち/枠切れ→10人）
           subInEn: de.subInEn || null,
+          userSub: !!de.userSub,          // 重症×監督モード自チーム＝ユーザーの交代采配待ち
           pos: (typeof de.pos === 'number') ? de.pos : null,
         });
       }

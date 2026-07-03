@@ -1781,6 +1781,20 @@ function applyDrop(x, y) {
 
   const targetPlayerIdx = team1State.lineup[targetPos];
 
+  // 規律: 退場/負傷退出でピッチを離れた選手の枠には補充できない（Sprint 2b・lab限定）。
+  //   フラグはライブチーム（gameState.team1 のクローン）側に付く。discipline.js 非同梱の
+  //   公開ビルドではフラグ自体が存在しない＝常に素通り（挙動不変）。
+  //   ★ _htMode（試合中の交代フロー=HT/監督采配）限定: 試合外の設定画面では gameState が
+  //     前試合の残骸のことがあり誤ブロックするため適用しない。
+  if (dragState.sourceType === 'bench' && _htMode &&
+      typeof gameState !== 'undefined' && gameState && gameState.team1 && gameState.team1.players) {
+    const _liveOutP = gameState.team1.players[targetPlayerIdx];
+    if (_liveOutP && (_liveOutP._sentOff || _liveOutP._discExcluded)) {
+      alert(t('discSubBlockedOut'));
+      return;
+    }
+  }
+
   if (dragState.sourceType === 'bench') {
     // ベンチ→スタメン（交代）
     // ハーフタイムモード中は人数制限チェック
@@ -2063,6 +2077,8 @@ function getActionParam(team, pos, action) {
   if (typeof mentalParamFactor === 'function') f *= mentalParamFactor(team, p);
   // 疲労: 出場時間×スタミナ → 逓減係数（DEV_NOTES①・mental.js 4b。GK/フレッシュは1.0・floor 0.80）
   if (typeof fatigueParamFactor === 'function') f *= fatigueParamFactor(team, p);
+  // 規律: 軽傷（続行可）の逓減係数（Sprint 2b・discipline.js。非該当/非同梱は1.0）
+  if (typeof injuryParamFactor === 'function') f *= injuryParamFactor(team, p);
 
   const adjusted = params.map(v => v * Math.max(f, 0.01));
 
@@ -2504,7 +2520,11 @@ function simulateChance(gs, chanceNo) {
       while (ofsPos === scene.ofsPos && tries++ < 10)
         ofsPos = selectOffencePosition(offence, area);
       if (ofsPos === scene.ofsPos) {
-        for (let _i = 1; _i < 11; _i++) { if (_i !== scene.ofsPos) { ofsPos = _i; break; } }
+        // 規律: 退場/負傷除外スロットはフォールバックでも選ばない（Sprint 2b・公開ビルドは no-op）
+        for (let _i = 1; _i < 11; _i++) {
+          if (_i !== scene.ofsPos &&
+              !(typeof disciplineIsOut === 'function' && disciplineIsOut(offence, _i))) { ofsPos = _i; break; }
+        }
       }
     }
     ofsPlayer = offence.players[offence.lineup[ofsPos]];
@@ -2754,7 +2774,11 @@ function simulateChance(gs, chanceNo) {
         let _spTries = 0;
         while (ofsPos === crossPos && _spTries++ < 10) ofsPos = selectOffencePosition(offence, area);
         if (ofsPos === crossPos) {
-          for (let _i = 1; _i < 11; _i++) { if (_i !== crossPos) { ofsPos = _i; break; } }
+          // 規律: 退場/負傷除外スロットはフォールバックでも選ばない（Sprint 2b・公開ビルドは no-op）
+          for (let _i = 1; _i < 11; _i++) {
+            if (_i !== crossPos &&
+                !(typeof disciplineIsOut === 'function' && disciplineIsOut(offence, _i))) { ofsPos = _i; break; }
+          }
         }
         ofsPlayer = offence.players[offence.lineup[ofsPos]];
         // セットプレーもクロスエリアのアクション（ボレー/ヘディング）から選択
@@ -2798,8 +2822,10 @@ function simulateChance(gs, chanceNo) {
           let newOfsPos = selectOffencePosition(offence, area, crossPos);
           // フォールバック（全員がcrossPosだった場合）
           if (newOfsPos === crossPos || newOfsPos === undefined) {
+            // 規律: 退場/負傷除外スロットはフォールバックでも選ばない（Sprint 2b・公開ビルドは no-op）
             for (let _i = 1; _i < 11; _i++) {
-              if (_i !== crossPos) { newOfsPos = _i; break; }
+              if (_i !== crossPos &&
+                  !(typeof disciplineIsOut === 'function' && disciplineIsOut(offence, _i))) { newOfsPos = _i; break; }
             }
           }
           if (newOfsPos === crossPos) {
@@ -2881,7 +2907,11 @@ function simulateChance(gs, chanceNo) {
         const _ckTaker = selectFKKicker(_ckOff);     // キッカー（FK精度上位）
         let _ckShooter = selectOffencePosition(_ckOff, _ckArea, _ckTaker);  // 競り合う選手（キッカー以外）
         if (_ckShooter === _ckTaker || _ckShooter === undefined) {
-          for (let _i = 1; _i < 11; _i++) { if (_i !== _ckTaker) { _ckShooter = _i; break; } }
+          // 規律: 退場/負傷除外スロットはフォールバックでも選ばない（Sprint 2b・公開ビルドは no-op）
+          for (let _i = 1; _i < 11; _i++) {
+            if (_i !== _ckTaker &&
+                !(typeof disciplineIsOut === 'function' && disciplineIsOut(_ckOff, _i))) { _ckShooter = _i; break; }
+          }
         }
         const _ckActions = area_data[_ckArea] ? area_data[_ckArea].actions : ['ヘディングシュート', 'ボレーシュート'];
         const _ckAction = _ckActions[Math.floor(rng() * _ckActions.length)];

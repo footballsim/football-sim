@@ -386,9 +386,13 @@ function fatigueParamFactor(team, p) {
   return Math.max(1 - T.MAX_DROP * lack * Math.pow(prog, T.CURVE_EXP), T.FLOOR);
 }
 
-// lab デバッグ用: メンタル×疲労の合成係数（dbg の「開始値」逆算と総合力表示が使用）。
+// lab デバッグ用: メンタル×疲労×軽傷の合成係数（dbg の「開始値」逆算と総合力表示が使用）。
+//   ★ 軽傷係数（discipline.js の injuryParamFactor・Sprint 2b）も必ず合成する。
+//     疲労層導入時と同じ罠（MENTAL_DESIGN.md 4b）: 合成し忘れると「開始値」に怪我分が混入する。
+//     discipline.js 非同梱（mental.js のみの構成）では typeof ガードで 1.0＝従来と同一。
 function labParamFactor(team, p) {
-  return mentalParamFactor(team, p) * fatigueParamFactor(team, p);
+  const inj = (typeof injuryParamFactor === 'function') ? injuryParamFactor(team, p) : 1.0;
+  return mentalParamFactor(team, p) * fatigueParamFactor(team, p) * inj;
 }
 
 /* ── 5. lab限定デバッグ表示（DBG-01・公開ビルドには mental.js ごと非同梱） ──
