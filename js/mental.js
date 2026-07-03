@@ -326,6 +326,120 @@ function mentalFoulFactor(dfsPlayer) {
   return 1 + MENTAL_TUNING.FOUL_FRUSTRATION_COEF * ((dfsPlayer && dfsPlayer.frustration) || 0);
 }
 
+/* ── 5. lab限定デバッグ表示（DBG-01・公開ビルドには mental.js ごと非同梱） ──
+ * ユーザー（ゲームデザイナー）がメンタル変動の影響を試合画面で目視するための数値バンド。
+ *   ①両チームの現在総合力（先発11人×29param合計×現在メンタル係数）
+ *   ②マッチアップの投入値（例: ポストプレー vs 対ポストプレー）＝変動込みの現在値
+ *   ③②の試合開始時相当値（現在値/メンタル係数）との比較
+ * simulate.js 側は typeof ガード付きの薄い seam のみ（判定/カウント/rng 不変）。
+ * 非表示フラグ: window.MENTAL_DEBUG_BAND = false（既定は表示）。
+ */
+
+/**
+ * チーム現在総合力（simulate.js の simulateChance 末尾から typeof ガードで呼ばれる）。
+ * @returns {{cur:number, base:number}} cur=現在メンタル係数込み / base=開始時（係数なし）。整数丸め。
+ */
+function mentalTeamDebugTotal(team) {
+  const out = { cur: 0, base: 0 };
+  if (!team || !team.players || !team.lineup) return out;
+  for (let pos = 0; pos < 11; pos++) {
+    const p = team.players[team.lineup[pos]];
+    if (!p || !p.params) continue;
+    let s = 0;
+    for (let i = 0; i < p.params.length; i++) s += p.params[i];
+    out.base += s;
+    out.cur += s * mentalParamFactor(team, p);
+  }
+  out.cur = Math.round(out.cur);
+  out.base = Math.round(out.base);
+  return out;
+}
+
+// HTMLエスケープ（選手名/チーム名を innerHTML に入れるため）
+function _mdbgEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+// 差分表示（現在値 vs 開始値）。±0.05 未満は「±0」グレー、増=緑▲/減=赤▼。
+function _mdbgDelta(cur, base, digits) {
+  const d = cur - base;
+  if (Math.abs(d) < 0.05) return '<span style="color:#9ca3af">±0</span>';
+  const col = d > 0 ? '#4ade80' : '#f87171';
+  return '<span style="color:' + col + '">' + (d > 0 ? '▲' : '▼') + Math.abs(d).toFixed(digits) + '</span>';
+}
+
+// チームカラーの小チップ（名前自体は可読色のまま）
+function _mdbgChip(color) {
+  return '<span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:' +
+    _mdbgEsc(color || '#9ca3af') + ';margin-right:3px;vertical-align:baseline"></span>';
+}
+
+/**
+ * デバッグバンド描画（simulate.js の nextChance から typeof ガードで呼ばれる）。
+ * カットシーン（#live-field-wrap / #mini-field-wrap）と実況（#log-area）の間に
+ * バンド div を1個挿入し、シーンごとに更新する。
+ * @param {object} sc  現在シーン（scene オブジェクト・sc.dbg があれば行2を出す）
+ * @param {object} res 現在チャンス結果（res.dbgTotals があれば行1を出す）
+ */
+function mentalRenderDebugBand(sc, res) {
+  if (typeof document === 'undefined' || !sc || !res) return;
+  const logArea = document.getElementById('log-area');
+  if (!logArea || !logArea.parentNode) return;
+  let band = document.getElementById('mental-debug-band');
+  // 非表示フラグ（将来ここを既定 false にすれば一括で消せる）
+  if (typeof window !== 'undefined' && window && window.MENTAL_DEBUG_BAND === false) {
+    if (band) band.style.display = 'none';
+    return;
+  }
+  if (!band) {
+    band = document.createElement('div');
+    band.id = 'mental-debug-band';
+    band.style.cssText =
+      'margin:0 0 6px;padding:4px 10px;background:rgba(0,0,0,0.55);' +
+      'border:1px solid rgba(255,255,255,0.15);border-radius:8px;' +
+      'color:#e5e7eb;font-size:11px;line-height:1.55;text-align:left;' +
+      'font-variant-numeric:tabular-nums;pointer-events:none;';
+    logArea.parentNode.insertBefore(band, logArea);   // カットシーン直下・実況の直前
+  }
+  band.style.display = '';
+
+  const rows = [];
+
+  // 行1: 両チーム現在総合力（team1=画面左 / team2=画面右。gameState は simulate.js グローバル）
+  const gs = (typeof gameState !== 'undefined' && gameState) ? gameState : null;
+  if (res.dbgTotals && gs && gs.team1 && gs.team2) {
+    const nameOf = t => (typeof getTeamName === 'function' ? getTeamName(t) : t.name);
+    const side = (t, tot) =>
+      _mdbgChip(t.team_color) + '<b>' + _mdbgEsc(nameOf(t)) + '</b> ' +
+      tot.cur.toLocaleString('en-US') +
+      ' <span style="color:#9ca3af">(開始' + tot.base.toLocaleString('en-US') + '</span> ' +
+      _mdbgDelta(tot.cur, tot.base, 0) + '<span style="color:#9ca3af">)</span>';
+    rows.push('<span style="color:#9ca3af">総合力</span> ' +
+      side(gs.team1, res.dbgTotals.t1) +
+      ' <span style="color:#6b7280">vs</span> ' +
+      side(gs.team2, res.dbgTotals.t2));
+  }
+
+  // 行2: マッチアップ投入値（dbg があるシーンのみ。開始値=メンタル係数を除した値）
+  if (sc.dbg && sc.offence && sc.defence) {
+    const d = sc.dbg;
+    const op = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+    const dp = sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+    const side = (chipColor, pName, actName, val, base) =>
+      _mdbgChip(chipColor) + _mdbgEsc(pName) + ' <span style="color:#93c5fd">' + _mdbgEsc(actName) + '</span> ' +
+      '<b>' + val.toFixed(1) + '</b>' +
+      ' <span style="color:#9ca3af">(開始' + base.toFixed(1) + '</span> ' +
+      _mdbgDelta(val, base, 1) + '<span style="color:#9ca3af">)</span>';
+    rows.push('<span style="color:#9ca3af">⚔</span> ' +
+      side(sc.offence.team_color, op ? op.name : '?', d.action, d.ofsVal, d.ofsBase) +
+      ' <span style="color:#6b7280">vs</span> ' +
+      side(sc.defence.team_color, dp ? dp.name : '?', d.defAction, d.dfsVal, d.dfsBase));
+  }
+
+  if (!rows.length) { band.style.display = 'none'; return; }
+  band.innerHTML = rows.join('<br>');
+}
+
 // Node（vm context / 連結ロード）でも参照できるよう、存在すれば module.exports にも載せる。
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -333,5 +447,6 @@ if (typeof module !== 'undefined' && module.exports) {
     mentalHash, mentalPersonality, mentalResetTeam,
     mentalOnDuel, mentalOnGoal, mentalOnFoul, mentalOnChanceEnd,
     mentalParamFactor, mentalFoulFactor,
+    mentalTeamDebugTotal, mentalRenderDebugBand,
   };
 }

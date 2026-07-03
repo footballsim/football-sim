@@ -1256,8 +1256,11 @@ function openMarkedPlayerSelect() {
   const content = document.getElementById('marked-select-content');
   content.innerHTML = '';
 
-  // 監督モードでは相手のライブ布陣（AIの交代・戦術変更を反映）を、それ以外はデフォルトを表示。
-  const _liveT2 = (_managerMode && gameState && gameState.team2) ? gameState.team2 : null;
+  // 監督モードの試合中采配（_htMode=采配画面を開いている間だけ true）でのみ、相手のライブ布陣
+  // （AIの交代・戦術変更を反映）を表示。プリマッチは必ず選択中チームのデフォルトを表示する。
+  //   ※ _managerMode/gameState は試合終了後・中断後も残るため、_htMode を併用しないと
+  //     前試合の相手の system/lineup が新しい対戦相手の選手配列に誤適用され配置が崩壊する。
+  const _liveT2 = (_managerMode && _htMode && gameState && gameState.team2) ? gameState.team2 : null;
   const t2sys = _liveT2 ? _liveT2.system : system_data.findIndex(s => s.name === team2Data.default_system);
   const sys2 = system_data[t2sys >= 0 ? t2sys : 0];
   const lineup2 = _liveT2 ? _liveT2.lineup.slice(0, 11) : team2Data.default_lineup.slice(0, 11);
@@ -2314,6 +2317,22 @@ function calcTime(chanceNo) {
   return t('overtimeLoss');
 }
 
+// ── lab限定デバッグ計測 seam（DBG-01・mental.js 同梱時のみ動作）─────────────
+//   デュエル/シュート解決へ実際に入った現在値（marked×0.85 等込み）と、メンタル係数
+//   （選手ごと一様乗算なので val/係数 で正確に復元可）を除した「試合開始時相当値」を返す。
+//   ★ 判定・カウント・rng 消費には一切影響しない（既算出の値を読むだけ）。
+//   ★ mentalOnDuel/mentalOnGoal が morale を動かす「前」に呼ぶこと（係数の捕捉タイミング）。
+//   ★ 公開ビルド（mental.js 非同梱）では typeof ガードで null ＝ dbg は一切記録されない。
+function _mkSceneDbg(offTeam, offP, defTeam, defP, action, ofsVal, dfsVal) {
+  if (typeof mentalParamFactor !== 'function') return null;
+  return {
+    action, defAction: '対' + action,
+    ofsVal, dfsVal,
+    ofsBase: ofsVal / mentalParamFactor(offTeam, offP),
+    dfsBase: dfsVal / mentalParamFactor(defTeam, defP),
+  };
+}
+
 function simulateChance(gs, chanceNo) {
   const {team1, team2} = gs;
   const time = calcTime(chanceNo);
@@ -2370,10 +2389,13 @@ function simulateChance(gs, chanceNo) {
   if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
   if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
 
+  // lab限定デバッグ: デュエル投入値を捕捉（DBG-01・mentalOnDuel で morale が動く前）
+  const _dbg1 = _mkSceneDbg(offence, ofsPlayer, defence, dfsPlayer, action, ofsPoint, dfsPoint);
   let result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
   // メンタル: デュエル結果を心理状態へ反映（PS-04・判定そのものは不変の result-hook）
   if (typeof mentalOnDuel === 'function') mentalOnDuel(ofsPlayer, dfsPlayer, result === '成功');
   let scene = { offence, defence, area, rawArea, ofsPos, dfsPos, action, scenario: action, result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
+  if (_dbg1) scene.dbg = _dbg1;
   scenes.push(scene);
 
   if (result === '失敗' && !inCounter && testCounter(defence, area, offence)) {
@@ -2477,6 +2499,8 @@ function simulateChance(gs, chanceNo) {
     dfsPoint = getActionParam(defence, dfsPos, '対'+action);
     if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
     if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
+    // lab限定デバッグ: デュエル投入値を捕捉（DBG-01・mentalOnDuel で morale が動く前）
+    const _dbgW = _mkSceneDbg(offence, ofsPlayer, defence, dfsPlayer, action, ofsPoint, dfsPoint);
     result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
     // メンタル: デュエル結果を心理状態へ反映（PS-04）
     if (typeof mentalOnDuel === 'function') mentalOnDuel(ofsPlayer, dfsPlayer, result === '成功');
@@ -2485,6 +2509,7 @@ function simulateChance(gs, chanceNo) {
     // 衝突するため、FWエリアでクロスを選んだ場合は区別できる名前にする
     const scenarioName = action === 'クロス' ? 'サイドクロス' : action;
     scene = { offence, defence, area, rawArea, ofsPos, dfsPos, action, scenario: scenarioName, result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
+    if (_dbgW) scene.dbg = _dbgW;
     scenes.push(scene);
 
     // ミドルシュートが選ばれたらwhileを抜けて後処理へ
@@ -2556,6 +2581,9 @@ function simulateChance(gs, chanceNo) {
       scenes.pop();
       const midOfsPoint = blockOfsPoint * 0.82;
       const midDfsPoint = getActionParam(defence, 0, '対ミドルシュート');
+      // lab限定デバッグ: シュートvsGK投入値を捕捉（DBG-01・mentalOnGoal で morale が動く前）
+      const _dbgMid = _mkSceneDbg(offence, offence.players[offence.lineup[midOfsPos]],
+        defence, defence.players[defence.lineup[0]], 'ミドルシュート', midOfsPoint, midDfsPoint);
       let midResult;
       if (rng() * 100 > midOfsPoint) {
         midResult = '枠を外した！';
@@ -2580,6 +2608,7 @@ function simulateChance(gs, chanceNo) {
         ofsPoint: Math.round(midOfsPoint), dfsPoint: Math.round(midDfsPoint),
         dfsAction: '対ミドルシュート'
       };
+      if (_dbgMid) midScene.dbg = _dbgMid;
       scenes.push(midScene);
     }
     finalArea = area;
@@ -2594,6 +2623,9 @@ function simulateChance(gs, chanceNo) {
     dfsPoint = getActionParam(defence, 0, '対中央からシュート');
     if (defence === team1 && team2.marked_player >= 0 && shootOfsPos === team2.marked_player) ofsPoint *= 0.85;
     if (defence === team1 && team1.marked_player >= 0 && offence.lineup[shootOfsPos] === team1.marked_player) ofsPoint *= 0.85;
+    // lab限定デバッグ: シュートvsGK投入値を捕捉（DBG-01・mentalOnGoal で morale が動く前）
+    const _dbgSM = _mkSceneDbg(offence, offence.players[offence.lineup[shootOfsPos]],
+      defence, defence.players[defence.lineup[0]], '中央からシュート', ofsPoint, dfsPoint);
 
     let shootResult;
     if (rng() * 100 > ofsPoint) {
@@ -2612,6 +2644,7 @@ function simulateChance(gs, chanceNo) {
       defence.gkSaveCounter++;
     }
     scene = { offence, defence, area: shootArea, crossPos: shootOfsPos, ofsPos: shootOfsPos, dfsPos: 0, action: '中央からシュート', scenario: 'シュート', result: shootResult, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対中央からシュート' };
+    if (_dbgSM) scene.dbg = _dbgSM;
     scenes.push(scene);
 
   } else if (area.substring(0, 2) === 'CR') {
@@ -2679,8 +2712,11 @@ function simulateChance(gs, chanceNo) {
         dfsPoint = getActionParam(defence, dfsPos, '対'+action);
         if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
         if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
+        // lab限定デバッグ: セットプレー競り合い投入値を捕捉（DBG-01）
+        const _dbgSP = _mkSceneDbg(offence, ofsPlayer, defence, dfsPlayer, action, ofsPoint, dfsPoint);
         result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
         scene = { offence, defence, area, crossPos, ofsPos, dfsPos, action, scenario: 'セットプレー', result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
+        if (_dbgSP) scene.dbg = _dbgSP;
         scenes.push(scene);
         shootAction = action;
       }
@@ -2726,8 +2762,11 @@ function simulateChance(gs, chanceNo) {
             dfsPoint = getActionParam(defence, dfsPos, '対'+action);
             if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
             if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
+            // lab限定デバッグ: クロス競り合い投入値を捕捉（DBG-01）
+            const _dbgCR = _mkSceneDbg(offence, ofsPlayer, defence, dfsPlayer, action, ofsPoint, dfsPoint);
             result = (function(o,d){var p=o*o/(o*o+d*d);return rng()<p?'成功':'失敗'})(ofsPoint,dfsPoint);
             scene = { offence, defence, area, crossPos, ofsPos, dfsPos, action, scenario: 'クロス', result, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+action };
+            if (_dbgCR) scene.dbg = _dbgCR;
             scenes.push(scene);
             shootAction = action;
           }
@@ -2745,6 +2784,8 @@ function simulateChance(gs, chanceNo) {
       dfsPoint = getActionParam(defence, 0, '対'+shootAction);
       if (defence === team1 && team2.marked_player >= 0 && ofsPos === team2.marked_player) ofsPoint *= 0.85;
       if (defence === team1 && team1.marked_player >= 0 && offence.lineup[ofsPos] === team1.marked_player) ofsPoint *= 0.85;
+      // lab限定デバッグ: シュートvsGK投入値を捕捉（DBG-01・mentalOnGoal で morale が動く前）
+      const _dbgSh = _mkSceneDbg(offence, ofsPlayer, defence, dfsPlayer, shootAction, ofsPoint, dfsPoint);
 
       let shootResult;
       if (rng() * 100 > ofsPoint) {
@@ -2764,6 +2805,7 @@ function simulateChance(gs, chanceNo) {
       }
 
       scene = { offence, defence, area, crossPos: scene.crossPos||ofsPos, ofsPos, dfsPos:0, action: shootAction, scenario: 'シュート', result: shootResult, ofsPoint: Math.round(ofsPoint), dfsPoint: Math.round(dfsPoint), dfsAction: '対'+shootAction };
+      if (_dbgSh) scene.dbg = _dbgSh;
       scenes.push(scene);
     }
   }
@@ -2829,6 +2871,11 @@ function simulateChance(gs, chanceNo) {
   const _chanceRes = { time, scenes, textScenes, goalScored, t1score: team1.score, t2score: team2.score };
   // メンタル: 発動記録があれば結果へ「追記」（既存フィールド不変・無ければ従来と同一形状）
   if (_mentalEvents.length) _chanceRes.mentalEvents = _mentalEvents;
+  // lab限定デバッグ: 両チームの現在総合力（先発11人×29param合計×現在メンタル係数）を「追記」
+  //   （DBG-01・公開ビルド＝mental.js 非同梱では typeof ガードで完全 no-op）
+  if (typeof mentalTeamDebugTotal === 'function') {
+    _chanceRes.dbgTotals = { t1: mentalTeamDebugTotal(team1), t2: mentalTeamDebugTotal(team2) };
+  }
   return _chanceRes;
 }
 
@@ -3784,6 +3831,10 @@ function nextChance() {
       miniFieldWrap.innerHTML = '';
     }
   }
+
+  // lab限定: パラメータ変動デバッグバンド（カットシーンと実況テキストの間・DBG-01）。
+  //   表示ロジックは mental.js 側。非同梱の公開ビルドでは typeof ガードで完全 no-op。
+  if (typeof mentalRenderDebugBand === 'function') mentalRenderDebugBand(sc, res);
 
   // テキストを追加（分割時はビート単位、通常は全文）
   const _beatText = _split ? _split.parts[_beat] : res.textScenes[currentSceneIdx];
