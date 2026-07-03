@@ -300,6 +300,7 @@
    * デュエル解決式には一切触れない（tactics は既存パラメータ）。HT/得点時に評価。
    * ──────────────────────────────────────────────────────────────── */
   var _mvOpponentAI = true;
+  var OPP_TACTIC_CHANCE = 0.25;   // 戦術変更の発動確率（条件成立時にこの確率で実行）
   function _mvTacName(idx) {
     if (typeof t === 'function') { var arr = t('tacticsNames'); if (arr && arr[idx]) return arr[idx]; }
     return (typeof TACTICS_NAMES !== 'undefined') ? TACTICS_NAMES[idx] : '';
@@ -310,10 +311,11 @@
     var prog = (typeof MATCH_CHANCES !== 'undefined') ? currentChanceIdx / MATCH_CHANCES : 0;
     var cur = gameState.team2.tactics, target = null, label = '';
     if (diff <= -2) { target = TACTICS_PRESS; label = _mvT('前がかりに総攻撃', 'all-out attack'); }
-    else if (diff === -1 && prog >= 0.45) { target = TACTICS_PRESS; label = _mvT('攻勢を強める', 'pushing forward'); }
-    else if (diff >= 2 && prog >= 0.6) { target = TACTICS_CATENACCIO; label = _mvT('守備を固める', 'locking it down'); }
-    else if (diff >= 1 && prog >= 0.8) { target = TACTICS_COUNTER; label = _mvT('逃げ切りを図る', 'game-managing'); }
+    else if (diff === -1) { target = TACTICS_PRESS; label = _mvT('攻勢を強める', 'pushing forward'); }
+    else if (diff >= 2) { target = TACTICS_COUNTER; label = _mvT('カウンターを狙う', 'counter-attacking'); }
+    else if (diff === 1 && prog >= 0.8) { target = TACTICS_CATENACCIO; label = _mvT('守備を固める', 'locking it down'); }
     if (target == null || target === cur) return;
+    if (Math.random() >= OPP_TACTIC_CHANCE) return;   // 発動確率（25%）
     if (_mvCtrl.applyDecision({ type: 'tactic', side: 'away', tactics: target })) {
       _mvToast('🧠 ' + _mvT('相手監督', 'Rival manager') + '：' + label + '（' + _mvTacName(target) + '）');
     }
