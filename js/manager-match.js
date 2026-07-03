@@ -399,7 +399,13 @@
     }
     var bench = _mvBench(team);
     if (!slots.length || !bench.length) return false;
-    function lowestOf(cat) { return slots.filter(function (s) { return s.cat === cat; }).sort(function (a, b) { return a.r - b.r; })[0]; }
+    // エース保護: 出場中の非GK最高評価選手は交代でOUTしない（現実の監督は主軸を残す）。
+    //   同値は lineup 順で先。GK は元々交代対象外。
+    var _aceIdx = -1, _aceR = -Infinity;
+    for (var _si = 0; _si < slots.length; _si++) { if (slots[_si].r > _aceR) { _aceR = slots[_si].r; _aceIdx = slots[_si].idx; } }
+    var outSlots = slots.filter(function (s) { return s.idx !== _aceIdx; });   // OUT候補＝エース以外
+    if (!outSlots.length) return false;
+    function lowestOf(cat) { return outSlots.filter(function (s) { return s.cat === cat; }).sort(function (a, b) { return a.r - b.r; })[0]; }
     function bestBench(pred) { return bench.filter(pred).sort(function (a, b) { return b.r - a.r; })[0]; }
 
     var plan = null;
@@ -409,7 +415,7 @@
     if (behind) {
       var att = bestBench(function (b) { return _mvPlayerCats(b.p)['FW']; });
       var out = (diff <= -2 && prog >= 0.75) ? lowestOf('DF') : lowestOf('FW');
-      if (!out) out = slots.slice().sort(function (a, b) { return a.r - b.r; })[0];  // fallback: 最弱
+      if (!out) out = outSlots.slice().sort(function (a, b) { return a.r - b.r; })[0];  // fallback: 最弱（エース除く）
       if (att && out && att.r >= out.r - OPP_SUB_ATT_DOWNGRADE) {
         plan = { out: out, in: att, label: _mvT('攻撃の駒を投入', 'attacking change') };
       }
@@ -427,7 +433,7 @@
     }
     // C. 均衡/リフレッシュ（最も稼働した選手を同ポジで）
     if (!plan && (atHT || prog >= 0.60)) {
-      var tired = slots.slice().sort(function (a, b) { return b.fatigue - a.fatigue; })[0];
+      var tired = outSlots.slice().sort(function (a, b) { return b.fatigue - a.fatigue; })[0];   // エース除く
       if (tired && tired.fatigue >= OPP_FATIGUE_MIN) {
         var same = bestBench(function (b) { return _mvPlayerCats(b.p)[tired.cat]; });
         if (same && same.r >= tired.r - OPP_SUB_FRESH_DOWNGRADE) {
