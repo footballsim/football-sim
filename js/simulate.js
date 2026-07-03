@@ -1276,8 +1276,10 @@ function openMarkedPlayerSelect() {
 
   // 戦術表示
   const tacticsLabel = document.createElement('div');
-  const tacticsName = (window.LANG === 'en' ? ['Possession','Press','Counter','Defensive','Balanced'] : ['ポゼッション','プレス','カウンター','守備重視','バランス重視'])[team2Data.default_tactics] || '-';
-  const tacticsEmoji = ['🎯','⚡','🔄','🛡️','🎲'][team2Data.default_tactics] || '';
+  // 監督モードでは相手のライブ戦術（AIの戦術変更を反映）を、それ以外はデフォルトを表示。
+  const _t2tac = _liveT2 ? _liveT2.tactics : team2Data.default_tactics;
+  const tacticsName = (window.LANG === 'en' ? ['Possession','Press','Counter','Defensive','Balanced'] : ['ポゼッション','プレス','カウンター','守備重視','バランス重視'])[_t2tac] || '-';
+  const tacticsEmoji = ['🎯','⚡','🔄','🛡️','🎲'][_t2tac] || '';
   tacticsLabel.style.cssText = 'font-size:11px;font-weight:700;color:var(--gold);margin-bottom:10px;text-align:center;padding:3px 10px;background:rgba(212,175,55,0.1);border-radius:8px;display:inline-block;width:fit-content;margin-left:auto;margin-right:auto';
   tacticsLabel.textContent = `${tacticsEmoji} ${window.LANG === 'en' ? 'Tactics' : '戦術'}: ${tacticsName}`;
   const tacticsWrap = document.createElement('div');
