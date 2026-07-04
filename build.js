@@ -42,7 +42,13 @@ const LOGIC_OPTS = {
   renameGlobals: false,            // ★必須: HTML onclick / 他ファイルから参照されるグローバル名を保持
   identifierNamesGenerator: 'hexadecimal',
   stringArray: true,
-  stringArrayEncoding: ['base64'],
+  // ⚠️ base64 は astral 絵文字(🟥🩹🚑等)を含む文字列を stringArray に載せると、
+  //   ランタイムのデコーダが稀に壊れ charAt undefined で全体が起動失敗する（非決定的・
+  //   stringArrayThreshold で確率変動）。2026-07-04 に退場/負傷カット追加で再現。
+  //   'none'（無エンコード＝配列参照のみ）にしてデコーダ自体を無くし根絶する。
+  //   ※ lab の可読性リスクは軽微（元々 renameGlobals:false の軽難読化）。公開再開時に
+  //     強度を戻すなら unicodeEscapeSequence:true 併用で base64 に戻す選択肢あり。
+  stringArrayEncoding: ['none'],
   stringArrayThreshold: 0.75,
   splitStrings: false,
   controlFlowFlattening: false,    // 軽量・低リスク優先（"軽難読化"）

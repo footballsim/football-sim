@@ -117,6 +117,15 @@
     if (typeof wcPhase !== 'undefined' && (wcPhase === 'et_first' || wcPhase === 'et_second')) return;
     if (typeof createMatch !== 'function') { alert('createMatch 未ロード'); return; }
 
+    // ★ 選手詳細ページのデータ源キーを team1Data に整合させる（2026-07-04 バグ修正）。
+    //   リーグ(league.js)は team1Data を実チーム(例:オランダ)へ差し替えるが _team1DataKey を
+    //   更新しないため、既定の 'japan2026vsNetherlands' のまま残り、フォーメーションで選手を
+    //   タップすると日本人選手のプロフィールが出ていた（showPlayerDetail が TEAM_DATA[key] を引く）。
+    if (typeof TEAM_DATA !== 'undefined' && typeof team1Data !== 'undefined') {
+      var _k1 = Object.keys(TEAM_DATA).find(function (k) { return TEAM_DATA[k] === team1Data; });
+      if (_k1 && typeof _team1DataKey !== 'undefined') _team1DataKey = _k1;
+    }
+
     // 相手（team2）状態を startGame と同様に構築（default_* から）。
     var t2sys = system_data.findIndex(function (s) { return s.name === team2Data.default_system; });
     team2State = {
@@ -544,27 +553,38 @@
   }
 
   /* ── 交代カットシーン（画像なし・手続き描画。画像が来たら差し替え） ────────
-   * 交代が適用された停止点で全画面オーバーレイを ~2s 表示 → done() で続行。
-   * 素材PNGは未使用（SUB_CUTSCENE_PLAN.md）。届いたら背景画像＋名前オーバーレイへ拡張。 */
+   * 2026-07-04 ユーザー要望で「画面いっぱいのポップアップ」→「カットイン帯の中」に変更。
+   *   #live-field-wrap（カットイン帯）の中に絶対配置で収める＝全画面を覆わない。
+   *   背景は #mv-subcut-bg（画像スロット）。後日は bg.style.backgroundImage に PNG を差すだけ。 */
   function _mvRenderSubCutscene(batch) {
-    var host = document.getElementById('screen-game'); if (!host) return;
+    var band = document.getElementById('live-field-wrap'); if (!band) return;
+    band.style.display = '';   // カットイン帯を表示（枠内カットシーンの土台）
     var el = document.getElementById('mv-subcut');
     if (!el) {
       el = document.createElement('div'); el.id = 'mv-subcut';
-      el.style.cssText = 'position:absolute;inset:0;z-index:66;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;' +
-        'background:radial-gradient(ellipse at center,rgba(10,20,42,0.94),rgba(3,7,15,0.98));opacity:0;transition:opacity .3s;pointer-events:none;padding:24px;box-sizing:border-box';
-      host.appendChild(el);
+      // ★ 全画面(inset:0 / #screen-game)ではなく、カットイン帯の中に収める。
+      el.style.cssText = 'position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;' +
+        'opacity:0;transition:opacity .28s;pointer-events:none;padding:8px 10px;box-sizing:border-box;overflow:hidden';
+      // 背景画像スロット（現状は手続きの暗幕。画像が来たら backgroundImage を差すだけ）。
+      var bg = document.createElement('div'); bg.id = 'mv-subcut-bg';
+      bg.style.cssText = 'position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at center,rgba(10,20,42,0.93),rgba(3,7,15,0.97));background-size:cover;background-position:center';
+      el.appendChild(bg);
+      band.appendChild(el);
     }
-    var head = '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:clamp(22px,7vw,30px);letter-spacing:3px;color:#cfe0ff;font-weight:700">🔁 ' + _mvT('選手交代', 'SUBSTITUTION') + '</div>';
+    var head = '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:clamp(16px,4.6vw,22px);letter-spacing:2px;color:#cfe0ff;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,.6)">🔁 ' + _mvT('選手交代', 'SUBSTITUTION') + '</div>';
     var cards = batch.map(function (s) {
       var col = s.teamColor || '#8899aa';
-      return '<div style="background:rgba(255,255,255,0.06);border:1px solid ' + col + ';border-left:5px solid ' + col + ';border-radius:12px;padding:14px 22px;min-width:min(280px,86vw);text-align:center;box-shadow:0 6px 22px rgba(0,0,0,0.4)">' +
-        '<div style="font-size:12px;font-weight:700;color:' + col + ';margin-bottom:9px;letter-spacing:1px">' + (s.teamName || '') + (s.label ? ' ・ ' + s.label : '') + '</div>' +
-        '<div style="font-size:clamp(15px,4.6vw,18px);font-weight:800;color:#ff6b6b;margin:3px 0">⬇ ' + s.out + '</div>' +
-        '<div style="font-size:clamp(15px,4.6vw,18px);font-weight:800;color:#51e08a;margin:3px 0">⬆ ' + s.in + '</div>' +
+      return '<div style="background:rgba(0,0,0,0.34);border:1px solid ' + col + ';border-left:4px solid ' + col + ';border-radius:9px;padding:6px 16px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.4)">' +
+        '<div style="font-size:10px;font-weight:700;color:' + col + ';margin-bottom:3px;letter-spacing:1px">' + (s.teamName || '') + (s.label ? ' ・ ' + s.label : '') + '</div>' +
+        '<div style="font-size:clamp(13px,3.8vw,16px);font-weight:800;color:#ff6b6b">⬇ ' + s.out + '</div>' +
+        '<div style="font-size:clamp(13px,3.8vw,16px);font-weight:800;color:#51e08a">⬆ ' + s.in + '</div>' +
         '</div>';
     }).join('');
-    el.innerHTML = head + cards;
+    // bg は保持し、前面のコンテンツだけ差し替える。
+    var content = document.getElementById('mv-subcut-content');
+    if (!content) { content = document.createElement('div'); content.id = 'mv-subcut-content';
+      content.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%'; el.appendChild(content); }
+    content.innerHTML = head + cards;
     el.getBoundingClientRect();   // reflow → フェードイン
     el.style.opacity = '1';
   }
