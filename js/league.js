@@ -98,7 +98,9 @@
     var standings = {};
     ids.forEach(function (id) { standings[id] = _emptyStanding(); });
     _state = {
-      version: 2,   // v2: 参加クラブを実チーム(上位8)へ切替（旧v1=架空クラブのセーブは無効化）
+      version: 3,   // v3: シーズン周回＋過去シーズンのアーカイブ(history)。v2=実チーム8・v1=架空クラブ
+      season: 1,
+      history: [],
       myClub: myClubId,
       rival: _computeRival(myClubId),   // 宿敵＝実力が最も近いクラブ（因縁の相手）
       clubs: ids,
@@ -151,10 +153,65 @@
       var raw = localStorage.getItem(LS_KEY);
       if (!raw) { _state = null; return; }
       var s = JSON.parse(raw);
-      if (!s || s.version !== 2 || !s.fixtures) { _state = null; return; }   // 旧版セーブは破棄
+      if (!s || !s.fixtures || (s.version !== 2 && s.version !== 3)) { _state = null; return; }   // 旧版(v1架空クラブ)は破棄
       _state = s;
-      if (!_state.rival) { _state.rival = _computeRival(_state.myClub); _save(); }  // 旧セーブへ宿敵を補完
+      if (!_state.rival) { _state.rival = _computeRival(_state.myClub); }  // 旧セーブへ宿敵を補完
+      // v2→v3 移行: シーズン周回＆過去シーズンのアーカイブ枠を追加（既存の進行は保持）。
+      if (_state.version === 2) {
+        _state.version = 3;
+        if (typeof _state.season !== 'number') _state.season = 1;
+        if (!Array.isArray(_state.history)) _state.history = [];
+        _save();
+      }
+      if (typeof _state.season !== 'number') _state.season = 1;
+      if (!Array.isArray(_state.history)) _state.history = [];
     } catch (e) { _state = null; }
+  }
+
+  // 完了したシーズンの要約（バックナンバー用・順位表スナップショット＋自クラブ成績＋宿敵通算）。
+  function _seasonSummary() {
+    var rows = _sortedStandings();
+    var champ = rows[0];
+    var myId = _state.myClub;
+    var myRow = _state.standings[myId] || _emptyStanding();
+    return {
+      season: _state.season || 1,
+      myClub: myId,
+      champion: champ ? champ.id : null,
+      myPos: _position(myId),
+      myRecord: { w: myRow.w, d: myRow.d, l: myRow.l, gf: myRow.gf, ga: myRow.ga, pts: myRow.pts },
+      rival: _state.rival || null,
+      rivalH2H: _state.rival ? _h2h(myId, _state.rival) : null,
+      standings: rows.map(function (r) { return { id: r.id, pts: r.pts, w: r.w, d: r.d, l: r.l, gf: r.gf, ga: r.ga }; })
+    };
+  }
+
+  // 今シーズンをアーカイブして、同じクラブで次シーズンを開始（記録は消さず引き継ぐ）。
+  function _startNextSeason() {
+    if (!_state) return;
+    var hist = Array.isArray(_state.history) ? _state.history.slice() : [];
+    hist.push(_seasonSummary());
+    if (hist.length > 50) hist = hist.slice(hist.length - 50);   // 上限（localStorage肥大化防止）
+    var my = _state.myClub;
+    var nextSeason = (_state.season || 1) + 1;
+    var ids = CLUB_DEFS.map(function (d) { return d.id; });
+    var standings = {};
+    ids.forEach(function (id) { standings[id] = _emptyStanding(); });
+    _state = {
+      version: 3,
+      season: nextSeason,
+      history: hist,
+      myClub: my,
+      rival: _computeRival(my),
+      clubs: ids,
+      fixtures: _makeFixtures(ids),
+      standings: standings,
+      round: 0,
+      lastPlayedDate: null,
+      lastResult: null,
+      finished: false
+    };
+    _save();
   }
 
   function _applyResult(homeId, awayId, hs, as) {
@@ -277,6 +334,46 @@
         '<button class="lg-logclose" onclick="leagueCloseLog()">✕</button>' +
       '</div>' +
       '<div class="lg-logbody">' + rows + '</div>';
+    (document.getElementById('screen-home') || document.body).appendChild(ov);
+  }
+
+  // 過去のシーズン（バックナンバー）オーバーレイ。新しい順に、優勝・自クラブ順位/成績・宿敵通算を表示。
+  function _showHistory() {
+    if (!_state || !_state.history || !_state.history.length) return;
+    _ensureStyle();
+    var old = document.getElementById('lg-hist-ov'); if (old) old.parentNode.removeChild(old);
+    var body = '';
+    for (var i = _state.history.length - 1; i >= 0; i--) {
+      var h = _state.history[i];
+      var champDef = h.champion ? _clubDef(h.champion) : null;
+      var mine = h.myClub === h.champion;
+      var mr = h.myRecord || { w: 0, d: 0, l: 0, pts: 0 };
+      var rivalTxt = (h.rival && h.rivalH2H)
+        ? _t('宿敵' + _clubName(h.rival) + '戦 ', 'vs rival ' + _clubName(h.rival) + ' ') +
+          h.rivalH2H.w + _t('勝', 'W') + h.rivalH2H.d + _t('分', 'D') + h.rivalH2H.l + _t('敗', 'L')
+        : '';
+      body +=
+        '<div class="lg-logrow" style="flex-direction:column;align-items:stretch;gap:4px;padding:10px 4px">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center">' +
+            '<b style="font-size:13px">' + _t('シーズン' + h.season, 'Season ' + h.season) + '</b>' +
+            '<span style="font-size:12px">🏆 ' + (champDef ? champDef.crest + ' ' + _clubName(h.champion) : '—') +
+              (mine ? ' <span style="color:#2ecc71;font-weight:800">' + _t('優勝', 'Champions') + '</span>' : '') + '</span>' +
+          '</div>' +
+          '<div class="lg-mini" style="text-align:left">' +
+            _t('自クラブ ', 'Your club ') + '<b style="color:#fff">' + h.myPos + _t('位', '') + '</b>' +
+            '　' + mr.pts + _t('pt', 'pts') + '　' + mr.w + _t('勝', 'W') + mr.d + _t('分', 'D') + mr.l + _t('敗', 'L') +
+            (rivalTxt ? '　🔥' + rivalTxt : '') +
+          '</div>' +
+        '</div>';
+    }
+    var ov = document.createElement('div');
+    ov.id = 'lg-hist-ov'; ov.className = 'lg-logov';
+    ov.innerHTML =
+      '<div class="lg-loghead">' +
+        '<div style="font-weight:800;font-size:14px">📚 ' + _t('過去のシーズン', 'Past seasons') + '</div>' +
+        '<button class="lg-logclose" onclick="leagueCloseHistory()">✕</button>' +
+      '</div>' +
+      '<div class="lg-logbody">' + body + '</div>';
     (document.getElementById('screen-home') || document.body).appendChild(ov);
   }
 
@@ -567,7 +664,8 @@
       _clubDef(rivalId).crest + ' <span style="color:#e8776f;font-weight:700">' + _clubName(rivalId) + '</span></div>' : '';
     html += '<div class="lg-card"><div class="lg-club">' +
       '<div class="lg-crest" style="background:' + myDef.color + '33;border:1px solid ' + myDef.color + '">' + myDef.crest + '</div>' +
-      '<div style="flex:1"><div class="lg-clubname">' + _clubName(myId) + '</div>' +
+      '<div style="flex:1"><div class="lg-clubname">' + _clubName(myId) +
+      ' <span class="lg-badge" style="background:rgba(255,255,255,.14);font-weight:700">' + _t('シーズン' + (_state.season || 1), 'Season ' + (_state.season || 1)) + '</span></div>' +
       '<div class="lg-sub">' + _t('現在', 'Position') + ' <b style="color:#fff">' + myPos + _t('位', '') + '</b>' +
       '　' + myRow.pts + _t('pt', ' pts') + '　' + myRow.w + _t('勝', 'W') + myRow.d + _t('分', 'D') + myRow.l + _t('敗', 'L') + '</div>' +
       rivalLine + '</div>' +
@@ -580,11 +678,11 @@
       var won = champ.id === myId;
       html += '<div class="lg-hero" style="background:linear-gradient(135deg,#d4a01755,rgba(0,0,0,0.3));border:1px solid #d4a017;text-align:center">' +
         '<div style="font-size:34px">🏆</div>' +
-        '<div style="font-size:16px;font-weight:800;margin-top:4px">' + _t('シーズン終了', 'Season Complete') + '</div>' +
+        '<div style="font-size:16px;font-weight:800;margin-top:4px">' + _t('シーズン' + (_state.season || 1) + ' 終了', 'Season ' + (_state.season || 1) + ' Complete') + '</div>' +
         '<div style="margin-top:6px;font-size:14px">' + _t('優勝', 'Champions') + '：' + champDef.crest + ' <b>' + _clubName(champ.id) + '</b></div>' +
         (won ? '<div style="color:#2ecc71;font-weight:800;margin-top:6px">' + _t('あなたのクラブが頂点に！', 'Your club took the title!') + '</div>' : '') +
         '</div>' +
-        '<button class="lg-btn" onclick="leagueConfirmNewSeason()">' + _t('新シーズンを始める', 'Start a new season') + '</button>';
+        '<button class="lg-btn" onclick="leagueConfirmNewSeason()">' + _t('次のシーズンへ（今季を記録に残す）', 'Next season (this one is saved)') + '</button>';
     } else {
       var fx = _myFixtureThisRound();
       var oppId = (fx.home === myId) ? fx.away : fx.home;
@@ -614,6 +712,10 @@
     // 前回試合の実況テキストログ
     if (_state.lastResult && _state.lastResult.log && _state.lastResult.log.length) {
       html += '<button class="lg-btn sec" onclick="leagueShowLog()">📜 ' + _t('前回の試合ログ（実況）を見る', 'View match commentary log') + '</button>';
+    }
+    // 過去のシーズン（バックナンバー）— 1シーズンでも終えていれば表示。
+    if (_state.history && _state.history.length) {
+      html += '<button class="lg-btn sec" onclick="leagueShowHistory()">📚 ' + _t('過去のシーズン（' + _state.history.length + '）', 'Past seasons (' + _state.history.length + ')') + '</button>';
     }
 
     // ミニ順位表
@@ -679,12 +781,15 @@
   window.leagueShowHub = function () { _renderHub(false); };
   window.leagueBackToTitle = function () { if (typeof showScreen === 'function') showScreen('title'); };
   window.leagueConfirmNewSeason = function () {
-    if (confirm(_t('現在のシーズン記録は消えます。新シーズンを始めますか？', 'Your current season will be erased. Start a new season?'))) {
-      var my = _state ? _state.myClub : null;
-      _state = null; _save(); localStorage.removeItem(LS_KEY);
-      _renderPick();
+    // 今シーズンを「過去のシーズン」に記録として残し、同じクラブで次シーズンへ（連載＝記録は消さない）。
+    if (confirm(_t('今シーズンを記録に残して、次のシーズンを始めますか？', 'Archive this season and start the next one?'))) {
+      _startNextSeason();
+      _renderHub(false);
     }
   };
+  // 過去のシーズン（バックナンバー）を表示。
+  window.leagueShowHistory = function () { _showHistory(); };
+  window.leagueCloseHistory = function () { var ov = document.getElementById('lg-hist-ov'); if (ov) ov.parentNode.removeChild(ov); };
   // デバッグ: ?debug=1 時、当日ロックを解除して連続プレイ可
   window.leagueDebugUnlock = function () { if (_state) { _state.lastPlayedDate = null; _save(); _renderHub(false); } };
   // テスト用（lab限定）：1日1回制限のON/OFFトグル（毎回プレイ可にする）

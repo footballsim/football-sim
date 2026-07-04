@@ -463,37 +463,51 @@
     for (var _si = 0; _si < slots.length; _si++) { if (slots[_si].r > _aceR) { _aceR = slots[_si].r; _aceIdx = slots[_si].idx; } }
     var outSlots = slots.filter(function (s) { return s.idx !== _aceIdx; });   // OUT候補＝エース以外
     if (!outSlots.length) return false;
-    function lowestOf(cat) { return outSlots.filter(function (s) { return s.cat === cat; }).sort(function (a, b) { return a.r - b.r; })[0]; }
     function bestBench(pred) { return bench.filter(pred).sort(function (a, b) { return b.r - a.r; })[0]; }
+    // ★ 投入選手が「実際に守れるポジション」のスロットだけを OUT 候補にする（得意ポジション厳守）。
+    //   これを守らないと FW を CB スロットへ入れる等の破綻が起きる（ユーザー指摘 2026-07-04）。
+    //   catPref があればその順で優先（例: 攻撃投入は FW→MF の枠を空けたい）。守れる枠が無ければ null。
+    function outSlotFor(inItem, catPref) {
+      if (!inItem) return null;
+      var cats = _mvPlayerCats(inItem.p);
+      var elig = outSlots.filter(function (s) { return cats[s.cat]; });   // 投入選手が守れる枠のみ
+      if (!elig.length) return null;
+      if (catPref) {
+        for (var ci = 0; ci < catPref.length; ci++) {
+          var byCat = elig.filter(function (s) { return s.cat === catPref[ci]; });
+          if (byCat.length) return byCat.sort(function (a, b) { return a.r - b.r; })[0];
+        }
+      }
+      return elig.slice().sort(function (a, b) { return a.r - b.r; })[0];   // 最も評価の低い適格枠
+    }
 
     var plan = null;
 
-    // A. ビハインド → 攻撃投入
+    // A. ビハインド → 攻撃投入（FW/攻撃的MFを投入。投入選手が守れる最弱枠と交代＝得意ポジ内）
     var behind = (diff <= -2 && (atHT || prog >= 0.55)) || (diff === -1 && (atHT || prog >= 0.65));
     if (behind) {
-      var att = bestBench(function (b) { return _mvPlayerCats(b.p)['FW']; });
-      var out = (diff <= -2 && prog >= 0.75) ? lowestOf('DF') : lowestOf('FW');
-      if (!out) out = outSlots.slice().sort(function (a, b) { return a.r - b.r; })[0];  // fallback: 最弱（エース除く）
-      if (att && out && att.r >= out.r - OPP_SUB_ATT_DOWNGRADE) {
-        plan = { out: out, in: att, label: _mvT('攻撃の駒を投入', 'attacking change') };
+      var att = bestBench(function (b) { var c = _mvPlayerCats(b.p); return c['FW'] || c['MF']; });
+      var outA = outSlotFor(att, ['FW', 'MF']);   // FW枠優先→無ければMF枠（DF枠には入れない）
+      if (att && outA && att.r >= outA.r - OPP_SUB_ATT_DOWNGRADE) {
+        plan = { out: outA, in: att, label: _mvT('攻撃の駒を投入', 'attacking change') };
       }
     }
-    // B. リード → 守備固め
+    // B. リード → 守備固め（DF/守備的MFを投入。投入選手が守れる最弱枠と交代）
     if (!plan) {
       var lead = (diff >= 2 && prog >= 0.70) || (diff === 1 && prog >= 0.75);
       if (lead) {
         var def = bestBench(function (b) { var c = _mvPlayerCats(b.p); return c['DF'] || c['MF']; });
-        var outFw = lowestOf('FW');
-        if (def && outFw && def.r >= outFw.r - OPP_SUB_DEF_DOWNGRADE) {
-          plan = { out: outFw, in: def, label: _mvT('守備を厚くする', 'shoring up') };
+        var outB = outSlotFor(def, ['MF', 'DF']);   // MF枠優先→無ければDF枠（FW枠には入れない）
+        if (def && outB && def.r >= outB.r - OPP_SUB_DEF_DOWNGRADE) {
+          plan = { out: outB, in: def, label: _mvT('守備を厚くする', 'shoring up') };
         }
       }
     }
-    // C. 均衡/リフレッシュ（最も稼働した選手を同ポジで）
+    // C. 均衡/リフレッシュ（最も稼働した選手を、そのポジを守れる控えで置換）
     if (!plan && (atHT || prog >= 0.60)) {
       var tired = outSlots.slice().sort(function (a, b) { return b.fatigue - a.fatigue; })[0];   // エース除く
       if (tired && tired.fatigue >= OPP_FATIGUE_MIN) {
-        var same = bestBench(function (b) { return _mvPlayerCats(b.p)[tired.cat]; });
+        var same = bestBench(function (b) { return _mvPlayerCats(b.p)[tired.cat]; });   // 同カテゴリを守れる控え
         if (same && same.r >= tired.r - OPP_SUB_FRESH_DOWNGRADE) {
           plan = { out: tired, in: same, label: _mvT('新しい脚を投入', 'fresh legs') };
         }
