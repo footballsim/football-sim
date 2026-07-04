@@ -59,6 +59,30 @@ function _disciplineEnabled() {
   return !(typeof window !== 'undefined' && window && window.DISCIPLINE_ENABLED === false);
 }
 
+/* ── テストモード（lab専用・検証用に稀少イベントを多発させる）──────────────
+ * カード/怪我はファール(≈2.6回/試合)にしか乗らず稀（レッド≈14試合に1枚）なので、
+ * ユーザーが1試合で全パターン（イエロー/レッド/退場/軽傷/重症→交代画面）を目視
+ * できるよう、ON の間だけ (a) ファール率 (b) カード/怪我率 を底上げする。
+ *   ・rng の呼び出し回数は変えない（確率の値だけを上げる）＝seed 再現の枠組みは不変。
+ *   ・discipline.js は lab 限定同梱なので、この関数群の存在自体が lab 限定。
+ *   ・トグルは window にも載せて UI から切り替え可能に。既定 OFF。
+ */
+var _disciplineTest = false;
+function disciplineTestOn() {
+  return _disciplineTest || (typeof window !== 'undefined' && window && window.DISCIPLINE_TEST === true);
+}
+function disciplineToggleTest() {
+  _disciplineTest = !disciplineTestOn();
+  if (typeof window !== 'undefined' && window) window.DISCIPLINE_TEST = _disciplineTest;
+  return _disciplineTest;
+}
+// ファール率の底上げ係数（simulate.js の fp 乗算フックが読む・rng 消費不変）。
+function disciplineFoulBoost() {
+  return disciplineTestOn() ? 6 : 1;   // 実効ファール率を大幅up（値のみ・上限は呼び出し側 cap）
+}
+// カード/怪我の基準確率へのテスト倍率。
+function _discTestRate() { return disciplineTestOn() ? 4 : 1; }
+
 function _discClamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
 // 選手評価（manager-match.js の _mvRating と同式: 29param 平均）。
@@ -217,8 +241,9 @@ function disciplineOnFoul(ctx) {
   const dirty = _discClamp((100 - (dfsP.params ? dfsP.params[fpIdx] : 50)) / 100, 0, 1);
   const amp = Math.min(1 + T.CARD_DIRTY_COEF * dirty + T.CARD_FRUST_COEF * (dfsP.frustration || 0),
                        T.CARD_AMP_CAP);
-  const pRed = T.RED_BASE * amp;
-  const pYellow = T.YELLOW_BASE * amp;
+  const _tr = _discTestRate();
+  const pRed = Math.min(T.RED_BASE * amp * _tr, 0.5);
+  const pYellow = Math.min(T.YELLOW_BASE * amp * _tr, 0.9 - Math.min(T.RED_BASE * amp * _tr, 0.5));
   let card = null;
   if (cardRoll < pRed) card = 'red';
   else if (cardRoll < pRed + pYellow) card = 'yellow';
@@ -259,7 +284,7 @@ function disciplineOnFoul(ctx) {
   const ofsP = ctx.ofsPlayer;
   const mc = (typeof MATCH_CHANCES !== 'undefined') ? MATCH_CHANCES : 32;
   const prog = Math.min((ofsP._pitchChances || 0) / mc, T.INJURY_PROG_CAP);
-  const pInj = Math.min(T.INJURY_BASE * (1 + T.INJURY_FATIGUE_COEF * prog), T.INJURY_PROB_CAP);
+  const pInj = Math.min(T.INJURY_BASE * (1 + T.INJURY_FATIGUE_COEF * prog) * _discTestRate(), disciplineTestOn() ? 0.85 : T.INJURY_PROB_CAP);
   if (injuryRoll < pInj) {
     const severity = (injuryRoll < pInj * T.INJURY_MINOR_RATIO) ? 'minor' : 'severe';
     ofsP._injured = true;                // 持ち越しマーカー（SN-01・リーグが読む）
@@ -399,5 +424,6 @@ if (typeof module !== 'undefined' && module.exports) {
     DISCIPLINE_TUNING,
     disciplineResetTeam, disciplineIsOut, disciplineOnFoul, disciplineOnChanceEnd,
     injuryParamFactor, disciplinePendingUserSub, disciplineResolveUserSub,
+    disciplineToggleTest, disciplineTestOn, disciplineFoulBoost,
   };
 }

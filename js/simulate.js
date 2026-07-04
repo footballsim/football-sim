@@ -2590,6 +2590,12 @@ function simulateChance(gs, chanceNo) {
       let fp = (100 - defence.players[defence.lineup[dfsPos]].params[FAIR_PLAY]) / 100;
       // メンタル: イライラした守備選手はファールしやすい（PS-04・fp への乗算のみ/rng判定は不変）
       if (typeof mentalFoulFactor === 'function' && typeof MENTAL_TUNING !== 'undefined') fp = Math.min(fp * mentalFoulFactor(dfsPlayer), MENTAL_TUNING.FOUL_PROB_CAP);
+      // 規律テストモード（lab専用・検証用）: ファール率を底上げ（値のみ・rng判定は不変）。
+      //   OFF時は boost===1 なので何も変えない（seed 再現・既存挙動に無影響）。
+      if (typeof disciplineFoulBoost === 'function') {
+        var _fb = disciplineFoulBoost();
+        if (_fb !== 1) fp = Math.min(fp * _fb, 0.95);
+      }
       if (rng() < fp) {
         const _suffix = area.substring(area.length-1);
         // ペナルティエリア内（FW=ボックス）のファール → 一定確率で PK（中央ほど高い）。

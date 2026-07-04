@@ -907,8 +907,14 @@
       '<button class="mv-btn mv-btn-main" id="mv-pp" onclick="_mvTogglePlay()" aria-label="' + _mvT('再生／一時停止', 'Play / Pause') + '">⏸</button>' +
       '<button class="mv-btn mv-btn-speed" id="mv-speed" onclick="_mvCycleSpeed()" aria-label="' + _mvT('再生速度', 'Playback speed') + '">1×</button>' +
       '<button class="mv-btn mv-btn-int" onclick="_mvOpenSetting()"><span class="mv-btn-ic">📋</span>' + _mvT('采配', 'Plan') + '</button>' +
+      // 規律テストトグル: discipline.js 同梱時（＝lab）のみ表示。カード/退場/怪我を多発させて検証。
+      ((typeof disciplineToggleTest === 'function')
+        ? '<button class="mv-btn mv-btn-ghost" id="mv-disctest" onclick="_mvToggleDiscTest()" title="' +
+          _mvT('カード・怪我を多発（検証用）', 'Force cards/injuries (test)') + '">🧪</button>'
+        : '') +
       '<button class="mv-btn mv-btn-ghost" onclick="_mvSkipToEnd()"><span class="mv-btn-ic">⏭</span>' + _mvT('結果', 'Result') + '</button>';
     host.appendChild(bar);
+    _mvSyncDiscTestBtn();
 
     // 采配パネル（采配する／続ける）。
     var dec = document.createElement('div');
@@ -923,6 +929,27 @@
       '<button class="mv-btn mv-btn-main" id="mv-dec-continue" onclick="_mvContinue()">▶</button>' +
       '</div></div>';
     host.appendChild(dec);
+  }
+
+  // 規律テストトグル（lab専用・🧪ボタン）: カード/退場/怪我を多発させ、1試合で全パターンを目視。
+  //   次に開始する試合から効く（進行中の試合の確率は既に確定済みのため）。
+  function _mvToggleDiscTest() {
+    if (typeof disciplineToggleTest !== 'function') return;
+    var on = disciplineToggleTest();
+    _mvSyncDiscTestBtn();
+    _mvToast(on
+      ? '🧪 ' + _mvT('検証モードON：次の試合からカード・怪我が多発します', 'Test mode ON: cards/injuries frequent from next match')
+      : '🧪 ' + _mvT('検証モードOFF（通常の発生率に戻ります）', 'Test mode OFF (normal rates)'));
+  }
+  function _mvSyncDiscTestBtn() {
+    var b = document.getElementById('mv-disctest');
+    if (!b || typeof disciplineTestOn !== 'function') return;
+    var on = disciplineTestOn();
+    b.style.background = on ? 'rgba(220,80,80,.28)' : '';
+    b.style.borderColor = on ? 'rgba(255,120,120,.55)' : '';
+    b.style.color = on ? '#ffd7d7' : '';
+    b.title = on ? _mvT('検証モードON（タップで解除）', 'Test mode ON (tap to disable)')
+                 : _mvT('カード・怪我を多発（検証用）', 'Force cards/injuries (test)');
   }
 
   // startGame からの復帰時の後始末（simulate.js が参照）。
@@ -946,6 +973,7 @@
   g._mvCloseSetting = _mvCloseSetting;
   g._mvSkipToEnd = _mvSkipToEnd;
   g._mvContinue = _mvContinue;
+  g._mvToggleDiscTest = _mvToggleDiscTest;
   g._mvManagerHTKickoff = _mvManagerHTKickoff;
   g._mvTeardownUI = _mvTeardownUI;
   g._mvOpponentReact = _mvOpponentReact;   // デバッグ/検証用ハンドル
