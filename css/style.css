@@ -579,6 +579,42 @@ body {
   box-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 
+/* 規律（Sprint 2b・lab）: 交代画面で負傷・退場選手を判別するマーカー。
+   フラグは discipline.js 同梱時（lab）のみ付くので公開ビルドでは一切適用されない。 */
+.player-circle.disc-needs-sub {           /* 重症負傷＝要交代（赤く点滅して注意を引く） */
+  box-shadow: 0 0 0 3px #ff3b3b, 0 0 10px 2px rgba(255,59,59,.8);
+  animation: discPulse 1s ease-in-out infinite;
+}
+@keyframes discPulse {
+  0%,100% { box-shadow: 0 0 0 3px #ff3b3b, 0 0 10px 2px rgba(255,59,59,.55); }
+  50%     { box-shadow: 0 0 0 4px #ff5c5c, 0 0 16px 4px rgba(255,59,59,.95); }
+}
+.player-circle.disc-sent-off {            /* 退場＝グレーアウト（交代不可） */
+  filter: grayscale(1) brightness(.55);
+  opacity: .5;
+}
+.player-circle.disc-minor {               /* 軽傷＝続行中だが能力低下 */
+  box-shadow: 0 0 0 2px #ffb020;
+}
+.disc-badge {                             /* 選手アイコン左上のステータス絵文字 */
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+  background: #12203a;
+  border: 1.5px solid white;
+  z-index: 21;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
 /* 案①: 適正外凡例 */
 .oop-legend {
   display: flex;

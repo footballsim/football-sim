@@ -733,7 +733,36 @@
     }
     if (typeof _updateHtSubsLabel === 'function') _updateHtSubsLabel();
 
+    _mvSyncInjuryBanner();   // 負傷交代の要求があれば選手名バナーを出す（Sprint 2b）
+
     showScreen('setting');
+  }
+
+  // 負傷交代バナー（Sprint 2b・lab）: 重症負傷で交代画面が開いた時、対象選手を明示する。
+  //   ピッチ上の🚑赤リングと合わせて「誰を交代するか」を確実に伝える。要求が無ければ隠す。
+  function _mvSyncInjuryBanner() {
+    var host = document.querySelector('#screen-setting .formation-wrap') ||
+               document.getElementById('formation-display');
+    var banner = document.getElementById('mv-injury-banner');
+    var req = (typeof disciplinePendingUserSub === 'function' && gameState && gameState.team1)
+      ? disciplinePendingUserSub(gameState.team1) : null;
+    if (!req) { if (banner) banner.style.display = 'none'; return; }
+    var injP = gameState.team1.players[req.outIdx];
+    var nm = injP ? _mvName(injP) : '?';
+    if (!banner && host && host.parentNode) {
+      banner = document.createElement('div');
+      banner.id = 'mv-injury-banner';
+      banner.style.cssText = 'margin:8px 10px;padding:10px 12px;border-radius:10px;' +
+        'background:rgba(220,59,59,.16);border:1px solid rgba(255,90,90,.5);' +
+        'color:#ffd7d7;font-size:13px;font-weight:700;text-align:center;line-height:1.5;';
+      host.parentNode.insertBefore(banner, host);
+    }
+    if (banner) {
+      banner.innerHTML = '🚑 ' + _mvT(
+        '<b style="color:#fff">' + nm + '</b> が負傷しました。ピッチで赤く光る選手です。ベンチから交代してください（交代しない場合は10人で続行）。',
+        '<b style="color:#fff">' + nm + '</b> is injured (pulsing red on the pitch). Sub from the bench, or continue with 10.');
+      banner.style.display = 'block';
+    }
   }
 
   function _mvCloseSetting() {

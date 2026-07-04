@@ -1530,6 +1530,37 @@ function renderFormation() {
     const circleWrap = document.createElement('div');
     circleWrap.style.cssText = 'position:relative;display:inline-flex;';
     circleWrap.appendChild(circle);
+
+    // 規律（Sprint 2b・lab限定）: 交代画面で負傷/退場の当該選手を判別できるようマーカーを付ける。
+    //   フラグはライブチーム（gameState.team1 のクローン）側に付く。discipline.js 非同梱の
+    //   公開ビルドではフラグが存在しない＝常に素通り（挙動・見た目とも不変）。
+    //   ★ _htMode（試合中の交代フロー）限定：試合外の設定画面では gameState が前試合の残骸の
+    //     ことがあるため適用しない（applyDrop の退場ブロックと同じ作法）。
+    if (_htMode && typeof gameState !== 'undefined' && gameState && gameState.team1 && gameState.team1.players) {
+      const _liveP = gameState.team1.players[playerIdx];
+      const _needsSub = gameState.team1._discUserSubReq && gameState.team1._discUserSubReq.outIdx === playerIdx;
+      if (_liveP) {
+        let _bIcon = null, _bTitle = '';
+        if (_needsSub) {                                  // 重症負傷＝要交代
+          circle.classList.add('disc-needs-sub');
+          _bIcon = '🚑'; _bTitle = window.LANG === 'en' ? 'Injured — substitute' : '負傷（要交代）';
+        } else if (_liveP._sentOff || _liveP._discExcluded) {   // 退場（レッド）＝交代不可
+          circle.classList.add('disc-sent-off');
+          _bIcon = '🟥'; _bTitle = window.LANG === 'en' ? 'Sent off' : '退場';
+        } else if (_liveP._injuredMinor) {                // 軽傷＝続行中だが能力低下
+          circle.classList.add('disc-minor');
+          _bIcon = '🩹'; _bTitle = window.LANG === 'en' ? 'Knocked (reduced)' : '軽傷（能力低下）';
+        }
+        if (_bIcon) {
+          const _badge = document.createElement('div');
+          _badge.className = 'disc-badge';
+          _badge.textContent = _bIcon;
+          _badge.title = _bTitle;
+          circleWrap.appendChild(_badge);
+        }
+      }
+    }
+
     if (_isOutOfPos) {
       const badge = document.createElement('div');
       badge.className = 'pos-badge';
