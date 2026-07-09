@@ -1068,9 +1068,11 @@ function _renderMangaDribbleScene(sc) {
   //   失敗: manga_tackle_slide/（スライディングタックル 233×161・ネイティブ左向き。2026-07-08受入PASS）
   var defP = sc.defence && sc.defence.players && sc.defence.lineup && sc.defence.players[sc.defence.lineup[sc.dfsPos]];
   var defFeat = defP ? _mangaFeat(defP.long_name || defP.name || '') : null;
-  var defImg = defFeat ? _loadCutsceneImg('img/cutscenes/' + (success ? 'manga_tackle/' : 'manga_tackle_slide/') + defFeat.hstyle + '.png') : null;
+  // 実験(2026-07-09): 成功時の守備も失敗時と同じスライダーポーズ(manga_tackle_slide)へ差し替えて試す。
+  //   キー接頭辞も 'ts_' に統一（'tk_'のままだとMangaRecolorのベースキャッシュが旧追走ポーズを使い回す）。
+  var defImg = defFeat ? _loadCutsceneImg('img/cutscenes/manga_tackle_slide/' + defFeat.hstyle + '.png') : null;
   var defColors = defFeat ? _mangaColors(sc.defence, defFeat.skin) : null;
-  var defColorKey = defFeat ? ((success ? 'tk_' : 'ts_') + defFeat.hstyle + '|' + defColors.shirt + defColors.shorts + defColors.socks + defColors.accent + defColors.skin) : null;
+  var defColorKey = defFeat ? ('ts_' + defFeat.hstyle + '|' + defColors.shirt + defColors.shorts + defColors.socks + defColors.accent + defColors.skin) : null;
 
   var W = 480, H = 216, ground = 196;
   var canvas = document.createElement('canvas');
@@ -1100,8 +1102,8 @@ function _renderMangaDribbleScene(sc) {
 
   // 体スケール: canvas縦横比が違うため描画幅で体格を個別調整。
   //   成功守備(追走・縦長250×453)=104 / 失敗守備(スライディング・横長233×161)=176（横長なので幅は大きめ＝体格は同等に見える。2026-07-09 守備を少し大きく＝攻撃者とのバランス調整）。
-  var bodyWDrib = 120, bodyWDef = success ? 104 : 176;
-  var heroX0 = success ? (W * 0.5 - dir * 6) : (W * 0.5 - dir * 47);   // 失敗=静止構図。デュエル中心(heroX0+dir*47)が画面中央に来るよう攻撃者を後ろ寄せ
+  var bodyWDrib = 120, bodyWDef = 176;   // 実験: 成功守備もスライダー(横長)＝176（旧・成功追走は104）
+  var heroX0 = success ? (W * 0.5 - dir * 46) : (W * 0.5 - dir * 47);   // 成功=両選手を中央寄せ(-6→-46・2026-07-09) / 失敗=静止構図のデュエル中心を画面中央に
   var P = success ? 460 : 820;   // 成功=460（ドリブラー移動速度）。失敗=820（スライドイン＋ボール離脱＋よろけ揺れが尺内に収まる長さ・成功側は不変）
 
   // 描画幅を指定して描く（高さはスプライトの縦横比から算出）。
@@ -1144,15 +1146,13 @@ function _renderMangaDribbleScene(sc) {
     if (success) {
       // 成功（突破）: 起点=添付ラフの密着デュエル（守備が左肩後ろに深く重なる）を一拍見せる→ドリブラーが前へ抜け出す。
       var t = Math.max(0, (p - 0.08) / 0.92), u = t * t * (3 - 2 * t);   // ほぼ溜めなし→即バーストで抜け出し
-      var heroX = heroX0 + dir * 74 * u;               // ドリブラー＝攻撃方向へ前進（守備を置き去り）
+      var heroX = heroX0 + dir * 110 * u;              // ドリブラー＝攻撃方向へ前進（守備を置き去り・移動量を長く 74→110）
       var defX = heroX0 + dir * 50;                     // 守備＝静止。中心がドリブラーを50px越える（更に深く＝守備は前方寄りに回り込み、大部分がドリブラーの陰に）
       var ballX = heroX + dir * 46;                     // ボールは前足の先
       var ballY = ground - 30;
 
       if (defImg) drawSprite(defImg, defColorKey, defColors, defX, ground, bodyWDef);   // 守備＝静止・先描き（ドリブラーの後ろに深く重なる）
-      // 前進の集中線（抜け出してから・ドリブラーの背後）
-      if (u > 0.05) speedLines(heroX - dir * 26, ground - bodyWDrib * 0.75, Math.min(0.5, u * 0.7), 46);
-      drawHero(heroX, ground);
+      drawHero(heroX, ground);                          // 集中線（ピカッ）は不要のため削除（2026-07-09）
       if (ballX > -20 && ballX < W + 20) _lpBall(ctx, ballX, ballY, 12, p * 15 * dir);
     } else {
       // 失敗（カット！）: 従来の静止構図を「最終静止状態」とし、そこへ至る短いシーケンス（2026-07-09 ユーザー要望）。
