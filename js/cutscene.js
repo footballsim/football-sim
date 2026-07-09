@@ -1008,9 +1008,184 @@ function _renderFkDeliveryScene(sc) {
 //   成功=ドリブラー＋ボールが前進(ネイティブ右)／失敗=ドリブラー静止・守備がスライドしてボールが弾かれる。
 //   ネイティブ=右攻め(スプライトは右向き) → team2(左)で水平反転。1回再生で静止。
 // ============================================================
+// ============================================================
+// 漫画ドリブルカットイン（lab限定・2026-07-07 配線）
+//   量産スプライト(img/cutscenes/manga/{beard}_{hair}.png・4髭×12髪=48)を
+//   選手identity(Portrait.featuresFor 流用＝ポートレート頭と髪/髭/肌が一致)で選び、
+//   MangaRecolor でチームキット{shirt,shorts,socks,accent}＋選手肌色へ実行時置換。
+//   ソロヒーロー構図（漫画的な一コマ＝主役1体＋躍動背景＋ボール＋集中線）。
+//   ★共有ファイルなので MangaRecolor 未ロードの本番では発火せず、従来の
+//     _renderDribbleScene(緑/赤フラットスプライト)へフォールバックする。
+// ============================================================
+var _MANGA_DRIB_ENABLED = true;
+// Portrait.HAIRSTYLE / BEARD / SKIN と同順（index一致が前提）。スプライト名の語彙。
+var _MANGA_HSTYLE = ['short', 'fade', 'skin', 'spike', 'curly', 'part', 'bangs', 'afro', 'slick', 'wavy', 'mohawk', 'bowl'];
+// カット！シーンのスプライトは10髪型で量産（1体1画像＝見切れ防止・2026-07-09）。bangs/bowlは未生成のため
+// 近縁の生成済み髪型へエイリアス。%12の割当ハッシュ・他画面（Portrait頭）の12髪型はそのまま維持。
+var _MANGA_HSTYLE_SPRITE_ALIAS = { bangs: 'short', bowl: 'skin' };
+var _MANGA_BEARD = ['none', 'stubble', 'mustache', 'goatee', 'full'];   // stubbleはスプライト未生成→noneで代替
+var _MANGA_SKIN = ['#ffdcbb', '#f4c79b', '#e6ad7f', '#cf8f5d', '#a06a3f', '#6f492c'];
+function _mangaFnv(str) { var h = 0x811c9dc5; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0; } return h >>> 0; }
+function _mangaFeat(longName) {
+  var n = longName == null ? '' : String(longName);
+  // 決定論割当：ポートレート頭と髪/髭/肌を揃えるため Portrait.featuresFor のindexを流用。未ロード時は同式で自前算出。
+  var f = (typeof Portrait !== 'undefined' && Portrait.featuresFor) ? Portrait.featuresFor(n) : null;
+  var hi = f ? f.hstyle : _mangaFnv('hstyle ' + n) % 12;
+  var bi = f ? f.beard : _mangaFnv('beard ' + n) % 5;
+  var si = f ? f.skin : _mangaFnv('skin ' + n) % 6;
+  var beard = _MANGA_BEARD[bi] || 'none'; if (beard === 'stubble') beard = 'none';
+  var hstyle = _MANGA_HSTYLE[hi] || 'short';
+  hstyle = _MANGA_HSTYLE_SPRITE_ALIAS[hstyle] || hstyle;   // 10髪型スプライトへリマップ（bangs→short / bowl→skin）
+  return { hstyle: hstyle, beard: beard, skin: _MANGA_SKIN[si] || '#e6ad7f' };
+}
+// カット！（ドリブル失敗）の攻撃側スプライト置き場。
+//   専用「走り」ポーズ12髪型（ユーザー生成2×2グリッド×3・2026-07-08受入）。252×343・ネイティブ右向き。
+var MANGA_DRIBBLE_FAIL_DIR = 'img/cutscenes/manga_dribble_fail/';
+function _mangaColors(td, skin) {
+  var kit = (typeof MangaRecolor !== 'undefined' && MangaRecolor.kitFor) ? MangaRecolor.kitFor(td) : { shirt: '#2060d0', shorts: '#1f9d3a', socks: '#cc2f9a', accent: '#24c2d0' };
+  return { shirt: kit.shirt, shorts: kit.shorts, socks: kit.socks, accent: kit.accent, skin: skin };
+}
+function _renderMangaDribbleScene(sc) {
+  if (typeof MangaRecolor === 'undefined' || !MangaRecolor.render) return null;   // 本番=未ロード→従来へ
+  var dribP = sc && sc.offence && sc.offence.players && sc.offence.lineup && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  if (!dribP) return null;
+  var longName = dribP.long_name || dribP.name || '';
+  var feat = _mangaFeat(longName);
+  var success = (sc.result === '成功');
+  var spriteId = feat.hstyle;                                          // 髭なし単体方式（新ドリブル体・2026-07-07）。髪型12種＝1体ずつ生成→正規化
+  // 攻撃側: 成功=ドリブル体 / 失敗=ボールを運ぶ走り（当面プレースホルダ＝同じドリブル体。MANGA_DRIBBLE_FAIL_DIR 参照）
+  var img = _loadCutsceneImg((success ? 'img/cutscenes/manga_dribble/' : MANGA_DRIBBLE_FAIL_DIR) + spriteId + '.png');
+  var colors = _mangaColors(sc.offence, feat.skin);
+  var colorKey = (success ? 'db_' : 'dbf_') + spriteId + '|' + colors.shirt + colors.shorts + colors.socks + colors.accent + colors.skin;
+  // 守備（デュエル相手）: identity/キットは守備選手・守備チームで独立リカラー。
+  //   成功: manga_tackle/（旧ドリブルセット=追走ポーズ・ドリブラーの後ろ側から止めに来る。2026-07-08構図確定）
+  //   失敗: manga_tackle_slide/（スライディングタックル 233×161・ネイティブ左向き。2026-07-08受入PASS）
+  var defP = sc.defence && sc.defence.players && sc.defence.lineup && sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+  var defFeat = defP ? _mangaFeat(defP.long_name || defP.name || '') : null;
+  var defImg = defFeat ? _loadCutsceneImg('img/cutscenes/' + (success ? 'manga_tackle/' : 'manga_tackle_slide/') + defFeat.hstyle + '.png') : null;
+  var defColors = defFeat ? _mangaColors(sc.defence, defFeat.skin) : null;
+  var defColorKey = defFeat ? ((success ? 'tk_' : 'ts_') + defFeat.hstyle + '|' + defColors.shirt + defColors.shorts + defColors.socks + defColors.accent + defColors.skin) : null;
+
+  var W = 480, H = 216, ground = 196;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var atkRight = _csAttackRight(sc);           // 攻撃方向。true=右へ攻める
+  var dir = atkRight ? 1 : -1;                 // ボール/前進の向き
+  // flipSpr は攻守共通で成立する:
+  //   攻撃体(manga_dribble)=ネイティブ右向き → 攻撃方向が左(dir=-1)のとき反転。
+  //   スライダー(manga_tackle_slide)=ネイティブ左向き（伸ばした足が左）だが、攻撃者の前方から
+  //   向かい合って滑り込む＝画面上は攻撃方向の逆を向く → 反転条件は攻撃体と同じ !atkRight。
+  var flipSpr = !atkRight;
+
+  var atkColor = (sc.offence && sc.offence.team_color) || colors.shirt;
+  var defColor = (sc.defence && sc.defence.team_color) || '#e36b1f';
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  var label = success ? (en ? 'BREAK!' : 'ドリブル突破！') : (en ? 'TACKLED!' : 'カット！');
+  var labelCol = success ? '#ffe14a' : '#ff5a3c';
+  var accent = success ? atkColor : defColor;
+  function dom(id) { var el = (typeof document !== 'undefined') && document.getElementById(id); return el ? el.textContent : ''; }
+  var dribName = (typeof getPlayerName === 'function') ? getPlayerName(dribP) : (dribP.name || '');
+  var atkTeamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
+  var defName = defP ? ((typeof getPlayerName === 'function') ? getPlayerName(defP) : (defP.name || '')) : '';
+  var defTeamNm = (typeof getTeamName === 'function' && sc.defence) ? getTeamName(sc.defence) : '';
+
+  // 体スケール: canvas縦横比が違うため描画幅で体格を個別調整。
+  //   成功守備(追走・縦長250×453)=104 / 失敗守備(スライディング・横長233×161)=176（横長なので幅は大きめ＝体格は同等に見える。2026-07-09 守備を少し大きく＝攻撃者とのバランス調整）。
+  var bodyWDrib = 120, bodyWDef = success ? 104 : 176;
+  var heroX0 = success ? (W * 0.5 - dir * 6) : (W * 0.5 - dir * 47);   // 失敗=静止構図。デュエル中心(heroX0+dir*47)が画面中央に来るよう攻撃者を後ろ寄せ
+  var P = success ? 460 : 820;   // 成功=460（ドリブラー移動速度）。失敗=820（スライドイン＋ボール離脱＋よろけ揺れが尺内に収まる長さ・成功側は不変）
+
+  // 描画幅を指定して描く（高さはスプライトの縦横比から算出）。
+  function drawSprite(imgRef, key, cols, cx, footY, targetW) {
+    if (!imgRef || !imgRef.complete || !imgRef.naturalWidth) return;   // ★未ロードでrenderすると空ベースがキャッシュ汚染される→ロード完了まで描かない
+    var spr = MangaRecolor.render(key, imgRef, cols);
+    if (!spr) return;
+    var nw = spr.width, nh = spr.height, hgt = targetW * (nh / nw);
+    ctx.save();
+    if (flipSpr) { ctx.translate(cx, 0); ctx.scale(-1, 1); ctx.translate(-cx, 0); }
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(spr, cx - targetW / 2, footY - hgt, targetW, hgt);
+    ctx.restore();
+  }
+  function drawHero(cx, footY) { drawSprite(img, colorKey, colors, cx, footY, bodyWDrib); }
+  function speedLines(x, y, a, spread) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 12, y + Math.sin(an) * 12); ctx.lineTo(x + Math.cos(an) * (spread || 52), y + Math.sin(an) * (spread || 52)); ctx.stroke(); } }
+  function hud() {
+    if (!CUTSCENE_BURN_LABELS) return;
+    var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
+    var timeTxt = dom('game-time-display'); if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
+    var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
+    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = labelCol; ctx.fillText(label, 12, H - 9);
+    // 成功=突破したドリブラー名 / 失敗=止めた守備選手名（✕付き・従来ドリブルシーンの流儀）
+    var nm = success ? (dribName ? (dribName + (atkTeamNm ? (' · ' + atkTeamNm) : '')) : '')
+                     : (defName ? ('✕ ' + defName + (defTeamNm ? (' · ' + defTeamNm) : '')) : '');
+    if (nm) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(nm, W - 12, H - 10); }
+  }
+
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var p = Math.min(1, (now - T0) / P);
+    ctx.clearRect(0, 0, W, H);
+    ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+
+    if (success) {
+      // 成功（突破）: 起点=添付ラフの密着デュエル（守備が左肩後ろに深く重なる）を一拍見せる→ドリブラーが前へ抜け出す。
+      var t = Math.max(0, (p - 0.08) / 0.92), u = t * t * (3 - 2 * t);   // ほぼ溜めなし→即バーストで抜け出し
+      var heroX = heroX0 + dir * 74 * u;               // ドリブラー＝攻撃方向へ前進（守備を置き去り）
+      var defX = heroX0 + dir * 50;                     // 守備＝静止。中心がドリブラーを50px越える（更に深く＝守備は前方寄りに回り込み、大部分がドリブラーの陰に）
+      var ballX = heroX + dir * 46;                     // ボールは前足の先
+      var ballY = ground - 30;
+
+      if (defImg) drawSprite(defImg, defColorKey, defColors, defX, ground, bodyWDef);   // 守備＝静止・先描き（ドリブラーの後ろに深く重なる）
+      // 前進の集中線（抜け出してから・ドリブラーの背後）
+      if (u > 0.05) speedLines(heroX - dir * 26, ground - bodyWDrib * 0.75, Math.min(0.5, u * 0.7), 46);
+      drawHero(heroX, ground);
+      if (ballX > -20 && ballX < W + 20) _lpBall(ctx, ballX, ballY, 12, p * 15 * dir);
+    } else {
+      // 失敗（カット！）: 従来の静止構図を「最終静止状態」とし、そこへ至る短いシーケンス（2026-07-09 ユーザー要望）。
+      //   静止構図: 守備スライダー=heroX0+dir*64（奥z・先描き）/ 攻撃者=heroX0（手前z・後描き）。
+      //   （守備を攻撃者側へ30px寄せ・z反転で守備の手が攻撃者の背後になるよう調整。2026-07-09微調整）
+      //   座標は全て攻撃方向 dir 基準（dir=±1どちらでも「前方から守備が滑り込む・ボールは前方へ弾かれ消える」が成立）。
+      var defXf = heroX0 + dir * 64;
+      // ① 守備スライドイン: 開始 defXf+dir*38（攻撃者から見て少し前方）→ defXf。最初の18%で ease-out 着地＝かなり速く。
+      var slT = Math.min(1, p / 0.18), slU = 1 - (1 - slT) * (1 - slT);
+      var defX = defXf + dir * 38 * (1 - slU);
+      // ② 攻撃者のよろけ: 着地(p>0.22)後から減衰sin（±2px・1周期＝左右1回）→ p=1で0＝静止構図へ収束。
+      var wq = Math.max(0, Math.min(1, (p - 0.22) / 0.78));
+      var heroXf = heroX0 + 2 * (1 - wq) * Math.sin(wq * Math.PI * 2);     // π*2 = 2π ＝ 1周期（左右1回だけ揺れる）
+      if (defImg) drawSprite(defImg, defColorKey, defColors, defX, ground, bodyWDef);   // スライダー＝奥z（先描き）
+      drawHero(heroXf, ground);                                            // 攻撃者＝手前z（後描き・守備の手を背後に隠す）
+      // 着地インパクトの集中線（控えめ・短く）＝守備の伸ばした足元(defX - dir*64)。
+      var impF = (p > 0.10 && p < 0.24) ? 1 - Math.abs(p - 0.17) / 0.07 : 0;
+      if (impF > 0) speedLines(defX - dir * 64, ground - 10, impF * 0.4, 34);
+      // ボール: 前足(heroX0+dir*30)から着地とほぼ同時に -dir へ高速離脱→画面外(-dir側)で消える。
+      var bStart = 0.14, ballX = (p < bStart) ? (heroX0 + dir * 30) : (heroX0 + dir * 30 - dir * 1600 * (p - bStart));
+      if (ballX > -16 && ballX < W + 16) _lpBall(ctx, ballX, ground - 14, 11, (p < bStart) ? 0 : (-dir * (p - bStart) * 80));
+    }
+    hud();
+    if (p < 1 || !img.complete || (defImg && !defImg.complete)) requestAnimationFrame(frame);   // 画像ロードが遅れても完了後に必ず両者を描き切る
+  }
+  requestAnimationFrame(frame);
+  // 成功=概ね中央 / 失敗=静止構図のデュエル中心を画面中央に配置済（heroX0の後ろ寄せで調整）。screen座標で算出済＝flip無し扱い。
+  return _csCenterSubject(canvas, 0.5, false);
+}
+
 var _DRIBBLE_SRC = 'img/cutscenes/dribble_01.png';
 var _DRIBBLE_DEF_SRC = 'img/cutscenes/dribbledef_01.png';
 function _renderDribbleScene(sc) {
+  // lab限定：漫画スプライトが使えるなら漫画ドリブルへ（本番は MangaRecolor 未定義→従来描画）。
+  if (_MANGA_DRIB_ENABLED && typeof MangaRecolor !== 'undefined' &&
+      (typeof window === 'undefined' || window.MANGA_CUTSCENE_ENABLED !== false)) {
+    var _mg = _renderMangaDribbleScene(sc);
+    if (_mg) return _mg;
+  }
   var W = 480, H = 216, ground = 190;
   var canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
