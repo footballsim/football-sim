@@ -1023,6 +1023,11 @@ var _MANGA_HSTYLE = ['short', 'fade', 'skin', 'spike', 'curly', 'part', 'bangs',
 // カット！シーンのスプライトは10髪型で量産（1体1画像＝見切れ防止・2026-07-09）。bangs/bowlは未生成のため
 // 近縁の生成済み髪型へエイリアス。%12の割当ハッシュ・他画面（Portrait頭）の12髪型はそのまま維持。
 var _MANGA_HSTYLE_SPRITE_ALIAS = { bangs: 'short', bowl: 'skin' };
+// 過渡期の単一髪型モード（2026-07-09）: 髪型バリエーション生成が律速なので、残りのカットシーン差し替えを
+// 先行するため全シーン・全選手を1髪型(fade=刈り上げ)に固定する。これで各シーン役ごと1枚だけ生成すればよい。
+// 副次効果: dribble等の既存多髪型シーンも同じfadeに寄り、シーン間の選手同一性が保たれる（別人化を防ぐ）。
+// バリエーション解禁時は null にするだけで各選手が決定論の髪型へ復帰（追加作業ゼロ・完全可逆）。
+var _MANGA_HAIR_UNIFORM = 'fade';
 var _MANGA_BEARD = ['none', 'stubble', 'mustache', 'goatee', 'full'];   // stubbleはスプライト未生成→noneで代替
 var _MANGA_SKIN = ['#ffdcbb', '#f4c79b', '#e6ad7f', '#cf8f5d', '#a06a3f', '#6f492c'];
 function _mangaFnv(str) { var h = 0x811c9dc5; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0; } return h >>> 0; }
@@ -1035,7 +1040,8 @@ function _mangaFeat(longName) {
   var si = f ? f.skin : _mangaFnv('skin ' + n) % 6;
   var beard = _MANGA_BEARD[bi] || 'none'; if (beard === 'stubble') beard = 'none';
   var hstyle = _MANGA_HSTYLE[hi] || 'short';
-  hstyle = _MANGA_HSTYLE_SPRITE_ALIAS[hstyle] || hstyle;   // 10髪型スプライトへリマップ（bangs→short / bowl→skin）
+  if (_MANGA_HAIR_UNIFORM) hstyle = _MANGA_HAIR_UNIFORM;                    // 過渡期＝全選手1髪型に固定
+  else hstyle = _MANGA_HSTYLE_SPRITE_ALIAS[hstyle] || hstyle;              // 10髪型スプライトへリマップ（bangs→short / bowl→skin）
   return { hstyle: hstyle, beard: beard, skin: _MANGA_SKIN[si] || '#e6ad7f' };
 }
 // カット！（ドリブル失敗）の攻撃側スプライト置き場。
@@ -1786,13 +1792,24 @@ function _headerRecolor(base, atkColor, defColor, srcId) {
   c.putImageData(im, 0, 0);
   _headerCache[key] = cv; return cv;
 }
+// ヘディング競り合い（新マンガ方式）: 攻撃/守備の跳躍体を別PNG(同一395×480座標系)で持ち、
+//   MangaRecolor で各チームのキット4色＋選手肌へ独立リカラー→同じ矩形に重ねて競り合い構図を復元。
+//   描画順=守備(先)→攻撃(後)で攻撃を前面（競り勝つ絵）。clashは当面 rise 流用（下の _HEADER_CLASH_* を
+//   専用アートへ差し替えれば frame B が切り替わる）。MangaRecolor 未ロード(本番)は null→従来SVGへ。
+var _HEADER_RISE_ATK_SRC = 'img/cutscenes/header_rise_atk.png';
+var _HEADER_RISE_DEF_SRC = 'img/cutscenes/header_rise_def.png';
+// clash（接触）専用アート（2026-07-09 差し替え済み・rise と同じ2体分離＋MangaRecolor方式）。
+var _HEADER_CLASH_ATK_SRC = 'img/cutscenes/header_clash_atk.png';
+var _HEADER_CLASH_DEF_SRC = 'img/cutscenes/header_clash_def.png';
 function _renderHeaderScene(sc) {
+  if (typeof MangaRecolor === 'undefined' || !MangaRecolor.render) return null;   // 本番=未ロード→従来SVGフォールバック
   var W = 480, H = 216, ground = 206;
   var canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
   var ctx = canvas.getContext('2d');
-  var clashImg = _loadCutsceneImg(_HEADER_SRC), riseImg = _loadCutsceneImg(_HEADER_RISE_SRC);
+  var riseAtkImg = _loadCutsceneImg(_HEADER_RISE_ATK_SRC), riseDefImg = _loadCutsceneImg(_HEADER_RISE_DEF_SRC);
+  var clashAtkImg = _loadCutsceneImg(_HEADER_CLASH_ATK_SRC), clashDefImg = _loadCutsceneImg(_HEADER_CLASH_DEF_SRC);
   var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
   var atkColor = (sc.offence && sc.offence.team_color) || '#d23';
   var defColor = (sc.defence && sc.defence.team_color) || '#2a2';
@@ -1813,6 +1830,16 @@ function _renderHeaderScene(sc) {
   var label = success ? (en ? 'HEADER!' : 'ヘディング！') : (en ? 'CLEARED!' : '競り負け！');
   var labelCol = success ? '#ffe14a' : '#ff5a3c';
   var accent = success ? atkColor : defColor;
+
+  // 選手別リカラー色（キット4色＋肌）。肌は選手ごと・髪はヘディングでは頭が焼き込みのため未使用。
+  var atkSkin = _mangaFeat(atkP ? (atkP.long_name || atkP.name || '') : '').skin;
+  var defSkin = _mangaFeat(defP ? (defP.long_name || defP.name || '') : '').skin;
+  var atkColors = _mangaColors(sc.offence, atkSkin), defColors = _mangaColors(sc.defence, defSkin);
+  // 色シグネチャ（キャッシュキー用）。rise/clashで別スプライトキーにする必要あり
+  //   ＝同キーだとMangaRecolorのベースキャッシュがrise画素を使い回しclashが出ない（2026-07-09バグ修正）。
+  var atkSig = atkColors.shirt + atkColors.shorts + atkColors.socks + atkColors.accent + atkColors.skin;
+  var defSig = defColors.shirt + defColors.shorts + defColors.socks + defColors.accent + defColors.skin;
+  function _hdrRender(imgRef, key, cols) { if (!imgRef || !imgRef.complete || !imgRef.naturalWidth) return null; return MangaRecolor.render(key, imgRef, cols); }
 
   var ballDir = success ? 1 : -1;   // pre-flip(ネイティブ=右攻め): 成功=右 / 失敗=左。左攻めは frame の flip で全反転
   var P = 1700;
@@ -1849,17 +1876,18 @@ function _renderHeaderScene(sc) {
     if (flip) { ctx.translate(W, 0); ctx.scale(-1, 1); }
 
     var sh = 168, inRise = p < riseEnd;
-    // frame A=rise(跳び上がり) → frame B=clash(接触)。未ロード時は他方へフォールバック。
-    var spr = inRise ? _headerRecolor(riseImg, atkColor, defColor, 'rise')
-                     : _headerRecolor(clashImg, atkColor, defColor, 'clash');
-    if (!spr) spr = _headerRecolor(clashImg, atkColor, defColor, 'clash') || _headerRecolor(riseImg, atkColor, defColor, 'rise');
+    // frame A=rise / frame B=clash（当面 rise 流用）。守備(先)→攻撃(後)を同一矩形に重ねて競り合いを復元。
+    var atkSpr = _hdrRender(inRise ? riseAtkImg : clashAtkImg, 'hdr_atk_' + (inRise ? 'r|' : 'c|') + atkSig, atkColors);
+    var defSpr = _hdrRender(inRise ? riseDefImg : clashDefImg, 'hdr_def_' + (inRise ? 'r|' : 'c|') + defSig, defColors);
+    var refSpr = atkSpr || defSpr;
     var headX = W / 2, headY = 40;
-    if (spr) {
-      var sw = spr.width * (sh / spr.height), sx = (W - sw) / 2;
+    if (refSpr) {
+      var sw = refSpr.width * (sh / refSpr.height), sx = (W - sw) / 2;
       var lift = inRise ? 30 * (1 - p / riseEnd) : 0;     // rise: 下→apex へ跳び上がる / clash: apex
       var sy = ground - sh + lift;
-      ctx.drawImage(spr, sx, sy, sw, sh);
-      headX = sx + sw * 0.46; headY = sy + sh * 0.085;    // 頭の接触点（やや攻撃側=赤寄り）
+      if (defSpr) ctx.drawImage(defSpr, sx, sy, sw, sh);  // 守備＝先描き（背面）
+      if (atkSpr) ctx.drawImage(atkSpr, sx, sy, sw, sh);  // 攻撃＝後描き（前面・競り勝つ絵）
+      headX = sx + sw * 0.47; headY = sy + sh * 0.07;     // 頭の接触点（2体の頭の間・やや上）
     }
     // 入射: ヘディング前、ボールが軌道に沿って頭へ飛来（ネイティブ=右上から＝赤線。左攻めは flip で左上）。接触(riseEnd)で頭へ到達。
     if (p < riseEnd) {
@@ -1884,7 +1912,7 @@ function _renderHeaderScene(sc) {
     ctx.restore();
     if (contact > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (contact * 0.4) + ')'; ctx.fillRect(0, 0, W, H); }
     hud();
-    if (p < 1) requestAnimationFrame(frame);
+    if (p < 1 || !riseAtkImg.complete || !riseDefImg.complete) requestAnimationFrame(frame);   // 画像ロードが遅れても完了後に描き切る
   }
   requestAnimationFrame(frame);
   return canvas;
