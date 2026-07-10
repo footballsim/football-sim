@@ -1967,7 +1967,8 @@ function _renderHeaderScene(sc) {
     ctx.clearRect(0, 0, W, H);
     ctx.imageSmoothingEnabled = false;
     // 背景を下げてピッチ線を下方へ＝跳んでいる選手を相対的に高く見せる（上に隙間が出ないよう拡大して cover・新規アート不要）
-    if (bgImg.complete && bgImg.naturalWidth) { var _bb = 28, _bs = Math.max(W / bgImg.naturalWidth, (H + 2 * _bb) / bgImg.naturalHeight), _bdw = bgImg.naturalWidth * _bs, _bdh = bgImg.naturalHeight * _bs; ctx.drawImage(bgImg, (W - _bdw) / 2, (H - _bdh) / 2 + _bb, _bdw, _bdh); } else { ctx.drawImage(bgFallback, 0, 0); }
+    //   _bb を大きくするほど芝生ラインが下がり、選手が地面から浮いて見える（選手の描画位置は不変・2026-07-10 ユーザー指示で背景側で調整）。
+    if (bgImg.complete && bgImg.naturalWidth) { var _bb = 42, _bs = Math.max(W / bgImg.naturalWidth, (H + 2 * _bb) / bgImg.naturalHeight), _bdw = bgImg.naturalWidth * _bs, _bdh = bgImg.naturalHeight * _bs; ctx.drawImage(bgImg, (W - _bdw) / 2, (H - _bdh) / 2 + _bb, _bdw, _bdh); } else { ctx.drawImage(bgFallback, 0, 0); }
 
     var flip = !_csAttackRight(sc);   // ネイティブ=右攻め。左攻め(team2)はシーン全体(選手＋ボール＋入射)を左右反転
     ctx.save();
@@ -1982,7 +1983,7 @@ function _renderHeaderScene(sc) {
     if (refSpr) {
       var sw = refSpr.width * (sh / refSpr.height), sx = (W - sw) / 2;
       var lift = inRise ? 30 * (1 - p / riseEnd) : 0;     // rise: 下→apex へ跳び上がる / clash: apex
-      var sy = ground - sh + lift;
+      var sy = ground - sh + lift;                        // 選手の描画位置は動かさない。浮き（地面から上）は背景の下げ幅 _bb で表現（2026-07-10 ユーザー指示）
       if (defSpr) ctx.drawImage(defSpr, sx, sy, sw, sh);  // 守備＝先描き（背面）
       if (atkSpr) ctx.drawImage(atkSpr, sx, sy, sw, sh);  // 攻撃＝後描き（前面・競り勝つ絵）
       headX = sx + sw * 0.47; headY = sy + sh * 0.07;     // 頭の接触点（2体の頭の間・やや上）
