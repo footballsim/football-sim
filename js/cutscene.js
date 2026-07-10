@@ -1329,11 +1329,14 @@ function _recolorPostplay(base, atkColor, defColor, srcId) {
 }
 var _POSTPLAY_SRC = 'img/cutscenes/postplay_t_01.png?v=pp6';
 var _POSTPLAY_FAIL_SRC = 'img/cutscenes/postplay_fail_t_01.png?v=pp5';   // 本番フォールバック用（赤緑タブロー）
-// 失敗＝新マンガ方式（2体分離）。攻撃(倒れ)・守備(立ち)を別PNG(同一557×452座標系・整列済み)で持ち、
-//   MangaRecolor で各チームのキット4色＋選手肌へ独立リカラー→同一矩形へ重ねて構図を復元（header と同流儀）。
-//   MangaRecolor 未ロード(本番)は _POSTPLAY_FAIL_SRC の従来タブローへフォールバック。
-var _POSTPLAY_FAIL_ATK_SRC = 'img/cutscenes/postplay_fail_atk.png';   // 攻撃選手（倒れている・右）
-var _POSTPLAY_FAIL_DEF_SRC = 'img/cutscenes/postplay_fail_def.png';   // 守備選手（立っている・左）
+// 失敗＝新マンガ方式（2体を各自独立配置）。攻撃(倒れ・横長)・守備(立ち・縦長)を別々の単体PNGで持ち、
+//   MangaRecolor で各チームのキット4色＋選手肌へ独立リカラー→各自の cx/footY へ「共通スケール k」で描く
+//   （ドリブル攻撃＋スライダー守備と同じ単体スプライト方式）。両アセットはシャツ青面積42000に正規化済み＝
+//   同体格なので必ず同一 k で描く（別 target 幅だと横長の倒れ選手が縮むためNG）。
+//   MangaRecolor 未ロード(本番)は _POSTPLAY_FAIL_SRC の従来タブロー1枚へフォールバック（旧アセット温存）。
+// ※将来 _MANGA_HAIR_UNIFORM=null 解禁時は各役12髪型へ展開予定（postplay_fail_atk/<hstyle>.png へ差し替え）。今は単体fade1枚。
+var _POSTPLAY_FAIL_ATK_SRC = 'img/cutscenes/postplay_fail_atk.png';   // 攻撃選手（倒れ込み・横長 1039×490）
+var _POSTPLAY_FAIL_DEF_SRC = 'img/cutscenes/postplay_fail_def.png';   // 守備選手（立ち圧力・縦長 626×764）
 function _renderPostplayScene(sc) {
   var W = 480, H = 216, ground = 190;   // 他シーン（ドリブル等）と同じ接地ライン
   var canvas = document.createElement('canvas');
@@ -1430,19 +1433,21 @@ function _renderPostplayScene(sc) {
     } else {
       withFlip(!flipH, function () {                                                  // 絵はネイティブ向きが逆＝!flipHで攻撃方向に合わせる
         if (_mangaPP) {
-          // 攻撃(倒れ)＋守備(立ち)を別チーム色にリカラーし同一矩形へ重ねる（同一557×452座標系）。
-          //   描画順=攻撃(倒れ・先描き)→守備(立ち・後描き)で守備を前面。★未ロードでrenderすると空ベースが
+          // 攻撃(倒れ)＋守備(立ち)を別チーム色にリカラーし、各自独立の cx/footY へ「共通スケール k」で描く。
+          //   両アセットはシャツ青面積42000に正規化済み＝同体格→同一 k で体格が揃う（別 target 幅はNG）。
+          //   描画順=攻撃(倒れ・先描き)→守備(立ち・後描き)で守備をやや前面。★未ロードでrenderすると空ベースが
           //   MangaRecolorのキャッシュを汚染する→ロード完了(complete&&naturalWidth)まで描かない（rAF継続）。
+          var PPF_K = 0.185;                                                          // 共通スケール：立ち守備の全高が画面 ~140px
           var aSpr = (failAtkImg.complete && failAtkImg.naturalWidth) ? MangaRecolor.render(ppfAtkKey, failAtkImg, ppfAtkCols) : null;
           var dSpr = (failDefImg.complete && failDefImg.naturalWidth) ? MangaRecolor.render(ppfDefKey, failDefImg, ppfDefCols) : null;
-          if (aSpr) drawSpr(aSpr, 240, ground + 2, 186);                             // 倒れ選手：足元/接地を地面ラインへ
-          if (dSpr) drawSpr(dSpr, 240, ground + 2, 186);                             // 立ち選手：同一矩形・同スケール・同位置に重ねる
+          if (aSpr) { var ah = (aSpr.naturalHeight || aSpr.height) * PPF_K; drawSpr(aSpr, 300, ground + 8, ah); }   // 攻撃(倒れ)：手前・右下・接地・先描き
+          if (dSpr) { var dh = (dSpr.naturalHeight || dSpr.height) * PPF_K; drawSpr(dSpr, 210, ground, dh); }       // 守備(立ち)：やや後ろ・左・後描き
         } else {
           var fSpr = _recolorPostplay(failImg, atkColor, defColor, 'ppfail') || failImg;    // 本番フォールバック: 赤→攻撃色・緑→守備色タブロー
           drawSpr(fSpr, 240, ground + 2, 150);                                       // タイト画像：足元を接地ラインへ
         }
       });
-      var kp = 0.12, bootX = _mangaPP ? 232 : 244, bootY = ground - 8;               // 新アートは守備の足元付近が弾かれ起点
+      var kp = 0.12, bootX = _mangaPP ? 228 : 244, bootY = ground - 8;               // 2体分離：守備(cx210)と攻撃(cx300)の間・守備足元付近が弾かれ起点
       var ballX = bootX + 1450 * Math.max(0, p - kp), ballY = bootY;                  // 弾かれて流れる
       contact = (p > kp - 0.02 && p < kp + 0.10) ? 1 - Math.abs(p - kp) / 0.10 : 0;
       withFlip(!flipH, function () {                                                  // 図と同じ反転でボールも描く
