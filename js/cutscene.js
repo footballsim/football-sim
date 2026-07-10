@@ -624,7 +624,14 @@ function _renderShotScene(sc, entry) {
   canvas.width = W; canvas.height = H;
   canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
   var ctx = canvas.getContext('2d');
-  var shooter = _loadCutsceneImg(entry.file);
+  // 漫画方式（lab・MangaRecolor ロード時）: シューターを選手別の髪型スプライト＋キット4色/肌でリカラー。
+  //   本番（未ロード）は従来のプリカラー shot_<kit> にフォールバック。シュート12髪型は 2026-07-10 受入（manga_shot/）。
+  var shooterP0 = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  var _shotManga = (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);
+  var _shFeat = _shotManga ? _mangaFeat(shooterP0 ? (shooterP0.long_name || shooterP0.name || '') : '') : null;
+  var _shCols = _shotManga ? _mangaColors(sc.offence, _shFeat.skin) : null;
+  var _shKey = _shFeat ? ('shot|' + _shFeat.hstyle + '|' + _shCols.shirt + _shCols.shorts + _shCols.socks + _shCols.accent + _shCols.skin) : null;
+  var shooter = _shotManga ? _loadCutsceneImg('img/cutscenes/manga_shot/' + _shFeat.hstyle + '.png') : _loadCutsceneImg(entry.file);
   var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
   var accent = (sc.offence && sc.offence.team_color) || '#1f4fd6';
 
@@ -649,7 +656,7 @@ function _renderShotScene(sc, entry) {
   var ph = 178, pcx = 326, sprW = 133;                        // 右配置（ロングパス同様）。スプライトは元から左向き＝反転不要
   var sx0 = pcx - sprW / 2, sy0 = ground - ph;
   var foot = [sx0 + sprW * 0.42, sy0 + ph * 0.79];            // 軸足のすねの前＝ボール起点（赤枠位置・TUNE）
-  var strikeP = 0.12, ballSpd = 2400, P = 1700;               // まっすぐ左へ・ロングパスより速い
+  var strikeP = 0, ballSpd = 2400, P = 1700;                  // 蹴った瞬間から即発射（待ちフレームなし・2026-07-10）・まっすぐ左へ
   var flipH = _csAttackRight(sc);                             // ネイティブ=左攻め → team1(右)で反転
 
   function speedLines(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 14, y + Math.sin(an) * 14); ctx.lineTo(x + Math.cos(an) * 58, y + Math.sin(an) * 58); ctx.stroke(); } }
@@ -675,7 +682,8 @@ function _renderShotScene(sc, entry) {
     var z = 1.0 + Math.min(1, p / 0.6) * 0.08;                       // 寄り
     ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(foot[0], foot[1]); ctx.scale(z, z); ctx.translate(-foot[0], -foot[1]);
     ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
-    if (shooter.complete && shooter.naturalWidth) { var pw = shooter.naturalWidth * (ph / shooter.naturalHeight); ctx.drawImage(shooter, pcx - pw / 2, ground - ph, pw, ph); }
+    var _shSpr = (_shotManga && shooter.complete && shooter.naturalWidth) ? MangaRecolor.render(_shKey, shooter, _shCols) : ((shooter.complete && shooter.naturalWidth) ? shooter : null);
+    if (_shSpr) { var pw = _shSpr.width * (ph / _shSpr.height); ctx.drawImage(_shSpr, pcx - pw / 2, ground - ph, pw, ph); }
     if (isSave) {
       // ===== セーブ: GK(左)＋ボールが手元で弾かれる =====
       var gkW = 210, gkH = gkW * 127 / 220, gkX = 8, gkY = 58;                 // GK配置（TUNE）
