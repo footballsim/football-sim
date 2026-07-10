@@ -706,6 +706,7 @@ function _renderShotScene(sc, entry) {
 // ショートパス: 単一フレームのパサー＋コードのボールで「近くの味方へ短い地上パス」。攻撃側チーム色・左攻めネイティブ。
 //   1回再生で静止（パス到達でボールが止まる）。生成元 tools/art/cutscenes/shortpass.png。
 // ============================================================
+var _MANGA_SHORTPASS_SRC = 'img/cutscenes/manga_shortpass_01.png';   // 203×460・単体・走り・ネイティブ右向き（漫画分離キット＋fade黒髪・透明マージン6px）
 function _renderShortpassScene(sc, entry) {
   var W = 480, H = 216, ground = 190;
   var canvas = document.createElement('canvas');
@@ -726,22 +727,32 @@ function _renderShortpassScene(sc, entry) {
   var en = (typeof window !== 'undefined' && window.LANG === 'en');
   var label = en ? 'SHORT PASS' : 'ショートパス';
 
-  // 最頻出のショートパスにバリエーション: 3パターンからランダムに1ポーズ（ユーザー要望）。
-  //   pose0 = 従来のプリカラー小スプライト(entry.file) / pose1 = onetwo2(走り) / pose2 = onetwo1(パサー) を実行時リカラー。
-  //   ※ onetwo3 は「ボールをトラップ＝③受け手」なのでパス演出に不適 → パサーの onetwo1 を使う。
-  //   foot=蹴り足のボール起点(絶対座標)・spriteFlip=pcx中心でスプライトを反転。
-  //   向きは3ポーズとも「攻撃方向=ボールの進む向き」を向く（flipHで team1/team2 両対応）。
-  //   ★重要: 各スプライトのネイティブ向きが異なるので spriteFlip は個別設定。
-  //     表示向き = native XOR spriteFlip XOR flipH。ボールは pre-flipH で左へ進む＝攻撃方向。
-  //     よって「pre-flipH で左を向く」= native XOR spriteFlip === 左 になるよう spriteFlip を決める。
-  //     pose0=native右→true／onetwo2=native右→true／onetwo1=native左→false。
-  //     （pose0 は元々 true。v2.2.17 で誤って false にしていたのを復帰）
-  var _poses = [
-    { img: _loadCutsceneImg(entry.file),   rc: null,  ph: 178, pcx: 318, foot: [300, 160], spriteFlip: true },   // 従来スプライト: native右→反転
-    { img: _loadCutsceneImg(_ONETWO2_SRC), rc: 'ot2', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: true },   // onetwo2(走り): native右→反転
-    { img: _loadCutsceneImg(_ONETWO1_SRC), rc: 'ot1', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: false }   // onetwo1(パサー): native左→反転無し
-  ];
-  var _pose = _poses[Math.floor(Math.random() * _poses.length)];
+  // 1枚化（ユーザー要望「一旦すべてこの1枚にする」2026-07-10）:
+  //   MangaRecolor が使える lab では新しい漫画スプライト manga_shortpass_01（ネイティブ右向き・走り）を
+  //   チーム別リカラーして常用（3パターンとも同じ絵に）。本番(MangaRecolor 未ロード)は従来のプリカラー
+  //   entry.file にフォールバック。foot=蹴り足のボール起点(絶対座標)・spriteFlip=pcx中心でスプライトを反転。
+  //   ★向き: ボールは pre-flipH で左（攻撃方向）へ蹴り出す。パサーもその左を向くべき。
+  //     表示向き = native XOR spriteFlip XOR flipH。新スプライトは native右 → spriteFlip:true で左を向く。
+  //   ★将来3種へ戻す場合: 下の _poses3 を復活させ Math.random() 選択に戻せばよい（構造温存・完全可逆）。
+  //     var _poses3 = [
+  //       { img: _loadCutsceneImg(entry.file),   rc: null,  ph: 178, pcx: 318, foot: [300, 160], spriteFlip: true },   // 従来: native右
+  //       { img: _loadCutsceneImg(_ONETWO2_SRC), rc: 'ot2', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: true },   // onetwo2(走り): native右
+  //       { img: _loadCutsceneImg(_ONETWO1_SRC), rc: 'ot1', ph: 182, pcx: 318, foot: [300, 166], spriteFlip: false }   // onetwo1(パサー): native左
+  //     ];
+  //     var _pose = _poses3[Math.floor(Math.random() * _poses3.length)];
+  var _mangaOn = (typeof MangaRecolor !== 'undefined' && MangaRecolor.render &&
+                  (typeof window === 'undefined' || window.MANGA_CUTSCENE_ENABLED !== false));
+  var _pose;
+  if (_mangaOn) {
+    // dribble/header と同流儀: 選手肌＋チームキット4色で MangaRecolor.render（colorsig でキャッシュ）。
+    var _sk = _mangaFeat(passer ? (passer.long_name || passer.name) : '').skin;
+    var _cols = _mangaColors(sc.offence, _sk);
+    var _csig = _cols.shirt + _cols.shorts + _cols.socks + _cols.accent + _cols.skin;
+    _pose = { img: _loadCutsceneImg(_MANGA_SHORTPASS_SRC), manga: true, mkey: 'spass|' + _csig, cols: _cols,
+              ph: 182, pcx: 318, foot: [300, 166], spriteFlip: true };   // native右→反転で左（攻撃方向）を向く
+  } else {
+    _pose = { img: _loadCutsceneImg(entry.file), rc: null, ph: 178, pcx: 318, foot: [300, 160], spriteFlip: true };   // 本番フォールバック: 従来プリカラー
+  }
   var ph = _pose.ph, pcx = _pose.pcx, foot = _pose.foot;
   var kickP = 0.12, ballSpd = 1300, P = 1500;                // 水平に蹴り出し・少し速め
   var flipH = _csAttackRight(sc);                            // ネイティブ=左攻め → team1(右)で反転
@@ -772,8 +783,14 @@ function _renderShortpassScene(sc, entry) {
     var z = 1.0 + Math.min(1, p / 0.7) * 0.08;
     ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(foot[0], foot[1]); ctx.scale(z, z); ctx.translate(-foot[0], -foot[1]);
     ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
-    var sprImg = _pose.rc ? (_recolorPostplay(_pose.img, accent, accent, _pose.rc) || _pose.img) : _pose.img;
-    var _snw = sprImg.naturalWidth || sprImg.width, _snh = sprImg.naturalHeight || sprImg.height;   // リカラー後はcanvas(naturalWidth無し)→width
+    var sprImg;
+    if (_pose.manga) {
+      // ★未ロードでrenderすると空ベースがMangaRecolorのキャッシュを汚染する→ロード完了まで描かない（rAF継続）。
+      sprImg = (_pose.img.complete && _pose.img.naturalWidth) ? (MangaRecolor.render(_pose.mkey, _pose.img, _pose.cols) || null) : null;
+    } else {
+      sprImg = _pose.rc ? (_recolorPostplay(_pose.img, accent, accent, _pose.rc) || _pose.img) : _pose.img;
+    }
+    var _snw = sprImg ? (sprImg.naturalWidth || sprImg.width) : 0, _snh = sprImg ? (sprImg.naturalHeight || sprImg.height) : 0;   // リカラー後はcanvas(naturalWidth無し)→width
     if (_snw) { var pw = _snw * (ph / _snh); ctx.save(); if (_pose.spriteFlip) { ctx.translate(pcx, 0); ctx.scale(-1, 1); ctx.translate(-pcx, 0); } ctx.drawImage(sprImg, pcx - pw / 2, ground - ph, pw, ph); ctx.restore(); }   // spriteFlip=pcx中心で反転しボール方向(左)へ向ける
     if (p < kickP) { _lpBall(ctx, foot[0], foot[1], 12, 0); }                                            // 蹴り足で待つ
     else if (onScreen) { _lpBall(ctx, bx, foot[1], 12, (p - kickP) * 80); }                              // 水平に蹴り出し→画面外で消える
