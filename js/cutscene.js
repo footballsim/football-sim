@@ -611,6 +611,12 @@ function _pickGkColor(atkColor, defColor) {
   for (var i = 0; i < _GK_PREF.length; i++) { var k = _GK_PREF[i]; if (k !== atk && k !== def) return k; }
   return 'yellow';
 }
+// 漫画GKダイビング（lab・2026-07-10）: 分離色スプライト1枚を _pickGkColor の色名→GKキット4色でリカラー。
+//   白グローブは低彩度=MangaRecolor partOf 'fixed' で白のまま保持。本番(未ロード)は従来 gk_<color>_01.png。
+var _MANGA_GK_DIVE_SRC = 'img/cutscenes/manga_gk_dive.png';
+var _GK_HEX = { yellow: '#f2c200', dark: '#2a2a33', white: '#e8e8ee', skyblue: '#3aa0e0', orange: '#e8641b', blue: '#1b5fd0', red: '#c8102e', green: '#1e8c3a' };
+function _gkShade(hex, f) { var h = hex.replace('#', ''); if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]; var v = [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; return '#' + v.map(function (c) { var s = Math.round(c * f).toString(16); return s.length < 2 ? '0' + s : s; }).join(''); }
+function _gkDiveColors(name, skin) { var main = _GK_HEX[name] || '#1b5fd0'; return { shirt: main, shorts: _gkShade(main, 0.42), socks: main, accent: '#eef0f5', skin: skin }; }
 
 // ============================================================
 // シュート専用カットイン: シューター（1フレーム・攻撃チーム色）＋コードのボール。
@@ -651,7 +657,11 @@ function _renderShotScene(sc, entry) {
   var outLabel = isWide ? (en ? 'OFF TARGET' : '枠外！') : isBlock ? (en ? 'BLOCKED!' : 'ブロック！') : isSave ? (en ? 'GK SAVE!' : 'ナイスセーブ！') : (en ? 'SHOT' : 'シュート');
   var outColor = isWide ? '#ffd24a' : '#ff5a3c';
   var gkColor = isSave ? _pickGkColor(accent, sc.defence && sc.defence.team_color) : null;   // GK色=両チームと別色
-  var gkImg = isSave ? _loadCutsceneImg('img/cutscenes/gk_' + gkColor + '_01.png') : null;
+  var _svGkManga = isSave && (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);
+  var _svGkP = isSave && sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[0]];
+  var _svGkCols = _svGkManga ? _gkDiveColors(gkColor, _mangaFeat(_svGkP ? (_svGkP.long_name || _svGkP.name || '') : '').skin) : null;
+  var _svGkKey = _svGkManga ? ('gkdive|' + gkColor + '|' + _svGkCols.skin) : null;
+  var gkImg = isSave ? (_svGkManga ? _loadCutsceneImg(_MANGA_GK_DIVE_SRC) : _loadCutsceneImg('img/cutscenes/gk_' + gkColor + '_01.png')) : null;
 
   var ph = 178, pcx = 326, sprW = 133;                        // 右配置（ロングパス同様）。スプライトは元から左向き＝反転不要
   var sx0 = pcx - sprW / 2, sy0 = ground - ph;
@@ -687,7 +697,7 @@ function _renderShotScene(sc, entry) {
     if (isSave) {
       // ===== セーブ: GK(左)＋ボールが手元で弾かれる =====
       var gkW = 210, gkH = gkW * 127 / 220, gkX = 8, gkY = 58;                 // GK配置（TUNE）
-      if (gkImg && gkImg.complete && gkImg.naturalWidth) ctx.drawImage(gkImg, gkX, gkY, gkW, gkH);
+      if (gkImg && gkImg.complete && gkImg.naturalWidth) { var _svs = _svGkManga ? MangaRecolor.render(_svGkKey, gkImg, _svGkCols) : gkImg; if (_svs) ctx.drawImage(_svs, gkX, gkY, gkW, gkH); }
       var hX = gkX + gkW * 0.84, hY = gkY + gkH * 0.13, savP = 0.46;           // GKの手元＝ボール到達点（TUNE）
       if (p < strikeP) { _lpBall(ctx, foot[0], foot[1], 11, 0); }              // かかとで待つ
       else if (p < savP) { var u = (p - strikeP) / (savP - strikeP); _lpBall(ctx, foot[0] + (hX - foot[0]) * u, foot[1] + (hY - foot[1]) * u, 11, (p - strikeP) * 70); }   // 手元へ飛ぶ
@@ -1634,7 +1644,11 @@ function _renderGkScene(sc, mode) {
   var atkColor = (sc.offence && sc.offence.team_color) || '#1f4fd6';
   var defColor = (sc.defence && sc.defence.team_color);
   var gkColor = _pickGkColor(atkColor, defColor);
-  var gkImg = _loadCutsceneImg('img/cutscenes/gk_' + gkColor + '_01.png');
+  var gkP0 = sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[0]];
+  var _gkManga = (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);
+  var _gkCols = _gkManga ? _gkDiveColors(gkColor, _mangaFeat(gkP0 ? (gkP0.long_name || gkP0.name || '') : '').skin) : null;
+  var _gkKey = _gkManga ? ('gkdive|' + gkColor + '|' + _gkCols.skin) : null;
+  var gkImg = _gkManga ? _loadCutsceneImg(_MANGA_GK_DIVE_SRC) : _loadCutsceneImg('img/cutscenes/gk_' + gkColor + '_01.png');
   var accent = defColor || '#e36b1f';                          // GK=守備側 → 守備色をアクセントに
 
   var gs = (typeof gameState !== 'undefined' && gameState) ? gameState : {};
@@ -1701,7 +1715,7 @@ function _renderGkScene(sc, mode) {
       }
     }
     var ballGone = !dive && (p > ballStartP + 0.03) && !onScreen;   // dive はボールを手元で凍結＝終了させない
-    var drawGK = function () { if (gkImg.complete && gkImg.naturalWidth) ctx.drawImage(gkImg, slide, gkY, gkW, gkH); };
+    var drawGK = function () { if (!gkImg.complete || !gkImg.naturalWidth) return; var _s = _gkManga ? MangaRecolor.render(_gkKey, gkImg, _gkCols) : gkImg; if (_s) ctx.drawImage(_s, slide, gkY, gkW, gkH); };
     var drawBall = function () { if (onScreen) _lpBall(ctx, bx, by, 12, (p - ballStartP) * 120); };
     ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(zc[0], zc[1]); ctx.scale(z, z); ctx.translate(-zc[0], -zc[1]);
     ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
