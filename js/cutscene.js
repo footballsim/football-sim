@@ -1892,8 +1892,10 @@ function _headerRecolor(base, atkColor, defColor, srcId) {
 //   MangaRecolor で各チームのキット4色＋選手肌へ独立リカラー→同じ矩形に重ねて競り合い構図を復元。
 //   描画順=守備(先)→攻撃(後)で攻撃を前面（競り勝つ絵）。clashは当面 rise 流用（下の _HEADER_CLASH_* を
 //   専用アートへ差し替えれば frame B が切り替わる）。MangaRecolor 未ロード(本番)は null→従来SVGへ。
-var _HEADER_RISE_ATK_SRC = 'img/cutscenes/header_rise_atk.png';
-var _HEADER_RISE_DEF_SRC = 'img/cutscenes/header_rise_def.png';
+//   rise は 2026-07-10 に「1枚絵の機械分離」→「独立生成の単体2枚」へ差し替え（旧版の腕欠損解消・
+//   処理系 tools/proto/process_header_rise2.py・座標系/体格は旧版に正規化済み）。
+var _HEADER_RISE_ATK_SRC = 'img/cutscenes/header_rise_atk.png?v=2';
+var _HEADER_RISE_DEF_SRC = 'img/cutscenes/header_rise_def.png?v=2';
 // clash（接触）専用アート（2026-07-09 差し替え済み・rise と同じ2体分離＋MangaRecolor方式）。
 var _HEADER_CLASH_ATK_SRC = 'img/cutscenes/header_clash_atk.png';
 var _HEADER_CLASH_DEF_SRC = 'img/cutscenes/header_clash_def.png';
