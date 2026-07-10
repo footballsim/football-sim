@@ -1327,7 +1327,7 @@ function _recolorPostplay(base, atkColor, defColor, srcId) {
   c.putImageData(im, 0, 0);
   _ppRecolorCache[key] = cv; return cv;
 }
-var _POSTPLAY_SRC = 'img/cutscenes/postplay_t_01.png?v=pp5';
+var _POSTPLAY_SRC = 'img/cutscenes/postplay_t_01.png?v=pp6';
 var _POSTPLAY_FAIL_SRC = 'img/cutscenes/postplay_fail_t_01.png?v=pp5';
 function _renderPostplayScene(sc) {
   var W = 480, H = 216, ground = 190;   // 他シーン（ドリブル等）と同じ接地ライン
