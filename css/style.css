@@ -1112,6 +1112,46 @@ body {
   color: var(--text-dim);
 }
 
+/* 話者ポートレート（丸フレーム）＝監督モードの実況帯でのみ表示（display は manager 限定で flex に）。
+   キャプ翼「顔窓」の近代化。将来 ring 内へ Portrait.render を差し込む前提の仮アイコン。 */
+.mv-speaker {
+  display: none;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.mv-speaker-ring {
+  width: clamp(56px, 16.5vw, 72px);
+  height: clamp(56px, 16.5vw, 72px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 30%, #2a3550, #161d2c);
+  border: 2.5px solid var(--japan-red, #c8102e);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,255,255,0.08);
+}
+.mv-speaker-ring canvas { width: 100%; height: 100%; image-rendering: pixelated; }
+.mv-speaker-ph { font-size: clamp(26px, 8vw, 34px); line-height: 1; }
+.mv-speaker-live {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #ff5a5a;
+}
+.mv-speaker-live i {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #ff3b3b;
+  box-shadow: 0 0 6px rgba(255,59,59,0.9);
+  animation: mvLiveBlink 1.4s ease-in-out infinite;
+}
+@keyframes mvLiveBlink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
 /* 実況ログ＝漫画のネーム（黒帯＋白縁＋ドロップシャドウ）。
    暗背景に溶け込むダークコンテナ＋各シーンを黒帯キャプションで表示。 */
 /* 実況パネル＝1枚の読み物エリア（フレーム直下の中継テロップ欄）。
@@ -1249,31 +1289,230 @@ body {
    ⚠️ 必ず .active 限定にすること：#mv-controls は試合後も DOM に残る（display:none だが存在）ため
    `:has(> #mv-controls)` は常時マッチする。.active を付けないと詳細度(2,0,0)で .screen:not(.active) の
    display:none を上書きし、結果画面へ遷移しても screen-game が消えず最後のシーンが残る（v2.6.3のバグ）。 */
-#screen-game.active:has(> #mv-controls) {
+/* ═══ 監督モード＝キャプ翼近代版・ブロードキャスト・カード ═══════════════════════════
+   映像+実況+スコアバグを1枚の「観戦カード」にまとめ、操作バー(#mv-controls)をその足に接地。
+   カードは内容サイズで締め、周囲はスタジアム地の"意図した余白"（承認モック ctsub_mock.html の .stage 準拠）。
+   構成: 上＝映像（クリーン・被せ物なし・カード幅いっぱい・頭切れ厳禁 contain）／
+        中＝実況帯（話者ポートレート丸フレーム＋白い吹き出し）／下＝スコアバグ（放送風）＋操作バー。
+   ⚠️ セレクタは `:has(> #mv-controls[style*="display: flex"])` に限定する（.active に加えて可視判定を追加）。
+      理由: #mv-controls は監督試合後も DOM に display:none で残る。単なる `:has(> #mv-controls)` だと
+      「監督試合を一度でも遊んだ後の W杯/通常試合（＝overlay 想定）」にもカード化が漏れ、
+      .game-controls を隠して「次のシーン」ボタンが消える等の破綻を招く。_mvShowControls(true/false) は
+      #mv-controls の inline style を "display: flex;"/"display: none;" に切り替えるので、flex の時だけ
+      ＝監督試合が実際に進行中の時だけカード・レイアウトを適用する（W杯モードの重ねレイアウトは不変）。 */
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) {
   display: flex;
   flex-direction: column;
+  justify-content: center;      /* カードを画面中央へ＝周囲はスタジアム地の余白（雰囲気） */
+  align-items: center;
+  padding: clamp(10px,3vw,20px) clamp(10px,3.2vw,18px);
+  /* リッチなスタジアム地：上=スタンド光／下=ピッチ光／中央=深い夜の暗色。カード周囲の余白がこの地で映える。 */
+  background:
+    radial-gradient(116% 42% at 50% 0%, rgba(54,78,126,0.32), transparent 60%),
+    radial-gradient(120% 44% at 50% 100%, rgba(28,80,52,0.24), transparent 60%),
+    radial-gradient(150% 96% at 50% 44%, #101a2c 0%, #0a1220 46%, #060b15 100%);
 }
-#screen-game:has(> #mv-controls) .match--immersive {
-  flex: 1 1 auto;
+/* カード本体＝映像+実況+スコアバグ。内容サイズ（伸ばさない）で締める。角丸上＋縁＋落ち影で"飾る"。 */
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .match--immersive {
+  flex: 0 0 auto;
   height: auto;
   min-height: 0;
-  justify-content: center;   /* HUD→カットイン→実況の塊を縦中央に置き、残りを上下の小さなマットへ均等配分 */
+  width: 100%;
+  max-width: 480px;
+  justify-content: flex-start;
+  gap: 0;
+  border-radius: clamp(16px,4.6vw,20px) clamp(16px,4.6vw,20px) 0 0;
+  overflow: hidden;
+  background: #0b1220;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-bottom: none;
+  box-shadow: 0 26px 64px rgba(0,0,0,0.62), inset 0 1px 0 rgba(255,255,255,0.09);
 }
-/* ステージは art サイズ（伸ばさない）＝帯内に空きを作らない。残余は .match の中央寄せが上下マットへ配分。
-   art の描画が間に合わない瞬間もレイアウトが跳ねないよう min-height で帯高さを予約する。 */
-#screen-game:has(> #mv-controls) .zone-center.stage-bg {
-  /* 従来表示に合わせ、中央ゾーンは縦長予約をせず内容（横長カットイン帯）サイズに。 */
+/* 監督モードはカード構成＝重ね用スクリムは不要（映像を暗く被せない） */
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .scrim { display: none; }
+
+/* --- 上段：試合映像（クリーン・カード幅いっぱい・頭切れなし contain）--- */
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .zone-center.stage-bg {
+  order: 1;
   flex: 0 0 auto;
   min-height: 0;
+  align-items: center;
+  padding: 0;
+  background: #05070d;               /* contain の余白が出た時の映像地（黒に近い＝額縁内） */
 }
-/* （旧）監督モードで #live-field-wrap を縦長へ引き伸ばす上書きは廃止＝ベースの横長帯を使う。 */
-/* 実況（latest-only 1枚）はカットイン直下に接地。zone-bottom は伸びず内容サイズ。 */
-#screen-game:has(> #mv-controls) .zone-bottom {
+/* 映像枠：520px 上限を解除しカード幅いっぱいで最大化。角丸/影はカード側が担うので枠自体は素通し。 */
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) #live-field-wrap {
+  max-width: 100%;
+  max-height: none;
+  width: 100%;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* --- 中段：実況帯（話者ポートレート＋白い吹き出し＝キャプ翼「顔窓＋セリフ窓」の近代化）---
+   一定のパディング＋控えめ min-height で"放送席"の量感を持たせつつ、内容を縦中央に据える。 */
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .zone-bottom {
+  order: 2;
   flex: 0 0 auto;
+  justify-content: center;
+  min-height: clamp(128px, 24vh, 200px);
+  padding: clamp(15px,4.4vw,22px) clamp(14px,4vw,18px);
+  gap: 0;
+  background: linear-gradient(180deg, #151d2d 0%, #0f1726 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
 }
-/* #mv-controls は末尾フローに接地（sticky の宙吊りを解消）。JS の :not(:last-child) 等は不変。 */
-#screen-game:has(> #mv-controls) #mv-controls {
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .game-content {
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(11px,3.4vw,16px);
+}
+/* 監督モードは映像＋実況に集中＝補助フィールド図・通常操作行は隠す（抑制と密度）。要素/ID は残す。 */
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) #mini-field-wrap,
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .game-controls { display: none; }
+/* 話者ポートレート（丸フレーム）を表示 */
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .mv-speaker { display: flex; }
+/* 実況ログ＝白い吹き出しの器 */
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) #log-area {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: center;
+}
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .log-event {
   position: relative;
+  background: linear-gradient(180deg, #fbfdff, #e7edf5);
+  color: #10151f;
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.42);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  padding: clamp(12px,3.4vw,16px) clamp(14px,4vw,18px);
+}
+/* 吹き出しの尻尾（左＝ポートレート方向を指す）*/
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .log-event::before {
+  content: "";
+  position: absolute;
+  left: -9px; top: 50%; transform: translateY(-50%);
+  border: 8px solid transparent;
+  border-right-color: #f5f9fd;
+}
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .log-time { color: #c8102e; }
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .log-text { color: #10151f; }
+/* 白地なので暗背景用の白テキストストロークを打ち消す（選手名の team_color は残す）。 */
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .log-text b,
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .log-text span[style*="font-weight"],
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .log-text span[style*="color"] {
+  -webkit-text-stroke: 0;
+  filter: saturate(1.2) brightness(0.85);
+  text-shadow: none;
+}
+
+/* --- カード足元手前：スコアバグ（放送風・映像に被せない）＝時刻・スコア・ポゼッション --- */
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .zone-top {
+  order: 3;
+  flex: 0 0 auto;
+  padding: clamp(8px,2.4vw,11px) clamp(13px,4vw,18px) clamp(9px,2.6vw,11px);
+  background: #0a0e17;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) .hud-meta { margin-top: clamp(5px,1.6vw,7px); }
+
+/* #mv-controls＝カードの足（丸角下＋縁）。sticky の宙吊りを解消しカード本体と一体化。
+   JS が注入する position:sticky / border-top / bg を上書き。:not(:last-child) 等の DOM 構造は不変。 */
+#screen-game.active:has(> #mv-controls[style*="display: flex"]) #mv-controls {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-top: none;
+  border-radius: 0 0 clamp(16px,4.6vw,20px) clamp(16px,4.6vw,20px);
+  box-shadow: 0 26px 64px rgba(0,0,0,0.62);
+}
+
+/* ═══ 監督モード・横画面（landscape）＝映像を画面いっぱいに最大化 ═══════════════════════
+   Steam/PC・スマホ横持ちが主戦場。縦積み構成（映像→実況→スコア+操作）は維持しつつ、
+   カードの max-width:480 固定を解除して「全画面シェル」に切り替える。映像は 100dvh の縦フレックス内で
+   "画面高に収めつつ幅方向で最大化"（余った高さを映像バンドが総取り）＝縦画面より遥かに大きく見せる。
+   頭切れ厳禁は不変（canvas は object-fit:contain のまま＝480:216 を崩さず全体表示）。全体は1画面に収める。
+   ⚠️ 監督モード限定（同じ可視ガード付きセレクタ）＝W杯モード横画面は不変。スマホ縦(portrait)は上のカードを維持。 */
+@media (orientation: landscape) {
+  /* PC/横持ちの body 430px 枠（@media min-width:600px のスマホ枠シミュレート）を、監督試合中だけ解除して
+     全画面化する。#screen-game は body 直下・#mv-controls は #screen-game 直下なので、ネスト :has を使わず
+     単一 :has（> 子結合子の連結）で「監督試合が進行中」を判定＝他画面/W杯は 430px 枠のまま不変。 */
+  body:has(> #screen-game.active > #mv-controls[style*="display: flex"]) {
+    max-width: none;
+    margin: 0;
+    box-shadow: none;
+  }
+  #screen-game.active:has(> #mv-controls[style*="display: flex"]) {
+    justify-content: stretch;
+    align-items: stretch;
+    padding: 0;
+  }
+  /* カード→全画面シェル：幅上限・角丸・縁・影を外し、縦に伸ばして映像バンドへ高さを供給 */
+  #screen-game.active:has(> #mv-controls[style*="display: flex"]) .match--immersive {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: #05080f;
+  }
+  /* 映像バンド：残り高を総取り。canvas は contain のままなので 480:216 を保ったまま最大表示（頭切れなし）。
+     横画面（<2.22:1）では左右にシネマ帯が出るが、これは意図した額縁（暗い無地）＝映像自体は最大。 */
+  #screen-game.active:has(> #mv-controls[style*="display: flex"]) .zone-center.stage-bg {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: calc(env(safe-area-inset-top,0px) + clamp(4px,1.2vh,10px)) clamp(6px,1.6vw,14px) clamp(4px,1.2vh,8px);
+  }
+  /* 映像枠を映像バンドいっぱいに（縦横とも）。内部の canvas が contain でフィット＝拡大クロップしない。 */
+  #screen-game.active:has(> #mv-controls[style*="display: flex"]) #live-field-wrap {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    aspect-ratio: auto;
+    margin: 0;
+    background: transparent;
+  }
+  /* 実況帯：横幅を活かして1行コンパクトに（映像へ高さを譲る）。内容は読みやすい幅で中央寄せ。 */
+  #screen-game.active:has(> #mv-controls[style*="display: flex"]) .zone-bottom {
+    flex: 0 0 auto;
+    min-height: 0;
+    justify-content: center;
+    padding: clamp(7px,1.6vh,12px) clamp(12px,3vw,26px);
+  }
+  #screen-game.active:has(> #mv-controls[style*="display: flex"]) .game-content {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  #screen-game.active:has(> #mv-controls[style*="display: flex"]) .mv-speaker-ring {
+    width: clamp(42px,6.4vh,56px);
+    height: clamp(42px,6.4vh,56px);
+  }
+  /* スコアバグ：横幅いっぱいだと間延びするので読みやすい幅に締めて中央寄せ */
+  #screen-game.active:has(> #mv-controls[style*="display: flex"]) .zone-top {
+    padding: clamp(5px,1.2vh,9px) clamp(12px,3vw,26px);
+  }
+  #screen-game.active:has(> #mv-controls[style*="display: flex"]) .hud {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  /* 操作バー：全幅の足（角丸・縁を外す）。ボタンは注入スタイルの justify-content:center で中央に並ぶ。 */
+  #screen-game.active:has(> #mv-controls[style*="display: flex"]) #mv-controls {
+    max-width: none;
+    width: 100%;
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.10);
+    border-radius: 0;
+    box-shadow: none;
+  }
 }
 
 /* GAME CONTROLS */

@@ -597,6 +597,12 @@
         </div>
         <!-- 簡易フィールド図（カットシーン直下の独立バンド・ダーク背景の上＝はっきり見える） -->
         <div id="mini-field-wrap" style="display:none"></div>
+        <!-- 話者ポートレート（監督モードの実況帯でのみ表示＝キャプ翼「顔窓」の近代化。
+             W杯モードでは display:none。将来 Portrait.render を ring 内へ差し込む前提の仮アイコン。 -->
+        <div id="mv-speaker" class="mv-speaker" aria-hidden="true">
+          <div class="mv-speaker-ring"><span class="mv-speaker-ph">🎙️</span></div>
+          <div class="mv-speaker-live"><i></i>LIVE</div>
+        </div>
         <div class="log-area" id="log-area"></div>
         <div class="game-controls">
           <button class="sub-btn" id="sub-btn" onclick="openSecondHalfSub()" style="display:none"></button>
