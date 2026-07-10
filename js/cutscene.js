@@ -71,7 +71,7 @@ var _bgsPreloaded = false;
 function _preloadCutsceneBgs() {
   if (_bgsPreloaded || typeof Image === 'undefined') return;
   _bgsPreloaded = true;
-  var list = [_LP_BG_SRC, _GK_BG_SRC, _GOAL_BG_SRC, _MISS_BG_SRC, _FOUL_REF_SRC, _POSTPLAY_FAIL_SRC, _POSTPLAY_FAIL_ATK_SRC, _POSTPLAY_FAIL_DEF_SRC, _ONETWO1_SRC, _ONETWO2_SRC, _ONETWO3_SRC];
+  var list = [_LP_BG_SRC, _GK_BG_SRC, _GOAL_BG_SRC, _MISS_BG_SRC, _FOUL_REF_SRC, _POSTPLAY_FAIL_SRC, _POSTPLAY_FAIL_ATK_SRC, _POSTPLAY_FAIL_DEF_SRC, _POSTPLAY_HOLD_ATK_SRC, _POSTPLAY_HOLD_DEF_SRC, _ONETWO1_SRC, _ONETWO2_SRC, _ONETWO3_SRC];
   for (var i = 0; i < list.length; i++) { if (list[i]) _loadCutsceneImg(list[i]); }
 }
 
@@ -1337,6 +1337,13 @@ var _POSTPLAY_FAIL_SRC = 'img/cutscenes/postplay_fail_t_01.png?v=pp5';   // 本�
 // ※将来 _MANGA_HAIR_UNIFORM=null 解禁時は各役12髪型へ展開予定（postplay_fail_atk/<hstyle>.png へ差し替え）。今は単体fade1枚。
 var _POSTPLAY_FAIL_ATK_SRC = 'img/cutscenes/postplay_fail_atk.png';   // 攻撃選手（倒れ込み・横長 1039×490）
 var _POSTPLAY_FAIL_DEF_SRC = 'img/cutscenes/postplay_fail_def.png';   // 守備選手（立ち圧力・縦長 626×764）
+// 成功＝ホールドアップ前半も新マンガ方式（2体を各自独立配置）。攻撃(前でシールド・536×994)・守備(後ろから前傾プレス・694×784)を
+//   別々の単体PNGで持ち、MangaRecolor で各チームのキット4色＋選手肌へ独立リカラー→各自の cx/footY へ「共通スケール k」で描く
+//   （失敗枝と同じ単体スプライト方式）。両アセットはシャツ青面積42000に正規化済み＝同体格なので必ず同一 k で描く。
+//   ※密着ポーズを別々生成した初回版のため位置は要微調整（preview で詰める前提）。MangaRecolor 未ロード(本番)は従来タブロー
+//   (_POSTPLAY_SRC) の赤緑1枚へフォールバック（旧アセット温存）。将来 _MANGA_HAIR_UNIFORM=null 解禁で各役12髪型へ展開予定。
+var _POSTPLAY_HOLD_ATK_SRC = 'img/cutscenes/postplay_holdup_atk.png?v=pp3'; // 攻撃選手（前でシールド・腕を前に組む）※2026-07-10 攻守入替
+var _POSTPLAY_HOLD_DEF_SRC = 'img/cutscenes/postplay_holdup_def.png?v=pp3'; // 守備選手（後ろから前傾・広いスタンス）
 function _renderPostplayScene(sc) {
   var W = 480, H = 216, ground = 190;   // 他シーン（ドリブル等）と同じ接地ライン
   var canvas = document.createElement('canvas');
@@ -1368,8 +1375,11 @@ function _renderPostplayScene(sc) {
   var _mangaPP = (typeof MangaRecolor !== 'undefined' && MangaRecolor.render &&
                   (typeof window === 'undefined' || window.MANGA_CUTSCENE_ENABLED !== false));
   var failAtkImg, failDefImg, ppfAtkCols, ppfDefCols, ppfAtkKey, ppfDefKey;
+  var holdAtkImg, holdDefImg, pphAtkKey, pphDefKey;   // 成功前半ホールドアップの2体（攻撃=前・守備=後）
+  var drbMangaImg, ppDrbKey;   // 成功後半＝抜け出しランナー（漫画ドリブラー・ドリブル成功と同一アセット）
   if (_mangaPP) {
-    var _aSkin = _mangaFeat(atkP ? (atkP.long_name || atkP.name || '') : '').skin;   // 攻撃肌
+    var _aFeat = _mangaFeat(atkP ? (atkP.long_name || atkP.name || '') : '');   // 攻撃 identity（髪型/肌）
+    var _aSkin = _aFeat.skin;   // 攻撃肌
     var _dSkin = _mangaFeat(defP ? (defP.long_name || defP.name || '') : '').skin;   // 守備肌
     ppfAtkCols = _mangaColors(sc.offence, _aSkin);   // 攻撃キット4色＋肌
     ppfDefCols = _mangaColors(sc.defence, _dSkin);   // 守備キット4色＋肌
@@ -1379,6 +1389,16 @@ function _renderPostplayScene(sc) {
     ppfDefKey = 'ppf_def|' + _dSig;
     failAtkImg = _loadCutsceneImg(_POSTPLAY_FAIL_ATK_SRC);
     failDefImg = _loadCutsceneImg(_POSTPLAY_FAIL_DEF_SRC);
+    // ホールドアップ(成功前半)も別ベース＝別spriteKey（pph_）。キット色/肌は失敗枝と同じ ppfAtkCols/ppfDefCols を流用。
+    pphAtkKey = 'pph_atk|' + _aSig;
+    pphDefKey = 'pph_def|' + _dSig;
+    holdAtkImg = _loadCutsceneImg(_POSTPLAY_HOLD_ATK_SRC);
+    holdDefImg = _loadCutsceneImg(_POSTPLAY_HOLD_DEF_SRC);
+    // 後半＝抜け出しランナーはドリブル成功と同一の漫画ドリブラー（manga_dribble/<hstyle>.png・250×338・ネイティブ右向き）。
+    //   spriteKeyは 'pp_drb_' 接頭辞で衝突回避。キット色/肌は攻撃選手（ppfAtkCols）を流用。過渡期は fade 固定。
+    var _drbSpriteId = _aFeat.hstyle;
+    drbMangaImg = _loadCutsceneImg('img/cutscenes/manga_dribble/' + _drbSpriteId + '.png');
+    ppDrbKey = 'pp_drb_' + _drbSpriteId + '|' + _aSig;
   }
   var dribImg = _loadCutsceneImg(_DRIBBLE_SRC);   // 反転突破は「抜け出し」と同じランナー単独を流用（守備なし）
   var P = success ? 2000 : 1700, zc = [240, 116];
@@ -1415,18 +1435,39 @@ function _renderPostplayScene(sc) {
     if (success) {
       var pSwap = 0.5;
       if (p < pSwap) {
-        withFlip(!flipH, function () {                                                   // タブロー絵はネイティブ向きが逆＝!flipHで攻撃方向に合わせる
-          var ppSpr = _recolorPostplay(postImg, atkColor, defColor, 'pp') || postImg;    // 赤→攻撃色・緑→守備色（ホールドアップ・2人タブロー）
-          drawSpr(ppSpr, 244, ground, 168);                                          // 少し小さく（190→168）
-          _lpBall(ctx, 224, ground - 14, 11, 0);                                     // 足元のボール
+        withFlip(!flipH, function () {                                                   // 絵はネイティブ向きが逆＝!flipHで攻撃方向に合わせる
+          if (_mangaPP) {
+            // 攻撃(前でシールド)＋守備(後ろから前傾)を別チーム色にリカラーし、各自独立の cx/footY へ「共通スケール k」で描く。
+            //   両アセットはシャツ青面積42000に正規化済み＝同体格→同一 k（0.185・失敗枝と同じ）で体格が揃う。
+            //   描画順=守備(後・先描き)→攻撃(前・後描き)で攻撃を前面。★未ロードでrenderすると空ベースが
+            //   MangaRecolorのキャッシュを汚染する→ロード完了(complete&&naturalWidth)まで描かない（rAF継続）。
+            var PPH_K = 0.185;                                                        // 共通スケール（失敗枝と同一）
+            var haSpr = (holdAtkImg.complete && holdAtkImg.naturalWidth) ? MangaRecolor.render(pphAtkKey, holdAtkImg, ppfAtkCols) : null;
+            var hdSpr = (holdDefImg.complete && holdDefImg.naturalWidth) ? MangaRecolor.render(pphDefKey, holdDefImg, ppfDefCols) : null;
+            if (hdSpr) { var hdh = (hdSpr.naturalHeight || hdSpr.height) * PPH_K; drawSpr(hdSpr, 210, ground, hdh); }   // 守備(後)：接地・先描き（2026-07-10 画面右へ30px＝withFlip反転のためcx 240→210）
+            if (haSpr) { var hah = (haSpr.naturalHeight || haSpr.height) * PPH_K; drawSpr(haSpr, 252, ground, hah); }   // 攻撃(前)：前・接地・後描き
+            _lpBall(ctx, 252 - 28, ground - 14, 11, 0);                               // ボールは攻撃選手の足元へ
+          } else {
+            var ppSpr = _recolorPostplay(postImg, atkColor, defColor, 'pp') || postImg;  // 本番フォールバック: 赤→攻撃色・緑→守備色（2人タブロー）
+            drawSpr(ppSpr, 244, ground, 168);                                         // 少し小さく（190→168）
+            _lpBall(ctx, 224, ground - 14, 11, 0);                                    // 足元のボール
+          }
         });
       } else {
         var u = (p - pSwap) / (1 - pSwap), ue = 1 - (1 - u) * (1 - u);
         // ランナー単独（「抜け出し」成功と同じ）。向きは他のドリブル/飛び出しと同じ攻撃方向（flipH）。
+        //   manga_dribble はネイティブ右向き＝withFlip(flipH)内で無反転なら attack-right(flipH=false)でそのまま右へ走り
+        //   attack-left(flipH=true)でwithFlipが反転＝二重反転にならず攻撃方向へ正しく走る（drawSpr内で追加反転しない）。
         withFlip(flipH, function () {
-          var dribSpr = _csRecolorBand(dribImg, 'green', atkColor, 'drb') || dribImg; // 緑→攻撃色（ランナー単独）
           var dribX = 196 + 150 * ue;
-          drawSpr(dribSpr, dribX, ground, 172);                                       // ランナー（少し小さく）
+          if (_mangaPP) {
+            // 漫画ドリブラー（ドリブル成功と同一アセット・攻撃キット色）。未ロード中は描かずrAF継続。
+            var drbSpr = (drbMangaImg.complete && drbMangaImg.naturalWidth) ? MangaRecolor.render(ppDrbKey, drbMangaImg, ppfAtkCols) : null;
+            if (drbSpr) drawSpr(drbSpr, dribX, ground, 176);                          // 前半ホールドアップ攻撃(~184px)と体格を揃える高さ
+          } else {
+            var dribSpr = _csRecolorBand(dribImg, 'green', atkColor, 'drb') || dribImg; // 本番フォールバック: 旧ランナー（緑→攻撃色）
+            drawSpr(dribSpr, dribX, ground, 172);                                     // ランナー（少し小さく）
+          }
           _lpBall(ctx, dribX + 48, ground - 24, 11, u * 15);                          // ボールは前方
         });
       }
@@ -1458,7 +1499,8 @@ function _renderPostplayScene(sc) {
     if (contact > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (contact * 0.4) + ')'; ctx.fillRect(0, 0, W, H); }
     hud();
     // 画像ロードが遅れても完了後に描き切る（未ロードで止まらせない）
-    if (p < 1 || (_mangaPP && !success && (!failAtkImg.complete || !failDefImg.complete))) requestAnimationFrame(frame);
+    if (p < 1 || (_mangaPP && !success && (!failAtkImg.complete || !failDefImg.complete))
+              || (_mangaPP && success && (!holdAtkImg.complete || !holdDefImg.complete || !drbMangaImg.complete))) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
   // ポストプレーは前半のホールドアップ・タブロー(244, !flipH で描画)が主。タブロー中心を可視窓中央へ。
