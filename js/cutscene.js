@@ -749,7 +749,7 @@ function _renderShortpassScene(sc, entry) {
     var _cols = _mangaColors(sc.offence, _sk);
     var _csig = _cols.shirt + _cols.shorts + _cols.socks + _cols.accent + _cols.skin;
     _pose = { img: _loadCutsceneImg(_MANGA_SHORTPASS_SRC), manga: true, mkey: 'spass|' + _csig, cols: _cols,
-              ph: 182, pcx: 318, foot: [300, 166], spriteFlip: true };   // native右→反転で左（攻撃方向）を向く
+              ph: 160, pcx: 318, foot: [300, 172], spriteFlip: true };   // native右→反転で左（攻撃方向）を向く。選手を少し小さく(182→160)＋ボール足元を追従(166→172)
   } else {
     _pose = { img: _loadCutsceneImg(entry.file), rc: null, ph: 178, pcx: 318, foot: [300, 160], spriteFlip: true };   // 本番フォールバック: 従来プリカラー
   }
