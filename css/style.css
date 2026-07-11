@@ -1624,6 +1624,51 @@ body {
   }
 }
 
+/* ═══ デイリーリーグ（lab限定）＝監督試合もハブと同じ横長スマホ枠に収める ═══════════════
+   dc49c91 の landscape breakout は「全画面(100dvh)」前提。リーグでは body が横長枠(clamp…×440px)に
+   固定されるため、#screen-game の height:100dvh をそのまま使うと枠の高さ(440)を無視して縦にはみ出す
+   （実測 body440 に対し #screen-game 800）。ここでは高さ参照を枠基準(100%)へ差し替え、vh 依存で膨らむ
+   3ゾーン（実況帯／スコア／操作）を枠内(≈440px)に締め直し、余りは映像バンドへ供給＝映像を主役に。
+   ⚠ gating: 既存と同一の可視ガード `:has(> #mv-controls[style*="display: flex"])`（監督試合の進行中のみ）
+      ＋ 先頭に body.league-mode を前置＝W杯/公開・非リーグの監督試合・portrait には一切波及しない。
+   ⚠ height/paddings のみ上書き。dc49c91 の3段構成・DOM・映像の object-fit:contain(頭切れ厳禁) は不変。 */
+@media (orientation: landscape) {
+  /* ① 100dvh → 枠の高さ(100%)。枠外への縦はみ出しを止め、3段を枠内へ収める起点。 */
+  body.league-mode #screen-game.active:has(> #mv-controls[style*="display: flex"]) {
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+  /* ② 映像バンド＝主役。上下パディングを詰めて残り高を最大限映像へ（頭切れは contain 維持で不変）。 */
+  body.league-mode #screen-game.active:has(> #mv-controls[style*="display: flex"]) .zone-center.stage-bg {
+    padding: clamp(2px,0.6vh,5px) clamp(6px,1.6vw,14px);
+  }
+  /* ③ 実況帯：枠基準で薄く（vh依存を小さめ px-clamp へ）＝映像へ高さを譲る。 */
+  body.league-mode #screen-game.active:has(> #mv-controls[style*="display: flex"]) .zone-bottom {
+    padding: clamp(5px,1.1vh,8px) clamp(12px,3vw,26px);
+  }
+  body.league-mode #screen-game.active:has(> #mv-controls[style*="display: flex"]) .mv-speaker-ring {
+    width: clamp(34px,4.2vh,42px);
+    height: clamp(34px,4.2vh,42px);
+  }
+  /* ④ スコアバグ：薄く */
+  body.league-mode #screen-game.active:has(> #mv-controls[style*="display: flex"]) .zone-top {
+    padding: clamp(3px,0.8vh,6px) clamp(12px,3vw,26px);
+  }
+  body.league-mode #screen-game.active:has(> #mv-controls[style*="display: flex"]) .hud-meta {
+    margin-top: clamp(3px,0.9vh,5px);
+  }
+  /* ⑤ 操作バー：縦padを詰め、ボタンは46pxまで（タップ域は44px以上を確保＝押しやすさは維持）。 */
+  body.league-mode #screen-game.active:has(> #mv-controls[style*="display: flex"]) #mv-controls {
+    padding-top: clamp(4px,0.9vh,6px);
+    padding-bottom: clamp(4px,0.9vh,6px);
+  }
+  body.league-mode #screen-game.active:has(> #mv-controls[style*="display: flex"]) #mv-controls .mv-btn {
+    min-height: clamp(44px,5.8vh,48px);
+  }
+}
+
 /* GAME CONTROLS */
 .game-controls {
   display: flex;
