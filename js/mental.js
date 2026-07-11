@@ -455,8 +455,9 @@ function mentalRenderDebugBand(sc, res) {
   const logArea = document.getElementById('log-area');
   if (!logArea || !logArea.parentNode) return;
   let band = document.getElementById('mental-debug-band');
-  // 非表示フラグ（将来ここを既定 false にすれば一括で消せる）
-  if (typeof window !== 'undefined' && window && window.MENTAL_DEBUG_BAND === false) {
+  // 既定OFF（オプトイン）。デバッグ帯（総合力/マッチアップ数値）は既定で非表示。
+  // 復活させたい時だけ console で window.MENTAL_DEBUG_BAND = true をセットする。
+  if (typeof window === 'undefined' || !window || window.MENTAL_DEBUG_BAND !== true) {
     if (band) band.style.display = 'none';
     return;
   }
