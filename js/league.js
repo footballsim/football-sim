@@ -557,9 +557,10 @@
       '.lg-pos{display:inline-block;width:18px;color:rgba(255,255,255,0.5);font-weight:700}',
       '.lg-dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px;vertical-align:middle}',
       '.lg-pick{display:grid;grid-template-columns:1fr 1fr;gap:10px}',
-      '.lg-pick .pc{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:12px;cursor:pointer;text-align:center;transition:transform .1s}',
+      '.lg-pick .pc{position:relative;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:10px 12px 12px;cursor:pointer;text-align:center;transition:transform .1s}',
       '.lg-pick .pc:active{transform:scale(0.97)}',
-      '.lg-pick .pc .cr{font-size:28px}',
+      '.lg-pick .pc .pc-face{display:block;width:100%;max-width:116px;margin:2px auto 0;aspect-ratio:6/7;border-radius:10px;background:radial-gradient(120% 90% at 50% 15%,rgba(255,255,255,0.16),rgba(0,0,0,0.22))}',
+      '.lg-pick .pc .cr{position:absolute;top:7px;right:9px;font-size:19px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.55))}',
       '.lg-pick .pc .pn{font-size:13px;font-weight:800;margin-top:4px}',
       '.lg-pick .pc .pr{font-size:10px;color:rgba(255,255,255,0.55);margin-top:2px}',
       '.lg-resbadge{font-family:"Bebas Neue";font-size:30px;font-weight:700;letter-spacing:1px}',
@@ -600,6 +601,7 @@
       var str = _clubStrength(d.id);
       var stars = '★'.repeat(Math.max(1, Math.min(5, Math.round((str - 66) / 3))));
       return '<div class="pc" onclick="leaguePickClub(\'' + d.id + '\')">' +
+        '<canvas class="pc-face" width="232" height="270" data-club="' + d.id + '"></canvas>' +
         '<div class="cr" style="filter:drop-shadow(0 0 6px ' + d.color + ')">' + d.crest + '</div>' +
         '<div class="pn">' + (_isEn() ? d.en : d.ja) + '</div>' +
         '<div class="pr" style="color:' + d.color + '">' + stars + '</div>' +
@@ -607,8 +609,8 @@
         '</div>';
     }).join('');
     _body().innerHTML =
-      '<div class="lg-wrap">' +
-        '<div class="lg-card" style="text-align:center">' +
+      '<div class="lg-wrap lg-pick-wrap">' +
+        '<div class="lg-card lg-pick-intro" style="text-align:center">' +
           '<div style="font-size:20px;font-weight:800">' + _t('デイリーリーグ', 'Daily League') + '</div>' +
           '<div class="lg-sub" style="margin-top:6px;font-size:12px">' +
             _t('8クラブ・ホーム&アウェイ14節。1日1試合、監督として1シーズンを戦う。',
@@ -618,6 +620,23 @@
         '<div class="lg-h">' + _t('▼ 指揮するクラブを選ぶ', '▼ Pick your club') + '</div>' +
         '<div class="lg-pick">' + cards + '</div>' +
       '</div>';
+    _paintPickPortraits(defs);
+  }
+
+  // PT-05: 各クラブ選択カードにキープレイヤーの大ポートレートを描く（lab限定・portrait.js）。
+  // portrait.js は LAB_ONLY のため typeof ガード（万一の非搭載でも no-op で崩さない）。
+  function _paintPickPortraits(defs) {
+    if (typeof Portrait === 'undefined') return;
+    Portrait.preload().then(function () {
+      defs.forEach(function (d) {
+        var cv = _body() && _body().querySelector('canvas.pc-face[data-club="' + d.id + '"]');
+        if (!cv) return;
+        var td = _clubData(d.id);
+        var kp = td && td.players && (td.players[td.default_keyplayer] || td.players[0]);
+        if (!kp) return;
+        Portrait.render(cv, kp.long_name || kp.name, { team: d.color });
+      });
+    });
   }
 
   function _resultColor(res) { return res === 'W' ? '#2ecc71' : res === 'L' ? '#e74c3c' : '#f1c40f'; }
@@ -630,7 +649,9 @@
     var myPos = rows.findIndex(function (r) { return r.id === myId; }) + 1;
     var myRow = rows[myPos - 1];
 
-    var html = '<div class="lg-wrap">';
+    // 横長では左(自クラブ/本日の試合)＋右(順位表)の2カラム。縦(portrait)では
+    // .lg-col が素の block になり従来どおり1カラムで積み上がる（フォールバック維持）。
+    var html = '<div class="lg-wrap"><div class="lg-cols"><div class="lg-col lg-col-main">';
 
     // 試合後バナー
     if (showBanner && _state.lastResult) {
@@ -671,7 +692,9 @@
       rivalLine + '</div>' +
       '</div></div>';
 
-    // 本日の試合 or シーズン終了
+    // 本日の試合 or シーズン終了（横長では左カラムの中央でVSが構図の重心になるよう
+    // .lg-match-block を flex:1 で伸ばして上下中央寄せ＝下端のデッドスペースを解消）
+    html += '<div class="lg-match-block">';
     if (_state.finished) {
       var champ = rows[0];
       var champDef = _clubDef(champ.id);
@@ -708,6 +731,7 @@
         html += '<button class="lg-btn" onclick="leaguePlayToday()">▶ ' + _t('今日の試合を戦う（監督モード）', "Play today's match (Manager mode)") + '</button>';
       }
     }
+    html += '</div>';   // /lg-match-block
 
     // 前回試合の実況テキストログ
     if (_state.lastResult && _state.lastResult.log && _state.lastResult.log.length) {
@@ -717,6 +741,9 @@
     if (_state.history && _state.history.length) {
       html += '<button class="lg-btn sec" onclick="leagueShowHistory()">📚 ' + _t('過去のシーズン（' + _state.history.length + '）', 'Past seasons (' + _state.history.length + ')') + '</button>';
     }
+
+    // ── ここまでが左カラム。順位表以降は右カラム（横長時）───────────────
+    html += '</div><div class="lg-col lg-col-side">';
 
     // ミニ順位表
     html += '<div class="lg-h">' + _t('順位表', 'Standings') + '</div>';
@@ -732,7 +759,7 @@
     }
 
     html += '<button class="lg-btn sec" onclick="leagueBackToTitle()">' + _t('← タイトルへ戻る', '← Back to title') + '</button>';
-    html += '</div>';
+    html += '</div></div></div>';   // /lg-col-side /lg-cols /lg-wrap
     _body().innerHTML = html;
   }
 
@@ -769,6 +796,9 @@
 
   function showLeague() {
     _ensureHomeScreen();
+    // 横長(landscape)レイアウト & PCの横長スマホ枠を league だけに限定するスコープ用フラグ。
+    // （W杯/公開の縦画面へは波及させない — style.css 側の全ルールが body.league-mode 配下）
+    if (document.body) document.body.classList.add('league-mode');
     _load();
     if (typeof showScreen === 'function') showScreen('home');
     if (!_state) _renderPick();
@@ -779,7 +809,10 @@
   window.leaguePickClub = function (id) { _newSeason(id); _renderHub(false); };
   window.leaguePlayToday = function () { playToday(); };
   window.leagueShowHub = function () { _renderHub(false); };
-  window.leagueBackToTitle = function () { if (typeof showScreen === 'function') showScreen('title'); };
+  window.leagueBackToTitle = function () {
+    if (document.body) document.body.classList.remove('league-mode');
+    if (typeof showScreen === 'function') showScreen('title');
+  };
   window.leagueConfirmNewSeason = function () {
     // 今シーズンを「過去のシーズン」に記録として残し、同じクラブで次シーズンへ（連載＝記録は消さない）。
     if (confirm(_t('今シーズンを記録に残して、次のシーズンを始めますか？', 'Archive this season and start the next one?'))) {

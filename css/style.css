@@ -150,12 +150,121 @@ body {
 @media (min-width: 600px) {
   html {
     background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
   }
   body {
-    max-width: 430px;
-    margin: 0 auto;
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+    width: 390px;
+    height: 844px;
+    max-height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 22px;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.55);
   }
+  .screen { min-height: 0; height: 100%; overflow-y: auto; }
+  #screen-game { height: 100%; }
+}
+
+/* =============================================================================
+ * デイリーリーグ（lab限定）— 横長(landscape)レイアウト
+ * -----------------------------------------------------------------------------
+ * すべて body.league-mode 配下に限定＝W杯/公開の縦画面には一切波及しない。
+ * gating は二重:  ① body.league-mode（showLeague で付与）  ② orientation:landscape
+ *   → 縦持ち(portrait)では下のルールは無効化され、league.js の 1カラムがそのまま残る。
+ * ========================================================================== */
+
+/* ① PCの「横長スマホ枠」— 縦枠(390×844)を landscape 時だけ横長枠へ差し替え */
+@media (min-width: 600px) and (orientation: landscape) {
+  body.league-mode {
+    width: clamp(760px, 94vw, 920px);
+    height: clamp(400px, 94vh, 440px);
+    min-height: 0;   /* 基底 body{min-height:100vh} を打ち消す（打ち消さないと縦に伸び中央寄せが効かない） */
+    max-height: 100vh;
+    border-radius: 22px;
+  }
+}
+
+/* ② 横長時の中身レイアウト（実機の横持ちスマホ＝width>600 も対象） */
+@media (orientation: landscape) {
+  body.league-mode #screen-home { overflow: hidden; }
+  /* #screen-home > #league-body > .lg-wrap の入れ子。中間の league-body も
+   * flex-fill にしないと高さ制約が伝播しない（.lg-wrap が内容高に膨らむ） */
+  body.league-mode #league-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* .lg-wrap を枠いっぱいに広げ、内部を左右2カラムへ（flex-fill で枠高に固定） */
+  body.league-mode .lg-wrap {
+    max-width: none;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  body.league-mode .lg-cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+    gap: 14px;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  /* 左カラムは flex 縦積み。club header(上)→match(中央で伸長)→補助(下) の階層 */
+  body.league-mode .lg-col-main { display: flex; flex-direction: column; }
+  /* 各要素は縮ませない（banner等が潰れて中身が切れるのを防ぐ）。溢れたら列がスクロール */
+  body.league-mode .lg-col-main > * { flex-shrink: 0; }
+  /* flex:1 0 auto = 余白があれば伸びて VS を中央に、無ければ内容高を保つ（縮んで
+   * 中身が溢れる＝重なりを防ぐ）。溢れる時は左カラム自身がスクロールする。 */
+  body.league-mode .lg-match-block {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  /* VS を構図の重心に：横長では試合カードを一回り大きく・堂々と */
+  body.league-mode .lg-match-block .lg-hero { padding: 18px 16px; }
+  body.league-mode .lg-match-block .lg-vs { margin: 10px 0; }
+  body.league-mode .lg-match-block .lg-vs .crest { font-size: 40px; }
+  body.league-mode .lg-match-block .lg-vs .nm { font-size: 13px; margin-top: 6px; }
+  body.league-mode .lg-match-block .lg-vs .mid { font-size: 28px; }
+
+  /* 各カラムは独立スクロール＝枠は縦に伸びない（順位表は右で常時一望） */
+  body.league-mode .lg-col { min-height: 0; overflow-y: auto; padding-right: 2px; }
+  body.league-mode .lg-col::-webkit-scrollbar { width: 5px; }
+  body.league-mode .lg-col::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 3px; }
+
+  /* 横長は縦マージンを詰めてリズムを一定に（縦用の18pxは間延びする） */
+  body.league-mode .lg-h { margin: 4px 2px 7px; }
+  body.league-mode .lg-col > *:first-child { margin-top: 0; }
+  body.league-mode .lg-card { margin-bottom: 10px; }
+  /* 右カラム末尾の「タイトルへ戻る」は控えめに */
+  body.league-mode .lg-col-side .lg-btn.sec { margin-top: 10px; }
+
+  /* ── クラブ選択：8クラブを 4×2 で一望 ── */
+  body.league-mode .lg-pick-wrap { overflow-y: auto; padding-bottom: 10px; }
+  body.league-mode .lg-pick { grid-template-columns: repeat(4, 1fr); gap: 9px; }
+  body.league-mode .lg-pick .pc { padding: 6px 10px 7px; }
+  body.league-mode .lg-pick .pc .pc-face { max-width: clamp(54px, 6.8vw, 80px); }
+  body.league-mode .lg-pick .pc .pn { font-size: 12px; margin-top: 3px; }
+  body.league-mode .lg-pick .pc .pr { margin-top: 1px; }
+  body.league-mode .lg-pick-intro {
+    padding: 6px 16px;
+    margin-bottom: 7px;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+  }
+  body.league-mode .lg-pick-intro > div:first-child { font-size: 17px; }
+  body.league-mode .lg-pick-intro .lg-sub { margin-top: 0 !important; }
 }
 
 /* ===== チーム選択グリッド（シングルマッチ）===== */
