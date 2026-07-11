@@ -619,6 +619,126 @@ function _gkShade(hex, f) { var h = hex.replace('#', ''); if (h.length === 3) h 
 function _gkDiveColors(name, skin) { var main = _GK_HEX[name] || '#1b5fd0'; return { shirt: main, shorts: _gkShade(main, 0.42), socks: main, accent: '#eef0f5', skin: skin }; }
 
 // ============================================================
+// 漫画2拍演出（北極星カンプ 2026-07-12・lab限定）
+//   拍1: シュート大ゴマの背景を芝/観客でなく「紙白＋放射スピード線＋ハーフトーン」へ（漫画文法）。
+//   拍2: シュートアニメ終盤に守備側GKの顔カットイン帯が左下（攻撃方向反転時は右下）から斜めに食い込む。台詞なし。
+//   ガード: 拍1=MangaRecolor / 拍2=Portrait が未ロードの公開ビルドでは一切発火しない＝従来演出のまま。
+// ============================================================
+var _MANGA_INK = '#14161c', _MANGA_PAPER = '#fbfaf5';
+
+// 監督ビューアの再生速度に演出尺を追従させる（表示層のみ）。#mv-speed の「1×/2×/3×」表示を
+// manager-match.js の _MV_SPEEDS と同値へ逆引きする。W杯モード等 #mv-speed が無い画面は null（従来尺）。
+var _MV_BEAT_MS = { 1: 2400, 2: 1300, 3: 700 };
+function _csBeatMs() {
+  if (typeof document === 'undefined') return null;
+  var el = document.getElementById('mv-speed');
+  if (!el) return null;
+  var m = /([123])/.exec(el.textContent || '');
+  return m ? _MV_BEAT_MS[+m[1]] : null;
+}
+
+// 拍1背景: 紙白＋放射スピード線（太/細の2層・焦点から外向きに先細り）＋左下ハーフトーン網点。
+//   決定論LCG＝毎回同じ絵。焦点(cx,cy)＝蹴り点。一度生成してキャッシュ（サイズ/焦点が同じ間は再利用）。
+var _mangaShotBgC = null, _mangaShotBgKey = '';
+function _mangaShotBg(W, H, cx, cy) {
+  var key = W + 'x' + H + '|' + Math.round(cx) + ',' + Math.round(cy);
+  if (_mangaShotBgC && _mangaShotBgKey === key) return _mangaShotBgC;
+  var c = document.createElement('canvas'); c.width = W; c.height = H;
+  var b = c.getContext('2d');
+  b.fillStyle = _MANGA_PAPER; b.fillRect(0, 0, W, H);
+  var lc = document.createElement('canvas'); lc.width = W; lc.height = H;
+  var l = lc.getContext('2d');
+  var s = 7; function rnd() { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; }
+  var R = Math.sqrt(W * W + H * H);
+  l.fillStyle = _MANGA_INK;
+  function ray(a, hw, r0, al) {   // 中心へ先細りの三角スピード線
+    l.globalAlpha = al;
+    l.beginPath();
+    l.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0);
+    l.lineTo(cx + Math.cos(a - hw) * R, cy + Math.sin(a - hw) * R);
+    l.lineTo(cx + Math.cos(a + hw) * R, cy + Math.sin(a + hw) * R);
+    l.closePath(); l.fill();
+  }
+  var i, N = 84;
+  for (i = 0; i < N; i++) ray((i + rnd() * 0.9) * 6.2832 / N, 0.004 + rnd() * 0.011, 46 + rnd() * 44, 0.72 + rnd() * 0.28);
+  var M = 150;
+  for (i = 0; i < M; i++) ray((i + rnd()) * 6.2832 / M, 0.0012 + rnd() * 0.003, 74 + rnd() * 66, 0.45 + rnd() * 0.4);
+  l.globalAlpha = 1;
+  // 焦点付近をソフトに白抜き（主役の白場＝視線誘導。カンプの mask-image 相当）
+  l.globalCompositeOperation = 'destination-out';
+  var g = l.createRadialGradient(cx, cy, 0, cx, cy, 168);
+  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.45, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  l.fillStyle = g; l.beginPath(); l.arc(cx, cy, 168, 0, 7); l.fill();
+  b.drawImage(lc, 0, 0);
+  // 左下ハーフトーン（中心から離れるほど薄い網点）
+  var hx0 = W * 0.10, hy0 = H * 0.96, hr = Math.min(W, H) * 0.9;
+  b.fillStyle = _MANGA_INK;
+  for (var gy = 0; gy < H; gy += 5) {
+    for (var gx = -3; gx < W; gx += 5) {
+      var ddx = gx - hx0, ddy = gy - hy0, dist = Math.sqrt(ddx * ddx + ddy * ddy);
+      if (dist >= hr) continue;
+      b.globalAlpha = 0.36 * (1 - dist / hr);
+      b.beginPath(); b.arc(gx + ((gy / 5) & 1) * 2.5, gy, 1.05, 0, 7); b.fill();
+    }
+  }
+  b.globalAlpha = 1;
+  _mangaShotBgC = c; _mangaShotBgKey = key; return c;
+}
+
+// 主役スプライトの墨リム（紙白背景に白キットが溶けないよう2px縁取り用シルエット）。リカラー後canvas単位でキャッシュ。
+var _csSilCache = {};
+function _csInkSil(spr, key) {
+  if (_csSilCache[key]) return _csSilCache[key];
+  var c = document.createElement('canvas');
+  c.width = spr.naturalWidth || spr.width; c.height = spr.naturalHeight || spr.height;
+  var x = c.getContext('2d'); x.drawImage(spr, 0, 0);
+  x.globalCompositeOperation = 'source-in'; x.fillStyle = _MANGA_INK; x.fillRect(0, 0, c.width, c.height);
+  _csSilCache[key] = c; return c;
+}
+
+// 蹴り点のインパクト星（白抜き＋墨縁のギザ星・カンプの impact star）
+function _csImpactStar(ctx, x, y, r) {
+  ctx.beginPath();
+  for (var i = 0; i < 18; i++) {
+    var a = i * 0.349 - 0.42;
+    var rr = (i & 1) ? r * 0.42 : r * (0.75 + ((i * 7) % 5) * 0.09);
+    var px = x + Math.cos(a) * rr, py = y + Math.sin(a) * rr;
+    if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = '#ffffff'; ctx.strokeStyle = _MANGA_INK; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+  ctx.fill(); ctx.stroke();
+}
+
+// 拍2: 顔カットイン帯（斜め上辺の墨枠＋紙面＋横集中線＋Portraitバスト・文字なし）を1枚に事前合成。
+//   スライドは毎フレーム transform で行い、帯の中身は静的＝この canvas を描くだけ（軽量）。
+function _buildShotCutinBand(bw, bh, bust) {
+  bw = Math.ceil(bw); bh = Math.ceil(bh);
+  var c = document.createElement('canvas'); c.width = bw; c.height = bh;
+  var x = c.getContext('2d');
+  x.beginPath(); x.moveTo(0, bh * 0.22); x.lineTo(bw, 0); x.lineTo(bw, bh); x.lineTo(0, bh); x.closePath();
+  x.fillStyle = _MANGA_INK; x.fill();                                   // 墨枠
+  x.beginPath(); x.moveTo(0, bh * 0.22 + 7); x.lineTo(bw - 6, 7); x.lineTo(bw - 6, bh); x.lineTo(0, bh); x.closePath();
+  x.fillStyle = _MANGA_PAPER; x.fill();                                 // 内側の紙面
+  x.save(); x.clip();
+  // 横集中線（左右端で薄く・中央で濃く）
+  var t = document.createElement('canvas'); t.width = bw; t.height = bh;
+  var tx = t.getContext('2d'); tx.fillStyle = _MANGA_INK; tx.globalAlpha = 0.5;
+  for (var y = 3; y < bh; y += 6) tx.fillRect(0, y, bw, 1.4);
+  tx.globalAlpha = 1; tx.globalCompositeOperation = 'destination-in';
+  var g = tx.createLinearGradient(0, 0, bw, 0);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.3, 'rgba(0,0,0,1)'); g.addColorStop(0.7, 'rgba(0,0,0,1)'); g.addColorStop(0.97, 'rgba(0,0,0,0)');
+  tx.fillStyle = g; tx.fillRect(0, 0, bw, bh);
+  x.drawImage(t, 0, 0);
+  // GKバスト（左寄せ・頭を大きく＝上下は帯からはみ出してクロップ。独立コマなので画風混在OK＝PT-06原則）
+  var ih = bh * 1.5, iw = ih * (bust.width / bust.height);
+  x.imageSmoothingEnabled = true;   // 絵画調ポートレートはスムージング有効の方が馴染む
+  x.drawImage(bust, bw * 0.02, -0.22 * bh, iw, ih);
+  x.restore();
+  return c;
+}
+
+// ============================================================
 // シュート専用カットイン: シューター（1フレーム・攻撃チーム色）＋コードのボール。
 //   セーブ(GK防いだ！)=シューター＋GK(左・自動コントラスト色)＋ボールが手元で弾かれる。
 //   枠外/ブロック=現状の左へ抜ける簡易演出（後で専用画像に差し替え）。ゴール！！は takeover 側。
@@ -663,13 +783,37 @@ function _renderShotScene(sc, entry) {
   var _svGkKey = _svGkManga ? ('gkdive|' + gkColor + '|' + _svGkCols.skin) : null;
   var gkImg = isSave ? (_svGkManga ? _loadCutsceneImg(_MANGA_GK_DIVE_SRC) : _loadCutsceneImg('img/cutscenes/gk_' + gkColor + '_01.png')) : null;
 
+  // ── 漫画2拍演出（lab・北極星カンプ）────────────────────────────────
+  //   拍1: 背景を放射スピード線＋ハーフトーンへ（_shotManga と同条件＝MangaRecolor 未ロードの公開ビルドは従来背景）。
+  //   拍2: 終盤に守備側GK（defence lineup[0]）の顔カットイン帯。Portrait 未ロードならカットインごとスキップ。
+  var _mangaBg = _shotManga;
+  var _cutinOn = _shotManga && !isSave && (typeof Portrait !== 'undefined') && Portrait && Portrait.render;
+  var _cutinBust = null, _cutinBandC = null;
+  if (_cutinOn) {
+    var _ciGkP = sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[0]];
+    var _ciGkName = _ciGkP ? (_ciGkP.long_name || _ciGkP.name || '') : '';
+    // GKキット色＝ダイブ絵（次ビート）と同じ _pickGkColor で選び、帯のジャージ色と連続させる
+    var _ciGkHex = _GK_HEX[_pickGkColor(accent, sc.defence && sc.defence.team_color)] || '#f2c200';
+    try {
+      Portrait.preload().then(function () {
+        var bc = document.createElement('canvas'); bc.width = 240; bc.height = 280;
+        Portrait.render(bc, _ciGkName, { team: _ciGkHex });
+        _cutinBust = bc;
+      }).catch(function () { /* 顔素材が来ない場合はカットインなしで進行（rAF延長はP+2400msで打ち切り済み） */ });
+    } catch (e) { _cutinOn = false; }
+  }
+
   var ph = 178, pcx = 326, sprW = 133;                        // 右配置（ロングパス同様）。スプライトは元から左向き＝反転不要
   var sx0 = pcx - sprW / 2, sy0 = ground - ph;
   var foot = [sx0 + sprW * 0.42, sy0 + ph * 0.79];            // 軸足のすねの前＝ボール起点（赤枠位置・TUNE）
   var strikeP = 0, ballSpd = 2400, P = 1700;                  // 蹴った瞬間から即発射（待ちフレームなし・2026-07-10）・まっすぐ左へ
+  // 監督ビューアの再生速度(1×/2×/3×)に追従: ビート尺-250ms 内にアニメ＋拍2が収まるよう短縮（1×は従来1700ms）。
+  var _beatMs = _csBeatMs();
+  if (_beatMs) P = Math.max(520, Math.min(1700, _beatMs - 250));
+  var _CUT_START = 0.52, _CUT_DUR = 0.16;                     // 拍2: アニメ52%時点でスライド開始・16%で着地→終端まで保持
   var flipH = _csAttackRight(sc);                             // ネイティブ=左攻め → team1(右)で反転
 
-  function speedLines(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 14, y + Math.sin(an) * 14); ctx.lineTo(x + Math.cos(an) * 58, y + Math.sin(an) * 58); ctx.stroke(); } }
+  function speedLines(x, y, a, col) { ctx.strokeStyle = col || ('rgba(255,255,255,' + a + ')'); ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 14, y + Math.sin(an) * 14); ctx.lineTo(x + Math.cos(an) * 58, y + Math.sin(an) * 58); ctx.stroke(); } }
   function hud() {
     if (!CUTSCENE_BURN_LABELS) return;   // 焼き込みラベル停止（時刻/アクション名/選手名はHUD・ネーム枠へ集約）
     var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
@@ -690,10 +834,23 @@ function _renderShotScene(sc, entry) {
     var p = Math.min(1, (now - T0) / P);
     ctx.clearRect(0, 0, W, H);
     var z = 1.0 + Math.min(1, p / 0.6) * 0.08;                       // 寄り
+    var strikeF = (p > strikeP - 0.02 && p < strikeP + 0.08) ? 1 - Math.abs(p - strikeP) / 0.08 : 0;
     ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(foot[0], foot[1]); ctx.scale(z, z); ctx.translate(-foot[0], -foot[1]);
-    ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+    ctx.imageSmoothingEnabled = false;
+    if (_mangaBg) ctx.drawImage(_mangaShotBg(W, H, foot[0], foot[1] - 10), 0, 0);   // 拍1: 紙白＋放射スピード線＋網点
+    else _lpDrawBg(ctx, bgImg, bgFallback, W, H);
     var _shSpr = (_shotManga && shooter.complete && shooter.naturalWidth) ? MangaRecolor.render(_shKey, shooter, _shCols) : ((shooter.complete && shooter.naturalWidth) ? shooter : null);
-    if (_shSpr) { var pw = _shSpr.width * (ph / _shSpr.height); ctx.drawImage(_shSpr, pcx - pw / 2, ground - ph, pw, ph); }
+    if (_shSpr) {
+      var pw = _shSpr.width * (ph / _shSpr.height);
+      if (_mangaBg && _shKey) {   // 紙白に白キットが溶けないよう墨リム2px（シルエット4方向オフセット）
+        var _sil = _csInkSil(_shSpr, _shKey), _o = 2;
+        ctx.drawImage(_sil, pcx - pw / 2 - _o, ground - ph, pw, ph);
+        ctx.drawImage(_sil, pcx - pw / 2 + _o, ground - ph, pw, ph);
+        ctx.drawImage(_sil, pcx - pw / 2, ground - ph - _o, pw, ph);
+        ctx.drawImage(_sil, pcx - pw / 2, ground - ph + _o, pw, ph);
+      }
+      ctx.drawImage(_shSpr, pcx - pw / 2, ground - ph, pw, ph);
+    }
     if (isSave) {
       // ===== セーブ: GK(左)＋ボールが手元で弾かれる =====
       var gkW = 210, gkH = gkW * 127 / 220, gkX = 8, gkY = 58;                 // GK配置（TUNE）
@@ -706,14 +863,40 @@ function _renderShotScene(sc, entry) {
       if (sv > 0) speedLines(hX, hY, sv * 0.7);                                // セーブ・インパクト
     } else {
       if (p < strikeP) { _lpBall(ctx, foot[0], foot[1], 11, 0); }             // かかとで待つ
-      else { var bx = foot[0] - ballSpd * (p - strikeP); if (bx > -16) _lpBall(ctx, bx, foot[1], 11, (p - strikeP) * 80); } // まっすぐ左へ（高速）
+      else {
+        var bx = foot[0] - ballSpd * (p - strikeP);
+        if (_mangaBg) {
+          // 墨縁の白抜きボール軌道（先細り・残す＝カンプの trail）＋蹴り点のインパクト星
+          var tx1 = Math.max(bx + 14, -2);
+          if (tx1 < foot[0] - 8) {
+            ctx.beginPath(); ctx.moveTo(foot[0], foot[1] - 3); ctx.lineTo(tx1, foot[1] - 9); ctx.lineTo(tx1, foot[1] + 9); ctx.lineTo(foot[0], foot[1] + 3); ctx.closePath();
+            ctx.fillStyle = _MANGA_PAPER; ctx.fill();
+            ctx.strokeStyle = _MANGA_INK; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.stroke();
+          }
+          _csImpactStar(ctx, foot[0], foot[1], 20 + strikeF * 8);
+        }
+        if (bx > -16) _lpBall(ctx, bx, foot[1], 11, (p - strikeP) * 80);      // まっすぐ左へ（高速）
+      }
     }
-    var strikeF = (p > strikeP - 0.02 && p < strikeP + 0.08) ? 1 - Math.abs(p - strikeP) / 0.08 : 0;
-    if (strikeF > 0) speedLines(foot[0], foot[1], strikeF * 0.6);    // 蹴り出しバースト
+    if (strikeF > 0) speedLines(foot[0], foot[1], strikeF * 0.6, _mangaBg ? ('rgba(20,22,28,' + (strikeF * 0.55).toFixed(3) + ')') : null);   // 蹴り出しバースト（紙白では墨色）
     ctx.restore();
     if (strikeF > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (strikeF * 0.45) + ')'; ctx.fillRect(0, 0, W, H); }
+    // ── 拍2: 守備GK顔カットイン帯（アニメ終盤・下端から斜めスライドイン・台詞なし）──
+    //   帯は常に「シューターと反対側」の下隅（flipH でシーンごと鏡像）。バスト未ロード中は描かず rAF を延長して待つ。
+    if (_cutinOn && _cutinBust && p >= _CUT_START) {
+      if (!_cutinBandC) _cutinBandC = _buildShotCutinBand(W * 0.44, H * 0.46, _cutinBust);
+      var q = Math.min(1, (p - _CUT_START) / _CUT_DUR);
+      var eB = 1 + 1.9 * Math.pow(q - 1, 3) + 0.9 * Math.pow(q - 1, 2);   // easeOutBack弱（軽いオーバーシュート）
+      ctx.save();
+      if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+      ctx.translate(-(_cutinBandC.width + 40) * (1 - eB), _cutinBandC.height * 0.35 * (1 - eB));
+      ctx.translate(0, H); ctx.rotate(-0.10 * (1 - eB)); ctx.translate(0, -H);
+      ctx.shadowColor = 'rgba(10,12,17,.35)'; ctx.shadowOffsetX = 5; ctx.shadowOffsetY = -5; ctx.shadowBlur = 0;
+      ctx.drawImage(_cutinBandC, 0, H - _cutinBandC.height);
+      ctx.restore();
+    }
     hud();
-    if (p < 1) requestAnimationFrame(frame);
+    if (p < 1 || (_cutinOn && !_cutinBandC && (now - T0) < P + 2400)) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
   // シューターが pcx=326（右1/3・0.68）。セーブでもシューターが主役なので同じく主役中央へ寄せる。
