@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>漫画演出テストルーム (lab)</title>
+<style>
+  :root{ --ink:#14161c; --gold:#f2c14e; }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0c1424,#070b14);color:#eef3ff;
+       font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+       min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:18px 12px 40px}
+  h1{font-size:16px;letter-spacing:.14em;margin:0 0 4px;color:var(--gold)}
+  .sub{font-size:11.5px;color:#8b98b3;margin:0 0 14px;text-align:center;line-height:1.6}
+  .stage{width:min(940px,96vw);aspect-ratio:480/216;background:#000;border-radius:12px;overflow:hidden;
+         border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 60px -20px rgba(0,0,0,.8);position:relative}
+  .stage canvas{width:100%;height:100%;display:block}
+  .stage .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+                color:#4d5c78;font-size:13px;letter-spacing:.1em}
+  .vars{display:flex;gap:10px;margin:16px 0 10px;flex-wrap:wrap;justify-content:center}
+  .vars button{min-height:48px;padding:10px 18px;border-radius:11px;border:1px solid rgba(255,255,255,.16);
+        background:#131d30;color:#eef3ff;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
+  .vars button:hover{filter:brightness(1.2)}
+  .vars button.on{background:linear-gradient(160deg,#f6cf6a,var(--gold));color:#3a2a05;border-color:transparent}
+  .vars button small{display:block;font-weight:600;font-size:10px;opacity:.75;margin-top:2px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;font-size:12.5px;color:#aab6cd}
+  select{background:#131d30;color:#eef3ff;border:1px solid rgba(255,255,255,.16);border-radius:8px;
+         padding:8px 10px;font-family:inherit;font-size:13px}
+  label.chk{display:inline-flex;gap:6px;align-items:center;cursor:pointer;min-height:44px}
+  .replay{min-height:44px;padding:8px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.2);
+          background:transparent;color:#eef3ff;font-family:inherit;font-size:13px;cursor:pointer}
+  .note{margin-top:14px;font-size:11px;color:#68758f;max-width:640px;text-align:center;line-height:1.7}
+  .err{color:#ff8f88;font-size:12px;margin-top:8px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<h1>漫画演出テストルーム</h1>
+<p class="sub">実ゲームと同一の描画コード（dist-lab）を直接呼び出すバリエーション確認用ページ。<br>試合の進行やセーブデータには一切影響しません。</p>
+
+<div class="stage" id="stage"><div class="empty">▼ 下のバリエーションを選択</div></div>
+
+<div class="vars">
+  <button id="btnB" onclick="showVar('B')">① 2拍・顔カットイン<small>シュート大ゴマ → GK顔が割り込む</small></button>
+  <button id="btnA" onclick="showVar('A')">② 対決割り<small>右シューター vs 左GK大ゴマ</small></button>
+  <button id="btnC" onclick="showVar('C')">③ 現行セーブ演出<small>GK支配構図(Var C)の漫画化は次スプリント</small></button>
+</div>
+
+<div class="row">
+  攻撃 <select id="selAtk"></select>
+  守備 <select id="selDef"></select>
+  <label class="chk"><input type="checkbox" id="chkFlip">攻撃方向を反転</label>
+  <button class="replay" onclick="replay()">↺ リプレイ</button>
+</div>
+
+<p class="note">①②はシュートビートの2バリエーション（実試合では選手名＋時刻の決定論ハッシュで自動的に入れ替わる）。③は現行のGKセーブ結果ビート＝「GK支配構図」漫画化のベース。台詞なしはゲーム全体のルール。</p>
+<div class="err" id="err"></div>
+
+<script src="js/players.js?v={{V}}"></script>
+<script src="js/rng.js?v={{V}}"></script>
+<script src="js/events.js?v={{V}}"></script>
+<script src="js/simulate.js?v={{V}}"></script>
+<script src="js/match.js?v={{V}}"></script>
+<script src="js/portrait.js?v={{V}}"></script>
+<script src="js/manga_recolor.js?v={{V}}"></script>
+<script src="js/cutscene.js?v={{V}}"></script>
+<script>
+(function () {
+  var KEYS = [
+    ['england2026', 'イングランド'], ['netherlands2026', 'オランダ'],
+    ['spain2026', 'スペイン'], ['france2026', 'フランス'],
+    ['argentina2026', 'アルゼンチン'], ['italy2026', 'イタリア'],
+    ['brazil2026', 'ブラジル'], ['belgium2026', 'ベルギー']
+  ];
+  var selAtk = document.getElementById('selAtk'), selDef = document.getElementById('selDef');
+  KEYS.forEach(function (k) {
+    selAtk.add(new Option(k[1], k[0]));
+    selDef.add(new Option(k[1], k[0]));
+  });
+  selAtk.value = 'belgium2026'; selDef.value = 'england2026';
+  var curVar = null;
+
+  function makeTeam(key) {
+    var data = TEAM_DATA[key];
+    var si = system_data.findIndex(function (s) { return s.name === data.default_system; });
+    return buildTeam(data, {
+      systemIdx: si >= 0 ? si : 0,
+      lineup: data.default_lineup.slice(),
+      tactics: data.default_tactics,
+      keyplayer: data.default_keyplayer,
+      marked_player: data.default_marked_player
+    });
+  }
+
+  function makeScene() {
+    var atk = makeTeam(selAtk.value), def = makeTeam(selDef.value);
+    // _csAttackRight は sc.offence === gameState.team1 で反転判定 → 反転チェックで team1 側を入れ替える
+    window.gameState = document.getElementById('chkFlip').checked
+      ? { team1: atk, team2: def } : { team1: def, team2: atk };
+    return { offence: atk, defence: def, ofsPos: 10, dfsPos: 0,
+             action: 'シュート', scenario: 'シュート', result: '成功' };
+  }
+
+  function put(c) {
+    var st = document.getElementById('stage');
+    st.innerHTML = ''; st.appendChild(c);
+  }
+
+  function err(msg) { document.getElementById('err').textContent = msg || ''; }
+
+  window.showVar = function (v, retry) {
+    curVar = v; err('');
+    ['A', 'B', 'C'].forEach(function (x) {
+      document.getElementById('btn' + x).classList.toggle('on', x === v);
+    });
+    try {
+      var sc = makeScene(), c = null;
+      if (v === 'A') {
+        c = _renderShotDuelScene(sc);
+      } else if (v === 'B') {
+        // 実試合はハッシュ偶奇で自動切替 → ここでは偶数(=Var B)になる ofsPos を探して強制
+        var entry = null;
+        for (var p = 10; p >= 1; p--) {
+          sc.ofsPos = p;
+          if ((_csShotVarHash(sc) & 1) === 0) break;
+        }
+        entry = _pickCutscene('shot', sc.offence.team_color);
+        if (!entry || !entry.file) {  // manifest 読込前はリトライ
+          if ((retry || 0) < 12) return setTimeout(function () { showVar(v, (retry || 0) + 1); }, 400);
+          return err('カットシーン素材の読込に失敗しました（リロードしてください）');
+        }
+        c = _renderShotScene(sc, entry);
+      } else {
+        c = _renderGkScene(sc, 'save');
+      }
+      if (!c) {
+        if ((retry || 0) < 12) return setTimeout(function () { showVar(v, (retry || 0) + 1); }, 400);
+        return err('描画がnullを返しました（素材読込前の可能性・リロードしてください）');
+      }
+      put(c);
+    } catch (e) { err('ERROR: ' + e.message); }
+  };
+  window.replay = function () { if (curVar) showVar(curVar); };
+
+  if (typeof Portrait !== 'undefined' && Portrait.preload) Portrait.preload();
+})();
+</script>
+</body>
+</html>
