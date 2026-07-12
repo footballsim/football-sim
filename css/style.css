@@ -1803,6 +1803,137 @@ body {
     box-shadow: 0 0 0 1px rgba(255, 210, 62, 0.22), 0 4px 14px rgba(0, 0, 0, 0.45);
     background: rgba(40, 33, 12, 0.72);
   }
+
+  /* ═══ 采配 → 試合設定画面（#screen-setting）＝横長2カラム最適化 ═══════════════════
+     リーグ采配/HT采配の文脈では kickoff/監督/📊 は JS が非表示にし、表示されるのは
+     「ヘッダー（試合へ戻る）＋スターティングメンバー（ピッチ+控え）＋設定4ボタン」のみ。
+     構成: 左＝縦長ピッチ（枠高いっぱい・aspect-ratio 100/145 で幅が決まる）＋控え（縦2列）
+           右＝設定4ボタン（2×2・垂直中央）。縦スクロールなしの1画面完結。
+     ・ドラッグ入替は clientX/Y + elementFromPoint 判定＝CSS再配置に無依存（実機確認済み）。
+     ・bench の‹›は横スクロール前提(scrollBy left)のため縦2列化に合わせ非表示（ホイール/スワイプで代替）。
+     ・DOM/id/onclick 無改変。#screen-setting は監督試合ガード(:has)の外＝body.league-mode 直下で
+       スコープし、W杯/シングル/公開・portrait の設定画面には一切波及しない。 */
+  body.league-mode #screen-setting.active {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  /* ヘッダー薄型化＋「▶ 試合へ戻る」(#mv-setting-back) を主アクションとして金縁強調 */
+  body.league-mode #screen-setting .screen-header {
+    flex-shrink: 0;
+    padding: clamp(6px, 1.6vh, 9px) clamp(12px, 1.8vw, 16px);
+    gap: 12px;
+  }
+  body.league-mode #screen-setting .screen-title-text { font-size: 18px; }
+  body.league-mode #screen-setting #mv-setting-back {
+    border: 1px solid rgba(255, 210, 62, 0.72);
+    box-shadow: 0 0 0 1px rgba(255, 210, 62, 0.22);
+    background: rgba(40, 33, 12, 0.55);
+    font-weight: 700;
+  }
+  /* 本文＝2カラムグリッド（左: ラベル+ピッチ/控え、右: 設定4ボタン） */
+  body.league-mode #screen-setting .setting-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-width: none;
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);   /* 左=ピッチ+控えを広く・右=4ボタン */
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: clamp(14px, 2.4vw, 24px);
+    row-gap: 4px;
+    padding: clamp(8px, 2vh, 12px) clamp(12px, 1.8vw, 18px) clamp(10px, 2.4vh, 14px);
+    overflow: hidden;
+  }
+  body.league-mode #screen-setting #label-starting {
+    grid-column: 1;
+    grid-row: 1;
+    text-align: left !important;
+    font-size: 12px !important;
+    margin: 0 0 2px !important;
+  }
+  body.league-mode #screen-setting #formation-view {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 0;
+  }
+  /* 万一 kickoff 系が表示される文脈でも重ならないよう右カラムへ退避（league では通常非表示） */
+  body.league-mode #screen-setting #btn-kickoff-top { grid-column: 2; grid-row: 1; margin-bottom: 0 !important; }
+  body.league-mode #screen-setting #btn-manager,
+  body.league-mode #screen-setting .setting-content > div:last-child { grid-column: 2; }
+  /* ── 左: ピッチ（枠高いっぱい）+ 控え（右隣・縦2列） ── */
+  body.league-mode #screen-setting .formation-layout {
+    height: 100%;
+    min-height: 0;
+    flex-direction: row;
+    gap: clamp(10px, 1.6vw, 16px);
+    margin-bottom: 0;
+  }
+  body.league-mode #screen-setting .field-panel {
+    flex: 0 0 auto;
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  body.league-mode #screen-setting .field-container {
+    flex: 0 0 auto;
+    height: calc(100% - 48px);   /* 凡例行（狭幅で2行折返し＝最大約42px+margin）を除いた枠高を明示。
+                                    aspect-ratio が幅を算出。凡例の見切れ防止をピッチ数pxより優先 */
+    min-height: 0;
+    width: auto;
+    aspect-ratio: 100 / 145;     /* 縦長ピッチを枠高最大で（高さ→幅） */
+    align-self: center;          /* stretchを解除（widthが確定するとaspect-ratioが無効になるため） */
+  }
+  body.league-mode #screen-setting .formation-display {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    padding-bottom: 0;   /* 幅基準の擬似高さを廃止（player-dot の%座標はそのまま機能） */
+  }
+  /* 凡例行: 自然幅が長く field-panel を押し広げてピッチを歪めるため、幅要求ゼロ化（width:0+min-width:100%） */
+  body.league-mode #screen-setting .field-panel > div:last-child {
+    flex-shrink: 0;
+    margin-top: 6px !important;
+    width: 0;
+    min-width: 100%;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+  }
+  body.league-mode #screen-setting .bench-panel {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    min-height: 0;
+  }
+  /* 「控え」「交代枠」ラベルは左揃え＝ピッチ列と同じ整列線（中央寄せの浮きを解消） */
+  body.league-mode #screen-setting .bench-panel-label { text-align: left; }
+  body.league-mode #screen-setting .bench-panel > div { justify-content: flex-start; }
+  body.league-mode #screen-setting .bench-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));   /* 幅に応じ2〜3列 */
+    gap: 6px;
+    align-content: start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 2px 2px 6px;
+  }
+  body.league-mode #screen-setting .bench-item { min-width: 0; }
+  body.league-mode #screen-setting #bench-prev,
+  body.league-mode #screen-setting #bench-next { display: none !important; }   /* ‹›は横スクロール専用(scrollBy left)＝縦グリッドでは不要。inline display:flex に勝つため !important */
+  /* ── 右: 設定4ボタン（2×2・中央に据えて構図のバランスを取る） ── */
+  body.league-mode #screen-setting .setting-btn-grid {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+    margin-bottom: 0;
+    gap: clamp(10px, 1.8vh, 14px);
+  }
+  body.league-mode #screen-setting .setting-nav-btn { padding: clamp(14px, 3.6vh, 18px) 10px; }
 }
 
 /* GAME CONTROLS */
