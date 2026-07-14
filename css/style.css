@@ -1624,16 +1624,19 @@ body {
   }
 }
 
-/* ═══ デイリーリーグ（lab限定）＝監督試合「プレー画面の最大化」（北極星: 漫画コマが画面のすべて）═══
-   映像（カットシーン canvas 480×216=2.22:1）を横長枠(≈920×440=2.09:1)へ幅フィットでほぼ全面表示し、
-   UIクロームは全てオーバーレイへ:
-     ・スコア/時間 = 左上の小チップ（.zone-top を転用・半透明地＋blur）
-     ・実況        = 映像下部に浮く白吹き出し（独立段を廃止・帯背景なし＝絵に面積を渡す）
-     ・操作        = 下端の薄いグラデ帯（#mv-controls を absolute 化・采配を主役に格上げ）
-   レイヤ: 映像(z1) < 実況(z20) < チップ(z30) < 操作(z40)。DOM/ID/JS は無改変（CSS再配置のみ）。
+/* ═══ デイリーリーグ（lab限定）＝監督試合「映像／実況／操作の非オーバーレイ縦スタック」═══
+   ユーザー指示: 実況を映像に重ねない。横長枠(≈920×440) を上から重ねずに積む3段構成へ:
+     ・映像(zone-center)  = flex:1 で残り高を総取り＝主役（できる限り大きく・contain で頭切れなし）
+     ・実況帯(zone-bottom) = 映像の"下"の独立バンド（自前の薄暗い地＋上ヘアライン＝映像に浮かせない）
+     ・操作帯(#mv-controls)= 最下段の操作シェルフ（自領域を持つ・采配は金縁で主役）
+   スコア/時間(.zone-top)だけは左上の小チップとして映像隅に重ねる（実況ではない最小の隅表示＝許容）。
+   構造: #screen-game(flex-col) = [ .match--immersive(flex:1, flex-col){ zone-center(flex:1) / zone-bottom } ][ #mv-controls ][ #mv-decision(absolute 采配モーダル) ]。
+   canvas は contain（480:216 保持・頭切れ厳禁）。枠は 920×440 なので映像を非重なりで積むと左右にシネマ・マット帯が出る＝意図した額縁として地色でまとめる。
+   DOM/ID/JS/inline style は無改変（CSS再配置のみ・inline の display:flex/none 切替と共存）。
    ⚠ gating: 可視ガードを `:has(> :is(#mv-controls, #mv-decision)[style*="display: flex"])` に拡張
       （HT/ゴール采配モーダル中は _mvShowControls(false) で controls が none になりガードが外れて
-       枠が崩れるため、decision パネル可視も「監督試合進行中」とみなす）。
+       枠が崩れるため、decision パネル可視も「監督試合進行中」とみなす＝全レイアウト規則をこの複合ガードで自足させ、
+       controls 可視のみを見る一般 landscape 規則が外れる瞬間もこのブロック単独で構図を保つ）。
       ＋ 先頭に body.league-mode を前置＝W杯/公開・非リーグの監督試合・portrait には一切波及しない。
    ⚠ 頭切れ厳禁: canvas は object-fit:contain のまま（2.22:1 保持・幅フィット時の上下黒帯は極小）。 */
 @media (orientation: landscape) {
@@ -1646,9 +1649,11 @@ body {
     min-height: 0;
     overflow: hidden;
   }
-  /* ── シェル: 100dvh→枠基準(100%)・オーバーレイの座標基準 ── */
+  /* ── シェル: 100dvh→枠基準(100%)・縦フレックスの器（映像/実況/操作を重ねず積む）＋ #mv-decision の座標基準 ── */
   body.league-mode #screen-game.active:has(> :is(#mv-controls, #mv-decision)[style*="display: flex"]) {
     position: relative;
+    display: flex;
+    flex-direction: column;
     height: 100%;
     max-height: 100%;
     min-height: 0;
@@ -1672,24 +1677,57 @@ body {
     max-height: calc(100% - 8px);
     overflow-y: auto;
   }
-  /* ── ステージ: .match--immersive を枠全面のレイヤ台へ（縦フレックス3段を廃止） ── */
+  /* ── ステージ: .match--immersive = 縦フレックスの容器（映像＋実況帯を積む・操作帯は #screen-game 直下の兄弟） ── */
   body.league-mode #screen-game.active:has(> :is(#mv-controls, #mv-decision)[style*="display: flex"]) .match--immersive {
-    position: absolute;
-    inset: 0;
-    display: block;
-    height: 100%;
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    height: auto;
     max-width: none;
+    margin: 0;
     border: none;
     border-radius: 0;
     box-shadow: none;
-    background: #05070d;
+    overflow: hidden;
+    background:
+      radial-gradient(115% 62% at 50% 0%, rgba(40, 58, 96, 0.20), transparent 60%),
+      #05070d;   /* 映像を非重なりで積むと出る左右シネマ・マットの地（意図した額縁） */
   }
-  /* ── 映像 = 全面（幅フィット・contain＝頭切れなし。2.22:1 なので上下帯は極小） ── */
+  /* ── 映像 = 上段の主役バンド。残り高を総取り（flex:1）。canvas は contain のまま＝頭切れなし ── */
   body.league-mode #screen-game.active:has(> :is(#mv-controls, #mv-decision)[style*="display: flex"]) .zone-center.stage-bg {
-    position: absolute;
-    inset: 0;
+    order: 1;
+    position: relative;
+    inset: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 1;
-    padding: 0;
+    padding: clamp(4px, 1vh, 8px) clamp(6px, 1.4vw, 12px) clamp(3px, 0.8vh, 6px);
+    /* 額装スクリーン背後のステージ・スポット光＝左右のマットを"照らされた舞台"に見せる（死に領域化を防ぐ） */
+    background: radial-gradient(78% 120% at 50% 46%, rgba(38, 56, 92, 0.34), rgba(9, 13, 22, 0) 72%);
+  }
+  /* 映像枠＝2.22:1 の額装スクリーン。バンド高に合わせ height:100%、幅は比率から導出（＝内部 canvas が
+     contain でぴったり収まり内側レターボックスが出ない）。枠の角丸＋ヘアライン＋影で「1枚の放送スクリーン」に見せ、
+     残る左右のマットは"意図した額縁"として読める（＝raw なピラーボックス＝死に領域に見せない）。
+     複合ガードで自足＝HT/ゴール采配モーダル中（controls 非表示で一般 landscape 規則が外れる瞬間）も縮まない。 */
+  body.league-mode #screen-game.active:has(> :is(#mv-controls, #mv-decision)[style*="display: flex"]) #live-field-wrap {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    max-height: none;
+    aspect-ratio: 480 / 216;
+    margin: 0 auto;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: clamp(8px, 1.4vw, 12px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background: #05070d;
   }
   /* ── スコア/時間 = 左上の小チップ（北極星「前半34′｜チーム 1-0 チーム」様式）──
      器は既存 .scoreboard の半透明ガラスをそのまま使う（.zone-top 側の地は消して二重箱を防ぐ）。 */
@@ -1750,51 +1788,63 @@ body {
     width: clamp(64px, 9vw, 90px);
     height: 4px;
   }
-  /* ── 実況 = 映像下部に浮く白吹き出し（帯背景なし・話者リング小・操作帯の上に載る） ── */
+  /* ── 実況帯 = 映像の"下"の独立バンド（映像に浮かせない・自前の薄暗い地＋上ヘアラインで映像と分離） ── */
   body.league-mode #screen-game.active:has(> :is(#mv-controls, #mv-decision)[style*="display: flex"]) .zone-bottom {
-    position: absolute;
-    left: clamp(10px, 1.8vw, 18px);
-    right: clamp(10px, 1.8vw, 18px);
+    order: 2;
+    position: relative;
+    left: auto;
+    right: auto;
     top: auto;
-    bottom: clamp(56px, 13.5vh, 66px);
-    z-index: 20;
+    bottom: auto;
+    z-index: 2;
+    flex: 0 0 auto;
     min-height: 0;
-    padding: 0;
-    background: transparent;
-    box-shadow: none;
-    pointer-events: none;   /* 吹き出しの余白が下の映像/操作へのタップを奪わない */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(6px, 1.4vh, 10px) clamp(12px, 2vw, 22px);
+    background: linear-gradient(180deg, #141c2b 0%, #0e1522 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    pointer-events: auto;
   }
   body.league-mode #screen-game.active:has(> :is(#mv-controls, #mv-decision)[style*="display: flex"]) .game-content {
-    max-width: 720px;
+    flex-direction: row;
+    align-items: center;
+    max-width: 760px;
+    width: 100%;
     margin: 0 auto;
-    gap: clamp(8px, 1.4vw, 12px);
+    gap: clamp(9px, 1.6vw, 13px);
   }
   body.league-mode #screen-game.active:has(> :is(#mv-controls, #mv-decision)[style*="display: flex"]) .mv-speaker-ring {
     width: clamp(30px, 4.4vh, 38px);
     height: clamp(30px, 4.4vh, 38px);
   }
   body.league-mode #screen-game.active:has(> :is(#mv-controls, #mv-decision)[style*="display: flex"]) .log-event {
-    padding: clamp(7px, 1.6vh, 10px) clamp(12px, 1.8vw, 16px);
-    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5);
+    padding: clamp(6px, 1.4vh, 9px) clamp(12px, 1.8vw, 16px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
   }
-  /* ── 操作 = 下端の薄いオーバーレイ（透明→暗グラデの足場・采配が主役） ── */
+  /* ── 操作帯 = 最下段の独立シェルフ（映像に重ねず自領域を持つ・上ヘアラインで実況帯と段差） ── */
   body.league-mode #screen-game.active:has(> :is(#mv-controls, #mv-decision)[style*="display: flex"]) #mv-controls {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 40;
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    z-index: 3;
+    flex: 0 0 auto;
     width: 100%;
     max-width: none;
+    margin: 0;
     border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 0;
-    box-shadow: none;
-    background: linear-gradient(180deg, transparent 0%, rgba(4, 7, 13, 0.55) 36%, rgba(4, 7, 13, 0.85) 100%);
-    padding-top: clamp(8px, 2vh, 12px);
-    padding-bottom: clamp(4px, 1vh, 6px);
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.40);
+    background: linear-gradient(180deg, #0a0f1a 0%, #060a13 100%);
+    padding: clamp(5px, 1.1vh, 7px) clamp(10px, 1.6vw, 16px) calc(clamp(5px, 1.1vh, 7px) + env(safe-area-inset-bottom, 0px));
+    gap: clamp(7px, 1.6vw, 11px);
   }
   body.league-mode #screen-game.active:has(> :is(#mv-controls, #mv-decision)[style*="display: flex"]) #mv-controls .mv-btn {
-    min-height: 44px;   /* 薄帯でもタップ域44pxは死守 */
+    min-height: 44px;   /* 独立帯でもタップ域44pxは死守 */
   }
   /* 采配＝監督の主ボタン。金縁アクセントで「押すべき1個」に格上げ（北極星の右下采配の思想） */
   body.league-mode #screen-game.active:has(> :is(#mv-controls, #mv-decision)[style*="display: flex"]) #mv-controls .mv-btn-int {
