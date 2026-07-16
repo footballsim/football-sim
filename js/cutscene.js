@@ -71,7 +71,7 @@ var _bgsPreloaded = false;
 function _preloadCutsceneBgs() {
   if (_bgsPreloaded || typeof Image === 'undefined') return;
   _bgsPreloaded = true;
-  var list = [_LP_BG_SRC, _GK_BG_SRC, _GOAL_BG_SRC, _MISS_BG_SRC, _FOUL_REF_SRC, _POSTPLAY_FAIL_SRC, _POSTPLAY_FAIL_ATK_SRC, _POSTPLAY_FAIL_DEF_SRC, _POSTPLAY_HOLD_ATK_SRC, _POSTPLAY_HOLD_DEF_SRC, _ONETWO1_SRC, _ONETWO2_SRC, _ONETWO3_SRC];
+  var list = [_LP_BG_SRC, _GK_BG_SRC, _GOAL_BG_SRC, _MISS_BG_SRC, _FOUL_REF_SRC, _FOUL_SKY_SRC, _POSTPLAY_FAIL_SRC, _POSTPLAY_FAIL_ATK_SRC, _POSTPLAY_FAIL_DEF_SRC, _POSTPLAY_HOLD_ATK_SRC, _POSTPLAY_HOLD_DEF_SRC, _ONETWO1_SRC, _ONETWO2_SRC, _ONETWO3_SRC];
   for (var i = 0; i < list.length; i++) { if (list[i]) _loadCutsceneImg(list[i]); }
 }
 
@@ -396,6 +396,36 @@ function _lpBg() {                         // 横長背景（空・観客席・�
   b.fillStyle = '#2b8636'; for (var k = 0; k < W; k += 48) b.fillRect(k, 120, 24, H - 120);
   b.fillStyle = 'rgba(255,255,255,.45)'; b.fillRect(0, 128, W, 2);
   _lpBgCache = bg; return bg;
+}
+var _foulBgCache = null;
+function _foulBg() {                        // ファール（主審ドアップ）専用の青空主体背景。地平線を大きく下げ、
+  if (_foulBgCache) return _foulBgCache;    //   上半身の背後を青空にする。遠景に薄いスタンド帯＋足元の芝ストライプ。
+  var W = 480, H = 216;
+  var bg = document.createElement('canvas'); bg.width = W; bg.height = H;
+  var b = bg.getContext('2d');
+  var s = 91; function rnd() { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; }
+  var horizon = 172;
+  // 青空グラデ（上ほど濃い抜けるような青→地平線付近で淡く）
+  var g = b.createLinearGradient(0, 0, 0, horizon); g.addColorStop(0, '#3f74d8'); g.addColorStop(0.6, '#5f92e6'); g.addColorStop(1, '#bcd4f4'); b.fillStyle = g; b.fillRect(0, 0, W, horizon);
+  // 太陽グロー（右上・主審が指す方向側）
+  var sun = b.createRadialGradient(392, 44, 6, 392, 44, 96); sun.addColorStop(0, 'rgba(255,252,232,.85)'); sun.addColorStop(1, 'rgba(255,252,232,0)'); b.fillStyle = sun; b.fillRect(0, 0, W, horizon);
+  // ふんわり雲（大小・2層で厚みを出す）
+  for (var i = 0; i < 16; i++) {
+    var cx = rnd() * W, cy = 16 + rnd() * 118, cw = 16 + rnd() * 26, ch = cw * (0.32 + rnd() * 0.14);
+    b.fillStyle = 'rgba(255,255,255,' + (0.5 + rnd() * 0.4).toFixed(2) + ')';
+    b.beginPath(); b.ellipse(cx, cy, cw, ch, 0, 0, 7); b.fill();
+    b.fillStyle = 'rgba(255,255,255,.35)';
+    b.beginPath(); b.ellipse(cx + cw * 0.5, cy + ch * 0.4, cw * 0.7, ch * 0.8, 0, 0, 7); b.fill();
+  }
+  // 遠景スタンド（地平線上の薄い帯・存在を示す程度）
+  b.fillStyle = 'rgba(58,63,106,.55)'; b.fillRect(0, horizon - 10, W, 10);
+  for (var j = 0; j < W * 10 / 10; j++) { var x = rnd() * W | 0, y = horizon - 10 + (rnd() * 10 | 0); b.fillStyle = ['rgba(207,216,255,.5)', 'rgba(255,255,255,.5)', 'rgba(159,176,240,.5)'][rnd() * 3 | 0]; b.fillRect(x, y, 2, 2); }
+  b.fillStyle = 'rgba(90,95,134,.7)'; b.fillRect(0, horizon - 1, W, 2);
+  // 芝（足元・ストライプ）
+  var pg = b.createLinearGradient(0, horizon, 0, H); pg.addColorStop(0, '#349940'); pg.addColorStop(1, '#256e2c'); b.fillStyle = pg; b.fillRect(0, horizon, W, H - horizon);
+  b.fillStyle = '#2b8636'; for (var k = 0; k < W; k += 48) b.fillRect(k, horizon, 24, H - horizon);
+  b.fillStyle = 'rgba(255,255,255,.4)'; b.fillRect(0, horizon + 6, W, 2);
+  _foulBgCache = bg; return bg;
 }
 function _lpPent(ctx, cx, cy, rad, rot) { ctx.beginPath(); for (var i = 0; i < 5; i++) { var a = rot + i * 1.2566 - 1.5708, px = cx + Math.cos(a) * rad, py = cy + Math.sin(a) * rad; i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); } ctx.closePath(); ctx.fill(); }
 function _lpBall(ctx, x, y, r, spin) {     // 正しいサッカーボール（中央＋外周の五角形パネル）
@@ -2806,7 +2836,8 @@ function _renderMidShotScene(sc, opts) {
 // ファール専用カット: 主審(笛＋ポイント)を“いつもの背景”に重ねる。主審は中立色なので recolor しない。
 //   攻撃方向で主審を左右反転（指す向き＝プレー再開方向）。笛フラッシュ＋FOUL!。元絵 tools/art/cutscenes/foul_ref_src.png。
 // ============================================================
-var _FOUL_REF_SRC = 'img/cutscenes/foul_ref_t_01.png';
+var _FOUL_REF_SRC = 'img/cutscenes/foul_ref_t_01.png?v=7';   // v7img: 肩トリム浮き解消(クラック充填gap2化)・回帰ゲート[A-F]全PASS
+var _FOUL_SKY_SRC = 'img/cutscenes/foul_sky_bg_01.png?v=2';  // ドアップ主審用の青空背景(雲＋太陽のみ・スタンド/芝なし・生成・不透明1枚絵)
 function _renderFoulScene(sc, isPK) {
   var W = 480, H = 216, ground = 214;
   var canvas = document.createElement('canvas');
@@ -2818,7 +2849,8 @@ function _renderFoulScene(sc, isPK) {
   if (isPK) canvas.className = 'cs-fullframe';
   var ctx = canvas.getContext('2d');
   var refImg = _loadCutsceneImg(_FOUL_REF_SRC);
-  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var foulSkyImg = _loadCutsceneImg(_FOUL_SKY_SRC);   // 主審ドアップ専用の青空主体スタジアム背景（生成PNG）
+  var foulBgFallback = _foulBg();                      // 404時は手続き描画の青空へフォールバック
   var accent = isPK ? '#ff3b3b' : '#ffcf33';   // PK=赤 / ファール=イエロー（警告色）
 
   var gs = (typeof gameState !== 'undefined' && gameState) ? gameState : {};
@@ -2859,7 +2891,7 @@ function _renderFoulScene(sc, isPK) {
     ctx.clearRect(0, 0, W, H); ctx.imageSmoothingEnabled = false;
     ctx.save();
     if (flip) { ctx.translate(W, 0); ctx.scale(-1, 1); }
-    _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+    _lpDrawBg(ctx, foulSkyImg, foulBgFallback, W, H);
     var pop = Math.min(1, p / 0.16), z = 0.92 + 0.08 * pop;   // 主審がポップイン
     var sh = 198 * z, whX = W * 0.30, whY = H * 0.34;
     if (refImg.complete && refImg.naturalWidth) {
