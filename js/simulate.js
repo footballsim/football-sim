@@ -3802,6 +3802,16 @@ function _shootSplit(sc, textHtml, prevSc, nextSc) {
     if (crParts.length >= 2) return { parts: [crParts[0], crParts[1]], steps: ['fkdeliver', 'spcontest'] };
     return null;
   }
+  // ロングパス: 「蹴り出し（結果非開示・ボールは飛んでいくだけ）」→「守備選手の反応（スルー/カット）」の2ビート
+  //   （ユーザー指定・2026-07-16）。テキストはPK/FKと同じ方式＝1ビート目は汎用の非ネタバレ文、
+  //   2ビート目に元の定型文（結果を含む）をそのまま使う。成功/失敗/カウンターいずれもこの2ビートで統一。
+  if (sc.action === 'ロングパス') {
+    const lpKicker = (typeof coloredName === 'function') ? coloredName(sc.offence, sc.ofsPos) : '';
+    const lpShot = (typeof window !== 'undefined' && window.LANG === 'en')
+      ? (lpKicker ? (lpKicker + ' lofts a long ball forward!') : 'A long ball forward!')
+      : (lpKicker ? (lpKicker + 'が前線へロングボールを送る！') : '前線へロングボール！');
+    return { parts: [lpShot, String(textHtml || '')], steps: ['lpkick', 'lpresult'] };
+  }
   const isShoot = (sc.scenario === 'シュート' || sc.scenario === 'ミドルシュート');
   const isShootResult = (sc.result === 'ゴール！！' || sc.result === '枠を外した！' || sc.result === 'GK防いだ！' || sc.result === 'ブロック');
   if (!isShoot || !isShootResult) return null;

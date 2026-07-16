@@ -256,6 +256,14 @@ function renderShootStep(sc, stepType) {
   if (stepType === 'pkref') return _renderFoulScene(sc, true);       // PK判定＝主審カット＋「PK！！」（赤ラベル）
   if (stepType === 'fkdeliver') return _renderFkDeliveryScene(sc);   // セットプレー/オープンプレーのクロスの「蹴り出し」（クロスを上げる）
   if (stepType === 'spcontest') return renderSceneArt(sc);           // セットプレーの「競り合い」＝ヘディング/ボレー（既存）
+  if (stepType === 'lpkick') {                                       // ロングパス拍1＝蹴り出しのみ（結果非開示・resultを成功に中立化してボールは飛ぶだけ）
+    var lpSc = {}; for (var lk in sc) { if (Object.prototype.hasOwnProperty.call(sc, lk)) lpSc[lk] = sc[lk]; }
+    lpSc.result = '成功';
+    var lpEntry = _pickCutscene('longpass', sc.offence && sc.offence.team_color);
+    if (lpEntry && lpEntry.fileA) return _renderLongpassScene(lpSc, lpEntry);
+    return null;
+  }
+  if (stepType === 'lpresult') return _renderLongpassResultScene(sc); // ロングパス拍2＝守備選手の反応（スルー/カット）
   if (stepType === 'result') {
     if (sc.result === '枠を外した！') return _renderMissScene(sc);
     if (sc.result === 'GK防いだ！') return _renderGkScene(sc, 'save');
@@ -623,6 +631,97 @@ function _renderLongpassScene(sc, entry, opts) {
   requestAnimationFrame(frame);
   // 成功=蹴り手が pcx=326（右1/3・0.68）／失敗=2人タブローは中央（~0.5）。フリップ込みで主役を可視窓中央へ。
   return _csCenterSubject(canvas, fail ? 0.50 : (pcx / W), flipH);
+}
+
+// ロングパス拍2＝守備選手の反応（2026-07-16 ユーザー指定でロングパスを2シーン化）。
+//   単一の守備選手スプライト（キット4色＋肌でリカラー、髪型は_mangaFeat準拠）を配置し、
+//   ボールが画面右から水平に飛来する: 成功=守備の伸ばした手の高さを素通りしてそのまま画面外へ（無接触）。
+//   失敗/カウンター=守備のブーツ付近で衝突→跳ね返る（インパクトのバースト＋フラッシュ）。
+//   本番(MangaRecolor未ロード)はnull→呼び出し側のフォールバックへ。
+var _MANGA_LONGPASS_DF_DIR = 'img/cutscenes/manga_longpass_df/';
+function _renderLongpassResultScene(sc) {
+  if (typeof MangaRecolor === 'undefined' || !MangaRecolor.render) return null;
+  var W = 480, H = 216, ground = 196;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+
+  var success = (sc.result === '成功');
+  var defP = sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+  var defName = defP ? ((typeof getPlayerName === 'function') ? getPlayerName(defP) : defP.name) : '';
+  var defTeamNm = (typeof getTeamName === 'function' && sc.defence) ? getTeamName(sc.defence) : '';
+  var defFeat = _mangaFeat(defP ? (defP.long_name || defP.name || '') : '');
+  var defCols = _mangaColors(sc.defence, defFeat.skin);
+  var defKey = 'lpdf|' + defFeat.hstyle + '|' + defCols.shirt + defCols.shorts + defCols.socks + defCols.accent + defCols.skin;
+  var defImg = _loadCutsceneImg(_MANGA_LONGPASS_DF_DIR + defFeat.hstyle + '.png');
+
+  var accent = success ? ((sc.offence && sc.offence.team_color) || '#1f4fd6') : ((sc.defence && sc.defence.team_color) || '#e36b1f');
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  var label = success ? (en ? 'THROUGH!' : 'スルー！') : (en ? 'CUT!' : 'カット！');
+  var labelCol = success ? '#ffe14a' : '#ff5a3c';
+
+  function dom(id) { var el = (typeof document !== 'undefined') && document.getElementById(id); return el ? el.textContent : ''; }
+  var timeTxt = dom('game-time-display');
+
+  var ph = 190, sx = W * 0.34, sy = ground - ph;         // 守備の描画枠
+  var flipH = _csAttackRight(sc);                        // ネイティブ=左攻め→右へのボール。キック拍(_renderLongpassScene)と同じ規約
+  var P = 1300;
+
+  function burst(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 12, y + Math.sin(an) * 12); ctx.lineTo(x + Math.cos(an) * 50, y + Math.sin(an) * 50); ctx.stroke(); } }
+  function hud() {
+    if (!CUTSCENE_BURN_LABELS) return;
+    var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
+    if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
+    var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
+    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = labelCol; ctx.fillText(label, 12, H - 9);
+    if (!success && defName) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText('✕ ' + defName + (defTeamNm ? (' · ' + defTeamNm) : ''), W - 12, H - 10); }
+  }
+
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var p = Math.min(1, (now - T0) / P);
+    ctx.clearRect(0, 0, W, H);
+    ctx.imageSmoothingEnabled = false;
+    ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+    _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+
+    var spr = (defImg.complete && defImg.naturalWidth) ? MangaRecolor.render(defKey, defImg, defCols) : null;
+    var dw = spr ? spr.width * (ph / spr.height) : 0;
+    var dx = sx;
+
+    var launchP = 0.06, spd = 2300, bx = null, by = null, impact = 0;
+    if (success) {
+      by = sy + ph * 0.28;                               // 伸ばした手の高さ＝反応するが届かない
+      if (p >= launchP) bx = W + 20 - spd * (p - launchP);
+    } else {
+      by = sy + ph * 0.85;                                // 足元の高さ
+      var footX = dx + dw * 0.90;                         // ボール進入側（右寄り）のブーツ＝衝突点
+      var hitDt = (W + 20 - footX) / spd;
+      if (p >= launchP) {
+        var dt = p - launchP;
+        if (dt < hitDt) { bx = W + 20 - spd * dt; }
+        else { var dd = dt - hitDt; bx = footX - spd * 0.6 * dd; by = by - spd * 0.5 * dd; }
+        impact = (dt > hitDt - 0.02 && dt < hitDt + 0.10) ? 1 - Math.abs(dt - hitDt) / 0.10 : 0;
+      }
+    }
+    if (spr) ctx.drawImage(spr, dx, sy, dw, ph);
+    var ballOn = (bx !== null && bx > -30 && bx < W + 30);
+    if (ballOn) _lpBall(ctx, bx, by, 12, p * 40);
+    if (impact > 0) burst(bx, by, impact * 0.9);
+    ctx.restore();
+    if (impact > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (impact * 0.4) + ')'; ctx.fillRect(0, 0, W, H); }
+    hud();
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return _csCenterSubject(canvas, 0.5, false);
 }
 
 // GKのキット色を選ぶ: 両チーム（攻撃/守備）と別色＋「GKらしい色」優先（黄/暗/白）。
