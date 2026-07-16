@@ -147,6 +147,7 @@
     _mvOppSubCount = 0; _mvOppOff = {}; _mvOppIn = {}; _mvLateChecked = false;   // 相手監督AIの交代状態をリセット
     window._mvMatchSubs = [];   // 全交代（自/相手）のログ記録をリセット
     _mvSubCutQueue = [];   // 交代カットシーン待ち行列をリセット
+    _mvSkillCutQueue = []; _mvSkillSeen = {};   // スキル発動カットイン待ち行列/既再生をリセット（PS-05）
     _subbedOff = new Set();
     _pendingSubLog = [];
     _shootSubStep = 0;
@@ -291,10 +292,15 @@
     //   ※ ゴール後の采配ポップアップは廃止（割り込み過多・采配はコントロールバー/HTで可能）。
     if (_mvGoalShown) {
       _mvOpponentDecide(false);   // 相手監督が失点/得点に反応（戦術＋交代）
+      _mvCollectSkillEvents();    // このチャンスの skill_activate（鼓舞など）を収集（PS-05）
       _mvPause();
       setTimeout(function () {
         if (!_managerMode) return;
-        _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); });   // 交代あれば先にカット → 続行
+        // 失点シーンの“後”に発動カットイン＋トースト → 交代カット → 続行（時系列＝失点→発動）。
+        _mvPlaySkillCutscenes(function () {
+          if (!_managerMode) return;
+          _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); });
+        });
       }, 3300);
       return;
     }
@@ -322,6 +328,51 @@
   function _mvSyncHud() {
     var cc = document.getElementById('chance-count');
     if (cc) cc.textContent = Math.min(currentChanceIdx, _mvCtrl.getState().n);
+    _mvRenderMentalHud();
+  }
+
+  /* ── メンタル可視化 HUD（PS-05・描画のみ・エンジン不変）───────────────
+   * 自チーム(team1)の chief morale アイコン と、ピッチ上のイライラ(frustration)選手数を
+   *   小さなピルで常時表示。mental.js が付与する team.morale / player.frustration を読むだけ。
+   * 非表示: window.MV_MENTAL_HUD===false（既定表示・mental非同梱でも 0 扱いで安全）。 */
+  function _mvMoraleIcon(m) {
+    if (m > 0.15) return '🔥';        // 高揚
+    if (m < -0.15) return '💧';       // 意気消沈
+    return '😐';
+  }
+  function _mvRenderMentalHud() {
+    if (typeof window !== 'undefined' && window.MV_MENTAL_HUD === false) {
+      var old = document.getElementById('mv-mental-hud'); if (old) old.style.display = 'none';
+      return;
+    }
+    var host = document.getElementById('screen-game'); if (!host) return;
+    var team = (typeof gameState !== 'undefined' && gameState) ? gameState.team1 : null;
+    if (!team || !team.players || !team.lineup) return;
+    var el = document.getElementById('mv-mental-hud');
+    if (!el) {
+      el = document.createElement('div'); el.id = 'mv-mental-hud';
+      el.style.cssText = 'position:absolute;top:104px;left:8px;z-index:55;display:flex;gap:6px;align-items:center;' +
+        'background:rgba(12,16,26,0.82);border:1px solid rgba(255,255,255,0.16);border-radius:16px;' +
+        'padding:4px 10px;font-size:11px;font-weight:800;color:#eef3ff;pointer-events:none;' +
+        'box-shadow:0 3px 10px rgba(0,0,0,0.35);white-space:nowrap;line-height:1.4';
+      host.appendChild(el);
+    }
+    el.style.display = '';
+    var m = team.morale || 0;
+    var frust = 0;
+    for (var pos = 0; pos < 11 && pos < team.lineup.length; pos++) {
+      var p = team.players[team.lineup[pos]];
+      if (p && (p.frustration || 0) > 0.4) frust++;
+    }
+    var col = (team.team_color) || '#8899aa';
+    var chip = '<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:' + col + ';margin-right:4px"></span>';
+    var moraleCol = m > 0.15 ? '#51e08a' : m < -0.15 ? '#7fb2ff' : '#cdd6e6';
+    var html = chip + '<span style="color:' + moraleCol + '">' + _mvMoraleIcon(m) + ' ' +
+      _mvT('士気', 'Morale') + '</span>';
+    if (frust > 0) {
+      html += '<span style="color:#ff8f6b;margin-left:8px">😠 ' + frust + '</span>';
+    }
+    el.innerHTML = html;
   }
 
   // 結果まで一気に（残りチャンスを全計算して結果画面へ）。
@@ -601,6 +652,84 @@
       _mvHideSubCutscene();
       setTimeout(function () { if (done) done(); }, 320);
     }, 2000);
+  }
+
+  /* ── スキル発動カットイン＋トースト（PS-05・鼓舞など）─────────────────
+   * mental.js/simulate.js が res.mentalEvents に記録した skill_activate を購読し、
+   *   失点シーン（ゴール余韻）の“後”に漫画的決めゴマ（_renderSkillActivateScene）と
+   *   発動トーストを差し込む。エンジン不可侵＝表示のみ・rng 消費ゼロ。
+   * キルスイッチ: window.SKILL_CUTIN_ENABLED===false（cutscene.js 側と同型）。 */
+  var _mvSkillCutQueue = [];   // 発動カットイン待ち行列（events.js 正規化形 evt）
+  var _mvSkillSeen = {};       // 再生済み skill_activate のキー（重複再生防止）
+  function _mvSkillCutEnabled() {
+    return typeof _skillCutinOn === 'function' ? _skillCutinOn()
+      : (typeof window === 'undefined' || window.SKILL_CUTIN_ENABLED !== false);
+  }
+  // 現時点までに計算済みのチャンス結果から未再生の skill_activate を収集して待ち行列へ。
+  //   raw mentalEvent {type,team:1|2,player,playerEn,skill} を events.js 正規化形へ写す。
+  function _mvCollectSkillEvents() {
+    if (typeof chanceResults === 'undefined' || !Array.isArray(chanceResults)) return;
+    var upto = Math.min(currentChanceIdx, chanceResults.length - 1);
+    for (var ci = 0; ci <= upto; ci++) {
+      var r = chanceResults[ci];
+      if (!r || !Array.isArray(r.mentalEvents)) continue;
+      for (var i = 0; i < r.mentalEvents.length; i++) {
+        var me = r.mentalEvents[i];
+        if (!me || me.type !== 'skill_activate') continue;
+        var key = ci + '|' + i + '|' + (me.skill || '') + '|' + (me.player || '');
+        if (_mvSkillSeen[key]) continue;
+        _mvSkillSeen[key] = true;
+        _mvSkillCutQueue.push({
+          team: me.team === 1 ? 'home' : me.team === 2 ? 'away' : null,
+          player: me.player || null, playerEn: me.playerEn || null,
+          skill: me.skill || null, detail: me.detail || null,
+        });
+      }
+    }
+  }
+  // 発動カットインのラベル（トースト用・i18n・選手名置換）。
+  function _mvSkillLabel(evt) {
+    var en = _isEn();
+    var pname = en ? (evt.playerEn || evt.player || '') : (evt.player || '');
+    var def = (typeof SKILL_DEFS !== 'undefined' && SKILL_DEFS && SKILL_DEFS[evt.skill]) ? SKILL_DEFS[evt.skill] : null;
+    var fb = (typeof _SKILL_LABEL_FALLBACK !== 'undefined' && _SKILL_LABEL_FALLBACK[evt.skill]) ? _SKILL_LABEL_FALLBACK[evt.skill] : null;
+    var lbl = (def && def.label) || fb || { ja: String(evt.skill || ''), en: String(evt.skill || '') };
+    return String(en ? lbl.en : lbl.ja).replace('{player}', pname).replace('｛選手｝', pname);
+  }
+  function _mvShowSkillCutin(evt) {
+    var band = document.getElementById('live-field-wrap'); if (!band) return false;
+    var c = (typeof _renderSkillActivateScene === 'function') ? _renderSkillActivateScene(evt) : null;
+    if (!c) return false;
+    band.style.display = '';
+    var el = document.getElementById('mv-skillcut');
+    if (!el) {
+      el = document.createElement('div'); el.id = 'mv-skillcut';
+      el.style.cssText = 'position:absolute;inset:0;z-index:7;display:flex;align-items:center;justify-content:center;' +
+        'opacity:0;transition:opacity .28s;pointer-events:none;overflow:hidden;background:#070b13';
+      band.appendChild(el);
+    }
+    el.innerHTML = '';
+    c.style.width = '100%'; c.style.height = '100%';
+    el.appendChild(c);
+    el.getBoundingClientRect();   // reflow → フェードイン
+    el.style.opacity = '1';
+    _mvToast('⚡ ' + _mvSkillLabel(evt));   // 発動トースト（相手監督AIトースト機構を流用）
+    return true;
+  }
+  function _mvHideSkillCutin() { var el = document.getElementById('mv-skillcut'); if (el) el.style.opacity = '0'; }
+  // 待ち行列を順に ~1.9s ずつ再生して done()。無効/空なら即 done()。
+  function _mvPlaySkillCutscenes(done) {
+    if (!_mvSkillCutEnabled() || !_mvSkillCutQueue.length) { _mvSkillCutQueue = []; if (done) done(); return; }
+    var batch = _mvSkillCutQueue.slice(); _mvSkillCutQueue = [];
+    (function step(i) {
+      if (!_managerMode) { _mvHideSkillCutin(); return; }
+      if (i >= batch.length) { _mvHideSkillCutin(); if (done) done(); return; }
+      var shown = _mvShowSkillCutin(batch[i]);
+      setTimeout(function () {
+        _mvHideSkillCutin();
+        setTimeout(function () { step(i + 1); }, shown ? 260 : 0);
+      }, shown ? 1900 : 0);
+    })(0);
   }
 
   // 相手監督の1停止点ぶんの判断（戦術＋交代）。
@@ -1043,4 +1172,6 @@
   g._mvOpponentSub = _mvOpponentSub;       // デバッグ/検証用ハンドル
   g._mvRenderSubCutscene = _mvRenderSubCutscene;   // デバッグ/検証用ハンドル
   g._mvPlaySubCutscenes = _mvPlaySubCutscenes;     // デバッグ/検証用ハンドル
+  g._mvPlaySkillCutscenes = _mvPlaySkillCutscenes; // デバッグ/検証用ハンドル（PS-05）
+  g._mvShowSkillCutin = _mvShowSkillCutin;         // デバッグ/検証用ハンドル（PS-05）
 })();

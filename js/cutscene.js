@@ -208,6 +208,17 @@ let SCENE_ART_ENABLED = true; // window.SCENE_ART_ENABLED===false で無効
 //   試合画面リデザインで HUDの試合時計 と 下部の漫画ネーム枠 に情報を集約したため、
 //   絵側のラベルは重複＋cover切り出しで欠けるので停止する。中央のGOAL!!/PENALTY!等の大演出は別系統(hud外)なので影響なし。
 var CUTSCENE_BURN_LABELS = false; // ←将来 ui-designer がCSSオーバーレイで擬似SFX復活させる選択肢あり
+// スキル発動カットイン（PS-05・鼓舞など漫画的決めゴマ）のキルスイッチ。
+//   window.SKILL_CUTIN_ENABLED===false で無効化（CUTSCENES_ENABLED にも従属）。
+let SKILL_CUTIN_ENABLED = true;
+function _skillCutinOn() {
+  if (!(CUTSCENES_ENABLED && (typeof window === 'undefined' || window.CUTSCENES_ENABLED !== false))) return false;
+  return SKILL_CUTIN_ENABLED && (typeof window === 'undefined' || window.SKILL_CUTIN_ENABLED !== false);
+}
+// スキルラベルのフォールバック（mental.js 非同梱の _scene_lab 等でも文言を出せるように）。
+var _SKILL_LABEL_FALLBACK = {
+  captaincy: { ja: '｛選手｝がチームを鼓舞した！', en: '{player} rallies the team!' },
+};
 
 var _ACTION_MOMENT = {
   'ロングパス': 'longpass', 'ショートパス': 'shortpass',
@@ -2925,4 +2936,176 @@ function _renderFoulScene(sc, isPK) {
   requestAnimationFrame(frame);
   // 主審は W*0.40（0.40）中心。flip 込みで主役を可視窓中央へ（PK=cs-fullframe はヘルパー側でスキップ）。
   return _csCenterSubject(canvas, 0.4, flip);
+}
+
+// ============================================================
+//  スキル発動カットイン（PS-05・漫画的決めゴマ）
+//   evt = events.js の SKILL_ACTIVATE Event 形 {team:'home'|'away', player, playerEn, skill, detail}
+//   手続き描画のみ（新規アセット無し）。中央にネームプレート＋i18nラベル、morale上昇モチーフ
+//   （立ち上る光の柱・上向き矢印・白い集中線）、チーム色アクセント。フェード/スケール出入り ~1750ms。
+//   mental.js 非同梱でも動くよう SKILL_DEFS が無ければ _SKILL_LABEL_FALLBACK を使う。
+//   無効時/未対応evtは null（呼び出し側フォールバック）。
+// ============================================================
+function _renderSkillActivateScene(evt) {
+  if (typeof document === 'undefined') return null;
+  if (!_skillCutinOn()) return null;
+  if (!evt || !evt.skill) return null;
+
+  var W = 480, H = 216;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.className = 'cs-fullframe';   // 中央大ラベルを contain で全文表示（cover 切れ回避）
+  canvas.style.cssText = 'display:block;width:100%';
+  var ctx = canvas.getContext('2d');
+
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  // チーム色（gameState 経由）。home=team1 / away=team2。
+  var gs = (typeof gameState !== 'undefined' && gameState) ? gameState : {};
+  var team = evt.team === 'home' ? gs.team1 : evt.team === 'away' ? gs.team2 : null;
+  var col = (team && team.team_color) || '#f2c14e';
+  var teamNm = team ? ((typeof getTeamName === 'function') ? getTeamName(team) : (team.name || '')) : '';
+  var pname = en ? (evt.playerEn || evt.player || '') : (evt.player || '');
+
+  // ラベル（SKILL_DEFS 優先・無ければフォールバック）。｛選手｝/{player} を選手名へ置換。
+  var def = (typeof SKILL_DEFS !== 'undefined' && SKILL_DEFS && SKILL_DEFS[evt.skill]) ? SKILL_DEFS[evt.skill] : null;
+  var lbl = (def && def.label) || _SKILL_LABEL_FALLBACK[evt.skill] || { ja: String(evt.skill), en: String(evt.skill) };
+  var text = String(en ? lbl.en : lbl.ja).replace('{player}', pname).replace('｛選手｝', pname);
+  var kicker = en ? 'SKILL ACTIVATED' : 'スキル発動';
+  var moraleTag = en ? 'MORALE ▲' : '士気 ▲';
+
+  // 色ユーティリティ（team色を暗く/明るく合成）。
+  function _hex(c) { var m = /^#?([0-9a-f]{6})$/i.exec(c || ''); if (!m) return [242, 193, 78]; var n = parseInt(m[1], 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  var rgb = _hex(col);
+  function rgba(mul, a) { return 'rgba(' + Math.round(rgb[0] * mul) + ',' + Math.round(rgb[1] * mul) + ',' + Math.round(rgb[2] * mul) + ',' + a + ')'; }
+
+  var P = 1750;
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;   // 差し替えで外れたら停止
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var p = Math.min(1, (now - T0) / P);
+    var appear = Math.min(1, p / 0.12);
+    var out = p > 0.86 ? (p - 0.86) / 0.14 : 0;
+    var alpha = appear * (1 - out);
+
+    ctx.clearRect(0, 0, W, H);
+
+    // 背景: 暗いラジアル（team色に寄せる）＋ビネット。
+    var bg = ctx.createRadialGradient(W / 2, H * 0.46, 20, W / 2, H * 0.46, W * 0.72);
+    bg.addColorStop(0, rgba(0.34, 0.96 * alpha));
+    bg.addColorStop(0.55, rgba(0.14, 0.98 * alpha));
+    bg.addColorStop(1, 'rgba(4,7,14,' + (0.99 * alpha) + ')');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+    // 白い集中線（漫画・回転しながら中央へ収束）。
+    var rot = p * 0.7;
+    ctx.save();
+    ctx.translate(W / 2, H * 0.46);
+    ctx.strokeStyle = 'rgba(255,255,255,' + (0.20 * alpha) + ')';
+    for (var i = 0; i < 26; i++) {
+      var an = i / 26 * 6.283 + rot;
+      ctx.lineWidth = (i % 2 ? 1.2 : 2.6);
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(an) * 96, Math.sin(an) * 96);
+      ctx.lineTo(Math.cos(an) * 360, Math.sin(an) * 360);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 立ち上る光の柱（team色・下から上へ流れる）。
+    var cols = 7;
+    for (var c = 0; c < cols; c++) {
+      var cx = (c + 0.5) / cols * W;
+      var ph = ((p * 1.6 + c * 0.37) % 1);         // 各柱の位相
+      var top = H - ph * H * 1.15;                   // 上へ抜ける
+      var lg = ctx.createLinearGradient(0, H, 0, top);
+      lg.addColorStop(0, rgba(1.25, 0.0));
+      lg.addColorStop(0.6, rgba(1.25, 0.16 * alpha));
+      lg.addColorStop(1, rgba(1.5, 0.0));
+      ctx.fillStyle = lg;
+      var bw = 14 + (c % 3) * 4;
+      ctx.fillRect(cx - bw / 2, top, bw, H - top);
+    }
+
+    // 上向き矢印（team色・鼓舞＝士気上昇のモチーフ）。左右に配置。
+    function upArrow(ax, scale, a) {
+      ctx.save();
+      ctx.translate(ax, H * 0.52);
+      ctx.scale(scale, scale);
+      ctx.fillStyle = rgba(1.35, a);
+      ctx.beginPath();
+      ctx.moveTo(0, -22); ctx.lineTo(15, -2); ctx.lineTo(6, -2);
+      ctx.lineTo(6, 20); ctx.lineTo(-6, 20); ctx.lineTo(-6, -2);
+      ctx.lineTo(-15, -2); ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    var arrBob = Math.sin(p * 9) * 4;
+    upArrow(58, 1.0 + 0.06 * Math.sin(p * 8), 0.85 * alpha);
+    upArrow(W - 58, 1.0 + 0.06 * Math.cos(p * 8), 0.85 * alpha);
+    // 中央の小さな上昇矢印の群れ（浮上）はkickerと重なるので左右のみ。arrBob は柱と矢印のわずかな揺れに使用。
+    if (arrBob) { /* no-op: 揺れ演出用（将来拡張） */ }
+
+    // 開始フラッシュ（決めゴマのインパクト）。
+    var flash = p < 0.14 ? (1 - p / 0.14) : 0;
+    if (flash > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (flash * 0.5) + ')'; ctx.fillRect(0, 0, W, H); }
+
+    // ---- テキスト塊（スケールイン）----
+    var pop = Math.min(1, p / 0.16);
+    var bz = 1.28 - 0.28 * pop;   // 大きく入って定位置へ
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(W / 2, H * 0.46);
+    ctx.scale(bz, bz);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+
+    // kicker（⚡ SKILL）＋ morale タグ。
+    ctx.font = '900 15px "Arial Black",sans-serif';
+    ctx.lineWidth = 4; ctx.strokeStyle = '#06070e';
+    ctx.strokeText('⚡ ' + kicker, 0, -58);
+    ctx.fillStyle = rgba(1.55, 1); ctx.fillText('⚡ ' + kicker, 0, -58);
+
+    // メインラベル（自動縮小で全文フィット）。
+    var fs = 40;
+    ctx.font = '900 ' + fs + 'px "Arial Black",sans-serif';
+    while (ctx.measureText(text).width > W * 0.86 && fs > 16) { fs -= 2; ctx.font = '900 ' + fs + 'px "Arial Black",sans-serif'; }
+    ctx.lineWidth = fs * 0.17; ctx.strokeStyle = '#06070e'; ctx.strokeText(text, 0, -14);
+    ctx.fillStyle = '#ffffff'; ctx.fillText(text, 0, -14);
+
+    // morale タグ（team色の帯風テキスト）。
+    ctx.font = '900 16px "Arial Black",sans-serif';
+    ctx.lineWidth = 4; ctx.strokeStyle = '#06070e';
+    ctx.strokeText(moraleTag, 0, 24);
+    ctx.fillStyle = rgba(1.5, 1); ctx.fillText(moraleTag, 0, 24);
+
+    // ネームプレート（team色チップ＋選手名 · チーム名）。
+    var nmText = (pname ? pname : '') + (teamNm ? '  ' + teamNm : '');
+    ctx.font = '800 14px sans-serif';
+    var nmW = ctx.measureText(nmText).width;
+    var plW = nmW + 34, plX = -plW / 2, plY = 44, plH = 24;
+    ctx.fillStyle = 'rgba(6,8,16,0.72)';
+    _csRoundRect(ctx, plX, plY, plW, plH, 7); ctx.fill();
+    ctx.fillStyle = rgba(1.4, 1);   // 左のチーム色チップ
+    ctx.fillRect(plX + 8, plY + 7, 10, 10);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#eef3ff'; ctx.fillText(nmText, plX + 24, plY + plH / 2 + 1);
+    ctx.restore();
+
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return canvas;   // cs-fullframe: contain 表示。_csCenterSubject は通さない（全画面決めゴマ）。
+}
+
+// 角丸矩形ヘルパー（既存に無ければ最小実装）。
+function _csRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
 }
