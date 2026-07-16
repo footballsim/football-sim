@@ -2377,6 +2377,14 @@ const area_data = {
   "CR_R":{name:"クロス右サイド",offences:[["CF",40],["左CF",40],["右CF",40],["左WG",30],["右WG",30],["OMF",30],["左OMF",30],["右OMF",30],["左SMF",20],["右SMF",20],["CMF",20],["左CMF",20],["右CMF",20],["左SB",5],["右SB",5]],matchup:{"CF":[["CB"],["左CB","右CB"],["DMF"],["左DMF","右DMF"],["CMF"]],"左CF":[["右CB"],["CB"],["左CB","右CB"],["右DMF","左DMF"],["左DMF","右DMF"]],"右CF":[["左CB","右CB"],["CB"],["左CB","右CB"],["右DMF","左DMF"],["左DMF","右DMF"]],"左WG":[["右SB"],["右CB"],["CB"],["右DMF"],["DMF"]],"右WG":[["左SB"],["左CB"],["CB"],["左DMF"],["DMF"]],"OMF":[["DMF"],["左DMF","右DMF"],["CB"],["左CB","右CB"],["CMF"]],"左OMF":[["右DMF","左DMF"],["DMF"],["右CB"],["CB"],["右CMF","左CMF"]],"右OMF":[["左DMF","右DMF"],["DMF"],["左CB"],["CB"],["左CMF","右CMF"]],"左SMF":[["右SB"],["右CB"],["右DMF"],["右CMF"],["右SMF"]],"右SMF":[["左SB"],["左CB"],["左DMF"],["左CMF"],["左SMF"]],"CMF":[["CMF"],["左CMF","右CMF"],["DMF"],["左DMF","右DMF"],["CB"]],"左CMF":[["右CMF","左CMF"],["CMF"],["右DMF"],["DMF"],["左CB","右CB"]],"右CMF":[["左CMF","右CMF"],["CMF"],["左DMF"],["DMF"],["左CB","右CB"]],"左SB":[["右SB"],["右CB"],["右DMF"],["右CMF"],["右SMF"]],"右SB":[["左SB"],["左CB"],["左DMF"],["左CMF"],["左SMF"]]},actions:["ボレーシュート","ヘディングシュート"]}
 };
 
+// エリア名の英語表記（sceneToText/_shootSplit 共通・2026-07-16 ロングパス拍1でのエリア表示追加のため共有化）
+const AREA_NAME_EN = {
+  'DF_L':'DF Left','DF_M':'DF Center','DF_R':'DF Right',
+  'MF_L':'MF Left','MF_M':'MF Center','MF_R':'MF Right',
+  'FW_L':'FW Left','FW_M':'FW Center','FW_R':'FW Right',
+  'CR_L':'Cross Left','CR_R':'Cross Right','SHOOT_M':'Shooting Area'
+};
+
 const scenario_data_ja = {
   "ショートパス|成功|ショートパス|同":"【攻撃選手】が味方とのワンツーで【守備選手】をかわし【対象エリア】を突破！",
   "ショートパス|成功|ロングパス|同":"【対象エリア】でボールをキープした【攻撃選手】が味方とのワンツー！  【守備選手】はこれを止められない！",
@@ -2406,18 +2414,18 @@ const scenario_data_ja = {
     "【対象エリア】、【守備選手】が【攻撃選手】のクロスを腕で阻もうとした！  レフェリーの笛が鳴り響く！"
   ],
   "サイドクロス|カウンター":"【対象エリア】、【攻撃選手】がクロスを狙うが【守備選手】がみごとにクリア！  そのままカウンター！",
-  "ロングパス|成功|クロス":"【対象エリア】、【攻撃選手】がロングパスを前線サイドへ通す！  【守備選手】は追いつけない！",
-  "ロングパス|成功|シュート":"【対象エリア】、【攻撃選手】がロングパスを前線へ通す！  【守備選手】は追いつけない！",
-  "ロングパス|成功|セットプレー":"【対象エリア】、【攻撃選手】がロングパスを前線へ通す！  【守備選手】は追いつけない！",
+  "ロングパス|成功|クロス":"【守備選手】は追いつけない！",
+  "ロングパス|成功|シュート":"【守備選手】は追いつけない！",
+  "ロングパス|成功|セットプレー":"【守備選手】は追いつけない！",
   "ロングパス|成功|ショートパス|同":"【対象エリア】、【攻撃選手】がロングパスを前線へ送る！  そのままボールをキープし味方とのワンツーを狙う！",
-  "ロングパス|成功|ショートパス|別":"【対象エリア】、【攻撃選手】がロングパスを前線へ通す！  【守備選手】はこれを止められない。【次の攻撃選手】へボールがわたる。",
+  "ロングパス|成功|ショートパス|別":"【守備選手】はこれを止められない。【次の攻撃選手】へボールがわたる。",
   "ロングパス|成功|ロングパス|同":"【対象エリア】、【攻撃選手】がロングパスを前線へ送る！  そのまま自らボールを受けさらに前へ！",
-  "ロングパス|成功|ロングパス|別":"【対象エリア】、【攻撃選手】がロングパスを前線へ通す！  【守備選手】はこれを止められない。【次の攻撃選手】へボールがわたる。",
+  "ロングパス|成功|ロングパス|別":"【守備選手】はこれを止められない。【次の攻撃選手】へボールがわたる。",
   "ロングパス|成功|ドリブル突破|同":"【対象エリア】、【攻撃選手】がロングパスを送りそのまま前線へ走りこむ！  【守備選手】は追いつけない！",
   "ロングパス|成功|飛び出し|同":"【対象エリア】、【攻撃選手】がロングパスを前線へ送りそのままウラへ飛び出す！  【守備選手】は対応できない！",
   "ロングパス|成功|ポストプレー|同":"【対象エリア】、【攻撃選手】がロングパスを前線へ送りそのままポストプレーでボールをキープ！  【守備選手】はこれを奪えない！",
   "ロングパス|成功|サイドクロス|同":"【対象エリア】、【攻撃選手】がロングパスを前線サイドへ通す！  そのまま前線へ仕掛ける！",
-  "ロングパス|成功|サイドクロス|別":"【対象エリア】、【攻撃選手】がロングパスを前線サイドへ通す！  【守備選手】は追いつけない。",
+  "ロングパス|成功|サイドクロス|別":"【守備選手】は追いつけない。",
   "ショートパス|成功|サイドクロス|同":"【攻撃選手】が味方とのパス交換で【守備選手】をかわし【対象エリア】を突破！  そのまま前線へ仕掛ける！",
   "ショートパス|成功|サイドクロス|別":"【対象エリア】の【攻撃選手】が【守備選手】をかわして【次の攻撃選手】へボールをつなぐ！",
   "ドリブル突破|成功|サイドクロス|同":"【対象エリア】、【攻撃選手】がドリブルで【守備選手】を抜き去った！！  そのまま前線へ仕掛ける！",
@@ -2442,9 +2450,9 @@ const scenario_data_ja = {
   "ショートパス|成功|セットプレー":"【攻撃選手】が味方とのパス交換で、マークしていた【守備選手】を振り切り【対象エリア】を突破！",
   "ポストプレー|成功|セットプレー":"【対象エリア】、【攻撃選手】が巧みなポストプレーでマークした【守備選手】を反転しかわす！",
   "飛び出し|成功|セットプレー":"【対象エリア】、パスに反応した【攻撃選手】は、絶妙な飛び出しで【守備選手】を振り切る！",
-  "ロングパス|成功|ドリブル突破|別":"【対象エリア】の【攻撃選手】がロングパス！  【守備選手】はこれを止められない。",
-  "ロングパス|成功|飛び出し|別":"【対象エリア】で【守備選手】のマークをかわした【攻撃選手】が前線のスペースへロングパスを通す！",
-  "ロングパス|成功|ポストプレー|別":"【対象エリア】、ルックアップした【攻撃選手】がロングボールを送る。これに【守備選手】が反応するがボールは取れない！",
+  "ロングパス|成功|ドリブル突破|別":"【守備選手】はこれを止められない。",
+  "ロングパス|成功|飛び出し|別":"【守備選手】は対応できない！",
+  "ロングパス|成功|ポストプレー|別":"【守備選手】が反応するがボールは取れない！",
   "ドリブル突破|成功|ショートパス|同":"【攻撃選手】がドリブルで【守備選手】を抜き去り【対象エリア】を突破！",
   "ドリブル突破|成功|ロングパス|同":"【攻撃選手】がドリブルで【守備選手】を抜き去り【対象エリア】を突破！",
   "ドリブル突破|成功|ドリブル突破|同":"【攻撃選手】がドリブルで【守備選手】を抜き去り【対象エリア】を突破！",
@@ -2475,7 +2483,7 @@ const scenario_data_ja = {
     "【対象エリア】の【攻撃選手】がショートパス。しかし【守備選手】がみごとにこれをカット！",
     "【対象エリア】の【攻撃選手】がパスを出すが、【守備選手】が素早く読んでインターセプト！"
   ],
-  "ロングパス|失敗":"【対象エリア】の【攻撃選手】がロングパスを狙うが、【守備選手】がみごとにこれをカット！",
+  "ロングパス|失敗":"【守備選手】がみごとにこれをカット！",
   "ドリブル突破|失敗":[
     "【対象エリア】、【攻撃選手】がドリブル突破を試みるが、【守備選手】は的確な守備でこれを止める！",
     "【対象エリア】、【攻撃選手】が仕掛けるが【守備選手】の粘り強いタックルでボールを奪われた！"
@@ -2496,7 +2504,7 @@ const scenario_data_ja = {
   "ポストプレー|ファール":"【対象エリア】、ボールをキープする【攻撃選手】に対して【守備選手】が後ろからチャージ、これはファールだ！",
   "サイドクロス|ファール":"【対象エリア】、クロスを上げようとした【攻撃選手】を【守備選手】が倒してしまった！  ファールの判定！",
   "ショートパス|カウンター":"【対象エリア】の【攻撃選手】がショートパス。しかし【守備選手】がみごとにこれをカット！  ここでカウンター！",
-  "ロングパス|カウンター":"【対象エリア】の【攻撃選手】がロングパスを狙うが、【守備選手】がみごとにこれをカット！  そして素早くカウンター！",
+  "ロングパス|カウンター":"【守備選手】がみごとにこれをカット！  そして素早くカウンター！",
   "ドリブル突破|カウンター":"【対象エリア】、【攻撃選手】がドリブル突破を試みるが、【守備選手】は的確な守備でこれを止める！  そのままカウンターをしかける！",
   "飛び出し|カウンター":"【対象エリア】、【攻撃選手】がウラへ飛び出すが、【守備選手】が素早く反応しこのボールをクリア！  これがそのままカウンターになった！",
   "ポストプレー|カウンター":"【対象エリア】、ボールをキープする【攻撃選手】に対して【守備選手】の積極的な守備！  ボールをみごとに奪取し、そのままカウンター！",
@@ -2569,18 +2577,18 @@ const scenario_data_en = {
     "In 【対象エリア】, 【守備選手】 tries to block 【攻撃選手】's cross with their arm!  The referee's whistle blows!"
   ],
   "サイドクロス|カウンター":"In 【対象エリア】, 【攻撃選手】 attempts a cross but 【守備選手】 clears it brilliantly!  Counter-attack!",
-  "ロングパス|成功|クロス":"In 【対象エリア】, 【攻撃選手】 plays a long ball forward to the flank!  【守備選手】 can't get back!",
-  "ロングパス|成功|シュート":"In 【対象エリア】, 【攻撃選手】 launches a long pass into the attack!  【守備選手】 can't keep up!",
-  "ロングパス|成功|セットプレー":"In 【対象エリア】, 【攻撃選手】 sends a long ball forward!  【守備選手】 can't get back!",
+  "ロングパス|成功|クロス":"【守備選手】 can't get back!",
+  "ロングパス|成功|シュート":"【守備選手】 can't keep up!",
+  "ロングパス|成功|セットプレー":"【守備選手】 can't get back!",
   "ロングパス|成功|ショートパス|同":"In 【対象エリア】, 【攻撃選手】 plays a long ball forward and holds possession, looking for a one-two combination!",
-  "ロングパス|成功|ショートパス|別":"In 【対象エリア】, 【攻撃選手】 plays a long ball forward — 【守備選手】 can't stop it. The ball finds 【次の攻撃選手】.",
+  "ロングパス|成功|ショートパス|別":"【守備選手】 can't stop it. The ball finds 【次の攻撃選手】.",
   "ロングパス|成功|ロングパス|同":"In 【対象エリア】, 【攻撃選手】 plays a long ball and continues the run to receive it further forward!",
-  "ロングパス|成功|ロングパス|別":"In 【対象エリア】, 【攻撃選手】 plays a long ball forward — 【守備選手】 can't stop it. The ball finds 【次の攻撃選手】.",
+  "ロングパス|成功|ロングパス|別":"【守備選手】 can't stop it. The ball finds 【次の攻撃選手】.",
   "ロングパス|成功|ドリブル突破|同":"In 【対象エリア】, 【攻撃選手】 plays a long ball and bursts forward to receive it!  【守備選手】 can't catch up!",
   "ロングパス|成功|飛び出し|同":"In 【対象エリア】, 【攻撃選手】 plays a long ball forward and immediately makes a run in behind!  【守備選手】 can't deal with it!",
   "ロングパス|成功|ポストプレー|同":"In 【対象エリア】, 【攻撃選手】 plays a long ball forward and holds possession!  【守備選手】 can't win it back!",
   "ロングパス|成功|サイドクロス|同":"In 【対象エリア】, 【攻撃選手】 plays a long ball wide and immediately pushes forward!",
-  "ロングパス|成功|サイドクロス|別":"In 【対象エリア】, 【攻撃選手】 plays a long ball wide!  【守備選手】 can't get back.",
+  "ロングパス|成功|サイドクロス|別":"【守備選手】 can't get back.",
   "ショートパス|成功|サイドクロス|同":"【攻撃選手】 plays one-touch passing to get past 【守備選手】 and breaks through 【対象エリア】!  Driving forward!",
   "ショートパス|成功|サイドクロス|別":"【攻撃選手】 in 【対象エリア】 gets past 【守備選手】 and feeds 【次の攻撃選手】!",
   "ドリブル突破|成功|サイドクロス|同":"In 【対象エリア】, 【攻撃選手】 bursts past 【守備選手】 with a dribble!!  Charging forward!",
@@ -2605,9 +2613,9 @@ const scenario_data_en = {
   "ショートパス|成功|セットプレー":"【攻撃選手】 plays quick combinations, shakes off 【守備選手】 and breaks through 【対象エリア】!",
   "ポストプレー|成功|セットプレー":"In 【対象エリア】, 【攻撃選手】 spins away from 【守備選手】 with intelligent link-up play!",
   "飛び出し|成功|セットプレー":"In 【対象エリア】, 【攻撃選手】 times the run brilliantly and escapes 【守備選手】!",
-  "ロングパス|成功|ドリブル突破|別":"【攻撃選手】 in 【対象エリア】 plays a long ball!  【守備選手】 can't stop it.",
-  "ロングパス|成功|飛び出し|別":"【攻撃選手】 in 【対象エリア】 gets away from the marker and plays a long ball into space!",
-  "ロングパス|成功|ポストプレー|別":"In 【対象エリア】, 【攻撃選手】 looks up and launches a long ball forward. 【守備選手】 reacts but can't reach it!",
+  "ロングパス|成功|ドリブル突破|別":"【守備選手】 can't stop it.",
+  "ロングパス|成功|飛び出し|別":"【守備選手】 can't react in time!",
+  "ロングパス|成功|ポストプレー|別":"【守備選手】 reacts but can't reach it!",
   "ドリブル突破|成功|ショートパス|同":"【攻撃選手】 dribbles past 【守備選手】 and breaks through 【対象エリア】!",
   "ドリブル突破|成功|ロングパス|同":"【攻撃選手】 dribbles past 【守備選手】 and breaks through 【対象エリア】!",
   "ドリブル突破|成功|ドリブル突破|同":"【攻撃選手】 dribbles past 【守備選手】 and breaks through 【対象エリア】!",
@@ -2638,7 +2646,7 @@ const scenario_data_en = {
     "【攻撃選手】 in 【対象エリア】 plays a short pass — but 【守備選手】 cuts it out brilliantly!",
     "【攻撃選手】 in 【対象エリア】 tries to play it short — but 【守備選手】 reads it and intercepts!"
   ],
-  "ロングパス|失敗":"【攻撃選手】 in 【対象エリア】 goes long — but 【守備選手】 cuts it out brilliantly!",
+  "ロングパス|失敗":"【守備選手】 cuts it out brilliantly!",
   "ドリブル突破|失敗":[
     "In 【対象エリア】, 【攻撃選手】 attempts to dribble through — but 【守備選手】 reads it and snuffs it out!",
     "In 【対象エリア】, 【攻撃選手】 tries to drive forward but 【守備選手】 wins the ball with a tenacious tackle!"
@@ -2659,7 +2667,7 @@ const scenario_data_en = {
   "ポストプレー|ファール":"In 【対象エリア】, 【守備選手】 charges in from behind on 【攻撃選手】 as they hold the ball — that's a foul!",
   "サイドクロス|ファール":"In 【対象エリア】, 【守備選手】 brings down 【攻撃選手】 as they prepare to cross!  Foul!",
   "ショートパス|カウンター":"【攻撃選手】 in 【対象エリア】 plays a short pass — but 【守備選手】 cuts it out!  Counter-attack!",
-  "ロングパス|カウンター":"【攻撃選手】 in 【対象エリア】 goes long — but 【守備選手】 reads it and clears!  Counter-attack!",
+  "ロングパス|カウンター":"【守備選手】 reads it and clears!  Counter-attack!",
   "ドリブル突破|カウンター":"In 【対象エリア】, 【攻撃選手】 attempts to dribble through — but 【守備選手】 snuffs it out!  They launch a counter-attack!",
   "飛び出し|カウンター":"In 【対象エリア】, 【攻撃選手】 tries to run in behind — but 【守備選手】 reacts and clears!  The ball breaks for a counter!",
   "ポストプレー|カウンター":"In 【対象エリア】, 【守備選手】 wins the ball from 【攻撃選手】 brilliantly!  Straight into a counter-attack!",
@@ -3040,7 +3048,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 ]
   },
   netherlands2026: {
-    name:"オランダ",en_name:"Netherlands",team_color:"#FF6600",flag:"🇳🇱",
+    name:"オランダ",en_name:"Netherlands",team_color:"#FF6600",kit:{shirt:"#EC652B",shorts:"#17181C",socks:"#EC652B",accent:"#17181C"},flag:"🇳🇱",
     default_system:"4-1-2-3", default_tactics:TACTICS_POSSESSION, default_keyplayer:5, default_marked_player:9,
     // default_lineupは「W杯初戦」vs 日本(2026/06/14 2-2)のXIで固定(4-3-3≒4-1-2-3): Verbruggen / Dumfries-VanHecke-VanDijk-VandeVen / DeJong / Gravenberch-Reijnders / Summerville-Gakpo-Malen。Depayは控え。FC26正式26名へ刷新(De Ligt/de Vrij/Xavi Simons/Frimpong は負傷or非選出、Bijlow非選出、Blind引退、壊れたプレースホルダ(テン・ハフ/Gakpo2/Klaassen誤記等)を整理し Roefs/Hato/Geertruida/de Roon/Til/Wieffer/Brobbey/Kluivert/Lang を追加)
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10],
@@ -3144,7 +3152,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 ]
   },
   brazil2026: {
-    name:"ブラジル",en_name:"Brazil",team_color:"#009C3B",flag:"🇧🇷",
+    name:"ブラジル",en_name:"Brazil",team_color:"#009C3B",kit:{shirt:"#F2C500",shorts:"#1B3A8A",socks:"#F2F4F7",accent:"#1E8C3A"},flag:"🇧🇷",
     default_system:"4-2-1-3",default_tactics:TACTICS_PRESS,
     default_keyplayer:9,default_marked_player:10,
     default_lineup:[26,28,3,27,4,23,6,16,7,10,29],
@@ -3256,7 +3264,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 ]
   },
   spain2026: {
-    name:"スペイン",en_name:"Spain",team_color:"#AA151B",flag:"🇪🇸",
+    name:"スペイン",en_name:"Spain",team_color:"#AA151B",kit:{shirt:"#B01823",shorts:"#1B2A6B",socks:"#1B2A6B",accent:"#F2C200"},flag:"🇪🇸",
     default_system:"4-1-2-3",default_tactics:TACTICS_POSSESSION,
     default_keyplayer:7,default_marked_player:8,
     default_lineup:[0,1,2,3,4,5,26,6,17,20,10],
@@ -3293,7 +3301,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 ]
   },
   france2026: {
-    name:"フランス",en_name:"France",team_color:"#002395",flag:"🇫🇷",
+    name:"フランス",en_name:"France",team_color:"#002395",kit:{shirt:"#1A2C6B",shorts:"#F2F4F7",socks:"#C8102E",accent:"#C8102E"},flag:"🇫🇷",
     default_system:"4-2-3-1",default_tactics:TACTICS_POSSESSION,
     default_keyplayer:10,default_marked_player:9,
     default_lineup:[0,1,2,3,4,5,18,7,26,8,9],
@@ -3330,7 +3338,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 ]
 },
   argentina2026: {
-    name:"アルゼンチン",en_name:"Argentina",team_color:"#74ACDF",flag:"🇦🇷",
+    name:"アルゼンチン",en_name:"Argentina",team_color:"#74ACDF",kit:{shirt:"#74ACDF",shorts:"#17181C",socks:"#F2F4F7",accent:"#F2C200"},flag:"🇦🇷",
     default_system:"4-4-2",default_tactics:TACTICS_COUNTER,
     default_keyplayer:9,default_marked_player:9,
     default_lineup:[0,27,3,26,29,6,5,7,28,9,16],
@@ -3370,7 +3378,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
 ]
   },
   england2026: {
-    name:"イングランド",en_name:"England",team_color:"#C8102E",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    name:"イングランド",en_name:"England",team_color:"#C8102E",kit:{shirt:"#F2F4F7",shorts:"#1A2A66",socks:"#F2F4F7",accent:"#C8102E"},flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",
     default_system:"4-2-3-1",default_tactics:TACTICS_FREE,
     default_keyplayer:9,default_marked_player:10,
     // 4-2-3-1 (vs CRO 2026/06/17 TM準拠): GK Pickford / James-Konsa-Stones-O'Reilly / Anderson-Rice / Madueke-Bellingham-Gordon / Kane
@@ -3592,7 +3600,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
 
   belgium2026: {
-    name:"ベルギー",en_name:"Belgium",team_color:"#CC0000",flag:"🇧🇪",
+    name:"ベルギー",en_name:"Belgium",team_color:"#CC0000",kit:{shirt:"#C8102E",shorts:"#17181C",socks:"#C8102E",accent:"#F2C200"},flag:"🇧🇪",
     default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
     default_keyplayer:9,default_marked_player:10,
     default_lineup:[0,13,15,16,1,6,5,8,7,9,22],
@@ -3971,7 +3979,7 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
   },
 
   italy2026: {
-    name:"イタリア",en_name:"Italy",team_color:"#003DA5",flag:"🇮🇹",
+    name:"イタリア",en_name:"Italy",team_color:"#003DA5",kit:{shirt:"#1B4BA0",shorts:"#F2F4F7",socks:"#1B4BA0",accent:"#F2C200"},flag:"🇮🇹",
     default_system:"4-2-3-1",default_tactics:TACTICS_PRESS,
     default_keyplayer:5,default_marked_player:10,
     default_lineup:[0,1,2,3,4,5,6,7,8,9,10],

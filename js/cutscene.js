@@ -584,6 +584,7 @@ function _renderLongpassScene(sc, entry, opts) {
     var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
     var p = Math.min(1, (now - T0) / P);   // 1回だけ再生（ループしない）。p=1 でフォロースルーに静止
     ctx.clearRect(0, 0, W, H);
+    var ballGone = false;   // ボールが画面外へ消えたら即終了（2026-07-16 ユーザー指定・尺の余りを詰める）
     if (!fail) {
       // ===== 成功: 通しの蹴り演出（構え→蹴り→前進） =====
       // 漫画スプライトが用意できていれば単一絵をリカラー描画（構え/蹴りの2フレームは使わない）。射出点fptは蹴り足ブーツへ。
@@ -602,6 +603,7 @@ function _renderLongpassScene(sc, entry, opts) {
         if (pl.complete && pl.naturalWidth) { var pw = pl.naturalWidth * (ph / pl.naturalHeight); ctx.drawImage(pl, pcx - pw / 2, ground - ph, pw, ph); } }
       if (p < strikeP) { _lpBall(ctx, fpt[0], fpt[1], 13, 0); }
       else if (p < strikeP + ballWin) { var u = (p - strikeP) / ballWin, bx = fpt[0] + (goal[0] - fpt[0]) * u, by = fpt[1] + (goal[1] - fpt[1]) * u; if (opts && opts.straightFast) { ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + 54, by); ctx.stroke(); ctx.lineCap = 'butt'; } _lpBall(ctx, bx, by, 13, u * (opts && opts.straightFast ? 34 : 16)); }
+      else { ballGone = true; }   // ボールが goal 到達点（画面外）まで飛びきった＝終了
       var strike = (p > strikeP - 0.02 && p < strikeP + 0.08) ? 1 - Math.abs(p - strikeP) / 0.08 : 0;
       if (strike > 0) speedLines(fpt[0], fpt[1], strike * 0.6);
       ctx.restore();
@@ -618,15 +620,15 @@ function _renderLongpassScene(sc, entry, opts) {
       if (spr) ctx.drawImage(spr, sx, sy, sw, sh);
       // ボール: 伸ばした足のブーツから、フィールドと水平に右へ（成功時と同速）。画面外で消える。
       if (p < kickP) { _lpBall(ctx, footX, footY, 13, 0); }                                            // ブーツで待つ
-      else { var bx = footX + ballSpd * (p - kickP); if (bx < W + 22) _lpBall(ctx, bx, footY, 13, (p - kickP) * 73); } // 水平に右へ
+      else { var bx = footX + ballSpd * (p - kickP); if (bx < W + 22) _lpBall(ctx, bx, footY, 13, (p - kickP) * 73); else ballGone = true; } // 水平に右へ・画面外に出たら終了
       var flashF = (p > kickP - 0.02 && p < kickP + 0.08) ? 1 - Math.abs(p - kickP) / 0.08 : 0;
       if (flashF > 0) speedLines(footX, footY, flashF * 0.6);
       ctx.restore();
       if (flashF > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (flashF * 0.5) + ')'; ctx.fillRect(0, 0, W, H); } // カット衝撃フラッシュ
     }
     hud();
-    // p=1 で停止（ループ解除）。ただし失敗で2人絵がまだロード中なら、ロード完了まで継続（差し替え漏れ防止）。
-    if (p < 1 || (fail && failBase && !failBase.complete)) requestAnimationFrame(frame);
+    // ボールが画面外へ消えたら即終了（静止）。ただし失敗で2人絵がまだロード中なら、ロード完了まで継続（差し替え漏れ防止）。
+    if ((!ballGone && p < 1) || (fail && failBase && !failBase.complete)) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
   // 成功=蹴り手が pcx=326（右1/3・0.68）／失敗=2人タブローは中央（~0.5）。フリップ込みで主役を可視窓中央へ。
@@ -712,13 +714,15 @@ function _renderLongpassResultScene(sc) {
       }
     }
     if (spr) ctx.drawImage(spr, dx, sy, dw, ph);
-    var ballOn = (bx !== null && bx > -30 && bx < W + 30);
+    var ballOn = (bx !== null && bx > -30 && bx < W + 30 && by > -30 && by < H + 30);
     if (ballOn) _lpBall(ctx, bx, by, 12, p * 40);
     if (impact > 0) burst(bx, by, impact * 0.9);
     ctx.restore();
     if (impact > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (impact * 0.4) + ')'; ctx.fillRect(0, 0, W, H); }
     hud();
-    if (p < 1) requestAnimationFrame(frame);
+    // ボールが画面外へ消えたら即終了（静止・2026-07-16 ユーザー指定）。着弾直後(bx=null)はまだ終了させない。
+    var ballGone = (bx !== null) && !ballOn && (p > launchP + 0.03);
+    if (!ballGone && p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
   return _csCenterSubject(canvas, 0.5, false);

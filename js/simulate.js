@@ -3052,11 +3052,11 @@ function sceneToText(scenes, sceneNo, team1, team2) {
       // まだない場合はシナリオ別の汎用文
       if (!s) {
         if (window.LANG === 'en') {
-          if (scenario === 'ロングパス') s = '【攻撃選手】 plays a long ball! 【守備選手】 can\'t stop it.';
+          if (scenario === 'ロングパス') s = '【守備選手】 can\'t stop it.';
           else if (scenario === '飛び出し') s = '【対象エリア】, 【攻撃選手】 makes a brilliant run past 【守備選手】!';
           else s = '【攻撃選手】 gets past 【守備選手】 and breaks through 【対象エリア】!';
         } else {
-          if (scenario === 'ロングパス') s = '【対象エリア】の【攻撃選手】がロングパス！  【守備選手】はこれを止められず、ボールが前線へ！';
+          if (scenario === 'ロングパス') s = '【守備選手】はこれを止められず、ボールが前線へ！';
           else if (scenario === '飛び出し') s = '【対象エリア】、パスに反応した【攻撃選手】が絶妙な飛び出しで【守備選手】を振り切る！';
           else s = '【攻撃選手】が【守備選手】をかわし【対象エリア】を突破！';
         }
@@ -3075,12 +3075,7 @@ function sceneToText(scenes, sceneNo, team1, team2) {
   }
 
   const _areaNameForText = window.LANG === 'en'
-    ? ({
-        'DF_L':'DF Left','DF_M':'DF Center','DF_R':'DF Right',
-        'MF_L':'MF Left','MF_M':'MF Center','MF_R':'MF Right',
-        'FW_L':'FW Left','FW_M':'FW Center','FW_R':'FW Right',
-        'CR_L':'Cross Left','CR_R':'Cross Right','SHOOT_M':'Shooting Area'
-      }[scene.area] || scene.area)
+    ? (AREA_NAME_EN[scene.area] || scene.area)
     : (area_data[scene.area] ? area_data[scene.area].name : scene.area);
   s = s.replace(/【対象エリア】/g, _areaNameForText);
   s = s.replace(/【攻撃選手】/g, coloredName(scene.offence, scene.ofsPos));
@@ -3803,13 +3798,16 @@ function _shootSplit(sc, textHtml, prevSc, nextSc) {
     return null;
   }
   // ロングパス: 「蹴り出し（結果非開示・ボールは飛んでいくだけ）」→「守備選手の反応（スルー/カット）」の2ビート
-  //   （ユーザー指定・2026-07-16）。テキストはPK/FKと同じ方式＝1ビート目は汎用の非ネタバレ文、
-  //   2ビート目に元の定型文（結果を含む）をそのまま使う。成功/失敗/カウンターいずれもこの2ビートで統一。
+  //   （ユーザー指定・2026-07-16）。1ビート目は汎用の非ネタバレ文（エリア＋選手名＋ロングボール送出のみ）、
+  //   2ビート目は定型文（js/players.js の scenario_data）をそのまま使う＝結果側テンプレートから
+  //   「エリア＋選手名＋ロングパス送出」の重複記述を除去済み（2026-07-16）なので二重説明にならない。
   if (sc.action === 'ロングパス') {
     const lpKicker = (typeof coloredName === 'function') ? coloredName(sc.offence, sc.ofsPos) : '';
-    const lpShot = (typeof window !== 'undefined' && window.LANG === 'en')
-      ? (lpKicker ? (lpKicker + ' lofts a long ball forward!') : 'A long ball forward!')
-      : (lpKicker ? (lpKicker + 'が前線へロングボールを送る！') : '前線へロングボール！');
+    const _lpEn = (typeof window !== 'undefined' && window.LANG === 'en');
+    const lpAreaNm = _lpEn ? (AREA_NAME_EN[sc.area] || sc.area) : (area_data[sc.area] ? area_data[sc.area].name : sc.area);
+    const lpShot = _lpEn
+      ? (lpKicker ? ('In ' + lpAreaNm + ', ' + lpKicker + ' lofts a long ball forward!') : ('In ' + lpAreaNm + ', a long ball forward!'))
+      : (lpKicker ? (lpAreaNm + 'の' + lpKicker + 'が前線へロングボールを送る！') : (lpAreaNm + 'から前線へロングボール！'));
     return { parts: [lpShot, String(textHtml || '')], steps: ['lpkick', 'lpresult'] };
   }
   const isShoot = (sc.scenario === 'シュート' || sc.scenario === 'ミドルシュート');
