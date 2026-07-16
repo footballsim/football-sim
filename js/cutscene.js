@@ -272,7 +272,7 @@ function renderShootStep(sc, stepType) {
   if (sc.action === 'フリーキック') return _renderFreekickScene(shotSc);   // FK=専用2フレーム（蹴る前→蹴った瞬間＋ボール弧）
   if (sc.action === 'ミドルシュート') return _renderMidShotScene(shotSc);
   if (sc.action === 'ボレーシュート') return _renderVolleyScene(shotSc);
-  if (sc.action === 'ヘディングシュート') return _renderHeaderScene(shotSc);
+  if (sc.action === 'ヘディングシュート') return _renderHeaderRiseDuelScene(shotSc) || _renderHeaderScene(shotSc);   // 対決割りRise優先・旧重ね絵フォールバック
   var entry = _pickCutscene('shot', sc.offence && sc.offence.team_color);   // ← PK もここ（シュート絵）
   if (entry && entry.file) return _renderShotScene(shotSc, entry);
   return null;
@@ -288,14 +288,14 @@ function renderSceneArt(sc, nextSc) {
   if (sc.scenario === 'コーナーキック') {
     var _ck = {}; for (var _ckk in sc) { if (Object.prototype.hasOwnProperty.call(sc, _ckk)) _ck[_ckk] = sc[_ckk]; }
     _ck.result = (sc.result === '失敗') ? '失敗' : '成功';
-    return _renderHeaderScene(_ck);
+    return _renderHeaderRiseDuelScene(_ck) || _renderHeaderScene(_ck);   // 対決割りRise優先・旧重ね絵フォールバック
   }
   if (sc.result === 'ファール') return _renderFoulScene(sc);   // ファール=主審カット（全アクション共通・recolorなし・笛＆FOUL!）
   if (sc.action === 'ミドルシュート') return _renderMidShotScene(sc);   // 専用ミドル: 成功(抜け)=直進 / ブロック=右上deflect。ゴールでも goal-net でなくミドル演出。
   if (sc.result === 'ゴール！！') return _renderGoalScene(sc);   // 全ゴール=新ゴール演出（旧バイシクル廃止）
   if (sc.action === 'フリーキック') return _renderFreekickScene(sc);   // FK=専用2フレーム（枠外/セーブ等の非分割時もここ。ゴールは上で処理）
   // ヘディング競り合い（クロス/セットプレー段, result=成功/失敗）= 専用ヘディング演出。シュート段(scenario=シュート)は下の通常処理へ。
-  if (sc.action === 'ヘディングシュート' && sc.scenario !== 'シュート') return _renderHeaderScene(sc);
+  if (sc.action === 'ヘディングシュート' && sc.scenario !== 'シュート') return _renderHeaderRiseDuelScene(sc) || _renderHeaderScene(sc);   // 対決割りRise優先・旧重ね絵フォールバック
   if (sc.action === 'ボレーシュート' && sc.scenario !== 'シュート') return _renderVolleyScene(sc);   // ボレー競り合い=ロングパス蹴りアニメ流用（ボール起点を膝高さへ）
   if (sc.action === 'クロス') return _renderCrossScene(sc);   // クロス=ミドル流用（成功=斜め上/失敗=反対方向）
   // ヘディング/ボレーの「シュート」段（クロス後の結果シーン。_ACTION_MOMENT 未登録なので個別に結果別描画）。
@@ -506,9 +506,12 @@ function _renderVolleyScene(sc) {
 function _renderLongpassScene(sc, entry, opts) {
   var W = 480, H = 216, ground = 190;
   var canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  // マンガ絵経路のみ内部2倍＋スムージング（NN縮小ジャギ対策 2026-07-15）。従来ドット絵経路（公開ビルド）は等倍＋pixelated維持。
+  var SS = 1;   // 等倍＋NNへ復帰（レトロ画素感 2026-07-15）。粗ドット化は _csPixelate 前段の高品質縮小が担う
+  canvas.width = W * SS; canvas.height = H * SS;
+  canvas.style.cssText = 'display:block;width:100%' + (SS > 1 ? '' : ';image-rendering:pixelated');
   var ctx = canvas.getContext('2d');
+  if (SS > 1) ctx.scale(SS, SS);
   var A = _loadCutsceneImg(entry.fileA), B = _loadCutsceneImg(entry.fileB);
   var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
   var accent = (sc.offence && sc.offence.team_color) || '#1f4fd6';
@@ -554,7 +557,17 @@ function _renderLongpassScene(sc, entry, opts) {
 
   var ph = 178, pcx = 326, foot = [(opts && opts.footX != null) ? opts.footX : 256, (opts && opts.footY != null) ? opts.footY : 178], goal = [-30, 50], strikeP = 0.10, P = 2000;
   if (opts && opts.straightFast) { goal = [-130, foot[1]]; }   // ボレー: 真っ直ぐ（水平・launch高さ）
-  var ballWin = (opts && opts.straightFast) ? 0.11 : 0.22;     // ボレー: 速く（シュート相当）
+  // 漫画ロングパス（lab・2026-07-15）: 成功かつ非ボレー時、単一スプライトを passer の髪型で読み、チームキット4色＋肌でリカラー。
+  //   本番(MangaRecolor未ロード)や素材未達(_lpImg未読)は従来の焼き込みA/B（entry.fileA/B）へ自動フォールバック。
+  var _lpManga = !fail && !(opts && opts.straightFast) && (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);
+  var _lpFeat = _lpManga ? _mangaFeat(passer ? (passer.long_name || passer.name || '') : '') : null;
+  var _lpCols = _lpManga ? _mangaColors(sc.offence, _lpFeat.skin) : null;
+  var _lpKey = _lpManga ? ('lp|' + _lpFeat.hstyle + '|' + _lpCols.shirt + _lpCols.shorts + _lpCols.socks + _lpCols.accent + _lpCols.skin) : null;
+  var _lpImg = _lpManga ? _loadCutsceneImg('img/cutscenes/manga_longpass/' + _lpFeat.hstyle + '.png') : null;
+  var _LP_FOOT_FX = 0.31, _LP_FOOT_FY = 0.93;   // 軸足ブーツ（下側・実測0.314/0.944）＝ボール射出点フラクション（2026-07-15 ユーザー指示で蹴り足0.12/0.61から軸足付近へ下げ）
+  var _LP_FOOT_DX = -20, _LP_FOOT_DY = -20;     // 軸足に乗らないよう「蹴り出す向き(native -x)＋上」へ微調整＝flip込みで画面上は右上（logical px・2026-07-15）
+  if (_lpManga) { strikeP = 0.02; }             // シュート同様に即発射（待ちフレームほぼ無し・2026-07-15）
+  var ballWin = (opts && opts.straightFast) ? 0.11 : (_lpManga ? 0.10 : 0.22);   // マンガ経路=速く飛ぶ（シュート相当）/ 従来焼き込みA/Bは従来速度
   var flipH = _csAttackRight(sc);                              // ネイティブ=左攻め → team1(右)で反転
   var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
   var started = false;
@@ -565,15 +578,24 @@ function _renderLongpassScene(sc, entry, opts) {
     ctx.clearRect(0, 0, W, H);
     if (!fail) {
       // ===== 成功: 通しの蹴り演出（構え→蹴り→前進） =====
+      // 漫画スプライトが用意できていれば単一絵をリカラー描画（構え/蹴りの2フレームは使わない）。射出点fptは蹴り足ブーツへ。
+      var mspr = null, mpw = 0, fpt = foot;
+      if (_lpManga && _lpImg.complete && _lpImg.naturalWidth) {
+        mspr = MangaRecolor.render(_lpKey, _lpImg, _lpCols);
+        mpw = mspr.width * (ph / mspr.height);
+        fpt = [pcx - mpw / 2 + mpw * _LP_FOOT_FX + _LP_FOOT_DX, (ground - ph) + ph * _LP_FOOT_FY + _LP_FOOT_DY];
+        mspr = _csPixelate(mspr, _lpKey, mpw, ph);   // レトロ画素化（高品質縮小→NN拡大）
+      }
       var z = 1.0 + Math.min(1, p / 0.7) * 0.10;                          // 寄りのズーム
-      ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(foot[0], foot[1]); ctx.scale(z, z); ctx.translate(-foot[0], -foot[1]);
-      ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
-      var pl = (p < strikeP) ? A : B;                                     // 構え→蹴り
-      if (pl.complete && pl.naturalWidth) { var pw = pl.naturalWidth * (ph / pl.naturalHeight); ctx.drawImage(pl, pcx - pw / 2, ground - ph, pw, ph); }
-      if (p < strikeP) { _lpBall(ctx, foot[0], foot[1], 13, 0); }
-      else if (p < strikeP + ballWin) { var u = (p - strikeP) / ballWin, bx = foot[0] + (goal[0] - foot[0]) * u, by = foot[1] + (goal[1] - foot[1]) * u; if (opts && opts.straightFast) { ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + 54, by); ctx.stroke(); ctx.lineCap = 'butt'; } _lpBall(ctx, bx, by, 13, u * (opts && opts.straightFast ? 34 : 16)); }
+      ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(fpt[0], fpt[1]); ctx.scale(z, z); ctx.translate(-fpt[0], -fpt[1]);
+      ctx.imageSmoothingEnabled = SS > 1 && !!mspr; _lpDrawBg(ctx, bgImg, bgFallback, W, H);   // マンガ絵=スムージング / ドット絵A/B=NN維持
+      if (mspr) { ctx.drawImage(mspr, pcx - mpw / 2, ground - ph, mpw, ph); }   // 漫画: 単一リカラー絵
+      else { var pl = (p < strikeP) ? A : B;                              // 従来: 構え→蹴りの焼き込みA/B
+        if (pl.complete && pl.naturalWidth) { var pw = pl.naturalWidth * (ph / pl.naturalHeight); ctx.drawImage(pl, pcx - pw / 2, ground - ph, pw, ph); } }
+      if (p < strikeP) { _lpBall(ctx, fpt[0], fpt[1], 13, 0); }
+      else if (p < strikeP + ballWin) { var u = (p - strikeP) / ballWin, bx = fpt[0] + (goal[0] - fpt[0]) * u, by = fpt[1] + (goal[1] - fpt[1]) * u; if (opts && opts.straightFast) { ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + 54, by); ctx.stroke(); ctx.lineCap = 'butt'; } _lpBall(ctx, bx, by, 13, u * (opts && opts.straightFast ? 34 : 16)); }
       var strike = (p > strikeP - 0.02 && p < strikeP + 0.08) ? 1 - Math.abs(p - strikeP) / 0.08 : 0;
-      if (strike > 0) speedLines(foot[0], foot[1], strike * 0.6);
+      if (strike > 0) speedLines(fpt[0], fpt[1], strike * 0.6);
       ctx.restore();
       if (strike > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (strike * 0.5) + ')'; ctx.fillRect(0, 0, W, H); } // 着弾フラッシュ
     } else {
@@ -614,6 +636,9 @@ function _pickGkColor(atkColor, defColor) {
 // 漫画GKダイビング（lab・2026-07-10）: 分離色スプライト1枚を _pickGkColor の色名→GKキット4色でリカラー。
 //   白グローブは低彩度=MangaRecolor partOf 'fixed' で白のまま保持。本番(未ロード)は従来 gk_<color>_01.png。
 var _MANGA_GK_DIVE_SRC = 'img/cutscenes/manga_gk_dive.png';
+// GKダイブ絵のアスペクト（高さ/幅）。旧絵=220×127→0.577。新絵(2026-07-15・茶wavy・より縦に伸びるダイブ)=440×368→0.836。
+// 描画は gkW を基準に gkH = gkW * _GK_DIVE_HW で算出（従来ハードコード 127/220 を置換）。手元グローブは新絵でも約(0.86,0.12)＝従来アンカーとほぼ一致。
+var _GK_DIVE_HW = 368 / 440;
 var _GK_HEX = { yellow: '#f2c200', dark: '#2a2a33', white: '#e8e8ee', skyblue: '#3aa0e0', orange: '#e8641b', blue: '#1b5fd0', red: '#c8102e', green: '#1e8c3a' };
 function _gkShade(hex, f) { var h = hex.replace('#', ''); if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]; var v = [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; return '#' + v.map(function (c) { var s = Math.round(c * f).toString(16); return s.length < 2 ? '0' + s : s; }).join(''); }
 function _gkDiveColors(name, skin) { var main = _GK_HEX[name] || '#1b5fd0'; return { shirt: main, shorts: _gkShade(main, 0.42), socks: main, accent: '#eef0f5', skin: skin }; }
@@ -793,6 +818,30 @@ function _csShockwave(ctx, x0, y0, x1, y1, off, amp, seed) {
   ctx.strokeStyle = _MANGA_INK; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke();
 }
 
+// レトロ画素化（2026-07-15 ユーザー指定: ドット絵らしい粗さへ）。高解像度マンガ絵スプライトを
+//   「描画サイズ÷セル」へ一旦高品質縮小し、その小画像をNN拡大で描く＝クッキリした粗ドット。
+//   _CS_PIXEL_CELL=1 でキャンバス論理1px=アート1px（従来ドット絵と同等の粗さ感）。上げるほど粗い（1.5, 2…）。
+var _CS_PIXEL_CELL = 1;
+var _csPixCache = {}, _csPixOrder = [];
+function _csPixelate(spr, key, dw, dh) {
+  if (!spr || !dw || !dh) return spr;
+  var w = Math.max(8, Math.round(dw / _CS_PIXEL_CELL)), h = Math.max(8, Math.round(dh / _CS_PIXEL_CELL));
+  var ck = key + '|' + w + 'x' + h;
+  if (_csPixCache[ck]) return _csPixCache[ck];
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  var x = c.getContext('2d'); x.imageSmoothingEnabled = true; if (x.imageSmoothingQuality) x.imageSmoothingQuality = 'high';
+  x.drawImage(spr, 0, 0, w, h);
+  _csPixCache[ck] = c; _csPixOrder.push(ck);
+  if (_csPixOrder.length > 120) delete _csPixCache[_csPixOrder.shift()];
+  return c;
+}
+
+// 漫画コマ「演出」の一括スイッチ（2026-07-15 ユーザー指示で一旦停止）。
+//   false: 紙白＋集中線背景・墨リム・対決割り・顔カットイン・ヘディング縦2コマを止め、従来のスタジアム/芝背景スタイルで描く。
+//   ※スプライトの新旧はこのフラグと独立: シュート/GK/ロングパスは新素材（MangaRecolorリカラー）を従来演出の上に描く（2026-07-15 指示）。
+//   ヘディングのみ旧スプライト（旧重ね競り合いシーンごと）。漫画演出の再開は true に戻すだけ。
+var MANGA_COMIC_STYLE = false;
+
 // Var A: 対角対決割り。canvas を対角の墨割り線で2分割し、右=シューター（蹴りの瞬間）/左=GKダイブ大ゴマ。
 //   両パネルとも背景はスピード線（_mangaShotBg 流用・焦点は各パネルの主）。墨縁の白抜きボール軌道＋
 //   ジグザグ衝撃波が割り線を跨いで右→左（ネイティブ）。ボールはGKの手元手前で静止＝結果非開示の緊張。
@@ -801,9 +850,11 @@ function _csShockwave(ctx, x0, y0, x1, y1, off, amp, seed) {
 function _renderShotDuelScene(sc) {
   var W = 480, H = 216, ground = 196;
   var canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var SS = 2;   // 内部解像度2倍（2026-07-15）: 高解像度マンガ絵をNN縮小→2倍表示すると輪郭ジャギ・網点斑点が出るため、2倍キャンバス＋スムージングで描く
+  canvas.width = W * SS; canvas.height = H * SS;
+  canvas.style.cssText = 'display:block;width:100%';
   var ctx = canvas.getContext('2d');
+  ctx.scale(SS, SS);
 
   // 右パネル: シューター（既存拍1と同じ12髪型スプライト＋キット/肌リカラー）
   var shooterP0 = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
@@ -824,7 +875,7 @@ function _renderShotDuelScene(sc) {
   var ph = 172, pcx = W * 0.80, sprW = 133;
   var foot = [pcx - sprW / 2 + sprW * 0.42, ground - ph + ph * 0.79];   // 蹴り点（既存拍1と同式）
   var dTop = W * 0.40, dBot = W * 0.60;                                 // 対角割り線（上→下で右へ・急角度）
-  var gkW = 264, gkH = gkW * 127 / 220, gkX = -14, gkY = 52;            // GK大ゴマ（パネル高の7割級・はみ出しクロップ上等）
+  var gkW = 264, gkH = gkW * _GK_DIVE_HW, gkX = -14, gkY = 52;            // GK大ゴマ（パネル高の7割級・はみ出しクロップ上等）
   var hX = gkX + gkW * 0.85, hY = gkY + gkH * 0.13;                     // GKの手元（既存 handsFx/Fy と同フラクション）
   var target = [hX + 30, hY + 6];                                       // ボール静止点＝手元の少し手前（結果非開示）
   var P = 1700;                                                         // 既存尺システムに従う（1×=1700ms）
@@ -849,7 +900,7 @@ function _renderShotDuelScene(sc) {
     var p = Math.min(1, (now - T0) / P);
     ctx.clearRect(0, 0, W, H);
     ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = true;   // 高解像度マンガ絵＝スムージング縮小（falseだとNN間引きでジャギ・斑点 2026-07-15）
 
     // ── 左パネル: GK焦点のスピード線＋ネット＋GK大（微ズーム）──
     ctx.save(); leftClip();
@@ -900,6 +951,137 @@ function _renderShotDuelScene(sc) {
   return _csCenterSubject(canvas, 0.5, false);   // 両雄構図＝中央
 }
 
+// ヘディング競り合い＝対決割り（垂直分割・2026-07-15 ユーザー指定で従来の重ね1コマ(_renderHeaderScene)から刷新）。
+//   左パネル=攻撃 / 右パネル=守備。縦長コマ2枚を中央に並べ、外側は紙白マージン（2026-07-15 参考画像準拠＝高さ強調・ほぼ全身）。
+//   両者は左上から飛来するクロスを見上げて競り上がり、接触→成功=右下(ゴール方向)/失敗=左上(クリア)へ弾ける。
+//   role別単一スプライトをMangaRecolorでキット4色＋肌にリカラー（髪はダーク=fixed維持）。MangaRecolor必須（呼び出し側でガード）。
+var _MANGA_HDR_RISE_ATK_SRC = 'img/cutscenes/manga_header_rise_atk.png';   // 原向き（左上のクロスを見上げる・2026-07-15 向き修正=反転廃止）
+var _MANGA_HDR_RISE_DEF_SRC = 'img/cutscenes/manga_header_rise_def.png';   // 原向き（左上を見上げる）
+function _renderHeaderRiseDuelScene(sc) {
+  if (!MANGA_COMIC_STYLE) return null;   // 漫画コマ停止中→呼び出し側の || で旧ヘディング（スタジアム背景）へフォールバック
+  if (typeof MangaRecolor === 'undefined' || !MangaRecolor.render) return null;   // 本番=未ロード→従来SVGフォールバック
+  var W = 480, H = 216, ground = 206, mid = W / 2;
+  var canvas = document.createElement('canvas');
+  var SS = 2;   // 内部解像度2倍＋スムージング（NN縮小ジャギ対策 2026-07-15）
+  canvas.width = W * SS; canvas.height = H * SS;
+  canvas.style.cssText = 'display:block;width:100%';
+  var ctx = canvas.getContext('2d');
+  ctx.scale(SS, SS);
+
+  var atkImg = _loadCutsceneImg(_MANGA_HDR_RISE_ATK_SRC), defImg = _loadCutsceneImg(_MANGA_HDR_RISE_DEF_SRC);
+  var atkP = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  var defP = sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+  var atkName = atkP ? ((typeof getPlayerName === 'function') ? getPlayerName(atkP) : atkP.name) : '';
+  var defName = defP ? ((typeof getPlayerName === 'function') ? getPlayerName(defP) : defP.name) : '';
+  var atkTeamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
+  var defTeamNm = (typeof getTeamName === 'function' && sc.defence) ? getTeamName(sc.defence) : '';
+  var atkSkin = _mangaFeat(atkP ? (atkP.long_name || atkP.name || '') : '').skin;
+  var defSkin = _mangaFeat(defP ? (defP.long_name || defP.name || '') : '').skin;
+  var atkCols = _mangaColors(sc.offence, atkSkin), defCols = _mangaColors(sc.defence, defSkin);
+  var atkKey = 'hdrduel_a|' + atkCols.shirt + atkCols.shorts + atkCols.socks + atkCols.accent + atkCols.skin;
+  var defKey = 'hdrduel_d|' + defCols.shirt + defCols.shorts + defCols.socks + defCols.accent + defCols.skin;
+  var success = (sc.result === '成功');
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  var label = success ? (en ? 'HEADER!' : 'ヘディング！') : (en ? 'CLEARED!' : '競り負け！');
+  var labelCol = success ? '#ffe14a' : '#ff5a3c';
+  var accent = success ? ((sc.offence && sc.offence.team_color) || '#d23') : ((sc.defence && sc.defence.team_color) || '#2a2');
+
+  var timeTxt = (function () { var el = (typeof document !== 'undefined') && document.getElementById('game-time-display'); return el ? el.textContent : ''; })();
+
+  // ジオメトリ（縦長2パネル・2026-07-15 参考画像準拠）: 中央に縦長コマ2枚（各132×216）を並べ、外側は紙白マージン。
+  //   ヘディングは高さのシーン＝ほぼ全身を見せる。両者とも原向き（左上のクロスを見上げる）。
+  var panelW = 132;                                   // 縦長パネル幅（高さは H いっぱい）
+  var pL = mid - panelW, pR = mid + panelW;           // パネル群の左端・右端
+  var ph = 205;                                       // ほぼ全身（スプライト380→205 縮尺・足元は僅かに切れる程度）
+  var ATK_HFX = 0.485, ATK_HFY = 0.120;               // ATKスプライトの頭中心フラクション（実測・原向き）
+  var DEF_HFX = 0.571, DEF_HFY = 0.115;               // DEFスプライトの頭中心フラクション（実測）
+  var atkHead = [mid - 44, 44];                       // 攻撃の頭＝中央シームのすぐ左・上寄り
+  var defHead = [mid + 46, 44];                       // 守備の頭＝中央シームのすぐ右・上寄り
+  var contactPt = [mid, 36];                          // ヘッド競り＝ボール接触点（両頭の間・上）
+  var ballFrom = [mid - 210, -14];                    // クロス飛来元（左上）＝両者の視線の先
+  var P = 1700; var _beatMs = _csBeatMs(); if (_beatMs) P = Math.max(520, Math.min(1700, _beatMs - 250));
+  var contactP = 0.50;
+
+  function rim4(sil, x, y, w, h) { var o = 2; ctx.drawImage(sil, x - o, y, w, h); ctx.drawImage(sil, x + o, y, w, h); ctx.drawImage(sil, x, y - o, w, h); ctx.drawImage(sil, x, y + o, w, h); }
+  function hud() {
+    if (!CUTSCENE_BURN_LABELS) return;
+    var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
+    if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
+    var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
+    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = labelCol; ctx.fillText(label, 12, H - 9);
+    var nm = success ? (atkName ? (atkName + (atkTeamNm ? (' · ' + atkTeamNm) : '')) : '') : (defName ? ('✕ ' + defName + (defTeamNm ? (' · ' + defTeamNm) : '')) : '');
+    if (nm) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(nm, W - 12, H - 10); }
+  }
+
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var p = Math.min(1, (now - T0) / P);
+    ctx.clearRect(0, 0, W, H);
+    ctx.imageSmoothingEnabled = true;   // 高解像度マンガ絵＝スムージング縮小（NNジャギ対策 2026-07-15）
+
+    var atkSpr = (atkImg.complete && atkImg.naturalWidth) ? MangaRecolor.render(atkKey, atkImg, atkCols) : null;
+    var defSpr = (defImg.complete && defImg.naturalWidth) ? MangaRecolor.render(defKey, defImg, defCols) : null;
+    var lift = 12 * (1 - Math.min(1, p / contactP));   // 接触までに競り上がる（少し下→apex）
+
+    // ── 紙白マージン（縦長コマの外側）──
+    ctx.fillStyle = _MANGA_PAPER; ctx.fillRect(0, 0, W, H);
+
+    // ── 左パネル: 攻撃（縦長・全身・微ズーム）──
+    ctx.save(); ctx.beginPath(); ctx.rect(pL, 0, panelW, H); ctx.clip();
+    var zL = 1.0 + Math.min(1, p / 0.7) * 0.05;
+    ctx.translate(contactPt[0], contactPt[1]); ctx.scale(zL, zL); ctx.translate(-contactPt[0], -contactPt[1]);
+    ctx.drawImage(_mangaShotBg(W, H, contactPt[0] - 20, contactPt[1] + 6), 0, 0);
+    if (atkSpr) { var aw = atkSpr.width * (ph / atkSpr.height); var ax = atkHead[0] - aw * ATK_HFX, ay = atkHead[1] - ph * ATK_HFY + lift;
+      rim4(_csInkSil(atkSpr, atkKey), ax, ay, aw, ph); ctx.drawImage(atkSpr, ax, ay, aw, ph); }
+    ctx.restore();
+
+    // ── 右パネル: 守備（縦長・全身・微ズーム）──
+    ctx.save(); ctx.beginPath(); ctx.rect(mid, 0, panelW, H); ctx.clip();
+    var zR = 1.0 + Math.min(1, p / 0.7) * 0.05;
+    ctx.translate(contactPt[0], contactPt[1]); ctx.scale(zR, zR); ctx.translate(-contactPt[0], -contactPt[1]);
+    ctx.drawImage(_mangaShotBg(W, H, contactPt[0] + 20, contactPt[1] + 6), 0, 0);
+    if (defSpr) { var dw = defSpr.width * (ph / defSpr.height); var dx = defHead[0] - dw * DEF_HFX, dy = defHead[1] - ph * DEF_HFY + lift;
+      rim4(_csInkSil(defSpr, defKey), dx, dy, dw, ph); ctx.drawImage(defSpr, dx, dy, dw, ph); }
+    ctx.restore();
+
+    // ── コマ枠（外枠の墨＋中央の白溝シーム）──
+    ctx.strokeStyle = _MANGA_INK; ctx.lineWidth = 4.5;
+    ctx.strokeRect(pL + 2, 2, panelW * 2 - 4, H - 4);
+    ctx.strokeStyle = _MANGA_PAPER; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(mid, 4); ctx.lineTo(mid, H - 4); ctx.stroke();
+    ctx.strokeStyle = _MANGA_INK; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(mid, 2); ctx.lineTo(mid, H - 2); ctx.stroke();
+
+    // ── ボール: 左上からのクロスが接触点へ飛来 → 接触で 成功=右下(ゴール方向) / 失敗=左上(クリア) ──
+    if (p < contactP) {
+      var it = p / contactP;
+      var bx = ballFrom[0] + (contactPt[0] - ballFrom[0]) * it;
+      var by = ballFrom[1] + (contactPt[1] - ballFrom[1]) * it - 24 * Math.sin(it * Math.PI);   // ふわっとした弧
+      var vx = ballFrom[0] - contactPt[0], vy = ballFrom[1] - contactPt[1], vl = Math.sqrt(vx * vx + vy * vy) || 1;
+      ctx.strokeStyle = 'rgba(20,22,28,0.35)'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + vx / vl * 38, by + vy / vl * 38); ctx.stroke(); ctx.lineCap = 'butt';
+      if (bx > -22 && bx < W + 22) _lpBall(ctx, bx, by, 11, it * 12);
+    } else {
+      var u = (p - contactP) / (1 - contactP); u = 1 - (1 - u) * (1 - u);
+      var dir = success ? 1 : -1;                       // 成功=右下(ゴールへ叩きつけ) / 失敗=左上(クリアで戻す)
+      var bx2 = contactPt[0] + dir * 320 * u;
+      var by2 = success ? (contactPt[1] + 84 * u) : (contactPt[1] - 60 * u - 16 * Math.sin(u * Math.PI));
+      if (bx2 > -22 && bx2 < W + 22 && by2 < H + 22) _lpBall(ctx, bx2, by2, 11, u * 24 * dir);
+    }
+    // 接触インパクト（中央上部の星＋フラッシュ）
+    var contact = (p >= contactP - 0.02 && p < contactP + 0.12) ? 1 - Math.abs(p - contactP) / 0.12 : 0;
+    if (contact > 0) { _csImpactStar(ctx, contactPt[0], contactPt[1], 20 * contact); ctx.fillStyle = 'rgba(255,255,255,' + (contact * 0.4) + ')'; ctx.fillRect(0, 0, W, H); }
+
+    hud();
+    if (p < 1 || ((!atkSpr || !defSpr) && (now - T0) < P + 3000)) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return _csCenterSubject(canvas, 0.5, false);
+}
+
 // ============================================================
 // シュート専用カットイン: シューター（1フレーム・攻撃チーム色）＋コードのボール。
 //   セーブ(GK防いだ！)=シューター＋GK(左・自動コントラスト色)＋ボールが手元で弾かれる。
@@ -910,18 +1092,21 @@ function _renderShotScene(sc, entry) {
   // 構図ローテーション（lab）: 決定論ハッシュが奇数 → Var A=対角対決割り（_renderShotDuelScene）。偶数 → Var B=2拍（本体）。
   //   対象は result='成功'（分割'shot'ビート/PK蹴り＝結果非開示）のみ。ブロック等の結果付き描画は Var B 固定。
   //   MangaRecolor 未ロードの公開ビルドはこの分岐に入らず常に従来経路＝公開版不変。
-  if (typeof MangaRecolor !== 'undefined' && MangaRecolor.render && sc.result === '成功' && (_csShotVarHash(sc) & 1)) {
+  if (MANGA_COMIC_STYLE && typeof MangaRecolor !== 'undefined' && MangaRecolor.render && sc.result === '成功' && (_csShotVarHash(sc) & 1)) {
     return _renderShotDuelScene(sc);
   }
   var W = 480, H = 216, ground = 190;
   var canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  // マンガ絵経路のみ内部2倍＋スムージング（NN縮小ジャギ対策 2026-07-15）。従来ドット絵経路（公開ビルド）は等倍＋pixelated維持。
+  var SS = 1;   // 等倍＋NNへ復帰（レトロ画素感 2026-07-15）。粗ドット化は _csPixelate 前段の高品質縮小が担う
+  canvas.width = W * SS; canvas.height = H * SS;
+  canvas.style.cssText = 'display:block;width:100%' + (SS > 1 ? '' : ';image-rendering:pixelated');
   var ctx = canvas.getContext('2d');
+  if (SS > 1) ctx.scale(SS, SS);
   // 漫画方式（lab・MangaRecolor ロード時）: シューターを選手別の髪型スプライト＋キット4色/肌でリカラー。
   //   本番（未ロード）は従来のプリカラー shot_<kit> にフォールバック。シュート12髪型は 2026-07-10 受入（manga_shot/）。
   var shooterP0 = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
-  var _shotManga = (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);
+  var _shotManga = (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);   // スプライトは新素材（従来演出の上に描く・2026-07-15）
   var _shFeat = _shotManga ? _mangaFeat(shooterP0 ? (shooterP0.long_name || shooterP0.name || '') : '') : null;
   var _shCols = _shotManga ? _mangaColors(sc.offence, _shFeat.skin) : null;
   var _shKey = _shFeat ? ('shot|' + _shFeat.hstyle + '|' + _shCols.shirt + _shCols.shorts + _shCols.socks + _shCols.accent + _shCols.skin) : null;
@@ -945,7 +1130,7 @@ function _renderShotScene(sc, entry) {
   var outLabel = isWide ? (en ? 'OFF TARGET' : '枠外！') : isBlock ? (en ? 'BLOCKED!' : 'ブロック！') : isSave ? (en ? 'GK SAVE!' : 'ナイスセーブ！') : (en ? 'SHOT' : 'シュート');
   var outColor = isWide ? '#ffd24a' : '#ff5a3c';
   var gkColor = isSave ? _pickGkColor(accent, sc.defence && sc.defence.team_color) : null;   // GK色=両チームと別色
-  var _svGkManga = isSave && (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);
+  var _svGkManga = isSave && (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);   // GKスプライトは新素材（従来演出の上に描く・2026-07-15）
   var _svGkP = isSave && sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[0]];
   var _svGkCols = _svGkManga ? _gkDiveColors(gkColor, _mangaFeat(_svGkP ? (_svGkP.long_name || _svGkP.name || '') : '').skin) : null;
   var _svGkKey = _svGkManga ? ('gkdive|' + gkColor + '|' + _svGkCols.skin) : null;
@@ -954,8 +1139,8 @@ function _renderShotScene(sc, entry) {
   // ── 漫画2拍演出（lab・北極星カンプ）────────────────────────────────
   //   拍1: 背景を放射スピード線＋ハーフトーンへ（_shotManga と同条件＝MangaRecolor 未ロードの公開ビルドは従来背景）。
   //   拍2: 終盤に守備側GK（defence lineup[0]）の顔カットイン帯。Portrait 未ロードならカットインごとスキップ。
-  var _mangaBg = _shotManga;
-  var _cutinOn = _shotManga && !isSave && (typeof Portrait !== 'undefined') && Portrait && Portrait.render;
+  var _mangaBg = _shotManga && MANGA_COMIC_STYLE;   // 漫画コマ停止中はスタジアム背景（_lpDrawBg）＋墨リムなし
+  var _cutinOn = MANGA_COMIC_STYLE && _shotManga && !isSave && (typeof Portrait !== 'undefined') && Portrait && Portrait.render;
   var _cutinBust = null, _cutinBandC = null;
   if (_cutinOn) {
     var _ciGkP = sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[0]];
@@ -1004,12 +1189,13 @@ function _renderShotScene(sc, entry) {
     var z = 1.0 + Math.min(1, p / 0.6) * 0.08;                       // 寄り
     var strikeF = (p > strikeP - 0.02 && p < strikeP + 0.08) ? 1 - Math.abs(p - strikeP) / 0.08 : 0;
     ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(foot[0], foot[1]); ctx.scale(z, z); ctx.translate(-foot[0], -foot[1]);
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = SS > 1;   // マンガ絵=スムージング / ドット絵=NN維持（2026-07-15）
     if (_mangaBg) ctx.drawImage(_mangaShotBg(W, H, foot[0], foot[1] - 10), 0, 0);   // 拍1: 紙白＋放射スピード線＋網点
     else _lpDrawBg(ctx, bgImg, bgFallback, W, H);
     var _shSpr = (_shotManga && shooter.complete && shooter.naturalWidth) ? MangaRecolor.render(_shKey, shooter, _shCols) : ((shooter.complete && shooter.naturalWidth) ? shooter : null);
     if (_shSpr) {
       var pw = _shSpr.width * (ph / _shSpr.height);
+      if (_shotManga && _shKey) _shSpr = _csPixelate(_shSpr, _shKey, pw, ph);   // レトロ画素化（高品質縮小→NN拡大）
       if (_mangaBg && _shKey) {   // 紙白に白キットが溶けないよう墨リム2px（シルエット4方向オフセット）
         var _sil = _csInkSil(_shSpr, _shKey), _o = 2;
         ctx.drawImage(_sil, pcx - pw / 2 - _o, ground - ph, pw, ph);
@@ -1021,8 +1207,8 @@ function _renderShotScene(sc, entry) {
     }
     if (isSave) {
       // ===== セーブ: GK(左)＋ボールが手元で弾かれる =====
-      var gkW = 210, gkH = gkW * 127 / 220, gkX = 8, gkY = 58;                 // GK配置（TUNE）
-      if (gkImg && gkImg.complete && gkImg.naturalWidth) { var _svs = _svGkManga ? MangaRecolor.render(_svGkKey, gkImg, _svGkCols) : gkImg; if (_svs) ctx.drawImage(_svs, gkX, gkY, gkW, gkH); }
+      var gkW = _svGkManga ? 145 : 210, gkH = gkW * (_svGkManga ? _GK_DIVE_HW : (127 / 220)), gkX = 8, gkY = 58;   // GK配置（TUNE）。スプライト別にアスペクト＆幅を切替＝描画高≈121で従来と同じ距離感（2026-07-15）
+      if (gkImg && gkImg.complete && gkImg.naturalWidth) { var _svs = _svGkManga ? MangaRecolor.render(_svGkKey, gkImg, _svGkCols) : gkImg; if (_svs && _svGkManga) _svs = _csPixelate(_svs, _svGkKey, gkW, gkH); if (_svs) ctx.drawImage(_svs, gkX, gkY, gkW, gkH); }
       var hX = gkX + gkW * 0.84, hY = gkY + gkH * 0.13, savP = 0.46;           // GKの手元＝ボール到達点（TUNE）
       if (p < strikeP) { _lpBall(ctx, foot[0], foot[1], 11, 0); }              // かかとで待つ
       else if (p < savP) { var u = (p - strikeP) / (savP - strikeP); _lpBall(ctx, foot[0] + (hX - foot[0]) * u, foot[1] + (hY - foot[1]) * u, 11, (p - strikeP) * 70); }   // 手元へ飛ぶ
@@ -1410,10 +1596,12 @@ var _MANGA_HSTYLE = ['short', 'fade', 'skin', 'spike', 'curly', 'part', 'bangs',
 // 近縁の生成済み髪型へエイリアス。%12の割当ハッシュ・他画面（Portrait頭）の12髪型はそのまま維持。
 var _MANGA_HSTYLE_SPRITE_ALIAS = { bangs: 'short', bowl: 'skin' };
 // 過渡期の単一髪型モード（2026-07-09）: 髪型バリエーション生成が律速なので、残りのカットシーン差し替えを
-// 先行するため全シーン・全選手を1髪型(fade=刈り上げ)に固定する。これで各シーン役ごと1枚だけ生成すればよい。
-// 副次効果: dribble等の既存多髪型シーンも同じfadeに寄り、シーン間の選手同一性が保たれる（別人化を防ぐ）。
+// 先行するため全シーン・全選手を1髪型に固定する。これで各シーン役ごと1枚だけ生成すればよい。
+// 副次効果: dribble等の既存多髪型シーンも同じ髪型に寄り、シーン間の選手同一性が保たれる（別人化を防ぐ）。
 // バリエーション解禁時は null にするだけで各選手が決定論の髪型へ復帰（追加作業ゼロ・完全可逆）。
-var _MANGA_HAIR_UNIFORM = 'fade';
+// 2026-07-15: 新シュート正典（茶スパイク＋アンダーカット）を wavy スロットへ受入 → 統一髪型を wavy へ。
+//   まず全シーンを wavy で揃え、以降 残り9髪型のシュート絵を順次差し替える方針（他セットの wavy.png は旧絵のまま＝要順次差し替え）。
+var _MANGA_HAIR_UNIFORM = 'wavy';
 var _MANGA_BEARD = ['none', 'stubble', 'mustache', 'goatee', 'full'];   // stubbleはスプライト未生成→noneで代替
 var _MANGA_SKIN = ['#ffdcbb', '#f4c79b', '#e6ad7f', '#cf8f5d', '#a06a3f', '#6f492c'];
 function _mangaFnv(str) { var h = 0x811c9dc5; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0; } return h >>> 0; }
@@ -1988,15 +2176,18 @@ var _GK_BG_SRC = 'img/cutscenes/gkbg_01.png';
 function _renderGkScene(sc, mode) {
   var W = 480, H = 216;
   var canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  // マンガ絵経路のみ内部2倍＋スムージング（NN縮小ジャギ対策 2026-07-15）。従来ドット絵経路（公開ビルド）は等倍＋pixelated維持。
+  var SS = 1;   // 等倍＋NNへ復帰（レトロ画素感 2026-07-15）。粗ドット化は _csPixelate 前段の高品質縮小が担う
+  canvas.width = W * SS; canvas.height = H * SS;
+  canvas.style.cssText = 'display:block;width:100%' + (SS > 1 ? '' : ';image-rendering:pixelated');
   var ctx = canvas.getContext('2d');
+  if (SS > 1) ctx.scale(SS, SS);
   var bgImg = _loadCutsceneImg(_GK_BG_SRC), bgFallback = _lpBg();
   var atkColor = (sc.offence && sc.offence.team_color) || '#1f4fd6';
   var defColor = (sc.defence && sc.defence.team_color);
   var gkColor = _pickGkColor(atkColor, defColor);
   var gkP0 = sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[0]];
-  var _gkManga = (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);
+  var _gkManga = (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);   // GKスプライトは新素材（従来演出の上に描く・2026-07-15）
   var _gkCols = _gkManga ? _gkDiveColors(gkColor, _mangaFeat(gkP0 ? (gkP0.long_name || gkP0.name || '') : '').skin) : null;
   var _gkKey = _gkManga ? ('gkdive|' + gkColor + '|' + _gkCols.skin) : null;
   var gkImg = _gkManga ? _loadCutsceneImg(_MANGA_GK_DIVE_SRC) : _loadCutsceneImg('img/cutscenes/gk_' + gkColor + '_01.png');
@@ -2030,7 +2221,7 @@ function _renderGkScene(sc, mode) {
   }
 
   // ジオメトリ（2枚目の配置参考・TUNE）: GKは大きめ・中央やや左、左→右へスライドしながらダイブ
-  var gkW = 300, gkH = gkW * 127 / 220, gkX0 = 8, gkX1 = 92, gkY = 36;   // 左→右へシーン終了まで移動
+  var gkW = _gkManga ? 205 : 300, gkH = gkW * (_gkManga ? _GK_DIVE_HW : (127 / 220)), gkX0 = 8, gkX1 = 92, gkY = 36;   // 左→右へ移動。スプライト別にアスペクト＆幅を切替＝描画高≈171/173で従来と同じ距離感（近すぎ修正 2026-07-15）
   var handsFx = 0.85, handsFy = 0.13;                          // GKの手元（スプライト内フラクション・TUNE）
   var ballSpd = 2400, ballStartP = 0.42, slope = 0.16, P = 1700;   // ボールは右→左・シュートシーンと同速（同じpx/ms）
   var zc = [240, 116];                                         // ズーム中心（固定でジッター防止）
@@ -2066,10 +2257,10 @@ function _renderGkScene(sc, mode) {
       }
     }
     var ballGone = !dive && (p > ballStartP + 0.03) && !onScreen;   // dive はボールを手元で凍結＝終了させない
-    var drawGK = function () { if (!gkImg.complete || !gkImg.naturalWidth) return; var _s = _gkManga ? MangaRecolor.render(_gkKey, gkImg, _gkCols) : gkImg; if (_s) ctx.drawImage(_s, slide, gkY, gkW, gkH); };
+    var drawGK = function () { if (!gkImg.complete || !gkImg.naturalWidth) return; var _s = _gkManga ? MangaRecolor.render(_gkKey, gkImg, _gkCols) : gkImg; if (_s && _gkManga) _s = _csPixelate(_s, _gkKey, gkW, gkH); if (_s) ctx.drawImage(_s, slide, gkY, gkW, gkH); };
     var drawBall = function () { if (onScreen) _lpBall(ctx, bx, by, 12, (p - ballStartP) * 120); };
     ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(zc[0], zc[1]); ctx.scale(z, z); ctx.translate(-zc[0], -zc[1]);
-    ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+    ctx.imageSmoothingEnabled = SS > 1; _lpDrawBg(ctx, bgImg, bgFallback, W, H);   // マンガ絵=スムージング / ドット絵=NN維持（2026-07-15）
     if (save || dive) { drawGK(); drawBall(); } else { drawBall(); drawGK(); }   // 抜けはボールをGKの背後（先に描画）に
     var handsContact = save || (dive && sc.result === 'GK防いだ！');   // 手元で実際にボールに触れる時だけインパクト（抜かれ＝すり抜けは発光なし）
     var ct = (handsContact && p > contactP - 0.02 && p < contactP + 0.09) ? 1 - Math.abs(p - contactP) / 0.09 : 0;
@@ -2276,7 +2467,7 @@ function _renderHeaderScene(sc) {
   if (typeof MangaRecolor === 'undefined' || !MangaRecolor.render) return null;   // 本番=未ロード→従来SVGフォールバック
   var W = 480, H = 216, ground = 206;
   var canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
+  canvas.width = W; canvas.height = H;   // 等倍＋NNへ復帰（レトロ画素感 2026-07-15）。粗ドット化は _csPixelate が担う
   canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
   var ctx = canvas.getContext('2d');
   var riseAtkImg = _loadCutsceneImg(_HEADER_RISE_ATK_SRC), riseDefImg = _loadCutsceneImg(_HEADER_RISE_DEF_SRC);
@@ -2338,7 +2529,7 @@ function _renderHeaderScene(sc) {
     var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
     var p = Math.min(1, (now - T0) / P);
     ctx.clearRect(0, 0, W, H);
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;   // NN描画（レトロ画素感 2026-07-15・スプライトは _csPixelate 済み）
     // 背景を下げてピッチ線を下方へ＝跳んでいる選手を相対的に高く見せる（上に隙間が出ないよう拡大して cover・新規アート不要）
     //   _bb を大きくするほど芝生ラインが下がり、選手が地面から浮いて見える（選手の描画位置は不変・2026-07-10 ユーザー指示で背景側で調整）。
     if (bgImg.complete && bgImg.naturalWidth) { var _bb = 42, _bs = Math.max(W / bgImg.naturalWidth, (H + 2 * _bb) / bgImg.naturalHeight), _bdw = bgImg.naturalWidth * _bs, _bdh = bgImg.naturalHeight * _bs; ctx.drawImage(bgImg, (W - _bdw) / 2, (H - _bdh) / 2 + _bb, _bdw, _bdh); } else { ctx.drawImage(bgFallback, 0, 0); }
@@ -2357,8 +2548,10 @@ function _renderHeaderScene(sc) {
       var sw = refSpr.width * (sh / refSpr.height), sx = (W - sw) / 2;
       var lift = inRise ? 30 * (1 - p / riseEnd) : 0;     // rise: 下→apex へ跳び上がる / clash: apex
       var sy = ground - sh + lift;                        // 選手の描画位置は動かさない。浮き（地面から上）は背景の下げ幅 _bb で表現（2026-07-10 ユーザー指示）
-      if (defSpr) ctx.drawImage(defSpr, sx, sy, sw, sh);  // 守備＝先描き（背面）
-      if (atkSpr) ctx.drawImage(atkSpr, sx, sy, sw, sh);  // 攻撃＝後描き（前面・競り勝つ絵）
+      var _pxA = atkSpr ? _csPixelate(atkSpr, 'hdr_atk_' + (inRise ? 'r|' : 'c|') + atkSig, sw, sh) : null;   // レトロ画素化
+      var _pxD = defSpr ? _csPixelate(defSpr, 'hdr_def_' + (inRise ? 'r|' : 'c|') + defSig, sw, sh) : null;
+      if (_pxD) ctx.drawImage(_pxD, sx, sy, sw, sh);      // 守備＝先描き（背面）
+      if (_pxA) ctx.drawImage(_pxA, sx, sy, sw, sh);      // 攻撃＝後描き（前面・競り勝つ絵）
       headX = sx + sw * 0.47; headY = sy + sh * 0.07;     // 頭の接触点（2体の頭の間・やや上）
     }
     // 入射: ヘディング前、ボールが軌道に沿って頭へ飛来（ネイティブ=右上から＝赤線。左攻めは flip で左上）。接触(riseEnd)で頭へ到達。
