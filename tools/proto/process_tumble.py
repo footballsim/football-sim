@@ -229,6 +229,37 @@ def reinforce_eye_ink(a, Lmax=120, v_to=0.16):
     return a, n, box
 
 
+def thicken_eye_stroke(a, eyebox, r=1):
+    """目の線を1px太らせて純黒化する（2026-07-17 ユーザー指摘「眉は線だが目は点」対応）。
+
+    実測: 眉は長く太い線で34%縮小に耐えるが、目の線は細く短いため点に潰れる。
+    reinforce_eye_ink(暗色化=リカラー保護)だけでは太さが足りなかった。
+    眉を巻き込まないよう「眉の下の帯」（eyebox から導出）に限定し、既存インク(L<70)を
+    r=1px 膨張させて近黒(12,10,10)で塗る。34%で眉=長い線・目=短い線の2本が分離して読める
+    ことをシムで確認済み（r=2 は眉と癒着するため不可）。"""
+    x0, y0, x1, y1 = eyebox[0] + 4, eyebox[1] + 26, eyebox[2] - 20, eyebox[3] - 5
+
+    def lum(p):
+        return 0.299 * int(p[0]) + 0.587 * int(p[1]) + 0.114 * int(p[2])
+    ink = {(x, y) for y in range(y0, y1) for x in range(x0, x1)
+           if a[y, x, 3] > 40 and lum(a[y, x]) < 70}
+    grow = set()
+    for x, y in ink:
+        for dx in range(-r, r + 1):
+            for dy in range(-r, r + 1):
+                grow.add((x + dx, y + dy))
+    n = 0
+    for x, y in grow:
+        if not (x0 - 1 <= x <= x1 and y0 - 1 <= y <= y1):
+            continue
+        if a[y, x, 3] < 40:
+            continue
+        if lum(a[y, x]) >= 25:
+            a[y, x, 0], a[y, x, 1], a[y, x, 2] = 12, 10, 10
+            n += 1
+    return a, n
+
+
 def kit_sim(a, kit):
     """manga_recolor 実閾値で分類→kit色着色（白ソックスでベロ白化しないかの検証用）。"""
     HUE = {'skin': (14, 50), 'shorts': (120, 168), 'accent': (170, 202), 'shirt': (203, 245), 'socks': (300, 350)}
@@ -288,7 +319,10 @@ def main():
             if not ok:
                 raise SystemExit('GATE FAIL: 口の加工が口box外へ漏れています。中止しました。')
     sa, neye, eyebox = reinforce_eye_ink(sa)
-    print(f'  eye_ink: fixed化={neye}px box={eyebox}')
+    neye2 = 0
+    if eyebox:
+        sa, neye2 = thicken_eye_stroke(sa, eyebox)
+    print(f'  eye_ink: fixed化={neye}px 目の線太らせ={neye2}px box={eyebox}')
     Image.fromarray(sa).save(OUT)
     print(f'out={tw}x{TARGET_H} holes_removed={holes} purge={npurge}px tongue_guard={ngd}+{ngd2}px mouth_rebuilt={nteeth}px defringe={nfr}+{nfr2}px')
 
