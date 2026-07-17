@@ -2069,6 +2069,7 @@ function buildTeam(data, state) {
   return {
     name: data.name,
     team_color: data.team_color,
+    kit: data.kit,   // authoring済みユニフォーム4色（無いチームはundefined→MangaRecolor.kitForがteam_colorから導出）
     flag: data.flag,
     players: data.players.map(p => ({...p, params:[...p.params]})),
     lineup: [...state.lineup],
