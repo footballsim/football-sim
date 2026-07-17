@@ -71,7 +71,7 @@ var _bgsPreloaded = false;
 function _preloadCutsceneBgs() {
   if (_bgsPreloaded || typeof Image === 'undefined') return;
   _bgsPreloaded = true;
-  var list = [_LP_BG_SRC, _GK_BG_SRC, _GOAL_BG_SRC, _MISS_BG_SRC, _FOUL_REF_SRC, _FOUL_SKY_SRC, _POSTPLAY_FAIL_SRC, _POSTPLAY_FAIL_ATK_SRC, _POSTPLAY_FAIL_DEF_SRC, _POSTPLAY_HOLD_ATK_SRC, _POSTPLAY_HOLD_DEF_SRC, _ONETWO1_SRC, _ONETWO2_SRC, _ONETWO3_SRC];
+  var list = [_LP_BG_SRC, _GK_BG_SRC, _GOAL_BG_SRC, _MISS_BG_SRC, _FOUL_REF_SRC, _FOUL_BG_SRC, _POSTPLAY_FAIL_SRC, _POSTPLAY_FAIL_ATK_SRC, _POSTPLAY_FAIL_DEF_SRC, _POSTPLAY_HOLD_ATK_SRC, _POSTPLAY_HOLD_DEF_SRC, _ONETWO1_SRC, _ONETWO2_SRC, _ONETWO3_SRC];
   for (var i = 0; i < list.length; i++) { if (list[i]) _loadCutsceneImg(list[i]); }
 }
 
@@ -2848,7 +2848,7 @@ function _renderMidShotScene(sc, opts) {
 //   攻撃方向で主審を左右反転（指す向き＝プレー再開方向）。笛フラッシュ＋FOUL!。元絵 tools/art/cutscenes/foul_ref_src.png。
 // ============================================================
 var _FOUL_REF_SRC = 'img/cutscenes/foul_ref_t_01.png?v=7';   // v7img: 肩トリム浮き解消(クラック充填gap2化)・回帰ゲート[A-F]全PASS
-var _FOUL_SKY_SRC = 'img/cutscenes/foul_sky_bg_01.png?v=2';  // ドアップ主審用の青空背景(雲＋太陽のみ・スタンド/芝なし・生成・不透明1枚絵)
+var _FOUL_BG_SRC = 'img/cutscenes/foul_crowd_bg_01.png?v=1';  // ドアップ主審用の背景=デフォーカスした観客席(被写界深度でシャープな主審を際立たせる・longpass_bg_01をガウスぼかし)
 function _renderFoulScene(sc, isPK) {
   var W = 480, H = 216, ground = 214;
   var canvas = document.createElement('canvas');
@@ -2860,8 +2860,8 @@ function _renderFoulScene(sc, isPK) {
   if (isPK) canvas.className = 'cs-fullframe';
   var ctx = canvas.getContext('2d');
   var refImg = _loadCutsceneImg(_FOUL_REF_SRC);
-  var foulSkyImg = _loadCutsceneImg(_FOUL_SKY_SRC);   // 主審ドアップ専用の青空主体スタジアム背景（生成PNG）
-  var foulBgFallback = _foulBg();                      // 404時は手続き描画の青空へフォールバック
+  var foulBgImg = _loadCutsceneImg(_FOUL_BG_SRC);      // 主審ドアップ専用のデフォーカス観客席背景（PNG）
+  var foulBgFallback = _lpBg();                        // 404時は手続き描画の通常スタジアム（観客席）へフォールバック
   var accent = isPK ? '#ff3b3b' : '#ffcf33';   // PK=赤 / ファール=イエロー（警告色）
 
   var gs = (typeof gameState !== 'undefined' && gameState) ? gameState : {};
@@ -2902,7 +2902,7 @@ function _renderFoulScene(sc, isPK) {
     ctx.clearRect(0, 0, W, H); ctx.imageSmoothingEnabled = false;
     ctx.save();
     if (flip) { ctx.translate(W, 0); ctx.scale(-1, 1); }
-    _lpDrawBg(ctx, foulSkyImg, foulBgFallback, W, H);
+    _lpDrawBg(ctx, foulBgImg, foulBgFallback, W, H);
     var pop = Math.min(1, p / 0.16), z = 0.92 + 0.08 * pop;   // 主審がポップイン
     var sh = 198 * z, whX = W * 0.30, whY = H * 0.34;
     if (refImg.complete && refImg.naturalWidth) {
