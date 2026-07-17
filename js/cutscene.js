@@ -2871,7 +2871,10 @@ var _MANGA_FOUL_ATK_DIR = 'img/cutscenes/manga_foul_atk/';
 // ★アセット差し替え時は必ず版数を上げる（同一URLのまま中身だけ変えるとブラウザが旧画像を掴み続ける）。
 //   build の ?v 自動更新は index.html のJS/CSSタグのみが対象で、JS内で組み立てる画像URLには効かない。
 //   f2 = 2026-07-17 口を納品原画どおり（白い歯/赤ベロ/黒い口奥）へ差し替え。
-var _MANGA_FOUL_ATK_V = '?v=f2';
+//   f4 = 2026-07-17 口を「輪郭・赤ベロ・黒い口の中」の3要素へ再構成（ユーザー方針）。
+//        ゲーム描画は native380→130px＝34%縮小で口全体が約9.6×8.9px・歯は約4×2px＝描き分け不能。
+//        歯を捨てて「口が開いている」ことの提示に振ったほうが実寸で明確に読める。
+var _MANGA_FOUL_ATK_V = '?v=f4';
 
 // ①削り: 守備選手単独のスライディングチャレンジ（manga_tackle_slide/<hstyle>.png流用・新規アセット不要）。
 function _renderFoulTackleScene(sc) {

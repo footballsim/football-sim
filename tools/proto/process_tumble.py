@@ -71,19 +71,101 @@ def tongue_guard(a, box, s_min=0.15):
     return a, n
 
 
+def rebuild_mouth(a, tongue_box, pad=6):
+    """口を「輪郭・赤いベロ・黒い口の中」の3要素へ再構成する（2026-07-17 ユーザー方針）。
+
+    ゲーム描画は native380→130px＝34%縮小で口全体が約9.6×8.9px・歯は約4×2pxしか残らない。
+    この解像度で歯を描き分けるのは不可能なので、歯（白）は捨てて「口が開いている」ことの提示に振る。
+    → 口の中の「赤でも肌でもない」画素（＝歯とその中間調・分割線）をインク黒(0,0,0)で潰す。
+    塗る色が黒なので、フラッドが口の輪郭線を巻き込んでも黒のまま＝輪郭は保たれる
+    （白で塗った前版は輪郭を消して口が「白い塊」化し asset-qa FAIL。同じフラッドでも色で結果が反転する）。
+    赤いベロと肌には侵入しないため、3要素はそのまま残る。"""
+    from collections import deque
+    l, t, r, b = tongue_box
+    l -= pad; t -= pad; r += pad; b += pad
+    l = max(0, l); t = max(0, t); r = min(a.shape[1], r); b = min(a.shape[0], b)
+
+    def lum(p):
+        return 0.299 * int(p[0]) + 0.587 * int(p[1]) + 0.114 * int(p[2])
+
+    # ★分類は色相ベース（MangaRecolorのHUE窓と同一定義）。RGB差分ベースの旧判定は
+    #   明るいオレンジ肌 rgb(255,197,116)（実測hue35°）を「赤＝ベロ」と誤分類し、
+    #   is_skin=False にしてフラッドを素肌へ通してしまった（2026-07-17 asset-qa指摘）。
+    def hsv(p):
+        return colorsys.rgb_to_hsv(int(p[0]) / 255, int(p[1]) / 255, int(p[2]) / 255)
+
+    def is_red(p):
+        if p[3] < 40:
+            return False
+        hh, ss, vv = hsv(p)
+        return hh * 360 < 14 and ss > 0.35 and vv > 0.3
+
+    def is_skin(p):
+        if p[3] < 40:
+            return False
+        hh, ss, vv = hsv(p)
+        return 14 <= hh * 360 <= 50 and ss >= 0.16 and vv >= 0.22
+
+    # ★seedにもガードを適用。旧実装は alpha と輝度だけで seed を決めており、肌ハイライト
+    #   （lum>200）が片っ端から seed 化していた。塗り条件を lum>30 にした版でその seed 自身が
+    #   黒塗り対象になり、素肌に黒点が出た。二重の防壁として box 限定＋seedガードを入れる。
+    seed = [(x, y) for y in range(t, b) for x in range(l, r)
+            if a[y, x, 3] > 40 and lum(a[y, x]) > 200
+            and not is_skin(a[y, x]) and not is_red(a[y, x])]
+    if not seed:
+        return 0
+    seen = set(seed); dq = deque(seed)
+    while dq:
+        x, y = dq.popleft()
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nx, ny = x + dx, y + dy
+            if not (l <= nx < r and t <= ny < b) or (nx, ny) in seen:
+                continue
+            p = a[ny, nx]
+            if p[3] < 40 or is_red(p) or is_skin(p):
+                continue
+            seen.add((nx, ny)); dq.append((nx, ny))
+    n = 0
+    for x, y in seen:
+        if lum(a[y, x]) > 30:          # 既に黒い画素はそのまま（＝輪郭を再塗装しない）
+            a[y, x, 0] = a[y, x, 1] = a[y, x, 2] = 0   # 原画のインク色＝純黒
+            n += 1
+    return n
+
+
 def find_tongue_box(a, pad=8):
-    """ガード済みベロ(純赤hue<14・s>0.35)のbboxをpad拡張して返す（ダウンスケール後の再ガード用）。"""
-    pts = []
+    """ベロ(純赤hue<14・s>0.35)の **最大連結成分** のbboxをpad拡張して返す。
+
+    ★全赤画素の min/max を取ってはいけない。スパイク/腿にも暗赤が15pxあり、box が
+      387×158＝キャンバス22% に肥大して胴・腕・腿を巻き込む（2026-07-17 asset-qa指摘の
+      素肌への黒点10pxの主因）。最大成分に限れば口周辺の約30×30に収まり、遠方への
+      副作用が構造的に発生し得なくなる。"""
+    from collections import deque
+    pts = set()
     for y in range(a.shape[0]):
         for x in range(a.shape[1]):
             if a[y, x, 3] < 40:
                 continue
             hh, ss, vv = colorsys.rgb_to_hsv(a[y, x, 0] / 255, a[y, x, 1] / 255, a[y, x, 2] / 255)
             if hh * 360 < 14 and ss > 0.35 and vv > 0.3 and a[y, x, 2] < 160:
-                pts.append((x, y))
+                pts.add((x, y))
     if not pts:
         return None
-    xs = [p[0] for p in pts]; ys = [p[1] for p in pts]
+    seen = set(); best = []
+    for p0 in pts:
+        if p0 in seen:
+            continue
+        comp = []; dq = deque([p0]); seen.add(p0)
+        while dq:
+            x, y = dq.popleft(); comp.append((x, y))
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    q = (x + dx, y + dy)
+                    if q in pts and q not in seen:
+                        seen.add(q); dq.append(q)
+        if len(comp) > len(best):
+            best = comp
+    xs = [p[0] for p in best]; ys = [p[1] for p in best]
     return (min(xs) - pad, min(ys) - pad, max(xs) + pad, max(ys) + pad)
 
 
@@ -130,11 +212,23 @@ def main():
     sa, nfr2 = P.defringe(sa)
     # ★ダウンスケール再サンプリングで生じるベロ縁の中間色相を再ガード（縮小後座標で自己特定）
     tb = find_tongue_box(sa)
-    ngd2 = 0
+    ngd2 = 0; nteeth = 0
+    before = sa.copy()
     if tb:
         sa, ngd2 = tongue_guard(sa, tb)
+        nteeth = rebuild_mouth(sa, tb)   # ★口を「輪郭・赤ベロ・黒い口の中」の3要素へ再構成
+        # ★ゲート: 口の加工が口box外へ漏れていないか。v1は素肌に黒点10pxを落として
+        #   asset-qa FAIL になった。diffのbboxを機械で見れば納品前に検出できたので必須化する。
+        diff = np.argwhere(np.any(before[..., :3] != sa[..., :3], axis=-1))
+        if len(diff):
+            dy0, dx0 = diff.min(0); dy1, dx1 = diff.max(0)
+            pad = 4
+            ok = (dx0 >= tb[0] - pad and dy0 >= tb[1] - pad and dx1 <= tb[2] + pad and dy1 <= tb[3] + pad)
+            print(f'  gate: tongue_box={tb} diff_bbox=(x{dx0}-{dx1}, y{dy0}-{dy1}) {len(diff)}px -> {"OK" if ok else "NG(口box外へ漏れ)"}')
+            if not ok:
+                raise SystemExit('GATE FAIL: 口の加工が口box外へ漏れています。中止しました。')
     Image.fromarray(sa).save(OUT)
-    print(f'out={tw}x{TARGET_H} holes_removed={holes} purge={npurge}px tongue_guard={ngd}+{ngd2}px defringe={nfr}+{nfr2}px')
+    print(f'out={tw}x{TARGET_H} holes_removed={holes} purge={npurge}px tongue_guard={ngd}+{ngd2}px mouth_rebuilt={nteeth}px defringe={nfr}+{nfr2}px')
 
     # 証拠: 白ソックスキット（ブラジル風=黄シャツ/青短パン/白ソックス）でベロが白化しないか
     KIT = {'shirt': (242, 197, 0), 'shorts': (27, 58, 138), 'socks': (242, 244, 247), 'accent': (30, 140, 58)}
