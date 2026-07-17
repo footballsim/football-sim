@@ -2868,6 +2868,10 @@ function _renderMidShotScene(sc, opts) {
 //   まだ本編（_shootSplit）には未配線＝テスト環境（_scene_lab.html）での確認用。
 // ============================================================
 var _MANGA_FOUL_ATK_DIR = 'img/cutscenes/manga_foul_atk/';
+// ★アセット差し替え時は必ず版数を上げる（同一URLのまま中身だけ変えるとブラウザが旧画像を掴み続ける）。
+//   build の ?v 自動更新は index.html のJS/CSSタグのみが対象で、JS内で組み立てる画像URLには効かない。
+//   f2 = 2026-07-17 口を納品原画どおり（白い歯/赤ベロ/黒い口奥）へ差し替え。
+var _MANGA_FOUL_ATK_V = '?v=f2';
 
 // ①削り: 守備選手単独のスライディングチャレンジ（manga_tackle_slide/<hstyle>.png流用・新規アセット不要）。
 function _renderFoulTackleScene(sc) {
@@ -2944,7 +2948,7 @@ function _renderFoulDownScene(sc) {
   var atkFeat = _mangaFeat(atkP ? (atkP.long_name || atkP.name || '') : '');
   var atkCols = _mangaColors(sc.offence, atkFeat.skin);
   var atkKey = 'fdn|' + atkFeat.hstyle + '|' + atkCols.shirt + atkCols.shorts + atkCols.socks + atkCols.accent + atkCols.skin;
-  var atkImg = _loadCutsceneImg(_MANGA_FOUL_ATK_DIR + atkFeat.hstyle + '.png');
+  var atkImg = _loadCutsceneImg(_MANGA_FOUL_ATK_DIR + atkFeat.hstyle + '.png' + _MANGA_FOUL_ATK_V);
 
   var accent = '#ffcf33';   // 警告色（守備の反則＝ファール共通）
   var en = (typeof window !== 'undefined' && window.LANG === 'en');
