@@ -2874,7 +2874,7 @@ var _MANGA_FOUL_ATK_DIR = 'img/cutscenes/manga_foul_atk/';
 //   f4 = 2026-07-17 口を「輪郭・赤ベロ・黒い口の中」の3要素へ再構成（ユーザー方針）。
 //        ゲーム描画は native380→130px＝34%縮小で口全体が約9.6×8.9px・歯は約4×2px＝描き分け不能。
 //        歯を捨てて「口が開いている」ことの提示に振ったほうが実寸で明確に読める。
-var _MANGA_FOUL_ATK_V = '?v=f7';
+var _MANGA_FOUL_ATK_V = '?v=f8';
 
 // ①削り: 守備選手単独のスライディングチャレンジ（manga_tackle_slide/<hstyle>.png流用・新規アセット不要）。
 function _renderFoulTackleScene(sc) {

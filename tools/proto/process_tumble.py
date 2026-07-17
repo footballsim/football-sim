@@ -169,6 +169,66 @@ def find_tongue_box(a, pad=8):
     return (min(xs) - pad, min(ys) - pad, max(xs) + pad, max(ys) + pad)
 
 
+def reinforce_eye_ink(a, Lmax=90, v_to=0.20):
+    """目の線を実行時リカラーから保護する（2026-07-17 ユーザー指摘「目が線にならない」対応）。
+
+    ★原因: 目の線を構成する暗画素のうち半分近く（実測473px）は真っ黒でなく「暗い茶色」で、
+      MangaRecolor の partOf では肌窓(hue14-50, s>=0.16, v>=0.22)に分類される。実行時に選手の
+      肌色ランプへ置換されるため、明るい肌の選手ほど目の線が持ち上がって溶け、34%縮小で
+      「線に見えない」。スプライト自体は新旧同等（位置合わせ済み実測: L<70=950 vs 919）で、
+      原画のせいでも縮小方式のせいでもない＝どの版でも起きていた構造問題。
+    対策: 目領域（ベロ基準で自己特定）の「暗いのに肌窓に入る画素」を v<=0.20 へ暗色化
+      ＝partOf='fixed' 化。以後どの肌色の選手でも目の線は変化しない。
+    """
+    def hsv(p):
+        return colorsys.rgb_to_hsv(int(p[0]) / 255, int(p[1]) / 255, int(p[2]) / 255)
+    # ベロ（純赤の最大連結成分）を特定して目boxを導出
+    from collections import deque
+    reds = set()
+    for y in range(a.shape[0]):
+        for x in range(a.shape[1]):
+            p = a[y, x]
+            if p[3] < 40:
+                continue
+            h, sst, v = hsv(p)
+            if (h * 360 < 14 or h * 360 > 350) and sst > 0.6 and v > 0.35 and p[2] < 90:
+                reds.add((x, y))
+    if not reds:
+        return a, 0, None
+    seen = set(); best = []
+    for p0 in reds:
+        if p0 in seen:
+            continue
+        comp = []; dq = deque([p0]); seen.add(p0)
+        while dq:
+            x, y = dq.popleft(); comp.append((x, y))
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    q = (x + dx, y + dy)
+                    if q in reds and q not in seen:
+                        seen.add(q); dq.append(q)
+        if len(comp) > len(best):
+            best = comp
+    xs = [q[0] for q in best]; ys = [q[1] for q in best]
+    tcx, tcy = (min(xs) + max(xs)) // 2, (min(ys) + max(ys)) // 2
+    box = (tcx - 30, tcy - 64, tcx + 34, tcy - 21)   # 眉+目を覆う（ベロ相対・実測から）
+    n = 0
+    for y in range(max(0, box[1]), min(a.shape[0], box[3])):
+        for x in range(max(0, box[0]), min(a.shape[1], box[2])):
+            p = a[y, x]
+            if p[3] < 40:
+                continue
+            L = 0.299 * int(p[0]) + 0.587 * int(p[1]) + 0.114 * int(p[2])
+            if L >= Lmax:
+                continue
+            h, sst, v = hsv(p)
+            if 14 <= h * 360 <= 50 and sst >= 0.16 and v >= 0.22:
+                f = v_to / v
+                a[y, x, 0] = int(p[0] * f); a[y, x, 1] = int(p[1] * f); a[y, x, 2] = int(p[2] * f)
+                n += 1
+    return a, n, box
+
+
 def kit_sim(a, kit):
     """manga_recolor 実閾値で分類→kit色着色（白ソックスでベロ白化しないかの検証用）。"""
     HUE = {'skin': (14, 50), 'shorts': (120, 168), 'accent': (170, 202), 'shirt': (203, 245), 'socks': (300, 350)}
@@ -227,6 +287,8 @@ def main():
             print(f'  gate: tongue_box={tb} diff_bbox=(x{dx0}-{dx1}, y{dy0}-{dy1}) {len(diff)}px -> {"OK" if ok else "NG(口box外へ漏れ)"}')
             if not ok:
                 raise SystemExit('GATE FAIL: 口の加工が口box外へ漏れています。中止しました。')
+    sa, neye, eyebox = reinforce_eye_ink(sa)
+    print(f'  eye_ink: fixed化={neye}px box={eyebox}')
     Image.fromarray(sa).save(OUT)
     print(f'out={tw}x{TARGET_H} holes_removed={holes} purge={npurge}px tongue_guard={ngd}+{ngd2}px mouth_rebuilt={nteeth}px defringe={nfr}+{nfr2}px')
 
