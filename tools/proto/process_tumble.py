@@ -260,6 +260,28 @@ def thicken_eye_stroke(a, eyebox, r=1):
     return a, n
 
 
+EYE_DONOR = 'tools/proto/_fk_backup_20260717/foul_atk_wavy_8b81035.png'
+
+
+def graft_eyes(a):
+    """旧スプライト(8b81035・16日原画由来)の「出来の良い目」を移植する（2026-07-17 ユーザー指定）。
+
+    経緯: 17日原画の目は線が細く短く、34%縮小で点に潰れる。thicken(1px膨張)は線にはなるが
+    「雑」（ユーザー評）。旧版の目はユーザーが「とてもいい状態」と明示した基準アセット。
+    新旧の顔はほぼ同一（シルエットIoU0.937・目インクの位置合わせ実測で offset=(+3,-1)）
+    なので矩形移植が成立する（ChatGPT別生成の口移植が失敗したのとは条件が違う）。
+    新(x,y) ← 旧(x+3, y-1)。箱は眉+目(552,68)-(616,108)。"""
+    donor = np.array(Image.open(EYE_DONOR).convert('RGBA')).astype(int)
+    n = 0
+    for y in range(68, 108):
+        for x in range(552, 616):
+            oy, ox = y - 1, x + 3
+            if donor[oy, ox, 3] > 40:
+                a[y, x] = donor[oy, ox]
+                n += 1
+    return a, n
+
+
 def kit_sim(a, kit):
     """manga_recolor 実閾値で分類→kit色着色（白ソックスでベロ白化しないかの検証用）。"""
     HUE = {'skin': (14, 50), 'shorts': (120, 168), 'accent': (170, 202), 'shirt': (203, 245), 'socks': (300, 350)}
@@ -318,11 +340,9 @@ def main():
             print(f'  gate: tongue_box={tb} diff_bbox=(x{dx0}-{dx1}, y{dy0}-{dy1}) {len(diff)}px -> {"OK" if ok else "NG(口box外へ漏れ)"}')
             if not ok:
                 raise SystemExit('GATE FAIL: 口の加工が口box外へ漏れています。中止しました。')
-    sa, neye, eyebox = reinforce_eye_ink(sa)
-    neye2 = 0
-    if eyebox:
-        sa, neye2 = thicken_eye_stroke(sa, eyebox)
-    print(f'  eye_ink: fixed化={neye}px 目の線太らせ={neye2}px box={eyebox}')
+    sa, ngraft = graft_eyes(sa)              # ★旧版の「良い目」を移植（thickenは雑のため廃止）
+    sa, neye, eyebox = reinforce_eye_ink(sa)  # 移植した目も明肌選手のリカラーから保護
+    print(f'  eyes: graft={ngraft}px fixed化={neye}px box={eyebox}')
     Image.fromarray(sa).save(OUT)
     print(f'out={tw}x{TARGET_H} holes_removed={holes} purge={npurge}px tongue_guard={ngd}+{ngd2}px mouth_rebuilt={nteeth}px defringe={nfr}+{nfr2}px')
 
