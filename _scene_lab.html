@@ -1,0 +1,149 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>演出テストラボ</title>
+<style>
+body{margin:0;background:linear-gradient(180deg,#0c1424,#070b14);color:#eef3ff;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif;min-height:100vh;padding:16px 12px 48px;display:flex;flex-direction:column;align-items:center}
+h1{font-size:16px;letter-spacing:.12em;color:#f2c14e;margin:0 0 12px}
+.layout{display:flex;gap:20px;align-items:flex-start;width:min(1440px,98vw);flex-wrap:wrap;justify-content:center}
+.left{flex:1 1 480px;max-width:960px;min-width:320px;display:flex;flex-direction:column;align-items:center}
+.stage{width:100%;aspect-ratio:480/216;background:#000;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 60px -20px rgba(0,0,0,.8)}
+.stage canvas{width:100%;height:100%;display:block}
+.panel{flex:0 1 360px;min-width:280px;max-height:calc(100vh - 32px);overflow-y:auto;position:sticky;top:16px;padding-right:4px}
+.grp{margin:0 0 16px}
+.grp h2{font-size:12px;letter-spacing:.1em;color:#8b98b3;margin:0 0 6px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:4px}
+.btns{display:flex;flex-direction:column;gap:8px}
+button{min-height:46px;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:#131d30;color:#eef3ff;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;text-align:left}
+button:hover{filter:brightness(1.25)}
+button.on{background:linear-gradient(160deg,#f6cf6a,#f2c14e);color:#3a2a05;border-color:transparent}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:#aab6cd;margin-top:10px;width:100%}
+select{background:#131d30;color:#eef3ff;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:8px 10px;font-size:13px;min-height:44px}
+label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:pointer}
+.replay{min-height:40px;padding:6px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#eef3ff;font-size:13px;cursor:pointer}
+.err{color:#ff8f88;font-size:12px;margin-top:10px;white-space:pre-wrap;max-width:640px}
+.hint{color:#68758f;font-size:11px;margin-top:10px;max-width:680px;text-align:center;line-height:1.7}
+</style></head>
+<body>
+<h1>⚽ 演出テストラボ</h1>
+<div class="layout">
+  <div class="left">
+    <div class="stage" id="stage"><canvas></canvas></div>
+    <div class="row">
+      攻撃 <select id="atk"></select>
+      守備 <select id="def"></select>
+      <label class="chk"><input type="checkbox" id="ok" checked> 成功</label>
+      <button class="replay" onclick="replay()">↺ リプレイ</button>
+    </div>
+    <div class="err" id="err"></div>
+    <p class="hint">実ゲームと同一の描画コード（root js）を直接呼ぶ確認用。試合進行・セーブに影響しません。「成功」チェックでヘディングは ヘディング！/競り負け！、シュートは成功/セーブ寄りが切替わります。</p>
+  </div>
+  <div class="panel">
+    <div class="grp"><h2>シュート</h2><div class="btns">
+      <button data-k="shotduel" onclick="run('shotduel')">対決割り（漫画演出・停止中の比較用）</button>
+      <button data-k="shot2" onclick="run('shot2')">2拍・顔カットイン</button>
+    </div></div>
+
+    <div class="grp"><h2>GKダイブ</h2><div class="btns">
+      <button data-k="gksave" onclick="run('gksave')">セーブ演出</button>
+    </div></div>
+
+    <div class="grp"><h2>ロングパス</h2><div class="btns">
+      <button data-k="longpass" onclick="run('longpass')">拍1：蹴り出し（結果非開示）</button>
+      <button data-k="lpresult" onclick="run('lpresult')">拍2：守備の反応（成功=スルー/失敗=カット）</button>
+    </div></div>
+
+    <div class="grp"><h2>ヘディング（Rise・対決割り）</h2><div class="btns">
+      <button data-k="header" onclick="run('header')">競り合い（成功/競り負けは「成功」チェックで切替）</button>
+    </div></div>
+
+    <div class="grp"><h2>フリーキック / クロス（新FKアート・MangaRecolor）</h2><div class="btns">
+      <button data-k="freekick" onclick="run('freekick')">直接FK（蹴る前→蹴った瞬間）</button>
+      <button data-k="fkcross" onclick="run('fkcross')">クロス流用（テンポ速）</button>
+    </div></div>
+
+    <div class="grp"><h2>ファール（3ビート案A・テスト実装）</h2><div class="btns">
+      <button data-k="foul1" onclick="run('foul1')">①削り（守備単独）</button>
+      <button data-k="foul2" onclick="run('foul2')">②転倒（攻撃単独・新スプライト）</button>
+      <button data-k="foul3" onclick="run('foul3')">③判定（主審）</button>
+    </div></div>
+
+    <div class="grp"><h2>スキル発動（PS-05・決めゴマ）</h2><div class="btns">
+      <button data-k="skill_captaincy" onclick="run('skill_captaincy')">鼓舞（キャプテンシー・失点後）</button>
+    </div></div>
+  </div>
+</div>
+
+<script src="js/players.js?v=lab17"></script>
+<script src="js/rng.js?v=lab17"></script>
+<script src="js/events.js?v=lab17"></script>
+<script src="js/simulate.js?v=lab17"></script>
+<script src="js/match.js?v=lab17"></script>
+<script src="js/portrait.js?v=lab17"></script>
+<script src="js/manga_recolor.js?v=lab17"></script>
+<script src="js/cutscene.js?v=lab17"></script>
+<script>
+var KEYS=[['belgium2026','ベルギー'],['england2026','イングランド'],['brazil2026','ブラジル'],['spain2026','スペイン'],['france2026','フランス'],['argentina2026','アルゼンチン'],['germany2026','ドイツ'],['netherlands2026','オランダ']];
+var atk=document.getElementById('atk'),def=document.getElementById('def');
+KEYS.forEach(function(k){atk.add(new Option(k[1],k[0]));def.add(new Option(k[1],k[0]));});
+atk.value='belgium2026';def.value='brazil2026';
+var cur='shotduel';
+function mk(key){var d=TEAM_DATA[key];var si=system_data.findIndex(function(s){return s.name===d.default_system;});return buildTeam(d,{systemIdx:si>=0?si:0,lineup:d.default_lineup.slice(),tactics:d.default_tactics,keyplayer:d.default_keyplayer,marked_player:d.default_marked_player});}
+function put(c){var st=document.getElementById('stage');st.innerHTML='';st.appendChild(c);}
+function err(m){document.getElementById('err').textContent=m||'';}
+function run(kind,retry){
+  cur=kind; err('');
+  document.querySelectorAll('button[data-k]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-k')===kind);});
+  try{
+    var a=mk(atk.value),b=mk(def.value);
+    window.gameState={team1:b,team2:a};
+    var ok=document.getElementById('ok').checked;
+    var c=null;
+    if(kind==='shotduel'){
+      var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'成功'};
+      c=_renderShotDuelScene(sc);
+    }else if(kind==='shot2'){
+      var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'成功'};
+      var entry=_pickCutscene('shot',a.team_color);
+      if(!entry||!entry.file){if((retry||0)<12)return setTimeout(function(){run(kind,(retry||0)+1);},400);return err('素材読込待ち…リロードしてください');}
+      c=_renderShotScene(sc,entry);
+    }else if(kind==='gksave'){
+      var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'GK防いだ！'};
+      c=_renderGkScene(sc,'save');
+    }else if(kind==='header'){
+      var sc={offence:a,defence:b,ofsPos:9,dfsPos:3,action:'ヘディングシュート',scenario:'クロス',result:ok?'成功':'失敗'};
+      c=_renderHeaderRiseDuelScene(sc)||_renderHeaderScene(sc);   // 実ゲームと同じフォールバック経路
+    }else if(kind==='longpass'){
+      var sc={offence:a,defence:b,ofsPos:7,dfsPos:5,action:'ロングパス',scenario:'ロングパス',result:'成功'};
+      var entry=_pickCutscene('longpass',a.team_color);
+      if(!entry||!entry.fileA){if((retry||0)<12)return setTimeout(function(){run(kind,(retry||0)+1);},400);return err('素材読込待ち…リロードしてください');}
+      c=_renderLongpassScene(sc,entry);
+    }else if(kind==='lpresult'){
+      var sc={offence:a,defence:b,ofsPos:7,dfsPos:5,action:'ロングパス',scenario:'ロングパス',result:ok?'成功':'失敗'};
+      c=_renderLongpassResultScene(sc);
+    }else if(kind==='freekick'){
+      var sc={offence:a,defence:b,ofsPos:8,dfsPos:0,action:'フリーキック',scenario:'フリーキック',result:'成功'};
+      c=_renderFreekickScene(sc);
+    }else if(kind==='fkcross'){
+      var sc={offence:a,defence:b,ofsPos:8,crossPos:8,dfsPos:0,action:'クロス',scenario:'クロス',result:'成功'};
+      c=_renderFreekickScene(sc);
+    }else if(kind==='foul1'){
+      var sc={offence:a,defence:b,ofsPos:7,dfsPos:5,action:'ロングパス',scenario:'ロングパス',result:'ファール'};
+      c=_renderFoulTackleScene(sc);
+    }else if(kind==='foul2'){
+      var sc={offence:a,defence:b,ofsPos:7,dfsPos:5,action:'ロングパス',scenario:'ロングパス',result:'ファール'};
+      c=_renderFoulDownScene(sc);
+    }else if(kind==='foul3'){
+      var sc={offence:a,defence:b,ofsPos:7,dfsPos:5,action:'ロングパス',scenario:'ロングパス',result:'ファール'};
+      c=_renderFoulScene(sc);
+    }else if(kind==='skill_captaincy'){
+      // 鼓舞＝自チーム(team1=b)失点時に発火。events.js 正規化形の evt を直接渡して単体プレビュー。
+      var cap=b.players[b.lineup[5]]||b.players[b.lineup[0]];
+      var evt={team:'home',skill:'captaincy',player:cap?cap.name:'—',playerEn:cap?(cap.en_name||cap.name):'—'};
+      c=_renderSkillActivateScene(evt);
+    }
+    if(!c){if((retry||0)<12)return setTimeout(function(){run(kind,(retry||0)+1);},400);return err('描画がnull（素材読込前かも・リロード）');}
+    put(c);
+  }catch(e){err('ERR: '+e.message+'\n'+e.stack);}
+}
+function replay(){run(cur);}
+if(typeof Portrait!=='undefined'&&Portrait.preload)Portrait.preload();
+setTimeout(function(){run('shot2');},500);
+</script></body></html>

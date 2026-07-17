@@ -1646,9 +1646,24 @@ function _renderFreekickScene(sc) {
   var mirror = _csAttackRight(sc);   // ネイティブ=左攻め（ボールは左上＝ゴール方向）→ team1 で全体ミラー
   // クロス流用時は FK よりさらにテンポを早く＝振りかぶり(freekick1)を短くしてすぐ「蹴った後」(freekick2)へ移行。
   var sw = (sc.scenario === 'クロス') ? 0.12 : 0.28, P = 1800;   // freekick1(蹴る前)→freekick2(蹴った瞬間)の切替点
-  var kx = 282, kh = 182;            // キッカー中心x・身長
-  var bx0 = 348, by0 = ground - 10;  // ボール起点＝右下（添付の赤丸位置）。軸足側へボール1個分(24px)寄せ済(372→348)
+  // 新FKアート(freekick1=333×360 蹴る前/腕広げ・freekick2=200×360 蹴った瞬間/縦長)。両フレームで
+  //   胴の重心x比率が違う(fk1 軸足≈native223=0.67 / fk2 軸足≈native101=0.505)ため、軸足(プラント)が
+  //   画面同一点に来るよう別センターで描く（フレーム切替時のガタつき防止）。native360→scale≈0.506。
+  var kh = 182;                      // キッカー身長
+  var plantX = 300;                  // 軸足の画面x（両フレーム共通アンカー）
+  var kx1 = 271, kx2 = 300;          // fk1/fk2 の描画中心x。軸足native(223/101)を plantX=300 に合わせた実測値
+  var kx = plantX;                   // 被写体センタリング代表値（_csCenterSubject 用）
+  // ボール起点＝蹴り足の接点。★シーン座標は「ネイティブ=左攻め」＝bx0を増やすとゴールから遠ざかる(＝ミラー表示の画面では左へ)。
+  //   ラボ/実試合の既定は mirror=true(_csAttackRight は gameState 未設定で true)なので、画面の左右はシーン座標と反転する。
+  var bx0 = 320, by0 = ground - 8;   // 2026-07-17 ユーザー指示で 280→310→320（画面上で計40px左＝ゴールから40px遠ざける）
   var vx = 2380, vy = 880;           // シュートと同等速度（≈1.4px/ms）・浅い左上へ直進（slope≈0.37）
+  // 新FK素材=分離配色RGBA(shirt青/shorts緑/socksマゼンタ/accentシアン+肌)→MangaRecolorで4スロット別々に置換。
+  //   旧_recolorPostplay(赤1色染め)は緑短パンを守備色に誤変換し青シャツを塗り残すため廃止（2026-07-17）。
+  var _fkManga = (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);
+  var _fkFeat  = _fkManga ? _mangaFeat(kicker ? (kicker.long_name || kicker.name || '') : '') : null;
+  var _fkCols  = _fkManga ? _mangaColors(sc.offence, _fkFeat.skin) : null;
+  var _fkSig   = _fkCols ? (_fkCols.shirt + _fkCols.shorts + _fkCols.socks + _fkCols.accent + _fkCols.skin) : '';
+  var _fk1Key  = _fkManga ? ('fk1|' + _fkSig) : null, _fk2Key = _fkManga ? ('fk2|' + _fkSig) : null;
 
   function speedLines(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 12, y + Math.sin(an) * 12); ctx.lineTo(x + Math.cos(an) * 50, y + Math.sin(an) * 50); ctx.stroke(); } }
   function drawSprF(img, cx, footY, h, flip) { if (!img) return; var nw = img.naturalWidth || img.width, nh = img.naturalHeight || img.height; if (!nw) return; var w = nw * (h / nh); ctx.save(); if (flip) { ctx.translate(cx, 0); ctx.scale(-1, 1); ctx.translate(-cx, 0); } ctx.drawImage(img, cx - w / 2, footY - h, w, h); ctx.restore(); }
@@ -1671,15 +1686,19 @@ function _renderFreekickScene(sc) {
     var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
     var p = Math.min(1, (now - T0) / P);
     ctx.clearRect(0, 0, W, H);
-    var spr1 = _recolorPostplay(img1, atkColor, atkColor, 'fk1') || img1;   // 赤キット→攻撃チーム色
-    var spr2 = _recolorPostplay(img2, atkColor, atkColor, 'fk2') || img2;
+    // 新FKアートは分離配色→MangaRecolorで{shirt/shorts/socks/accent}+肌を別々に置換→_csPixelateで仕上げ。
+    //   MangaRecolor 未ロード(公開ビルド)はネイティブ素材をそのまま描画（旧_recolorPostplayは新ベースで色が壊れるため使わない）。
+    var spr1 = (img1.complete && img1.naturalWidth) ? (_fkManga ? MangaRecolor.render(_fk1Key, img1, _fkCols) : img1) : null;
+    if (spr1 && _fkManga) spr1 = _csPixelate(spr1, _fk1Key, spr1.width * (kh / spr1.height), kh);
+    var spr2 = (img2.complete && img2.naturalWidth) ? (_fkManga ? MangaRecolor.render(_fk2Key, img2, _fkCols) : img2) : null;
+    if (spr2 && _fkManga) spr2 = _csPixelate(spr2, _fk2Key, spr2.width * (kh / spr2.height), kh);
     ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
 
     var contact = 0;
     if (p < sw) {
       // ① 蹴る前: 振りかぶり。ボールは足元で静止。
       withScene(function () {
-        drawSprF(spr1, kx, ground, kh, false);   // freekick1 は左向き＝ネイティブのまま
+        drawSprF(spr1, kx1, ground, kh, false);   // freekick1 は左向き＝ネイティブのまま。軸足を plantX へ合わせた kx1
         _lpBall(ctx, bx0, by0, 12, 0);
       });
     } else {
@@ -1689,7 +1708,7 @@ function _renderFreekickScene(sc) {
       var by = by0 - vy * dt;                           // 浅い角度で左上へ（直進・弧なし）
       contact = (dt < 0.06) ? (1 - dt / 0.06) : 0;
       withScene(function () {
-        drawSprF(spr2, kx, ground, kh, false);
+        drawSprF(spr2, kx2, ground, kh, false);   // 軸足を plantX へ合わせた kx2
         if (bx > -20 && by > -20) _lpBall(ctx, bx, by, 12, dt * 120);
         if (contact > 0) speedLines(bx0, by0, contact * 0.8);
       });
@@ -1699,7 +1718,7 @@ function _renderFreekickScene(sc) {
     if (p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  // キッカーが kx=282（やや右・0.59）。mirror 込みで主役を可視窓中央へ。
+  // キッカー軸足 plantX=300（0.625）。mirror 込みで主役を可視窓中央へ。
   return _csCenterSubject(canvas, kx / W, mirror);
 }
 
@@ -2841,6 +2860,175 @@ function _renderMidShotScene(sc, opts) {
   requestAnimationFrame(frame);
   // シューターは sx=86＋幅≈192＝中心 ~0.4（やや左）。flip 込みで主役を可視窓中央へ。
   return _csCenterSubject(canvas, 0.4, flip);
+}
+
+// ============================================================
+// ファール3ビート化（テスト実装・2026-07-16 ユーザー指定「1画像1選手」方針）:
+//   ①削り（守備単独・manga_tackle_slide流用）→②転倒（攻撃単独・manga_foul_atk新規）→③判定（主審・既存）。
+//   まだ本編（_shootSplit）には未配線＝テスト環境（_scene_lab.html）での確認用。
+// ============================================================
+var _MANGA_FOUL_ATK_DIR = 'img/cutscenes/manga_foul_atk/';
+
+// ①削り: 守備選手単独のスライディングチャレンジ（manga_tackle_slide/<hstyle>.png流用・新規アセット不要）。
+function _renderFoulTackleScene(sc) {
+  if (typeof MangaRecolor === 'undefined' || !MangaRecolor.render) return null;
+  var W = 480, H = 216, ground = 196;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+
+  var defP = sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+  var defName = defP ? ((typeof getPlayerName === 'function') ? getPlayerName(defP) : defP.name) : '';
+  var defTeamNm = (typeof getTeamName === 'function' && sc.defence) ? getTeamName(sc.defence) : '';
+  var defFeat = _mangaFeat(defP ? (defP.long_name || defP.name || '') : '');
+  var defCols = _mangaColors(sc.defence, defFeat.skin);
+  var defKey = 'ftk|' + defFeat.hstyle + '|' + defCols.shirt + defCols.shorts + defCols.socks + defCols.accent + defCols.skin;
+  var defImg = _loadCutsceneImg('img/cutscenes/manga_tackle_slide/' + defFeat.hstyle + '.png');
+
+  var accent = (sc.defence && sc.defence.team_color) || '#e36b1f';
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  var label = en ? 'CHALLENGE!' : 'チャレンジ！';
+  function dom(id) { var el = (typeof document !== 'undefined') && document.getElementById(id); return el ? el.textContent : ''; }
+  var timeTxt = dom('game-time-display');
+
+  var ph = 160, sx = W * 0.32, sy = ground - ph;
+  var flipH = _csAttackRight(sc);   // 守備は攻撃の逆を向いて迎え撃つ＝キック拍と同じ規約を流用
+  var P = 1100;
+
+  function hud() {
+    if (!CUTSCENE_BURN_LABELS) return;
+    var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
+    if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
+    var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
+    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = '#ffcf33'; ctx.fillText(label, 12, H - 9);
+    if (defName) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(defName + (defTeamNm ? (' · ' + defTeamNm) : ''), W - 12, H - 10); }
+  }
+
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var p = Math.min(1, (now - T0) / P);
+    ctx.clearRect(0, 0, W, H);
+    ctx.imageSmoothingEnabled = false;
+    ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+    _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+    var spr = (defImg.complete && defImg.naturalWidth) ? MangaRecolor.render(defKey, defImg, defCols) : null;
+    if (spr) { var dw = spr.width * (ph / spr.height); ctx.drawImage(spr, sx, sy, dw, ph); }
+    ctx.restore();
+    hud();
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return _csCenterSubject(canvas, 0.5, false);
+}
+
+// ②転倒: 攻撃選手単独のダウン（新規スプライト manga_foul_atk/<hstyle>.png・2026-07-16受入）。
+function _renderFoulDownScene(sc) {
+  if (typeof MangaRecolor === 'undefined' || !MangaRecolor.render) return null;
+  var W = 480, H = 216, ground = 196;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+
+  var atkP = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  var atkName = atkP ? ((typeof getPlayerName === 'function') ? getPlayerName(atkP) : atkP.name) : '';
+  var atkTeamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
+  var atkFeat = _mangaFeat(atkP ? (atkP.long_name || atkP.name || '') : '');
+  var atkCols = _mangaColors(sc.offence, atkFeat.skin);
+  var atkKey = 'fdn|' + atkFeat.hstyle + '|' + atkCols.shirt + atkCols.shorts + atkCols.socks + atkCols.accent + atkCols.skin;
+  var atkImg = _loadCutsceneImg(_MANGA_FOUL_ATK_DIR + atkFeat.hstyle + '.png');
+
+  var accent = '#ffcf33';   // 警告色（守備の反則＝ファール共通）
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  var label = en ? 'BROUGHT DOWN!' : '倒された！';
+  function dom(id) { var el = (typeof document !== 'undefined') && document.getElementById(id); return el ? el.textContent : ''; }
+  var timeTxt = dom('game-time-display');
+
+  var ph = 130, sx = W * 0.06, sy = ground - ph;   // ロングパス相当のスケール感へ縮小（2026-07-16・寝そべりポーズは横長のため高さ基準では画面占有率が上がりやすい）。頭部は素材の右寄り(frac 0.81)＝起点を左寄りへ下げて顔の見切れを解消
+  var P = 1300;
+  // スライド演出（2026-07-16 ユーザー指定）: 削られた勢いのまま左→右へ滑って止まる（ease-out）。
+  //   攻撃方向で向きを変えると滑走感が破綻するため、この単独リアクションは常に画面基準（左→右固定）。
+  var slideP = 0.30, slideDist = 74;
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+  function burst(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 10, y + Math.sin(an) * 10); ctx.lineTo(x + Math.cos(an) * 42, y + Math.sin(an) * 42); ctx.stroke(); } }
+  // 土煙: スライド中、進行方向の後方（左）へ土色パフを連続発生→上へ舞いつつ薄れる。派手め（2026-07-16 好評につき増量）。
+  function dustPuffs(px, py, slideT) {
+    ctx.save();
+    for (var i = 0; i < 14; i++) {
+      var f = slideT - i * 0.035;
+      if (f < 0 || f > 1) continue;
+      var dx = -(i * 8 + f * 42), dy = -f * 22 - (i % 4) * 4;
+      var r = 6 + f * 11;
+      // 外側=薄い土煙の広がり、内側=白っぽいコア（コントラストで視認性UP）
+      ctx.globalAlpha = (1 - f) * 0.7;
+      ctx.fillStyle = '#d9c79a';
+      ctx.beginPath(); ctx.arc(px + dx, py + dy, r, 0, 6.29); ctx.fill();
+      ctx.globalAlpha = (1 - f) * 0.55;
+      ctx.fillStyle = '#f2e8cf';
+      ctx.beginPath(); ctx.arc(px + dx, py + dy, r * 0.55, 0, 6.29); ctx.fill();
+    }
+    ctx.restore();
+  }
+  // 残像トレイル: スライド中のみ、少し過去の位置を薄く重ねて速度感を出す。
+  function ghostTrail(spr, dw, slideT) {
+    if (slideT >= 1 || slideT <= 0) return;
+    ctx.save();
+    for (var g = 1; g <= 3; g++) {
+      var gt = slideT - g * 0.09; if (gt < 0) continue;
+      var gx = sx + slideDist * easeOutCubic(gt);
+      ctx.globalAlpha = 0.20 * (1 - g / 4) * (1 - slideT);
+      ctx.drawImage(spr, gx, sy, dw, ph);
+    }
+    ctx.restore();
+  }
+
+  function hud() {
+    if (!CUTSCENE_BURN_LABELS) return;
+    var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
+    if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
+    var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = accent; ctx.fillRect(0, H - 30, W, 3);
+    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = accent; ctx.fillText(label, 12, H - 9);
+    if (atkName) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(atkName + (atkTeamNm ? (' · ' + atkTeamNm) : ''), W - 12, H - 10); }
+  }
+
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var p = Math.min(1, (now - T0) / P);
+    ctx.clearRect(0, 0, W, H);
+    ctx.imageSmoothingEnabled = false;
+    _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+    var spr = (atkImg.complete && atkImg.naturalWidth) ? MangaRecolor.render(atkKey, atkImg, atkCols) : null;
+    var slideT = Math.min(1, p / slideP);
+    var curSx = sx + slideDist * easeOutCubic(slideT);
+    var contactX = curSx + (spr ? (spr.width * (ph / spr.height)) * 0.42 : sx * 0.42), contactY = sy + ph * 0.80;
+    if (spr) {
+      var dw = spr.width * (ph / spr.height);
+      ghostTrail(spr, dw, slideT);           // 残像（スプライトの下描き）
+      ctx.drawImage(spr, curSx, sy, dw, ph);
+    }
+    dustPuffs(contactX, contactY, slideT);   // 土煙（スプライトの上描き＝地面から舞い上がる手前感）
+    var impact = (p > slideP - 0.02 && p < slideP + 0.14) ? 1 - Math.abs(p - slideP) / 0.14 : 0;
+    if (impact > 0) burst(contactX, contactY, impact * 0.85);   // 着地インパクト
+    if (impact > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (impact * 0.35) + ')'; ctx.fillRect(0, 0, W, H); }
+    hud();
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return _csCenterSubject(canvas, 0.5, false);
 }
 
 // ============================================================
