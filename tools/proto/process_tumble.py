@@ -169,7 +169,7 @@ def find_tongue_box(a, pad=8):
     return (min(xs) - pad, min(ys) - pad, max(xs) + pad, max(ys) + pad)
 
 
-def reinforce_eye_ink(a, Lmax=90, v_to=0.20):
+def reinforce_eye_ink(a, Lmax=120, v_to=0.16):
     """目の線を実行時リカラーから保護する（2026-07-17 ユーザー指摘「目が線にならない」対応）。
 
     ★原因: 目の線を構成する暗画素のうち半分近く（実測473px）は真っ黒でなく「暗い茶色」で、
