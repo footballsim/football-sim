@@ -2907,7 +2907,7 @@ function _renderFoulScene(sc, isPK) {
     var sh = 198 * z, whX = W * 0.30, whY = H * 0.34;
     if (refImg.complete && refImg.naturalWidth) {
       var sw = refImg.naturalWidth * (sh / refImg.naturalHeight);
-      var sx = W * 0.40 - sw / 2, sy = ground - sh;
+      var sx = W * 0.40 - sw / 2, sy = ground - sh + 14;   // +14px 下げ: 腿の切れ目を枠外へ逃がし「浮き」を解消（2026-07-17 ユーザー指摘）
       ctx.drawImage(refImg, sx, sy, sw, sh);
       whX = sx + sw * 0.30; whY = sy + sh * 0.27;             // 笛の位置（口元）
     }
