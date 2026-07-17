@@ -14,13 +14,13 @@ from PIL import Image
 import colorsys
 import process_header_rise2 as P
 
-SRC = os.path.expanduser('~/Downloads/ChatGPT Image 2026年7月16日 18_23_01.png')
+SRC = os.path.expanduser('~/Downloads/ChatGPT Image 2026年7月17日 16_53_32.png')
 OUT = 'img/cutscenes/manga_foul_atk/wavy.png'
 SP = '/private/tmp/claude-501/-Users-iwasakimitsuru/dedf9791-510a-4d65-b825-eee2aae84067/scratchpad'
 TARGET_H = 380   # 現行 wavy.png (737x380) と同スケール
 
 # 口領域（原画1254px座標・実測ベロ x959-978 y419-435 に余白）
-MOUTH_BOX = (935, 395, 1005, 460)   # l, t, r, b
+MOUTH_BOX = (940, 400, 1000, 460)   # l, t, r, b（新原画2026-07-17: 実測ベロ x960-979 y417-440 に余白）
 
 
 def fill_enclosed_bg(a, min_px=4000):
