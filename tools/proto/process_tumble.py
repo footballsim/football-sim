@@ -340,9 +340,10 @@ def main():
             print(f'  gate: tongue_box={tb} diff_bbox=(x{dx0}-{dx1}, y{dy0}-{dy1}) {len(diff)}px -> {"OK" if ok else "NG(口box外へ漏れ)"}')
             if not ok:
                 raise SystemExit('GATE FAIL: 口の加工が口box外へ漏れています。中止しました。')
-    sa, ngraft = graft_eyes(sa)              # ★旧版の「良い目」を移植（thickenは雑のため廃止）
-    sa, neye, eyebox = reinforce_eye_ink(sa)  # 移植した目も明肌選手のリカラーから保護
-    print(f'  eyes: graft={ngraft}px fixed化={neye}px box={eyebox}')
+    # ★目は tools/proto/graft_eyes_v3.py を本スクリプトの後に必ず実行して移植する。
+    #   旧 graft_eyes(矩形コピー)は髪を巻き込み継ぎ目ブロックを作ったため廃止（2026-07-17）。
+    #   v3=「線(暗インク成分)だけを眉の重心合わせで移植」。donor=8b81035(ユーザー指定の良い目)。
+    print('  NOTE: 目の移植は python3 tools/proto/graft_eyes_v3.py を続けて実行すること')
     Image.fromarray(sa).save(OUT)
     print(f'out={tw}x{TARGET_H} holes_removed={holes} purge={npurge}px tongue_guard={ngd}+{ngd2}px mouth_rebuilt={nteeth}px defringe={nfr}+{nfr2}px')
 
