@@ -1204,17 +1204,22 @@ function openTacticsSelect() {
   const content = document.getElementById('tactics-select-content');
   content.innerHTML = '';
   TACTICS_NAMES.forEach((name, i) => {
+    // 戦術習得制（MG-04・リーグ限定）: league.js 非同梱／リーグ外では常に null＝制限なし
+    const lock = (typeof leagueTacticInfo === 'function') ? leagueTacticInfo(i) : null;
+    const locked = !!(lock && lock.locked);
     const opt = document.createElement('div');
-    opt.className = 'tactics-option' + (i === team1State.tactics ? ' selected' : '');
+    opt.className = 'tactics-option' + (i === team1State.tactics ? ' selected' : '') + (locked ? ' locked' : '');
+    if (locked) opt.style.cssText = 'opacity:.45;cursor:not-allowed';
     opt.innerHTML = `
-      <div class="tactics-option-icon">${TACTICS_ICON[i]}</div>
+      <div class="tactics-option-icon">${locked ? '🔒' : TACTICS_ICON[i]}</div>
       <div class="tactics-option-text">
         <div class="tactics-option-name">${t('tacticsNames')[i]||name}</div>
-        <div class="tactics-option-desc">${getTacticsDesc(i)}</div>
+        <div class="tactics-option-desc">${locked ? lock.hint : getTacticsDesc(i)}</div>
       </div>
-      ${i === team1State.tactics ? '<span style="color:var(--japan-blue);font-size:20px">✓</span>' : ''}
+      ${(!locked && i === team1State.tactics) ? '<span style="color:var(--japan-blue);font-size:20px">✓</span>' : ''}
     `;
     opt.onclick = () => {
+      if (locked) return;   // 未習得は選べない（説明文で理由を出しているので無反応でよい）
       team1State.tactics = i;
       closeSubSelect('tactics');
     };
@@ -1453,12 +1458,18 @@ function renderOpponentLineup() {
 
 function renderTactics() {
   const grid = document.getElementById('tactics-grid');
-  grid.innerHTML = TACTICS_NAMES.map((t, i) =>
-    `<button class="tactic-btn ${i === team1State.tactics ? 'active' : ''}" onclick="setTactics(${i})">${t}</button>`
-  ).join('');
+  grid.innerHTML = TACTICS_NAMES.map((t, i) => {
+    // 戦術習得制（MG-04・リーグ限定）
+    const lock = (typeof leagueTacticInfo === 'function') ? leagueTacticInfo(i) : null;
+    const locked = !!(lock && lock.locked);
+    return `<button class="tactic-btn ${i === team1State.tactics ? 'active' : ''}"${locked ? ` disabled title="${lock.hint}" style="opacity:.45;cursor:not-allowed"` : ''} onclick="setTactics(${i})">${locked ? '🔒' : ''}${t}</button>`;
+  }).join('');
 }
 
 function setTactics(i) {
+  // 未習得の戦術は選べない（MG-04・リーグ限定。league.js 非同梱／リーグ外では常に通過）
+  const lock = (typeof leagueTacticInfo === 'function') ? leagueTacticInfo(i) : null;
+  if (lock && lock.locked) return;
   team1State.tactics = i;
   renderTactics();
 }
@@ -3500,10 +3511,16 @@ function _buildHtTactics() {
   const names = t('tacticsNames');
   names.forEach((name, i) => {
     const selected = team1State.tactics === i;
+    // 戦術習得制（MG-04・リーグ限定）。ハーフタイムの采配でも未習得は使えない
+    const lock = (typeof leagueTacticInfo === 'function') ? leagueTacticInfo(i) : null;
+    const locked = !!(lock && lock.locked);
     const btn = document.createElement('button');
-    btn.textContent = name;
-    btn.style.cssText = `padding:7px 11px;border-radius:8px;border:2px solid ${selected ? '#1a3a6b' : '#ddd'};background:${selected ? '#1a3a6b' : 'white'};color:${selected ? 'white' : '#333'};font-size:12px;font-weight:700;font-family:inherit;cursor:pointer`;
+    btn.textContent = locked ? ('🔒' + name) : name;
+    if (locked) btn.title = lock.hint;
+    btn.disabled = locked;
+    btn.style.cssText = `padding:7px 11px;border-radius:8px;border:2px solid ${selected ? '#1a3a6b' : '#ddd'};background:${selected ? '#1a3a6b' : 'white'};color:${selected ? 'white' : '#333'};font-size:12px;font-weight:700;font-family:inherit;cursor:${locked ? 'not-allowed' : 'pointer'};opacity:${locked ? '.45' : '1'}`;
     btn.onclick = () => {
+      if (locked) return;
       team1State.tactics = i;
       _buildHtTactics();
     };

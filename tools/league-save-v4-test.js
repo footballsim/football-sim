@@ -562,6 +562,40 @@ L.startNextSeason();
 check('次シーズンでも目標が提示される', !!L.getState().manager.seasonGoal.target);
 check('クラブの信頼は在任が続く限り引き継ぐ', L.getState().manager.clubTrust === 71);
 
+/* ── ⑯ MG-04 戦術習得制 ───────────────────────────────────────── */
+section('⑯ MG-04 戦術習得制（リーグ限定・未習得は選べない）');
+reset(); L.newSeason(MY);
+const TID = L.TACTIC_IDS;
+const iOf = id => TID.indexOf(id);
+const info = vm.runInContext('window.leagueTacticInfo', ctx);
+
+check('リーグの試合外では制限なし（null を返す）', info(iOf('PRESS')) === null);
+L.setLeagueMatchActive(true);
+check('初期習得＝ポゼッション', L.isTacticUnlocked(iOf('POSSESSION')));
+check('初期習得＝守備重視(CATENACCIO)', L.isTacticUnlocked(iOf('CATENACCIO')));
+check('★ バランス重視(FREE)は常時開放（多くのクラブの既定戦術＝塞ぐと試合が始まらない）',
+  L.isTacticUnlocked(iOf('FREE')));
+check('未習得のプレッシングはロック', !L.isTacticUnlocked(iOf('PRESS')));
+check('未習得のカウンターはロック', !L.isTacticUnlocked(iOf('COUNTER')));
+const li = info(iOf('PRESS'));
+check('ロック情報に進捗とヒントが載る', !!(li && li.locked && typeof li.progress === 'number' && li.hint));
+
+// 戦術勉強で解放 → 選べるようになる
+L.setWeekSlot(0, 'tactic_study');
+let unlocked16 = null, guard = 0;
+while (!unlocked16 && guard < 20) {
+  L.getState().round = guard;
+  L.setWeekSlot(0, 'tactic_study');
+  const rr = L.consumeWeek('D');
+  unlocked16 = rr && rr.unlocked; guard++;
+}
+check('戦術勉強で解放される', unlocked16 === 'PRESS', String(unlocked16));
+check('解放後は選べる', L.isTacticUnlocked(iOf('PRESS')));
+check('解放後は leagueTacticInfo が locked:false を返す', info(iOf('PRESS')).locked === false);
+check('まだ未習得のカウンターはロックのまま', !L.isTacticUnlocked(iOf('COUNTER')));
+L.setLeagueMatchActive(false);
+check('試合が終われば制限は消える（シングル/W杯に漏らさない）', info(iOf('COUNTER')) === null);
+
 /* ── まとめ ─────────────────────────────────────────────────── */
 console.log('\n' + (fail === 0 ? '✅ PASS' : '❌ FAIL') + '  ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail === 0 ? 0 : 1);

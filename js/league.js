@@ -466,6 +466,39 @@
    * ★ 成長オーバーレイ適用後のデータで見る＝「今の相手」を見る。rng 不使用＝決定論。 */
   function _opponentThreat(oppId) { return _opponentThreats(oppId)[0] || THREAT_ACTIONS[0].id; }
 
+  /* ===========================================================================
+   * MG-04 — 戦術習得制（リーグモード限定）
+   * ---------------------------------------------------------------------------
+   * 采配で選べる戦術を「習得済み」だけに絞る。初期2種＋バランス重視、残りは戦術勉強で解放。
+   * ★ **バランス重視(FREE) は常時開放**。多くのクラブの default_tactics であり、
+   *   「何もしない状態」＝ベースラインなので、これを塞ぐと試合が始められない。
+   * ★ リーグの試合中だけ効かせる（_leagueMatchActive）。シングル/W杯は全戦術そのまま。
+   * ★ 公開版は league.js 非同梱＝simulate.js 側は typeof ガードで完全 no-op。
+   * ========================================================================= */
+  var _leagueMatchActive = false;
+
+  function _isTacticUnlocked(idx) {
+    var id = TACTIC_IDS[idx];
+    if (!id || id === 'FREE') return true;              // バランス重視は常に選べる
+    var m = _state && _state.manager;
+    if (!m || !m.learnedTactics) return true;
+    return m.learnedTactics.indexOf(id) >= 0;
+  }
+
+  /* simulate.js の戦術UIが呼ぶ唯一の窓口。
+   * 戻り値 null = 制限なし（＝リーグ外／league.js 非同梱と同じ扱い）。 */
+  window.leagueTacticInfo = function (idx) {
+    if (!_leagueMatchActive || !_state || !_state.manager) return null;
+    if (_isTacticUnlocked(idx)) return { locked: false };
+    var id = TACTIC_IDS[idx];
+    var prog = Math.round((_state.manager.tacticProgress && _state.manager.tacticProgress[id]) || 0);
+    return {
+      locked: true, id: id, progress: prog,
+      hint: _t('未習得（' + prog + '%）— 週の準備で「戦術勉強」を選ぶと習得できる',
+               'Not learned (' + prog + '%) — pick "Tactic study" in your week to unlock')
+    };
+  };
+
   // 未習得の戦術（習得順＝TACTIC_IDS の並び。FREE は習得対象外）
   function _nextUnlearnedTactic() {
     var m = _state && _state.manager; if (!m) return null;
@@ -1413,11 +1446,21 @@
     team1Data = _overlaySquad(myId);
     team2Data = _overlaySquad(oppId);
 
+    // MG-04: リーグでは未習得の戦術は使えない。ここから先の采配UIに制限をかける
+    _leagueMatchActive = true;
+    // クラブの既定戦術が未習得なら、習得済み（無ければバランス重視）へ落として開始する
+    var startTactics = team1Data.default_tactics;
+    if (!_isTacticUnlocked(startTactics)) {
+      var learnedIdx = TACTIC_IDS.indexOf('FREE');
+      for (var ti = 0; ti < TACTIC_IDS.length; ti++) if (_isTacticUnlocked(ti) && TACTIC_IDS[ti] !== 'FREE') { learnedIdx = ti; break; }
+      startTactics = learnedIdx;
+    }
+
     // team1State は startManagerMatch の呼び出し側責務（team2State は内部生成）
     var s1 = system_data.findIndex(function (s) { return s.name === team1Data.default_system; });
     team1State = {
       systemIdx: s1 >= 0 ? s1 : 0,
-      tactics: team1Data.default_tactics,
+      tactics: startTactics,
       keyplayer: team1Data.default_keyplayer,
       marked_player: (team1Data.default_marked_player !== undefined) ? team1Data.default_marked_player : -1,
       lineup: team1Data.default_lineup.slice(0, 11)
@@ -1435,6 +1478,7 @@
   function _onMatchFinish(myId, oppId, iAmHome, fx) {
     window._leagueOnMatchFinish = null;
     _endManagerMatchCtx();   // MG-03: 対策 buff はこの1試合限り（他会場の AI 消化前に必ず解除）
+    _leagueMatchActive = false;   // MG-04: 戦術の制限もリーグの試合中だけ（シングル/W杯に漏らさない）
     // 自チーム = team1（gameState.team1）。得点は team.score。
     var myScore = (gameState && gameState.team1) ? gameState.team1.score : 0;
     var oppScore = (gameState && gameState.team2) ? gameState.team2.score : 0;
@@ -2088,6 +2132,10 @@
     beginMatchCtx: _beginManagerMatchCtx,
     endMatchCtx: _endManagerMatchCtx,
     nextUnlearnedTactic: _nextUnlearnedTactic,
+    // MG-04 戦術習得制
+    isTacticUnlocked: _isTacticUnlocked,
+    setLeagueMatchActive: function (v) { _leagueMatchActive = v; },
+    TACTIC_IDS: TACTIC_IDS,
     // SN-02 シーズン目標/信頼度
     ensureSeasonGoal: _ensureSeasonGoal,
     seasonGoalText: _seasonGoalText,
