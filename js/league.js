@@ -120,6 +120,9 @@
       RECOVERY: 1.2,    // 回復日 → conditioning（設計 §1.2 の「休養」）
       TRAINING: 0.8     // 個人練習 → analysis（選手を見る目）
     },
+    // ★ MATCH_ALL（指揮しただけの微増）を効かせる param。
+    //   popularity は入れない＝人気は「結果で上下する双方向 param」で、試合をこなすだけでは上がらない（MG-05）。
+    MATCH_ALL_PARAMS: ['tactical', 'analysis', 'motivator', 'conditioning'],
     // 🎯 個人練習で選手の「武器」が伸びる量の base（gain = base×(1-v/99) の逓減）。
     //   目安: 95の選手 ≈ +0.1/週（ほぼ伸びない）／70の選手 ≈ +0.7/週。
     //   ⚠️ 成長は persistent＝マルチシーズンの能力インフレに直結するので SN-10 の KPI 計測対象。
@@ -128,6 +131,21 @@
     //   mental の [0.90,1.10] と乗算されるため、監督分は単独 ±5% から始める。
     BUFF_MAX: 0.05,
     TACTIC_GAIN: 25     // 戦術勉強1回あたりの習得ゲージ（tactical で ±・100 で解放）
+  };
+
+  /* MG-05 人気の双方向変動（設計書 §1.3）。結果（勝敗）＋内容（得点差・宿敵・連勝）の両面。
+   * ★ 人気は**メタ層専用**＝試合内の param 係数には一切触れない（勝率を人気で操作しない）。
+   *   実効果は解任圧力(SN-05)と移籍オファー(SN-04)で state 遷移として配線する。
+   * ⚠️ 係数はまだ検討の余地あり（BACKLOG MG-13 と同じ扱い・SN-10 で KPI 判定）。 */
+  var POPULARITY_TUNING = {
+    WIN: 2.0,
+    LOSS: -2.0,
+    DRAW: -0.2,        // 引き分け＝「退屈」の僅少ペナルティ
+    GD_COEF: 0.5,      // 得点差1につき（大勝で加点・大敗で減点）
+    RIVAL_WIN: 3.0,    // 宿敵に勝つと跳ねる
+    RIVAL_LOSS: -2.0,  // 宿敵に負けると余計に落ちる
+    STREAK_COEF: 0.5,  // 連勝/連敗の継続ボーナス（今節を含む連続数 - 1 に掛ける）
+    STREAK_CAP: 5      // 連勝ボーナスの頭打ち
   };
 
   var SEASON_TUNING = {
@@ -710,6 +728,71 @@
     else m.tacticProgress[tid] = next;
   }
 
+  /* ===========================================================================
+   * MG-05 — 人気システム（設計書 §1.3）
+   * ---------------------------------------------------------------------------
+   * 唯一の双方向 param。試合結果（勝敗）と内容（得点差・宿敵・連勝）で上下する。
+   * ★ 決定論: 連勝数は fixtures の確定済みスコアから毎回組み直す（新しい保存項目を作らない）。
+   * ★ rng 不使用。★ 試合内の param 係数には触れない（メタ層専用）。
+   * ========================================================================= */
+
+  /* 自クラブの結果列（古い順の 'W'|'D'|'L'）を fixtures から再構成する。 */
+  function _myResultSeries() {
+    var my = _state.myClub, out = [];
+    for (var r = 0; r < _state.fixtures.length; r++) {
+      var ms = _state.fixtures[r];
+      for (var i = 0; i < ms.length; i++) {
+        var m = ms[i];
+        if (!m.played || (m.home !== my && m.away !== my)) continue;
+        var mine = (m.home === my) ? m.hs : m.as;
+        var opp = (m.home === my) ? m.as : m.hs;
+        out.push(mine > opp ? 'W' : (mine < opp ? 'L' : 'D'));
+      }
+    }
+    return out;
+  }
+
+  /* 直近の連続（{res:'W'|'L', n:回数}）。引き分けで途切れる。 */
+  function _currentStreak() {
+    var s = _myResultSeries();
+    if (!s.length) return { res: null, n: 0 };
+    var last = s[s.length - 1];
+    if (last === 'D') return { res: 'D', n: 1 };
+    var n = 0;
+    for (var i = s.length - 1; i >= 0 && s[i] === last; i--) n++;
+    return { res: last, n: n };
+  }
+
+  /* 今節ぶんの人気の増減を計算して反映する。★ 順位表適用後（＝fixtures に今節が入った後）に呼ぶ。 */
+  function _updatePopularity(res, gd, isRival) {
+    var m = _state && _state.manager; if (!m || !m.params) return null;
+    var P = POPULARITY_TUNING;
+    var parts = [];
+    var d = 0;
+
+    if (res === 'W') { d += P.WIN; parts.push({ k: 'win', v: P.WIN }); }
+    else if (res === 'L') { d += P.LOSS; parts.push({ k: 'loss', v: P.LOSS }); }
+    else { d += P.DRAW; parts.push({ k: 'draw', v: P.DRAW }); }
+
+    if (gd) { var g = P.GD_COEF * gd; d += g; parts.push({ k: 'gd', v: g }); }
+
+    if (isRival && res !== 'D') {
+      var rv = (res === 'W') ? P.RIVAL_WIN : P.RIVAL_LOSS;
+      d += rv; parts.push({ k: 'rival', v: rv });
+    }
+
+    var st = _currentStreak();
+    if ((st.res === 'W' || st.res === 'L') && st.n >= 2) {
+      var n = Math.min(st.n, P.STREAK_CAP) - 1;
+      var sv = P.STREAK_COEF * n * (st.res === 'W' ? 1 : -1);
+      d += sv; parts.push({ k: 'streak', v: sv, n: st.n });
+    }
+
+    var before = m.params.popularity;
+    m.params.popularity = Math.max(0, Math.min(MANAGER_TUNING.CAP, before + d));
+    return { delta: Math.round((m.params.popularity - before) * 10) / 10, raw: d, parts: parts, streak: st, value: m.params.popularity };
+  }
+
   /* 週の終わり（＝試合終了）にコマを消費して監督/選手を伸ばす（§1.2）。
    * ★ 種類ごとの分岐を持たない＝def.grow と def.consume を回すだけ。
    * ★ rng 不使用（確定した試合結果と選択済みの週プランを読むだけ）。 */
@@ -719,8 +802,9 @@
     var out = { grown: {}, week: null, unlocked: null, trained: [] };
     function _add(k, base) { var d = _grow(m.params, k, base); if (d > 0) out.grown[k] = (out.grown[k] || 0) + d; }
 
-    // 試合を1つ指揮（結果不問）＝全 param 微増 ／ 勝利 → 戦術眼・モチベーター
-    ['tactical', 'analysis', 'motivator', 'conditioning', 'popularity'].forEach(function (k) { _add(k, G.MATCH_ALL); });
+    // 試合を1つ指揮（結果不問）＝一方向 param が微増 ／ 勝利 → 戦術眼・モチベーター
+    //   ★ popularity は含めない＝人気は結果で上下する（MG-05 の _updatePopularity が唯一の駆動源）
+    MANAGER_TUNING.MATCH_ALL_PARAMS.forEach(function (k) { _add(k, G.MATCH_ALL); });
     if (res === 'W') { _add('tactical', G.WIN); _add('motivator', G.WIN); }
 
     var pa = _pendingWeek();
@@ -1271,6 +1355,8 @@
 
     var res = (myScore > oppScore) ? 'W' : (myScore < oppScore) ? 'L' : 'D';
     var mg = _consumeWeek(res);   // MG-03b: 今週の3コマを消費して監督/選手を伸ばす（成長は persistent）
+    // MG-05: 人気は結果と内容で上下（★ fixtures に今節が入った後＝連勝数が今節を含む位置で呼ぶ）
+    mg.popularity = _updatePopularity(res, myScore - oppScore, _isRival(oppId));
     _state.lastResult = {
       manager: mg,   // 試合後バナーの成長表示用（MG-08 の演出はここを読む）
       round: _state.round,
@@ -1513,7 +1599,7 @@
       parts.push(_t(l[0], l[1]) + ' <b style="color:#7ad0ff">+' + (Math.round(d * 10) / 10) + '</b>');
     }
     var trained = (mg.trained || []);
-    if (!parts.length && !mg.unlocked && !trained.length) return '';
+    if (!parts.length && !mg.unlocked && !trained.length && !mg.popularity) return '';
     // 今週どう使ったか（3コマの内訳を1行に）
     var weekLine = '';
     if (mg.week && mg.week.slots) {
@@ -1529,9 +1615,35 @@
     var unlockLine = mg.unlocked
       ? '<div style="margin-top:5px;color:#ffd479;font-weight:800">🎓 ' +
         _t(_tacticLabel(mg.unlocked) + ' を習得した！', 'Learned ' + _tacticLabel(mg.unlocked) + '!') + '</div>' : '';
+    var popLine = _popularityLineHTML(mg.popularity);
     return '<div class="lg-mini" style="margin-top:8px;text-align:center;border-top:1px solid rgba(255,255,255,0.12);padding-top:8px">' +
       '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px">' + _t('今週の成果', "This week's gains") + '</div>' +
-      weekLine + parts.join('　') + trainLine + unlockLine + '</div>';
+      weekLine + parts.join('　') + trainLine + unlockLine + '</div>' + popLine;
+  }
+
+  /* 世論＝人気の増減（MG-05）。新聞の短評風に「なぜ動いたか」を1行で見せる。
+   * ★ 数字だけ動かさない＝内訳（結果/得点差/宿敵/連勝）を必ず言葉にする。 */
+  function _popularityLineHTML(pop) {
+    if (!pop) return '';
+    var up = pop.delta > 0, flat = Math.abs(pop.delta) < 0.05;
+    var col = flat ? 'rgba(255,255,255,0.6)' : (up ? '#8fe3a4' : '#ff9a8f');
+    var sign = (pop.delta > 0 ? '+' : '') + pop.delta;
+    var why = pop.parts.map(function (p) {
+      if (p.k === 'win') return _t('勝利', 'Win');
+      if (p.k === 'loss') return _t('敗戦', 'Loss');
+      if (p.k === 'draw') return _t('引き分け', 'Draw');
+      if (p.k === 'gd') return (p.v > 0 ? _t('快勝の内容', 'Convincing') : _t('大敗の内容', 'Heavy defeat'));
+      if (p.k === 'rival') return (p.v > 0 ? _t('宿敵撃破', 'Derby win') : _t('宿敵に屈す', 'Derby loss'));
+      if (p.k === 'streak') return (p.v > 0 ? _t(p.n + '連勝', p.n + '-game win run') : _t(p.n + '連敗', p.n + '-game losing run'));
+      return '';
+    }).filter(Boolean).join('・');
+    var mood = flat ? _t('世論は静観', 'The public is unmoved')
+      : (up ? _t('支持が高まっている', 'Support is rising') : _t('風当たりが強まっている', 'Pressure is building'));
+    return '<div class="lg-mini" style="margin-top:6px;text-align:center;border-top:1px solid rgba(255,255,255,0.12);padding-top:8px">' +
+      '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px">' + _t('世論', 'Public opinion') + '</div>' +
+      '<div>' + _t('人気', 'Popularity') + ' <b style="color:' + col + '">' + sign + '</b>' +
+      ' <span style="opacity:.6">（' + Math.round(pop.value) + '）</span>　' + mood + '</div>' +
+      (why ? '<div style="opacity:.65;margin-top:2px">' + why + '</div>' : '') + '</div>';
   }
 
   /* 監督ステータス（MG-03/MG-05 の可視化・数字が動いていることを読ませる最小表示） */
@@ -1551,8 +1663,14 @@
         '<div style="flex:0 0 2.2em;text-align:right;font-size:11px;font-weight:700">' + v + '</div></div>';
     }).join('');
     var learned = (m.learnedTactics || []).map(_tacticLabel).join('・');
+    // MG-05: 連勝/連敗は人気の駆動要因なのでここに出す（次節の人気の動きが読める）
+    var st = _currentStreak(), stLine = '';
+    if (st.n >= 2 && (st.res === 'W' || st.res === 'L')) {
+      stLine = '<div class="lg-mini" style="margin-top:4px;color:' + (st.res === 'W' ? '#8fe3a4' : '#ff9a8f') + '">' +
+        (st.res === 'W' ? '🔥 ' + _t(st.n + '連勝中', st.n + '-game win run') : '💧 ' + _t(st.n + '連敗中', st.n + '-game losing run')) + '</div>';
+    }
     return '<div class="lg-h">' + _t('監督', 'Manager') + '</div>' +
-      '<div class="lg-card" style="padding:9px 11px">' + rows +
+      '<div class="lg-card" style="padding:9px 11px">' + rows + stLine +
       '<div class="lg-mini" style="margin-top:7px;border-top:1px solid rgba(255,255,255,0.1);padding-top:6px">' +
         _t('習得戦術', 'Tactics learned') + '：' + learned + '</div></div>';
   }
@@ -1786,6 +1904,11 @@
     beginMatchCtx: _beginManagerMatchCtx,
     endMatchCtx: _endManagerMatchCtx,
     nextUnlearnedTactic: _nextUnlearnedTactic,
+    // MG-05 人気
+    updatePopularity: _updatePopularity,
+    currentStreak: _currentStreak,
+    myResultSeries: _myResultSeries,
+    POPULARITY_TUNING: POPULARITY_TUNING,
     WEEK_SLOTS: WEEK_SLOTS,
     WEEK_ACTION_DEFS: WEEK_ACTION_DEFS,   // ★ ここに1行足すだけでコマが増えることの検証に使う
     SAVE_VERSION: SAVE_VERSION,

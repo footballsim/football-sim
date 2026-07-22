@@ -422,6 +422,85 @@ check('おまかせは常に全コマ埋める', L.pendingWeek().slots.every(Boo
 DEFS.length = before12;   // 後片付け（以降のテストに影響させない）
 check('テーブルを戻せる（登録は配列操作だけ）', L.WEEK_ACTION_DEFS.length === before12);
 
+/* ── ⑬ MG-05 人気（結果＋内容で双方向に動く唯一の param） ───────────── */
+section('⑬ MG-05 人気システム');
+reset(); L.newSeason(MY);
+const P = L.POPULARITY_TUNING;
+const pop = () => L.getState().manager.params.popularity;
+
+check('人気は「指揮しただけ」では上がらない（MATCH_ALL 対象外）', (function () {
+  const b = pop();
+  L.consumeWeek('D');                    // 週プラン無しで試合をこなす
+  return pop() === b;
+})(), 'pop=' + pop());
+
+// 勝敗の基本値（fixtures を触らず単体で式を検証）
+L.getState().manager.params.popularity = 50;
+let r = L.updatePopularity('W', 1, false);
+check('勝利で上がる（勝利+得点差）', Math.abs(r.raw - (P.WIN + P.GD_COEF * 1)) < 1e-9, 'raw=' + r.raw);
+L.getState().manager.params.popularity = 50;
+r = L.updatePopularity('L', -3, false);
+check('大敗はより大きく下がる（得点差が効く）',
+  Math.abs(r.raw - (P.LOSS + P.GD_COEF * -3)) < 1e-9, 'raw=' + r.raw);
+L.getState().manager.params.popularity = 50;
+r = L.updatePopularity('D', 0, false);
+check('引き分けは僅少マイナス（退屈ペナルティ）', Math.abs(r.raw - P.DRAW) < 1e-9, 'raw=' + r.raw);
+
+// 宿敵
+L.getState().manager.params.popularity = 50;
+const rivalWin = L.updatePopularity('W', 1, true).raw;
+L.getState().manager.params.popularity = 50;
+const normalWin = L.updatePopularity('W', 1, false).raw;
+check('宿敵に勝つと跳ねる', Math.abs((rivalWin - normalWin) - P.RIVAL_WIN) < 1e-9);
+L.getState().manager.params.popularity = 50;
+const rivalLoss = L.updatePopularity('L', -1, true).raw;
+L.getState().manager.params.popularity = 50;
+const normalLoss = L.updatePopularity('L', -1, false).raw;
+check('宿敵に負けると余計に落ちる', Math.abs((rivalLoss - normalLoss) - P.RIVAL_LOSS) < 1e-9);
+
+// clamp
+L.getState().manager.params.popularity = 99;
+L.updatePopularity('W', 5, true);
+check('人気は100を超えない', pop() === 100, '' + pop());
+L.getState().manager.params.popularity = 0.5;
+L.updatePopularity('L', -5, true);
+check('人気は0を下回らない', pop() === 0, '' + pop());
+
+/* 連勝は fixtures の確定スコアから組み直す（新しい保存項目を作らない＝決定論） */
+section('⑭ 連勝/連敗（fixtures から再構成）');
+reset(); L.newSeason(MY);
+function playRound(myGoals, oppGoals) {
+  const st = L.getState();
+  const ms = st.fixtures[st.round];
+  const fx = ms.find(m => m.home === MY || m.away === MY);
+  const home = (fx.home === MY);
+  fx.played = true; fx.hs = home ? myGoals : oppGoals; fx.as = home ? oppGoals : myGoals;
+  st.round++;
+}
+check('試合前は連勝なし', L.currentStreak().n === 0);
+playRound(2, 0); playRound(1, 0);
+check('2連勝を検出', L.currentStreak().res === 'W' && L.currentStreak().n === 2,
+  JSON.stringify(L.currentStreak()));
+check('結果列が古い順に並ぶ', JSON.stringify(L.myResultSeries()) === JSON.stringify(['W', 'W']));
+L.getState().manager.params.popularity = 50;
+const withStreak = L.updatePopularity('W', 1, false);
+check('連勝ボーナスが乗る',
+  withStreak.parts.some(p => p.k === 'streak' && p.v > 0), JSON.stringify(withStreak.parts));
+playRound(0, 0);
+check('引き分けで連勝が途切れる', L.currentStreak().res === 'D' && L.currentStreak().n === 1);
+playRound(0, 2); playRound(0, 1); playRound(0, 3);
+check('3連敗を検出', L.currentStreak().res === 'L' && L.currentStreak().n === 3);
+L.getState().manager.params.popularity = 50;
+const losing = L.updatePopularity('L', -1, false);
+check('連敗はマイナス方向に効く', losing.parts.some(p => p.k === 'streak' && p.v < 0));
+check('連勝ボーナスは頭打ちする（STREAK_CAP）', (function () {
+  for (let i = 0; i < 8; i++) playRound(1, 0);
+  const st = L.currentStreak();
+  L.getState().manager.params.popularity = 50;
+  const big = L.updatePopularity('W', 0, false).parts.find(p => p.k === 'streak');
+  return st.n > P.STREAK_CAP && Math.abs(big.v - P.STREAK_COEF * (P.STREAK_CAP - 1)) < 1e-9;
+})());
+
 /* ── まとめ ─────────────────────────────────────────────────── */
 console.log('\n' + (fail === 0 ? '✅ PASS' : '❌ FAIL') + '  ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail === 0 ? 0 : 1);
