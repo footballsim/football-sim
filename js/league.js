@@ -148,6 +148,25 @@
     STREAK_CAP: 5      // 連勝ボーナスの頭打ち
   };
 
+  /* SN-02 シーズン目標＋クラブ信頼度（設計書 §3.1/§3.2）。
+   * ★ 目標はクラブの「戦力の格」から決定論で決める（rng 不使用）。強いクラブほど要求が厳しい。
+   * ★ clubTrust は解任判定（SN-05）の材料。ここでは「上下させて見せる」までを実装する。
+   * ⚠️ 係数は暫定（MG-13/MG-14 と同じ扱い＝判定は SN-10）。 */
+  var GOAL_TUNING = {
+    // 戦力順位 r（1=最強）→ 要求順位。最強クラブは優勝、以下は「自分の格より1つ上」を求められる。
+    TARGET_FOR_RANK: function (r, n) { return Math.max(1, Math.min(n - 1, r - 1)); },
+    TRUST_WIN: 2.0,        // 勝利
+    TRUST_LOSS: -2.0,      // 敗戦
+    TRUST_DRAW: -0.3,      // 引き分け（僅少マイナス）
+    TRUST_ON_TRACK: 1.0,   // 目標圏内で節を終えている
+    TRUST_OFF_TRACK: -0.6, // 目標圏外（1順位ごと・下回るほど押し下げ）
+    TRUST_OFF_CAP: -3.0,   // 圏外ペナルティの下限
+    SEASON_ACHIEVED: 15,   // season 終了時: 達成
+    SEASON_MISSED: -15,    // 同: 未達
+    SEASON_POP_ACHIEVED: 6,   // 達成時の人気ボーナス
+    SEASON_POP_MISSED: -6     // 未達時の人気ペナルティ
+  };
+
   var SEASON_TUNING = {
     // 怪我の欠場節数（discipline.js の severity マーカーを読む・§6.4）
     INJURY_OUT: { minor: 1, severe: 3 },
@@ -729,6 +748,88 @@
   }
 
   /* ===========================================================================
+   * SN-02 — シーズン目標＋クラブからの信頼度（設計書 §3.1・§3.2）
+   * ---------------------------------------------------------------------------
+   * 開幕時にクラブが「今季これを達成しろ」と要求し、季中は信頼度が上下する。
+   * ★ 目標は戦力の格から決定論で決める（強いクラブほど要求が厳しい）＝rng 不使用。
+   * ★ clubTrust は解任判定（SN-05）の材料。ここでは「動いて見える」ところまで。
+   * ========================================================================= */
+
+  // 戦力順位（1=最強）。同値は CLUB_DEFS の並び順で決着＝決定論。
+  function _strengthRank(clubId) {
+    var arr = CLUB_DEFS.map(function (d, i) { return { id: d.id, s: _clubStrength(d.id), ord: i }; });
+    arr.sort(function (a, b) { return (b.s - a.s) || (a.ord - b.ord); });
+    for (var i = 0; i < arr.length; i++) if (arr[i].id === clubId) return i + 1;
+    return arr.length;
+  }
+
+  /* 開幕時の目標を決める。既にあれば触らない（季中に要求が変わらない）。 */
+  function _ensureSeasonGoal() {
+    var m = _state && _state.manager; if (!m) return null;
+    if (m.seasonGoal && m.seasonGoal.target) return m.seasonGoal;
+    var n = CLUB_DEFS.length;
+    var r = _strengthRank(_state.myClub);
+    m.seasonGoal = { type: 'table_pos', target: GOAL_TUNING.TARGET_FOR_RANK(r, n), rank: r };
+    return m.seasonGoal;
+  }
+
+  function _seasonGoalText() {
+    var g = _state && _state.manager && _state.manager.seasonGoal;
+    if (!g) return '';
+    if (g.target <= 1) return _t('優勝', 'Win the title');
+    return _t(g.target + '位以内', 'Top ' + g.target + ' finish');
+  }
+
+  // 現在（または最終）順位が目標を満たしているか
+  function _goalMet(pos) {
+    var g = _state && _state.manager && _state.manager.seasonGoal;
+    return !!(g && pos && pos <= g.target);
+  }
+
+  /* 節ごとの信頼度更新。結果＋「目標圏内にいるか」の2本立て。 */
+  function _updateClubTrust(res, pos) {
+    var m = _state && _state.manager; if (!m) return null;
+    var G = GOAL_TUNING, g = _ensureSeasonGoal();
+    var parts = [], d = 0;
+
+    if (res === 'W') { d += G.TRUST_WIN; parts.push({ k: 'win', v: G.TRUST_WIN }); }
+    else if (res === 'L') { d += G.TRUST_LOSS; parts.push({ k: 'loss', v: G.TRUST_LOSS }); }
+    else { d += G.TRUST_DRAW; parts.push({ k: 'draw', v: G.TRUST_DRAW }); }
+
+    if (pos && g) {
+      if (pos <= g.target) { d += G.TRUST_ON_TRACK; parts.push({ k: 'on_track', v: G.TRUST_ON_TRACK }); }
+      else {
+        var off = Math.max(G.TRUST_OFF_CAP, G.TRUST_OFF_TRACK * (pos - g.target));
+        d += off; parts.push({ k: 'off_track', v: off, gap: pos - g.target });
+      }
+    }
+
+    var before = (typeof m.clubTrust === 'number') ? m.clubTrust : MANAGER_TUNING.TRUST_START;
+    m.clubTrust = Math.max(0, Math.min(100, before + d));
+    return { delta: Math.round((m.clubTrust - before) * 10) / 10, parts: parts, value: m.clubTrust, onTrack: _goalMet(pos) };
+  }
+
+  /* シーズン終了時の清算＝達成/未達で信頼度と人気が大きく動く（[SEASON_END]）。
+   * ★ 解任・オファーへの分岐は SN-05/SN-04。ここは判定と清算まで。 */
+  function _settleSeason(finalPos) {
+    var m = _state && _state.manager; if (!m) return null;
+    var G = GOAL_TUNING, g = _ensureSeasonGoal();
+    var achieved = _goalMet(finalPos);
+    var tBefore = m.clubTrust, pBefore = m.params.popularity;
+    m.clubTrust = Math.max(0, Math.min(100, tBefore + (achieved ? G.SEASON_ACHIEVED : G.SEASON_MISSED)));
+    m.params.popularity = Math.max(0, Math.min(MANAGER_TUNING.CAP,
+      pBefore + (achieved ? G.SEASON_POP_ACHIEVED : G.SEASON_POP_MISSED)));
+    var out = {
+      achieved: achieved, goal: g && g.target, finalPos: finalPos,
+      trustDelta: Math.round((m.clubTrust - tBefore) * 10) / 10,
+      popDelta: Math.round((m.params.popularity - pBefore) * 10) / 10,
+      trust: m.clubTrust
+    };
+    m.lastSeasonResult = out;   // 次季の解任/オファー判定（SN-04/05）が読む
+    return out;
+  }
+
+  /* ===========================================================================
    * MG-05 — 人気システム（設計書 §1.3）
    * ---------------------------------------------------------------------------
    * 唯一の双方向 param。試合結果（勝敗）と内容（得点差・宿敵・連勝）で上下する。
@@ -925,6 +1026,7 @@
       seasonMeta: _defaultSeasonMeta(),        // 行動フェーズ（MG-03）
       squads: {}                               // 選手持ち越し（lazy 生成・SN-01）
     };
+    _ensureSeasonGoal();   // SN-02: 開幕時にクラブが目標を提示する
     _save();
   }
 
@@ -989,6 +1091,7 @@
       if (!_state.manager) _state.manager = _defaultManager(_state.myClub, _state.season);
       if (!_state.seasonMeta) _state.seasonMeta = _defaultSeasonMeta();
       if (!_state.squads) _state.squads = {};   // 空 = 全選手 base のまま（delta なし）
+      _ensureSeasonGoal();   // SN-02: 目標未設定の既存セーブにも開幕目標を生やす
       if (_prevVersion !== _state.version || !_hadV4) _save();   // 移行が起きた時だけ一度保存
     } catch (e) { _state = null; }
   }
@@ -1043,6 +1146,9 @@
       seasonMeta: _defaultSeasonMeta(),
       squads: squads
     };
+    // SN-02: 目標は季ごとに出し直す（戦力が変われば要求も変わる）。信頼度は在任が続く限り引き継ぐ。
+    manager.seasonGoal = null;
+    _ensureSeasonGoal();
     _save();
   }
 
@@ -1357,6 +1463,8 @@
     var mg = _consumeWeek(res);   // MG-03b: 今週の3コマを消費して監督/選手を伸ばす（成長は persistent）
     // MG-05: 人気は結果と内容で上下（★ fixtures に今節が入った後＝連勝数が今節を含む位置で呼ぶ）
     mg.popularity = _updatePopularity(res, myScore - oppScore, _isRival(oppId));
+    // SN-02: クラブからの信頼度は「結果」＋「目標圏内にいるか」で上下（順位確定後に呼ぶ）
+    mg.trust = _updateClubTrust(res, _position(myId));
     _state.lastResult = {
       manager: mg,   // 試合後バナーの成長表示用（MG-08 の演出はここを読む）
       round: _state.round,
@@ -1370,7 +1478,12 @@
     };
     _state.round++;
     _state.lastPlayedDate = _todayStr();
-    if (_state.round >= _state.fixtures.length) _state.finished = true;
+    if (_state.round >= _state.fixtures.length) {
+      _state.finished = true;
+      // SN-02 [SEASON_END]: 目標の達成判定と清算（信頼度・人気が大きく動く）。
+      //   解任/オファーへの分岐は SN-05/SN-04 で、この結果（manager.lastSeasonResult）を読む。
+      _state.lastResult.season = _settleSeason(_position(myId));
+    }
     _save();
 
     // 監督ビューアの後片付け → リーグホームへ（試合後バナー付き）
@@ -1599,7 +1712,7 @@
       parts.push(_t(l[0], l[1]) + ' <b style="color:#7ad0ff">+' + (Math.round(d * 10) / 10) + '</b>');
     }
     var trained = (mg.trained || []);
-    if (!parts.length && !mg.unlocked && !trained.length && !mg.popularity) return '';
+    if (!parts.length && !mg.unlocked && !trained.length && !mg.popularity && !mg.trust) return '';
     // 今週どう使ったか（3コマの内訳を1行に）
     var weekLine = '';
     if (mg.week && mg.week.slots) {
@@ -1615,7 +1728,7 @@
     var unlockLine = mg.unlocked
       ? '<div style="margin-top:5px;color:#ffd479;font-weight:800">🎓 ' +
         _t(_tacticLabel(mg.unlocked) + ' を習得した！', 'Learned ' + _tacticLabel(mg.unlocked) + '!') + '</div>' : '';
-    var popLine = _popularityLineHTML(mg.popularity);
+    var popLine = _popularityLineHTML(mg.popularity) + _trustLineHTML(mg.trust);
     return '<div class="lg-mini" style="margin-top:8px;text-align:center;border-top:1px solid rgba(255,255,255,0.12);padding-top:8px">' +
       '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px">' + _t('今週の成果', "This week's gains") + '</div>' +
       weekLine + parts.join('　') + trainLine + unlockLine + '</div>' + popLine;
@@ -1646,6 +1759,41 @@
       (why ? '<div style="opacity:.65;margin-top:2px">' + why + '</div>' : '') + '</div>';
   }
 
+  /* クラブからの信頼（SN-02）。「目標圏内かどうか」がそのまま次季の椅子に効く、を毎節見せる。 */
+  function _trustLineHTML(tr) {
+    if (!tr) return '';
+    var up = tr.delta > 0, flat = Math.abs(tr.delta) < 0.05;
+    var col = flat ? 'rgba(255,255,255,0.6)' : (up ? '#8fe3a4' : '#ff9a8f');
+    var sign = (tr.delta > 0 ? '+' : '') + tr.delta;
+    var why = tr.parts.map(function (p) {
+      if (p.k === 'on_track') return _t('目標圏内', 'On track');
+      if (p.k === 'off_track') return _t('目標に' + p.gap + 'つ足りない', p.gap + ' places off target');
+      return '';
+    }).filter(Boolean).join('・');
+    return '<div class="lg-mini" style="margin-top:4px;text-align:center">' +
+      _t('クラブの信頼', 'Club trust') + ' <b style="color:' + col + '">' + sign + '</b>' +
+      ' <span style="opacity:.6">（' + Math.round(tr.value) + '）</span>' +
+      (why ? '　<span style="opacity:.65">' + why + '</span>' : '') + '</div>';
+  }
+
+  /* シーズン終了の達成判定（SN-02）。優勝セレモニー/振り返りの本番演出は SN-03。 */
+  function _seasonVerdictHTML(sv) {
+    if (!sv) return '';
+    var ok = sv.achieved;
+    var col = ok ? '#8fe3a4' : '#ff9a8f';
+    return '<div class="lg-card" style="margin-top:8px;border-color:' + col + '66;background:rgba(0,0,0,0.2);text-align:center">' +
+      '<div style="font-size:10px;color:rgba(255,255,255,0.5);letter-spacing:1px">' + _t('クラブの評価', 'Club verdict') + '</div>' +
+      '<div style="font-weight:800;font-size:15px;margin-top:3px;color:' + col + '">' +
+        (ok ? _t('目標達成', 'Target achieved') : _t('目標未達', 'Target missed')) + '</div>' +
+      '<div class="lg-mini" style="margin-top:3px">' +
+        _t('要求 ' + (sv.goal <= 1 ? '優勝' : sv.goal + '位以内') + ' ／ 結果 ' + sv.finalPos + '位',
+           'Expected ' + (sv.goal <= 1 ? 'the title' : 'top ' + sv.goal) + ' / finished ' + sv.finalPos) + '</div>' +
+      '<div class="lg-mini" style="margin-top:4px">' +
+        _t('クラブの信頼', 'Club trust') + ' <b style="color:' + col + '">' + (sv.trustDelta > 0 ? '+' : '') + sv.trustDelta + '</b>' +
+        '　' + _t('人気', 'Popularity') + ' <b style="color:' + col + '">' + (sv.popDelta > 0 ? '+' : '') + sv.popDelta + '</b></div>' +
+      '</div>';
+  }
+
   /* 監督ステータス（MG-03/MG-05 の可視化・数字が動いていることを読ませる最小表示） */
   function _managerCardHTML() {
     var m = _state.manager; if (!m || !m.params) return '';
@@ -1662,6 +1810,25 @@
           '<div style="width:' + Math.max(0, Math.min(100, v)) + '%;height:100%;background:linear-gradient(90deg,#4a9eff,#7ad0ff)"></div></div>' +
         '<div style="flex:0 0 2.2em;text-align:right;font-size:11px;font-weight:700">' + v + '</div></div>';
     }).join('');
+    // SN-02: クラブからの要求と信頼度（解任の材料＝MG の param とは別枠で見せる）
+    var goalBlock = '';
+    var g = _ensureSeasonGoal();
+    if (g) {
+      var pos = _position(_state.myClub);
+      var met = _goalMet(pos);
+      var trust = Math.round((typeof m.clubTrust === 'number') ? m.clubTrust : MANAGER_TUNING.TRUST_START);
+      var tcol = trust >= 60 ? '#8fe3a4' : (trust >= 35 ? '#ffd479' : '#ff9a8f');
+      goalBlock = '<div class="lg-mini" style="margin-top:7px;border-top:1px solid rgba(255,255,255,0.1);padding-top:6px">' +
+        '<div>' + _t('クラブの要求', 'Club expects') + '：<b style="color:#fff">' + _seasonGoalText() + '</b>' +
+        '　<span style="color:' + (met ? '#8fe3a4' : '#ff9a8f') + '">' +
+          (met ? _t('達成圏内', 'on track') : _t('未達ライン', 'off track')) + '</span></div>' +
+        '<div style="display:flex;align-items:center;gap:6px;margin-top:4px">' +
+          '<div style="flex:0 0 40%">' + _t('クラブの信頼', 'Club trust') + '</div>' +
+          '<div style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.12);overflow:hidden">' +
+            '<div style="width:' + trust + '%;height:100%;background:' + tcol + '"></div></div>' +
+          '<div style="flex:0 0 2.2em;text-align:right;font-weight:700;color:' + tcol + '">' + trust + '</div>' +
+        '</div></div>';
+    }
     var learned = (m.learnedTactics || []).map(_tacticLabel).join('・');
     // MG-05: 連勝/連敗は人気の駆動要因なのでここに出す（次節の人気の動きが読める）
     var st = _currentStreak(), stLine = '';
@@ -1670,7 +1837,7 @@
         (st.res === 'W' ? '🔥 ' + _t(st.n + '連勝中', st.n + '-game win run') : '💧 ' + _t(st.n + '連敗中', st.n + '-game losing run')) + '</div>';
     }
     return '<div class="lg-h">' + _t('監督', 'Manager') + '</div>' +
-      '<div class="lg-card" style="padding:9px 11px">' + rows + stLine +
+      '<div class="lg-card" style="padding:9px 11px">' + rows + stLine + goalBlock +
       '<div class="lg-mini" style="margin-top:7px;border-top:1px solid rgba(255,255,255,0.1);padding-top:6px">' +
         _t('習得戦術', 'Tactics learned') + '：' + learned + '</div></div>';
   }
@@ -1743,6 +1910,8 @@
         '<div style="margin-top:6px;font-size:14px">' + _t('優勝', 'Champions') + '：' + champDef.crest + ' <b>' + _clubName(champ.id) + '</b></div>' +
         (won ? '<div style="color:#2ecc71;font-weight:800;margin-top:6px">' + _t('あなたのクラブが頂点に！', 'Your club took the title!') + '</div>' : '') +
         '</div>' +
+        // SN-02: クラブの評価（達成/未達）。ここが SN-05 の解任判定の入口になる。
+        _seasonVerdictHTML(_state.lastResult && _state.lastResult.season) +
         '<button class="lg-btn" onclick="leagueConfirmNewSeason()">' + _t('次のシーズンへ（今季を記録に残す）', 'Next season (this one is saved)') + '</button>';
     } else {
       var fx = _myFixtureThisRound();
@@ -1904,6 +2073,14 @@
     beginMatchCtx: _beginManagerMatchCtx,
     endMatchCtx: _endManagerMatchCtx,
     nextUnlearnedTactic: _nextUnlearnedTactic,
+    // SN-02 シーズン目標/信頼度
+    ensureSeasonGoal: _ensureSeasonGoal,
+    seasonGoalText: _seasonGoalText,
+    goalMet: _goalMet,
+    updateClubTrust: _updateClubTrust,
+    settleSeason: _settleSeason,
+    strengthRank: _strengthRank,
+    GOAL_TUNING: GOAL_TUNING,
     // MG-05 人気
     updatePopularity: _updatePopularity,
     currentStreak: _currentStreak,

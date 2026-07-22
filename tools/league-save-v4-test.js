@@ -501,6 +501,67 @@ check('連勝ボーナスは頭打ちする（STREAK_CAP）', (function () {
   return st.n > P.STREAK_CAP && Math.abs(big.v - P.STREAK_COEF * (P.STREAK_CAP - 1)) < 1e-9;
 })());
 
+/* ── ⑮ SN-02 シーズン目標＋クラブ信頼度 ───────────────────────── */
+section('⑮ SN-02 シーズン目標＋クラブからの信頼度');
+reset(); L.newSeason(MY);
+const G2 = L.GOAL_TUNING;
+const goal = L.getState().manager.seasonGoal;
+check('開幕時に目標が提示される', !!(goal && goal.type === 'table_pos' && goal.target >= 1), JSON.stringify(goal));
+check('目標は戦力の格から決まる（決定論）', goal.rank === L.strengthRank(MY) && goal.target === G2.TARGET_FOR_RANK(goal.rank, 8));
+check('最強クラブには「優勝」が要求される', (function () {
+  const strongest = ['england2026','netherlands2026','spain2026','france2026','argentina2026','italy2026','brazil2026','belgium2026']
+    .find(id => L.strengthRank(id) === 1);
+  reset(); L.newSeason(strongest);
+  const g = L.getState().manager.seasonGoal;
+  return g.target === 1;
+})());
+check('季中に要求は変わらない', (function () {
+  reset(); L.newSeason(MY);
+  const t0 = L.getState().manager.seasonGoal.target;
+  L.getState().round = 7;
+  return L.ensureSeasonGoal().target === t0;
+})());
+
+// 信頼度: 結果＋目標圏内かどうか
+reset(); L.newSeason(MY);
+L.getState().manager.seasonGoal = { type: 'table_pos', target: 3, rank: 4 };
+L.getState().manager.clubTrust = 50;
+let tr = L.updateClubTrust('W', 2);
+check('勝利かつ目標圏内で信頼が上がる', tr.delta > 0 && tr.parts.some(p => p.k === 'on_track'), JSON.stringify(tr.parts));
+L.getState().manager.clubTrust = 50;
+tr = L.updateClubTrust('L', 8);
+check('敗戦かつ圏外で大きく下がる', tr.delta < 0 && tr.parts.some(p => p.k === 'off_track'), JSON.stringify(tr.parts));
+check('圏外ペナルティには下限がある（TRUST_OFF_CAP）',
+  tr.parts.find(p => p.k === 'off_track').v === G2.TRUST_OFF_CAP);
+L.getState().manager.clubTrust = 99;
+L.updateClubTrust('W', 1);
+check('信頼度は100を超えない', L.getState().manager.clubTrust === 100);
+L.getState().manager.clubTrust = 1;
+L.updateClubTrust('L', 8);
+check('信頼度は0を下回らない', L.getState().manager.clubTrust === 0);
+
+// シーズン終了の清算
+L.getState().manager.clubTrust = 50;
+L.getState().manager.params.popularity = 50;
+let sv = L.settleSeason(2);            // 目標3位以内 → 2位＝達成
+check('達成なら信頼と人気が大きく上がる',
+  sv.achieved && sv.trustDelta === G2.SEASON_ACHIEVED && sv.popDelta === G2.SEASON_POP_ACHIEVED, JSON.stringify(sv));
+L.getState().manager.clubTrust = 50;
+L.getState().manager.params.popularity = 50;
+sv = L.settleSeason(6);                // 未達
+check('未達なら大きく下がる',
+  !sv.achieved && sv.trustDelta === G2.SEASON_MISSED && sv.popDelta === G2.SEASON_POP_MISSED);
+check('判定結果は manager に残る（SN-04/05 が読む）',
+  L.getState().manager.lastSeasonResult && L.getState().manager.lastSeasonResult.achieved === false);
+
+// 次シーズンで目標は出し直し・信頼は引き継ぐ
+reset(); L.newSeason(MY);
+L.getState().manager.clubTrust = 71;
+const st15 = L.getState(); st15.round = st15.fixtures.length; st15.finished = true;
+L.startNextSeason();
+check('次シーズンでも目標が提示される', !!L.getState().manager.seasonGoal.target);
+check('クラブの信頼は在任が続く限り引き継ぐ', L.getState().manager.clubTrust === 71);
+
 /* ── まとめ ─────────────────────────────────────────────────── */
 console.log('\n' + (fail === 0 ? '✅ PASS' : '❌ FAIL') + '  ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail === 0 ? 0 : 1);
