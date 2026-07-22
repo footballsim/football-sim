@@ -113,7 +113,11 @@
    * ========================================================================= */
   var SAVE_VERSION = 4;
 
-  // 戦術 index → 保存用 id（players.js: TACTICS_POSSESSION=0 … TACTICS_FREE=4）
+  /* 戦術 index → 保存用 id（players.js: TACTICS_POSSESSION=0 … TACTICS_FREE=4）。
+   * ★ CATENACCIO / FREE は**古い名残の識別子**だが、players.js の定数名と揃っており、
+   *   かつ**セーブに残るキー**なので改名しない（改名 = 既存セーブの習得戦術が失われる）。
+   *   ユーザーに見える名前は常に t('tacticsNames') 側（守備重視 / バランス重視）を通す
+   *   ＝ _tacticLabel が唯一の表示経路。ここのIDと表示名が違っていても正常。 */
   var TACTIC_IDS = ['POSSESSION', 'PRESS', 'COUNTER', 'CATENACCIO', 'FREE'];
 
   var MANAGER_TUNING = {
