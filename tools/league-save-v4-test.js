@@ -214,26 +214,50 @@ check('中身が既定だけのエントリは保存しない（セーブを疎�
 check('新シーズンの seasonMeta は初期化される',
   ns.seasonMeta && ns.seasonMeta.actionsLog.length === 0 && ns.seasonMeta.pendingAction === null);
 
-/* ── ⑦ MG-03 行動フェーズ（選ぶ → 効く → 伸びる） ───────────────── */
-section('⑦ MG-03 行動フェーズ（ビデオ学習 / 戦術勉強）');
+/* ── ⑦ MG-03b 週プラン（1節=1週間・月〜金を3コマ） ───────────────── */
+section('⑦ MG-03b 今週の準備（3コマ配分）');
 reset(); L.newSeason(MY);
 const mgf = vm.runInContext('window.managerParamFactor', ctx);
 
-check('初期状態ではアクション未選択', L.pendingAction() === null);
+check('初期状態では週プラン未設定', L.pendingWeek() === null);
 check('対策 buff は未選択なら無効（係数 1.0）', (function () {
   L.beginMatchCtx(MY);
   return mgf({ name: TEAM_DATA[MY].name }, null, '対ドリブル突破') === 1.0;
 })());
 
-// ビデオ学習: 相手の一番得意な攻め筋を決定論で割り出す
+// ビデオ学習: 相手の得意な攻め筋を決定論で割り出す
 const fx0 = L.getState().fixtures[0].find(m => m.home === MY || m.away === MY);
 const opp0 = (fx0.home === MY) ? fx0.away : fx0.home;
-const threat = L.opponentThreat(opp0);
-check('相手の得意な攻め筋が決定論で決まる（同じ入力で同じ答え）', threat === L.opponentThreat(opp0), threat);
-L.chooseAction('video_study');
-let pa = L.pendingAction();
-check('ビデオ学習が今節の pendingAction に入る', !!pa && pa.kind === 'video_study' && pa.target === threat);
-check('保存される', JSON.parse(api.ls.getItem(LS_KEY)).seasonMeta.pendingAction.kind === 'video_study');
+const ranked = L.opponentThreats(opp0);
+const threat = ranked[0];
+check('攻め筋のランキングが決定論で決まる（同じ入力で同じ答え）',
+  JSON.stringify(ranked) === JSON.stringify(L.opponentThreats(opp0)), ranked.join('>'));
+check('ランキングは全6本を重複なく並べる', new Set(ranked).size === 6 && ranked.length === 6);
+check('_opponentThreat は1位と一致', L.opponentThreat(opp0) === threat);
+
+L.setWeekSlot(0, 'video_study');
+let pa = L.pendingWeek();
+check('コマ1にビデオ学習が入る（対象＝1位の武器）',
+  !!pa && pa.slots[0].kind === 'video_study' && pa.slots[0].target === threat);
+check('未設定のコマは null のまま', pa.slots[1] === null && pa.slots[2] === null);
+check('コマ数は常に3', pa.slots.length === L.WEEK_SLOTS && L.WEEK_SLOTS === 3);
+check('保存される', JSON.parse(api.ls.getItem(LS_KEY)).seasonMeta.pendingAction.slots[0].kind === 'video_study');
+
+// 重ねがけ＝封じる武器が1本ずつ増える
+L.setWeekSlot(1, 'video_study');
+pa = L.pendingWeek();
+check('ビデオ学習を重ねると2本目の武器を狙う', pa.slots[1].target === ranked[1], pa.slots[1].target);
+check('1本目の対象は変わらない', pa.slots[0].target === ranked[0]);
+L.beginMatchCtx(MY);
+check('2本とも試合中に効く', mgf({ name: TEAM_DATA[MY].name }, null, '対' + ranked[0]) > 1 &&
+  mgf({ name: TEAM_DATA[MY].name }, null, '対' + ranked[1]) > 1);
+check('3本目（未対策）には効かない', mgf({ name: TEAM_DATA[MY].name }, null, '対' + ranked[2]) === 1.0);
+check('重ねても1本あたりの上限は変わらない（+5%以内）',
+  mgf({ name: TEAM_DATA[MY].name }, null, '対' + ranked[0]) <= 1.05);
+// 同じコマをもう一度押すと空に戻る
+L.setWeekSlot(1, '');
+check('同じアイコンを押し直すとコマが空になる', L.pendingWeek().slots[1] === null);
+L.setWeekSlot(1, 'video_study');
 
 L.beginMatchCtx(MY);
 const myTeamStub = { name: TEAM_DATA[MY].name };
@@ -242,7 +266,7 @@ const fBuff = mgf(myTeamStub, null, '対' + threat);
 check('対策した攻め筋を守る時だけ係数が上がる', fBuff > 1.0, 'f=' + fBuff);
 check('係数は +5% 以内（[0.95,1.05] clamp）', fBuff <= 1.05);
 check('初期 tactical=20 なら +1% 程度', Math.abs(fBuff - 1.01) < 0.0001, 'f=' + fBuff);
-check('別の攻め筋には効かない', mgf(myTeamStub, null, '対ロングパス') === 1.0 || threat === 'ロングパス');
+check('対策していない攻め筋には効かない', mgf(myTeamStub, null, '対' + ranked[2]) === 1.0);
 check('攻撃側（"対"なし）には効かない', mgf(myTeamStub, null, threat) === 1.0);
 check('相手チームには効かない', mgf(oppTeamStub, null, '対' + threat) === 1.0);
 vm.runInContext('window.MANAGER_ENABLED = false', ctx);
@@ -253,33 +277,96 @@ check('試合が終われば係数は 1.0 に戻る', mgf(myTeamStub, null, '対
 
 // 成長: gain = base × (1 - param/CAP) の逓減
 const before7 = JSON.parse(JSON.stringify(L.getState().manager.params));
-let mg = L.consumeAction('W');
+let mg = L.consumeWeek('W');
 const after7 = L.getState().manager.params;
-check('勝利で戦術眼が伸びる（試合0.4＋勝利1.0＋ビデオ1.5 の逓減後）',
+check('勝利で戦術眼が伸びる（試合0.4＋勝利1.0＋ビデオ1.5×2 の逓減後）',
   after7.tactical > before7.tactical, before7.tactical + '→' + after7.tactical);
 check('指揮しただけの param も微増する', after7.conditioning > before7.conditioning);
 check('成長は逓減する（20 のとき base の 80%）',
   Math.abs((after7.conditioning - before7.conditioning) - 0.4 * 0.8) < 1e-9,
   '' + (after7.conditioning - before7.conditioning));
-check('アクションは消費される', L.pendingAction() === null);
-check('actionsLog に残る', L.getState().seasonMeta.actionsLog.length === 1);
+check('週プランは消費される', L.pendingWeek() === null);
+check('コマの数だけ actionsLog に残る', L.getState().seasonMeta.actionsLog.length === 2,
+  '' + L.getState().seasonMeta.actionsLog.length);
 check('成長の内訳が lastResult 用に返る', !!(mg && mg.grown && mg.grown.tactical));
 
 // 上限付き: CAP 付近では伸びない
 L.getState().manager.params.tactical = 100;
-const capped = L.consumeAction('W');
+const capped = L.consumeWeek('W');
 check('CAP=100 では成長しない（上限）', L.getState().manager.params.tactical === 100);
 check('CAP 超えの値は返さない', !capped.grown.tactical);
 
+/* 🏥 回復日＝週の練習なので「試合の前」に効く */
+section('⑧ 🏥 回復日（負傷者の復帰が1週早まる）');
+L.getState().round = 0;
+const injKey = keyOf(TEAM_DATA[MY].players[TEAM_DATA[MY].default_lineup[5]]);
+L.squadEntry(MY, injKey).injuryOut = 2;
+check('離脱者リストに週数付きで出る', (function () {
+  const a = L.absentees(MY).find(x => x.name === TEAM_DATA[MY].players[TEAM_DATA[MY].default_lineup[5]].name);
+  return !!a && a.weeks === 2 && a.kind === 'injury';
+})());
+L.setWeekSlot(0, 'recovery');
+check('回復日を選んだだけでは、まだ効かない（試合前に適用）', L.squadEntry(MY, injKey).injuryOut === 2);
+let healed = L.applyWeekRecovery(MY);
+check('試合前に適用すると1週ぶん回復する', L.squadEntry(MY, injKey).injuryOut === 1 && healed === 1);
+check('二重適用されない（中断して戻っても増えない）',
+  L.applyWeekRecovery(MY) === 0 && L.squadEntry(MY, injKey).injuryOut === 1);
+L.setWeekSlot(1, 'recovery');
+L.applyWeekRecovery(MY);
+check('回復日を重ねるとさらに1週進む（合計2週）', L.squadEntry(MY, injKey).injuryOut === 0);
+// 出場停止は休んでも短くならない（現実準拠）
+const susKey = keyOf(TEAM_DATA[MY].players[TEAM_DATA[MY].default_lineup[6]]);
+L.squadEntry(MY, susKey).suspendOut = 1;
+L.setWeekSlot(2, 'recovery');
+L.applyWeekRecovery(MY);
+check('出場停止は回復日で短縮されない', L.squadEntry(MY, susKey).suspendOut === 1);
+check('回復日でも conditioning が伸びる', (function () {
+  const b = L.getState().manager.params.conditioning;
+  L.consumeWeek('D');
+  return L.getState().manager.params.conditioning > b;
+})());
+
+/* 🎯 個人練習＝選手の武器を伸ばす（persistent 成長として squads.growth に積む） */
+section('⑨ 🎯 個人練習（選手の武器が伸びる）');
+L.getState().round = 1;
+const starIdx = TEAM_DATA[MY].default_lineup[9];
+const star = TEAM_DATA[MY].players[starIdx];
+const starKey = keyOf(star);
+const topIdx = star.params.indexOf(Math.max.apply(null, star.params));
+L.setWeekSlot(0, 'individual_training');
+check('個人練習には既定の対象選手が入る', !!L.pendingWeek().slots[0].target);
+L.setTrainee(0, starKey);
+check('対象選手を差し替えられる', L.pendingWeek().slots[0].target === starKey);
+const trainRes = L.consumeWeek('D');
+const g = L.squadEntry(MY, starKey).growth;
+check('その選手の「武器」（最大param）が伸びる', (g[topIdx] || 0) > 0, JSON.stringify(g));
+check('成長は逓減する（強い選手ほど伸びない）', (g[topIdx] || 0) < 1.0, '' + g[topIdx]);
+check('伸びた内容が lastResult 用に返る', !!(trainRes.trained && trainRes.trained.length === 1));
+check('オーバーレイに反映される（base param が上がる）',
+  L.overlaySquad(MY).players[starIdx].params[topIdx] > star.params[topIdx]);
+
+/* 「おまかせ」 */
+section('⑩ 🎲 おまかせ（惰性プレイでも1日1回が成立する）');
+L.getState().round = 2;
+L.squadEntry(MY, injKey).injuryOut = 2;
+L.autoWeek();
+const autoSlots = L.pendingWeek().slots;
+check('3コマとも埋まる', autoSlots.every(Boolean) && autoSlots.length === 3);
+check('負傷者がいれば回復日が入る', autoSlots.some(s => s.kind === 'recovery'));
+check('未習得の戦術があれば戦術勉強が入る', autoSlots.some(s => s.kind === 'tactic_study'));
+check('残りは相手対策で埋まる', autoSlots.some(s => s.kind === 'video_study'));
+
 // 戦術勉強: ゲージ → 解放
+section('⑪ 📖 戦術勉強（ゲージ→解放）');
+reset(); L.newSeason(MY);
 L.getState().manager.params.tactical = 20;
 const target = L.nextUnlearnedTactic();
 check('未習得の戦術が習得順に選ばれる', target === 'PRESS', String(target));
 let unlocked = null, loops = 0;
 while (!unlocked && loops < 20) {
-  L.getState().round = loops;                 // 節を進めながら毎節「戦術勉強」
-  L.chooseAction('tactic_study');
-  const r = L.consumeAction('D');
+  L.getState().round = loops;                 // 週を進めながら毎週「戦術勉強」
+  L.setWeekSlot(0, 'tactic_study');
+  const r = L.consumeWeek('D');
   unlocked = r && r.unlocked; loops++;
 }
 check('戦術勉強を続けると習得できる', unlocked === target, 'unlocked=' + unlocked + ' after ' + loops);
