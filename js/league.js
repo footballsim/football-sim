@@ -447,11 +447,78 @@
    * ========================================================================= */
   var WEEK_SLOTS = 3;
 
+  /* ★ コマの種類は増える前提（2026-07-22 ユーザー指示）。追加は**この表に1行足すだけ**で、
+   *   UI（アイコン列・説明文・ピッカー）／おまかせ／成長／消費 まで自動で行き渡るようにする。
+   *   ＝新しいコマのために _setWeekSlot / _autoWeek / _consumeWeek / UI を触らない。
+   *
+   * 1行の書き方:
+   *   kind      保存に使う識別子（セーブに残るので後から変えない）
+   *   icon/ja/en   表示
+   *   grow      {param, base}  … 監督のどの param が MANAGER_TUNING.GROWTH.<base> ぶん伸びるか
+   *   target    fn(ctx, nth)   … 対象の既定値。nth = 同じ種類が何コマ目か（0始まり）
+   *   keepTarget true          … ユーザーが選んだ対象を再計算で上書きしない（ピッカー系）
+   *   picker    'player'       … コマの下に対象選択UIを出す
+   *   enabled   fn()           … false なら選べない（例: 全戦術習得済み）
+   *   text      fn(slot, ctx)  … コマ行の説明文
+   *   summary   fn(slot)       … 試合後「今週の成果」の1行表示
+   *   preMatch  fn(ctx, n)     … 試合の前に効く処理（n=そのコマ数。回復日など）
+   *   consume   fn(slot, out)  … 週の終わりの処理（ゲージ加算・選手成長など）
+   *   autoOnce  fn(ctx)        … おまかせで「1コマだけ」入れるか（優先度は配列順）
+   *   autoFill  true           … おまかせの残り枠を埋める種類
+   *
+   * ⚠️ 各コマの**効果の大きさ・種類はまだ検討中**（BACKLOG MG-13）。数値は MANAGER_TUNING に
+   *   集約してあるので、チューニングはこの表と定数だけを触れば済む。 */
   var WEEK_ACTION_DEFS = [
-    { kind: 'video_study',         icon: '📹', ja: 'ビデオ学習', en: 'Video study' },
-    { kind: 'recovery',            icon: '🏥', ja: '回復日',     en: 'Recovery day' },
-    { kind: 'tactic_study',        icon: '📖', ja: '戦術勉強',   en: 'Tactic study' },
-    { kind: 'individual_training', icon: '🎯', ja: '個人練習',   en: 'Individual training' }
+    {
+      kind: 'video_study', icon: '📹', ja: 'ビデオ学習', en: 'Video study',
+      grow: { param: 'tactical', base: 'VIDEO' },
+      autoFill: true,
+      // 重ねがけ＝「1本目・2本目…」と封じる武器が増える（nth で対象が決まる）
+      target: function (ctx, nth) { var r = _opponentThreats(ctx.oppId); return r[nth] || r[r.length - 1]; },
+      text: function (slot) {
+        return _t('「' + _threatLabel(slot.target) + '」を封じる', 'Shut down "' + _threatLabel(slot.target) + '"');
+      },
+      summary: function (slot) { return _threatLabel(slot.target); }
+    },
+    {
+      kind: 'recovery', icon: '🏥', ja: '回復日', en: 'Recovery day',
+      grow: { param: 'conditioning', base: 'RECOVERY' },
+      autoOnce: function (ctx) {
+        return _absentees(ctx.myId).some(function (a) { return a.kind === 'injury'; });
+      },
+      text: function () { return _t('負傷者の復帰が1週早まる', 'Injured players return a week sooner'); },
+      // ★ 週の練習 → 週末の試合、という時間順。先発を組む前に効かせる（_applyWeekRecovery が呼ぶ）
+      preMatch: function (ctx, n) { return _healSquad(ctx.myId, n); }
+    },
+    {
+      kind: 'tactic_study', icon: '📖', ja: '戦術勉強', en: 'Tactic study',
+      grow: { param: 'tactical', base: 'TACTIC' },
+      enabled: function () { return !!_nextUnlearnedTactic(); },
+      autoOnce: function () { return !!_nextUnlearnedTactic(); },
+      target: function () { return _nextUnlearnedTactic(); },
+      text: function (slot) {
+        var prog = Math.round((_state.manager.tacticProgress && _state.manager.tacticProgress[slot.target]) || 0);
+        return _t(_tacticLabel(slot.target) + '（' + prog + '%）', _tacticLabel(slot.target) + ' (' + prog + '%)');
+      },
+      summary: function (slot) { return _tacticLabel(slot.target); },
+      consume: function (slot, out) { _advanceTactic(slot.target, out); }
+    },
+    {
+      kind: 'individual_training', icon: '🎯', ja: '個人練習', en: 'Individual training',
+      grow: { param: 'analysis', base: 'TRAINING' },
+      picker: 'player', keepTarget: true,
+      target: function (ctx) { return _defaultTrainee(ctx.myId); },
+      text: function (slot, ctx) {
+        var b = _bestParamOf(ctx.myId, slot.target);
+        if (!b) return _t('選手を鍛える', 'Train a player');
+        return _t('武器「' + b.name + '」を伸ばす（+' + b.gain + '）',
+                  'Sharpen their best attribute (+' + b.gain + ')');
+      },
+      consume: function (slot, out) {
+        var t = _trainPlayer(_state.myClub, slot.target);
+        if (t) out.trained.push(t);
+      }
+    }
   ];
   function _weekActionDef(kind) {
     for (var i = 0; i < WEEK_ACTION_DEFS.length; i++) if (WEEK_ACTION_DEFS[i].kind === kind) return WEEK_ACTION_DEFS[i];
@@ -514,34 +581,42 @@
     return out;
   }
 
-  /* ビデオ学習の対象は「何コマ目のビデオか」で決まる（1本目=最大の武器…）。
-   * 保存時に再計算して slots に焼く＝表示と効果が必ず一致する。 */
-  function _retargetVideoSlots(pa, oppId) {
-    var ranked = _opponentThreats(oppId), k = 0;
+  /* 週プランの文脈（自クラブ/対戦相手）。def の各 fn に渡す唯一の引数。 */
+  function _weekCtx() {
+    var fx = _myFixtureThisRound(); if (!fx) return null;
+    var myId = _state.myClub;
+    return { myId: myId, oppId: (fx.home === myId) ? fx.away : fx.home, fx: fx };
+  }
+
+  /* 全コマの対象を並び順で再計算する（同じ種類の「何コマ目か」= nth を def に渡す）。
+   * ★ 種類ごとの分岐を持たない＝コマの種類が増えてもこの関数は変わらない。
+   *   keepTarget の def（ユーザーが選ぶピッカー系）は既に対象があれば上書きしない。 */
+  function _retargetSlots(pa, ctx) {
+    var nth = {};
     for (var i = 0; i < pa.slots.length; i++) {
-      var s = pa.slots[i];
-      if (s && s.kind === 'video_study') { s.target = ranked[k] || ranked[ranked.length - 1]; k++; }
+      var s = pa.slots[i]; if (!s) continue;
+      var def = _weekActionDef(s.kind); if (!def) continue;
+      var k = nth[s.kind] = (nth[s.kind] === undefined ? 0 : nth[s.kind] + 1);
+      if (!def.target) continue;
+      if (def.keepTarget && s.target) continue;
+      s.target = def.target(ctx, k);
     }
   }
 
-  /* コマに置くものを決める（試合前なら何度でも変更可）。 */
+  /* コマに置くものを決める（試合前なら何度でも変更可）。kind='' でそのコマを空に戻す。 */
   function _setWeekSlot(idx, kind) {
     if (!_state || _state.finished) return;
     if (idx < 0 || idx >= WEEK_SLOTS) return;
-    var fx = _myFixtureThisRound(); if (!fx) return;
-    var myId = _state.myClub;
-    var oppId = (fx.home === myId) ? fx.away : fx.home;
+    var ctx = _weekCtx(); if (!ctx) return;
     var pa = _ensureWeek();
 
-    if (!kind) { pa.slots[idx] = null; }
-    else if (kind === 'tactic_study' && !_nextUnlearnedTactic()) return;   // 全習得済み＝置けない
+    if (!kind) pa.slots[idx] = null;
     else {
-      var slot = { kind: kind, target: null };
-      if (kind === 'tactic_study') slot.target = _nextUnlearnedTactic();
-      else if (kind === 'individual_training') slot.target = _defaultTrainee(myId);
-      pa.slots[idx] = slot;
+      var def = _weekActionDef(kind); if (!def) return;
+      if (def.enabled && !def.enabled(ctx)) return;   // 例: 全戦術習得済みの「戦術勉強」
+      pa.slots[idx] = { kind: kind, target: null };
     }
-    _retargetVideoSlots(pa, oppId);
+    _retargetSlots(pa, ctx);
     _save();
     _renderHub(false);
   }
@@ -554,101 +629,113 @@
     return p ? _playerKey(p) : null;
   }
 
+  // ピッカー系のコマ（picker:'player'）の対象差し替え
   function _setTraineeTarget(idx, playerKey) {
     var pa = _pendingWeek(); if (!pa) return;
     var s = pa.slots[idx];
-    if (!s || s.kind !== 'individual_training') return;
+    var def = s && _weekActionDef(s.kind);
+    if (!def || !def.picker) return;
     s.target = playerKey;
     _save();
     _renderHub(false);
   }
 
-  /* 「おまかせ」＝ 負傷者がいれば回復日を1コマ、残りは相手対策、戦術が未習得なら1コマ勉強。
-   * 惰性プレイでも1日1回が成立するように（毎回3枠を悩ませない）。 */
+  /* 「おまかせ」＝ def の autoOnce を配列順に1コマずつ入れ、残りを autoFill で埋める。
+   * 惰性プレイでも1日1回が成立するように（毎回3枠を悩ませない）。
+   * ★ 新しいコマを増やす時は def に autoOnce を書けばここへ自動で参加する。 */
   function _autoWeek() {
     if (!_state || _state.finished) return;
-    var fx = _myFixtureThisRound(); if (!fx) return;
-    var myId = _state.myClub;
+    var ctx = _weekCtx(); if (!ctx) return;
     var pa = _ensureWeek();
     var plan = [];
-    if (_absentees(myId).some(function (a) { return a.kind === 'injury'; })) plan.push('recovery');
-    if (_nextUnlearnedTactic()) plan.push('tactic_study');
-    while (plan.length < WEEK_SLOTS) plan.push('video_study');
-    plan.length = WEEK_SLOTS;
-    pa.slots = plan.map(function (k) {
-      var s = { kind: k, target: null };
-      if (k === 'tactic_study') s.target = _nextUnlearnedTactic();
-      return s;
+    WEEK_ACTION_DEFS.forEach(function (d) {
+      if (plan.length >= WEEK_SLOTS) return;
+      if (d.autoOnce && d.autoOnce(ctx)) plan.push(d.kind);
     });
-    _retargetVideoSlots(pa, (fx.home === myId) ? fx.away : fx.home);
+    var filler = WEEK_ACTION_DEFS.filter(function (d) { return d.autoFill; })[0];
+    while (plan.length < WEEK_SLOTS && filler) plan.push(filler.kind);
+    plan.length = Math.min(plan.length, WEEK_SLOTS);
+    pa.slots = plan.map(function (k) { return { kind: k, target: null }; });
+    while (pa.slots.length < WEEK_SLOTS) pa.slots.push(null);
+    _retargetSlots(pa, ctx);
     _save();
     _renderHub(false);
   }
 
-  /* 🏥 回復日は「試合の前」に効く（週の練習→週末の試合、という時間順）。
-   * ★ 1コマ＝チーム全体の負傷回復が1週進む。出場停止は休んでも短くならない（現実準拠）。
-   * ★ recoveryApplied で二重適用を防ぐ（試合を中断して戻った時など）。 */
+  /* 試合の前に効くコマ（def.preMatch）をまとめて適用する。
+   * ★ 「週の練習 → 週末の試合」の時間順。先発を組む前に呼ぶこと（playToday が担保）。
+   * ★ preApplied で二重適用を防ぐ（試合を中断して戻った時など）。 */
   function _applyWeekRecovery(myId) {
     var pa = _pendingWeek(); if (!pa) return 0;
-    var want = pa.slots.filter(function (s) { return s && s.kind === 'recovery'; }).length;
-    var done = pa.recoveryApplied || 0;
-    var n = want - done;
-    if (n <= 0) return 0;
-    var td = _clubData(myId), healed = 0;
-    if (td) {
-      for (var i = 0; i < td.players.length; i++) {
-        var e = _peekSquadEntry(myId, _playerKey(td.players[i]));
-        if (!e || !(e.injuryOut > 0)) continue;
-        var before = e.injuryOut;
-        e.injuryOut = Math.max(0, e.injuryOut - n);
-        healed += (before - e.injuryOut);
-      }
-    }
-    pa.recoveryApplied = want;
+    var ctx = { myId: myId };
+    if (!pa.preApplied) pa.preApplied = {};
+    // 旧フィールド（回復日だけだった頃）からの引き継ぎ
+    if (pa.recoveryApplied && pa.preApplied.recovery === undefined) pa.preApplied.recovery = pa.recoveryApplied;
+    var total = 0;
+    WEEK_ACTION_DEFS.forEach(function (d) {
+      if (!d.preMatch) return;
+      var want = pa.slots.filter(function (s) { return s && s.kind === d.kind; }).length;
+      var n = want - (pa.preApplied[d.kind] || 0);
+      if (n <= 0) return;
+      total += (d.preMatch(ctx, n) || 0);
+      pa.preApplied[d.kind] = want;
+    });
+    pa.recoveryApplied = pa.preApplied.recovery || 0;   // 後方互換（テスト/旧セーブ）
     _save();
+    return total;
+  }
+
+  // 🏥 1コマ＝チーム全体の負傷回復が1週進む。出場停止は休んでも短くならない（現実準拠）。
+  function _healSquad(clubId, weeks) {
+    var td = _clubData(clubId); if (!td) return 0;
+    var healed = 0;
+    for (var i = 0; i < td.players.length; i++) {
+      var e = _peekSquadEntry(clubId, _playerKey(td.players[i]));
+      if (!e || !(e.injuryOut > 0)) continue;
+      var before = e.injuryOut;
+      e.injuryOut = Math.max(0, e.injuryOut - weeks);
+      healed += (before - e.injuryOut);
+    }
     return healed;
   }
 
-  /* 週の終わり（＝試合終了）に3コマを消費して監督/選手を伸ばす（§1.2）。
+  // 📖 習得ゲージを進める（速度は戦術眼に比例：20 で約 1.0 倍・100 で 1.4 倍）
+  function _advanceTactic(tid, out) {
+    var m = _state.manager;
+    if (!tid || m.learnedTactics.indexOf(tid) >= 0) return;
+    if (!m.tacticProgress) m.tacticProgress = {};
+    var speed = 1 + (m.params.tactical / MANAGER_TUNING.CAP) * 0.5 - 0.1;
+    var next = (m.tacticProgress[tid] || 0) + MANAGER_TUNING.TACTIC_GAIN * speed;
+    if (next >= 100) { m.tacticProgress[tid] = 100; m.learnedTactics.push(tid); out.unlocked = tid; }
+    else m.tacticProgress[tid] = next;
+  }
+
+  /* 週の終わり（＝試合終了）にコマを消費して監督/選手を伸ばす（§1.2）。
+   * ★ 種類ごとの分岐を持たない＝def.grow と def.consume を回すだけ。
    * ★ rng 不使用（確定した試合結果と選択済みの週プランを読むだけ）。 */
   function _consumeWeek(res) {
     var m = _state && _state.manager; if (!m || !m.params) return null;
     var G = MANAGER_TUNING.GROWTH;
-    var grown = {};
-    function _add(k, base) { var d = _grow(m.params, k, base); if (d > 0) grown[k] = (grown[k] || 0) + d; }
+    var out = { grown: {}, week: null, unlocked: null, trained: [] };
+    function _add(k, base) { var d = _grow(m.params, k, base); if (d > 0) out.grown[k] = (out.grown[k] || 0) + d; }
 
     // 試合を1つ指揮（結果不問）＝全 param 微増 ／ 勝利 → 戦術眼・モチベーター
     ['tactical', 'analysis', 'motivator', 'conditioning', 'popularity'].forEach(function (k) { _add(k, G.MATCH_ALL); });
     if (res === 'W') { _add('tactical', G.WIN); _add('motivator', G.WIN); }
 
     var pa = _pendingWeek();
-    var unlocked = null, trained = [];
+    out.week = pa;
     if (pa) {
       for (var i = 0; i < pa.slots.length; i++) {
         var s = pa.slots[i]; if (!s) continue;
-        if (s.kind === 'video_study') _add('tactical', G.VIDEO);
-        else if (s.kind === 'recovery') _add('conditioning', G.RECOVERY);
-        else if (s.kind === 'individual_training') {
-          _add('analysis', G.TRAINING);
-          var t = _trainPlayer(_state.myClub, s.target);
-          if (t) trained.push(t);
-        } else if (s.kind === 'tactic_study') {
-          _add('tactical', G.TACTIC);
-          var tid = s.target || _nextUnlearnedTactic();
-          if (tid && m.learnedTactics.indexOf(tid) < 0) {
-            if (!m.tacticProgress) m.tacticProgress = {};
-            // 習得速度は戦術眼に比例（20 で約 1.0 倍・100 で 1.4 倍）
-            var speed = 1 + (m.params.tactical / MANAGER_TUNING.CAP) * 0.5 - 0.1;
-            var next = (m.tacticProgress[tid] || 0) + MANAGER_TUNING.TACTIC_GAIN * speed;
-            if (next >= 100) { m.tacticProgress[tid] = 100; m.learnedTactics.push(tid); unlocked = tid; }
-            else m.tacticProgress[tid] = next;
-          }
-        }
+        var def = _weekActionDef(s.kind); if (!def) continue;
+        if (def.grow) _add(def.grow.param, G[def.grow.base] || 0);
+        if (def.consume) def.consume(s, out);
         _state.seasonMeta.actionsLog.push({ round: pa.round, action: s.kind, target: s.target });
       }
       _state.seasonMeta.pendingAction = null;
     }
-    return { grown: grown, week: pa, unlocked: unlocked, trained: trained };
+    return out;
   }
 
   /* 選手の「武器」＝現在値（base + 成長 delta）が最大の param。今週伸びる量も一緒に返す。 */
@@ -1250,7 +1337,8 @@
       /* 今週の準備（MG-03b・週プラン3コマ）。固定pxを避け em/% ベースで組む。 */
       '.lg-slotrow{display:flex;align-items:center;gap:0.5em;padding:0.35em 0;border-bottom:1px solid rgba(255,255,255,0.07)}',
       '.lg-slotno{flex:0 0 1.3em;text-align:center;font-size:0.72em;font-weight:800;color:rgba(255,255,255,0.4)}',
-      '.lg-slotchips{display:flex;gap:0.25em;flex:0 0 auto}',
+      /* ★ 種類が増えても崩れないよう折り返す（flex-wrap） */
+      '.lg-slotchips{display:flex;flex-wrap:wrap;gap:0.25em;flex:0 1 auto;max-width:60%}',
       '.lg-slotchip{width:2.1em;height:2.1em;border-radius:0.55em;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.06);color:#fff;font-size:0.95em;line-height:1;cursor:pointer;padding:0;transition:transform .1s,background .1s}',
       '.lg-slotchip.on{background:linear-gradient(135deg,#3f7fd6,#5aa6ef);border-color:rgba(150,210,255,0.7);box-shadow:0 2px 8px rgba(60,130,220,0.45)}',
       '.lg-slotchip:disabled{opacity:0.28;cursor:default}',
@@ -1342,31 +1430,30 @@
    * 効果の主語は常にユーザー＝コーチ助言(MG-06)と違い、これは監督自身の決断。 */
   function _actionPhaseHTML() {
     var m = _state.manager; if (!m) return '';
-    var myId = _state.myClub;
-    var fx = _myFixtureThisRound(); if (!fx) return '';
-    var oppId = (fx.home === myId) ? fx.away : fx.home;
+    var ctx = _weekCtx(); if (!ctx) return '';
     var pa = _pendingWeek();
     var slots = pa ? pa.slots : [null, null, null];
-    var noTactic = !_nextUnlearnedTactic();
 
     var head = '<div class="lg-h">' + _t('今週の準備', "This week's prep") +
-      '<span class="lg-badge">' + _t('月〜金 / 3コマ', 'Mon–Fri / 3 slots') + '</span></div>';
+      '<span class="lg-badge">' + _t('月〜金 / ' + WEEK_SLOTS + 'コマ', 'Mon–Fri / ' + WEEK_SLOTS + ' slots') + '</span></div>';
 
     var rows = '';
     for (var i = 0; i < WEEK_SLOTS; i++) {
       var s = slots[i];
+      // ★ アイコン列は WEEK_ACTION_DEFS をそのまま並べる＝種類が増えても勝手に増える（列は折り返す）
       var chips = WEEK_ACTION_DEFS.map(function (d) {
         var on = !!(s && s.kind === d.kind);
-        var dis = (d.kind === 'tactic_study' && noTactic && !on);
+        var dis = !on && d.enabled && !d.enabled(ctx);
         return '<button class="lg-slotchip' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '') +
           ' title="' + _t(d.ja, d.en) + '" onclick="leagueSetWeekSlot(' + i + ',\'' + (on ? '' : d.kind) + '\')">' +
           d.icon + '</button>';
       }).join('');
       rows += '<div class="lg-slotrow"><span class="lg-slotno">' + (i + 1) + '</span>' +
         '<span class="lg-slotchips">' + chips + '</span>' +
-        '<span class="lg-slottext">' + _weekSlotText(s, myId, oppId) + '</span></div>';
-      // 🎯 個人練習は対象選手を選ぶ（このコマの直下に出す）
-      if (s && s.kind === 'individual_training') rows += _traineeSelectHTML(i, myId, s.target);
+        '<span class="lg-slottext">' + _weekSlotText(s, ctx) + '</span></div>';
+      // 対象を選ぶコマ（picker）は、このコマの直下にピッカーを出す
+      var sdef = s && _weekActionDef(s.kind);
+      if (sdef && sdef.picker === 'player') rows += _traineeSelectHTML(i, ctx.myId, s.target);
     }
 
     var chosen = slots.filter(Boolean).length;
@@ -1382,26 +1469,10 @@
     // ★ 離脱者は右カラム（選手情報ゾーン）に置く＝左カラムの主導線「週末の試合へ」を押し下げない
   }
 
-  function _weekSlotText(s, myId, oppId) {
+  function _weekSlotText(s, ctx) {
     if (!s) return '<span style="color:rgba(255,255,255,0.35)">' + _t('未設定', 'empty') + '</span>';
-    if (s.kind === 'video_study') {
-      return _t('「' + _threatLabel(s.target) + '」を封じる', 'Shut down "' + _threatLabel(s.target) + '"');
-    }
-    if (s.kind === 'recovery') {
-      return _t('負傷者の復帰が1週早まる', 'Injured players return a week sooner');
-    }
-    if (s.kind === 'tactic_study') {
-      var prog = Math.round((_state.manager.tacticProgress && _state.manager.tacticProgress[s.target]) || 0);
-      return _t(_tacticLabel(s.target) + '（' + prog + '%）', _tacticLabel(s.target) + ' (' + prog + '%)');
-    }
-    if (s.kind === 'individual_training') {
-      var b = _bestParamOf(myId, s.target);
-      if (!b) return _t('選手を鍛える', 'Train a player');
-      // 伸ばす対象＝その選手の「武器」。強い選手ほど伸びしろが小さいことも読ませる。
-      return _t('武器「' + b.name + '」を伸ばす（+' + b.gain + '）',
-                'Sharpen their best attribute (+' + b.gain + ')');
-    }
-    return '';
+    var def = _weekActionDef(s.kind);
+    return (def && def.text) ? def.text(s, ctx) : (def ? _t(def.ja, def.en) : '');
   }
 
   function _traineeSelectHTML(idx, clubId, cur) {
@@ -1448,9 +1519,7 @@
     if (mg.week && mg.week.slots) {
       var used = mg.week.slots.filter(Boolean).map(function (s) {
         var d = _weekActionDef(s.kind); if (!d) return '';
-        if (s.kind === 'video_study') return d.icon + _threatLabel(s.target);
-        if (s.kind === 'tactic_study') return d.icon + _tacticLabel(s.target);
-        return d.icon + _t(d.ja, d.en);
+        return d.icon + (d.summary ? d.summary(s) : _t(d.ja, d.en));
       }).filter(Boolean);
       if (used.length) weekLine = '<div style="margin-bottom:3px">' + used.join('　') + '</div>';
     }
@@ -1718,6 +1787,7 @@
     endMatchCtx: _endManagerMatchCtx,
     nextUnlearnedTactic: _nextUnlearnedTactic,
     WEEK_SLOTS: WEEK_SLOTS,
+    WEEK_ACTION_DEFS: WEEK_ACTION_DEFS,   // ★ ここに1行足すだけでコマが増えることの検証に使う
     SAVE_VERSION: SAVE_VERSION,
     SEASON_TUNING: SEASON_TUNING,
     MANAGER_TUNING: MANAGER_TUNING

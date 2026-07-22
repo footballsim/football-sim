@@ -374,6 +374,54 @@ check('習得後 learnedTactics に入る', L.getState().manager.learnedTactics.
 check('次は別の未習得戦術へ進む', L.nextUnlearnedTactic() === 'COUNTER', String(L.nextUnlearnedTactic()));
 check('習得済みは進捗100で止まる', L.getState().manager.tacticProgress[target] === 100);
 
+/* ── ⑫ コマの種類は「増える前提」 ─────────────────────────────────
+ * 新しいコマは WEEK_ACTION_DEFS に1行足すだけで、選択・おまかせ・成長・消費・ログまで
+ * 行き渡ること（＝_setWeekSlot / _autoWeek / _consumeWeek を触らずに済むこと）を実証する。 */
+section('⑫ コマの種類を増やせる（登録テーブルに1行足すだけ）');
+reset(); L.newSeason(MY);
+const DEFS = L.WEEK_ACTION_DEFS;
+const before12 = DEFS.length;
+let customConsumed = 0;
+DEFS.push({
+  kind: 'press_conference', icon: '🎤', ja: '記者会見', en: 'Press conference',
+  grow: { param: 'popularity', base: 'VIDEO' },
+  target: function () { return 'home_fans'; },
+  text: function () { return 'テスト用のコマ'; },
+  summary: function () { return 'テスト'; },
+  consume: function () { customConsumed++; }
+});
+L.setWeekSlot(0, 'press_conference');
+let pw12 = L.pendingWeek();
+check('新しい種類のコマを置ける', !!pw12 && pw12.slots[0].kind === 'press_conference');
+check('def.target で既定の対象が入る', pw12.slots[0].target === 'home_fans');
+const pop0 = L.getState().manager.params.popularity;
+L.consumeWeek('D');
+check('def.grow どおりに監督の param が伸びる', L.getState().manager.params.popularity > pop0);
+check('def.consume が呼ばれる', customConsumed === 1);
+check('actionsLog にも残る',
+  L.getState().seasonMeta.actionsLog.some(a => a.action === 'press_conference'));
+
+// enabled:false のコマは選べない（＝置いても無視される）
+DEFS.push({ kind: 'locked_action', icon: '🔒', ja: 'ロック', en: 'Locked', enabled: function () { return false; } });
+L.getState().round = 1;
+L.setWeekSlot(0, 'locked_action');
+check('enabled=false のコマは置けない', L.pendingWeek() === null || L.pendingWeek().slots[0] === null);
+
+// おまかせも新しい種類を拾う（autoOnce を持つ def が配列順で1コマ入る）
+DEFS.push({
+  kind: 'scouting', icon: '🔍', ja: 'スカウト', en: 'Scouting',
+  grow: { param: 'analysis', base: 'TACTIC' },
+  autoOnce: function () { return true; },
+  text: function () { return 'テスト用スカウト'; }
+});
+L.autoWeek();
+check('おまかせが新しい autoOnce のコマを拾う',
+  L.pendingWeek().slots.some(s => s && s.kind === 'scouting'));
+check('おまかせは常に全コマ埋める', L.pendingWeek().slots.every(Boolean));
+
+DEFS.length = before12;   // 後片付け（以降のテストに影響させない）
+check('テーブルを戻せる（登録は配列操作だけ）', L.WEEK_ACTION_DEFS.length === before12);
+
 /* ── まとめ ─────────────────────────────────────────────────── */
 console.log('\n' + (fail === 0 ? '✅ PASS' : '❌ FAIL') + '  ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail === 0 ? 0 : 1);
