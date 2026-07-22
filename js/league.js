@@ -200,8 +200,11 @@
       name: null,
       age: null,                 // 年齢概念（案D）は SN-08 で使用。null=年齢なし運用でも動く
       params: { tactical: S, analysis: S, motivator: S, conditioning: S, popularity: S },
-      learnedTactics: ['POSSESSION', 'CATENACCIO'],   // MG-04: 初期2種（解放は戦術勉強で）
-      tacticProgress: { PRESS: 0, COUNTER: 0 },        // 習得ゲージ 0-100
+      // MG-04: 初期は「バランス重視」のみ（2026-07-22 ユーザー決定）。
+      //   ★ バランス重視(FREE) は learnedTactics に入れない＝常時開放の扱い（_isTacticUnlocked）。
+      //   つまり新米監督は無策のベースラインだけを持って始まり、4戦術は全て勉強で解放する。
+      learnedTactics: [],
+      tacticProgress: {},                              // 習得ゲージ 0-100（勉強した戦術から生える）
       coaches: { analysis: 1, physical: 0, mental: 0, scout: 0 },  // 0=未雇用
       clubTrust: MANAGER_TUNING.TRUST_START,
       seasonGoal: null,          // SN-02 が開幕時に設定（{type:'table_pos',target:n}）
@@ -433,11 +436,16 @@
   function _threatDef(id) { for (var i = 0; i < THREAT_ACTIONS.length; i++) if (THREAT_ACTIONS[i].id === id) return THREAT_ACTIONS[i]; return null; }
   function _threatLabel(id) { var d = _threatDef(id); return d ? _t(d.id, d.en) : id; }
 
-  var TACTIC_LABELS = {
-    POSSESSION: ['ポゼッション', 'Possession'], PRESS: ['プレッシング', 'Pressing'],
-    COUNTER: ['カウンター', 'Counter'], CATENACCIO: ['カテナチオ', 'Catenaccio'], FREE: ['フリー', 'Free']
-  };
-  function _tacticLabel(id) { var l = TACTIC_LABELS[id]; return l ? _t(l[0], l[1]) : id; }
+  /* 戦術の表示名は **ゲーム本体の i18n をそのまま引く**（players.js の tacticsNames）。
+   * ★ ここで独自の呼び名を持つと戦術選択画面と食い違う（実際に「フリー」vs「バランス重視」、
+   *   「カテナチオ」vs「守備重視」でズレていた・2026-07-22 に発覚して修正）。
+   *   表示名は1箇所に集約し、league 側は index を介して引くだけにする。 */
+  function _tacticLabel(id) {
+    var i = TACTIC_IDS.indexOf(id);
+    if (i < 0) return id;
+    var names = (typeof t === 'function') ? t('tacticsNames') : null;
+    return (names && names[i]) || (typeof TACTICS_NAMES !== 'undefined' ? TACTICS_NAMES[i] : id);
+  }
 
   /* クラブの攻め筋プロファイル（先発11人＝GK除く10人の平均）。攻め筋ごとの素の強さ。 */
   function _threatProfile(clubId) {
@@ -1888,7 +1896,12 @@
           '<div style="flex:0 0 2.2em;text-align:right;font-weight:700;color:' + tcol + '">' + trust + '</div>' +
         '</div></div>';
     }
-    var learned = (m.learnedTactics || []).map(_tacticLabel).join('・');
+    // ★ バランス重視(FREE) は常時使える基本形なので、習得済みリストの先頭に必ず並べる
+    //   （learnedTactics には入れていないため、表示側で補う）
+    var learned = [_tacticLabel('FREE')].concat((m.learnedTactics || []).map(_tacticLabel)).join('・');
+    var lockedCount = TACTIC_IDS.filter(function (id) {
+      return id !== 'FREE' && (m.learnedTactics || []).indexOf(id) < 0;
+    }).length;
     // MG-05: 連勝/連敗は人気の駆動要因なのでここに出す（次節の人気の動きが読める）
     var st = _currentStreak(), stLine = '';
     if (st.n >= 2 && (st.res === 'W' || st.res === 'L')) {
@@ -1898,7 +1911,9 @@
     return '<div class="lg-h">' + _t('監督', 'Manager') + '</div>' +
       '<div class="lg-card" style="padding:9px 11px">' + rows + stLine + goalBlock +
       '<div class="lg-mini" style="margin-top:7px;border-top:1px solid rgba(255,255,255,0.1);padding-top:6px">' +
-        _t('習得戦術', 'Tactics learned') + '：' + learned + '</div></div>';
+        _t('使える戦術', 'Tactics available') + '：' + learned +
+        (lockedCount ? '<span style="opacity:.55">　🔒' + _t('未習得 ' + lockedCount, lockedCount + ' locked') + '</span>' : '') +
+        '</div></div>';
   }
 
   function _renderHub(showBanner) {
@@ -2134,6 +2149,7 @@
     nextUnlearnedTactic: _nextUnlearnedTactic,
     // MG-04 戦術習得制
     isTacticUnlocked: _isTacticUnlocked,
+    tacticLabel: _tacticLabel,
     setLeagueMatchActive: function (v) { _leagueMatchActive = v; },
     TACTIC_IDS: TACTIC_IDS,
     // SN-02 シーズン目標/信頼度

@@ -78,7 +78,8 @@ L.load();
 let s = L.getState();
 check('version が 4 に上がる', s && s.version === L.SAVE_VERSION, 'version=' + (s && s.version));
 check('manager が既定で生える', !!(s.manager && s.manager.params && s.manager.params.tactical === L.MANAGER_TUNING.START));
-check('learnedTactics は初期2種', !!(s.manager && s.manager.learnedTactics.length === 2));
+check('learnedTactics は空＝初期はバランス重視のみ（2026-07-22 ユーザー決定）',
+  !!(s.manager && Array.isArray(s.manager.learnedTactics) && s.manager.learnedTactics.length === 0));
 check('seasonMeta / squads が生える', !!(s.seasonMeta && s.squads));
 check('進行中の round が保持される', s.round === 5, 'round=' + s.round);
 check('順位表が保持される', s.standings[MY].pts === 13);
@@ -361,7 +362,7 @@ section('⑪ 📖 戦術勉強（ゲージ→解放）');
 reset(); L.newSeason(MY);
 L.getState().manager.params.tactical = 20;
 const target = L.nextUnlearnedTactic();
-check('未習得の戦術が習得順に選ばれる', target === 'PRESS', String(target));
+check('未習得の戦術が習得順に選ばれる（最初はポゼッション）', target === 'POSSESSION', String(target));
 let unlocked = null, loops = 0;
 while (!unlocked && loops < 20) {
   L.getState().round = loops;                 // 週を進めながら毎週「戦術勉強」
@@ -371,7 +372,7 @@ while (!unlocked && loops < 20) {
 }
 check('戦術勉強を続けると習得できる', unlocked === target, 'unlocked=' + unlocked + ' after ' + loops);
 check('習得後 learnedTactics に入る', L.getState().manager.learnedTactics.indexOf(target) >= 0);
-check('次は別の未習得戦術へ進む', L.nextUnlearnedTactic() === 'COUNTER', String(L.nextUnlearnedTactic()));
+check('次は別の未習得戦術へ進む', L.nextUnlearnedTactic() === 'PRESS', String(L.nextUnlearnedTactic()));
 check('習得済みは進捗100で止まる', L.getState().manager.tacticProgress[target] === 100);
 
 /* ── ⑫ コマの種類は「増える前提」 ─────────────────────────────────
@@ -571,8 +572,8 @@ const info = vm.runInContext('window.leagueTacticInfo', ctx);
 
 check('リーグの試合外では制限なし（null を返す）', info(iOf('PRESS')) === null);
 L.setLeagueMatchActive(true);
-check('初期習得＝ポゼッション', L.isTacticUnlocked(iOf('POSSESSION')));
-check('初期習得＝守備重視(CATENACCIO)', L.isTacticUnlocked(iOf('CATENACCIO')));
+check('★ 初期はポゼッションもロック（バランス重視のみ）', !L.isTacticUnlocked(iOf('POSSESSION')));
+check('★ 初期は守備重視もロック', !L.isTacticUnlocked(iOf('CATENACCIO')));
 check('★ バランス重視(FREE)は常時開放（多くのクラブの既定戦術＝塞ぐと試合が始まらない）',
   L.isTacticUnlocked(iOf('FREE')));
 check('未習得のプレッシングはロック', !L.isTacticUnlocked(iOf('PRESS')));
@@ -589,12 +590,21 @@ while (!unlocked16 && guard < 20) {
   const rr = L.consumeWeek('D');
   unlocked16 = rr && rr.unlocked; guard++;
 }
-check('戦術勉強で解放される', unlocked16 === 'PRESS', String(unlocked16));
-check('解放後は選べる', L.isTacticUnlocked(iOf('PRESS')));
-check('解放後は leagueTacticInfo が locked:false を返す', info(iOf('PRESS')).locked === false);
+check('戦術勉強で解放される', unlocked16 === 'POSSESSION', String(unlocked16));
+check('解放後は選べる', L.isTacticUnlocked(iOf('POSSESSION')));
+check('解放後は leagueTacticInfo が locked:false を返す', info(iOf('POSSESSION')).locked === false);
 check('まだ未習得のカウンターはロックのまま', !L.isTacticUnlocked(iOf('COUNTER')));
 L.setLeagueMatchActive(false);
 check('試合が終われば制限は消える（シングル/W杯に漏らさない）', info(iOf('COUNTER')) === null);
+
+// 表示名はゲーム本体の i18n を引く（独自の呼び名を持つと戦術選択画面と食い違う）
+const tacticNames = vm.runInContext("(typeof t==='function') ? t('tacticsNames') : TACTICS_NAMES", ctx);
+check('戦術の表示名がゲーム本体と一致する（FREE=バランス重視）',
+  L.tacticLabel('FREE') === tacticNames[iOf('FREE')], L.tacticLabel('FREE') + ' vs ' + tacticNames[iOf('FREE')]);
+check('戦術の表示名がゲーム本体と一致する（CATENACCIO=守備重視）',
+  L.tacticLabel('CATENACCIO') === tacticNames[iOf('CATENACCIO')], L.tacticLabel('CATENACCIO'));
+check('全戦術で表示名が一致する',
+  TID.every((id, i) => L.tacticLabel(id) === tacticNames[i]));
 
 /* ── まとめ ─────────────────────────────────────────────────── */
 console.log('\n' + (fail === 0 ? '✅ PASS' : '❌ FAIL') + '  ' + pass + ' passed, ' + fail + ' failed');
