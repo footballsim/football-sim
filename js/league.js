@@ -110,7 +110,18 @@
   var MANAGER_TUNING = {
     START: 20,          // 全 param の初期値（新米監督・難易度は作らないので個体差なし）
     CAP: 100,
-    TRUST_START: 50     // クラブからの信頼度の初期値（SN-02 で運用）
+    TRUST_START: 50,    // クラブからの信頼度の初期値（SN-02 で運用）
+    // 成長の base（設計書 §1.2）。実際の増分は gain = base × (1 - param/CAP) ＝ 上限付き逓減。
+    GROWTH: {
+      MATCH_ALL: 0.4,   // 試合を1つ指揮（結果不問）＝全 param 微増
+      WIN: 1.0,         // 勝利 → tactical / motivator
+      VIDEO: 1.5,       // ビデオ学習 → tactical
+      TACTIC: 1.0       // 戦術勉強 → tactical（＋習得ゲージ）
+    },
+    // ビデオ学習の対策 buff（§6.1）。tactical に比例し、上限 +5%。
+    //   mental の [0.90,1.10] と乗算されるため、監督分は単独 ±5% から始める。
+    BUFF_MAX: 0.05,
+    TACTIC_GAIN: 25     // 戦術勉強1回あたりの習得ゲージ（tactical で ±・100 で解放）
   };
 
   var SEASON_TUNING = {
@@ -341,6 +352,188 @@
       }
     }
   }
+
+  /* ===========================================================================
+   * MG-03 — 行動フェーズ MVP（試合前に1アクション・設計書 §1.2/§6.1）
+   * ---------------------------------------------------------------------------
+   * 「今日は何をするか」の決断を1日1回。初期アクション2種:
+   *   📹 ビデオ学習 … 次戦の相手が最も得意な攻め筋を割り出し、その1本に対策 buff（試合内）
+   *   📖 戦術勉強   … 未習得戦術の習得ゲージを進める（100 で解放＝MG-04 が使う）
+   * ★ 効果は getActionParam の係数 seam に「1本だけ」相乗り（§6.1）。デュエル式・チャンス数は不可侵。
+   * ★ 決定論のみ（相手の得意筋は params から算出）＝ rng を新規消費しない。
+   * ========================================================================= */
+
+  // 攻め筋 → 参照する param（getActionParam の攻撃側の式に合わせる）。対策の対象＝この6本。
+  var THREAT_ACTIONS = [
+    { id: 'ドリブル突破', en: 'Dribbling',      idx: [ACCELERATION, AGILITY, DRIBBLE_ACCURACY, DRIBBLE_SPEED] },
+    { id: 'クロス',       en: 'Crossing',       idx: [LONGPASS, CURVE] },
+    { id: 'ポストプレー', en: 'Hold-up play',   idx: [POWER, RESPONSE, BALL_TECH] },
+    { id: 'ロングパス',   en: 'Long passing',   idx: [LONGPASS] },
+    { id: 'ショートパス', en: 'Short passing',  idx: [SHORTPASS] },
+    { id: '飛び出し',     en: 'Runs in behind', idx: [ACCELERATION, RESPONSE, AGILITY, POSITIONING, OFFENSIVE] }
+  ];
+  function _threatDef(id) { for (var i = 0; i < THREAT_ACTIONS.length; i++) if (THREAT_ACTIONS[i].id === id) return THREAT_ACTIONS[i]; return null; }
+  function _threatLabel(id) { var d = _threatDef(id); return d ? _t(d.id, d.en) : id; }
+
+  var TACTIC_LABELS = {
+    POSSESSION: ['ポゼッション', 'Possession'], PRESS: ['プレッシング', 'Pressing'],
+    COUNTER: ['カウンター', 'Counter'], CATENACCIO: ['カテナチオ', 'Catenaccio'], FREE: ['フリー', 'Free']
+  };
+  function _tacticLabel(id) { var l = TACTIC_LABELS[id]; return l ? _t(l[0], l[1]) : id; }
+
+  /* クラブの攻め筋プロファイル（先発11人＝GK除く10人の平均）。攻め筋ごとの素の強さ。 */
+  function _threatProfile(clubId) {
+    var td = _overlaySquad(clubId);
+    var prof = THREAT_ACTIONS.map(function () { return 0; });
+    if (!td || !td.players) return prof;
+    var lineup = (td.default_lineup || []).slice(1, 11);   // 0=GK は攻め筋の対象外
+    for (var a = 0; a < THREAT_ACTIONS.length; a++) {
+      var def = THREAT_ACTIONS[a], sum = 0, n = 0;
+      for (var i = 0; i < lineup.length; i++) {
+        var p = td.players[lineup[i]];
+        if (!p || !p.params) continue;
+        var v = 0;
+        for (var k = 0; k < def.idx.length; k++) v += p.params[def.idx[k]];
+        sum += v / def.idx.length; n++;
+      }
+      prof[a] = n ? (sum / n) : 0;
+    }
+    return prof;
+  }
+
+  /* 相手が最も得意な攻め筋を決定論で割り出す。
+   * ★ 素の平均値どうしを比べてはいけない: 攻め筋ごとに参照 param 数も水準も違うため、
+   *   単一 param のショートパス/ロングパスが常に勝ってしまう（実装当初の欠陥）。
+   *   → 「リーグ平均に対してどれだけ突出しているか」の相対値で比べる＝そのチームらしさが出る。
+   * ★ 成長オーバーレイ適用後のデータで見る＝「今の相手」を見る。rng 不使用＝決定論。 */
+  function _opponentThreat(oppId) {
+    var mine = _threatProfile(oppId);
+    var ids = CLUB_DEFS.map(function (d) { return d.id; });
+    var sums = THREAT_ACTIONS.map(function () { return 0; });
+    for (var c = 0; c < ids.length; c++) {
+      var prof = _threatProfile(ids[c]);
+      for (var a = 0; a < sums.length; a++) sums[a] += prof[a];
+    }
+    var best = null, bestVal = -Infinity;
+    for (var a2 = 0; a2 < THREAT_ACTIONS.length; a2++) {
+      var mean = sums[a2] / (ids.length || 1);
+      if (!mean) continue;
+      var rel = (mine[a2] - mean) / mean;   // リーグ平均比（＋ほど得意）
+      // 同値は THREAT_ACTIONS の並び順で決着＝決定論（> のみで更新する）
+      if (rel > bestVal) { bestVal = rel; best = THREAT_ACTIONS[a2].id; }
+    }
+    return best || THREAT_ACTIONS[0].id;
+  }
+
+  // 未習得の戦術（習得順＝TACTIC_IDS の並び。FREE は習得対象外）
+  function _nextUnlearnedTactic() {
+    var m = _state && _state.manager; if (!m) return null;
+    var learned = m.learnedTactics || [];
+    for (var i = 0; i < TACTIC_IDS.length; i++) {
+      var id = TACTIC_IDS[i];
+      if (id === 'FREE') continue;
+      if (learned.indexOf(id) < 0) return id;
+    }
+    return null;
+  }
+
+  /* 成長式（§1.2）: gain = base × (1 - param/CAP)。0 に近いほど伸び、CAP 付近で頭打ち。 */
+  function _grow(params, key, base) {
+    if (!params || typeof params[key] !== 'number') return 0;
+    var cur = params[key];
+    var gain = base * (1 - cur / MANAGER_TUNING.CAP);
+    if (gain < 0) gain = 0;
+    params[key] = Math.max(0, Math.min(MANAGER_TUNING.CAP, cur + gain));
+    return params[key] - cur;
+  }
+
+  // 今節ぶんの選択済みアクション（無ければ null）
+  function _pendingAction() {
+    var sm = _state && _state.seasonMeta;
+    var pa = sm && sm.pendingAction;
+    return (pa && pa.round === _state.round) ? pa : null;
+  }
+
+  /* アクションを選ぶ（1節1回・選び直しは試合前なら可）。★ 効果が出るのは次の試合中。 */
+  function _chooseAction(kind) {
+    if (!_state || _state.finished) return;
+    var fx = _myFixtureThisRound(); if (!fx) return;
+    var oppId = (fx.home === _state.myClub) ? fx.away : fx.home;
+    var pa = { round: _state.round, kind: kind, target: null };
+    if (kind === 'video_study') pa.target = _opponentThreat(oppId);
+    else if (kind === 'tactic_study') pa.target = _nextUnlearnedTactic();
+    else return;
+    if (kind === 'tactic_study' && !pa.target) return;   // 全戦術習得済み＝選べない
+    _state.seasonMeta.pendingAction = pa;
+    _save();
+    _renderHub(false);
+  }
+
+  /* 試合終了時に「アクションを消費して監督を伸ばす」（§1.2）。
+   * ★ rng 不使用（確定した試合結果と選択済みアクションを読むだけ）。 */
+  function _consumeAction(res) {
+    var m = _state && _state.manager; if (!m || !m.params) return null;
+    var G = MANAGER_TUNING.GROWTH;
+    var grown = {};
+    function _add(k, base) { var d = _grow(m.params, k, base); if (d > 0) grown[k] = (grown[k] || 0) + d; }
+
+    // 試合を1つ指揮（結果不問）＝全 param 微増 ／ 勝利 → 戦術眼・モチベーター
+    ['tactical', 'analysis', 'motivator', 'conditioning', 'popularity'].forEach(function (k) { _add(k, G.MATCH_ALL); });
+    if (res === 'W') { _add('tactical', G.WIN); _add('motivator', G.WIN); }
+
+    var pa = _pendingAction();
+    var unlocked = null;
+    if (pa) {
+      if (pa.kind === 'video_study') _add('tactical', G.VIDEO);
+      else if (pa.kind === 'tactic_study') {
+        _add('tactical', G.TACTIC);
+        var tid = pa.target;
+        if (tid && m.learnedTactics.indexOf(tid) < 0) {
+          if (!m.tacticProgress) m.tacticProgress = {};
+          // 習得速度は戦術眼に比例（20 で約 1.0 倍・100 で 1.4 倍）
+          var speed = 1 + (m.params.tactical / MANAGER_TUNING.CAP) * 0.5 - 0.1;
+          var next = (m.tacticProgress[tid] || 0) + MANAGER_TUNING.TACTIC_GAIN * speed;
+          if (next >= 100) {
+            m.tacticProgress[tid] = 100;
+            m.learnedTactics.push(tid);
+            unlocked = tid;
+          } else m.tacticProgress[tid] = next;
+        }
+      }
+      _state.seasonMeta.actionsLog.push({ round: pa.round, action: pa.kind, target: pa.target });
+      _state.seasonMeta.pendingAction = null;
+    }
+    return { grown: grown, action: pa, unlocked: unlocked };
+  }
+
+  /* ── 試合内効果（§6.1）: getActionParam の係数チェーンに足す唯一のフック ──────
+   * ★ 返すのは「1つに合成済みの係数」。フックは1本だけ・clamp は返す側で行う。
+   * ★ league の試合中だけ有効（_mgMatchCtx が立っている時のみ）＝シングル/W杯は完全 no-op。
+   * ★ 公開 docs は league.js 非同梱＝typeof ガードで no-op（公開挙動不変）。 */
+  var _mgMatchCtx = null;
+
+  function _beginManagerMatchCtx(myId) {
+    var m = _state && _state.manager;
+    var pa = _pendingAction();
+    if (!m || !pa || pa.kind !== 'video_study' || !pa.target) { _mgMatchCtx = null; return; }
+    var td = _clubData(myId);
+    _mgMatchCtx = {
+      myTeamName: td ? td.name : null,
+      counterAction: pa.target,
+      // 対策の効き＝戦術眼に比例（0→0% / 100→+5%）。設計 §6.1 の [0.95,1.05] 内に収まる。
+      buff: MANAGER_TUNING.BUFF_MAX * (m.params.tactical / MANAGER_TUNING.CAP)
+    };
+  }
+  function _endManagerMatchCtx() { _mgMatchCtx = null; }
+
+  window.managerParamFactor = function (team, p, action) {
+    if (typeof window !== 'undefined' && window.MANAGER_ENABLED === false) return 1.0;   // キルスイッチ
+    var c = _mgMatchCtx;
+    if (!c || !c.counterAction || !team || team.name !== c.myTeamName) return 1.0;
+    if (action !== '対' + c.counterAction) return 1.0;   // 対策した攻め筋を守る時だけ効く
+    var f = 1 + c.buff;
+    return Math.max(0.95, Math.min(1.05, f));            // clamp は返す側で（§6.1）
+  };
 
   function _newSeason(myClubId) {
     var ids = CLUB_DEFS.map(function (d) { return d.id; });
@@ -736,6 +929,9 @@
       lineup: team1Data.default_lineup.slice(0, 11)
     };
 
+    // MG-03: ビデオ学習で選んだ対策をこの試合だけ有効化（managerParamFactor が読む）
+    _beginManagerMatchCtx(myId);
+
     // 試合終了フック（_mvFinish が拾う。1回で自動解除）
     window._leagueOnMatchFinish = function () { _onMatchFinish(myId, oppId, iAmHome, fx); };
 
@@ -744,6 +940,7 @@
 
   function _onMatchFinish(myId, oppId, iAmHome, fx) {
     window._leagueOnMatchFinish = null;
+    _endManagerMatchCtx();   // MG-03: 対策 buff はこの1試合限り（他会場の AI 消化前に必ず解除）
     // 自チーム = team1（gameState.team1）。得点は team.score。
     var myScore = (gameState && gameState.team1) ? gameState.team1.score : 0;
     var oppScore = (gameState && gameState.team2) ? gameState.team2.score : 0;
@@ -784,7 +981,9 @@
     }
 
     var res = (myScore > oppScore) ? 'W' : (myScore < oppScore) ? 'L' : 'D';
+    var mg = _consumeAction(res);   // MG-03: アクションを消費して監督を伸ばす（成長は persistent）
     _state.lastResult = {
+      manager: mg,   // 試合後バナーの成長表示用（MG-08 の演出はここを読む）
       round: _state.round,
       mine: {
         me: myId, opp: oppId, ms: myScore, os: oppScore, res: res, home: iAmHome,
@@ -922,6 +1121,97 @@
 
   function _resultColor(res) { return res === 'W' ? '#2ecc71' : res === 'L' ? '#e74c3c' : '#f1c40f'; }
 
+  /* ── 行動フェーズ カード（MG-03）─────────────────────────────────────
+   * 「今日は何をするか」を試合前に1つ選ぶ。選択後は決めた内容が残り、試合後に消費される。
+   * 効果の主語は常にユーザー＝コーチ助言(MG-06)と違い、これは監督自身の決断。 */
+  function _actionPhaseHTML() {
+    var m = _state.manager; if (!m) return '';
+    var pa = _pendingAction();
+    var head = '<div class="lg-h">' + _t('行動フェーズ', 'Action phase') +
+      '<span class="lg-badge">' + _t('1日1アクション', '1 action / day') + '</span></div>';
+
+    if (pa) {
+      var body;
+      if (pa.kind === 'video_study') {
+        body = '<div style="font-size:14px;font-weight:800">📹 ' + _t('ビデオ学習', 'Video study') + '</div>' +
+          '<div class="lg-mini" style="margin-top:3px">' +
+          _t('相手の武器「' + _threatLabel(pa.target) + '」を対策する。今日の試合で守備が少し噛み合う。',
+             'Countering their "' + _threatLabel(pa.target) + '". Your defence will read it slightly better today.') + '</div>';
+      } else {
+        var prog = Math.round((m.tacticProgress && m.tacticProgress[pa.target]) || 0);
+        body = '<div style="font-size:14px;font-weight:800">📖 ' + _t('戦術勉強', 'Tactic study') + '</div>' +
+          '<div class="lg-mini" style="margin-top:3px">' +
+          _t(_tacticLabel(pa.target) + ' を習得中（' + prog + '%）', 'Learning ' + _tacticLabel(pa.target) + ' (' + prog + '%)') + '</div>';
+      }
+      return head + '<div class="lg-card" style="border-color:rgba(120,200,255,0.35);background:rgba(70,140,220,0.12)">' + body +
+        '<div class="lg-mini" style="margin-top:6px;color:rgba(255,255,255,0.45)">' +
+        _t('※ 試合が終わると消費されます（試合前なら選び直せます）', '* Consumed when the match ends (you can change it before kickoff)') + '</div>' +
+        '</div>';
+    }
+
+    var nextTactic = _nextUnlearnedTactic();
+    var tacticBtn = nextTactic
+      ? '<button class="lg-btn sec" onclick="leagueChooseAction(\'tactic_study\')">📖 ' +
+          _t('戦術勉強 — ' + _tacticLabel(nextTactic) + ' を学ぶ', 'Tactic study — learn ' + _tacticLabel(nextTactic)) + '</button>'
+      : '<button class="lg-btn sec" disabled>📖 ' + _t('戦術勉強 — 全て習得済み', 'Tactic study — all learned') + '</button>';
+
+    return head + '<div class="lg-card">' +
+      '<div class="lg-mini" style="margin-bottom:6px">' + _t('今日は何をする？', 'What will you do today?') + '</div>' +
+      '<button class="lg-btn sec" onclick="leagueChooseAction(\'video_study\')">📹 ' +
+        _t('ビデオ学習 — 次の相手を対策する', 'Video study — scout the next opponent') + '</button>' +
+      tacticBtn + '</div>';
+  }
+
+  /* 試合後の成長表示（MG-03。派手な演出は MG-08 で・ここは「動いた事実」を見せる最小形） */
+  function _managerGrowthHTML(lr) {
+    var mg = lr && lr.manager; if (!mg) return '';
+    var labels = { tactical: ['戦術眼', 'Tactics'], analysis: ['分析力', 'Analysis'], motivator: ['モチベーター', 'Motivation'], conditioning: ['フィジカル管理', 'Conditioning'], popularity: ['人気', 'Popularity'] };
+    var parts = [];
+    for (var k in mg.grown) {
+      if (!Object.prototype.hasOwnProperty.call(mg.grown, k)) continue;
+      var d = mg.grown[k]; if (!(d >= 0.05)) continue;   // 表示上の下限（微増は丸めて出さない）
+      var l = labels[k] || [k, k];
+      parts.push(_t(l[0], l[1]) + ' <b style="color:#7ad0ff">+' + (Math.round(d * 10) / 10) + '</b>');
+    }
+    if (!parts.length && !mg.unlocked) return '';
+    var actLine = '';
+    if (mg.action) {
+      actLine = (mg.action.kind === 'video_study')
+        ? '📹 ' + _t('ビデオ学習：' + _threatLabel(mg.action.target) + ' を対策した', 'Video study: countered ' + _threatLabel(mg.action.target))
+        : '📖 ' + _t('戦術勉強：' + _tacticLabel(mg.action.target), 'Tactic study: ' + _tacticLabel(mg.action.target));
+    }
+    var unlockLine = mg.unlocked
+      ? '<div style="margin-top:5px;color:#ffd479;font-weight:800">🎓 ' +
+        _t(_tacticLabel(mg.unlocked) + ' を習得した！', 'Learned ' + _tacticLabel(mg.unlocked) + '!') + '</div>' : '';
+    return '<div class="lg-mini" style="margin-top:8px;text-align:center;border-top:1px solid rgba(255,255,255,0.12);padding-top:8px">' +
+      '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px">' + _t('監督の成長', 'Manager growth') + '</div>' +
+      (actLine ? '<div style="margin-bottom:3px">' + actLine + '</div>' : '') +
+      parts.join('　') + unlockLine + '</div>';
+  }
+
+  /* 監督ステータス（MG-03/MG-05 の可視化・数字が動いていることを読ませる最小表示） */
+  function _managerCardHTML() {
+    var m = _state.manager; if (!m || !m.params) return '';
+    var defs = [
+      ['tactical', '戦術眼', 'Tactics'], ['analysis', '分析力', 'Analysis'],
+      ['motivator', 'モチベーター', 'Motivation'], ['conditioning', 'フィジカル管理', 'Conditioning'],
+      ['popularity', '人気', 'Popularity']
+    ];
+    var rows = defs.map(function (d) {
+      var v = Math.round(m.params[d[0]] || 0);
+      return '<div style="display:flex;align-items:center;gap:6px;margin-top:4px">' +
+        '<div style="flex:0 0 40%;font-size:11px;color:rgba(255,255,255,0.7)">' + _t(d[1], d[2]) + '</div>' +
+        '<div style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.12);overflow:hidden">' +
+          '<div style="width:' + Math.max(0, Math.min(100, v)) + '%;height:100%;background:linear-gradient(90deg,#4a9eff,#7ad0ff)"></div></div>' +
+        '<div style="flex:0 0 2.2em;text-align:right;font-size:11px;font-weight:700">' + v + '</div></div>';
+    }).join('');
+    var learned = (m.learnedTactics || []).map(_tacticLabel).join('・');
+    return '<div class="lg-h">' + _t('監督', 'Manager') + '</div>' +
+      '<div class="lg-card" style="padding:9px 11px">' + rows +
+      '<div class="lg-mini" style="margin-top:7px;border-top:1px solid rgba(255,255,255,0.1);padding-top:6px">' +
+        _t('習得戦術', 'Tactics learned') + '：' + learned + '</div></div>';
+  }
+
   function _renderHub(showBanner) {
     _ensureStyle();
     var myId = _state.myClub;
@@ -949,6 +1239,7 @@
       // 見出し＋MOM＋得点者＋順位変動（試合後レポート）
       html += '<div style="text-align:center;font-weight:800;font-size:14px;margin:10px 4px 4px">' + _headlineText(lr) + '</div>' +
         '<div class="lg-mini" style="text-align:center;line-height:1.7">' + _reportRowsHTML(lr) + '</div>';
+      html += _managerGrowthHTML(lr);   // MG-03: 監督の成長／戦術解放（MG-08 で演出化する土台）
       if (lr.others && lr.others.length) {
         var ot = lr.others.map(function (o) {
           return _clubName(o.home) + ' <b>' + o.hs + '-' + o.as + '</b> ' + _clubName(o.away);
@@ -972,6 +1263,9 @@
       '　' + myRow.pts + _t('pt', ' pts') + '　' + myRow.w + _t('勝', 'W') + myRow.d + _t('分', 'D') + myRow.l + _t('敗', 'L') + '</div>' +
       rivalLine + '</div>' +
       '</div></div>';
+
+    // 行動フェーズ（MG-03）＝試合の前に「今日は何をするか」を1つ決める
+    if (!_state.finished) html += _actionPhaseHTML();
 
     // 本日の試合 or シーズン終了（横長では左カラムの中央でVSが構図の重心になるよう
     // .lg-match-block を flex:1 で伸ばして上下中央寄せ＝下端のデッドスペースを解消）
@@ -1029,6 +1323,9 @@
     // ミニ順位表
     html += '<div class="lg-h">' + _t('順位表', 'Standings') + '</div>';
     html += _standingsTableHTML(rows, myId);
+
+    // 監督ステータス（MG-03: 成長が見えないと「1param 1効果」が読めない）
+    html += _managerCardHTML();
 
     // テスト用（lab限定）：1日1回制限のON/OFFトグル
     if (_testMode()) {
@@ -1090,6 +1387,8 @@
   window.leaguePickClub = function (id) { _newSeason(id); _renderHub(false); };
   window.leaguePlayToday = function () { playToday(); };
   window.leagueShowHub = function () { _renderHub(false); };
+  // 行動フェーズ（MG-03）: 'video_study' | 'tactic_study'
+  window.leagueChooseAction = function (kind) { _chooseAction(kind); };
   window.leagueBackToTitle = function () {
     if (document.body) document.body.classList.remove('league-mode');
     if (typeof showScreen === 'function') showScreen('title');
@@ -1122,6 +1421,14 @@
     tickCarryover: _tickCarryover,
     recordTeamCarryover: _recordTeamCarryover,
     carrySquads: _carrySquads,
+    // MG-03 行動フェーズ
+    chooseAction: _chooseAction,
+    consumeAction: _consumeAction,
+    pendingAction: _pendingAction,
+    opponentThreat: _opponentThreat,
+    beginMatchCtx: _beginManagerMatchCtx,
+    endMatchCtx: _endManagerMatchCtx,
+    nextUnlearnedTactic: _nextUnlearnedTactic,
     SAVE_VERSION: SAVE_VERSION,
     SEASON_TUNING: SEASON_TUNING,
     MANAGER_TUNING: MANAGER_TUNING

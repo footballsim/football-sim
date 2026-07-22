@@ -214,6 +214,79 @@ check('中身が既定だけのエントリは保存しない（セーブを疎�
 check('新シーズンの seasonMeta は初期化される',
   ns.seasonMeta && ns.seasonMeta.actionsLog.length === 0 && ns.seasonMeta.pendingAction === null);
 
+/* ── ⑦ MG-03 行動フェーズ（選ぶ → 効く → 伸びる） ───────────────── */
+section('⑦ MG-03 行動フェーズ（ビデオ学習 / 戦術勉強）');
+reset(); L.newSeason(MY);
+const mgf = vm.runInContext('window.managerParamFactor', ctx);
+
+check('初期状態ではアクション未選択', L.pendingAction() === null);
+check('対策 buff は未選択なら無効（係数 1.0）', (function () {
+  L.beginMatchCtx(MY);
+  return mgf({ name: TEAM_DATA[MY].name }, null, '対ドリブル突破') === 1.0;
+})());
+
+// ビデオ学習: 相手の一番得意な攻め筋を決定論で割り出す
+const fx0 = L.getState().fixtures[0].find(m => m.home === MY || m.away === MY);
+const opp0 = (fx0.home === MY) ? fx0.away : fx0.home;
+const threat = L.opponentThreat(opp0);
+check('相手の得意な攻め筋が決定論で決まる（同じ入力で同じ答え）', threat === L.opponentThreat(opp0), threat);
+L.chooseAction('video_study');
+let pa = L.pendingAction();
+check('ビデオ学習が今節の pendingAction に入る', !!pa && pa.kind === 'video_study' && pa.target === threat);
+check('保存される', JSON.parse(api.ls.getItem(LS_KEY)).seasonMeta.pendingAction.kind === 'video_study');
+
+L.beginMatchCtx(MY);
+const myTeamStub = { name: TEAM_DATA[MY].name };
+const oppTeamStub = { name: TEAM_DATA[opp0].name };
+const fBuff = mgf(myTeamStub, null, '対' + threat);
+check('対策した攻め筋を守る時だけ係数が上がる', fBuff > 1.0, 'f=' + fBuff);
+check('係数は +5% 以内（[0.95,1.05] clamp）', fBuff <= 1.05);
+check('初期 tactical=20 なら +1% 程度', Math.abs(fBuff - 1.01) < 0.0001, 'f=' + fBuff);
+check('別の攻め筋には効かない', mgf(myTeamStub, null, '対ロングパス') === 1.0 || threat === 'ロングパス');
+check('攻撃側（"対"なし）には効かない', mgf(myTeamStub, null, threat) === 1.0);
+check('相手チームには効かない', mgf(oppTeamStub, null, '対' + threat) === 1.0);
+vm.runInContext('window.MANAGER_ENABLED = false', ctx);
+check('キルスイッチ MANAGER_ENABLED=false で無効化', mgf(myTeamStub, null, '対' + threat) === 1.0);
+vm.runInContext('delete window.MANAGER_ENABLED', ctx);
+L.endMatchCtx();
+check('試合が終われば係数は 1.0 に戻る', mgf(myTeamStub, null, '対' + threat) === 1.0);
+
+// 成長: gain = base × (1 - param/CAP) の逓減
+const before7 = JSON.parse(JSON.stringify(L.getState().manager.params));
+let mg = L.consumeAction('W');
+const after7 = L.getState().manager.params;
+check('勝利で戦術眼が伸びる（試合0.4＋勝利1.0＋ビデオ1.5 の逓減後）',
+  after7.tactical > before7.tactical, before7.tactical + '→' + after7.tactical);
+check('指揮しただけの param も微増する', after7.conditioning > before7.conditioning);
+check('成長は逓減する（20 のとき base の 80%）',
+  Math.abs((after7.conditioning - before7.conditioning) - 0.4 * 0.8) < 1e-9,
+  '' + (after7.conditioning - before7.conditioning));
+check('アクションは消費される', L.pendingAction() === null);
+check('actionsLog に残る', L.getState().seasonMeta.actionsLog.length === 1);
+check('成長の内訳が lastResult 用に返る', !!(mg && mg.grown && mg.grown.tactical));
+
+// 上限付き: CAP 付近では伸びない
+L.getState().manager.params.tactical = 100;
+const capped = L.consumeAction('W');
+check('CAP=100 では成長しない（上限）', L.getState().manager.params.tactical === 100);
+check('CAP 超えの値は返さない', !capped.grown.tactical);
+
+// 戦術勉強: ゲージ → 解放
+L.getState().manager.params.tactical = 20;
+const target = L.nextUnlearnedTactic();
+check('未習得の戦術が習得順に選ばれる', target === 'PRESS', String(target));
+let unlocked = null, loops = 0;
+while (!unlocked && loops < 20) {
+  L.getState().round = loops;                 // 節を進めながら毎節「戦術勉強」
+  L.chooseAction('tactic_study');
+  const r = L.consumeAction('D');
+  unlocked = r && r.unlocked; loops++;
+}
+check('戦術勉強を続けると習得できる', unlocked === target, 'unlocked=' + unlocked + ' after ' + loops);
+check('習得後 learnedTactics に入る', L.getState().manager.learnedTactics.indexOf(target) >= 0);
+check('次は別の未習得戦術へ進む', L.nextUnlearnedTactic() === 'COUNTER', String(L.nextUnlearnedTactic()));
+check('習得済みは進捗100で止まる', L.getState().manager.tacticProgress[target] === 100);
+
 /* ── まとめ ─────────────────────────────────────────────────── */
 console.log('\n' + (fail === 0 ? '✅ PASS' : '❌ FAIL') + '  ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail === 0 ? 0 : 1);

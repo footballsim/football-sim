@@ -2111,6 +2111,9 @@ function getActionParam(team, pos, action) {
   if (typeof fatigueParamFactor === 'function') f *= fatigueParamFactor(team, p);
   // 規律: 軽傷（続行可）の逓減係数（Sprint 2b・discipline.js。非該当/非同梱は1.0）
   if (typeof injuryParamFactor === 'function') f *= injuryParamFactor(team, p);
+  // 監督: ビデオ学習の対策 buff（MG-03・league.js。clamp[0.95,1.05] は返す側／リーグの試合中のみ・
+  //   非同梱の公開版とシングル/W杯では常に 1.0＝完全 no-op）
+  if (typeof managerParamFactor === 'function') f *= managerParamFactor(team, p, action);
 
   const adjusted = params.map(v => v * Math.max(f, 0.01));
 
