@@ -780,6 +780,12 @@ function _pickGkColor(atkColor, defColor) {
 // 漫画GKダイビング（lab・2026-07-10）: 分離色スプライト1枚を _pickGkColor の色名→GKキット4色でリカラー。
 //   白グローブは低彩度=MangaRecolor partOf 'fixed' で白のまま保持。本番(未ロード)は従来 gk_<color>_01.png。
 var _MANGA_GK_DIVE_SRC = 'img/cutscenes/manga_gk_dive.png';
+// シューター用スプライトの読み込み先ディレクトリ。既定=manga_shot（本番挙動は不変）。
+// 演出テストラボから window._LAB_SHOT_DIR に別ディレクトリ名を入れると差し替わり、新旧アートを比較できる。
+function _shotSpriteDir() {
+  var d = (typeof window !== 'undefined') && window._LAB_SHOT_DIR;
+  return (typeof d === 'string' && /^[\w-]+$/.test(d)) ? d : 'manga_shot';
+}
 // GKダイブ絵のアスペクト（高さ/幅）。旧絵=220×127→0.577。新絵(2026-07-15・茶wavy・より縦に伸びるダイブ)=440×368→0.836。
 // 描画は gkW を基準に gkH = gkW * _GK_DIVE_HW で算出（従来ハードコード 127/220 を置換）。手元グローブは新絵でも約(0.86,0.12)＝従来アンカーとほぼ一致。
 var _GK_DIVE_HW = 368 / 440;
@@ -1004,8 +1010,9 @@ function _renderShotDuelScene(sc) {
   var shooterP0 = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
   var _feat = _mangaFeat(shooterP0 ? (shooterP0.long_name || shooterP0.name || '') : '');
   var _cols = _mangaColors(sc.offence, _feat.skin);
-  var _shKey = 'shot|' + _feat.hstyle + '|' + _cols.shirt + _cols.shorts + _cols.socks + _cols.accent + _cols.skin;
-  var shooter = _loadCutsceneImg('img/cutscenes/manga_shot/' + _feat.hstyle + '.png');
+  var _shDir = _shotSpriteDir();
+  var _shKey = 'shot|' + _shDir + '|' + _feat.hstyle + '|' + _cols.shirt + _cols.shorts + _cols.socks + _cols.accent + _cols.skin;
+  var shooter = _loadCutsceneImg('img/cutscenes/' + _shDir + '/' + _feat.hstyle + '.png');
 
   // 左パネル: GKダイブ（_pickGkColor＝両チームと別色・ダイブ絵ビートと同キー＝リカラーキャッシュ共有）
   var accent = (sc.offence && sc.offence.team_color) || '#1f4fd6';
@@ -1253,8 +1260,9 @@ function _renderShotScene(sc, entry) {
   var _shotManga = (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);   // スプライトは新素材（従来演出の上に描く・2026-07-15）
   var _shFeat = _shotManga ? _mangaFeat(shooterP0 ? (shooterP0.long_name || shooterP0.name || '') : '') : null;
   var _shCols = _shotManga ? _mangaColors(sc.offence, _shFeat.skin) : null;
-  var _shKey = _shFeat ? ('shot|' + _shFeat.hstyle + '|' + _shCols.shirt + _shCols.shorts + _shCols.socks + _shCols.accent + _shCols.skin) : null;
-  var shooter = _shotManga ? _loadCutsceneImg('img/cutscenes/manga_shot/' + _shFeat.hstyle + '.png') : _loadCutsceneImg(entry.file);
+  var _shDir2 = _shotSpriteDir();
+  var _shKey = _shFeat ? ('shot|' + _shDir2 + '|' + _shFeat.hstyle + '|' + _shCols.shirt + _shCols.shorts + _shCols.socks + _shCols.accent + _shCols.skin) : null;
+  var shooter = _shotManga ? _loadCutsceneImg('img/cutscenes/' + _shDir2 + '/' + _shFeat.hstyle + '.png') : _loadCutsceneImg(entry.file);
   var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
   var accent = (sc.offence && sc.offence.team_color) || '#1f4fd6';
 

@@ -39,6 +39,13 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
     <div class="grp"><h2>シュート</h2><div class="btns">
       <button data-k="shotduel" onclick="run('shotduel')">対決割り（漫画演出・停止中の比較用）</button>
       <button data-k="shot2" onclick="run('shot2')">2拍・顔カットイン</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      シューター絵
+      <select id="shotdir" onchange="setShotDir(this.value)">
+        <option value="manga_shot">現行（正典 wavy）</option>
+        <option value="manga_shot_v2">新ドット版 v2（スパイキーツーブロック）</option>
+      </select>
     </div></div>
 
     <div class="grp"><h2>GKダイブ</h2><div class="btns">
@@ -71,14 +78,14 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
   </div>
 </div>
 
-<script src="js/players.js?v=lab29"></script>
-<script src="js/rng.js?v=lab29"></script>
-<script src="js/events.js?v=lab29"></script>
-<script src="js/simulate.js?v=lab29"></script>
-<script src="js/match.js?v=lab29"></script>
-<script src="js/portrait.js?v=lab29"></script>
-<script src="js/manga_recolor.js?v=lab29"></script>
-<script src="js/cutscene.js?v=lab29"></script>
+<script src="js/players.js?v=lab30"></script>
+<script src="js/rng.js?v=lab30"></script>
+<script src="js/events.js?v=lab30"></script>
+<script src="js/simulate.js?v=lab30"></script>
+<script src="js/match.js?v=lab30"></script>
+<script src="js/portrait.js?v=lab30"></script>
+<script src="js/manga_recolor.js?v=lab30"></script>
+<script src="js/cutscene.js?v=lab30"></script>
 <script>
 var KEYS=[['belgium2026','ベルギー'],['england2026','イングランド'],['brazil2026','ブラジル'],['spain2026','スペイン'],['france2026','フランス'],['argentina2026','アルゼンチン'],['germany2026','ドイツ'],['netherlands2026','オランダ']];
 var atk=document.getElementById('atk'),def=document.getElementById('def');
@@ -87,6 +94,8 @@ atk.value='belgium2026';def.value='brazil2026';
 var cur='shotduel';
 function mk(key){var d=TEAM_DATA[key];var si=system_data.findIndex(function(s){return s.name===d.default_system;});return buildTeam(d,{systemIdx:si>=0?si:0,lineup:d.default_lineup.slice(),tactics:d.default_tactics,keyplayer:d.default_keyplayer,marked_player:d.default_marked_player});}
 function put(c){var st=document.getElementById('stage');st.innerHTML='';st.appendChild(c);}
+// シューター絵の差し替え（ラボ限定・cutscene.js は typeof ガードで既定 manga_shot）
+function setShotDir(v){window._LAB_SHOT_DIR=v;if(typeof MangaRecolor!=='undefined'&&MangaRecolor.clearCache)MangaRecolor.clearCache();run(cur);}
 function err(m){document.getElementById('err').textContent=m||'';}
 function run(kind,retry){
   cur=kind; err('');
