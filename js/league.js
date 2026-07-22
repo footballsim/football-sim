@@ -93,12 +93,261 @@
 
   function _emptyStanding() { return { p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 }; }
 
+  /* ===========================================================================
+   * SN-01 / MG-02 — 統合セーブスキーマ v4（設計書 MANAGER_SEASON_DESIGN.md §2）
+   * ---------------------------------------------------------------------------
+   * ★ セーブ改定は 1 回だけ（v3→v4）。年齢/選手成長/信頼度/怪我・出場停止の持ち越し/
+   *   シーズン引き継ぎ/アーカイブ/監督キャリアを「全部入り」でスキーマ化する。
+   *   以後の継ぎ足し改定は β ユーザーのセーブを壊すため禁止。
+   * ★ 追加フィールドは全て任意＝欠落時はデフォルト補完（既存 v2/v3 セーブを壊さない）。
+   * ★ rng を新規消費しない（決定論のみ）＝ seed 完全再現（T-06）を壊さない。
+   * ========================================================================= */
+  var SAVE_VERSION = 4;
+
+  // 戦術 index → 保存用 id（players.js: TACTICS_POSSESSION=0 … TACTICS_FREE=4）
+  var TACTIC_IDS = ['POSSESSION', 'PRESS', 'COUNTER', 'CATENACCIO', 'FREE'];
+
+  var MANAGER_TUNING = {
+    START: 20,          // 全 param の初期値（新米監督・難易度は作らないので個体差なし）
+    CAP: 100,
+    TRUST_START: 50     // クラブからの信頼度の初期値（SN-02 で運用）
+  };
+
+  var SEASON_TUNING = {
+    // 怪我の欠場節数（discipline.js の severity マーカーを読む・§6.4）
+    INJURY_OUT: { minor: 1, severe: 3 },
+    SUSPEND_RED: 1,        // レッド＝次節出場停止
+    YELLOW_ACCUM: 3,       // イエロー累積の閾値
+    SUSPEND_ACCUM: 1,      // 累積到達時の出場停止節数
+    MIN_AVAILABLE: 11      // 詰み防止＝先発 11 人を確保できなければ欠場を強制解除（§3.3）
+  };
+
+  // 選手識別キー（PT/PS と同じ決定論キー＝long_name 優先）
+  function _playerKey(p) { return (p && (p.long_name || p.name)) || ''; }
+
+  function _defaultManager(clubId, season) {
+    var S = MANAGER_TUNING.START;
+    return {
+      name: null,
+      age: null,                 // 年齢概念（案D）は SN-08 で使用。null=年齢なし運用でも動く
+      params: { tactical: S, analysis: S, motivator: S, conditioning: S, popularity: S },
+      learnedTactics: ['POSSESSION', 'CATENACCIO'],   // MG-04: 初期2種（解放は戦術勉強で）
+      tacticProgress: { PRESS: 0, COUNTER: 0 },        // 習得ゲージ 0-100
+      coaches: { analysis: 1, physical: 0, mental: 0, scout: 0 },  // 0=未雇用
+      clubTrust: MANAGER_TUNING.TRUST_START,
+      seasonGoal: null,          // SN-02 が開幕時に設定（{type:'table_pos',target:n}）
+      tenure: { clubId: clubId || null, sinceSeason: season || 1 }
+    };
+  }
+
+  function _defaultSeasonMeta() { return { actionsLog: [], pendingAction: null }; }
+
+  // 選手の持ち越しデータ（クラブ×選手の delta オーバーレイ）。
+  // ★ lazy 生成: 初回アクセス時にだけ作る＝800選手を展開せず localStorage 肥大化を避ける。
+  function _defaultSquadEntry() {
+    return {
+      age: null,       // SN-08（年齢モデル）で使用。null=未設定
+      growth: {},      // param idx → 累積 delta（疎・0 は持たない）
+      trust: MANAGER_TUNING.TRUST_START,  // 監督との信頼度（MG-12）
+      injuryOut: 0,    // 怪我による欠場残り節数
+      suspendOut: 0,   // 出場停止の残り節数
+      yellowAccum: 0,  // イエロー累積（SEASON_TUNING.YELLOW_ACCUM で停止）
+      apps: 0, goals: 0, assists: 0   // シーズン統計（RW-02・成長入力）
+    };
+  }
+
+  // squads[clubId][playerKey] を lazy 生成して返す（読み書き共通の唯一の入口）。
+  function _squadEntry(clubId, playerKey) {
+    if (!_state) return _defaultSquadEntry();
+    if (!_state.squads) _state.squads = {};
+    if (!_state.squads[clubId]) _state.squads[clubId] = {};
+    var c = _state.squads[clubId];
+    if (!c[playerKey]) c[playerKey] = _defaultSquadEntry();
+    return c[playerKey];
+  }
+
+  // 既存エントリを「生成せずに」覗く（overlay の高速パス＝疎なままにしておく）。
+  function _peekSquadEntry(clubId, playerKey) {
+    var c = _state && _state.squads && _state.squads[clubId];
+    return (c && c[playerKey]) || null;
+  }
+
+  /* ── オーバーレイ適用済みクラブデータ（§2.2） ─────────────────────────
+   * ★ TEAM_DATA 本体は不変（single/WC モードと共有の不変ソース）。clone に対して
+   *   ① growth を base param へ焼き込み（persistent な成長）
+   *   ② injuryOut/suspendOut>0 の選手を先発から除外（詰み防止つき）
+   * を適用して返す。1試合あたり数クラブ分の clone なのでコストは無視できる。 */
+  function _overlaySquad(clubId) {
+    var src = _clubData(clubId);
+    if (!src) return src;
+    var td = {};
+    for (var k in src) if (Object.prototype.hasOwnProperty.call(src, k)) td[k] = src[k];
+    td._srcKey = clubId;   // clone でも TEAM_DATA キーを辿れるようにする（manager-match.js の選手詳細用）
+
+    var unavailable = {};   // players index → true
+    td.players = src.players.map(function (p, idx) {
+      var np = {};
+      for (var k2 in p) if (Object.prototype.hasOwnProperty.call(p, k2)) np[k2] = p[k2];
+      np.params = p.params.slice();
+      var ov = _peekSquadEntry(clubId, _playerKey(p));
+      if (ov) {
+        if (ov.growth) {
+          for (var gi in ov.growth) {
+            var i = parseInt(gi, 10);
+            if (isNaN(i) || i < 0 || i >= np.params.length) continue;
+            np.params[i] = Math.max(1, Math.min(99, np.params[i] + ov.growth[gi]));
+          }
+        }
+        if ((ov.injuryOut > 0) || (ov.suspendOut > 0)) unavailable[idx] = true;
+      }
+      return np;
+    });
+
+    td.default_lineup = _availableLineup(src, td, unavailable, clubId);
+    return td;
+  }
+
+  /* 欠場者を除いた lineup を組む。先発 11 人の穴は「ベンチ→未登録選手」の順で埋める。
+   * 詰み防止（§3.3）: それでも 11 人に満たないなら欠場残り節数を 0 に clamp して解除する。 */
+  function _availableLineup(src, td, unavailable, clubId) {
+    var base = (src.default_lineup || []).slice();
+    var total = td.players.length;
+    var used = {}, out = [];
+
+    function _push(i) { if (i == null || used[i]) return false; used[i] = true; out.push(i); return true; }
+
+    // ① 既存 lineup の順序を尊重して、出場可能な選手だけ拾う
+    for (var b = 0; b < base.length; b++) if (!unavailable[base[b]]) _push(base[b]);
+    // ② 11 人に足りなければ、未登録の出場可能な選手で補充（GK 以外の並びは engine が解決）
+    for (var i2 = 0; i2 < total && out.length < 11; i2++) if (!unavailable[i2]) _push(i2);
+
+    // ③ 詰み防止: 出場可能者が 11 人未満 → 欠場を軽い順に強制解除して復帰させる
+    if (out.length < SEASON_TUNING.MIN_AVAILABLE) {
+      var outs = [];
+      for (var i3 = 0; i3 < total; i3++) {
+        if (!unavailable[i3]) continue;
+        var e = _peekSquadEntry(clubId, _playerKey(td.players[i3]));
+        outs.push({ idx: i3, rest: e ? ((e.injuryOut || 0) + (e.suspendOut || 0)) : 0, entry: e });
+      }
+      outs.sort(function (a, b2) { return a.rest - b2.rest; });   // 残りが短い＝軽い順に復帰
+      for (var o = 0; o < outs.length && out.length < SEASON_TUNING.MIN_AVAILABLE; o++) {
+        if (outs[o].entry) { outs[o].entry.injuryOut = 0; outs[o].entry.suspendOut = 0; }
+        _push(outs[o].idx);
+      }
+    }
+
+    // ④ ベンチ（12人目以降）＝元 lineup の残りを順序どおりに積む（欠場者は入れない）。
+    //    ベンチ枠の大きさは元データと同じ（=base.length）に保つ＝交代枠の挙動を変えない。
+    var size = Math.max(base.length, 11);
+    for (var i4 = 0; i4 < base.length && out.length < size; i4++) if (!unavailable[base[i4]]) _push(base[i4]);
+    for (var i5 = 0; i5 < total && out.length < size; i5++) if (!unavailable[i5]) _push(i5);
+    return out;
+  }
+
+  /* ── シーズン跨ぎの持ち越し（§2・SN-07 の土台） ───────────────────────
+   * 引き継ぐ = age / growth（成長は persistent）/ trust（監督との信頼）。
+   * リセット = 当季の記録（apps/goals/assists）と欠場カウンタ（injuryOut/suspendOut/yellowAccum）。
+   * 何も持たないエントリは捨てて localStorage を疎に保つ（history 50件上限と同じ配慮）。 */
+  function _carrySquads(prev) {
+    var out = {};
+    if (!prev) return out;
+    for (var clubId in prev) {
+      if (!Object.prototype.hasOwnProperty.call(prev, clubId)) continue;
+      var src = prev[clubId], dst = {};
+      for (var pk in src) {
+        if (!Object.prototype.hasOwnProperty.call(src, pk)) continue;
+        var e = src[pk] || {};
+        var growth = {}, hasGrowth = false;
+        if (e.growth) for (var gi in e.growth) {
+          if (!Object.prototype.hasOwnProperty.call(e.growth, gi)) continue;
+          if (e.growth[gi]) { growth[gi] = e.growth[gi]; hasGrowth = true; }
+        }
+        var trust = (typeof e.trust === 'number') ? e.trust : MANAGER_TUNING.TRUST_START;
+        var age = (typeof e.age === 'number') ? e.age : null;
+        // 引き継ぐ中身が何もない（成長なし・信頼が既定・年齢なし）なら保存しない
+        if (!hasGrowth && age === null && trust === MANAGER_TUNING.TRUST_START) continue;
+        var ne = _defaultSquadEntry();
+        ne.growth = growth; ne.trust = trust; ne.age = age;
+        dst[pk] = ne;
+      }
+      if (Object.keys(dst).length) out[clubId] = dst;
+    }
+    return out;
+  }
+
+  /* ── 節が明けるたびに欠場カウンタを 1 減らす（§6.4） ─────────────────
+   * ★ 順序が意味を持つ: 「先に減らす → その試合で出た怪我/退場を書く」。
+   *   こうすると今節で負傷した選手は必ず次節を欠場し、前節から引きずっていた選手は復帰する。 */
+  function _tickCarryover() {
+    if (!_state || !_state.squads) return;
+    for (var clubId in _state.squads) {
+      if (!Object.prototype.hasOwnProperty.call(_state.squads, clubId)) continue;
+      var c = _state.squads[clubId];
+      for (var pk in c) {
+        if (!Object.prototype.hasOwnProperty.call(c, pk)) continue;
+        var e = c[pk];
+        if (e.injuryOut > 0) e.injuryOut--;
+        if (e.suspendOut > 0) e.suspendOut--;
+      }
+    }
+  }
+
+  /* ── 試合終了時に discipline.js のマーカーを読んで持ち越しへ書く（§6.4） ──
+   * team = 試合で使われたチームオブジェクト（_overlaySquad 由来の clone）。
+   *   apps  … 出場した選手（終了時の先発11 ＋ 交代で退いた選手 ＋ カード/怪我で退場した選手）
+   *   goals/assists … 呼び出し側が名前キーの集計を渡した時だけ記録（＝自クラブのみ・RW-02）
+   *   injuryOut/suspendOut/yellowAccum … _injured/_injurySeverity/_sentOff/_yellowCards から算出
+   * ★ rng を新規消費しない（既に確定した試合結果を読むだけ）。 */
+  function _recordTeamCarryover(clubId, team, statsByName, useSubbedOff) {
+    if (!_state || !clubId || !team || !team.players) return;
+    var players = team.players;
+    var appeared = {};
+    var lu = team.lineup || [];
+    for (var i = 0; i < lu.length && i < 11; i++) if (lu[i] != null) appeared[lu[i]] = true;
+    // 交代で退いた選手（simulate.js の共有 Set）。★ これは対話モードの team1 専用なので、
+    //   相手チームや AIvsAI に流用すると別チームの index を誤って出場扱いにする。
+    if (useSubbedOff && typeof _subbedOff !== 'undefined' && _subbedOff && typeof _subbedOff.forEach === 'function') {
+      _subbedOff.forEach(function (idx) { appeared[idx] = true; });
+    }
+
+    for (var idx = 0; idx < players.length; idx++) {
+      var p = players[idx];
+      if (!p) continue;
+      var touched = !!appeared[idx] || !!p._injured || !!p._sentOff || (p._yellowCards > 0);
+      if (!touched) continue;
+      var e = _squadEntry(clubId, _playerKey(p));
+      if (appeared[idx] || p._injured || p._sentOff) e.apps++;
+
+      if (statsByName) {
+        var st = statsByName[p.name];
+        if (st) { e.goals += (st.goals || 0); e.assists += (st.assists || 0); }
+      }
+
+      // 怪我 → 重症度に応じた欠場節数（すでに欠場中なら長い方を採用）
+      if (p._injured) {
+        var n = SEASON_TUNING.INJURY_OUT[p._injurySeverity] || SEASON_TUNING.INJURY_OUT.minor;
+        if (n > e.injuryOut) e.injuryOut = n;
+      }
+      // 退場（レッド/2枚目イエロー）→ 次節出場停止。累積カウンタはリセット。
+      if (p._sentOff) {
+        if (SEASON_TUNING.SUSPEND_RED > e.suspendOut) e.suspendOut = SEASON_TUNING.SUSPEND_RED;
+        e.yellowAccum = 0;
+      } else if (p._yellowCards > 0) {
+        e.yellowAccum += p._yellowCards;
+        if (e.yellowAccum >= SEASON_TUNING.YELLOW_ACCUM) {
+          e.yellowAccum -= SEASON_TUNING.YELLOW_ACCUM;
+          if (SEASON_TUNING.SUSPEND_ACCUM > e.suspendOut) e.suspendOut = SEASON_TUNING.SUSPEND_ACCUM;
+        }
+      }
+    }
+  }
+
   function _newSeason(myClubId) {
     var ids = CLUB_DEFS.map(function (d) { return d.id; });
     var standings = {};
     ids.forEach(function (id) { standings[id] = _emptyStanding(); });
     _state = {
-      version: 3,   // v3: シーズン周回＋過去シーズンのアーカイブ(history)。v2=実チーム8・v1=架空クラブ
+      version: SAVE_VERSION,   // v4: 監督/シーズンメタ/選手持ち越しを統合。v3=周回+history・v2=実チーム8・v1=架空クラブ
       season: 1,
       history: [],
       myClub: myClubId,
@@ -109,7 +358,10 @@
       round: 0,
       lastPlayedDate: null,
       lastResult: null,   // { round, mine:{me,opp,ms,os,res,rival,posBefore,posAfter,mom,scorers}, others:[...] }
-      finished: false
+      finished: false,
+      manager: _defaultManager(myClubId, 1),   // MG-02
+      seasonMeta: _defaultSeasonMeta(),        // 行動フェーズ（MG-03）
+      squads: {}                               // 選手持ち越し（lazy 生成・SN-01）
     };
     _save();
   }
@@ -153,18 +405,29 @@
       var raw = localStorage.getItem(LS_KEY);
       if (!raw) { _state = null; return; }
       var s = JSON.parse(raw);
-      if (!s || !s.fixtures || (s.version !== 2 && s.version !== 3)) { _state = null; return; }   // 旧版(v1架空クラブ)は破棄
-      _state = s;
+      if (!s || !s.fixtures || !(s.version >= 2 && s.version <= SAVE_VERSION)) { _state = null; return; }   // 旧版(v1架空クラブ)/未来版は破棄
+      var _prevVersion = s.version;
+      var _hadV4 = !!(s.manager && s.seasonMeta && s.squads);
+      _state = s;   // ※ 以降 s と _state は同一オブジェクト。移行判定は上の控えを使う
       if (!_state.rival) { _state.rival = _computeRival(_state.myClub); }  // 旧セーブへ宿敵を補完
       // v2→v3 移行: シーズン周回＆過去シーズンのアーカイブ枠を追加（既存の進行は保持）。
       if (_state.version === 2) {
         _state.version = 3;
         if (typeof _state.season !== 'number') _state.season = 1;
         if (!Array.isArray(_state.history)) _state.history = [];
-        _save();
+      }
+      // v3→v4 移行（SN-01/MG-02）: 監督・シーズンメタ・選手持ち越しの枠を補完するだけ。
+      //   進行中のリーグはそのまま継続する（欠落フィールドの補完のみ・破壊的変更なし）。
+      if (_state.version < SAVE_VERSION) {
+        _state.version = SAVE_VERSION;
       }
       if (typeof _state.season !== 'number') _state.season = 1;
       if (!Array.isArray(_state.history)) _state.history = [];
+      // ↓ v4 フィールドは版数に関係なく毎回「欠落なら補完」（部分的に壊れたセーブにも耐える）
+      if (!_state.manager) _state.manager = _defaultManager(_state.myClub, _state.season);
+      if (!_state.seasonMeta) _state.seasonMeta = _defaultSeasonMeta();
+      if (!_state.squads) _state.squads = {};   // 空 = 全選手 base のまま（delta なし）
+      if (_prevVersion !== _state.version || !_hadV4) _save();   // 移行が起きた時だけ一度保存
     } catch (e) { _state = null; }
   }
 
@@ -197,8 +460,12 @@
     var ids = CLUB_DEFS.map(function (d) { return d.id; });
     var standings = {};
     ids.forEach(function (id) { standings[id] = _emptyStanding(); });
+    // ★ v4: 監督（成長・信頼・キャリア）と選手の持ち越し（growth/年齢/信頼）はシーズンを跨いで引き継ぐ。
+    //   季ごとにリセットするのは「当季の記録」= apps/goals/assists と欠場カウンタ・行動ログのみ。
+    var manager = _state.manager || _defaultManager(my, nextSeason);
+    var squads = _carrySquads(_state.squads);
     _state = {
-      version: 3,
+      version: SAVE_VERSION,
       season: nextSeason,
       history: hist,
       myClub: my,
@@ -209,7 +476,10 @@
       round: 0,
       lastPlayedDate: null,
       lastResult: null,
-      finished: false
+      finished: false,
+      manager: manager,
+      seasonMeta: _defaultSeasonMeta(),
+      squads: squads
     };
     _save();
   }
@@ -256,7 +526,7 @@
    * 既存WCモードと同一方式（scene: result==='ゴール！！' / 得点=ofsPos / 助=crossPos）。
    * 自チーム＝ sc.offence === gameState.team1（league は team1 に自クラブをセット）。 */
   function _collectMyStats() {
-    var empty = { scorers: [], mom: null };
+    var empty = { scorers: [], mom: null, stats: {} };   // stats = 選手名→{goals,assists,duelWins}（v4 持ち越し用）
     if (typeof chanceResults === 'undefined' || !chanceResults) return empty;
     if (typeof gameState === 'undefined' || !gameState || !gameState.team1) return empty;
     var t1 = gameState.team1, stats = {};
@@ -295,7 +565,7 @@
       var kp = td.players[td.default_keyplayer] || td.players[0];
       if (kp) mom = { name: kp.name, goals: 0, assists: 0 };
     }
-    return { scorers: scorers, mom: mom };
+    return { scorers: scorers, mom: mom, stats: stats };
   }
 
   /* ── 実況テキストログ（試合後に見直す） ─────────────────────────────
@@ -450,8 +720,11 @@
     var iAmHome = (fx.home === myId);
 
     // 監督ビューアは常に team1 = 自チーム（左）として表示。ホーム/アウェイは順位表記録側で扱う。
-    team1Data = _clubData(myId);
-    team2Data = _clubData(oppId);
+    // ★ v4: TEAM_DATA そのものではなく「持ち越しオーバーレイ適用済み clone」を渡す（§2.2）。
+    //   成長 delta を base param へ焼き込み、怪我/出場停止の選手を先発から外す（詰み防止つき）。
+    //   TEAM_DATA 本体は single/WC と共有の不変ソースなので絶対に書き換えない。
+    team1Data = _overlaySquad(myId);
+    team2Data = _overlaySquad(oppId);
 
     // team1State は startManagerMatch の呼び出し側責務（team2State は内部生成）
     var s1 = system_data.findIndex(function (s) { return s.name === team1Data.default_system; });
@@ -480,6 +753,11 @@
     var matchLog = _buildMatchLog();
     var posBefore = _position(myId);
 
+    // ── v4 持ち越し（§6.4）: 先に前節分のカウンタを減らし、その後に今節の怪我/退場を書く
+    _tickCarryover();
+    _recordTeamCarryover(myId, gameState && gameState.team1, report.stats, true);
+    _recordTeamCarryover(oppId, gameState && gameState.team2, null);
+
     // 順位表はホーム/アウェイの実カードで記録
     var hs = iAmHome ? myScore : oppScore;
     var as = iAmHome ? oppScore : myScore;
@@ -494,8 +772,11 @@
       if (m === fx || m.played) continue;
       var res = { home: 0, away: 0 };
       try {
-        var r = playMatch(_clubData(m.home), _clubData(m.away));
+        var r = playMatch(_overlaySquad(m.home), _overlaySquad(m.away));
         res = r.result;
+        // AI 同士の試合も怪我/出場停止を持ち越す（得点者内訳は自クラブのみ記録＝RW-02）
+        _recordTeamCarryover(m.home, r.home, null);
+        _recordTeamCarryover(m.away, r.away, null);
       } catch (e) { console.warn('[league] AI match failed', e); }
       m.played = true; m.hs = res.home; m.as = res.away;
       _applyResult(m.home, m.away, res.home, res.away);
@@ -827,6 +1108,24 @@
   window.leagueDebugUnlock = function () { if (_state) { _state.lastPlayedDate = null; _save(); _renderHub(false); } };
   // テスト用（lab限定）：1日1回制限のON/OFFトグル（毎回プレイ可にする）
   window.leagueToggleTestLock = function () { if (_state) { _state.testUnlock = !_state.testUnlock; _save(); _renderHub(false); } };
+  /* 検証用 seam（lab限定・UI からは使わない）。
+   * v4 スキーマ層（移行/オーバーレイ/持ち越し）を headless で機械検証するための入口。
+   * → tools/league-save-v4-test.js。挙動には一切影響しない（読み書きは既存関数のみ）。 */
+  window._leagueTestAPI = {
+    load: _load, save: _save,
+    getState: function () { return _state; },
+    setState: function (s) { _state = s; },
+    newSeason: _newSeason,
+    startNextSeason: _startNextSeason,
+    overlaySquad: _overlaySquad,
+    squadEntry: _squadEntry,
+    tickCarryover: _tickCarryover,
+    recordTeamCarryover: _recordTeamCarryover,
+    carrySquads: _carrySquads,
+    SAVE_VERSION: SAVE_VERSION,
+    SEASON_TUNING: SEASON_TUNING,
+    MANAGER_TUNING: MANAGER_TUNING
+  };
   // 実況テキストログの表示/閉じる
   window.leagueShowLog = function () { _showMatchLog(); };
   window.leagueCloseLog = function () { var ov = document.getElementById('lg-log-ov'); if (ov) ov.parentNode.removeChild(ov); };

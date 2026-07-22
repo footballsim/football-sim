@@ -1,0 +1,219 @@
+/**
+ * league-save-v4-test.js — 統合セーブスキーマ v4（SN-01 / MG-02）の headless 検証。
+ *
+ * 検証対象（設計書 MANAGER_SEASON_DESIGN.md §2・§2.1・§2.2・§6.4）:
+ *   ① v2/v3 → v4 の移行が「欠落フィールドの補完のみ」で、進行中のリーグを壊さない
+ *   ② _overlaySquad が growth を base param へ焼き込み、TEAM_DATA 本体は不変のまま
+ *   ③ 怪我/出場停止の選手が先発から外れる＋詰み防止（11人を必ず確保）
+ *   ④ 試合後の持ち越し記録（怪我の重症度・レッド・イエロー累積・出場数）
+ *   ⑤ 節送りで欠場カウンタが 1 ずつ減る（先に減らす→今節の怪我を書く の順序）
+ *   ⑥ シーズン跨ぎ = 成長/信頼は引き継ぎ・当季の記録と欠場カウンタはリセット
+ *
+ * 実行: node tools/league-save-v4-test.js
+ * ※ league.js は <script> 前提のブラウザモジュールなので、DOM/localStorage をスタブして
+ *   エンジン一式と同じ vm context に連結ロードする（tools/lib/load-engine.js と同じ作法）。
+ */
+'use strict';
+const fs = require('fs');
+const vm = require('vm');
+const path = require('path');
+const { ROOT, JS_FILES } = require('./lib/load-engine.js');
+
+/* ── ブラウザ API スタブ（localStorage だけは本物同然の実体を持たせる） ── */
+const STUB = `
+class URLSearchParams{constructor(s){}get(k){return null;}}
+const _elStub={textContent:"",innerHTML:"",value:"",style:{},dataset:{},classList:{add:()=>{},remove:()=>{},toggle:()=>{},contains:()=>false},appendChild:()=>{},removeChild:()=>{},setAttribute:()=>{},getAttribute:()=>null,addEventListener:()=>{},querySelector:()=>null,querySelectorAll:()=>[],getContext:()=>null,focus:()=>{},remove:()=>{}};
+const document={getElementById:()=>(_elStub),querySelector:()=>null,querySelectorAll:()=>[],createElement:()=>(Object.assign({},_elStub)),createElementNS:()=>(Object.assign({},_elStub)),body:{appendChild:()=>{},classList:{add:()=>{},remove:()=>{}}},documentElement:{style:{},classList:{add:()=>{},remove:()=>{}}},addEventListener:()=>{},head:{appendChild:()=>{}}};
+const _lsData={};
+const localStorage={getItem:(k)=>(k in _lsData? _lsData[k]:null),setItem:(k,v)=>{_lsData[k]=String(v);},removeItem:(k)=>{delete _lsData[k];},_dump:()=>_lsData};
+const sessionStorage={getItem:()=>null,setItem:()=>{}};
+const window={addEventListener:()=>{},location:{hash:"",search:""},matchMedia:()=>({matches:false,addEventListener:()=>{}}),navigator:{language:"ja"},localStorage:localStorage};
+const navigator={language:"ja"};
+const firebase={initializeApp:()=>{},firestore:()=>({collection:()=>({doc:()=>({get:()=>Promise.resolve({exists:false,data:()=>({})}),set:()=>Promise.resolve(),update:()=>Promise.resolve()})})})};
+const gtag=()=>{};
+const alert=()=>{};
+const confirm=()=>true;
+function showScreen(){}
+function showWCStats(){}
+function startManagerMatch(){}
+`;
+
+let code = STUB + '\n';
+for (const f of JS_FILES) code += fs.readFileSync(path.join(ROOT, 'js', f), 'utf8') + '\n';
+code += fs.readFileSync(path.join(ROOT, 'js', 'league.js'), 'utf8') + '\n';
+
+const ctx = vm.createContext({
+  Math, console, parseInt, parseFloat, isNaN, isFinite,
+  setTimeout: (fn) => fn(), clearTimeout: () => {}, setInterval: () => 0, clearInterval: () => {},
+  Promise, JSON, Object, Array, String, Number, Boolean, Date, RegExp, Error, require, __dirname: ROOT,
+});
+vm.runInContext(code, ctx, { filename: 'league-concat.js' });
+
+const api = vm.runInContext('({ L: window._leagueTestAPI, TEAM_DATA: TEAM_DATA, ls: localStorage })', ctx);
+const L = api.L;
+const TEAM_DATA = api.TEAM_DATA;
+const LS_KEY = 'fs_league_v1';
+const MY = 'england2026';
+
+/* ── 極小テストランナー ─────────────────────────────────────────── */
+let pass = 0, fail = 0;
+function check(name, cond, detail) {
+  if (cond) { pass++; console.log('  ✅ ' + name); }
+  else { fail++; console.log('  ❌ ' + name + (detail ? '  → ' + detail : '')); }
+}
+function section(t) { console.log('\n' + t); }
+function reset() { api.ls.removeItem(LS_KEY); L.setState(null); }
+function keyOf(p) { return p.long_name || p.name; }
+
+/* ── ① 移行: v3 セーブ → v4 ───────────────────────────────────── */
+section('① v3 → v4 マイグレーション（進行中データを壊さない）');
+reset();
+L.newSeason(MY);                       // v4 の新規セーブを作り、v3 相当へ手で落とす
+const v3 = JSON.parse(api.ls.getItem(LS_KEY));
+v3.version = 3; delete v3.manager; delete v3.seasonMeta; delete v3.squads;
+v3.round = 5; v3.standings[MY] = { p: 5, w: 4, d: 1, l: 0, gf: 12, ga: 3, pts: 13 };
+api.ls.setItem(LS_KEY, JSON.stringify(v3));
+L.setState(null);
+L.load();
+let s = L.getState();
+check('version が 4 に上がる', s && s.version === L.SAVE_VERSION, 'version=' + (s && s.version));
+check('manager が既定で生える', !!(s.manager && s.manager.params && s.manager.params.tactical === L.MANAGER_TUNING.START));
+check('learnedTactics は初期2種', !!(s.manager && s.manager.learnedTactics.length === 2));
+check('seasonMeta / squads が生える', !!(s.seasonMeta && s.squads));
+check('進行中の round が保持される', s.round === 5, 'round=' + s.round);
+check('順位表が保持される', s.standings[MY].pts === 13);
+check('移行後に保存される', JSON.parse(api.ls.getItem(LS_KEY)).version === 4);
+
+// 部分的に壊れた v4（manager だけ欠落）にも耐える
+const broken = JSON.parse(api.ls.getItem(LS_KEY));
+delete broken.manager;
+api.ls.setItem(LS_KEY, JSON.stringify(broken));
+L.setState(null); L.load();
+check('v4 でも欠落フィールドを補完する', !!L.getState().manager);
+
+// v1（架空クラブ時代）は破棄される
+const old = JSON.parse(api.ls.getItem(LS_KEY)); old.version = 1;
+api.ls.setItem(LS_KEY, JSON.stringify(old));
+L.setState(null); L.load();
+check('v1 セーブは破棄される', L.getState() === null);
+
+/* ── ② オーバーレイ: growth 焼き込み・TEAM_DATA 不変 ───────────── */
+section('② _overlaySquad（成長の焼き込み・TEAM_DATA 保護）');
+reset(); L.newSeason(MY);
+const basePlayer = TEAM_DATA[MY].players[0];
+const baseKey = keyOf(basePlayer);
+const baseParam11 = basePlayer.params[11];
+L.squadEntry(MY, baseKey).growth = { 11: 5 };
+let td = L.overlaySquad(MY);
+check('growth delta が base param に乗る', td.players[0].params[11] === baseParam11 + 5,
+  td.players[0].params[11] + ' vs ' + (baseParam11 + 5));
+check('TEAM_DATA 本体は不変', TEAM_DATA[MY].players[0].params[11] === baseParam11);
+check('params 配列が別実体（共有していない）', td.players[0].params !== TEAM_DATA[MY].players[0].params);
+
+L.squadEntry(MY, baseKey).growth = { 11: 999 };
+check('growth は 1..99 に clamp', L.overlaySquad(MY).players[0].params[11] === 99);
+L.squadEntry(MY, baseKey).growth = {};
+
+/* ── ③ 欠場者の除外と詰み防止 ─────────────────────────────────── */
+section('③ 怪我/出場停止による先発除外＋詰み防止');
+const lineup0 = TEAM_DATA[MY].default_lineup.slice(0, 11);
+const outIdx = lineup0[3];
+L.squadEntry(MY, keyOf(TEAM_DATA[MY].players[outIdx])).injuryOut = 2;
+td = L.overlaySquad(MY);
+check('怪我の選手が先発から外れる', td.default_lineup.slice(0, 11).indexOf(outIdx) < 0);
+check('先発は 11 人のまま', td.default_lineup.slice(0, 11).length === 11);
+check('先発に重複がない', new Set(td.default_lineup.slice(0, 11)).size === 11);
+
+// 詰み防止: スカッドのほぼ全員を欠場させても 11 人揃う
+const total = TEAM_DATA[MY].players.length;
+for (let i = 0; i < total; i++) {
+  const e = L.squadEntry(MY, keyOf(TEAM_DATA[MY].players[i]));
+  e.injuryOut = (i % 2 === 0) ? 3 : 1;   // 軽い(1)/重い(3) を混在させる
+}
+td = L.overlaySquad(MY);
+check('全員欠場でも先発 11 人を確保（詰み防止）', td.default_lineup.slice(0, 11).length === 11);
+check('復帰は「残り節数が短い＝軽い」選手から', (function () {
+  const on = td.default_lineup.slice(0, 11);
+  return on.every(function (i) { return L.squadEntry(MY, keyOf(TEAM_DATA[MY].players[i])).injuryOut === 0; });
+})());
+
+/* ── ④ 試合後の持ち越し記録 ───────────────────────────────────── */
+section('④ _recordTeamCarryover（discipline マーカー → 欠場節数）');
+reset(); L.newSeason(MY);
+const team = L.overlaySquad(MY);
+team.lineup = TEAM_DATA[MY].default_lineup.slice(0, 11);
+const pInjured = team.players[team.lineup[0]];
+const pRed = team.players[team.lineup[1]];
+const pYellow = team.players[team.lineup[2]];
+const pScorer = team.players[team.lineup[3]];
+pInjured._injured = true; pInjured._injurySeverity = 'severe';
+pRed._sentOff = true;
+pYellow._yellowCards = 1;
+L.recordTeamCarryover(MY, team, (function () { const m = {}; m[pScorer.name] = { goals: 2, assists: 1 }; return m; })(), true);
+
+check('重傷 → 3 節欠場', L.squadEntry(MY, keyOf(pInjured)).injuryOut === L.SEASON_TUNING.INJURY_OUT.severe);
+check('退場 → 次節出場停止', L.squadEntry(MY, keyOf(pRed)).suspendOut === L.SEASON_TUNING.SUSPEND_RED);
+check('イエロー1枚は累積のみ（停止なし）',
+  L.squadEntry(MY, keyOf(pYellow)).yellowAccum === 1 && L.squadEntry(MY, keyOf(pYellow)).suspendOut === 0);
+check('得点/アシストが記録される',
+  L.squadEntry(MY, keyOf(pScorer)).goals === 2 && L.squadEntry(MY, keyOf(pScorer)).assists === 1);
+check('出場した 11 人に apps が付く', (function () {
+  return team.lineup.every(function (i) { return L.squadEntry(MY, keyOf(team.players[i])).apps === 1; });
+})());
+check('出場していない選手には apps が付かない',
+  L.squadEntry(MY, keyOf(team.players[team.lineup[0]])).apps === 1 &&
+  !(L.getState().squads[MY][keyOf(team.players[20])] || {}).apps);
+
+// イエロー累積が閾値に達したら出場停止（3枚目で停止・カウンタは繰り越し分を残す）
+for (let k = 0; k < 2; k++) {
+  const t2 = L.overlaySquad(MY);
+  t2.lineup = [team.lineup[2]];
+  t2.players[team.lineup[2]]._yellowCards = 1;
+  L.recordTeamCarryover(MY, t2, null, false);
+}
+check('イエロー累積 ' + L.SEASON_TUNING.YELLOW_ACCUM + ' 枚 → 出場停止',
+  L.squadEntry(MY, keyOf(pYellow)).suspendOut === L.SEASON_TUNING.SUSPEND_ACCUM,
+  'suspendOut=' + L.squadEntry(MY, keyOf(pYellow)).suspendOut);
+check('累積カウンタは閾値ぶん差し引かれる', L.squadEntry(MY, keyOf(pYellow)).yellowAccum === 0);
+
+/* ── ⑤ 節送りで欠場カウンタが減る ─────────────────────────────── */
+section('⑤ _tickCarryover（節が明けたら 1 減る）');
+const before = L.squadEntry(MY, keyOf(pInjured)).injuryOut;
+L.tickCarryover();
+check('怪我の残り節数が 1 減る', L.squadEntry(MY, keyOf(pInjured)).injuryOut === before - 1);
+L.tickCarryover(); L.tickCarryover(); L.tickCarryover();
+check('0 未満にはならない', L.squadEntry(MY, keyOf(pInjured)).injuryOut === 0);
+
+/* ── ⑥ シーズン跨ぎの引き継ぎ ─────────────────────────────────── */
+section('⑥ _carrySquads / _startNextSeason（成長は継続・当季の記録はリセット）');
+reset(); L.newSeason(MY);
+const e1 = L.squadEntry(MY, baseKey);
+e1.growth = { 11: 3 }; e1.trust = 70; e1.age = 27;
+e1.apps = 14; e1.goals = 9; e1.assists = 4; e1.injuryOut = 2; e1.suspendOut = 1; e1.yellowAccum = 2;
+L.squadEntry(MY, keyOf(TEAM_DATA[MY].players[1]));   // 中身が既定のままのエントリ（捨てられるはず）
+L.getState().manager.params.tactical = 44;
+L.getState().manager.clubTrust = 61;
+const st = L.getState();
+st.round = st.fixtures.length; st.finished = true;    // シーズン終了状態にしてから周回
+let threw = null;
+try { L.startNextSeason(); } catch (e) { threw = e; }
+check('_startNextSeason が例外を投げない（_carrySquads 未定義バグの回帰）', threw === null, threw && threw.message);
+const ns = L.getState();
+check('シーズン番号が進む', ns && ns.season === 2);
+check('監督の成長は引き継がれる', ns.manager.params.tactical === 44 && ns.manager.clubTrust === 61);
+check('過去シーズンが history に残る', Array.isArray(ns.history) && ns.history.length === 1);
+const c1 = ns.squads[MY][baseKey];
+check('選手の growth / trust / age は引き継がれる',
+  !!c1 && c1.growth['11'] === 3 && c1.trust === 70 && c1.age === 27);
+check('当季の記録（apps/goals/assists）はリセット',
+  !!c1 && c1.apps === 0 && c1.goals === 0 && c1.assists === 0);
+check('欠場カウンタもリセット',
+  !!c1 && c1.injuryOut === 0 && c1.suspendOut === 0 && c1.yellowAccum === 0);
+check('中身が既定だけのエントリは保存しない（セーブを疎に保つ）',
+  !ns.squads[MY][keyOf(TEAM_DATA[MY].players[1])]);
+check('新シーズンの seasonMeta は初期化される',
+  ns.seasonMeta && ns.seasonMeta.actionsLog.length === 0 && ns.seasonMeta.pendingAction === null);
+
+/* ── まとめ ─────────────────────────────────────────────────── */
+console.log('\n' + (fail === 0 ? '✅ PASS' : '❌ FAIL') + '  ' + pass + ' passed, ' + fail + ' failed');
+process.exit(fail === 0 ? 0 : 1);
