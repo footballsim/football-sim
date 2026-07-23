@@ -627,6 +627,39 @@ check('actionsLog に両方残る', (function () {
   return log.some(a => a.action === 'speech_study') && log.some(a => a.action === 'sports_science');
 })());
 
+/* ── ⑱ SN-03 シーズン終了フロー（総評・表彰・アーカイブ拡張） ─────────── */
+section('⑱ SN-03 シーズン終了フロー');
+reset(); L.newSeason(MY);
+// 当季記録を作る（得点王/アシスト王/皆勤の候補）
+const pA = keyOf(TEAM_DATA[MY].players[TEAM_DATA[MY].default_lineup[3]]);
+const pB = keyOf(TEAM_DATA[MY].players[TEAM_DATA[MY].default_lineup[4]]);
+Object.assign(L.squadEntry(MY, pA), { goals: 9, assists: 2, apps: 12 });
+Object.assign(L.squadEntry(MY, pB), { goals: 3, assists: 7, apps: 14 });
+const top18 = L.seasonTopPlayers();
+check('得点王が正しく選ばれる', top18.scorer && top18.scorer.name === pA && top18.scorer.n === 9);
+check('アシスト王が正しく選ばれる', top18.assister && top18.assister.name === pB && top18.assister.n === 7);
+check('皆勤賞が正しく選ばれる', top18.iron && top18.iron.name === pB && top18.iron.n === 14);
+
+// 総評テンプレ: 達成/未達・宿敵・得失点で文が変わる
+L.getState().manager.seasonGoal = { type: 'table_pos', target: 3, rank: 4 };
+L.settleSeason(2);
+let sum18 = L.seasonSummary();
+check('総評に達成の文脈が入る', L.seasonReviewText(sum18).indexOf('堅実') >= 0 || sum18.champion === MY,
+  L.seasonReviewText(sum18));
+L.settleSeason(7);
+sum18 = L.seasonSummary();
+check('未達なら悔しさの文脈になる', L.seasonReviewText(sum18).indexOf('悔し') >= 0, L.seasonReviewText(sum18));
+
+// アーカイブ拡張（RW-02 がそのまま読む形）
+check('summary に verdict/goal/top/managerSnap が載る',
+  !!(sum18.verdict && typeof sum18.goal === 'number' && sum18.top && sum18.managerSnap));
+const st18 = L.getState(); st18.round = st18.fixtures.length; st18.finished = true;
+L.startNextSeason();
+const arch = L.getState().history[0];
+check('history のアーカイブにも新フィールドが残る',
+  !!(arch && arch.top && arch.managerSnap && arch.verdict !== undefined));
+check('アーカイブの得点王が保存される', arch.top.scorer && arch.top.scorer.name === pA);
+
 /* ── まとめ ─────────────────────────────────────────────────── */
 console.log('\n' + (fail === 0 ? '✅ PASS' : '❌ FAIL') + '  ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail === 0 ? 0 : 1);

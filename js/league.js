@@ -1172,11 +1172,65 @@
   }
 
   // 完了したシーズンの要約（バックナンバー用・順位表スナップショット＋自クラブ成績＋宿敵通算）。
+  /* ===========================================================================
+   * SN-03 — シーズン終了フロー（設計書 §3.1 [CEREMONY/REVIEW]）
+   * ---------------------------------------------------------------------------
+   * 優勝＝セレモニー／非優勝＝振り返り。squads の当季記録（apps/goals/assists）から
+   * 個人タイトルを集計し、総評はテンプレで生成（軽LLM化は後日＝まずテンプレで縦貫通）。
+   * ★ すべて確定済みデータの読み出しのみ＝rng 不使用・エンジン不変。
+   * ========================================================================= */
+
+  /* 自クラブの当季 個人記録トップ（得点王/アシスト王/皆勤）。squads は疎なので実在選手だけ拾う。 */
+  function _seasonTopPlayers() {
+    var myId = _state.myClub;
+    var c = (_state.squads && _state.squads[myId]) || {};
+    var top = { scorer: null, assister: null, iron: null };
+    for (var pk in c) {
+      if (!Object.prototype.hasOwnProperty.call(c, pk)) continue;
+      var e = c[pk];
+      if (e.goals > 0 && (!top.scorer || e.goals > top.scorer.n)) top.scorer = { name: pk, n: e.goals };
+      if (e.assists > 0 && (!top.assister || e.assists > top.assister.n)) top.assister = { name: pk, n: e.assists };
+      if (e.apps > 0 && (!top.iron || e.apps > top.iron.n)) top.iron = { name: pk, n: e.apps };
+    }
+    return top;
+  }
+
+  /* シーズン総評（テンプレ）。順位・目標・宿敵・得点力から1〜2文を組む。 */
+  function _seasonReviewText(sum) {
+    var lines = [];
+    var isChamp = sum.champion === sum.myClub;
+    var achieved = sum.verdict ? sum.verdict.achieved : false;
+    if (isChamp) {
+      lines.push(_t('圧巻のシーズンだった。' + _clubName(sum.myClub) + 'がリーグの頂点に立った。',
+        'A commanding season — ' + _clubName(sum.myClub) + ' stand at the top of the league.'));
+    } else if (achieved) {
+      lines.push(_t('クラブの要求に応えた堅実なシーズン。' + sum.myPos + '位でフィニッシュした。',
+        'A solid season that met the club\'s demands, finishing ' + sum.myPos + '.'));
+    } else {
+      lines.push(_t('悔しさの残るシーズン。' + sum.myPos + '位はクラブの期待に届かなかった。',
+        'A frustrating season — ' + sum.myPos + ' fell short of the club\'s expectations.'));
+    }
+    var h = sum.rivalH2H;
+    if (h && (h.w + h.d + h.l) > 0) {
+      if (h.w > h.l) lines.push(_t('宿敵' + _clubName(sum.rival) + 'との対決を制したことは大きな誇りだ。',
+        'Winning the rivalry against ' + _clubName(sum.rival) + ' is a point of pride.'));
+      else if (h.l > h.w) lines.push(_t('宿敵' + _clubName(sum.rival) + 'に屈した借りは、来季必ず返す。',
+        'The debt owed to rivals ' + _clubName(sum.rival) + ' must be repaid next season.'));
+    }
+    var r = sum.myRecord;
+    if (r && r.gf - r.ga >= 10) lines.push(_t('得点力はリーグを圧倒した（得失点+' + (r.gf - r.ga) + '）。',
+      'The attack overwhelmed the league (GD +' + (r.gf - r.ga) + ').'));
+    else if (r && r.ga - r.gf >= 10) lines.push(_t('守備の再建が来季最大の課題だ（得失点' + (r.gf - r.ga) + '）。',
+      'Rebuilding the defence is the biggest task ahead (GD ' + (r.gf - r.ga) + ').'));
+    return lines.join('');
+  }
+
   function _seasonSummary() {
     var rows = _sortedStandings();
     var champ = rows[0];
     var myId = _state.myClub;
     var myRow = _state.standings[myId] || _emptyStanding();
+    var m = _state.manager || {};
     return {
       season: _state.season || 1,
       myClub: myId,
@@ -1185,7 +1239,16 @@
       myRecord: { w: myRow.w, d: myRow.d, l: myRow.l, gf: myRow.gf, ga: myRow.ga, pts: myRow.pts },
       rival: _state.rival || null,
       rivalH2H: _state.rival ? _h2h(myId, _state.rival) : null,
-      standings: rows.map(function (r) { return { id: r.id, pts: r.pts, w: r.w, d: r.d, l: r.l, gf: r.gf, ga: r.ga }; })
+      standings: rows.map(function (r) { return { id: r.id, pts: r.pts, w: r.w, d: r.d, l: r.l, gf: r.gf, ga: r.ga }; }),
+      // ── SN-03 追加（RW-02 バックナンバーがそのまま読む）──
+      verdict: m.lastSeasonResult || null,            // SN-02 の達成判定
+      goal: m.seasonGoal ? m.seasonGoal.target : null,
+      top: _seasonTopPlayers(),                        // 得点王/アシスト王/皆勤
+      managerSnap: m.params ? {                        // 季末の監督スナップショット
+        tactical: Math.round(m.params.tactical), analysis: Math.round(m.params.analysis),
+        motivator: Math.round(m.params.motivator), conditioning: Math.round(m.params.conditioning),
+        popularity: Math.round(m.params.popularity), clubTrust: Math.round(m.clubTrust || 0)
+      } : null
     };
   }
 
@@ -1862,7 +1925,19 @@
       (why ? '　<span style="opacity:.65">' + why + '</span>' : '') + '</div>';
   }
 
-  /* シーズン終了の達成判定（SN-02）。優勝セレモニー/振り返りの本番演出は SN-03。 */
+  /* 個人タイトル（SN-03）。当季の squads 記録から得点王/アシスト王/皆勤を表彰する。 */
+  function _seasonAwardsHTML(top) {
+    if (!top || (!top.scorer && !top.assister && !top.iron)) return '';
+    var rows = [];
+    if (top.scorer) rows.push('👑 ' + _t('得点王', 'Top scorer') + '：<b>' + top.scorer.name + '</b>（' + top.scorer.n + _t('点', '') + '）');
+    if (top.assister) rows.push('🎁 ' + _t('アシスト王', 'Top assists') + '：<b>' + top.assister.name + '</b>（' + top.assister.n + '）');
+    if (top.iron) rows.push('🛡️ ' + _t('皆勤賞', 'Iron man') + '：<b>' + top.iron.name + '</b>（' + top.iron.n + _t('試合', ' apps') + '）');
+    return '<div class="lg-mini" style="margin-top:7px;text-align:center;line-height:1.9;border-top:1px solid rgba(255,255,255,0.14);padding-top:7px">' +
+      '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:2px">' + _t('シーズン表彰', 'Season awards') + '</div>' +
+      rows.join('<br>') + '</div>';
+  }
+
+  /* シーズン終了の達成判定（SN-02）。 */
   function _seasonVerdictHTML(sv) {
     if (!sv) return '';
     var ok = sv.achieved;
@@ -1997,11 +2072,26 @@
       var champ = rows[0];
       var champDef = _clubDef(champ.id);
       var won = champ.id === myId;
-      html += '<div class="lg-hero" style="background:linear-gradient(135deg,#d4a01755,rgba(0,0,0,0.3));border:1px solid #d4a017;text-align:center">' +
-        '<div style="font-size:34px">🏆</div>' +
-        '<div style="font-size:16px;font-weight:800;margin-top:4px">' + _t('シーズン' + (_state.season || 1) + ' 終了', 'Season ' + (_state.season || 1) + ' Complete') + '</div>' +
-        '<div style="margin-top:6px;font-size:14px">' + _t('優勝', 'Champions') + '：' + champDef.crest + ' <b>' + _clubName(champ.id) + '</b></div>' +
-        (won ? '<div style="color:#2ecc71;font-weight:800;margin-top:6px">' + _t('あなたのクラブが頂点に！', 'Your club took the title!') + '</div>' : '') +
+      // SN-03: シーズン終了フロー＝優勝はセレモニー・非優勝は振り返りの「最終話」を1枚で見せる。
+      //   個人タイトル（得点王/アシスト王/皆勤）と総評テンプレは _seasonSummary と同じソース。
+      var fin = _seasonSummary();
+      var heroBg = won ? 'linear-gradient(135deg,#d4a01766,#7a2ffc22,rgba(0,0,0,0.3))' : 'linear-gradient(135deg,' + myDef.color + '33,rgba(0,0,0,0.35))';
+      var heroBorder = won ? '#ffd24a' : 'rgba(255,255,255,0.25)';
+      html += '<div class="lg-hero" style="background:' + heroBg + ';border:1px solid ' + heroBorder + ';text-align:center">' +
+        '<div style="font-size:34px">' + (won ? '🏆' : '📖') + '</div>' +
+        '<div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.55);margin-top:2px">' +
+          _t('最終話', 'SEASON FINALE') + '</div>' +
+        '<div style="font-size:16px;font-weight:800;margin-top:2px">' +
+          (won ? _t('王者、' + _clubName(myId) + '！', _clubName(myId) + ' — Champions!')
+               : _t('シーズン' + (_state.season || 1) + '、閉幕', 'Season ' + (_state.season || 1) + ' ends')) + '</div>' +
+        (won ? '<div style="color:#ffd24a;font-weight:800;margin-top:5px">' + _t('シャーレを掲げ、街はクラブカラーに染まった。', 'The trophy is lifted; the town wears your colours.') + '</div>'
+             : '<div style="margin-top:5px;font-size:13px">' + _t('優勝', 'Champions') + '：' + champDef.crest + ' <b>' + _clubName(champ.id) + '</b>　' + _t('自クラブ', 'You') + '：<b>' + fin.myPos + _t('位', '') + '</b></div>') +
+        // 総評（テンプレ・軽LLM化は後日）
+        '<div class="lg-mini" style="margin-top:8px;text-align:left;line-height:1.8;border-top:1px solid rgba(255,255,255,0.14);padding-top:8px">' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.5);text-align:center;margin-bottom:3px">' + _t('シーズン総評', 'Season review') + '</div>' +
+          _seasonReviewText(fin) + '</div>' +
+        // 個人タイトル
+        _seasonAwardsHTML(fin.top) +
         '</div>' +
         // SN-02: クラブの評価（達成/未達）。ここが SN-05 の解任判定の入口になる。
         _seasonVerdictHTML(_state.lastResult && _state.lastResult.season) +
@@ -2171,6 +2261,10 @@
     tacticLabel: _tacticLabel,
     setLeagueMatchActive: function (v) { _leagueMatchActive = v; },
     TACTIC_IDS: TACTIC_IDS,
+    // SN-03 シーズン終了フロー
+    seasonSummary: _seasonSummary,
+    seasonTopPlayers: _seasonTopPlayers,
+    seasonReviewText: _seasonReviewText,
     // SN-02 シーズン目標/信頼度
     ensureSeasonGoal: _ensureSeasonGoal,
     seasonGoalText: _seasonGoalText,
