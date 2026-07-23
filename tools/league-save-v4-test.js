@@ -731,6 +731,61 @@ L.acceptOffer(notOffered);
 check('オファー外のクラブは受諾できない（防護）', L.getState().myClub === clubBefore,
   'tried ' + notOffered + ' offers=' + offered19.join(','));
 
+/* ── ⑳ BX ベストイレブン（節ごと＋シーズン） ───────────────────── */
+section('⑳ BX ベストイレブン');
+reset(); L.newSeason(MY);
+const OPP = 'brazil2026';
+const pm = vm.runInContext('playMatch', ctx);
+const m20 = pm(vm.runInContext("TEAM_DATA['" + MY + "']", ctx), vm.runInContext("TEAM_DATA['" + OPP + "']", ctx));
+const rr20 = L.rateMatch(m20.home, m20.away, m20.chanceResults, MY, OPP);
+check('両チーム先発11人が評価される',
+  Object.keys(rr20[MY]).length === 11 && Object.keys(rr20[OPP]).length === 11,
+  Object.keys(rr20[MY]).length + '/' + Object.keys(rr20[OPP]).length);
+check('評価点は4.0〜10.0に収まる', (function () {
+  return [MY, OPP].every(c => Object.values(rr20[c]).every(e => e.rating >= 4 && e.rating <= 10));
+})());
+check('GK/DF/MF/FW の区分が付く', (function () {
+  const gs = new Set(Object.values(rr20[MY]).map(e => e.group));
+  return gs.has('GK') && gs.has('DF') && (gs.has('MF') || gs.has('FW'));
+})());
+check('得点者は同ポジション帯の平均より高い', (function () {
+  const all = [...Object.values(rr20[MY]), ...Object.values(rr20[OPP])];
+  const scorers = all.filter(e => e.goals > 0);
+  if (!scorers.length) return true;   // 0-0 なら判定不能=パス
+  const rest = all.filter(e => e.goals === 0 && e.group === scorers[0].group);
+  const avg = rest.reduce((a, e) => a + e.rating, 0) / (rest.length || 1);
+  return scorers[0].rating > avg;
+})());
+check('同じ試合データなら同じ評価（決定論）',
+  JSON.stringify(L.rateMatch(m20.home, m20.away, m20.chanceResults, MY, OPP)) === JSON.stringify(rr20));
+
+const xi20 = L.pickBestXI(rr20);
+check('ベストイレブンは GK1/DF4/MF4/FW2', (function () {
+  return xi20.GK.length === 1 && xi20.DF.length <= 4 && xi20.MF.length <= 4 && xi20.FW.length <= 2 &&
+    (xi20.GK.length + xi20.DF.length + xi20.MF.length + xi20.FW.length) <= 11;
+})(), JSON.stringify({ gk: xi20.GK.length, df: xi20.DF.length, mf: xi20.MF.length, fw: xi20.FW.length }));
+check('各枠は評価点の降順', (function () {
+  return ['DF', 'MF'].every(g => xi20[g].every((p, i, a) => i === 0 || a[i - 1].rating >= p.rating));
+})());
+
+// 通年集計 → シーズンベストイレブン（最低出場数のゲート）
+for (let i = 0; i < L.BESTXI_TUNING.SEASON_MIN_APPS; i++) L.accumulateRatings(rr20);
+const pr20 = L.getState().seasonMeta.playerRatings;
+check('通年集計が seasonMeta に貯まる', !!(pr20 && pr20[MY] && Object.keys(pr20[MY]).length === 11));
+check('出場数がカウントされる', Object.values(pr20[MY])[0].n === L.BESTXI_TUNING.SEASON_MIN_APPS);
+const sxi20 = L.seasonBestXI();
+check('シーズンベストイレブンが選出される', !!(sxi20 && sxi20.GK.length === 1));
+check('出場数が足りない選手は協会選出の対象外', (function () {
+  // 1回だけ出た架空エントリを混ぜても選ばれない
+  L.getState().seasonMeta.playerRatings[MY]['幽霊選手'] = { name: '幽霊選手', group: 'FW', sum: 10, n: 1, goals: 9, assists: 0 };
+  const s = L.seasonBestXI();
+  return s.FW.every(p => p.name !== '幽霊選手');
+})());
+// シーズン跨ぎで通年集計はリセットされる（seasonMeta ごと初期化）
+const st20 = L.getState(); st20.round = st20.fixtures.length; st20.finished = true;
+L.startNextSeason();
+check('次シーズンで通年集計はリセット', !L.getState().seasonMeta.playerRatings);
+
 /* ── まとめ ─────────────────────────────────────────────────── */
 console.log('\n' + (fail === 0 ? '✅ PASS' : '❌ FAIL') + '  ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail === 0 ? 0 : 1);

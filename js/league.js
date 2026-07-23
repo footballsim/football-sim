@@ -917,6 +917,167 @@
   }
 
   /* ===========================================================================
+   * BX — ベストイレブン（2026-07-23 ユーザー指示）
+   * ---------------------------------------------------------------------------
+   * ①1節ごと: 全4試合の選手評価点から GK1/DF4/MF4/FW2 を選出（サッカー専門誌風）。
+   * ②シーズン終了時: 通年平均からリーグ協会がベストイレブンを発表（公式発表風）。
+   * ★ 評価点は確定済みシーン列から決定論で算出（rng 不使用・エンジン不変）。
+   * ★ 通年集計は seasonMeta.playerRatings に持つ（欠落補完の任意フィールド＝改定なし・季ごとにリセット）。
+   * ========================================================================= */
+  var BESTXI_TUNING = {
+    BASE: 6.0,                 // 出場のベース点
+    OFF_WIN: 0.25, OFF_LOSE: -0.15,   // デュエル勝ち/負け（攻撃側）
+    DEF_WIN: 0.25, DEF_LOSE: -0.15,   // 同（守備側）
+    GOAL: 1.2, ASSIST: 0.7,    // 得点/アシスト
+    FOUL: -0.3, FOUL_WON: 0.1, // ファールを犯した/受けた
+    GK_SAVE: 0.5, GK_CONCEDE: -0.4,   // GKセーブ/失点
+    CLEAN_SHEET: 0.6,          // 無失点（GK と DF 全員）
+    TEAM_WIN: 0.2,             // 勝利チーム全員
+    MIN: 4.0, MAX: 10.0,
+    SEASON_MIN_APPS: 7         // シーズン選出の最低出場数（14節の半分）
+  };
+
+  // ポジション種別 → GK/DF/MF/FW（system_data の positions から左右を剥いだもの）
+  function _posGroup(postype) {
+    if (postype === 'GK') return 'GK';
+    if (postype === 'CB' || postype === 'SB' || postype === 'SW') return 'DF';
+    if (postype === 'DMF' || postype === 'CMF' || postype === 'OMF' || postype === 'SMF') return 'MF';
+    return 'FW';   // CF / WG
+  }
+
+  /* 1試合ぶんの選手評価点（両チーム）。シーン列を読むだけ＝決定論。
+   * 戻り値: { clubId: { playerKey: {name, group, rating, goals, assists} } } */
+  function _rateMatch(t1, t2, crs, id1, id2) {
+    var out = {};
+    out[id1] = {}; out[id2] = {};
+    var acc = {};   // "clubId|key" → {p, team, pos, delta, goals, assists}
+
+    function _ent(clubId, team, pos) {
+      var p = team.players[team.lineup[pos]];
+      if (!p) return null;
+      var k = clubId + '|' + _playerKey(p);
+      if (!acc[k]) acc[k] = { clubId: clubId, name: p.name, key: _playerKey(p), pos: pos, team: team, delta: 0, goals: 0, assists: 0 };
+      return acc[k];
+    }
+    function _idOf(team) { return team === t1 ? id1 : id2; }
+
+    // 先発11人は出場ベース点を必ず持つ（シーンに絡まなくても選出対象になる）
+    [[t1, id1], [t2, id2]].forEach(function (ti) {
+      for (var pos = 0; pos < 11; pos++) _ent(ti[1], ti[0], pos);
+    });
+
+    var B = BESTXI_TUNING;
+    (crs || []).forEach(function (cr) {
+      (cr.scenes || []).forEach(function (sc) {
+        if (!sc || !sc.offence || !sc.defence) return;
+        var off = _ent(_idOf(sc.offence), sc.offence, sc.ofsPos);
+        var def = _ent(_idOf(sc.defence), sc.defence, sc.dfsPos);
+        var gk = _ent(_idOf(sc.defence), sc.defence, 0);
+        var r = sc.result;
+        if (r === 'ゴール！！') {
+          if (off) { off.delta += B.GOAL; off.goals++; }
+          if (sc.crossPos !== undefined && sc.crossPos !== sc.ofsPos) {
+            var ap = _ent(_idOf(sc.offence), sc.offence, sc.crossPos);
+            if (ap) { ap.delta += B.ASSIST; ap.assists++; }
+          }
+          if (def && def !== gk) def.delta += B.DEF_LOSE;
+          if (gk) gk.delta += B.GK_CONCEDE;
+        } else if (r === 'GK防いだ！') {
+          if (off) off.delta += B.OFF_WIN * 0.5;   // 枠内に飛ばした分の半分
+          if (gk) gk.delta += B.GK_SAVE;
+        } else if (r === '成功' || r === 'カウンター') {
+          if (off) off.delta += B.OFF_WIN;
+          if (def) def.delta += B.DEF_LOSE;
+        } else if (r === '失敗' || r === 'ブロック') {
+          if (off) off.delta += B.OFF_LOSE;
+          if (def) def.delta += B.DEF_WIN;
+        } else if (r === '枠を外した！') {
+          if (off) off.delta += B.OFF_LOSE;
+        } else if (r === 'ファール') {
+          if (def) def.delta += B.FOUL;      // ファールを犯すのは守備側
+          if (off) off.delta += B.FOUL_WON;
+        }
+      });
+    });
+
+    // チームボーナス（勝利・無失点）と最終評価点
+    var s1 = t1.score, s2 = t2.score;
+    for (var k in acc) {
+      if (!Object.prototype.hasOwnProperty.call(acc, k)) continue;
+      var e = acc[k];
+      var mine = (e.clubId === id1) ? s1 : s2;
+      var opp = (e.clubId === id1) ? s2 : s1;
+      if (mine > opp) e.delta += BESTXI_TUNING.TEAM_WIN;
+      var postype = e.team.getPositionType(e.pos);
+      var group = _posGroup(postype);
+      if (opp === 0 && (group === 'GK' || group === 'DF')) e.delta += BESTXI_TUNING.CLEAN_SHEET;
+      var rating = Math.max(BESTXI_TUNING.MIN, Math.min(BESTXI_TUNING.MAX, BESTXI_TUNING.BASE + e.delta));
+      out[e.clubId][e.key] = {
+        name: e.name, group: group, postype: postype,
+        rating: Math.round(rating * 10) / 10, goals: e.goals, assists: e.assists
+      };
+    }
+    return out;
+  }
+
+  /* 評価点マップ（クラブ→選手→{group,rating,...}）から GK1/DF4/MF4/FW2 を選ぶ。
+   * 同点は クラブの並び順→選手キー で決着＝決定論。 */
+  function _pickBestXI(ratingsByClub) {
+    var pool = [];
+    var order = CLUB_DEFS.map(function (d) { return d.id; });
+    order.forEach(function (cid) {
+      var c = ratingsByClub[cid]; if (!c) return;
+      Object.keys(c).sort().forEach(function (pk) {
+        var e = c[pk];
+        pool.push({ clubId: cid, key: pk, name: e.name, group: e.group, rating: e.rating, goals: e.goals || 0, assists: e.assists || 0 });
+      });
+    });
+    pool.sort(function (a, b) { return b.rating - a.rating; });   // 安定ソート＝同点は投入順
+    var need = { GK: 1, DF: 4, MF: 4, FW: 2 };
+    var xi = { GK: [], DF: [], MF: [], FW: [] };
+    pool.forEach(function (p) { if (xi[p.group].length < need[p.group]) xi[p.group].push(p); });
+    return xi;
+  }
+
+  /* 通年集計（seasonMeta.playerRatings に加算）。欠落時は生やす＝セーブ改定なし。 */
+  function _accumulateRatings(ratingsByClub) {
+    var sm = _state && _state.seasonMeta; if (!sm) return;
+    if (!sm.playerRatings) sm.playerRatings = {};
+    for (var cid in ratingsByClub) {
+      if (!Object.prototype.hasOwnProperty.call(ratingsByClub, cid)) continue;
+      if (!sm.playerRatings[cid]) sm.playerRatings[cid] = {};
+      var dst = sm.playerRatings[cid], src = ratingsByClub[cid];
+      for (var pk in src) {
+        if (!Object.prototype.hasOwnProperty.call(src, pk)) continue;
+        var e = src[pk];
+        if (!dst[pk]) dst[pk] = { name: e.name, group: e.group, sum: 0, n: 0, goals: 0, assists: 0 };
+        dst[pk].sum += e.rating; dst[pk].n++;
+        dst[pk].goals += e.goals; dst[pk].assists += e.assists;
+        dst[pk].group = e.group;   // 最新のポジション種別を採用
+      }
+    }
+  }
+
+  /* シーズンのベストイレブン（通年平均・最低出場数つき）。リーグ協会の選出（SN-03 最終話が読む）。 */
+  function _seasonBestXI() {
+    var sm = _state && _state.seasonMeta;
+    var pr = sm && sm.playerRatings; if (!pr) return null;
+    var byClub = {};
+    var minApps = BESTXI_TUNING.SEASON_MIN_APPS;
+    for (var cid in pr) {
+      if (!Object.prototype.hasOwnProperty.call(pr, cid)) continue;
+      byClub[cid] = {};
+      for (var pk in pr[cid]) {
+        if (!Object.prototype.hasOwnProperty.call(pr[cid], pk)) continue;
+        var e = pr[cid][pk];
+        if (e.n < minApps) continue;   // 出場が少ない選手は協会選出の対象外
+        byClub[cid][pk] = { name: e.name, group: e.group, rating: Math.round((e.sum / e.n) * 100) / 100, goals: e.goals, assists: e.assists };
+      }
+    }
+    return _pickBestXI(byClub);
+  }
+
+  /* ===========================================================================
    * SN-04 / SN-05 — 再契約・移籍オファー・解任（設計書 §3.2/§3.3）
    * ---------------------------------------------------------------------------
    * シーズン終了後の「契約の分岐」。解任されてもゲームオーバーにしない＝必ず他クラブで続く。
@@ -1662,6 +1823,15 @@
     _recordTeamCarryover(myId, gameState && gameState.team1, report.stats, true);
     _recordTeamCarryover(oppId, gameState && gameState.team2, null);
 
+    // ── BX: 自試合の選手評価点（節のベストイレブン素材・chanceResults が生きているうちに採る）
+    var roundRatings = {};
+    try {
+      if (gameState && gameState.team1 && typeof chanceResults !== 'undefined') {
+        var rr0 = _rateMatch(gameState.team1, gameState.team2, chanceResults, myId, oppId);
+        roundRatings[myId] = rr0[myId]; roundRatings[oppId] = rr0[oppId];
+      }
+    } catch (e) { console.warn('[league] rating failed', e); }
+
     // 順位表はホーム/アウェイの実カードで記録
     var hs = iAmHome ? myScore : oppScore;
     var as = iAmHome ? oppScore : myScore;
@@ -1681,6 +1851,9 @@
         // AI 同士の試合も怪我/出場停止を持ち越す（得点者内訳は自クラブのみ記録＝RW-02）
         _recordTeamCarryover(m.home, r.home, null);
         _recordTeamCarryover(m.away, r.away, null);
+        // BX: 他会場の評価点も採る（節のベストイレブンは全4試合から選ぶ）
+        var rrA = _rateMatch(r.home, r.away, r.chanceResults, m.home, m.away);
+        roundRatings[m.home] = rrA[m.home]; roundRatings[m.away] = rrA[m.away];
       } catch (e) { console.warn('[league] AI match failed', e); }
       m.played = true; m.hs = res.home; m.as = res.away;
       _applyResult(m.home, m.away, res.home, res.away);
@@ -1693,7 +1866,11 @@
     mg.popularity = _updatePopularity(res, myScore - oppScore, _isRival(oppId));
     // SN-02: クラブからの信頼度は「結果」＋「目標圏内にいるか」で上下（順位確定後に呼ぶ）
     mg.trust = _updateClubTrust(res, _position(myId));
+    // BX: 節のベストイレブン確定＋通年集計へ加算
+    _accumulateRatings(roundRatings);
+    var roundXI = _pickBestXI(roundRatings);
     _state.lastResult = {
+      bestXI: roundXI,   // 今節のベストイレブン（専門誌風カードが読む）
       manager: mg,   // 試合後バナーの成長表示用（MG-08 の演出はここを読む）
       round: _state.round,
       mine: {
@@ -2016,6 +2193,48 @@
       rows.join('<br>') + '</div>';
   }
 
+  /* ── ベストイレブンの描画（BX）──────────────────────────────────
+   * FW→MF→DF→GK の順に上から並べるピッチ風レイアウト（前線が上＝紙面の花形）。
+   * mode 'weekly' = サッカー専門誌風（黄×黒のマストヘッド・見出しの勢い）
+   * mode 'season' = リーグ協会の公式発表風（紺×金・格式） */
+  function _bestXIHTML(xi, mode, titleJa, titleEn, subJa, subEn) {
+    if (!xi || !xi.GK.length) return '';
+    var weekly = (mode === 'weekly');
+    var wrapStyle = weekly
+      ? 'background:linear-gradient(170deg,#0d3b1e,#0a2a16 70%);border:2px solid #f5c518'
+      : 'background:linear-gradient(170deg,#0b1a3a,#081128 70%);border:2px solid #c9a227';
+    var headBand = weekly
+      ? '<div style="background:#f5c518;color:#111;font-weight:900;font-size:13px;letter-spacing:2px;' +
+        'padding:5px 10px;margin:-11px -13px 8px;border-radius:9px 9px 0 0;display:flex;justify-content:space-between;align-items:center">' +
+        '<span>⚽ ' + _t(titleJa, titleEn) + '</span>' +
+        '<span style="font-size:10px;font-weight:800;background:#111;color:#f5c518;padding:2px 7px;border-radius:3px">' + _t(subJa, subEn) + '</span></div>'
+      : '<div style="text-align:center;margin:-3px 0 8px">' +
+        '<div style="font-size:9px;letter-spacing:3px;color:#c9a227">' + _t(subJa, subEn) + '</div>' +
+        '<div style="font-weight:900;font-size:15px;color:#f4e7c3;margin-top:2px">🏅 ' + _t(titleJa, titleEn) + '</div>' +
+        '<div style="width:56px;height:2px;background:#c9a227;margin:5px auto 0"></div></div>';
+
+    function _chip(p) {
+      var def = _clubDef(p.clubId);
+      var badge = weekly ? '#f5c518' : '#c9a227';
+      var stat = (p.goals ? '⚽' + p.goals : '') + (p.assists ? ' 🅰' + p.assists : '');
+      return '<div style="display:inline-flex;flex-direction:column;align-items:center;min-width:5.2em;max-width:7em;margin:2px 3px">' +
+        '<div style="font-size:15px;line-height:1">' + (def ? def.crest : '') + '</div>' +
+        '<div style="font-size:10px;font-weight:800;color:#fff;text-align:center;line-height:1.25;margin-top:2px;word-break:keep-all">' + p.name + '</div>' +
+        '<div style="font-size:10px;font-weight:900;color:#111;background:' + badge + ';border-radius:3px;padding:0 5px;margin-top:2px">' + p.rating.toFixed(1) + '</div>' +
+        (stat ? '<div style="font-size:9px;color:rgba(255,255,255,0.75);margin-top:1px">' + stat + '</div>' : '') +
+        '</div>';
+    }
+    function _line(label, arr) {
+      if (!arr.length) return '';
+      return '<div style="display:flex;align-items:center;gap:6px;margin-top:5px">' +
+        '<div style="flex:0 0 2em;font-size:9px;font-weight:800;letter-spacing:1px;color:rgba(255,255,255,0.45);text-align:center">' + label + '</div>' +
+        '<div style="flex:1;text-align:center">' + arr.map(_chip).join('') + '</div></div>';
+    }
+    return '<div class="lg-card" style="margin-top:8px;' + wrapStyle + '">' + headBand +
+      _line('FW', xi.FW) + _line('MF', xi.MF) + _line('DF', xi.DF) + _line('GK', xi.GK) +
+      '</div>';
+  }
+
   /* 契約の分岐（SN-04/SN-05）。解任＝現クラブ残留不可・オファーから必ず選ぶ（ゲームオーバーにしない）。 */
   function _contractBranchHTML() {
     var br = _contractBranch();
@@ -2161,6 +2380,12 @@
           '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px">' + _t('他会場', 'Other results') + '</div>' + ot + '</div>';
       }
       html += '</div>';
+      // BX: 今節のベストイレブン（サッカー専門誌風・第N節号）
+      if (lr.bestXI) {
+        html += _bestXIHTML(lr.bestXI, 'weekly',
+          'WEEKLY BEST XI', 'WEEKLY BEST XI',
+          '第' + (lr.round + 1) + '節号', 'Round ' + (lr.round + 1) + ' issue');
+      }
       html += _previewHTML();   // 次回予告
     }
 
@@ -2208,6 +2433,10 @@
         // 個人タイトル
         _seasonAwardsHTML(fin.top) +
         '</div>' +
+        // BX: シーズンベストイレブン＝リーグ協会からの公式発表（通年平均・最低出場数つき）
+        _bestXIHTML(_seasonBestXI(), 'season',
+          'シーズンベストイレブン', 'Team of the Season',
+          'リーグ協会 公式発表', 'OFFICIAL — LEAGUE ASSOCIATION') +
         // SN-02: クラブの評価（達成/未達）→ SN-04/05: 契約の分岐（再契約/オファー/解任）
         _seasonVerdictHTML(_state.lastResult && _state.lastResult.season) +
         _contractBranchHTML();
@@ -2384,6 +2613,13 @@
     tacticLabel: _tacticLabel,
     setLeagueMatchActive: function (v) { _leagueMatchActive = v; },
     TACTIC_IDS: TACTIC_IDS,
+    // BX ベストイレブン
+    rateMatch: _rateMatch,
+    pickBestXI: _pickBestXI,
+    accumulateRatings: _accumulateRatings,
+    seasonBestXI: _seasonBestXI,
+    posGroup: _posGroup,
+    BESTXI_TUNING: BESTXI_TUNING,
     // SN-04/05 契約分岐
     isSacked: _isSacked,
     computeOffers: _computeOffers,
