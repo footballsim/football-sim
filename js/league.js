@@ -919,7 +919,7 @@
   /* ===========================================================================
    * BX — ベストイレブン（2026-07-23 ユーザー指示）
    * ---------------------------------------------------------------------------
-   * ①1節ごと: 全4試合の選手評価点から GK1/DF4/MF4/FW2 を選出（サッカー専門誌風）。
+   * ①1節ごと: 全4試合の選手評価点から GK1/DF3/MF4/FW3（3-4-3型）を選出（サッカー専門誌風）。
    * ②シーズン終了時: 通年平均からリーグ協会がベストイレブンを発表（公式発表風）。
    * ★ 評価点は確定済みシーン列から決定論で算出（rng 不使用・エンジン不変）。
    * ★ 通年集計は seasonMeta.playerRatings に持つ（欠落補完の任意フィールド＝改定なし・季ごとにリセット）。
@@ -936,6 +936,8 @@
     MIN: 4.0, MAX: 10.0,
     SEASON_MIN_APPS: 7         // シーズン選出の最低出場数（14節の半分）
   };
+  // ベストイレブンの配分（2026-07-24 ユーザー指定＝3-4-3型）。合計11。
+  var BESTXI_FORMATION = { GK: 1, DF: 3, MF: 4, FW: 3 };
 
   // ポジション種別 → GK/DF/MF/FW（system_data の positions から左右を剥いだもの）
   function _posGroup(postype) {
@@ -1020,7 +1022,7 @@
     return out;
   }
 
-  /* 評価点マップ（クラブ→選手→{group,rating,...}）から GK1/DF4/MF4/FW2 を選ぶ。
+  /* 評価点マップ（クラブ→選手→{group,rating,...}）から BESTXI_FORMATION（GK1/DF3/MF4/FW3）を選ぶ。
    * 同点は クラブの並び順→選手キー で決着＝決定論。 */
   function _pickBestXI(ratingsByClub) {
     var pool = [];
@@ -1033,7 +1035,7 @@
       });
     });
     pool.sort(function (a, b) { return b.rating - a.rating; });   // 安定ソート＝同点は投入順
-    var need = { GK: 1, DF: 4, MF: 4, FW: 2 };
+    var need = BESTXI_FORMATION;   // GK1/DF3/MF4/FW3（2026-07-24 ユーザー指定・3-4-3型）
     var xi = { GK: [], DF: [], MF: [], FW: [] };
     pool.forEach(function (p) { if (xi[p.group].length < need[p.group]) xi[p.group].push(p); });
     return xi;

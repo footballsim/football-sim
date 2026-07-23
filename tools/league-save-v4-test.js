@@ -760,8 +760,8 @@ check('同じ試合データなら同じ評価（決定論）',
   JSON.stringify(L.rateMatch(m20.home, m20.away, m20.chanceResults, MY, OPP)) === JSON.stringify(rr20));
 
 const xi20 = L.pickBestXI(rr20);
-check('ベストイレブンは GK1/DF4/MF4/FW2', (function () {
-  return xi20.GK.length === 1 && xi20.DF.length <= 4 && xi20.MF.length <= 4 && xi20.FW.length <= 2 &&
+check('ベストイレブンは GK1/DF3/MF4/FW3（3-4-3型）', (function () {
+  return xi20.GK.length === 1 && xi20.DF.length <= 3 && xi20.MF.length <= 4 && xi20.FW.length <= 3 &&
     (xi20.GK.length + xi20.DF.length + xi20.MF.length + xi20.FW.length) <= 11;
 })(), JSON.stringify({ gk: xi20.GK.length, df: xi20.DF.length, mf: xi20.MF.length, fw: xi20.FW.length }));
 check('各枠は評価点の降順', (function () {
