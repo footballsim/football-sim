@@ -131,7 +131,9 @@
       VIDEO: 1.5,       // ビデオ学習 → tactical
       TACTIC: 1.0,      // 戦術勉強 → tactical（＋習得ゲージ）
       RECOVERY: 1.2,    // 回復日 → conditioning（設計 §1.2 の「休養」）
-      TRAINING: 0.8     // 個人練習 → analysis（選手を見る目）
+      TRAINING: 0.8,    // 個人練習 → analysis（選手を見る目）
+      SPEECH: 1.5,      // 話術勉強 → motivator（MG-15・2026-07-23 名称確定）
+      SCIENCE: 1.5      // スポーツ科学 → conditioning（同上）
     },
     // ★ MATCH_ALL（指揮しただけの微増）を効かせる param。
     //   popularity は入れない＝人気は「結果で上下する双方向 param」で、試合をこなすだけでは上がらない（MG-05）。
@@ -599,6 +601,19 @@
       },
       summary: function (slot) { return _tacticLabel(slot.target); },
       consume: function (slot, out) { _advanceTactic(slot.target, out); }
+    },
+    {
+      // MG-15（2026-07-23 名称確定）: 監督の自己研磨コマ＝「戦術勉強」の姉妹。人を動かす言葉を磨く。
+      //   効果配線は motivator の成長のみ（喝=PS-06 が入った時に初めて意味を持つ＝1param 1効果）。
+      kind: 'speech_study', icon: '🗣️', ja: '話術勉強', en: 'Speech study',
+      grow: { param: 'motivator', base: 'SPEECH' },
+      text: function () { return _t('選手を動かす言葉を磨く', 'Sharpen the words that move players'); }
+    },
+    {
+      // MG-15（2026-07-23 名称確定）: フィジカル管理の自己研磨。回復・疲労・コンディションの科学。
+      kind: 'sports_science', icon: '🧪', ja: 'スポーツ科学', en: 'Sports science',
+      grow: { param: 'conditioning', base: 'SCIENCE' },
+      text: function () { return _t('回復と疲労の科学を学ぶ', 'Study recovery and fatigue science'); }
     },
     {
       kind: 'individual_training', icon: '🎯', ja: '個人練習', en: 'Individual training',

@@ -606,6 +606,27 @@ check('戦術の表示名がゲーム本体と一致する（CATENACCIO=守備�
 check('全戦術で表示名が一致する',
   TID.every((id, i) => L.tacticLabel(id) === tacticNames[i]));
 
+/* ── ⑰ MG-15 監督の自己研磨コマ（話術勉強／スポーツ科学） ───────────── */
+section('⑰ MG-15 話術勉強・スポーツ科学（2026-07-23 名称確定）');
+reset(); L.newSeason(MY);
+check('話術勉強のコマが登録されている', L.WEEK_ACTION_DEFS.some(d => d.kind === 'speech_study'));
+check('スポーツ科学のコマが登録されている', L.WEEK_ACTION_DEFS.some(d => d.kind === 'sports_science'));
+L.setWeekSlot(0, 'speech_study');
+L.setWeekSlot(1, 'sports_science');
+const mot0 = L.getState().manager.params.motivator;
+const con0 = L.getState().manager.params.conditioning;
+L.consumeWeek('D');
+check('話術勉強でモチベーターが伸びる（指揮0.4+話術1.5の逓減後）',
+  L.getState().manager.params.motivator > mot0 + 1.0,
+  mot0 + '→' + L.getState().manager.params.motivator);
+check('スポーツ科学でフィジカル管理が伸びる',
+  L.getState().manager.params.conditioning > con0 + 1.0,
+  con0 + '→' + L.getState().manager.params.conditioning);
+check('actionsLog に両方残る', (function () {
+  const log = L.getState().seasonMeta.actionsLog;
+  return log.some(a => a.action === 'speech_study') && log.some(a => a.action === 'sports_science');
+})());
+
 /* ── まとめ ─────────────────────────────────────────────────── */
 console.log('\n' + (fail === 0 ? '✅ PASS' : '❌ FAIL') + '  ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail === 0 ? 0 : 1);
