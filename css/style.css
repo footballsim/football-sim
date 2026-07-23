@@ -1891,11 +1891,14 @@ body {
     width: 100%;
     display: grid;
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);   /* 左=ピッチ+控えを広く・右=4ボタン */
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;   /* 行は内容サイズ＝align-content:center で縦中央に寄る */
     column-gap: clamp(14px, 2.4vw, 24px);
     row-gap: 4px;
     padding: clamp(8px, 2vh, 12px) clamp(12px, 1.8vw, 18px) clamp(10px, 2.4vh, 14px);
     overflow: hidden;
+    /* ★ 縦長カード（card 高さ上限 880）で下半分が大きく空くのを防ぐ＝2行を縦中央に寄せる。
+       ピッチは下で確定高さ（min(58vh,460px)）にしたので、行を auto にして中央寄せできる。 */
+    align-content: center;
   }
   body.league-mode #screen-setting #label-starting {
     grid-column: 1;
@@ -1915,7 +1918,6 @@ body {
   body.league-mode #screen-setting .setting-content > div:last-child { grid-column: 2; }
   /* ── 左: ピッチ（枠高いっぱい）+ 控え（右隣・縦2列） ── */
   body.league-mode #screen-setting .formation-layout {
-    height: 100%;
     min-height: 0;
     flex-direction: row;
     gap: clamp(10px, 1.6vw, 16px);
@@ -1924,18 +1926,21 @@ body {
   body.league-mode #screen-setting .field-panel {
     flex: 0 0 auto;
     min-width: 0;
-    height: 100%;
     display: flex;
     flex-direction: column;
   }
   body.league-mode #screen-setting .field-container {
     flex: 0 0 auto;
-    height: calc(100% - 48px);   /* 凡例行（狭幅で2行折返し＝最大約42px+margin）を除いた枠高を明示。
-                                    aspect-ratio が幅を算出。凡例の見切れ防止をピッチ数pxより優先 */
+    /* ★ ピッチは「確定高さ」で描く（旧: 高さ100%基準）。理由:
+       card 高さ上限 880 の縦長カードで、高さ100%基準だとピッチが縦いっぱいに肥大→横幅を
+       食い尽くし控えを1列に潰していた（2026-07-24 ユーザー報告）。ビューポート基準の確定高さに
+       すると、ピッチ幅（＝field-pan 幅）が一定に収まり控えに2〜3列ぶんの横幅が残る。
+       高さ→幅の aspect-ratio は維持（歪みなし）。 */
+    height: min(58vh, 460px);
     min-height: 0;
     width: auto;
-    aspect-ratio: 100 / 145;     /* 縦長ピッチを枠高最大で（高さ→幅） */
-    align-self: center;          /* stretchを解除（widthが確定するとaspect-ratioが無効になるため） */
+    aspect-ratio: 100 / 145;     /* 縦長ピッチ（高さ→幅） */
+    align-self: center;
   }
   body.league-mode #screen-setting .formation-display {
     position: absolute;
@@ -1955,8 +1960,9 @@ body {
   body.league-mode #screen-setting .bench-panel {
     flex: 1 1 auto;
     min-width: 0;
-    height: 100%;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
   /* 「控え」「交代枠」ラベルは左揃え＝ピッチ列と同じ整列線（中央寄せの浮きを解消） */
   body.league-mode #screen-setting .bench-panel-label { text-align: left; }
@@ -1964,6 +1970,7 @@ body {
   body.league-mode #screen-setting .bench-list {
     flex: 1 1 auto;
     min-height: 0;
+    max-height: min(58vh, 460px);   /* ピッチと同じ高さで頭を揃える＝はみ出しは内部スクロール */
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));   /* 幅に応じ2〜3列 */
     gap: 6px;
