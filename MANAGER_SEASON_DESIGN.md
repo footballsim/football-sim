@@ -217,9 +217,12 @@ sacked = (未達) AND (clubTrust < TRUST_SACK_THRESHOLD)
 clubTrust の季中更新（_onMatchFinish で）:
   Δtrust = +TW×(勝) −TL×(負) + goalProgress(順位が目標に近いほど+)
 seasonGoal 未達の度合い（目標順位 − 実順位）が大きいほど clubTrust を押し下げる
-TRUST_SACK_THRESHOLD は popularity で緩和（人気監督は猶予）:
-  effThreshold = TRUST_SACK_THRESHOLD − POP_GRACE×(popularity/100)
 ```
+
+> ⚠️ **2026-07-23 ユーザー決定で役割分担を確定**: **解任圧力は clubTrust（信頼度）だけで判定する**。
+> 旧案の「popularity で解任閾値を緩和（POP_GRACE）」は**破棄**＝人気は解任判定に混ぜない。
+> **popularity の実効果は移籍オファー（SN-04）のみ**（高い＝上位クラブから声がかかる／低い＝オファー消滅、救済の1件を除く）。
+> 「世間の評価（人気）」と「雇い主の評価（信頼）」を混ぜないことで、それぞれの意味が濁らない。
 
 - **ゲームオーバーにしない**（SCOPE 1章）。`sacked=true` でも [SACKED]→他クラブオファーで**必ず継続**。オファーが人気低で全消滅した場合の詰み回避＝**最低1件は下位クラブから保証**（救済）。
 
