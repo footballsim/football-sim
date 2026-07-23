@@ -117,13 +117,18 @@
     if (typeof wcPhase !== 'undefined' && (wcPhase === 'et_first' || wcPhase === 'et_second')) return;
     if (typeof createMatch !== 'function') { alert('createMatch 未ロード'); return; }
 
-    // ★ 選手詳細ページのデータ源キーを team1Data に整合させる（2026-07-04 バグ修正）。
+    // ★ 選手詳細ページのデータ源キーを team1Data に整合させる（2026-07-04 バグ修正／2026-07-24 再修正）。
     //   リーグ(league.js)は team1Data を実チーム(例:オランダ)へ差し替えるが _team1DataKey を
     //   更新しないため、既定の 'japan2026vsNetherlands' のまま残り、フォーメーションで選手を
     //   タップすると日本人選手のプロフィールが出ていた（showPlayerDetail が TEAM_DATA[key] を引く）。
-    if (typeof TEAM_DATA !== 'undefined' && typeof team1Data !== 'undefined') {
-      var _k1 = Object.keys(TEAM_DATA).find(function (k) { return TEAM_DATA[k] === team1Data; });
-      if (_k1 && typeof _team1DataKey !== 'undefined') _team1DataKey = _k1;
+    //   ⚠️ 再発の原因: SN-01(セーブv4)以降、リーグは team1Data に _overlaySquad の「clone」を渡すため
+    //   参照一致（TEAM_DATA[k] === team1Data）ではキーが見つからず既定に戻っていた。
+    //   → clone が持つ _srcKey（実クラブキー）を最優先で使い、無ければ従来の参照一致で探す。
+    if (typeof TEAM_DATA !== 'undefined' && typeof team1Data !== 'undefined' && typeof _team1DataKey !== 'undefined') {
+      var _k1 = (team1Data && team1Data._srcKey && TEAM_DATA[team1Data._srcKey])
+        ? team1Data._srcKey
+        : Object.keys(TEAM_DATA).find(function (k) { return TEAM_DATA[k] === team1Data; });
+      if (_k1) _team1DataKey = _k1;
     }
 
     // 相手（team2）状態を startGame と同様に構築（default_* から）。
