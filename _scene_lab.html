@@ -61,6 +61,10 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
       <button data-k="header" onclick="run('header')">競り合い（成功/競り負けは「成功」チェックで切替）</button>
     </div></div>
 
+    <div class="grp"><h2>飛び出し（スルーパス・走りループ6コマ）</h2><div class="btns">
+      <button data-k="runin" onclick="run('runin')">スルーパスへ走り込み（成功=6コマ走り／失敗=カット）</button>
+    </div></div>
+
     <div class="grp"><h2>フリーキック / クロス（新FKアート・MangaRecolor）</h2><div class="btns">
       <button data-k="freekick" onclick="run('freekick')">直接FK（蹴る前→蹴った瞬間）</button>
       <button data-k="fkcross" onclick="run('fkcross')">クロス流用（テンポ速）</button>
@@ -78,14 +82,14 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
   </div>
 </div>
 
-<script src="js/players.js?v=lab30"></script>
-<script src="js/rng.js?v=lab30"></script>
-<script src="js/events.js?v=lab30"></script>
-<script src="js/simulate.js?v=lab30"></script>
-<script src="js/match.js?v=lab30"></script>
-<script src="js/portrait.js?v=lab30"></script>
-<script src="js/manga_recolor.js?v=lab30"></script>
-<script src="js/cutscene.js?v=lab30"></script>
+<script src="js/players.js?v=lab31"></script>
+<script src="js/rng.js?v=lab31"></script>
+<script src="js/events.js?v=lab31"></script>
+<script src="js/simulate.js?v=lab31"></script>
+<script src="js/match.js?v=lab31"></script>
+<script src="js/portrait.js?v=lab31"></script>
+<script src="js/manga_recolor.js?v=lab31"></script>
+<script src="js/cutscene.js?v=lab31"></script>
 <script>
 var KEYS=[['belgium2026','ベルギー'],['england2026','イングランド'],['brazil2026','ブラジル'],['spain2026','スペイン'],['france2026','フランス'],['argentina2026','アルゼンチン'],['germany2026','ドイツ'],['netherlands2026','オランダ']];
 var atk=document.getElementById('atk'),def=document.getElementById('def');
@@ -127,6 +131,9 @@ function run(kind,retry){
     }else if(kind==='lpresult'){
       var sc={offence:a,defence:b,ofsPos:7,dfsPos:5,action:'ロングパス',scenario:'ロングパス',result:ok?'成功':'失敗'};
       c=_renderLongpassResultScene(sc);
+    }else if(kind==='runin'){
+      var sc={offence:a,defence:b,ofsPos:9,dfsPos:4,action:'飛び出し',scenario:'飛び出し',result:ok?'成功':'失敗'};
+      c=_renderRunInScene(sc);
     }else if(kind==='freekick'){
       var sc={offence:a,defence:b,ofsPos:8,dfsPos:0,action:'フリーキック',scenario:'フリーキック',result:'成功'};
       c=_renderFreekickScene(sc);
