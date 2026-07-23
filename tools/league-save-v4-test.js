@@ -786,6 +786,38 @@ const st20 = L.getState(); st20.round = st20.fixtures.length; st20.finished = tr
 L.startNextSeason();
 check('次シーズンで通年集計はリセット', !L.getState().seasonMeta.playerRatings);
 
+/* ── ㉑ RW-02 バックナンバー（アーカイブの読み返し） ───────────────── */
+section('㉑ RW-02 バックナンバー');
+reset(); L.newSeason(MY);
+// 1シーズンぶんの素材（評価点・当季記録・判定）を作ってアーカイブへ
+const m21 = pm(vm.runInContext("TEAM_DATA['" + MY + "']", ctx), vm.runInContext("TEAM_DATA['brazil2026']", ctx));
+const rr21 = L.rateMatch(m21.home, m21.away, m21.chanceResults, MY, 'brazil2026');
+for (let i = 0; i < L.BESTXI_TUNING.SEASON_MIN_APPS; i++) L.accumulateRatings(rr21);
+Object.assign(L.squadEntry(MY, keyOf(TEAM_DATA[MY].players[TEAM_DATA[MY].default_lineup[3]])), { goals: 8, assists: 3, apps: 13 });
+L.getState().manager.seasonGoal = { type: 'table_pos', target: 3, rank: 4 };
+L.settleSeason(2);
+const st21 = L.getState(); st21.round = st21.fixtures.length; st21.finished = true;
+L.startNextSeason();
+const h21 = L.getState().history[0];
+check('アーカイブに協会ベストイレブンが保存される', !!(h21.bestXI && h21.bestXI.GK.length === 1));
+check('アーカイブに表彰/判定/監督スナップが揃う', !!(h21.top && h21.verdict && h21.managerSnap));
+// バックナンバー1冊ぶんの描画（文字列として検証）
+const issue = L.historyIssueHTML(h21, true);
+check('表紙に号数と優勝クラブが載る', issue.indexOf('シーズン1') >= 0 && issue.indexOf('🏆') >= 0);
+check('達成/未達チップが載る', issue.indexOf('目標達成') >= 0 || issue.indexOf('目標未達') >= 0);
+check('総評がアーカイブから再生成される', issue.indexOf('シーズン総評') >= 0);
+check('協会ベストイレブンが載る', issue.indexOf('シーズンベストイレブン') >= 0);
+check('最終順位表が載る', issue.indexOf('最終順位表') >= 0);
+check('当時の監督スナップが載る', issue.indexOf('当時の監督') >= 0);
+check('得点王が載る', issue.indexOf('得点王') >= 0);
+// 旧アーカイブ（SN-03 以前＝bestXI等なし）でも壊れず描ける
+const legacy = { season: 9, myClub: MY, champion: 'brazil2026', myPos: 4,
+  myRecord: { w: 5, d: 4, l: 5, gf: 20, ga: 18, pts: 19 }, rival: null, rivalH2H: null,
+  standings: h21.standings };
+let issueOk = true, legacyHTML = '';
+try { legacyHTML = L.historyIssueHTML(legacy, false); } catch (e) { issueOk = false; }
+check('旧形式のアーカイブでも壊れない（欠落フィールド耐性）', issueOk && legacyHTML.indexOf('シーズン9') >= 0);
+
 /* ── まとめ ─────────────────────────────────────────────────── */
 console.log('\n' + (fail === 0 ? '✅ PASS' : '❌ FAIL') + '  ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail === 0 ? 0 : 1);

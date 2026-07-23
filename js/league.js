@@ -1483,6 +1483,7 @@
       verdict: m.lastSeasonResult || null,            // SN-02 の達成判定
       goal: m.seasonGoal ? m.seasonGoal.target : null,
       top: _seasonTopPlayers(),                        // 得点王/アシスト王/皆勤
+      bestXI: _seasonBestXI(),                         // 協会選出ベストイレブン（BX・RW-02 が読み返す）
       managerSnap: m.params ? {                        // 季末の監督スナップショット
         tactical: Math.round(m.params.tactical), analysis: Math.round(m.params.analysis),
         motivator: Math.round(m.params.motivator), conditioning: Math.round(m.params.conditioning),
@@ -1654,39 +1655,98 @@
   }
 
   // 過去のシーズン（バックナンバー）オーバーレイ。新しい順に、優勝・自クラブ順位/成績・宿敵通算を表示。
+  /* ── RW-02 バックナンバー（過去シーズンの読み返し）───────────────────
+   * 各シーズン＝「1冊のバックナンバー」。<details> で開くと当時の記録が全部読める:
+   *   最終順位表／クラブの評価（達成/未達）／シーズン総評／表彰／協会ベストイレブン／監督の当時値。
+   * ★ すべてアーカイブ（history）の確定データを描くだけ＝再計算しない（総評文のみ表示時に現在LANGで生成）。 */
+  function _historyIssueHTML(h, isLatest) {
+    var champDef = h.champion ? _clubDef(h.champion) : null;
+    var mine = h.myClub === h.champion;
+    var mr = h.myRecord || { w: 0, d: 0, l: 0, pts: 0, gf: 0, ga: 0 };
+    var myDef = _clubDef(h.myClub);
+
+    // ── 表紙（summary 行）＝号数・優勝・自クラブの成績
+    var verdictChip = '';
+    if (h.verdict) {
+      verdictChip = h.verdict.achieved
+        ? '<span class="lg-badge" style="background:#1e7a43">' + _t('目標達成', 'Achieved') + '</span>'
+        : '<span class="lg-badge" style="background:#8a2f2f">' + _t('目標未達', 'Missed') + '</span>';
+    }
+    var cover =
+      '<summary style="cursor:pointer;list-style:none;padding:10px 8px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:6px">' +
+          '<b style="font-size:13px">📖 ' + _t('シーズン' + h.season, 'Season ' + h.season) + '</b>' +
+          '<span style="font-size:12px">🏆 ' + (champDef ? champDef.crest + ' ' + _clubName(h.champion) : '—') +
+            (mine ? ' <span style="color:#ffd24a;font-weight:800">' + _t('優勝', 'Champions') + '</span>' : '') + '</span>' +
+        '</div>' +
+        '<div class="lg-mini" style="text-align:left;margin-top:3px">' +
+          (myDef ? myDef.crest + ' ' : '') + _clubName(h.myClub) + '　<b style="color:#fff">' + h.myPos + _t('位', '') + '</b>' +
+          '　' + mr.pts + _t('pt', 'pts') + '　' + mr.w + _t('勝', 'W') + mr.d + _t('分', 'D') + mr.l + _t('敗', 'L') +
+          '　' + verdictChip +
+          '<span style="float:right;opacity:.5">' + _t('▼ 読む', '▼ read') + '</span>' +
+        '</div>' +
+      '</summary>';
+
+    // ── 中身（開いたとき）
+    var inner = '';
+
+    // 総評（表示時に現在LANGで生成＝アーカイブの確定データから）
+    inner += '<div class="lg-mini" style="text-align:left;line-height:1.8;border-top:1px solid rgba(255,255,255,0.12);padding-top:7px">' +
+      '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:2px">' + _t('シーズン総評', 'Season review') + '</div>' +
+      _seasonReviewText(h) + '</div>';
+
+    // 宿敵の対戦成績
+    if (h.rival && h.rivalH2H && (h.rivalH2H.w + h.rivalH2H.d + h.rivalH2H.l) > 0) {
+      inner += '<div class="lg-mini" style="margin-top:5px;text-align:left">🔥 ' +
+        _t('宿敵 ' + _clubName(h.rival) + ' 戦：', 'Rivalry vs ' + _clubName(h.rival) + ': ') +
+        h.rivalH2H.w + _t('勝', 'W') + h.rivalH2H.d + _t('分', 'D') + h.rivalH2H.l + _t('敗', 'L') + '</div>';
+    }
+
+    // 表彰＋協会ベストイレブン（SN-03/BX のアーカイブ）
+    inner += _seasonAwardsHTML(h.top);
+    if (h.bestXI) {
+      inner += _bestXIHTML(h.bestXI, 'season',
+        'シーズンベストイレブン', 'Team of the Season',
+        'リーグ協会 公式発表', 'OFFICIAL — LEAGUE ASSOCIATION');
+    }
+
+    // 最終順位表（アーカイブから再構成・自クラブをハイライト）
+    if (h.standings && h.standings.length) {
+      var rows = h.standings.map(function (r) {
+        return { id: r.id, p: (r.w + r.d + r.l), w: r.w, d: r.d, l: r.l, gd: (r.gf - r.ga), pts: r.pts };
+      });
+      inner += '<div style="margin-top:7px"><div style="font-size:10px;color:rgba(255,255,255,0.5);text-align:center;margin-bottom:3px">' +
+        _t('最終順位表', 'Final table') + '</div>' + _standingsTableHTML(rows, h.myClub) + '</div>';
+    }
+
+    // 当時の監督（季末スナップショット）
+    if (h.managerSnap) {
+      var ms2 = h.managerSnap;
+      inner += '<div class="lg-mini" style="margin-top:6px;text-align:center;border-top:1px solid rgba(255,255,255,0.12);padding-top:6px">' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:2px">' + _t('当時の監督', 'Manager back then') + '</div>' +
+        _t('戦術眼', 'Tac') + ' <b>' + ms2.tactical + '</b>　' + _t('分析', 'Ana') + ' <b>' + ms2.analysis + '</b>　' +
+        _t('モチベ', 'Mot') + ' <b>' + ms2.motivator + '</b>　' + _t('フィジ', 'Con') + ' <b>' + ms2.conditioning + '</b>　' +
+        _t('人気', 'Pop') + ' <b>' + ms2.popularity + '</b>　' + _t('信頼', 'Trust') + ' <b>' + ms2.clubTrust + '</b></div>';
+    }
+
+    return '<details' + (isLatest ? ' open' : '') + ' class="lg-card" style="margin:6px 0;padding:0 8px 8px">' +
+      cover + '<div style="padding:0 2px 4px">' + inner + '</div></details>';
+  }
+
   function _showHistory() {
     if (!_state || !_state.history || !_state.history.length) return;
     _ensureStyle();
     var old = document.getElementById('lg-hist-ov'); if (old) old.parentNode.removeChild(old);
     var body = '';
     for (var i = _state.history.length - 1; i >= 0; i--) {
-      var h = _state.history[i];
-      var champDef = h.champion ? _clubDef(h.champion) : null;
-      var mine = h.myClub === h.champion;
-      var mr = h.myRecord || { w: 0, d: 0, l: 0, pts: 0 };
-      var rivalTxt = (h.rival && h.rivalH2H)
-        ? _t('宿敵' + _clubName(h.rival) + '戦 ', 'vs rival ' + _clubName(h.rival) + ' ') +
-          h.rivalH2H.w + _t('勝', 'W') + h.rivalH2H.d + _t('分', 'D') + h.rivalH2H.l + _t('敗', 'L')
-        : '';
-      body +=
-        '<div class="lg-logrow" style="flex-direction:column;align-items:stretch;gap:4px;padding:10px 4px">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center">' +
-            '<b style="font-size:13px">' + _t('シーズン' + h.season, 'Season ' + h.season) + '</b>' +
-            '<span style="font-size:12px">🏆 ' + (champDef ? champDef.crest + ' ' + _clubName(h.champion) : '—') +
-              (mine ? ' <span style="color:#2ecc71;font-weight:800">' + _t('優勝', 'Champions') + '</span>' : '') + '</span>' +
-          '</div>' +
-          '<div class="lg-mini" style="text-align:left">' +
-            _t('自クラブ ', 'Your club ') + '<b style="color:#fff">' + h.myPos + _t('位', '') + '</b>' +
-            '　' + mr.pts + _t('pt', 'pts') + '　' + mr.w + _t('勝', 'W') + mr.d + _t('分', 'D') + mr.l + _t('敗', 'L') +
-            (rivalTxt ? '　🔥' + rivalTxt : '') +
-          '</div>' +
-        '</div>';
+      body += _historyIssueHTML(_state.history[i], i === _state.history.length - 1);
     }
     var ov = document.createElement('div');
     ov.id = 'lg-hist-ov'; ov.className = 'lg-logov';
     ov.innerHTML =
       '<div class="lg-loghead">' +
-        '<div style="font-weight:800;font-size:14px">📚 ' + _t('過去のシーズン', 'Past seasons') + '</div>' +
+        '<div style="font-weight:800;font-size:14px">📚 ' + _t('バックナンバー', 'Back issues') +
+          '<span class="lg-badge" style="margin-left:6px">' + _state.history.length + _t('冊', '') + '</span></div>' +
         '<button class="lg-logclose" onclick="leagueCloseHistory()">✕</button>' +
       '</div>' +
       '<div class="lg-logbody">' + body + '</div>';
@@ -2475,7 +2535,7 @@
     }
     // 過去のシーズン（バックナンバー）— 1シーズンでも終えていれば表示。
     if (_state.history && _state.history.length) {
-      html += '<button class="lg-btn sec" onclick="leagueShowHistory()">📚 ' + _t('過去のシーズン（' + _state.history.length + '）', 'Past seasons (' + _state.history.length + ')') + '</button>';
+      html += '<button class="lg-btn sec" onclick="leagueShowHistory()">📚 ' + _t('バックナンバー（' + _state.history.length + '冊）', 'Back issues (' + _state.history.length + ')') + '</button>';
     }
 
     // ── ここまでが左カラム。順位表以降は右カラム（横長時）───────────────
@@ -2613,6 +2673,8 @@
     tacticLabel: _tacticLabel,
     setLeagueMatchActive: function (v) { _leagueMatchActive = v; },
     TACTIC_IDS: TACTIC_IDS,
+    // RW-02 バックナンバー
+    historyIssueHTML: _historyIssueHTML,
     // BX ベストイレブン
     rateMatch: _rateMatch,
     pickBestXI: _pickBestXI,
