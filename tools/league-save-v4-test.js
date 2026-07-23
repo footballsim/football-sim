@@ -660,6 +660,77 @@ check('history のアーカイブにも新フィールドが残る',
   !!(arch && arch.top && arch.managerSnap && arch.verdict !== undefined));
 check('アーカイブの得点王が保存される', arch.top.scorer && arch.top.scorer.name === pA);
 
+/* ── ⑲ SN-04/SN-05 再契約・移籍オファー・解任 ───────────────────── */
+section('⑲ SN-04/SN-05 契約の分岐（解任＝信頼のみ・オファー＝人気のみ）');
+reset(); L.newSeason(MY);
+const C19 = L.CONTRACT_TUNING;
+function finishSeason(achieved, trust, pop) {
+  const st = L.getState();
+  st.round = st.fixtures.length; st.finished = true;
+  st.manager.clubTrust = trust;
+  st.manager.params.popularity = pop;
+  st.manager.lastSeasonResult = { achieved: achieved, goal: 3, finalPos: achieved ? 2 : 7 };
+}
+
+// 解任判定＝信頼のみ（MG-15: 人気は混ぜない）
+finishSeason(false, 20, 90);
+check('未達×低信頼 → 解任（人気90でも救えない＝人気は判定に混ぜない）', L.isSacked());
+finishSeason(false, 50, 5);
+check('未達でも信頼が高ければ残留（人気5でも解任されない）', !L.isSacked());
+finishSeason(true, 10, 50);
+check('達成なら低信頼でも解任されない', !L.isSacked());
+
+// オファー＝人気で門戸が変わる（決定論）
+finishSeason(true, 50, 90);
+const offersHigh = L.computeOffers();
+finishSeason(true, 50, 45);
+const offersMid = L.computeOffers();
+finishSeason(true, 50, 5);
+const offersLow = L.computeOffers();
+check('オファーは最大' + C19.OFFER_MAX + '件', offersHigh.length <= C19.OFFER_MAX && offersHigh.length > 0);
+check('自クラブはオファーに含まれない',
+  [offersHigh, offersMid, offersLow].every(os => os.every(o => o.clubId !== MY)));
+check('人気が高いほど強いクラブから声がかかる',
+  offersHigh[0].strength >= offersMid[0].strength && offersMid[0].strength >= offersLow[0].strength,
+  offersHigh[0].strength + ' / ' + offersMid[0].strength + ' / ' + offersLow[0].strength);
+check('人気最低でも最低1件は残る（詰み防止）', offersLow.length >= 1);
+check('同じ入力なら同じオファー（決定論）',
+  JSON.stringify(L.computeOffers()) === JSON.stringify(L.computeOffers()));
+
+// 分岐: 解任なら残留不可
+finishSeason(false, 20, 50);
+let br19 = L.contractBranch();
+check('解任時は残留を選べない（canRenew=false）', br19.sacked && !br19.canRenew);
+check('解任でもオファーは必ずある（ゲームオーバーにしない）', br19.offers.length >= 1);
+finishSeason(true, 80, 50);
+br19 = L.contractBranch();
+check('残留可のときは canRenew=true', !br19.sacked && br19.canRenew);
+
+// オファー受諾＝クラブ移籍
+finishSeason(false, 20, 50);
+const dest = L.computeOffers()[0].clubId;
+const seasonBefore = L.getState().season;
+L.getState().manager.params.tactical = 66;
+L.acceptOffer(dest);
+const ns19 = L.getState();
+check('受諾でクラブが替わる', ns19.myClub === dest, ns19.myClub);
+check('シーズンが進む', ns19.season === seasonBefore + 1);
+check('新任クラブの信頼は初期値にリセット', ns19.manager.clubTrust === L.MANAGER_TUNING.TRUST_START);
+check('tenure が新クラブ×次シーズンに更新', ns19.manager.tenure.clubId === dest && ns19.manager.tenure.sinceSeason === ns19.season);
+check('監督の成長は移籍しても引き継ぐ', ns19.manager.params.tactical === 66);
+check('宿敵が新クラブ基準で再計算される', ns19.rival !== null && ns19.rival !== dest);
+check('新クラブにも開幕目標が提示される', !!ns19.manager.seasonGoal.target);
+
+// 防護: 提示していないクラブへは行けない（人気5＝下位のみ提示の状態で、提示外のクラブを狙う）
+finishSeason(true, 80, 5);
+const offered19 = L.computeOffers().map(o => o.clubId);
+const notOffered = ['england2026','netherlands2026','spain2026','france2026','argentina2026','italy2026','brazil2026','belgium2026']
+  .find(id => id !== L.getState().myClub && offered19.indexOf(id) < 0);
+const clubBefore = L.getState().myClub;
+L.acceptOffer(notOffered);
+check('オファー外のクラブは受諾できない（防護）', L.getState().myClub === clubBefore,
+  'tried ' + notOffered + ' offers=' + offered19.join(','));
+
 /* ── まとめ ─────────────────────────────────────────────────── */
 console.log('\n' + (fail === 0 ? '✅ PASS' : '❌ FAIL') + '  ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail === 0 ? 0 : 1);

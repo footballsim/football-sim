@@ -182,6 +182,18 @@
     SEASON_POP_MISSED: -6     // 未達時の人気ペナルティ
   };
 
+  /* SN-04/SN-05 再契約・移籍オファー・解任（設計書 §3.2/§3.3・MG-15 の役割分担で確定）。
+   * ★ 解任は clubTrust（信頼度）だけで判定＝人気は混ぜない（POP_GRACE 破棄済み）。
+   * ★ オファーの門戸は popularity だけで決まる＝高いほど上位クラブから声がかかる。
+   * ★ すべて決定論（戦力順位と人気しきい値のみ・rng 不使用）。
+   * ⚠️ しきい値は暫定＝SN-10 の KPI（解任頻度・オファー分布）で判定する。 */
+  var CONTRACT_TUNING = {
+    TRUST_SACK_THRESHOLD: 35,   // 未達 かつ 信頼がこれ未満 → 解任
+    OFFER_POP_HIGH: 60,         // 人気がこれ以上 → 上位クラブも候補に入る
+    OFFER_POP_MID: 30,          // これ以上 → 中位クラブまで／未満 → 下位のみ（救済1件保証）
+    OFFER_MAX: 3                // 提示するオファーの最大数
+  };
+
   var SEASON_TUNING = {
     // 怪我の欠場節数（discipline.js の severity マーカーを読む・§6.4）
     INJURY_OUT: { minor: 1, severe: 3 },
@@ -905,6 +917,72 @@
   }
 
   /* ===========================================================================
+   * SN-04 / SN-05 — 再契約・移籍オファー・解任（設計書 §3.2/§3.3）
+   * ---------------------------------------------------------------------------
+   * シーズン終了後の「契約の分岐」。解任されてもゲームオーバーにしない＝必ず他クラブで続く。
+   * ★ 解任 = (目標未達) AND (clubTrust < しきい値)。人気は判定に混ぜない（MG-15）。
+   * ★ オファー = 人気で門戸が変わる（高→上位クラブ／低→下位のみ・救済1件保証）。
+   * ★ 決定論のみ（戦力順位×人気しきい値）・rng 不使用。
+   * ========================================================================= */
+
+  /* 解任判定。シーズン終了時の清算結果（manager.lastSeasonResult）を読む。 */
+  function _isSacked() {
+    var m = _state && _state.manager;
+    var lsr = m && m.lastSeasonResult;
+    if (!lsr) return false;
+    return !lsr.achieved && (m.clubTrust < CONTRACT_TUNING.TRUST_SACK_THRESHOLD);
+  }
+
+  /* 移籍オファーの生成（決定論）。
+   * 全クラブを戦力順に並べ、人気の帯で「どの層から声がかかるか」を決める。
+   *   人気60以上 → 上位クラブを含む全域から上から順に
+   *   人気30以上 → 中位以下から
+   *   人気30未満 → 下位のみ（それでも最低1件は保証＝詰み防止）
+   * 自クラブは常に除外。 */
+  function _computeOffers() {
+    var m = _state && _state.manager; if (!m) return [];
+    var pop = m.params.popularity;
+    var C = CONTRACT_TUNING;
+    var ranked = CLUB_DEFS
+      .map(function (d, i) { return { id: d.id, s: _clubStrength(d.id), ord: i }; })
+      .sort(function (a, b) { return (b.s - a.s) || (a.ord - b.ord); })
+      .filter(function (c) { return c.id !== _state.myClub; });
+    var n = ranked.length;
+    var from;   // ranked の何番目から声がかかるか（0=最強クラブも候補）
+    if (pop >= C.OFFER_POP_HIGH) from = 0;
+    else if (pop >= C.OFFER_POP_MID) from = Math.floor(n / 3);
+    else from = Math.floor(n * 2 / 3);
+    var pool = ranked.slice(from);
+    if (!pool.length) pool = [ranked[n - 1]];   // 救済＝最低1件（最下位クラブ）
+    return pool.slice(0, C.OFFER_MAX).map(function (c, i) {
+      return { clubId: c.id, strength: c.s, rank: from + i + 1 };
+    });
+  }
+
+  /* 契約の分岐（シーズン終了画面が読む）。 */
+  function _contractBranch() {
+    if (!_state || !_state.finished) return null;
+    var sacked = _isSacked();
+    return {
+      sacked: sacked,
+      offers: _computeOffers(),
+      canRenew: !sacked    // 解任なら現クラブ残留は選べない
+    };
+  }
+
+  /* オファー受諾＝クラブを移って次シーズンへ。
+   * myClub 差し替え → 宿敵再計算・信頼リセット(50)・tenure 更新。周回インフラは再利用。 */
+  function _acceptOffer(clubId) {
+    if (!_state || !_state.finished) return;
+    var valid = _computeOffers().some(function (o) { return o.clubId === clubId; });
+    if (!valid) return;   // 提示していないクラブへは行けない（UI外からの呼び出し防護）
+    var m = _state.manager;
+    m.clubTrust = MANAGER_TUNING.TRUST_START;            // 新任クラブの信頼は初期値から
+    m.tenure = { clubId: clubId, sinceSeason: (_state.season || 1) + 1 };
+    _startNextSeason(clubId);
+  }
+
+  /* ===========================================================================
    * MG-05 — 人気システム（設計書 §1.3）
    * ---------------------------------------------------------------------------
    * 唯一の双方向 param。試合結果（勝敗）と内容（得点差・宿敵・連勝）で上下する。
@@ -1252,13 +1330,14 @@
     };
   }
 
-  // 今シーズンをアーカイブして、同じクラブで次シーズンを開始（記録は消さず引き継ぐ）。
-  function _startNextSeason() {
+  // 今シーズンをアーカイブして次シーズンを開始（記録は消さず引き継ぐ）。
+  // newClubId 指定時＝移籍（SN-04）: myClub を差し替えて同じ周回インフラで続ける。
+  function _startNextSeason(newClubId) {
     if (!_state) return;
     var hist = Array.isArray(_state.history) ? _state.history.slice() : [];
     hist.push(_seasonSummary());
     if (hist.length > 50) hist = hist.slice(hist.length - 50);   // 上限（localStorage肥大化防止）
-    var my = _state.myClub;
+    var my = newClubId || _state.myClub;
     var nextSeason = (_state.season || 1) + 1;
     var ids = CLUB_DEFS.map(function (d) { return d.id; });
     var standings = {};
@@ -1937,6 +2016,42 @@
       rows.join('<br>') + '</div>';
   }
 
+  /* 契約の分岐（SN-04/SN-05）。解任＝現クラブ残留不可・オファーから必ず選ぶ（ゲームオーバーにしない）。 */
+  function _contractBranchHTML() {
+    var br = _contractBranch();
+    if (!br) return '';
+    var html = '';
+
+    if (br.sacked) {
+      html += '<div class="lg-card" style="margin-top:8px;border-color:#e74c3c99;background:rgba(120,20,20,0.25);text-align:center">' +
+        '<div style="font-size:22px">📋</div>' +
+        '<div style="font-weight:800;font-size:15px;margin-top:3px;color:#ff9a8f">' + _t('解任通告', 'Sacked') + '</div>' +
+        '<div class="lg-mini" style="margin-top:4px;line-height:1.7">' +
+          _t('目標未達と信頼の低下を受け、クラブはあなたとの契約を打ち切った。<br>だが、あなたの挑戦はここで終わらない。', 'The club has terminated your contract.<br>But your story does not end here.') + '</div></div>';
+    }
+
+    // オファー一覧（解任時は必須の選択肢・残留可なら「移籍する」の選択肢）
+    if (br.offers.length) {
+      var offerRows = br.offers.map(function (o) {
+        var def = _clubDef(o.clubId);
+        return '<button class="lg-btn sec" style="display:flex;align-items:center;gap:8px;text-align:left" ' +
+          'onclick="leagueAcceptOffer(\'' + o.clubId + '\')">' +
+          '<span style="font-size:18px">' + def.crest + '</span>' +
+          '<span style="flex:1"><b>' + _clubName(o.clubId) + '</b>' +
+          '<span class="lg-mini" style="display:block">' + _t('チーム力', 'Strength') + ' ' + o.strength + '</span></span>' +
+          '<span style="opacity:.6">▶</span></button>';
+      }).join('');
+      html += '<div class="lg-h" style="margin-top:8px">' + _t('届いたオファー', 'Offers on the table') +
+        '<span class="lg-badge">' + br.offers.length + '</span></div>' + offerRows;
+    }
+
+    if (br.canRenew) {
+      html += '<button class="lg-btn" onclick="leagueConfirmNewSeason()">' +
+        _t('残留して次のシーズンへ（今季を記録に残す）', 'Stay and start next season') + '</button>';
+    }
+    return html;
+  }
+
   /* シーズン終了の達成判定（SN-02）。 */
   function _seasonVerdictHTML(sv) {
     if (!sv) return '';
@@ -2093,9 +2208,9 @@
         // 個人タイトル
         _seasonAwardsHTML(fin.top) +
         '</div>' +
-        // SN-02: クラブの評価（達成/未達）。ここが SN-05 の解任判定の入口になる。
+        // SN-02: クラブの評価（達成/未達）→ SN-04/05: 契約の分岐（再契約/オファー/解任）
         _seasonVerdictHTML(_state.lastResult && _state.lastResult.season) +
-        '<button class="lg-btn" onclick="leagueConfirmNewSeason()">' + _t('次のシーズンへ（今季を記録に残す）', 'Next season (this one is saved)') + '</button>';
+        _contractBranchHTML();
     } else {
       var fx = _myFixtureThisRound();
       var oppId = (fx.home === myId) ? fx.away : fx.home;
@@ -2222,6 +2337,14 @@
       _renderHub(false);
     }
   };
+  // SN-04: 移籍オファーの受諾（確認ダイアログ→クラブを移って次シーズンへ）
+  window.leagueAcceptOffer = function (clubId) {
+    if (confirm(_t(_clubName(clubId) + ' のオファーを受けますか？（今季を記録に残し、新天地で次のシーズンへ）',
+                   'Accept the offer from ' + _clubName(clubId) + '?'))) {
+      _acceptOffer(clubId);
+      _renderHub(false);
+    }
+  };
   // 過去のシーズン（バックナンバー）を表示。
   window.leagueShowHistory = function () { _showHistory(); };
   window.leagueCloseHistory = function () { var ov = document.getElementById('lg-hist-ov'); if (ov) ov.parentNode.removeChild(ov); };
@@ -2261,6 +2384,12 @@
     tacticLabel: _tacticLabel,
     setLeagueMatchActive: function (v) { _leagueMatchActive = v; },
     TACTIC_IDS: TACTIC_IDS,
+    // SN-04/05 契約分岐
+    isSacked: _isSacked,
+    computeOffers: _computeOffers,
+    contractBranch: _contractBranch,
+    acceptOffer: _acceptOffer,
+    CONTRACT_TUNING: CONTRACT_TUNING,
     // SN-03 シーズン終了フロー
     seasonSummary: _seasonSummary,
     seasonTopPlayers: _seasonTopPlayers,
