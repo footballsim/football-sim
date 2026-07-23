@@ -1097,7 +1097,12 @@ function selectMatch(key) {
     team1Data = TEAM_DATA.japan2026vsNetherlands;
     team2Data = TEAM_DATA.england2026;
   }
-  _team1DataKey = Object.keys(TEAM_DATA).find(k => TEAM_DATA[k] === team1Data) || 'japan2026vsNetherlands';
+  // ★ _srcKey を最優先（clone 対策）→ 参照一致 → 既定。この関数では team1Data は TEAM_DATA 直接参照
+  //   なので現状は参照一致で解決するが、将来 clone を渡されても日本選手に落ちないよう防御しておく
+  //   （league.js の _overlaySquad clone は _srcKey を持つ・manager-match.js:130 と同型）。
+  _team1DataKey = (team1Data && team1Data._srcKey && TEAM_DATA[team1Data._srcKey])
+    ? team1Data._srcKey
+    : (Object.keys(TEAM_DATA).find(k => TEAM_DATA[k] === team1Data) || 'japan2026vsNetherlands');
   initSettingScreen();
   showScreen('setting');
 }
