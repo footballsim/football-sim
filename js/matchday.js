@@ -171,7 +171,8 @@
       var dots = '';
       for (var d = 0; d < panels.length; d++) dots += '<i class="lg-md-dot"></i>';
       ov.innerHTML =
-        '<div class="lg-md-paper" aria-hidden="true"><canvas data-labart="paper_texture"></canvas></div>' +
+        // 5% で敷くだけの紙テクスチャ。読めない濃さなのでスロットのラベルは出さない
+        '<div class="lg-md-paper" aria-hidden="true"><canvas data-labart="paper_texture" data-labart-quiet></canvas></div>' +
         '<div class="lg-md-head">' +
           '<button type="button" class="lg-md-quit" aria-label="close">✕</button>' +
           '<div class="lg-md-mast">' + (opts.title || '') + '</div>' +

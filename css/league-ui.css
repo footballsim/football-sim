@@ -511,7 +511,8 @@
  *   どんな CG を差し替えてもコントラストが保証される（背景任せにしない）。 */
 .lg-md-cut {
   display: block;
-  background: linear-gradient(165deg, rgba(6, 14, 30, .84), rgba(3, 8, 18, .90));
+  /* backdrop 型：背景は全面に敷くが、文字はこの「ほぼ不透明」な面の上に載せる */
+  background: linear-gradient(165deg, rgba(8, 16, 34, .96), rgba(4, 10, 22, .97));
   border: 1px solid rgba(255, 255, 255, .16);
   border-radius: var(--lg-r-l);
   padding: 20px 18px;
@@ -666,21 +667,38 @@
 /* =============================================================================
  * 10b. PC-01 記者会見 / BD-01 ボードとの面談（選択に結果が伴うコマ）
  * ========================================================================== */
+/* ★ 原則: 画像は専用の帯（region）に閉じ込め、**文字は絶対に画像の上に載せない**。
+ *   以前は press_wall を全面背景にして半透明スクリム越しに文字を置いていたため、
+ *   プレースホルダのラベルがボタンの隙間から透けて読めた（＝破綻）。
+ *   半透明の裏にある文字は必ず前面の文字と喧嘩する。文字は不透明な面の上に置く。 */
 .lg-press, .lg-board {
   position: relative;
   overflow: hidden;
   padding: 0;
+  background: #0d1730;                 /* ← 不透明。裏を透かさない */
   border-color: rgba(255, 255, 255, .20);
 }
-.lg-press-bg, .lg-board-bg {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  opacity: .5;
+/* 画像の領域（ここにだけCGが入る。文字は入らない） */
+.lg-press-art, .lg-board-art {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 5;
+  max-height: 128px;
+  overflow: hidden;
+  background: #0a1224;
+  border-bottom: 1px solid var(--lg-line);
 }
+.lg-press-art canvas, .lg-board-art canvas { display: block; width: 100%; height: 100%; }
+/* 帯の下端だけ落として本文へ繋ぐ（この上にも文字は置かない） */
+.lg-press-art::after, .lg-board-art::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 42%;
+  background: linear-gradient(180deg, rgba(13, 23, 48, 0), rgba(13, 23, 48, .92));
+  pointer-events: none;
+}
+/* 文字の領域（不透明なカード面の上） */
 .lg-press-fg, .lg-board-fg {
   position: relative; z-index: 1;
-  padding: 13px 14px 14px;
-  background: linear-gradient(180deg, rgba(4, 10, 22, .62), rgba(4, 10, 22, .86));
+  padding: 12px 14px 14px;
 }
 
 /* 質問 */

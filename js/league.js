@@ -1962,7 +1962,7 @@
         '<span class="lg-board-eff">' + (eff.join('　') || note || '') + '</span></button>';
     }
     return '<div class="lg-card lg-board">' +
-      '<canvas class="lg-board-bg" data-labart="boardroom"></canvas>' +
+      '<div class="lg-board-art"><canvas data-labart="boardroom"></canvas></div>' +
       '<div class="lg-board-fg">' +
         '<div class="lgp-kicker">' + _t('ボードとの面談', 'MEETING THE BOARD') + '</div>' +
         '<div class="lg-board-q">' +
@@ -2186,7 +2186,7 @@
         '<span class="lg-press-say">「' + _t(ch.ja, ch.en) + '」</span></button>';
     }).join('');
     return '<div class="lg-card lg-press">' +
-      '<canvas class="lg-press-bg" data-labart="press_wall"></canvas>' +
+      '<div class="lg-press-art"><canvas data-labart="press_wall"></canvas></div>' +
       '<div class="lg-press-fg">' +
         '<div class="lgp-kicker">' + _t('記者会見', 'PRESS CONFERENCE') + '</div>' +
         '<div class="lg-press-q"><span class="lg-press-mic">🎙</span>' +
@@ -2204,7 +2204,7 @@
     var who = (eff.momOnly && eff.names.length) ? eff.names[0] + _t('の信頼', ' trust')
                                                 : _t('選手の信頼', 'Squad trust');
     return '<div class="lg-card lg-press answered">' +
-      '<canvas class="lg-press-bg" data-labart="press_wall"></canvas>' +
+      '<div class="lg-press-art"><canvas data-labart="press_wall"></canvas></div>' +
       '<div class="lg-press-fg">' +
         '<div class="lgp-kicker">' + _t('記者会見', 'PRESS CONFERENCE') + '</div>' +
         '<div class="lg-press-said">「' + _t(ch.ja, ch.en) + '」</div>' +
@@ -2229,9 +2229,10 @@
         var ch = q.choices[parseInt(opt.getAttribute('data-press'), 10)];
         if (!ch) { next(); return; }
         var eff = _applyPress(lr, ch) || { pop: 0, trust: 0, squad: 0, momOnly: false, names: [] };
-        if (_juiceOn() && Juice.flash) Juice.flash(el, { count: 4 });
         el.innerHTML = _pressResultHTML(ch, eff);
         _paintPortraitCanvases(el);
+        // フラッシュは「画像の帯」の中だけで焚く（本文の上で光らせない）
+        if (_juiceOn() && Juice.flash) Juice.flash(el.querySelector('.lg-press-art') || el, { count: 4 });
         if (_juiceOn()) Juice.reveal(el.querySelector('.lg-press-said'), { dur: 320 });
         return;
       }
@@ -2309,7 +2310,9 @@
         html: function () { return _pressHTML(pq, lr); },
         onShow: function (el, firstTime) {
           _paintPortraitCanvases(el);
-          if (firstTime && _juiceOn() && Juice.flash) Juice.flash(el, { count: 3 });
+          if (firstTime && _juiceOn() && Juice.flash) {
+            Juice.flash(el.querySelector('.lg-press-art') || el, { count: 3 });
+          }
         },
         await: function (el, next) { _bindPress(el, pq, lr, next); }
       });

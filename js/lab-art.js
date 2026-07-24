@@ -275,19 +275,16 @@
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    // 下地系＝左上の隅に小さく（UI の可読性を落とさない）
+    // 下地系（backdrop）＝この面の上には半透明のカードが載る。
+    //   ★ 説明文を置くと、カード越しに透けて本文と喧嘩する（記者会見で実際に破綻した）。
+    //     ここは「枠＋スロット名の1行」だけに留める。仕様は SLOTS / LabArt.missing() で読む。
     if (corner) {
-      var cs = Math.max(10, Math.min(15, w * 0.011));
+      var cs = Math.max(9, Math.min(13, w * 0.009));
       ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-      var tx = x + pad + cs * 0.7, ty = y + pad + cs * 0.6;
-      ctx.fillStyle = 'rgba(4,10,22,0.62)';
-      ctx.fillRect(tx - cs * 0.5, ty - cs * 0.35, cs * 22, cs * 2.6);
-      ctx.fillStyle = 'rgba(122,208,255,0.92)';
-      ctx.font = '800 ' + Math.round(cs) + 'px "Noto Sans JP",sans-serif';
-      ctx.fillText('🖼 ' + L.here + '  ' + key, tx, ty);
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.font = '700 ' + Math.round(cs * 0.85) + 'px monospace';
-      ctx.fillText((slot.w || '') + '×' + (slot.h || '') + '  ' + L.none, tx, ty + cs * 1.35);
+      var tx = x + pad + cs * 0.7, ty = y + pad + cs * 0.5;
+      ctx.fillStyle = 'rgba(122,208,255,0.5)';
+      ctx.font = '700 ' + Math.round(cs) + 'px monospace';
+      ctx.fillText('🖼 ' + key, tx, ty);
       ctx.restore();
       return;
     }
@@ -346,7 +343,13 @@
       cv.height = Math.max(1, Math.round(h * dpr));
       var ctx = cv.getContext('2d');
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      LabArt.paint(ctx, key || cv.getAttribute('data-labart'), 0, 0, w, h);
+      // data-labart-quiet: ごく薄く敷くだけの面（例 5% の紙テクスチャ）は
+      //   ラベルを出さない。読めない濃さで文字だけ乗ると、ただのノイズになる。
+      var quiet = cv.hasAttribute && cv.hasAttribute('data-labart-quiet');
+      var prev = window.LABART_SHOW_SLOTS;
+      if (quiet) window.LABART_SHOW_SLOTS = false;
+      try { LabArt.paint(ctx, key || cv.getAttribute('data-labart'), 0, 0, w, h); }
+      finally { if (quiet) window.LABART_SHOW_SLOTS = prev; }
       return true;
     } catch (e) { return false; }
   };
