@@ -254,21 +254,39 @@
     });
   };
 
-  /* ── シーケンサ（UX-04 の心臓）──────────────────────────────────────────
-   * panels を「1コマずつ」開いて積み上げる。タップで次へ、最後に onDone。
-   * 演出OFF時は全パネルを即座に積んで完了させる（内容は必ず全部見える）。
+  /* ── シーケンサ ────────────────────────────────────────────────────────
+   * 2つのモードがある。
    *
-   * @param {HTMLElement} host  積み上げ先
-   * @param {Array} panels [{id, html, sfx, hold, onShow(el), skippable}]
-   * @param {Object} opts {auto, tapHint, onPanel(el,panel,i), onDone}
+   *   mode:'replace'（既定で使うべき／カードデッキ）
+   *     1ビートが1画面を占有し、タップで**入れ替わる**。前後移動できる。
+   *     ★ 積み上げ式（下に伸びる）は「文書」に見えてゲームらしくない、という
+   *       実プレイのフィードバックで既定を replace に寄せた（2026-07-24）。
+   *
+   *   mode:'stack'（旧・誌面が下に伸びる）
+   *     互換のために残す。演出OFF時は全パネルを即座に積んで完了する。
+   *
+   * @param {HTMLElement} host  描画先
+   * @param {Array} panels [{id, html|fn, sfx, onShow(el,firstTime), await(el,next)}]
+   * @param {Object} opts {mode, tapTarget, onIndex(i,total,firstTime), onDone}
    * @returns {Promise<void>}
    */
   Juice.sequence = function (host, panels, opts) {
     opts = opts || {};
     panels = (panels || []).filter(Boolean);
+    var replace = (opts.mode === 'replace');
+
     return new Promise(function (resolve) {
-      if (!host) { if (opts.onDone) opts.onDone(); resolve(); return; }
-      var i = 0, waiting = false, finished = false, blocked = false;
+      if (!host || !panels.length) { if (opts.onDone) opts.onDone(); resolve(); return; }
+      var i = -1, finished = false, blocked = false, busy = false;
+      var seen = {}, answered = {};
+
+      // replace モードは「1枚だけ載る舞台」を作り、その中身を差し替える
+      var stage = host;
+      if (replace) {
+        stage = document.createElement('div');
+        stage.className = 'lgj-stage';
+        host.appendChild(stage);
+      }
 
       function build(p) {
         var el = document.createElement('div');
@@ -276,9 +294,6 @@
         // html は文字列でも関数でもよい。関数なら「表示する瞬間」に評価するので、
         // 直前のコマ（記者会見など）の結果を反映した内容を出せる。
         el.innerHTML = (typeof p.html === 'function') ? (p.html() || '') : (p.html || '');
-        host.appendChild(el);
-        try { if (p.onShow) p.onShow(el); } catch (e) { console.warn('[juice] onShow failed', e); }
-        if (opts.onPanel) { try { opts.onPanel(el, p, i); } catch (e) {} }
         return el;
       }
 
@@ -290,61 +305,88 @@
         resolve();
       }
 
-      // 演出OFF: 全部そのまま積んで終わり
-      if (!Juice.ready()) {
-        for (; i < panels.length; i++) build(panels[i]);
-        finish();
-        return;
+      function present(idx, dir) {
+        var p = panels[idx];
+        var el = build(p);
+        var firstTime = !seen[idx];
+        seen[idx] = true;
+
+        if (replace) {
+          var old = stage.firstChild;
+          stage.appendChild(el);
+          if (Juice.ready()) {
+            var dx = (dir < 0 ? -28 : 28);
+            el.style.opacity = '0';
+            el.style.transform = 'translateX(' + dx + 'px)';
+            el.style.transition = 'opacity .24s ease, transform .3s cubic-bezier(.22,.61,.36,1)';
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(0)'; });
+            });
+            if (old) {
+              old.style.transition = 'opacity .16s ease, transform .2s ease-in';
+              old.style.opacity = '0';
+              old.style.transform = 'translateX(' + (-dx) + 'px)';
+              setTimeout(function () { if (old.parentNode) old.parentNode.removeChild(old); }, 190);
+            }
+          } else if (old && old.parentNode) {
+            old.parentNode.removeChild(old);
+          }
+        } else {
+          host.appendChild(el);
+          Juice.reveal(el);
+          try { el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+        }
+
+        // 効果音と祝祭は「初めて見たとき」だけ（戻って再表示で紙吹雪が再発しない）
+        if (p.sfx && firstTime) Juice.sfx(p.sfx);
+        try { if (p.onShow) p.onShow(el, firstTime); } catch (e) { console.warn('[juice] onShow failed', e); }
+        if (opts.onIndex) { try { opts.onIndex(idx, panels.length, firstTime); } catch (e) {} }
+        return el;
       }
 
-      function showNext() {
-        if (i >= panels.length) { finish(); return; }
-        var p = panels[i];
-        var el = build(p);
-        Juice.reveal(el);
-        if (p.sfx) Juice.sfx(p.sfx);
-        // 直前に開いたコマへスクロール（誌面が下に伸びる感覚）
-        try { el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
-        i++;
-        var last = (i >= panels.length);
-        waiting = false;
+      function goTo(idx, dir) {
+        if (finished || busy || blocked) return;
+        if (idx < 0) return;
+        if (idx >= panels.length) { finish(); return; }
+        busy = true;
+        i = idx;
+        var el = present(idx, dir || 1);
+        var p = panels[idx];
 
-        // ★ 入力待ちのコマ（記者会見など）＝答えるまでタップで先へ進ませない。
-        //   p.await(el, next) を呼び、コマ側が next() を呼んだ時だけ解除する。
-        if (typeof p.await === 'function') {
+        // ★ 入力待ちのコマ（記者会見など）＝答えるまで前後に動かさない。
+        //   一度答えたコマに戻ってきたときは、もうブロックしない。
+        if (typeof p.await === 'function' && !answered[idx]) {
           blocked = true;
           var resumed = false;
           try {
             p.await(el, function () {
               if (resumed || finished) return;
-              resumed = true;
-              blocked = false;
-              lastAt = 0;                     // 回答直後の1タップを throttle で潰さない
-              if (last) setTimeout(finish, 260); else showNext();
+              resumed = true; answered[idx] = true; blocked = false;
+              goTo(i + 1, 1);
             });
           } catch (e) { blocked = false; console.warn('[juice] await failed', e); }
-          return;
         }
-
-        if (last) { setTimeout(finish, 260); return; }
-        if (opts.auto) setTimeout(advance, (p.hold || 0) + 900);
+        setTimeout(function () { busy = false; }, 240);   // 連打で飛ばされない最小間隔
       }
 
-      // 連打で飛ばされないよう最小間隔を設ける
-      var lastAt = 0;
-      function advance() {
-        if (blocked) return;                  // 入力待ちの間はタップを無視
-        var now = (window.performance && performance.now) ? performance.now() : (lastAt + 999);
-        if (now - lastAt < 260) return;
-        lastAt = now;
-        if (waiting || finished) return;
-        waiting = true;
-        showNext();
+      function advance() { goTo(i + 1, 1); }
+      function back() { goTo(i - 1, -1); }
+
+      // stack モードで演出OFF: 全部そのまま積んで終わり（内容は必ず全部見える）
+      if (!replace && !Juice.ready()) {
+        for (var k = 0; k < panels.length; k++) {
+          var el0 = build(panels[k]);
+          host.appendChild(el0);
+          try { if (panels[k].onShow) panels[k].onShow(el0, true); } catch (e) {}
+        }
+        finish();
+        return;
       }
 
-      function onKey(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); advance(); } }
-      // ★ タップ判定は host（＝積み上がったコマだけ）ではなく、指定された広い面に付ける。
-      //   host だけだと余白をタップしても進まず「止まった」と誤解される（実機で踏んだ）。
+      function onKey(e) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); advance(); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); back(); }
+      }
       var tapOn = opts.tapTarget || host;
       function detach() {
         tapOn.removeEventListener('click', advance);
@@ -353,7 +395,11 @@
       tapOn.addEventListener('click', advance);
       document.addEventListener('keydown', onKey);
 
-      showNext();   // 1コマ目は即出す
+      // 外から前後させるための操作口（ナビのボタン用）
+      opts.controls = { next: advance, prev: back, close: finish,
+                        index: function () { return i; }, total: panels.length };
+
+      goTo(0, 1);
     });
   };
 

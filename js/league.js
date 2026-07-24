@@ -2258,12 +2258,13 @@
           '<div class="mid"><b data-lgc="' + lr.mine.ms + '">0</b> - <b data-lgc="' + lr.mine.os + '">0</b></div>' +
           '<div class="side"><div class="crest">' + oppDef.crest + '</div><div class="nm">' + _clubName(oppId) + '</div></div>' +
         '</div></div>',
-      onShow: function (el) {
+      onShow: function (el, firstTime) {
         if (!_juiceOn()) return;
         Array.prototype.forEach.call(el.querySelectorAll('[data-lgc]'), function (n) {
           Juice.countUp(n, parseInt(n.getAttribute('data-lgc'), 10) || 0, { dur: 520 });
         });
-        if (lr.mine.res === 'W') Juice.confetti(el, { colors: [myDef.color, '#ffd24a', '#ffffff'] });
+        // 祝祭は初見のときだけ（戻って見返すたびに紙吹雪が出ると安っぽい）
+        if (firstTime && lr.mine.res === 'W') Juice.confetti(el, { colors: [myDef.color, '#ffd24a', '#ffffff'] });
       }
     });
 
@@ -2306,9 +2307,9 @@
       panels.push({
         id: 'press', sfx: 'flash',
         html: function () { return _pressHTML(pq, lr); },
-        onShow: function (el) {
+        onShow: function (el, firstTime) {
           _paintPortraitCanvases(el);
-          if (_juiceOn() && Juice.flash) Juice.flash(el, { count: 3 });
+          if (firstTime && _juiceOn() && Juice.flash) Juice.flash(el, { count: 3 });
         },
         await: function (el, next) { _bindPress(el, pq, lr, next); }
       });

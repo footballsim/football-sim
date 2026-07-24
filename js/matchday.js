@@ -166,55 +166,79 @@
     var ov;
     try {
       ov = _mkOverlay('lg-md-post');
+      // ★ 積み上げ式（下に伸びる誌面）をやめ、**1ビート=1画面のカードデッキ**にする。
+      //   ヘッダ / デッキ / ナビ の3段固定で、本文はスクロールで伸びない。
+      var dots = '';
+      for (var d = 0; d < panels.length; d++) dots += '<i class="lg-md-dot"></i>';
       ov.innerHTML =
         '<div class="lg-md-paper" aria-hidden="true"><canvas data-labart="paper_texture"></canvas></div>' +
         '<div class="lg-md-head">' +
+          '<button type="button" class="lg-md-quit" aria-label="close">✕</button>' +
           '<div class="lg-md-mast">' + (opts.title || '') + '</div>' +
           (opts.sub ? '<div class="lg-md-issue">' + opts.sub + '</div>' : '') +
+          '<div class="lg-md-dots">' + dots + '</div>' +
         '</div>' +
-        '<div class="lg-md-scroll"><div class="lg-md-body"></div>' +
-          '<div class="lg-md-foot"></div></div>' +
-        '<div class="lg-md-hint">' + (opts.tapHint || '') + '</div>';
+        '<div class="lg-md-deck"></div>' +
+        '<div class="lg-md-nav">' +
+          '<button type="button" class="lg-md-prev" aria-label="prev">◀</button>' +
+          '<div class="lg-md-step"></div>' +
+          '<button type="button" class="lg-md-next">' + (opts.tapHint || '▶') + '</button>' +
+        '</div>';
 
       if (typeof LgUI !== 'undefined' && LgUI.paintArt) LgUI.paintArt(ov);
 
-      var body = ov.querySelector('.lg-md-body');
-      var foot = ov.querySelector('.lg-md-foot');
-      var hint = ov.querySelector('.lg-md-hint');
+      var deck = ov.querySelector('.lg-md-deck');
+      var dotEls = ov.querySelectorAll('.lg-md-dot');
+      var stepEl = ov.querySelector('.lg-md-step');
+      var prevB = ov.querySelector('.lg-md-prev');
+      var nextB = ov.querySelector('.lg-md-next');
+      var quitB = ov.querySelector('.lg-md-quit');
 
       function close() {
-        var j = _juice();
-        // ★ 監督室への復帰も暗転のピークで（号が消えてから背後が見える、を避ける）
-        if (j && j.screenSwap) j.screenSwap(function () { _kill(ov); finish(); });
+        var j2 = _juice();
+        // ★ 監督室への復帰は暗転のピークで（カードが消えてから背後が見える、を避ける）
+        if (j2 && j2.screenSwap) j2.screenSwap(function () { _kill(ov); finish(); });
         else { _kill(ov); finish(); }
       }
 
-      function onDone() {
-        if (hint) hint.style.display = 'none';
-        foot.innerHTML = '<button type="button" class="lg-btn lg-md-close">' +
-          (opts.closeLabel || 'CLOSE') + '</button>';
-        var btn = foot.querySelector('.lg-md-close');
-        btn.addEventListener('click', function (e) { e.stopPropagation(); close(); });
-        var j = _juice();
-        if (j && j.reveal) j.reveal(btn, { dur: 300 });
-        try { foot.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
-      }
+      var seqOpts = {
+        mode: 'replace',
+        tapTarget: deck,
+        onIndex: function (idx, total) {
+          Array.prototype.forEach.call(dotEls, function (n, k) {
+            if (k === idx) n.className = 'lg-md-dot on';
+            else if (k < idx) n.className = 'lg-md-dot past';
+            else n.className = 'lg-md-dot';
+          });
+          if (stepEl) stepEl.textContent = (idx + 1) + ' / ' + total;
+          if (prevB) prevB.disabled = (idx === 0);
+          // 最後のカードでは「▶」を「監督室へ戻る」に変える＝出口が迷子にならない
+          if (nextB) nextB.textContent = (idx === total - 1)
+            ? (opts.closeLabel || 'CLOSE') : (opts.tapHint || '▶');
+          if (nextB) nextB.className = 'lg-md-next' + (idx === total - 1 ? ' final' : '');
+        },
+        onDone: close
+      };
 
       var j = _juice();
       if (j && j.sequence) {
-        // タップはオーバーレイ全面で受ける（コマの外側をタップしても進む）
-        j.sequence(body, panels, { tapTarget: ov, tapHint: opts.tapHint, onDone: onDone });
+        j.sequence(deck, panels, seqOpts);
+        // ナビのボタンはデッキのタップ送りに伝播させない（二重送りを防ぐ）
+        if (prevB) prevB.addEventListener('click', function (e) { e.stopPropagation(); if (seqOpts.controls) seqOpts.controls.prev(); });
+        if (nextB) nextB.addEventListener('click', function (e) { e.stopPropagation(); if (seqOpts.controls) seqOpts.controls.next(); });
       } else {
-        // Juice 未搭載: 全部そのまま積んで閉じるボタンを出す（内容は必ず全部見える）
+        // Juice 未搭載: 全部そのまま積んで出口を出す（内容は必ず全部見える）
         panels.forEach(function (p) {
           var el = document.createElement('div');
           el.className = 'lgj-panel' + (p.id ? ' lgj-' + p.id : '');
-          el.innerHTML = p.html || '';
-          body.appendChild(el);
-          try { if (p.onShow) p.onShow(el); } catch (e) {}
+          el.innerHTML = (typeof p.html === 'function') ? (p.html() || '') : (p.html || '');
+          deck.appendChild(el);
+          try { if (p.onShow) p.onShow(el, true); } catch (e) {}
         });
-        onDone();
+        if (stepEl) stepEl.textContent = panels.length + ' / ' + panels.length;
+        if (nextB) { nextB.textContent = opts.closeLabel || 'CLOSE'; nextB.className = 'lg-md-next final'; nextB.addEventListener('click', close); }
       }
+      if (quitB) quitB.addEventListener('click', function (e) { e.stopPropagation(); close(); });
     } catch (e) {
       console.warn('[matchday] post-match failed, falling back', e);
       _kill(ov);
