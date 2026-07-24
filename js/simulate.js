@@ -1591,6 +1591,22 @@ function renderFormation() {
       }
     }
 
+    // MD-01 リーグ: 前節の布陣を維持しつつ、欠場者（怪我/出場停止）をその位置にグレー＋
+    //   マーカーで示す（自動で控えに落とさない＝配置を崩さない）。起用不可なので
+    //   キックオフ時に警告で止める（leagueKickoff）。控えと入れ替えれば通常表示に戻る。
+    const _lgAbs = (typeof leaguePlayerAbsence === 'function') ? leaguePlayerAbsence(playerIdx) : null;
+    if (_lgAbs) {
+      circle.style.background = '#8a8a8a';
+      circle.style.opacity = '0.55';
+      const _ab = document.createElement('div');
+      _ab.className = 'disc-badge';
+      _ab.textContent = _lgAbs.kind === 'injury' ? '🩹' : '🟥';
+      _ab.title = _lgAbs.kind === 'injury'
+        ? (window.LANG === 'en' ? 'Injured (' + _lgAbs.weeks + 'w)' : '怪我（あと' + _lgAbs.weeks + '週）')
+        : (window.LANG === 'en' ? 'Suspended (' + _lgAbs.weeks + 'w)' : '出場停止（あと' + _lgAbs.weeks + '週）');
+      circleWrap.appendChild(_ab);
+    }
+
     if (_isOutOfPos) {
       const badge = document.createElement('div');
       badge.className = 'pos-badge';

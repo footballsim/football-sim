@@ -282,7 +282,7 @@
    *   ① growth を base param へ焼き込み（persistent な成長）
    *   ② injuryOut/suspendOut>0 の選手を先発から除外（詰み防止つき）
    * を適用して返す。1試合あたり数クラブ分の clone なのでコストは無視できる。 */
-  function _overlaySquad(clubId) {
+  function _overlaySquad(clubId, opts) {
     var src = _clubData(clubId);
     if (!src) return src;
     var td = {};
@@ -308,7 +308,18 @@
       return np;
     });
 
-    td.default_lineup = _availableLineup(src, td, unavailable, clubId);
+    // ★ keepAbsent（ユーザーのチーム＝設定画面用）: 前節の布陣（＝クラブ既定の正しい配置）を
+    //   そのまま維持し、欠場者もその位置に残す。設定画面でグレー表示＋キックオフ時に警告で止める。
+    //   相手AI・他会場（監督がいない）は従来どおり自動除外＝合法布陣で戦わせる。
+    //   ただし出場可能者が11人未満なら詰むので、その時だけ従来の補充ロジックに戻す。
+    if (opts && opts.keepAbsent) {
+      var raw = (src.default_lineup || []).slice();
+      var availCount = 0;
+      for (var ri = 0; ri < td.players.length; ri++) if (!unavailable[ri]) availCount++;
+      td.default_lineup = (availCount >= 11) ? raw : _availableLineup(src, td, unavailable, clubId);
+    } else {
+      td.default_lineup = _availableLineup(src, td, unavailable, clubId);
+    }
     return td;
   }
 
@@ -2414,7 +2425,9 @@
     // ★ v4: TEAM_DATA そのものではなく「持ち越しオーバーレイ適用済み clone」を渡す（§2.2）。
     //   成長 delta を base param へ焼き込み、怪我/出場停止の選手を先発から外す（詰み防止つき）。
     //   TEAM_DATA 本体は single/WC と共有の不変ソースなので絶対に書き換えない。
-    team1Data = _overlaySquad(myId);
+    // ★ 自チームは前節の布陣を維持（欠場者もその位置に残す＝グレー表示＋キックオフで警告）。
+    //   相手(team2)は自動除外＝合法布陣で戦う。
+    team1Data = _overlaySquad(myId, { keepAbsent: true });
     team2Data = _overlaySquad(oppId);
 
     // MG-04: リーグでは未習得の戦術は使えない。ここから先の采配UIに制限をかける
@@ -2459,6 +2472,24 @@
    * startGame(simulate.js) が window._leagueInMatch を見てこれに委譲する。 */
   window.leagueKickoff = function () {
     if (_preMatchRunning || !_pendingMatch) return;
+    // ★ 欠場者が先発にいたらキックオフさせない（控えと入れ替えるまで試合を始めない）。
+    var absent = [];
+    if (typeof team1State !== 'undefined' && team1State && team1State.lineup && team1Data && team1Data.players) {
+      for (var i = 0; i < 11; i++) {
+        var idx = team1State.lineup[i];
+        var p = team1Data.players[idx];
+        if (!p) continue;
+        var e = _peekSquadEntry(team1Data._srcKey || _pendingMatch.myId, _playerKey(p));
+        if (e && ((e.injuryOut > 0) || (e.suspendOut > 0))) {
+          absent.push(p.name + (e.injuryOut > 0 ? _t('（怪我）', ' (injured)') : _t('（出場停止）', ' (suspended)')));
+        }
+      }
+    }
+    if (absent.length) {
+      alert(_t('出場できない選手が先発にいます：\n' + absent.join('、') + '\n\n控えと入れ替えてからキックオフしてください。',
+               'These players cannot play but are in your XI:\n' + absent.join(', ') + '\n\nSwap them out before kickoff.'));
+      return;   // 試合を始めない（設定画面に留まる）
+    }
     var pm = _pendingMatch;
     window._leagueInMatch = false;   // 設定画面を抜けた＝試合へコミット
     // UX-03: 漫画のコマ送りで「ため」を作ってから試合へ（未搭載/OFF なら即キックオフ）。
