@@ -46,11 +46,28 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
         <option value="manga_shot">現行（正典 wavy）</option>
         <option value="manga_shot_v2">新ドット版 v2（スパイキーツーブロック）</option>
       </select>
+    </div>
+    <div class="row" style="margin-top:8px">
+      2拍演出の種別
+      <select id="shotanim" onchange="setShotAnim(this.value)">
+        <option value="">ランダム（本番と同じ50/50）</option>
+        <option value="still">静止絵（1枚絵）</option>
+        <option value="anim">2コマアニメ（振りかぶり→蹴り）</option>
+      </select>
     </div></div>
 
     <div class="grp"><h2>GKダイブ</h2><div class="btns">
       <button data-k="gksave" onclick="run('gksave')">セーブ演出</button>
-    </div></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      ダイブ絵のポーズ
+      <select id="gkdive" onchange="setGkDive(this.value)">
+        <option value="">ランダム（本番と同じ50/50）</option>
+        <option value="0">ポーズA（斜め上へ横っ飛び）</option>
+        <option value="1">ポーズB（水平ダイブ・横っ飛び）</option>
+      </select>
+    </div>
+    <p class="hint" style="margin:6px 0 0">ポーズ選択は GKダイブを使う全演出（セーブ演出／対決割り／シュートのセーブ）に効きます。</p></div>
 
     <div class="grp"><h2>ロングパス</h2><div class="btns">
       <button data-k="longpass" onclick="run('longpass')">拍1：蹴り出し（結果非開示）</button>
@@ -82,14 +99,14 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
   </div>
 </div>
 
-<script src="js/players.js?v=lab31"></script>
-<script src="js/rng.js?v=lab31"></script>
-<script src="js/events.js?v=lab31"></script>
-<script src="js/simulate.js?v=lab31"></script>
-<script src="js/match.js?v=lab31"></script>
-<script src="js/portrait.js?v=lab31"></script>
-<script src="js/manga_recolor.js?v=lab31"></script>
-<script src="js/cutscene.js?v=lab31"></script>
+<script src="js/players.js?v=lab40"></script>
+<script src="js/rng.js?v=lab40"></script>
+<script src="js/events.js?v=lab40"></script>
+<script src="js/simulate.js?v=lab40"></script>
+<script src="js/match.js?v=lab40"></script>
+<script src="js/portrait.js?v=lab40"></script>
+<script src="js/manga_recolor.js?v=lab40"></script>
+<script src="js/cutscene.js?v=lab40"></script>
 <script>
 var KEYS=[['belgium2026','ベルギー'],['england2026','イングランド'],['brazil2026','ブラジル'],['spain2026','スペイン'],['france2026','フランス'],['argentina2026','アルゼンチン'],['germany2026','ドイツ'],['netherlands2026','オランダ']];
 var atk=document.getElementById('atk'),def=document.getElementById('def');
@@ -100,6 +117,9 @@ function mk(key){var d=TEAM_DATA[key];var si=system_data.findIndex(function(s){r
 function put(c){var st=document.getElementById('stage');st.innerHTML='';st.appendChild(c);}
 // シューター絵の差し替え（ラボ限定・cutscene.js は typeof ガードで既定 manga_shot）
 function setShotDir(v){window._LAB_SHOT_DIR=v;if(typeof MangaRecolor!=='undefined'&&MangaRecolor.clearCache)MangaRecolor.clearCache();run(cur);}
+// ラボ限定の演出強制（本番は未定義＝ランダム）。''=ランダム / 決め打ちで確認。
+function setShotAnim(v){window._LAB_SHOT_ANIM=(v==='anim')?true:(v==='still')?false:undefined;run(cur);}
+function setGkDive(v){window._LAB_GK_DIVE=(v==='0')?0:(v==='1')?1:undefined;run(cur);}
 function err(m){document.getElementById('err').textContent=m||'';}
 function run(kind,retry){
   cur=kind; err('');
@@ -107,6 +127,7 @@ function run(kind,retry){
   try{
     var a=mk(atk.value),b=mk(def.value);
     window.gameState={team1:b,team2:a};
+    window._LAB_FORCE_SHOT2=(kind==='shot2');   // shot2ボタンは構図ローテを止めて必ず2拍本体を描く（種別セレクタを効かせる）
     var ok=document.getElementById('ok').checked;
     var c=null;
     if(kind==='shotduel'){
