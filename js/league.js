@@ -2317,43 +2317,89 @@
   }
 
   /* ST-01: 試合詳細スタッツ（シングルマッチ後スタッツの転用・AI総括は入れない）。
-   * chanceResults から集計＝narration.js の showResult と同じ算出（チャンス/シュート/
-   * GKセーブ/ポゼッション）。t1=自チーム / t2=相手（監督ビューアは常に team1=自）。 */
+   * chanceResults から集計＝narration.js の showResult と同じ算出。t1=自チーム / t2=相手
+   * （監督ビューアは常に team1=自）。得点者・デュエル勝率・GKセーブ率・選手別関与・攻撃
+   * パターン別ゴールまで採取して lastResult に保存＝カードデッキ／記録タブから再表示できる。 */
   function _computeMatchStats() {
     if (typeof chanceResults === 'undefined' || !chanceResults) return null;
     if (typeof gameState === 'undefined' || !gameState || !gameState.team1) return null;
     var t1 = gameState.team1, t2 = gameState.team2;
-    var s = { t1: { ch: 0, sh: 0, gk: 0, atk: 0 }, t2: { ch: 0, sh: 0, gk: 0, atk: 0 } };
+    var s = {
+      t1: { ch: 0, sh: 0, gk: 0, atk: 0 }, t2: { ch: 0, sh: 0, gk: 0, atk: 0 },
+      scorers1: [], scorers2: [],
+      duels1: {}, duels2: {},   // name -> {w,l}
+      gk1: { save: 0, goal: 0 }, gk2: { save: 0, goal: 0 },
+      inv1: {}, inv2: {},       // name -> count（関与シーン数）
+      patterns: {}              // 'me'|'opp'+'|'+action -> count
+    };
+    function _duelTgt(team) { return team === t1 ? s.duels1 : team === t2 ? s.duels2 : null; }
     chanceResults.forEach(function (res) {
       if (!res || !res.scenes) return;
       var c1 = false, c2 = false;
       res.scenes.forEach(function (sc) {
-        // ポゼッション＝全シーンの攻撃回数比（showResult と同じ）
         if (sc.offence === t1) s.t1.atk++; else if (sc.offence === t2) s.t2.atk++;
         var isShoot = (sc.result === 'ゴール！！' || sc.result === 'GK防いだ！' || sc.result === '枠を外した！');
         var isNormal = (sc.result === '成功' || sc.result === '失敗' || sc.result === 'ファール');
+        // 関与シーン数（攻撃側の起点選手）
+        var op = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+        if (op) { var inv = (sc.offence === t1) ? s.inv1 : (sc.offence === t2) ? s.inv2 : null; if (inv) inv[op.name] = (inv[op.name] || 0) + 1; }
         if (!isShoot && !isNormal) return;
-        // チャンス＝FW到達 or シュート。1チャンス1カウント
         if (isShoot || (sc.area && sc.area.substring(0, 2) === 'FW')) {
           if (sc.offence === t1 && !c1) { s.t1.ch++; c1 = true; }
           if (sc.offence === t2 && !c2) { s.t2.ch++; c2 = true; }
         }
-        if (isShoot) { if (sc.offence === t1) s.t1.sh++; else if (sc.offence === t2) s.t2.sh++; }
+        if (isShoot) {
+          if (sc.offence === t1) s.t1.sh++; else if (sc.offence === t2) s.t2.sh++;
+          // 得点者
+          if (sc.result === 'ゴール！！' && op) {
+            (sc.offence === t1 ? s.scorers1 : s.scorers2).push({ time: res.time, name: op.name });
+            var pat = sc.action || sc.scenario || '?';
+            var pk = (sc.offence === t1 ? 'me' : 'opp') + '|' + pat;
+            s.patterns[pk] = (s.patterns[pk] || 0) + 1;
+          }
+          // GKセーブ率（守備側GK）
+          var gkt = (sc.defence === t1) ? s.gk1 : (sc.defence === t2) ? s.gk2 : null;
+          if (gkt) { if (sc.result === 'GK防いだ！') gkt.save++; else gkt.goal++; }
+        }
         if (sc.result === 'GK防いだ！') { if (sc.defence === t1) s.t1.gk++; else if (sc.defence === t2) s.t2.gk++; }
+        // デュエル（成功/ファール=攻撃勝ち / 失敗=守備勝ち）
+        if (isNormal) {
+          var win = (sc.result === '成功' || sc.result === 'ファール');
+          var ofp = op, dfp = sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+          var ot = _duelTgt(sc.offence), dt = _duelTgt(sc.defence);
+          if (ofp && ot) { if (!ot[ofp.name]) ot[ofp.name] = { w: 0, l: 0 }; win ? ot[ofp.name].w++ : ot[ofp.name].l++; }
+          if (dfp && dt) { if (!dt[dfp.name]) dt[dfp.name] = { w: 0, l: 0 }; win ? dt[dfp.name].l++ : dt[dfp.name].w++; }
+        }
       });
     });
     var tot = s.t1.atk + s.t2.atk || 1;
     s.t1.poss = Math.round(s.t1.atk / tot * 100);
     s.t2.poss = 100 - s.t1.poss;
+    // 保存を軽くするため、デュエル/関与は配列化＋上位に絞る
+    function _duelArr(o) {
+      return Object.keys(o).map(function (n) { return { name: n, w: o[n].w, l: o[n].l }; })
+        .sort(function (a, b) { return (b.w + b.l) - (a.w + a.l); });
+    }
+    function _invArr(o) {
+      return Object.keys(o).map(function (n) { return { name: n, c: o[n] }; })
+        .sort(function (a, b) { return b.c - a.c; }).slice(0, 5);
+    }
+    s.duels1 = _duelArr(s.duels1); s.duels2 = _duelArr(s.duels2);
+    s.inv1 = _invArr(s.inv1); s.inv2 = _invArr(s.inv2);
+    s.patterns = Object.keys(s.patterns).map(function (k) {
+      var p = k.split('|'); return { side: p[0], action: p[1], count: s.patterns[k] };
+    }).sort(function (a, b) { return b.count - a.count; });
     return s;
   }
 
-  /* 試合スタッツのカード HTML。自チーム(左)＝t1 / 相手(右)＝t2。 */
+  /* 試合スタッツのカード HTML（AI総括以外の全項目）。自チーム(左)＝t1 / 相手(右)＝t2。 */
   function _matchStatsHTML(lr) {
     var s = lr && lr.stats;
     if (!s) return '';
     var myDef = _clubDef(lr.mine.me), opDef = _clubDef(lr.mine.opp);
     var myCol = (myDef && myDef.color) || '#4a9eff', opCol = (opDef && opDef.color) || '#e8776f';
+    var myName = _clubName(lr.mine.me), opName = _clubName(lr.mine.opp);
+
     function bar() {
       return '<div class="lg-stat-poss">' +
         '<span class="lg-stat-pv" style="color:' + myCol + '">' + s.t1.poss + '%</span>' +
@@ -2367,19 +2413,99 @@
         '<span class="lg-stat-l">' + label + '</span>' +
         '<span class="lg-stat-n">' + r + '</span></div>';
     }
+    function sub(t) { return '<div class="lg-stat-sub">' + t + '</div>'; }
+
+    // 得点者
+    var scorers = '';
+    if ((s.scorers1 && s.scorers1.length) || (s.scorers2 && s.scorers2.length)) {
+      var l1 = (s.scorers1 || []).map(function (g) { return '<div style="text-align:left;color:' + myCol + '">' + g.time + ' ' + g.name + '</div>'; }).join('');
+      var l2 = (s.scorers2 || []).map(function (g) { return '<div style="text-align:right;color:' + opCol + '">' + g.name + ' ' + g.time + '</div>'; }).join('');
+      scorers = sub('⚽ ' + _t('得点者', 'Goalscorers')) +
+        '<div class="lg-stat-scorers"><div>' + l1 + '</div><div>' + l2 + '</div></div>';
+    }
+
+    // デュエル勝率（チームごと・上位）
+    function duelTable(arr, col, name) {
+      if (!arr || !arr.length) return '';
+      var rows = arr.slice(0, 8).map(function (d) {
+        var t = d.w + d.l, rate = t ? Math.round(d.w / t * 100) : 0;
+        return '<div class="lg-duel-row"><span class="lg-duel-nm">' + d.name + '</span>' +
+          '<span class="lg-duel-bar"><i style="width:' + rate + '%;background:' + col + '"></i></span>' +
+          '<span class="lg-duel-rt">' + rate + '%</span>' +
+          '<span class="lg-duel-wl">' + d.w + _t('勝', 'W') + d.l + _t('敗', 'L') + '</span></div>';
+      }).join('');
+      return '<div class="lg-duel-team" style="border-left:3px solid ' + col + '">' +
+        '<div class="lg-duel-h">' + name + '</div>' + rows + '</div>';
+    }
+    var duels = '';
+    if ((s.duels1 && s.duels1.length) || (s.duels2 && s.duels2.length)) {
+      duels = sub('⚔ ' + _t('デュエル勝率', 'Duel win rate')) +
+        duelTable(s.duels1, myCol, myName) + duelTable(s.duels2, opCol, opName);
+    }
+
+    // GKセーブ率
+    function gkLine(g, col, name) {
+      var t = g.save + g.goal; if (!t) return '';
+      var rate = Math.round(g.save / t * 100);
+      return '<div class="lg-duel-row"><span class="lg-duel-nm">' + name + '</span>' +
+        '<span class="lg-duel-bar"><i style="width:' + rate + '%;background:' + col + '"></i></span>' +
+        '<span class="lg-duel-rt">' + rate + '%</span>' +
+        '<span class="lg-duel-wl">' + g.save + _t('セーブ', 'S') + '/' + t + '</span></div>';
+    }
+    var gkr = gkLine(s.gk1, myCol, myName) + gkLine(s.gk2, opCol, opName);
+    if (gkr) gkr = sub('🧤 ' + _t('GKセーブ率', 'GK save rate')) + gkr;
+
+    // 選手別関与シーン数（上位5）
+    function invList(arr, col) {
+      if (!arr || !arr.length) return '';
+      var mx = arr[0].c || 1;
+      return '<div class="lg-inv-col">' + arr.map(function (v, i) {
+        var medal = ['🥇', '🥈', '🥉'][i] || '　';
+        var pct = Math.round(v.c / mx * 100);
+        return '<div class="lg-inv-row"><span class="lg-inv-nm">' + medal + ' ' + v.name + '</span>' +
+          '<span class="lg-inv-c">' + v.c + '</span>' +
+          '<span class="lg-inv-bar"><i style="width:' + pct + '%;background:' + col + '"></i></span></div>';
+      }).join('') + '</div>';
+    }
+    var inv = '';
+    if ((s.inv1 && s.inv1.length) || (s.inv2 && s.inv2.length)) {
+      inv = sub('👟 ' + _t('選手別 関与シーン数', 'Involvement')) +
+        '<div class="lg-inv-grid">' + invList(s.inv1, myCol) + invList(s.inv2, opCol) + '</div>';
+    }
+
+    // 攻撃パターン別ゴール
+    var patt = '';
+    if (s.patterns && s.patterns.length) {
+      patt = sub('🎯 ' + _t('攻撃パターン別ゴール', 'Goals by pattern')) +
+        s.patterns.map(function (p) {
+          var col = (p.side === 'me') ? myCol : opCol, nm = (p.side === 'me') ? myName : opName;
+          var label = (typeof getActionLabel === 'function') ? getActionLabel(p.action) : p.action;
+          return '<div class="lg-patt-row"><span style="color:' + col + ';font-weight:700;min-width:5em">' + nm + '</span>' +
+            '<span style="flex:1">' + label + '</span><span style="font-weight:800">⚽×' + p.count + '</span></div>';
+        }).join('');
+    }
+
+    // 試合詳細（実況ログ）はデッキ(z400)より下(z200)になり隠れるため、ここには埋め込まず
+    //   案内だけ出す。実況ログは監督室の「記録」タブ →「前回の試合ログ」で全文が読める。
+    var logHint = (lr.log && lr.log.length)
+      ? '<div class="lg-stat-loghint">📜 ' + _t('実況ログは監督室の「記録」タブで読めます', 'Full play-by-play is in the Records tab') + '</div>'
+      : '';
+
     return '<div class="lg-card lg-stats">' +
       '<div class="lgp-kicker" style="text-align:center">' + _t('試合スタッツ', 'MATCH STATS') + '</div>' +
       '<div class="lg-stat-head">' +
-        '<span style="color:' + myCol + '">' + (myDef ? myDef.crest : '') + ' ' + _clubName(lr.mine.me) + '</span>' +
+        '<span style="color:' + myCol + '">' + (myDef ? myDef.crest : '') + ' ' + myName + '</span>' +
         '<span class="lg-stat-score">' + lr.mine.ms + ' - ' + lr.mine.os + '</span>' +
-        '<span style="color:' + opCol + '">' + _clubName(lr.mine.opp) + ' ' + (opDef ? opDef.crest : '') + '</span>' +
+        '<span style="color:' + opCol + '">' + opName + ' ' + (opDef ? opDef.crest : '') + '</span>' +
       '</div>' +
       '<div class="lg-stat-plabel">' + _t('ポゼッション', 'Possession') + '</div>' + bar() +
       '<div class="lg-stat-grid">' +
         row(s.t1.ch, _t('チャンス', 'Chances'), s.t2.ch) +
         row(s.t1.sh, _t('シュート', 'Shots'), s.t2.sh) +
         row(s.t1.gk, _t('GKセーブ', 'GK Saves'), s.t2.gk) +
-      '</div></div>';
+      '</div>' +
+      scorers + gkr + duels + inv + patt + logHint +
+      '</div>';
   }
 
   /* UX-04: 試合後を「今節の号」として1コマずつ開く。
