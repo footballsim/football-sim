@@ -48,6 +48,9 @@ const DISCIPLINE_TUNING = {
   // 重症度分岐（Sprint 2b）: 軽傷=続行可・残り時間の param 減 ／ 重症=続行不可（強制交代）
   INJURY_MINOR_RATIO:  0.6,    // 負傷のうち軽傷の割合（重症=残り 0.4）。総発生率は INJURY_BASE 系で不変
   INJURY_MINOR_FACTOR: 0.85,   // 軽傷選手の param 係数（getActionParam seam・残り時間ずっと）
+  // DC-01 イエロー持ちの「守備の不安」: 守備局面の param 係数（getActionParam seam・二枚目を
+  //   恐れて踏み込めない＝抜かれやすい）。攻撃は不変・GK除外。式/カウントには非干渉。
+  YELLOW_CAUTION_FACTOR: 0.85,  // -15%（守備の1対1のみ・イエロー1枚もらった以降ずっと）
   // 交代枠（W杯ルール5枚。負傷強制交代も同じ枠を消費）
   MAX_SUBS:            5,
 };
@@ -213,6 +216,22 @@ function disciplineIsOut(team, pos) {
 function injuryParamFactor(team, p) {
   if (!_disciplineEnabled()) return 1.0;
   return (p && p._injuredMinor) ? DISCIPLINE_TUNING.INJURY_MINOR_FACTOR : 1.0;
+}
+
+/**
+ * DC-01 イエロー持ちの「守備の不安」係数（getActionParam seam・injuryParamFactor と同列）。
+ * ★ デュエル式 ofs²/(ofs²+dfs²)・チャンス数・カウントには一切触れない。
+ *   守備の問い合わせ（action が '対' で始まる）のときだけ dfs 入力を下げるだけ＝
+ *   二枚目を恐れて踏み込めず抜かれやすくなる、を表現する。攻撃（素のaction）は不変。
+ *   GK 除外は呼び出し側（getActionParam の pos!==0）で行う。
+ * @returns {number} イエロー1枚以上（退場除く）×守備アクションなら YELLOW_CAUTION_FACTOR、他は 1.0
+ */
+function disciplineCautionFactor(team, p, action) {
+  if (!_disciplineEnabled()) return 1.0;
+  if (!p || p._sentOff) return 1.0;
+  if (!((p._yellowCards || 0) >= 1)) return 1.0;
+  if (typeof action !== 'string' || action.charAt(0) !== '対') return 1.0;   // 守備局面のみ
+  return DISCIPLINE_TUNING.YELLOW_CAUTION_FACTOR;
 }
 
 /**
@@ -423,7 +442,7 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     DISCIPLINE_TUNING,
     disciplineResetTeam, disciplineIsOut, disciplineOnFoul, disciplineOnChanceEnd,
-    injuryParamFactor, disciplinePendingUserSub, disciplineResolveUserSub,
+    injuryParamFactor, disciplineCautionFactor, disciplinePendingUserSub, disciplineResolveUserSub,
     disciplineToggleTest, disciplineTestOn, disciplineFoulBoost,
   };
 }

@@ -2156,6 +2156,9 @@ function getActionParam(team, pos, action) {
   if (typeof fatigueParamFactor === 'function') f *= fatigueParamFactor(team, p);
   // 規律: 軽傷（続行可）の逓減係数（Sprint 2b・discipline.js。非該当/非同梱は1.0）
   if (typeof injuryParamFactor === 'function') f *= injuryParamFactor(team, p);
+  // DC-01: イエロー持ちの「守備の不安」＝守備アクション('対〜')のみ dfs を下げる。
+  //   GK(pos 0)は除外（被カード稀＋セーブ弱体化は影響過大）。非同梱/非該当は1.0＝no-op。
+  if (pos !== 0 && typeof disciplineCautionFactor === 'function') f *= disciplineCautionFactor(team, p, action);
   // 監督: ビデオ学習の対策 buff（MG-03・league.js。clamp[0.95,1.05] は返す側／リーグの試合中のみ・
   //   非同梱の公開版とシングル/W杯では常に 1.0＝完全 no-op）
   if (typeof managerParamFactor === 'function') f *= managerParamFactor(team, p, action);
@@ -3137,12 +3140,31 @@ function sceneToText(scenes, sceneNo, team1, team2) {
   if (sceneNo + 1 < scenes.length) {
     s = s.replace(/【次の攻撃選手】/g, coloredName(scene.offence, scenes[sceneNo+1].ofsPos));
   }
+
+  // DC-01: イエロー持ちの守備選手が1対1で抜かれた瞬間だけ、「二枚目を恐れて踏み込めない」を添える。
+  //   ★ scene から純粋に読むだけ（rng 不使用）＝シミュの乱数列を乱さない。GK・シュート系は対象外。
+  const _fieldDuel = ['ショートパス','ロングパス','ドリブル突破','飛び出し','ポストプレー','サイドクロス'];
+  if (scene.result === '成功' && scene.dfsPos && scene.dfsPos !== 0 && _fieldDuel.includes(scene.scenario)) {
+    const _dfP = scene.defence.players[scene.defence.lineup[scene.dfsPos]];
+    const _discOff = (typeof window !== 'undefined' && window.DISCIPLINE_ENABLED === false);
+    if (_dfP && !_dfP._sentOff && (_dfP._yellowCards || 0) >= 1 && !_discOff) {
+      const _nm = coloredName(scene.defence, scene.dfsPos);
+      s += (window.LANG === 'en')
+        ? ` On a booking, ${_nm} dares not dive in.`
+        : ` イエロー持ちの${_nm}、二枚目を恐れて踏み込めない。`;
+    }
+  }
   return s;
 }
 
 function coloredName(team, pos) {
   const p = team.players[team.lineup[pos]];
-  return `<span style="color:${team.team_color};font-weight:bold">${p ? getPlayerName(p) : '?'}</span>`;
+  // DC-01: イエロー持ち（退場を除く）は名前に🟨を添える＝「二枚目を警戒中」の常設マーカー。
+  //   純粋な文字列組み立て（rng 不使用）＝ sceneToText 経由でもシミュの乱数列を乱さない。
+  const booked = !!(p && !p._sentOff && (p._yellowCards || 0) >= 1 &&
+    !(typeof window !== 'undefined' && window.DISCIPLINE_ENABLED === false));
+  const mark = booked ? '🟨' : '';
+  return `<span style="color:${team.team_color};font-weight:bold">${p ? getPlayerName(p) : '?'}${mark}</span>`;
 }
 
 // ============================================================
