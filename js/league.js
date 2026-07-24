@@ -2741,6 +2741,7 @@
         '<div class="lg-h">' + _t('▼ 指揮するクラブを選ぶ', '▼ Pick your club') + '</div>' +
         '<div class="lg-pick">' + cards + '</div>' +
       '</div>';
+    _hubMode(false);             // 8枚並ぶのでこの画面はスクロールさせる
     _paintPickPortraits(defs);   // data-club の顔（クラブカラー指定つき）
     _afterRender();              // 監督室の背景・その他の canvas・バー
   }
@@ -3095,6 +3096,92 @@
         '</div></div>';
   }
 
+  /* ═══════════════════════════════════════════════════════════════════════
+   * UX-07 監督室ハブ（固定1画面・タブで入れ替える）
+   * -----------------------------------------------------------------------
+   * ★ 縦に積むのをやめた。試合後を積み上げ→カードデッキにしたのと同じ理由。
+   *   以前は「今週の準備」が場所を取り、**肝心の VS とプレイボタンが画面外へ
+   *   押し出されていた**（主役が見えない）。
+   *   → 上に固定ステータスバー / 左に「次の試合」（常時・主役） / 右にタブ。
+   * 骨格（.lg-cols / .lg-col-main / .lg-col-side）は style.css の横長2カラムを
+   * 壊さないためそのまま使い、中身だけを差し替える。
+   * ═══════════════════════════════════════════════════════════════════════ */
+  var _hubTab = 'prep';
+  var HUB_TABS = [
+    { id: 'prep', ja: '準備', en: 'Prep' },
+    { id: 'table', ja: '順位', en: 'Table' },
+    { id: 'manager', ja: '監督', en: 'Manager' },
+    { id: 'record', ja: '記録', en: 'Records' }
+  ];
+
+  /* 固定ステータスバー＝「自分が誰で、今どこにいるか」を常に1行で見せる。 */
+  function _statusBarHTML(myId, myPos, myRow) {
+    var d = _clubDef(myId);
+    var rivalId = _state.rival;
+    var rival = rivalId
+      ? '<span class="lg-hb-rival">' + _t('宿敵', 'Rival') + ' ' + _clubDef(rivalId).crest + '</span>' : '';
+    return '<div class="lg-hubbar">' +
+      '<span class="lg-hb-crest" style="background:' + d.color + '33;border-color:' + d.color + '">' + d.crest + '</span>' +
+      '<span class="lg-hb-name">' + _clubName(myId) + '</span>' +
+      '<span class="lg-hb-season">S' + (_state.season || 1) + '</span>' +
+      '<span class="lg-hb-sep"></span>' +
+      '<span class="lg-hb-stat"><b>' + myPos + _t('位', '') + '</b></span>' +
+      '<span class="lg-hb-stat">' + myRow.pts + _t('pt', 'pts') + '</span>' +
+      '<span class="lg-hb-stat lg-hb-rec">' + myRow.w + _t('勝', 'W') + myRow.d + _t('分', 'D') + myRow.l + _t('敗', 'L') + '</span>' +
+      rival + '</div>';
+  }
+
+  function _hubTabsHTML() {
+    var pa = _pendingWeek();
+    var chosen = (pa && pa.slots) ? pa.slots.filter(Boolean).length : 0;
+    return '<div class="lg-tabs">' + HUB_TABS.map(function (t) {
+      var badge = '';
+      // 未設定のコマが残っていれば「準備」に赤点＝開かなくても要対応が分かる
+      if (t.id === 'prep' && !_state.finished && chosen < WEEK_SLOTS) badge = '<i class="lg-tab-dot"></i>';
+      if (t.id === 'record' && _state.history && _state.history.length) {
+        badge = '<span class="lg-tab-n">' + _state.history.length + '</span>';
+      }
+      return '<button type="button" class="lg-tab' + (_hubTab === t.id ? ' on' : '') + '" ' +
+        'data-tab="' + t.id + '" onclick="leagueSetHubTab(\'' + t.id + '\')">' +
+        _t(t.ja, t.en) + badge + '</button>';
+    }).join('') + '</div>';
+  }
+
+  function _hubTabBodyHTML() {
+    var myId = _state.myClub;
+    if (_hubTab === 'table') return _standingsTableHTML(_sortedStandings(), myId);
+    if (_hubTab === 'manager') return _managerCardHTML();
+    if (_hubTab === 'record') return _hubRecordHTML();
+    // prep（既定）＝今週の準備＋離脱者
+    var h = '';
+    if (!_state.finished) h += _actionPhaseHTML() + _absenteeHTML(myId);
+    if (!h) h = '<div class="lg-card lg-mini" style="text-align:center">' +
+      _t('シーズンは終了しました', 'The season is over') + '</div>';
+    return h;
+  }
+
+  function _hubRecordHTML() {
+    var h = '';
+    if (_state.lastResult && _state.lastResult.log && _state.lastResult.log.length) {
+      h += '<button class="lg-btn sec" onclick="leagueShowLog()">📜 ' + _t('前回の試合ログ（実況）', 'Match commentary log') + '</button>';
+    }
+    if (_state.lastResult && _matchdayOn()) {
+      h += '<button class="lg-btn sec" onclick="leagueReplayPostMatch()">🗞 ' + _t('前回の「号」をもう一度読む', 'Re-read the last issue') + '</button>';
+    }
+    if (_state.history && _state.history.length) {
+      h += '<button class="lg-btn sec" onclick="leagueShowHistory()">📚 ' + _t('バックナンバー（' + _state.history.length + '冊）', 'Back issues (' + _state.history.length + ')') + '</button>';
+    }
+    if (_testMode()) {
+      var tOn = !!(_state && _state.testUnlock);
+      var tl = tOn ? _t('🔓 テスト：1日1回制限 OFF（毎回プレイ可）', '🔓 TEST: daily limit OFF (replay anytime)')
+                   : _t('🔒 テスト：1日1回制限 ON（タップで解除）', '🔒 TEST: daily limit ON (tap to disable)');
+      h += '<button class="lg-btn sec" style="border:1px dashed rgba(255,255,255,0.35);font-size:12px;' +
+        (tOn ? 'color:#ffd479' : '') + '" onclick="leagueToggleTestLock()">' + tl + '</button>';
+    }
+    h += '<button class="lg-btn sec" onclick="leagueBackToTitle()">' + _t('← タイトルへ戻る', '← Back to title') + '</button>';
+    return h;
+  }
+
   function _renderHub(showBanner) {
     _ensureStyle();
     var myId = _state.myClub;
@@ -3103,9 +3190,9 @@
     var myPos = rows.findIndex(function (r) { return r.id === myId; }) + 1;
     var myRow = rows[myPos - 1];
 
-    // 横長では左(自クラブ/本日の試合)＋右(順位表)の2カラム。縦(portrait)では
-    // .lg-col が素の block になり従来どおり1カラムで積み上がる（フォールバック維持）。
-    var html = '<div class="lg-wrap"><div class="lg-cols"><div class="lg-col lg-col-main">';
+    // UX-07: 上に固定ステータスバー → 左カラム＝次の試合（主役）／右カラム＝タブ。
+    var html = '<div class="lg-wrap lg-hub">' + _statusBarHTML(myId, myPos, myRow) +
+      '<div class="lg-cols"><div class="lg-col lg-col-main">';
 
     // 試合後バナー
     if (showBanner && _state.lastResult) {
@@ -3140,28 +3227,11 @@
       html += _previewHTML();   // 次回予告
     }
 
-    // 自クラブヘッダー
-    var rivalId = _state.rival;
-    var rivalLine = rivalId ? '<div class="lg-sub" style="margin-top:3px">' + _t('宿敵', 'Rival') + '：' +
-      _clubDef(rivalId).crest + ' <span style="color:#e8776f;font-weight:700">' + _clubName(rivalId) + '</span></div>' : '';
-    html += '<div class="lg-card"><div class="lg-club">' +
-      '<div class="lg-crest" style="background:' + myDef.color + '33;border:1px solid ' + myDef.color + '">' + myDef.crest + '</div>' +
-      '<div style="flex:1"><div class="lg-clubname">' + _clubName(myId) +
-      ' <span class="lg-badge" style="background:rgba(255,255,255,.14);font-weight:700">' + _t('シーズン' + (_state.season || 1), 'Season ' + (_state.season || 1)) + '</span></div>' +
-      '<div class="lg-sub">' + _t('現在', 'Position') + ' <b style="color:#fff">' + myPos + _t('位', '') + '</b>' +
-      '　' + myRow.pts + _t('pt', ' pts') + '　' + myRow.w + _t('勝', 'W') + myRow.d + _t('分', 'D') + myRow.l + _t('敗', 'L') + '</div>' +
-      rivalLine + '</div>' +
-      '</div></div>';
-
-    // BD-01: 開幕はボードとの面談から。約束を交わすまで試合に進めない＝1年の入口。
-    if (!_state.finished) html += _boardTalkHTML();
-
-    // 行動フェーズ（MG-03）＝試合の前に「今日は何をするか」を1つ決める
-    if (!_state.finished) html += _actionPhaseHTML();
-
-    // 本日の試合 or シーズン終了（横長では左カラムの中央でVSが構図の重心になるよう
-    // .lg-match-block を flex:1 で伸ばして上下中央寄せ＝下端のデッドスペースを解消）
-    html += '<div class="lg-match-block">';
+    // ★ クラブ情報は上のステータスバーへ、今週の準備は右カラムの「準備」タブへ移した。
+    //   左カラムには「次にやること」だけを残す＝主役が画面外に押し出されない。
+    //   状態ごとにモディファイアを付ける（CSS 側で高さの配り方を変えるため）
+    var mbMod = _state.finished ? ' lg-mb-final' : (_boardTalkPending() ? ' lg-mb-board' : ' lg-mb-next');
+    html += '<div class="lg-match-block' + mbMod + '">';
     if (_state.finished) {
       var champ = rows[0];
       var champDef = _clubDef(champ.id);
@@ -3194,6 +3264,10 @@
         // SN-02: クラブの評価（達成/未達）→ SN-04/05: 契約の分岐（再契約/オファー/解任）
         _seasonVerdictHTML(_state.lastResult && _state.lastResult.season) +
         _contractBranchHTML();
+    } else if (_boardTalkPending()) {
+      // BD-01: 開幕はボードとの面談から。約束を交わすまでは**これだけ**を見せる
+      //   （試合カードと並べると、やるべき1つがぼやける）。
+      html += _boardTalkHTML();
     } else {
       var fx = _myFixtureThisRound();
       var oppId = (fx.home === myId) ? fx.away : fx.home;
@@ -3206,18 +3280,41 @@
       html += '<div class="lg-h">' + _t('第' + (_state.round + 1) + '節 / 14　<span style="opacity:.55;font-weight:400">週末の一戦</span>',
         'Round ' + (_state.round + 1) + ' / 14　<span style="opacity:.55;font-weight:400">Matchday</span>') +
         '<span class="lg-badge">' + haBadge + '</span>' + rivalBadge + '</div>';
+      // ★ ただの VS 札ではなく「試合プレビュー」にする。箱だけ伸ばして中が空だと間延びする。
+      function _sideHTML(id, def) {
+        var st = _state.standings[id] || { pts: 0 };
+        return '<div class="side">' +
+          '<div class="crest">' + def.crest + '</div>' +
+          '<div class="nm">' + _clubName(id) + '</div>' +
+          '<div class="lg-vs-pos">' + _position(id) + _t('位', '') + ' · ' + st.pts + _t('pt', 'pts') + '</div>' +
+          '</div>';
+      }
+      var infoRows = [];
+      infoRows.push('<span class="lg-ni-k">' + _t('相手の攻め筋', 'Their threat') + '</span>' +
+        '<b>' + _threatLabel(_opponentThreat(oppId)) + '</b>');
+      var prev = _state.lastResult && _state.lastResult.mine;
+      if (prev) {
+        infoRows.push('<span class="lg-ni-k">' + _t('前節', 'Last') + '</span>' +
+          '<b style="color:' + _resultColor(prev.res) + '">' + prev.ms + '-' + prev.os + '</b>' +
+          ' <span style="opacity:.7">vs ' + _clubName(prev.opp) + '</span>');
+      }
+      var st2 = _currentStreak();
+      if (st2.n >= 2 && (st2.res === 'W' || st2.res === 'L')) {
+        infoRows.push('<span class="lg-ni-k">' + _t('調子', 'Form') + '</span>' +
+          '<b style="color:' + (st2.res === 'W' ? 'var(--lg-good)' : 'var(--lg-bad)') + '">' +
+          (st2.res === 'W' ? '🔥 ' + _t(st2.n + '連勝', st2.n + 'W') : '💧 ' + _t(st2.n + '連敗', st2.n + 'L')) + '</b>');
+      }
+      infoRows.push('<span class="lg-ni-k">' + _t('クラブの要求', 'Target') + '</span><b>' + _seasonGoalText() + '</b>');
+
       html += '<div class="lg-hero" style="background:linear-gradient(135deg,' + myDef.color + '33,' + oppDef2.color + '33)' +
         (oppIsRival ? ';border:1px solid #c0392b99' : '') + '">' +
         (oppIsRival ? '<div style="text-align:center;color:#e8776f;font-weight:800;font-size:12px;margin-bottom:4px">🔥 ' + _t('宿敵対決', 'RIVALRY') + '　' + (function () { var h = _h2h(myId, oppId); return _t('通算 ' + h.w + '勝' + h.d + '分' + h.l + '敗', h.w + '-' + h.d + '-' + h.l); })() + '</div>' : '') +
-        '<div class="lg-vs">' +
-          '<div class="side"><div class="crest">' + myDef.crest + '</div><div class="nm">' + _clubName(myId) + '</div></div>' +
-          '<div class="mid">VS</div>' +
-          '<div class="side"><div class="crest">' + oppDef2.crest + '</div><div class="nm">' + _clubName(oppId) + '</div></div>' +
-        '</div></div>';
-      if (_boardTalkPending()) {
-        // BD-01: 面談が終わるまでキックオフさせない（約束してからシーズンが始まる）
-        html += '<button class="lg-btn" disabled>' + _t('まずボードと話す', 'Speak to the board first') + '</button>';
-      } else if (_lockedToday()) {
+        '<div class="lg-vs">' + _sideHTML(myId, myDef) + '<div class="mid">VS</div>' + _sideHTML(oppId, oppDef2) + '</div>' +
+        '<div class="lg-nextinfo">' + infoRows.map(function (x) {
+          return '<div class="lg-ni-row">' + x + '</div>';
+        }).join('') + '</div>' +
+        '</div>';
+      if (_lockedToday()) {
         html += '<button class="lg-btn" disabled>' + _t('本日は消化済み — また明日', 'Played today — come back tomorrow') + '</button>';
         html += '<div class="lg-mini" style="text-align:center;margin-top:6px">' + _t('1日1試合＝1週間。物語は毎日ひとつずつ進む。', 'One match a day — one week per day. The story advances daily.') + '</div>';
       } else {
@@ -3226,40 +3323,17 @@
     }
     html += '</div>';   // /lg-match-block
 
-    // 前回試合の実況テキストログ
-    if (_state.lastResult && _state.lastResult.log && _state.lastResult.log.length) {
-      html += '<button class="lg-btn sec" onclick="leagueShowLog()">📜 ' + _t('前回の試合ログ（実況）を見る', 'View match commentary log') + '</button>';
-    }
-    // 過去のシーズン（バックナンバー）— 1シーズンでも終えていれば表示。
-    if (_state.history && _state.history.length) {
-      html += '<button class="lg-btn sec" onclick="leagueShowHistory()">📚 ' + _t('バックナンバー（' + _state.history.length + '冊）', 'Back issues (' + _state.history.length + ')') + '</button>';
-    }
-
-    // ── ここまでが左カラム。順位表以降は右カラム（横長時）───────────────
+    // ── ここまでが左カラム（主役）。右カラムは**タブで入れ替わる**パネル ──────
+    //   順位表 / 今週の準備 / 監督 / 記録 を縦に積むのをやめ、1つずつ見せる。
     html += '</div><div class="lg-col lg-col-side">';
-
-    // ミニ順位表
-    html += '<div class="lg-h">' + _t('順位表', 'Standings') + '</div>';
-    html += _standingsTableHTML(rows, myId);
-
-    // 離脱者（怪我/出場停止の残り週数）＝回復日コマの意味がここで読める
-    if (!_state.finished) html += _absenteeHTML(myId);
-
-    // 監督ステータス（MG-03: 成長が見えないと「1param 1効果」が読めない）
-    html += _managerCardHTML();
-
-    // テスト用（lab限定）：1日1回制限のON/OFFトグル
-    if (_testMode()) {
-      var tOn = !!(_state && _state.testUnlock);
-      var tl = tOn ? _t('🔓 テスト：1日1回制限 OFF（毎回プレイ可）', '🔓 TEST: daily limit OFF (replay anytime)')
-                   : _t('🔒 テスト：1日1回制限 ON（タップで解除）', '🔒 TEST: daily limit ON (tap to disable)');
-      html += '<button class="lg-btn sec" style="border:1px dashed rgba(255,255,255,0.35);font-size:12px;' +
-        (tOn ? 'color:#ffd479' : '') + '" onclick="leagueToggleTestLock()">' + tl + '</button>';
-    }
-
-    html += '<button class="lg-btn sec" onclick="leagueBackToTitle()">' + _t('← タイトルへ戻る', '← Back to title') + '</button>';
+    html += _hubTabsHTML();
+    html += '<div id="lg-tabbody" class="lg-tabbody">' + _hubTabBodyHTML() + '</div>';
     html += '</div></div></div>';   // /lg-col-side /lg-cols /lg-wrap
     _body().innerHTML = html;
+    // UX-07: ハブは1画面固定。ただし**シーズン終了（最終話）は長文の読み物**で
+    //   表彰・Team of the Season・契約分岐まで続くため、固定すると切れて操作不能に
+    //   なる。ここだけはページスクロールを許す。
+    _hubMode(!_state.finished);
     _afterRender();
   }
 
@@ -3267,6 +3341,12 @@
    *   ① 監督室の背景を敷く（冪等・DOM は包まないのでレイアウトに影響しない）
    *   ② 顔（portrait.js）と背景アート（lab-art.js）の canvas を塗る
    *   ③ 監督ステータス等のバーを 0 から伸ばす */
+  /* UX-07: ハブのときだけ画面を固定する（クラブ選択は8枚並ぶのでスクロールさせる）。 */
+  function _hubMode(on) {
+    var s = document.getElementById('screen-home'); if (!s) return;
+    if (on) s.classList.add('hub-mode'); else s.classList.remove('hub-mode');
+  }
+
   function _afterRender() {
     var body = _body(); if (!body) return;
     if (_lgOn() && LgUI.mountOffice) LgUI.mountOffice(document.getElementById('screen-home'));
@@ -3340,6 +3420,21 @@
   window.leagueSetWeekSlot = function (idx, kind) { _setWeekSlot(idx, kind); };
   window.leagueSetTrainee = function (idx, key) { _setTraineeTarget(idx, key); };
   window.leagueAutoWeek = function () { _autoWeek(); };
+  /* UX-07: ハブのタブ切替。★ ハブ全体ではなくパネルの中身だけ差し替える
+   * （主役の試合カードを毎回描き直さない＝チラつかない）。 */
+  window.leagueSetHubTab = function (t) {
+    _hubTab = t;
+    var body = document.getElementById('lg-tabbody');
+    if (!body) { _renderHub(false); return; }
+    body.innerHTML = _hubTabBodyHTML();
+    var btns = document.querySelectorAll('#league-body .lg-tab');
+    Array.prototype.forEach.call(btns, function (b) {
+      if (b.getAttribute('data-tab') === t) b.classList.add('on'); else b.classList.remove('on');
+    });
+    _paintPortraitCanvases(body);
+    _growBars(body);
+    if (_juiceOn()) { Juice.sfx('tick'); Juice.reveal(body, { dur: 220 }); }
+  };
   window.leagueBackToTitle = function () {
     if (document.body) document.body.classList.remove('league-mode');
     if (typeof showScreen === 'function') showScreen('title');

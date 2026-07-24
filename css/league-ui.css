@@ -184,6 +184,84 @@
 .lg-pos { display: inline-block; width: 18px; color: var(--lg-text-mute); font-weight: 700; }
 
 /* =============================================================================
+ * 1b. UX-07 監督室ハブ（固定1画面・ステータスバー＋タブ）
+ * ★ 縦に積むのをやめた。主役（次の試合）は常に見え、それ以外はタブで入れ替える。
+ * ========================================================================== */
+
+/* 固定ステータスバー＝「自分が誰で、今どこにいるか」を1行で常時表示 */
+.lg-hubbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 7px 10px; margin-bottom: 10px;
+  background: var(--lg-surface); border: 1px solid var(--lg-line);
+  border-radius: var(--lg-r-m);
+  font-size: 12px; color: var(--lg-text-dim);
+}
+.lg-hb-crest {
+  width: 26px; height: 26px; border-radius: 7px; border: 1px solid transparent;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex: 0 0 auto;
+}
+.lg-hb-name { font-size: 14px; font-weight: 800; color: var(--lg-text); }
+.lg-hb-season {
+  font-size: 10px; font-weight: 800; letter-spacing: .5px;
+  padding: 2px 7px; border-radius: 20px; background: var(--lg-surface-3); color: var(--lg-text);
+}
+.lg-hb-sep { flex: 1 1 auto; }
+.lg-hb-stat { white-space: nowrap; }
+.lg-hb-stat b { color: var(--lg-text); font-size: 13px; }
+.lg-hb-rival { white-space: nowrap; color: #e8776f; font-weight: 700; }
+
+/* タブ */
+.lg-tabs {
+  display: flex; gap: 5px; flex: 0 0 auto;
+  padding: 3px; margin-bottom: 9px;
+  background: rgba(0, 0, 0, .28); border: 1px solid var(--lg-line);
+  border-radius: var(--lg-r-m);
+}
+.lg-tab {
+  position: relative; flex: 1;
+  padding: 8px 6px; border: none; border-radius: var(--lg-r-s);
+  background: transparent; color: var(--lg-text-mute);
+  font-family: inherit; font-size: 12px; font-weight: 800; cursor: pointer;
+  transition: background var(--lg-t-fast), color var(--lg-t-fast);
+}
+.lg-tab:hover { color: var(--lg-text-dim); background: var(--lg-surface); }
+.lg-tab.on {
+  background: var(--lg-surface-3); color: var(--lg-text);
+  box-shadow: inset 0 -2px 0 var(--lg-info);
+}
+/* 未対応が残っている合図（開かなくても分かる） */
+.lg-tab-dot {
+  position: absolute; top: 5px; right: 7px;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--lg-accent);
+}
+.lg-tab-n {
+  margin-left: 4px; font-size: 10px; font-weight: 800;
+  padding: 1px 5px; border-radius: 20px;
+  background: var(--lg-surface-3); color: var(--lg-text-dim);
+}
+
+/* タブの中身＝ここだけがスクロールする（画面は伸びない） */
+.lg-tabbody { min-height: 0; }
+.lg-tabbody > *:last-child { margin-bottom: 0; }
+
+/* 試合カードの下の判断材料（相手の攻め筋・前節・調子・要求）
+   ＝左カラムの余白を「意味のある情報」で埋める。ただの余白は作らない。 */
+.lg-nextinfo {
+  background: rgba(0, 0, 0, .26); border: 1px solid var(--lg-line);
+  border-radius: var(--lg-r-m); padding: 2px 12px; margin-top: 12px;
+}
+/* VS の各サイドに順位と勝点（プレビューとしての情報量） */
+.lg-vs-pos { font-size: 10px; color: var(--lg-text-mute); font-weight: 700; margin-top: 3px; }
+.lg-ni-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0; font-size: 12px; color: var(--lg-text);
+  border-bottom: 1px solid var(--lg-line-soft);
+}
+.lg-ni-row:last-child { border-bottom: none; }
+.lg-ni-k { flex: 0 0 7.5em; font-size: 11px; color: var(--lg-text-mute); font-weight: 700; }
+
+/* =============================================================================
  * 2. クラブ選択
  * ========================================================================== */
 .lg-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -764,6 +842,67 @@
 /* =============================================================================
  * 12. 横長（landscape）— style.css の 2カラムと共存する調整のみ
  * ========================================================================== */
+/* ── UX-07 ハブを1画面に固定する（スクロールするのはタブの中身だけ）────── */
+@media (orientation: landscape) {
+  /* 右カラム自体はスクロールさせず、タブ＋中身の2段にする
+     （style.css の .lg-col{overflow-y:auto} をここで打ち消す） */
+  body.league-mode .lg-hub .lg-col-side {
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  body.league-mode .lg-hub .lg-col-main { overflow: hidden; }
+  body.league-mode .lg-hub .lg-tabbody {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 2px;
+  }
+  body.league-mode .lg-hubbar { margin-bottom: 8px; }
+  /* ★ 左は試合カードだけ、右は準備/順位/監督の実データ。右を広く取る
+     （既定の 1.12fr : 0.88fr のままだと右が窮屈でアイコン列が折り返す）。 */
+  body.league-mode .lg-hub .lg-cols {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  }
+
+  /* ★ デッドスペースを作らない：中央寄せで上下に余白を作る代わりに、
+     VS カード自体を伸ばして高さを使い切る（試合が「主役」に見える）。 */
+  body.league-mode .lg-hub .lg-mb-next {
+    flex: 1 1 auto; min-height: 0; justify-content: flex-start;
+  }
+  body.league-mode .lg-hub .lg-mb-next > .lg-hero {
+    flex: 1 1 auto; min-height: 0;
+    display: flex; flex-direction: column; justify-content: flex-start;
+  }
+  /* ★ 箱だけ伸ばして中身が小さいままだと「間延び」になる。
+     VS を伸縮領域にして高さを使い切り（縦中央に揃う）、判断材料は下端に置く。 */
+  body.league-mode .lg-hub .lg-mb-next .lg-vs { flex: 1 1 auto; min-height: 0; margin: 0; }
+  body.league-mode .lg-hub .lg-mb-next .lg-vs .crest { font-size: clamp(38px, 8.5vh, 76px); line-height: 1.1; }
+  body.league-mode .lg-hub .lg-mb-next .lg-vs .nm { font-size: clamp(13px, 2vh, 17px); margin-top: 10px; }
+  body.league-mode .lg-hub .lg-mb-next .lg-vs .mid { font-size: clamp(26px, 5.5vh, 48px); opacity: .7; }
+  /* 面談・最終話は内容量が多いので、伸ばさずカラム内でスクロールさせる */
+  body.league-mode .lg-hub .lg-mb-board,
+  body.league-mode .lg-hub .lg-mb-final {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto; justify-content: flex-start;
+  }
+}
+
+/* 縦持ちでもハブは伸びない。中身だけがスクロールする。
+   ★ クラブ選択画面（.lg-pick-wrap）まで固定すると8枚が切れるので、
+     hub-mode クラス（_renderHub が付け、_renderPick が外す）で限定する。 */
+@media (orientation: portrait) {
+  body.league-mode #screen-home.hub-mode { overflow: hidden; display: flex; flex-direction: column; }
+  body.league-mode #screen-home.hub-mode > #league-body {
+    flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
+  }
+  body.league-mode .lg-wrap.lg-hub {
+    flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; padding-bottom: 12px;
+  }
+  body.league-mode .lg-hub .lg-cols {
+    flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
+  }
+  body.league-mode .lg-hub .lg-col-main { flex: 0 0 auto; }
+  body.league-mode .lg-hub .lg-col-side {
+    flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
+  }
+  body.league-mode .lg-hub .lg-tabbody { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+}
+
 @media (orientation: landscape) {
   /* 横長は画面が低いので、カードデッキを詰めて1枚が収まりやすくする */
   body.league-mode .lg-md-post .lgj-stage { max-width: 620px; }
