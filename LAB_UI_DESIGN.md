@@ -362,3 +362,22 @@ Matchday.playPostMatch(panels, opts, done)   // UX-04
 → `_opponentThreatsRanked()` が val 降順で返し、バーは各チーム内の min→max を 0..1 に
 伸ばして「どの攻め筋に寄っているか」を可視化する。表示順とビデオ学習の対策順は val 順で
 統一（順位とバーが必ず一致）。エンジンには触れないので回帰リスクなし。
+
+## 13. MD-01 試合前の設定画面（スタメン/戦術/システム）
+
+**なぜ**: 「週末の試合へ」で即キックオフだったが、監督なら**試合前にスタメン・戦術・
+システムを決める**のが自然。既存の設定画面インフラ（`initSettingScreen`/`screen-setting`）を
+流用して間に挟んだ。
+
+**フロー**: 週末の試合へ → **設定画面** → キックオフ → 導入コマ(UX-03) → 試合。
+
+- `playToday()` は team1State を組んだあと `startManagerMatch()` を直接叩かず、
+  `window._leagueInMatch=true` にして設定画面を出す。
+- キックオフは `startGame()`(simulate) が `window._leagueInMatch` を見て `leagueKickoff()`
+  に委譲＝導入コマ→試合。戻るは `settingBack()`→`leagueCancelPrep()` で監督室へ。
+- 戦術ロック（MG-04）は既存の `leagueTacticInfo` フックで設定画面でも効く
+  （開幕は「バランス重視」のみ選択可）。複数試合ボタン(📊10/100)はリーグでは非表示。
+- `initSettingScreen` はリーグ時 team1State を上書きしない（習得済み戦術の制約を保つ）。
+- キャンセルは巻き戻す（戦術buff `_endManagerMatchCtx`・終了フック・pending・フラグ）。
+  試合は消費しない（round 据え置き）。回復日 healing は冪等なので触らない。
+- 公開版は `window._leagueInMatch` が undefined＝全ガード falsy で従来どおり（無影響）。

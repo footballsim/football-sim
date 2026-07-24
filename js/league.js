@@ -2393,6 +2393,7 @@
   /* ── 試合起動（自チーム = 監督ビューア） ─────────────────────────────── */
   // UX-03: 導入の再生中に再入すると、オーバーレイが重なり startManagerMatch も二重に走る。
   var _preMatchRunning = false;
+  var _pendingMatch = null;   // MD-01: 設定画面〜キックオフの間の対戦カード保持
   function playToday() {
     if (!_state || _state.finished) return;
     if (_lockedToday()) return;
@@ -2442,14 +2443,43 @@
     // 試合終了フック（_mvFinish が拾う。1回で自動解除）
     window._leagueOnMatchFinish = function () { _onMatchFinish(myId, oppId, iAmHome, fx); };
 
-    // UX-03: 即キックオフをやめ、漫画のコマ送りで「ため」を作ってから試合へ。
-    //   Matchday 未搭載／演出OFF なら go() が即座に呼ばれる＝従来どおり。
+    // MD-01: 即キックオフをやめ、まず**試合設定画面**（スタメン/戦術/システム）を出す。
+    //   キックオフはこの画面から（leagueKickoff）。戻る＝leagueCancelPrep で監督室へ。
+    //   設定画面は既存インフラ（initSettingScreen / screen-setting）を流用。
+    //   ★ team1State は上で「習得済み戦術」に制約して組んだので、initSettingScreen 側では
+    //     上書きしない（window._leagueInMatch を見て team1State リセットを飛ばす）。
+    _pendingMatch = { myId: myId, oppId: oppId, iAmHome: iAmHome, fx: fx };
+    window._leagueInMatch = true;
+    _settingBackScreen = 'home';   // フォールバック（実際の戻るは settingBack→leagueCancelPrep）
+    if (typeof initSettingScreen === 'function') initSettingScreen();
+    if (typeof showScreen === 'function') showScreen('setting');
+  }
+
+  /* MD-01: 設定画面の「キックオフ」から呼ばれる。ここで導入コマ→試合へ。
+   * startGame(simulate.js) が window._leagueInMatch を見てこれに委譲する。 */
+  window.leagueKickoff = function () {
+    if (_preMatchRunning || !_pendingMatch) return;
+    var pm = _pendingMatch;
+    window._leagueInMatch = false;   // 設定画面を抜けた＝試合へコミット
+    // UX-03: 漫画のコマ送りで「ため」を作ってから試合へ（未搭載/OFF なら即キックオフ）。
     _preMatchRunning = true;
-    _playPreMatchThen(myId, oppId, iAmHome, function () {
+    _playPreMatchThen(pm.myId, pm.oppId, pm.iAmHome, function () {
       _preMatchRunning = false;
       startManagerMatch();
     });
-  }
+  };
+
+  /* MD-01: 設定画面の「戻る」＝試合をキャンセルして監督室へ。
+   * 準備で仕込んだもの（戦術buff・終了フック・pending）を全て巻き戻す。
+   * ★ 回復日の healing は冪等（_applyWeekRecovery が preApplied で管理）なので触らない。 */
+  window.leagueCancelPrep = function () {
+    window._leagueInMatch = false;
+    _leagueMatchActive = false;
+    _endManagerMatchCtx();
+    window._leagueOnMatchFinish = null;
+    _pendingMatch = null;
+    if (typeof showScreen === 'function') showScreen('home');
+  };
 
   /* UX-03 プレマッチ導入。Matchday は文言を持たないので、ここで全部組んで渡す。 */
   function _playPreMatchThen(myId, oppId, iAmHome, go) {
@@ -2493,6 +2523,8 @@
 
   function _onMatchFinish(myId, oppId, iAmHome, fx) {
     window._leagueOnMatchFinish = null;
+    window._leagueInMatch = false;   // MD-01: 設定画面フラグの後始末（保険）
+    _pendingMatch = null;
     _endManagerMatchCtx();   // MG-03: 対策 buff はこの1試合限り（他会場の AI 消化前に必ず解除）
     _leagueMatchActive = false;   // MG-04: 戦術の制限もリーグの試合中だけ（シングル/W杯に漏らさない）
     // 自チーム = team1（gameState.team1）。得点は team.score。
@@ -3500,6 +3532,10 @@
     if (_juiceOn()) { Juice.sfx('tick'); Juice.reveal(body, { dur: 220 }); }
   };
   window.leagueBackToTitle = function () {
+    // MD-01: リーグを離れるので試合準備フラグを必ず落とす（single/WC へ漏らさない）
+    window._leagueInMatch = false;
+    _leagueMatchActive = false;
+    _pendingMatch = null;
     if (document.body) document.body.classList.remove('league-mode');
     if (typeof showScreen === 'function') showScreen('title');
   };

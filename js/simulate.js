@@ -1117,7 +1117,9 @@ function initSettingScreen() {
     `${getTeamName(team1Data)} vs ${getTeamName(team2Data)}`;
 
   // Init state（W杯モード第2戦以降は前試合の設定を引き継ぐ）
-  if (!(isWorldCupMode && wcMatchIndex > 0)) {
+  // ★ リーグ（MD-01）は playToday が team1State を「習得済み戦術」に制約して組むので上書きしない。
+  const _leagueMD = (typeof window !== 'undefined' && window._leagueInMatch);
+  if (!(isWorldCupMode && wcMatchIndex > 0) && !_leagueMD) {
     team1State = {
       systemIdx: system_data.findIndex(s => s.name === team1Data.default_system),
       tactics: team1Data.default_tactics,
@@ -1137,7 +1139,8 @@ function initSettingScreen() {
   applyLang();
 
   // W杯モード時は多試合ボタンを非表示。監督モードも単一試合（非W杯）でのみ表示。
-  const multiVisible = !isWorldCupMode;
+  // ★ リーグ（MD-01）でも非表示＝1試合1回のカードを一括シミュレートさせない。
+  const multiVisible = !isWorldCupMode && !_leagueMD;
   document.getElementById('btn-multi').style.display    = multiVisible ? '' : 'none';
   document.getElementById('btn-multi100').style.display = multiVisible ? '' : 'none';
   // 「👔 監督モードで観戦」ボタンは常時非表示。シングルマッチのキックオフが監督モードに委譲済み
@@ -1953,9 +1956,24 @@ function closeModal(id) {
 // GAME ENGINE
 // ============================================================
 
+// 設定画面の「戻る」。リーグ（MD-01）はキャンセル扱いで監督室へ、それ以外は元画面へ。
+function settingBack() {
+  if (typeof window !== 'undefined' && window._leagueInMatch && typeof window.leagueCancelPrep === 'function') {
+    window.leagueCancelPrep();
+    return;
+  }
+  showScreen(_settingBackScreen);
+}
+
 function startGame() {
   // 延長戦は _runWCETPhase() で処理するため setting 画面からは実行しない
   if (wcPhase === 'et_first' || wcPhase === 'et_second') return;
+
+  // ★ リーグ（MD-01）: 設定画面のキックオフは導入コマ→試合の league 経路へ委譲する。
+  if (typeof window !== 'undefined' && window._leagueInMatch && typeof window.leagueKickoff === 'function') {
+    window.leagueKickoff();
+    return;
+  }
 
   // ★ 監督モードをシングルマッチのデフォルト体験にする（ユーザー確定方針・VISION「監督として読む」）。
   //   W杯モード（group/knockout）は現状維持＝従来の手動シーン送りで進める。
