@@ -2316,6 +2316,72 @@
     });
   }
 
+  /* ST-01: 試合詳細スタッツ（シングルマッチ後スタッツの転用・AI総括は入れない）。
+   * chanceResults から集計＝narration.js の showResult と同じ算出（チャンス/シュート/
+   * GKセーブ/ポゼッション）。t1=自チーム / t2=相手（監督ビューアは常に team1=自）。 */
+  function _computeMatchStats() {
+    if (typeof chanceResults === 'undefined' || !chanceResults) return null;
+    if (typeof gameState === 'undefined' || !gameState || !gameState.team1) return null;
+    var t1 = gameState.team1, t2 = gameState.team2;
+    var s = { t1: { ch: 0, sh: 0, gk: 0, atk: 0 }, t2: { ch: 0, sh: 0, gk: 0, atk: 0 } };
+    chanceResults.forEach(function (res) {
+      if (!res || !res.scenes) return;
+      var c1 = false, c2 = false;
+      res.scenes.forEach(function (sc) {
+        // ポゼッション＝全シーンの攻撃回数比（showResult と同じ）
+        if (sc.offence === t1) s.t1.atk++; else if (sc.offence === t2) s.t2.atk++;
+        var isShoot = (sc.result === 'ゴール！！' || sc.result === 'GK防いだ！' || sc.result === '枠を外した！');
+        var isNormal = (sc.result === '成功' || sc.result === '失敗' || sc.result === 'ファール');
+        if (!isShoot && !isNormal) return;
+        // チャンス＝FW到達 or シュート。1チャンス1カウント
+        if (isShoot || (sc.area && sc.area.substring(0, 2) === 'FW')) {
+          if (sc.offence === t1 && !c1) { s.t1.ch++; c1 = true; }
+          if (sc.offence === t2 && !c2) { s.t2.ch++; c2 = true; }
+        }
+        if (isShoot) { if (sc.offence === t1) s.t1.sh++; else if (sc.offence === t2) s.t2.sh++; }
+        if (sc.result === 'GK防いだ！') { if (sc.defence === t1) s.t1.gk++; else if (sc.defence === t2) s.t2.gk++; }
+      });
+    });
+    var tot = s.t1.atk + s.t2.atk || 1;
+    s.t1.poss = Math.round(s.t1.atk / tot * 100);
+    s.t2.poss = 100 - s.t1.poss;
+    return s;
+  }
+
+  /* 試合スタッツのカード HTML。自チーム(左)＝t1 / 相手(右)＝t2。 */
+  function _matchStatsHTML(lr) {
+    var s = lr && lr.stats;
+    if (!s) return '';
+    var myDef = _clubDef(lr.mine.me), opDef = _clubDef(lr.mine.opp);
+    var myCol = (myDef && myDef.color) || '#4a9eff', opCol = (opDef && opDef.color) || '#e8776f';
+    function bar() {
+      return '<div class="lg-stat-poss">' +
+        '<span class="lg-stat-pv" style="color:' + myCol + '">' + s.t1.poss + '%</span>' +
+        '<span class="lg-stat-bar">' +
+          '<i style="width:' + s.t1.poss + '%;background:' + myCol + '"></i>' +
+          '<i style="width:' + s.t2.poss + '%;background:' + opCol + '"></i></span>' +
+        '<span class="lg-stat-pv" style="color:' + opCol + '">' + s.t2.poss + '%</span></div>';
+    }
+    function row(l, label, r) {
+      return '<div class="lg-stat-row"><span class="lg-stat-n">' + l + '</span>' +
+        '<span class="lg-stat-l">' + label + '</span>' +
+        '<span class="lg-stat-n">' + r + '</span></div>';
+    }
+    return '<div class="lg-card lg-stats">' +
+      '<div class="lgp-kicker" style="text-align:center">' + _t('試合スタッツ', 'MATCH STATS') + '</div>' +
+      '<div class="lg-stat-head">' +
+        '<span style="color:' + myCol + '">' + (myDef ? myDef.crest : '') + ' ' + _clubName(lr.mine.me) + '</span>' +
+        '<span class="lg-stat-score">' + lr.mine.ms + ' - ' + lr.mine.os + '</span>' +
+        '<span style="color:' + opCol + '">' + _clubName(lr.mine.opp) + ' ' + (opDef ? opDef.crest : '') + '</span>' +
+      '</div>' +
+      '<div class="lg-stat-plabel">' + _t('ポゼッション', 'Possession') + '</div>' + bar() +
+      '<div class="lg-stat-grid">' +
+        row(s.t1.ch, _t('チャンス', 'Chances'), s.t2.ch) +
+        row(s.t1.sh, _t('シュート', 'Shots'), s.t2.sh) +
+        row(s.t1.gk, _t('GKセーブ', 'GK Saves'), s.t2.gk) +
+      '</div></div>';
+  }
+
   /* UX-04: 試合後を「今節の号」として1コマずつ開く。
    * 各パネルの HTML は既存ビルダをそのまま再利用＝文言・ロジックを二重管理しない。 */
   function _postMatchPanels(lr) {
@@ -2360,6 +2426,22 @@
         id: 'report', sfx: 'ping',
         html: '<div class="lg-card"><div class="lgp-kicker">' + _t('この試合の主役', 'Standout') + '</div>' +
           '<div class="lg-mini" style="text-align:center;line-height:1.9;font-size:13px">' + ms + '</div></div>'
+      });
+    }
+
+    // ST-01 試合スタッツ（シングルマッチ後スタッツの転用・AI総括なし）
+    var statsHTML = _matchStatsHTML(lr);
+    if (statsHTML) {
+      panels.push({
+        id: 'stats', sfx: 'tick',
+        html: statsHTML,
+        onShow: function (el, firstTime) {
+          if (!firstTime || !_juiceOn()) return;
+          // 数値をカウントアップ＋ポゼッションバーを伸ばす（手触り）
+          Array.prototype.forEach.call(el.querySelectorAll('.lg-stat-n'), function (n) {
+            var to = parseInt(n.textContent, 10); if (!isNaN(to)) Juice.countUp(n, to, { dur: 500 });
+          });
+        }
       });
     }
 
@@ -2694,6 +2776,9 @@
         rival: _isRival(oppId), posBefore: posBefore, posAfter: _position(myId),
         mom: report.mom, scorers: report.scorers
       },
+      // ST-01: 試合詳細スタッツ（シングルマッチ後スタッツの転用）。chanceResults が生きて
+      //   いるうちに採取して保存＝カードデッキ／記録タブから再表示できる。
+      stats: _computeMatchStats(),
       others: others,
       log: matchLog   // 実況テキストログ（試合後に見直す用）
     };
