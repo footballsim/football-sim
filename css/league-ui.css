@@ -1,0 +1,631 @@
+/* =============================================================================
+ * league-ui.css — 試合外パートのデザインシステム（lab限定 / LAB_UI_DESIGN.md §5）
+ * -----------------------------------------------------------------------------
+ * ★ このファイルは js/league.js の _ensureStyle() が実行時注入していた巨大文字列の
+ *   移行先。トークン（--lg-*）を1か所に集約し、ハードコード16進色を排する。
+ *   （データ由来の色＝クラブカラーだけは JS 側のインライン指定を許す）
+ *
+ * ★ 読み込みは build.js が lab の <head> にだけ挿す。公開 docs/index.html は不変。
+ * ★ style.css の body.league-mode（横長2カラム）と共存する。DOM構造は変えない。
+ * ========================================================================== */
+
+:root {
+  /* 存在確認センチネル（league.js が読み込み成否を検出する） */
+  --lg-css: 1;
+
+  /* 面 */
+  --lg-bg-0: #0b1f3f;
+  --lg-bg-1: #0a2a5e;
+  --lg-bg-2: #0d1b3e;
+  --lg-surface: rgba(255, 255, 255, .06);
+  --lg-surface-2: rgba(255, 255, 255, .10);
+  --lg-surface-3: rgba(255, 255, 255, .14);
+  --lg-line: rgba(255, 255, 255, .12);
+  --lg-line-soft: rgba(255, 255, 255, .07);
+
+  /* 文字 */
+  --lg-text: #fff;
+  --lg-text-dim: rgba(255, 255, 255, .70);
+  --lg-text-mute: rgba(255, 255, 255, .45);
+  --lg-text-faint: rgba(255, 255, 255, .32);
+
+  /* 意味色 */
+  --lg-win: #2ecc71;
+  --lg-draw: #f1c40f;
+  --lg-loss: #e74c3c;
+  --lg-accent: #e8433b;
+  --lg-accent-2: #c0392b;
+  --lg-info: #7ad0ff;
+  --lg-info-2: #4a9eff;
+  --lg-good: #8fe3a4;
+  --lg-bad: #ff9a8f;
+  --lg-warn: #ffd479;
+  --lg-gold: #f5c518;
+  --lg-gold-2: #c9a227;
+  --lg-paper: #f4efe2;
+  --lg-ink: #14110b;
+
+  /* 形 */
+  --lg-r-s: 8px;
+  --lg-r-m: 12px;
+  --lg-r-l: 16px;
+  --lg-pad-s: 8px;
+  --lg-pad-m: 12px;
+  --lg-pad-l: 16px;
+  --lg-shadow: 0 4px 18px rgba(0, 0, 0, .25);
+  --lg-shadow-l: 0 10px 34px rgba(0, 0, 0, .45);
+
+  /* 動き */
+  --lg-t-fast: .14s;
+  --lg-t-mid: .32s;
+  --lg-t-slow: .6s;
+  --lg-ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+/* =============================================================================
+ * 1. 監督室（#screen-home）とレイアウト土台
+ * ========================================================================== */
+#screen-home {
+  background: linear-gradient(160deg, var(--lg-bg-0) 0%, var(--lg-bg-1) 52%, var(--lg-bg-2) 100%);
+  align-items: center;
+  justify-content: flex-start;
+  overflow-y: auto;
+  color: var(--lg-text);
+  position: relative;
+}
+
+/* UX-01 監督室の背景レイヤ（LgUI.mountOffice が敷く・DOM構造は包まない） */
+.lg-office-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.lg-office-backdrop .lg-office-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: .55;
+}
+.lg-office-backdrop .lg-office-deskart {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 22%;
+  opacity: .40;
+}
+.lg-office-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 40%, rgba(0, 0, 0, 0) 0%, rgba(4, 10, 22, .55) 100%);
+}
+/* 中身は必ず背景より前 */
+#screen-home > #league-body { position: relative; z-index: 1; }
+
+.lg-wrap {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 12px 14px 40px;
+  box-sizing: border-box;
+}
+
+.lg-h {
+  font-family: "Bebas Neue", sans-serif;
+  letter-spacing: 1px;
+  font-size: 15px;
+  color: #cde0ff;
+  margin: 18px 2px 8px;
+  font-weight: 700;
+}
+
+.lg-card {
+  background: var(--lg-surface);
+  border: 1px solid var(--lg-line);
+  border-radius: var(--lg-r-l);
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: var(--lg-shadow);
+  backdrop-filter: blur(2px);
+}
+
+.lg-club { display: flex; align-items: center; gap: 12px; }
+.lg-crest {
+  width: 44px; height: 44px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+}
+.lg-clubname { font-size: 17px; font-weight: 800; line-height: 1.15; }
+.lg-sub { font-size: 11px; color: var(--lg-text-dim); margin-top: 2px; }
+.lg-mini { font-size: 11px; color: var(--lg-text-dim); line-height: 1.7; }
+
+.lg-hero {
+  border-radius: var(--lg-r-l);
+  padding: 16px 14px;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.lg-vs { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0; }
+.lg-vs .side { flex: 1; text-align: center; }
+.lg-vs .crest { font-size: 30px; }
+.lg-vs .nm { font-size: 12px; font-weight: 700; margin-top: 3px; line-height: 1.2; }
+.lg-vs .mid { font-family: "Bebas Neue"; font-size: 22px; opacity: .85; padding: 0 4px; }
+
+.lg-badge {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px;
+  background: var(--lg-surface-3); margin-left: 6px; vertical-align: middle;
+}
+.lg-resbadge { font-family: "Bebas Neue"; font-size: 30px; font-weight: 700; letter-spacing: 1px; }
+
+.lg-btn {
+  display: block; width: 100%; box-sizing: border-box;
+  padding: 14px; border: none; border-radius: var(--lg-r-m);
+  font-family: inherit; font-size: 15px; font-weight: 800;
+  cursor: pointer; margin-top: 6px; color: var(--lg-text);
+  background: linear-gradient(135deg, var(--lg-accent), var(--lg-accent-2));
+  box-shadow: 0 4px 14px rgba(192, 57, 43, .4);
+  transition: transform var(--lg-t-fast) var(--lg-ease), filter var(--lg-t-fast);
+}
+.lg-btn:active:not(:disabled) { transform: scale(.975); filter: brightness(1.1); }
+.lg-btn:disabled {
+  background: var(--lg-surface-2); color: var(--lg-text-mute);
+  box-shadow: none; cursor: default;
+}
+.lg-btn.sec { background: var(--lg-surface-2); box-shadow: none; font-size: 14px; }
+.lg-btn-inline { display: inline-block; width: auto; margin-top: 0; padding: .5em .9em; font-size: .8em; }
+
+.lg-dot { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+.lg-pos { display: inline-block; width: 18px; color: var(--lg-text-mute); font-weight: 700; }
+
+/* =============================================================================
+ * 2. クラブ選択
+ * ========================================================================== */
+.lg-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lg-pick .pc {
+  position: relative; background: var(--lg-surface);
+  border: 1px solid var(--lg-line); border-radius: var(--lg-r-m);
+  padding: 10px 12px 12px; cursor: pointer; text-align: center;
+  transition: transform var(--lg-t-fast) var(--lg-ease), border-color var(--lg-t-fast);
+}
+.lg-pick .pc:active { transform: scale(.97); }
+.lg-pick .pc:hover { border-color: var(--lg-surface-3); }
+.lg-pick .pc .pc-face {
+  display: block; width: 100%; max-width: 116px; margin: 2px auto 0;
+  aspect-ratio: 6/7; border-radius: 10px;
+  background: radial-gradient(120% 90% at 50% 15%, rgba(255, 255, 255, .16), rgba(0, 0, 0, .22));
+}
+.lg-pick .pc .cr { position: absolute; top: 7px; right: 9px; font-size: 19px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .55)); }
+.lg-pick .pc .pn { font-size: 13px; font-weight: 800; margin-top: 4px; }
+.lg-pick .pc .pr { font-size: 10px; color: var(--lg-text-dim); margin-top: 2px; }
+
+/* =============================================================================
+ * 3. 今週の準備（週プラン3コマ）
+ * ========================================================================== */
+.lg-slotrow {
+  display: flex; align-items: center; gap: .5em;
+  padding: .35em 0; border-bottom: 1px solid var(--lg-line-soft);
+}
+.lg-slotno { flex: 0 0 1.3em; text-align: center; font-size: .72em; font-weight: 800; color: var(--lg-text-mute); }
+.lg-slotchips { display: flex; flex-wrap: wrap; gap: .25em; flex: 0 1 auto; max-width: 60%; }
+.lg-slotchip {
+  width: 2.1em; height: 2.1em; border-radius: .55em;
+  border: 1px solid var(--lg-line); background: var(--lg-surface);
+  color: var(--lg-text); font-size: .95em; line-height: 1; cursor: pointer; padding: 0;
+  transition: transform var(--lg-t-fast) var(--lg-ease), background var(--lg-t-fast), box-shadow var(--lg-t-fast);
+}
+.lg-slotchip.on {
+  background: linear-gradient(135deg, #3f7fd6, #5aa6ef);
+  border-color: rgba(150, 210, 255, .7);
+  box-shadow: 0 2px 8px rgba(60, 130, 220, .45);
+}
+.lg-slotchip:disabled { opacity: .28; cursor: default; }
+.lg-slotchip:active:not(:disabled) { transform: scale(.92); }
+.lg-slottext { flex: 1; min-width: 0; font-size: .72em; color: var(--lg-text-dim); line-height: 1.35; overflow: hidden; text-overflow: ellipsis; }
+.lg-slotsub { padding: 0 0 .4em 1.8em; }
+.lg-slotfoot { display: flex; align-items: center; gap: .7em; margin-top: .5em; }
+.lg-absrow { display: flex; align-items: center; gap: .4em; font-size: .75em; padding: .2em 0; color: rgba(255, 255, 255, .85); }
+
+/* 旧 <select>（LgUI 未搭載時のフォールバック用に残す） */
+.lg-select {
+  width: 100%; box-sizing: border-box;
+  background: var(--lg-surface-2); color: var(--lg-text);
+  border: 1px solid rgba(255, 255, 255, .18); border-radius: .5em;
+  padding: .4em .6em; font-family: inherit; font-size: .78em;
+}
+
+/* =============================================================================
+ * 4. UX-06 選手ピッカー（<select> の置換）
+ * ========================================================================== */
+.lg-pk { margin: .1em 0 .5em 1.8em; }
+.lg-pk-strip {
+  display: flex; gap: 7px; overflow-x: auto; padding: 4px 2px 8px;
+  scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
+}
+.lg-pk-strip::-webkit-scrollbar { height: 4px; }
+.lg-pk-strip::-webkit-scrollbar-thumb { background: var(--lg-surface-3); border-radius: 2px; }
+.lg-pk-card {
+  flex: 0 0 auto; width: 62px; scroll-snap-align: start;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: var(--lg-surface); border: 1px solid var(--lg-line);
+  border-radius: 10px; padding: 5px 3px 6px; cursor: pointer;
+  color: var(--lg-text); font-family: inherit;
+  transition: transform var(--lg-t-fast) var(--lg-ease), border-color var(--lg-t-fast), background var(--lg-t-fast);
+}
+.lg-pk-card:active { transform: scale(.94); }
+.lg-pk-card.on {
+  background: linear-gradient(160deg, rgba(90, 166, 239, .34), rgba(63, 127, 214, .18));
+  border-color: rgba(150, 210, 255, .75);
+  box-shadow: 0 2px 10px rgba(60, 130, 220, .4);
+}
+.lg-pk-face {
+  width: 100%; height: auto; aspect-ratio: 112/130; border-radius: 7px;
+  background: radial-gradient(120% 90% at 50% 15%, rgba(255, 255, 255, .14), rgba(0, 0, 0, .24));
+}
+.lg-pk-name { font-size: 9px; font-weight: 800; line-height: 1.15; text-align: center; word-break: keep-all; }
+.lg-pk-sub { font-size: 8px; color: var(--lg-text-mute); }
+
+/* =============================================================================
+ * 5. UX-06 ゲーム順位表
+ * ========================================================================== */
+.lg-tbl {
+  background: var(--lg-surface); border: 1px solid var(--lg-line);
+  border-radius: var(--lg-r-m); padding: 6px 8px 8px;
+  margin-bottom: 12px; box-shadow: var(--lg-shadow);
+}
+.lg-tbl-head, .lg-tbl-row {
+  display: grid;
+  grid-template-columns: 1.5em minmax(0, 1fr) 1.7em 1.7em 1.7em 1.7em 2.2em 2.2em;
+  align-items: center; gap: 2px;
+}
+.lg-tbl-head {
+  font-size: 9px; font-weight: 700; color: var(--lg-text-mute);
+  padding: 4px 2px; border-bottom: 1px solid var(--lg-line); text-align: center;
+}
+.lg-tbl-head .c-nm { text-align: left; padding-left: 2px; }
+.lg-tbl-row {
+  font-size: 12px; padding: 6px 2px; text-align: center;
+  border-bottom: 1px solid var(--lg-line-soft);
+  border-radius: 6px;
+  transition: background var(--lg-t-mid);
+}
+.lg-tbl-row:last-child { border-bottom: none; }
+.lg-tbl-row .c-pos { color: var(--lg-text-mute); font-weight: 700; font-size: 11px; }
+.lg-tbl-row .c-nm {
+  text-align: left; font-weight: 700; display: flex; align-items: center; gap: 3px;
+  min-width: 0; overflow: hidden;
+}
+.lg-tbl-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-tbl-crest { flex: 0 0 auto; }
+.lg-tbl-row .c-pts { font-weight: 800; }
+/* 自クラブ＝一目で分かる（左に発光するバー） */
+.lg-tbl-row.me {
+  background: linear-gradient(90deg, rgba(122, 208, 255, .20), rgba(255, 255, 255, .05));
+  box-shadow: inset 3px 0 0 var(--lg-info);
+}
+.lg-tbl-row.me .c-pos { color: var(--lg-text); }
+.lg-tbl-row.promo { box-shadow: inset 3px 0 0 var(--lg-win); }
+.lg-tbl-row.releg { box-shadow: inset 3px 0 0 var(--lg-loss); }
+.lg-tbl-row.me.promo { box-shadow: inset 3px 0 0 var(--lg-win), 0 0 0 1px rgba(122, 208, 255, .3) inset; }
+.lg-tbl-move { font-size: 9px; font-weight: 800; margin-left: 3px; flex: 0 0 auto; }
+.lg-tbl-move.up { color: var(--lg-win); }
+.lg-tbl-move.down { color: var(--lg-loss); }
+
+/* 旧 <table>（バックナンバー等のフォールバック用に残す） */
+.lg-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.lg-table th { color: rgba(255, 255, 255, .55); font-weight: 700; font-size: 10px; padding: 5px 3px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, .15); }
+.lg-table td { padding: 7px 3px; text-align: center; border-bottom: 1px solid var(--lg-line-soft); }
+.lg-table td.nm { text-align: left; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+.lg-table tr.me { background: rgba(255, 255, 255, .11); }
+.lg-table td.pts { font-weight: 800; }
+
+/* =============================================================================
+ * 6. 監督ステータスのバー（伸びる）
+ * ========================================================================== */
+.lg-stat { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.lg-stat-label { flex: 0 0 40%; font-size: 11px; color: var(--lg-text-dim); }
+.lg-stat-track { flex: 1; height: 6px; border-radius: 3px; background: var(--lg-surface-2); overflow: hidden; }
+.lg-stat-fill { display: block; height: 100%; width: 0; border-radius: 3px; }
+.lg-stat-val { flex: 0 0 2.2em; text-align: right; font-size: 11px; font-weight: 700; }
+
+/* =============================================================================
+ * 7. UX-05 BEST XI 見開き（雑誌の紙面）
+ * ========================================================================== */
+.lg-sp {
+  border-radius: var(--lg-r-m); padding: 12px 11px 13px;
+  margin: 8px 0 12px; box-shadow: var(--lg-shadow-l); overflow: hidden;
+}
+.lg-sp.weekly { background: linear-gradient(170deg, #0d3b1e, #0a2a16 70%); border: 2px solid var(--lg-gold); }
+.lg-sp.season { background: linear-gradient(170deg, #0b1a3a, #081128 70%); border: 2px solid var(--lg-gold-2); }
+
+.lg-sp-head.weekly {
+  background: var(--lg-gold); color: var(--lg-ink);
+  font-weight: 900; font-size: 13px; letter-spacing: 2px;
+  padding: 5px 10px; margin: -12px -11px 10px; border-radius: 9px 9px 0 0;
+  display: flex; justify-content: space-between; align-items: center; gap: 6px;
+}
+.lg-sp-head.weekly .lg-sp-sub {
+  font-size: 10px; font-weight: 800; background: var(--lg-ink);
+  color: var(--lg-gold); padding: 2px 7px; border-radius: 3px; letter-spacing: .5px;
+}
+.lg-sp-head.season { text-align: center; margin: -2px 0 10px; }
+.lg-sp-head.season .lg-sp-sub { font-size: 9px; letter-spacing: 3px; color: var(--lg-gold-2); }
+.lg-sp-head.season .lg-sp-title { font-weight: 900; font-size: 15px; color: #f4e7c3; margin-top: 2px; }
+.lg-sp-rule { display: block; width: 56px; height: 2px; background: var(--lg-gold-2); margin: 5px auto 0; }
+
+/* ピッチ図＝紙面の下地 */
+.lg-sp-pitch {
+  background:
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, .045) 0 26px, rgba(255, 255, 255, 0) 26px 52px),
+    radial-gradient(90% 70% at 50% 0%, rgba(255, 255, 255, .07), rgba(0, 0, 0, .12));
+  border: 1px solid rgba(255, 255, 255, .10);
+  border-radius: var(--lg-r-s);
+  padding: 8px 6px;
+}
+.lg-sp-line { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+.lg-sp-line:first-child { margin-top: 0; }
+.lg-sp-lbl {
+  flex: 0 0 2em; font-size: 9px; font-weight: 800; letter-spacing: 1px;
+  color: var(--lg-text-mute); text-align: center;
+}
+.lg-sp-row { flex: 1; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.lg-sp-card {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 4.6em; max-width: 6.4em; padding: 3px 2px;
+  border-radius: 7px; background: rgba(0, 0, 0, .22);
+}
+.lg-sp-face {
+  width: 100%; max-width: 48px; height: auto; aspect-ratio: 96/112;
+  border-radius: 5px; background: rgba(255, 255, 255, .07);
+}
+.lg-sp-crest { font-size: 14px; line-height: 1.1; margin-top: 1px; }
+.lg-sp-name {
+  font-size: 10px; font-weight: 800; color: var(--lg-text);
+  text-align: center; line-height: 1.2; margin-top: 1px; word-break: keep-all;
+}
+.lg-sp-rate {
+  font-size: 10px; font-weight: 900; color: var(--lg-ink);
+  border-radius: 3px; padding: 0 5px; margin-top: 2px;
+}
+.lg-sp.weekly .lg-sp-rate { background: var(--lg-gold); }
+.lg-sp.season .lg-sp-rate { background: var(--lg-gold-2); }
+.lg-sp-stat { font-size: 9px; color: rgba(255, 255, 255, .75); margin-top: 1px; }
+
+/* =============================================================================
+ * 8. UX-05 本棚（バックナンバー）
+ * ========================================================================== */
+.lg-shelf { position: relative; padding: 10px 4px 0; margin-bottom: 16px; }
+.lg-shelf-books {
+  display: flex; align-items: flex-end; gap: 5px;
+  overflow-x: auto; padding: 4px 6px 0; min-height: 118px;
+}
+.lg-shelf-books::-webkit-scrollbar { height: 4px; }
+.lg-shelf-books::-webkit-scrollbar-thumb { background: var(--lg-surface-3); border-radius: 2px; }
+.lg-spine {
+  flex: 0 0 auto; width: 34px; height: 108px;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 6px 2px; cursor: pointer; color: var(--lg-text); font-family: inherit;
+  border: none; border-radius: 3px 3px 0 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, .38) 0%, var(--spine, #3f6fae) 22%, var(--spine, #3f6fae) 78%, rgba(0, 0, 0, .3) 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .22), 0 3px 8px rgba(0, 0, 0, .45);
+  transition: transform var(--lg-t-mid) var(--lg-ease);
+}
+.lg-spine:hover { transform: translateY(-7px); }
+.lg-spine:active { transform: translateY(-3px) scale(.98); }
+.lg-spine-label {
+  writing-mode: vertical-rl; text-orientation: mixed;
+  font-size: 10px; font-weight: 800; letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .6); flex: 1;
+  overflow: hidden; white-space: nowrap;
+}
+.lg-spine-crest { font-size: 13px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .6)); }
+.lg-spine-sub { font-size: 8px; opacity: .85; }
+/* 選択中＝棚から抜き出して立っている */
+.lg-spine.sel {
+  transform: translateY(-11px);
+  box-shadow: inset 0 2px 0 var(--lg-info), 0 6px 14px rgba(0, 0, 0, .6);
+  outline: 1px solid rgba(122, 208, 255, .6);
+}
+.lg-spine.ok { box-shadow: inset 0 2px 0 var(--lg-gold), 0 3px 8px rgba(0, 0, 0, .45); }
+.lg-spine.ng { box-shadow: inset 0 2px 0 rgba(255, 255, 255, .12), 0 3px 8px rgba(0, 0, 0, .45); opacity: .82; }
+.lg-shelf-plank {
+  display: block; width: 100%; height: 14px; border-radius: 2px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, .5);
+}
+
+/* 開いた1冊 */
+.lg-issue {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .03));
+  border: 1px solid var(--lg-line); border-radius: var(--lg-r-m);
+  padding: 12px; margin-bottom: 12px;
+}
+.lg-issue-head {
+  font-family: "Bebas Neue", sans-serif; letter-spacing: 1px;
+  font-size: 16px; color: #cde0ff; margin-bottom: 8px;
+  border-bottom: 1px solid var(--lg-line); padding-bottom: 6px;
+}
+
+.lg-stampart { display: block; width: 92px; height: 92px; margin: 0 auto; }
+
+/* =============================================================================
+ * 9. オーバーレイ（試合ログ / バックナンバー）
+ * ========================================================================== */
+.lg-logov {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(6, 12, 24, .98);
+  display: flex; flex-direction: column; color: var(--lg-text);
+}
+.lg-loghead {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 14px 16px; border-bottom: 1px solid var(--lg-line); flex-shrink: 0;
+}
+.lg-logclose {
+  background: var(--lg-surface-3); border: none; color: var(--lg-text);
+  width: 34px; height: 34px; border-radius: 9px; font-size: 15px; cursor: pointer; flex-shrink: 0;
+}
+.lg-logbody {
+  flex: 1; overflow-y: auto; padding: 8px 14px 48px;
+  max-width: 520px; margin: 0 auto; width: 100%; box-sizing: border-box;
+}
+.lg-logrow {
+  display: flex; gap: 10px; padding: 7px 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, .06); font-size: 13px; line-height: 1.55;
+}
+.lg-logtime { flex-shrink: 0; width: 44px; color: var(--lg-text-mute); font-size: 11px; font-weight: 700; text-align: right; padding-top: 2px; }
+.lg-logtxt { flex: 1; color: #e8eefc; }
+.lg-logrow.sub {
+  background: rgba(46, 204, 113, .10); border-left: 3px solid var(--lg-win);
+  border-radius: 4px; padding-left: 8px;
+}
+.lg-logrow.sub .lg-logtxt { color: #8ef0b0; font-weight: 700; }
+
+/* =============================================================================
+ * 10. UX-03/04 マッチデー（試合前導入 / 試合後の号）
+ * ========================================================================== */
+.lg-md-ov {
+  position: fixed; inset: 0; z-index: 400;
+  display: flex; flex-direction: column;
+  color: var(--lg-text); overflow: hidden;
+}
+
+/* ── 試合前の導入 */
+.lg-md-pre { background: #050b18; align-items: center; justify-content: center; cursor: pointer; }
+.lg-md-art { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+/* 背景を軽く沈めるだけ。可読性は下の .lg-md-cut のパネルで構造的に担保する
+ * （スクリムだけに頼ると、あとから CG を差し替えたときに再び読めなくなる）。 */
+.lg-md-pre::after {
+  content: ''; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(3, 8, 18, .42) 0%, rgba(3, 8, 18, .22) 45%, rgba(3, 8, 18, .68) 100%);
+  pointer-events: none;
+}
+.lg-md-stage {
+  position: relative; z-index: 2; width: 100%; max-width: 520px;
+  padding: 24px 22px; text-align: center;
+}
+/* ★ 漫画の「コマ」＝文字は必ずこのパネルの上に載る。
+ *   どんな CG を差し替えてもコントラストが保証される（背景任せにしない）。 */
+.lg-md-cut {
+  display: block;
+  background: linear-gradient(165deg, rgba(6, 14, 30, .84), rgba(3, 8, 18, .90));
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: var(--lg-r-l);
+  padding: 20px 18px;
+  box-shadow: 0 14px 44px rgba(0, 0, 0, .6);
+  backdrop-filter: blur(3px);
+}
+/* KICK OFF は「抜き」＝枠なしで背景に直接叩きつける */
+.lg-md-stage.kickoff .lg-md-cut {
+  background: none; border: none; box-shadow: none; backdrop-filter: none;
+}
+.lg-md-stage, .lg-md-stage * { text-shadow: 0 2px 8px rgba(0, 0, 0, .85); }
+.lg-md-kicker {
+  font-size: 11px; letter-spacing: 3px; font-weight: 800;
+  color: rgba(255, 255, 255, .72); text-transform: uppercase;
+}
+.lg-md-big {
+  font-family: "Bebas Neue", sans-serif; font-size: 46px; letter-spacing: 3px;
+  line-height: 1.05; margin-top: 4px; text-shadow: 0 4px 22px rgba(0, 0, 0, .8);
+}
+.lg-md-sub { font-size: 13px; color: rgba(255, 255, 255, .88); margin-top: 8px; line-height: 1.6; }
+.lg-md-clash { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 6px 0; }
+.lg-md-clash .side { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.lg-md-clash .side b { font-size: 44px; line-height: 1; filter: drop-shadow(0 3px 10px rgba(0, 0, 0, .7)); }
+.lg-md-clash .side i { font-style: normal; font-size: 13px; font-weight: 800; }
+.lg-md-clash .mid { font-family: "Bebas Neue", sans-serif; font-size: 30px; opacity: .8; }
+.lg-md-rival {
+  display: inline-block; font-size: 12px; font-weight: 900; letter-spacing: 1px;
+  color: #ffd9d4; background: rgba(192, 57, 43, .55);
+  border: 1px solid var(--lg-accent); border-radius: 20px;
+  padding: 3px 12px; margin-bottom: 10px;
+}
+.lg-md-stage.rival .lg-md-clash .mid { color: var(--lg-accent); opacity: 1; }
+.lg-md-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 10px; }
+.lg-md-chip {
+  font-size: 12px; font-weight: 700; padding: 5px 11px; border-radius: 18px;
+  background: var(--lg-surface-2); border: 1px solid var(--lg-line);
+}
+.lg-md-chip.dim { color: var(--lg-text-mute); }
+.lg-md-kickoff {
+  font-family: "Bebas Neue", sans-serif; font-size: 62px; letter-spacing: 6px;
+  color: var(--lg-gold); text-shadow: 0 0 30px rgba(245, 197, 24, .55), 0 6px 26px rgba(0, 0, 0, .8);
+}
+.lg-md-skip {
+  position: absolute; top: 14px; right: 14px; z-index: 3;
+  background: rgba(0, 0, 0, .45); border: 1px solid var(--lg-line);
+  color: var(--lg-text-dim); font-family: inherit; font-size: 11px; font-weight: 800;
+  padding: 7px 12px; border-radius: 18px; cursor: pointer;
+}
+.lg-md-hint {
+  position: absolute; bottom: 16px; left: 0; right: 0; z-index: 3;
+  text-align: center; font-size: 11px; color: var(--lg-text-faint);
+  pointer-events: none; animation: lgPulse 1.9s ease-in-out infinite;
+}
+@keyframes lgPulse { 0%, 100% { opacity: .35 } 50% { opacity: .85 } }
+
+/* ── 試合後の号 */
+.lg-md-post { background: linear-gradient(170deg, #08122a 0%, #050b18 100%); cursor: pointer; }
+.lg-md-paper { position: absolute; inset: 0; z-index: 0; opacity: .06; pointer-events: none; }
+.lg-md-paper canvas { width: 100%; height: 100%; }
+.lg-md-head {
+  position: relative; z-index: 2; flex-shrink: 0;
+  padding: 14px 16px 10px; text-align: center;
+  border-bottom: 2px solid var(--lg-gold);
+  background: linear-gradient(180deg, rgba(0, 0, 0, .35), rgba(0, 0, 0, 0));
+}
+.lg-md-mast {
+  font-family: "Bebas Neue", sans-serif; font-size: 24px; letter-spacing: 4px; color: var(--lg-gold);
+}
+.lg-md-issue { font-size: 10px; letter-spacing: 2px; color: var(--lg-text-mute); margin-top: 2px; }
+.lg-md-scroll {
+  position: relative; z-index: 2; flex: 1; overflow-y: auto;
+  padding: 14px 14px 70px; -webkit-overflow-scrolling: touch;
+}
+.lg-md-body { max-width: 460px; margin: 0 auto; }
+.lg-md-foot { max-width: 460px; margin: 4px auto 0; }
+.lg-md-close { margin-top: 10px; }
+
+/* シーケンサが積むコマ */
+.lgj-panel { margin-bottom: 10px; }
+.lgj-panel:last-child { margin-bottom: 0; }
+
+/* 試合後パネルの中身 */
+.lgp-kicker {
+  font-size: 10px; letter-spacing: 2px; font-weight: 800;
+  color: var(--lg-text-mute); text-transform: uppercase; margin-bottom: 4px; text-align: center;
+}
+.lgp-headline { background: linear-gradient(135deg, rgba(18, 35, 63, .9), rgba(10, 23, 48, .9)); }
+.lgp-h1 {
+  font-size: 19px; font-weight: 900; line-height: 1.4; text-align: center;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, .5);
+}
+.lgp-score .lg-vs .mid { font-size: 34px; opacity: 1; font-weight: 700; }
+.lgp-stamp { letter-spacing: 2px; }
+
+/* =============================================================================
+ * 11. アクセシビリティ — 動きを減らす設定を尊重
+ * ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .lg-btn, .lg-slotchip, .lg-pick .pc, .lg-pk-card, .lg-spine, .lg-tbl-row, .lg-stat-fill {
+    transition: none !important;
+  }
+  .lg-md-hint { animation: none !important; opacity: .6 !important; }
+  .lgj-panel { opacity: 1 !important; transform: none !important; }
+  .lg-spine:hover { transform: none !important; }
+}
+
+/* =============================================================================
+ * 12. 横長（landscape）— style.css の 2カラムと共存する調整のみ
+ * ========================================================================== */
+@media (orientation: landscape) {
+  body.league-mode .lg-md-post .lg-md-body,
+  body.league-mode .lg-md-post .lg-md-foot { max-width: 620px; }
+  body.league-mode .lg-md-big { font-size: 38px; }
+  body.league-mode .lg-md-kickoff { font-size: 52px; }
+  body.league-mode .lg-shelf-books { min-height: 96px; }
+  body.league-mode .lg-spine { height: 88px; width: 30px; }
+}

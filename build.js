@@ -33,7 +33,10 @@ const JS_FILES = ['players.js', 'rng.js', 'simulate.js', 'events.js', 'match.js'
 // ★ mental.js（個性・メンタル・スキル層 PS-02〜04）も lab 限定＝公開版には非同梱。
 // ★ discipline.js（カード・退場・怪我 Sprint 2）も同方式で lab 限定。
 //   simulate.js のフックは typeof ガード付きなので、不在の公開版では完全 no-op（公開挙動不変）。
-const LAB_ONLY_JS = ['mental.js', 'discipline.js', 'portrait.js', 'league.js', 'manga_recolor.js'];
+// ★ UX-01〜06（試合外のゲーム化 / LAB_UI_DESIGN.md）で追加した演出・UI 層も lab 限定。
+//   league.js からは typeof ガードで呼ぶので、未搭載でも no-op（公開版の挙動は不変）。
+const LAB_ONLY_JS = ['mental.js', 'discipline.js', 'portrait.js', 'manga_recolor.js',
+  'juice.js', 'lab-art.js', 'lg-ui.js', 'matchday.js', 'league.js'];
 
 // 試合エンジン系: 最小化＋軽難読化
 const LOGIC_OPTS = {
@@ -134,11 +137,21 @@ const labInject =
   `<script src="js/discipline.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/portrait.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/manga_recolor.js?v=${BUILD_VER}"></script>\n` +
+  // UX-01〜06: 演出・UI 層は league.js より前（league.js が typeof で拾う）。
+  //   juice(基盤) → lab-art(画像解決) → lg-ui(部品) → matchday(試合前後の演出) の依存順。
+  `<script src="js/juice.js?v=${BUILD_VER}"></script>\n` +
+  `<script src="js/lab-art.js?v=${BUILD_VER}"></script>\n` +
+  `<script src="js/lg-ui.js?v=${BUILD_VER}"></script>\n` +
+  `<script src="js/matchday.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/league.js?v=${BUILD_VER}"></script>\n` +
   `<script>window.LEAGUE_TEST_MODE=true;(function(){function boot(){var tm=document.querySelector('.top-menu');if(tm)tm.style.display='none';` +
   `if(typeof showLeague==='function')showLeague();}` +
   `if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',boot);else boot();})();</script>\n`;
 labHtml = labHtml.replace('</body>', labInject + '</body>');
+// UX-01: 試合外のデザインシステム（トークン＋部品CSS）は lab の <head> にだけ挿す。
+//   ★ 公開 docs/index.html は一切変更しない（本番凍結中・css/ の複製だけは共通で無害）。
+labHtml = labHtml.replace('</head>',
+  `<link rel="stylesheet" href="css/league-ui.css?v=${BUILD_VER}">\n</head>`);
 // タイトルを lab 向けに（任意・SEO/共有時の表示）
 labHtml = labHtml.replace(/<title>[^<]*<\/title>/, '<title>Daily League (private beta)</title>');
 fs.writeFileSync(path.join(LAB, 'index.html'), labHtml);
