@@ -286,6 +286,16 @@
   border-top: 1px solid var(--lg-line-soft);
   font-size: 10px; color: var(--lg-text-mute); text-align: center;
 }
+/* 相手の欠場者（怪我/出場停止）＝相手も欠場者を外して戦う、の見える化 */
+.lg-scout-absrow {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 5px;
+  margin-top: 7px; padding-top: 7px; border-top: 1px solid var(--lg-line-soft);
+}
+.lg-scout-abslabel { font-size: 10px; font-weight: 700; color: var(--lg-text-mute); flex: 0 0 auto; }
+.lg-scout-abs {
+  font-size: 11px; font-weight: 700; color: var(--lg-text-dim);
+  background: var(--lg-surface-2); border-radius: 12px; padding: 2px 8px;
+}
 .lg-ni-row {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 0; font-size: 12px; color: var(--lg-text);

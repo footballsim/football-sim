@@ -2450,6 +2450,20 @@
       lineup: team1Data.default_lineup.slice(0, 11)
     };
 
+    // MD-02: 前節に組んだ布陣を復元（入れ替えた布陣を次節も覚えておく）。
+    //   保存は leagueKickoff（＝実際に試合を始めた布陣だけ記憶）。欠場者が混じっていても
+    //   そのまま復元し、設定画面でグレー＋キックオフ警告に任せる（＝入れ替えを促す）。
+    var saved = _state.lineups && _state.lineups[myId];
+    if (saved) {
+      if (typeof saved.systemIdx === 'number' && system_data[saved.systemIdx]) team1State.systemIdx = saved.systemIdx;
+      if (typeof saved.keyplayer === 'number') team1State.keyplayer = saved.keyplayer;
+      if (typeof saved.tactics === 'number' && _isTacticUnlocked(saved.tactics)) team1State.tactics = saved.tactics;
+      if (Array.isArray(saved.lineup) && saved.lineup.length === 11 &&
+          saved.lineup.every(function (i) { return typeof i === 'number' && i >= 0 && i < team1Data.players.length; })) {
+        team1State.lineup = saved.lineup.slice();
+      }
+    }
+
     // MG-03b: 📹 ビデオ学習で対策した攻め筋を、この試合の間だけ係数として効かせる
     _beginManagerMatchCtx(myId);
 
@@ -2491,6 +2505,15 @@
       return;   // 試合を始めない（設定画面に留まる）
     }
     var pm = _pendingMatch;
+    // MD-02: 実際に試合を始めた布陣を記憶（次節に復元）。marked_player は相手依存なので保存しない。
+    if (typeof team1State !== 'undefined' && team1State && team1State.lineup) {
+      if (!_state.lineups) _state.lineups = {};
+      _state.lineups[pm.myId] = {
+        systemIdx: team1State.systemIdx, tactics: team1State.tactics,
+        keyplayer: team1State.keyplayer, lineup: team1State.lineup.slice(0, 11)
+      };
+      _save();
+    }
     window._leagueInMatch = false;   // 設定画面を抜けた＝試合へコミット
     // UX-03: 漫画のコマ送りで「ため」を作ってから試合へ（未搭載/OFF なら即キックオフ）。
     _preMatchRunning = true;
@@ -2880,9 +2903,22 @@
     var hint = anyCovered
       ? _t('封じた攻め筋は今週の試合で弱まる', 'Countered threats are weakened this match')
       : _t('📹 ビデオ学習で上から順に封じられる', '📹 Video study shuts these down, top-down');
+
+    // 相手の欠場者（怪我/出場停止）＝相手も自動で欠場者を外して戦う、が見える化＝安心材料。
+    var oppAbs = _absentees(oppId);
+    var absLine = '';
+    if (oppAbs.length) {
+      var chips = oppAbs.map(function (a) {
+        var ic = (a.kind === 'injury') ? '🩹' : '🟥';
+        return '<span class="lg-scout-abs">' + ic + a.name + '</span>';
+      }).join('');
+      absLine = '<div class="lg-scout-absrow"><span class="lg-scout-abslabel">' +
+        _t('相手の欠場', 'Opp. out') + '</span>' + chips + '</div>';
+    }
+
     return '<div class="lg-h">' + _t('偵察レポート', 'Scouting') +
         '<span class="lg-badge">' + _t('相手の攻め筋', 'Their threats') + '</span></div>' +
-      '<div class="lg-card lg-scout">' + rows +
+      '<div class="lg-card lg-scout">' + rows + absLine +
         '<div class="lg-scout-hint">' + hint + '</div></div>';
   }
 
