@@ -27,10 +27,14 @@
     office_bg:     { w: 1280, h: 720,  label: 'corner', desc: '監督室の背景（デスク越しの視点・ブラインド・戦術ボード）' },
     office_desk:   { w: 1280, h: 260,  label: 'corner', desc: 'デスク面のテクスチャ（下部に帯として敷く）' },
     corkboard:     { w: 720,  h: 480,  label: 'corner', desc: '掲示板（週の予定を貼る面）' },
-    tunnel:        { w: 1280, h: 720,  desc: '入場トンネル（プレマッチ コマ1）' },
-    stadium_night: { w: 1280, h: 720,  desc: 'スタジアム遠景・ナイター（プレマッチ コマ2）' },
-    press_wall:    { w: 1280, h: 720,  desc: '記者会見のバックパネル（PC-01 会見コマ）' },
-    boardroom:     { w: 1280, h: 720,  desc: 'ボードとの面談室（BD-01 開幕の面談）' },
+    // 全画面の下地にコマ（.lg-md-cut）が乗る＝backdrop 型。説明文は隅に留める
+    //   （中央に出すとコマの裏に潜り込み、記者会見で起きた「文字の喧嘩」を再発させる）。
+    tunnel:        { w: 1280, h: 720, label: 'corner', desc: '入場トンネル（プレマッチ コマ1）' },
+    stadium_night: { w: 1280, h: 720, label: 'corner', desc: 'スタジアム遠景・ナイター（プレマッチ コマ2）' },
+    // ★ 帯として使うスロットは 16:5。CSS の aspect-ratio と必ず一致させること
+    //   （以前 max-height が aspect-ratio を上書きし、枠の形と宣言サイズが食い違っていた）。
+    press_wall:    { w: 1280, h: 400,  desc: '記者会見のバックパネル（PC-01 会見コマ・帯）' },
+    boardroom:     { w: 1280, h: 400,  desc: 'ボードとの面談室（BD-01 開幕の面談・帯）' },
     paper_texture: { w: 1024, h: 1024, label: 'corner', desc: '誌面の紙テクスチャ（tileable）' },
     shelf_wood:    { w: 1024, h: 256,  label: 'corner', desc: '本棚の棚板（バックナンバー）' },
     stamp_win:     { w: 512,  h: 512,  desc: '勝利スタンプ（透過PNG）' },
@@ -260,18 +264,35 @@
     var slot = LabArt.SLOTS[key] || {};
     var corner = (slot.label === 'corner');
     var pad = Math.max(4, Math.min(18, w * 0.03));
+
+    /* ★ 枠は「実アセットと同じ形」で描く。
+     * 領域型(region)で CSS の箱と宣言サイズの縦横比がズレていたら、宣言サイズ側に
+     * 合わせてレターボックスし、**ズレを目で見えるようにする**（枠が橙になる）。
+     * ここがズレたまま実画像を入れると切れる/歪むので、その場で気づけるようにする。
+     * 下地型(backdrop)は cover 前提なのでズレて当然＝判定しない。 */
+    var fx = x, fy = y, fw = w, fh = h, mismatch = false;
+    if (!corner && slot.w && slot.h && w > 0 && h > 0) {
+      var want = slot.w / slot.h, have = w / h;
+      if (Math.abs(want - have) / want > 0.05) {
+        mismatch = true;
+        if (have > want) { fw = h * want; fx = x + (w - fw) / 2; }
+        else { fh = w / want; fy = y + (h - fh) / 2; }
+      }
+    }
+
     ctx.save();
     // 下地を少し沈めて、重ねる文字と枠を読ませる（下地系は UI が上に乗るので控えめ）
     ctx.fillStyle = corner ? 'rgba(4,10,22,0.22)' : 'rgba(4,10,22,0.42)';
     ctx.fillRect(x, y, w, h);
-    // 破線の枠
-    ctx.strokeStyle = corner ? 'rgba(122,208,255,0.42)' : 'rgba(122,208,255,0.75)';
+    // 破線の枠（実アセットの形）
+    ctx.strokeStyle = mismatch ? 'rgba(255,170,60,0.95)'
+                               : (corner ? 'rgba(122,208,255,0.42)' : 'rgba(122,208,255,0.75)');
     ctx.lineWidth = Math.max(1, Math.min(3, w * 0.004));
     if (ctx.setLineDash) ctx.setLineDash([Math.max(5, w * 0.018), Math.max(4, w * 0.014)]);
-    ctx.strokeRect(x + pad, y + pad, Math.max(1, w - pad * 2), Math.max(1, h - pad * 2));
+    ctx.strokeRect(fx + pad, fy + pad, Math.max(1, fw - pad * 2), Math.max(1, fh - pad * 2));
     if (ctx.setLineDash) ctx.setLineDash([]);
 
-    var cx = x + w / 2, cy = y + h / 2;
+    var cx = fx + fw / 2, cy = fy + fh / 2;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
@@ -304,9 +325,10 @@
         ctx.fillText(slot.desc, cx, cy + s * 1.4);
       }
       if (slot.w) {
-        ctx.fillStyle = 'rgba(122,208,255,0.75)';
+        ctx.fillStyle = mismatch ? 'rgba(255,170,60,0.95)' : 'rgba(122,208,255,0.75)';
         ctx.font = '700 ' + Math.round(s * 0.78) + 'px monospace';
-        ctx.fillText(slot.w + '×' + slot.h + '  ' + L.none, cx, cy + s * 2.7);
+        ctx.fillText(slot.w + '×' + slot.h + '  ' + L.none +
+          (mismatch ? '  ⚠ ' + (en ? 'BOX ASPECT MISMATCH' : '枠の比が不一致') : ''), cx, cy + s * 2.7);
       }
     } else if (w >= 96) {
       var s2 = Math.max(9, Math.min(13, w * 0.09));

@@ -757,15 +757,18 @@
   border-color: rgba(255, 255, 255, .20);
 }
 /* 画像の領域（ここにだけCGが入る。文字は入らない） */
+/* ★ 枠は実アセットと同じ形にする（1280×400 = 16:5）。
+   max-height を付けると aspect-ratio が上書きされ、枠の形が宣言サイズと
+   食い違う（＝入れた画像が切れる/歪む）。高さの制限はしない。 */
 .lg-press-art, .lg-board-art {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 5;
-  max-height: 128px;
   overflow: hidden;
   background: #0a1224;
   border-bottom: 1px solid var(--lg-line);
 }
+.lg-press-art canvas, .lg-board-art canvas { object-fit: cover; }
 .lg-press-art canvas, .lg-board-art canvas { display: block; width: 100%; height: 100%; }
 /* 帯の下端だけ落として本文へ繋ぐ（この上にも文字は置かない） */
 .lg-press-art::after, .lg-board-art::after {

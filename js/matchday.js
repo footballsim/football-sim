@@ -55,7 +55,7 @@
     // キルスイッチ／演出OFF：何もせず即キックオフ
     if (window.PREMATCH_ENABLED === false || !_ready()) { finish(); return; }
 
-    var ov, timer = null, killed = false;
+    var ov, killed = false;
     try {
       ov = _mkOverlay('lg-md-pre');
       var myD = ctx.myDef || {}, opD = ctx.oppDef || {};
@@ -108,7 +108,6 @@
       function close() {
         if (killed) return;
         killed = true;
-        if (timer) clearTimeout(timer);
         var j = _juice();
         // ★ 画面の入れ替えは暗転のピークで行う（フェード後だと元画面が一瞬見えてしまう）
         if (j && j.screenSwap) j.screenSwap(function () { _kill(ov); finish(); });
@@ -126,23 +125,18 @@
         var j = _juice();
         if (j && j.reveal) j.reveal(cut, { dur: 360 });
         if (c.sfx) _sfx(c.sfx);
-        if (timer) clearTimeout(timer);
-        // 自動送り（タップでも進める）。最後のコマは短く切ってキックオフへ。
-        // window.PREMATCH_CUT_MS で1コマの尺を調整できる（テンポ調整・検証用）。
-        var cutMs = (typeof window.PREMATCH_CUT_MS === 'number') ? window.PREMATCH_CUT_MS : 1750;
-        timer = setTimeout(step, (idx >= cuts.length) ? Math.min(640, cutMs) : cutMs);
+        // ★ 自動送りはしない。読む速さは人によって違うし、勝手に切り替わると
+        //   「読んでいる途中で流れた」になる。進むのはタップ、抜けるのは SKIP。
       }
 
       ov.addEventListener('click', function (e) {
         if (e.target && e.target.classList && e.target.classList.contains('lg-md-skip')) { close(); return; }
-        if (timer) clearTimeout(timer);
         step();
       });
 
-      // ★ 安全網: 何が起きても必ず試合へ進む（尺を延ばしたときも切れないよう連動）
-      var cutMsN = (typeof window.PREMATCH_CUT_MS === 'number') ? window.PREMATCH_CUT_MS : 1750;
-      setTimeout(function () { close(); }, Math.max(14000, cuts.length * cutMsN + 6000));
-
+      // ★ 以前はここに「一定時間で強制的に試合へ進む」安全網があったが、自動送りを
+      //   やめた以上これも外す（読んでいる最中に勝手に始まってしまうため）。
+      //   詰まったときの脱出口は常設の SKIP ボタン。
       step();
     } catch (e) {
       console.warn('[matchday] pre-match failed, going straight to kickoff', e);
