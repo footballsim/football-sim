@@ -212,6 +212,21 @@
    *   → 名前だけを架空化する方式を採るなら、long_name は「内部ID」として据え置き、表示名だけ差し替える。 */
   function _playerKey(p) { return (p && (p.long_name || p.name)) || ''; }
 
+  /* 表示名（p.name）→ squads のキー（_playerKey = long_name||name）を引く。
+   * ★ MOM や得点者は p.name で記録されるので、そのまま _squadEntry に渡すと
+   *   別キーの幽霊エントリが生まれ、変更が誰にも当たらない（PC-01 実装時に踏んだ）。
+   *   見つからなければ与えられた名前をそのまま返す（既にキー形式のケース）。 */
+  function _squadKeyByName(clubId, name) {
+    var td = _clubData(clubId);
+    if (td && td.players) {
+      for (var i = 0; i < td.players.length; i++) {
+        var p = td.players[i];
+        if (p.name === name || _playerKey(p) === name) return _playerKey(p);
+      }
+    }
+    return name;
+  }
+
   function _defaultManager(clubId, season) {
     var S = MANAGER_TUNING.START;
     return {
@@ -1276,11 +1291,18 @@
     }
     if (bestIdx < 0) return null;
     var gain = MANAGER_TUNING.TRAIN_BASE * (1 - bestVal / 99);
+    // MG-12: 選手の信頼が練習の伸びに乗る（信頼50=等倍・0で0.7倍・100で1.3倍）。
+    //   ★ これが記者会見（PC-01）で「選手をかばう」を選ぶ意味になる。
+    //   エンジンには一切触らないので、試合バランスの回帰リスクは無い。
+    var tr = (typeof e.trust === 'number') ? e.trust : MANAGER_TUNING.TRUST_START;
+    var trustMul = 1 + (tr - MANAGER_TUNING.TRUST_START) / 100 * 0.6;
+    gain *= Math.max(0.7, Math.min(1.3, trustMul));
     if (gain <= 0) return null;
     if (!e.growth) e.growth = {};
     e.growth[bestIdx] = Math.round(((e.growth[bestIdx] || 0) + gain) * 100) / 100;
     var pname = (typeof PARAM_NAMES !== 'undefined' && PARAM_NAMES[bestIdx]) || ('#' + bestIdx);
-    return { name: p.name, param: bestIdx, paramName: pname, gain: Math.round(gain * 10) / 10 };
+    return { name: p.name, param: bestIdx, paramName: pname, gain: Math.round(gain * 10) / 10,
+             trust: Math.round(tr) };
   }
 
   /* ── 試合内効果（§6.1）: getActionParam の係数チェーンに足す唯一のフック ──────
@@ -1876,6 +1898,347 @@
     return typeof Matchday !== 'undefined' && window.JUICE_ENABLED !== false;
   }
 
+  /* ═══════════════════════════════════════════════════════════════════════
+   * BD-01 ボードとの交渉（開幕・シーズンに1度）
+   * -----------------------------------------------------------------------
+   * これまでシーズン目標はクラブから一方的に提示されるだけで、プレイヤーに
+   * 交渉の余地が無かった。開幕でボードと約束を交わす → 毎節の記者会見で世論と
+   * 向き合う → シーズン末に評価される、という「監督の1年」の入口にする。
+   *   下げる = 達成は楽だが信頼と人気を先に失う
+   *   宣言   = 信頼と人気を先に得るが、未達時の落差が大きくなる（既存の清算に乗る）
+   * ═══════════════════════════════════════════════════════════════════════ */
+  var BOARD_TUNING = {
+    LOWER: { goal: +1, trust: -8, pop: -3 },   // 目標を1つ下げてもらう
+    ACCEPT: { goal: 0, trust: 0, pop: 0 },
+    RAISE: { goal: -1, trust: +8, pop: +4 }    // より高い目標を宣言する
+  };
+
+  /* 開幕節（round 0）でまだ面談していなければ true。 */
+  function _boardTalkPending() {
+    if (!_state || _state.finished) return false;
+    if (_state.round !== 0) return false;
+    var bt = _state.boardTalk;
+    return !(bt && bt.season === (_state.season || 1));
+  }
+
+  // ★ 呼び出しは小文字('accept'/'lower'/'raise')、定義は大文字。必ずここで正規化する
+  //   （黙って ACCEPT にフォールバックすると「下げた/宣言した」が無効化されて気づけない）。
+  function _boardDef(kind) { return BOARD_TUNING[String(kind || '').toUpperCase()] || null; }
+
+  function _applyBoardTalk(kind) {
+    if (!_state || !_state.manager || !_boardTalkPending()) return;
+    var d = _boardDef(kind);
+    if (!d) { console.warn('[league] 未知のボード選択:', kind); return; }
+    var g = _ensureSeasonGoal();
+    var n = CLUB_DEFS.length;
+    if (g && d.goal) g.target = Math.max(1, Math.min(n - 1, g.target + d.goal));
+    var m = _state.manager;
+    if (d.trust) {
+      var base = (typeof m.clubTrust === 'number') ? m.clubTrust : MANAGER_TUNING.TRUST_START;
+      m.clubTrust = Math.max(0, Math.min(100, base + d.trust));
+    }
+    if (d.pop) m.params.popularity = Math.max(0, Math.min(MANAGER_TUNING.CAP, (m.params.popularity || 0) + d.pop));
+    _state.boardTalk = { season: (_state.season || 1), choice: kind, goal: g ? g.target : null };
+    _save();
+    _renderHub(false);
+  }
+
+  function _boardTalkHTML() {
+    if (!_boardTalkPending()) return '';
+    var g = _ensureSeasonGoal(); if (!g) return '';
+    var n = CLUB_DEFS.length;
+    function goalLabel(t) {
+      t = Math.max(1, Math.min(n - 1, t));
+      return t <= 1 ? _t('優勝', 'the title') : _t(t + '位以内', 'top ' + t);
+    }
+    function opt(kind, ja, en, note) {
+      var d = _boardDef(kind); if (!d) return '';
+      var eff = [];
+      if (d.goal) eff.push(_t('目標→' + goalLabel(g.target + d.goal), 'Target → ' + goalLabel(g.target + d.goal)));
+      if (d.trust) eff.push(_t('信頼', 'Trust') + ' ' + (d.trust > 0 ? '+' : '') + d.trust);
+      if (d.pop) eff.push(_t('人気', 'Pop') + ' ' + (d.pop > 0 ? '+' : '') + d.pop);
+      return '<button type="button" class="lg-board-opt" onclick="leagueBoardTalk(\'' + kind + '\')">' +
+        '<span class="lg-board-say">「' + _t(ja, en) + '」</span>' +
+        '<span class="lg-board-eff">' + (eff.join('　') || note || '') + '</span></button>';
+    }
+    return '<div class="lg-card lg-board">' +
+      '<canvas class="lg-board-bg" data-labart="boardroom"></canvas>' +
+      '<div class="lg-board-fg">' +
+        '<div class="lgp-kicker">' + _t('ボードとの面談', 'MEETING THE BOARD') + '</div>' +
+        '<div class="lg-board-q">' +
+          _t('「今季、我々はあなたに<b>' + goalLabel(g.target) + '</b>を期待している。異論はあるかね？」',
+             '"This season we expect <b>' + goalLabel(g.target) + '</b> from you. Any objection?"') +
+        '</div>' +
+        '<div class="lg-board-opts">' +
+          opt('accept', '承知しました。その目標でやります', 'Understood. I accept that target.') +
+          opt('lower', '正直、その目標は高すぎます', 'Honestly, that target is too high.') +
+          opt('raise', 'それでは物足りない。もっと上を狙います', "That's not enough. We'll aim higher.") +
+        '</div>' +
+      '</div></div>';
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * PC-01 記者会見（試合後・毎試合・選択に結果が伴う）
+   * -----------------------------------------------------------------------
+   * これまで「人気」と「クラブの信頼」は結果の関数でしか動かず、プレイヤーが
+   * 触れるレバーが無かった。会見は **新しい数値を1つも足さずに** 既存の3通貨
+   * （人気／クラブの信頼／選手の信頼）を選択で動かせる唯一の場にする。
+   * ★ 支配的な選択肢を作らない＝どれかが常に最適にならないよう配分する。
+   * ═══════════════════════════════════════════════════════════════════════ */
+  var PRESS_TUNING = { SQUAD_MIN: 0, SQUAD_MAX: 100, POP_MIN: 0, TRUST_MIN: 0, TRUST_MAX: 100 };
+
+  /* 質問は「その試合で実際に起きたこと」から選ぶ（上から順に最初に当たったもの）。
+   * choices: pop=人気 / trust=クラブの信頼 / squad=選手の信頼（momOnly なら MOM のみ） */
+  var PRESS_QUESTIONS = [
+    {
+      id: 'sacked_rumor',
+      when: function (lr, c) { return (c.streakL >= 2) || (c.trust < 35); },
+      q: ['解任の噂が出ています。進退についてどうお考えですか？', 'There are rumours about your future. What do you say?'],
+      choices: [
+        { id: 'shield', ja: '選手たちは全力でやっている。責めるなら私を', en: 'The players give everything. Blame me, not them.', pop: 0, trust: 2, squad: 6 },
+        { id: 'own', ja: 'この順位は私の責任です。立て直す道筋はあります', en: 'This table is on me. I have a way back.', pop: -1, trust: 4, squad: 0 },
+        { id: 'defiant', ja: '私はどこにも行きません。次節を見ていてください', en: "I'm going nowhere. Watch the next match.", pop: 3, trust: -2, squad: 2 }
+      ]
+    },
+    {
+      id: 'rival_win',
+      when: function (lr) { return lr.mine.rival && lr.mine.res === 'W'; },
+      q: ['宿敵を破りました。今の率直な気持ちを聞かせてください', 'You beat your rivals. How does it feel?'],
+      choices: [
+        { id: 'shield', ja: '選手が全てやってくれた。私は見ていただけです', en: 'The players did it all. I just watched.', pop: 1, trust: 0, squad: 6 },
+        { id: 'own', ja: 'まだ1勝です。浮かれるつもりはありません', en: "It's one win. We stay grounded.", pop: 0, trust: 4, squad: 0 },
+        { id: 'defiant', ja: '力の差を見せられたと思います', en: 'I think we showed the gap in quality.', pop: 4, trust: -2, squad: 1 }
+      ]
+    },
+    {
+      id: 'rival_loss',
+      when: function (lr) { return lr.mine.rival && lr.mine.res === 'L'; },
+      q: ['宿敵に敗れました。何が足りなかったのでしょう？', 'Beaten by your rivals. What was missing?'],
+      choices: [
+        { id: 'own', ja: '私の準備不足です。選手に非はありません', en: 'I under-prepared them. The players are not at fault.', pop: -1, trust: 4, squad: 4 },
+        { id: 'shield', ja: '選手は戦いました。結果だけを受け止めます', en: 'They fought. I accept the result.', pop: 0, trust: 1, squad: 6 },
+        { id: 'defiant', ja: '次は必ず借りを返します', en: "We'll settle this next time.", pop: 3, trust: -1, squad: 2 }
+      ]
+    },
+    {
+      id: 'heavy_loss',
+      when: function (lr) { return (lr.mine.ms - lr.mine.os) <= -3; },
+      q: ['この大敗、責任は誰にあるとお考えですか？', 'A heavy defeat. Who is responsible?'],
+      choices: [
+        { id: 'own', ja: '全て私の責任です', en: 'It is entirely on me.', pop: -1, trust: 5, squad: 1 },
+        { id: 'shield', ja: '選手を守ります。彼らは最後まで走りました', en: 'I protect my players. They ran to the end.', pop: 0, trust: -1, squad: 7 },
+        { id: 'excuse', ja: '今日は運がなかった、それだけです', en: 'We were simply unlucky today.', pop: -3, trust: -3, squad: 3 }
+      ]
+    },
+    {
+      id: 'big_win',
+      when: function (lr) { return (lr.mine.ms - lr.mine.os) >= 3; },
+      q: ['大勝でした。勝因はどこにありましたか？', 'A big win. What was behind it?'],
+      choices: [
+        { id: 'shield', ja: '選手の質です。私は何もしていません', en: 'The quality of the players. I did nothing.', pop: 1, trust: 0, squad: 6 },
+        { id: 'own', ja: '準備してきた通りに出せた、それだけです', en: 'We executed exactly what we prepared.', pop: 0, trust: 4, squad: 1 },
+        { id: 'defiant', ja: 'この程度で満足はしません。まだ上を目指せます', en: "This isn't enough. We can go higher.", pop: 4, trust: -1, squad: -1 }
+      ]
+    },
+    {
+      id: 'mom_star',
+      when: function (lr) { return !!(lr.mine.mom && lr.mine.mom.goals >= 2); },
+      qFn: function () { return ['%s選手の活躍が目立ちました。評価を聞かせてください', 'What did you make of %s today?']; },
+      choices: [
+        { id: 'praise', ja: '彼は特別な選手です。誇りに思います', en: 'He is special. I am proud of him.', pop: 2, trust: 0, squad: 6 },
+        { id: 'team', ja: 'チーム全体の成果です。彼一人の力ではない', en: "It's the whole team's work, not one man's.", pop: 0, trust: 3, squad: 2 },
+        { id: 'harsh', ja: 'まだ物足りない。彼はもっとやれます', en: 'Not enough. He can do much more.', pop: 1, trust: 3, squad: -5, momOnly: true }
+      ]
+    },
+    {
+      id: 'off_track',
+      when: function (lr, c) { return c.offTrack; },
+      q: ['目標の達成は現実的だとお考えですか？', 'Is the target still realistic?'],
+      choices: [
+        { id: 'own', ja: '必ず届かせます。約束します', en: 'We will get there. I promise that.', pop: 1, trust: 4, squad: 1 },
+        { id: 'shield', ja: '厳しいのは事実です。一戦ずつ積み上げます', en: "It's hard. We take it one match at a time.", pop: 0, trust: 1, squad: 5 },
+        { id: 'blame_board', ja: 'そもそも目標設定が高すぎたのではないですか', en: 'Perhaps the target was set too high to begin with.', pop: 2, trust: -5, squad: 2 }
+      ]
+    },
+    {
+      id: 'normal_win',
+      when: function (lr) { return lr.mine.res === 'W'; },
+      q: ['今日の勝因はどこにありましたか？', 'What won you the match today?'],
+      choices: [
+        { id: 'shield', ja: '選手がよく走ってくれました', en: 'The players worked incredibly hard.', pop: 1, trust: 0, squad: 5 },
+        { id: 'own', ja: '狙い通りの試合運びができました', en: 'The game plan worked as intended.', pop: 0, trust: 3, squad: 1 },
+        { id: 'defiant', ja: '当然の結果です。まだ通過点にすぎません', en: 'As expected. This is only a step.', pop: 3, trust: -1, squad: 0 }
+      ]
+    },
+    {
+      id: 'normal_draw',
+      when: function (lr) { return lr.mine.res === 'D'; },
+      q: ['勝ち切れませんでした。どう受け止めていますか？', "You couldn't see it out. How do you view it?"],
+      choices: [
+        { id: 'own', ja: '仕留められなかったのは私の采配の問題です', en: 'Failing to kill it off is on my decisions.', pop: -1, trust: 4, squad: 2 },
+        { id: 'shield', ja: '選手はよくやりました。勝点1を持ち帰ります', en: 'They did well. We take the point.', pop: 0, trust: 1, squad: 5 },
+        { id: 'defiant', ja: '正直、勝てた試合を落としたと思っています', en: 'Honestly, we dropped two points today.', pop: 2, trust: 0, squad: -2 }
+      ]
+    },
+    {
+      id: 'normal_loss',
+      when: function () { return true; },   // 最終フォールバック（必ずどれかに当たる）
+      q: ['敗因をどう見ていますか？', 'How do you explain the defeat?'],
+      choices: [
+        { id: 'own', ja: '私の責任です。次までに修正します', en: 'On me. I will fix it before the next one.', pop: -1, trust: 4, squad: 1 },
+        { id: 'shield', ja: '選手は戦いました。批判は私に向けてください', en: 'They fought. Aim the criticism at me.', pop: 0, trust: 0, squad: 6 },
+        { id: 'defiant', ja: '内容は悪くない。続けていれば結果はついてきます', en: 'The performance was fine. Results will follow.', pop: 2, trust: -2, squad: 2 }
+      ]
+    }
+  ];
+
+  /* 会見の文脈（質問の選択に使う）。 */
+  function _pressCtx() {
+    var st = _currentStreak();
+    var m = _state.manager || { params: {} };
+    return {
+      streakL: (st.res === 'L') ? st.n : 0,
+      streakW: (st.res === 'W') ? st.n : 0,
+      trust: Math.round((typeof m.clubTrust === 'number') ? m.clubTrust : MANAGER_TUNING.TRUST_START),
+      offTrack: !_goalMet(_position(_state.myClub))
+    };
+  }
+
+  function _pressQuestion(lr) {
+    if (!lr || !lr.mine) return null;
+    var c = _pressCtx();
+    for (var i = 0; i < PRESS_QUESTIONS.length; i++) {
+      var q = PRESS_QUESTIONS[i];
+      try { if (q.when(lr, c)) return q; } catch (e) { /* 条件で落ちても会見自体は止めない */ }
+    }
+    return null;
+  }
+
+  function _pressQuestionText(q, lr) {
+    var pair = q.qFn ? q.qFn(lr) : q.q;
+    var txt = _t(pair[0], pair[1]);
+    if (txt.indexOf('%s') >= 0) txt = txt.replace('%s', (lr.mine.mom && lr.mine.mom.name) || '');
+    return txt;
+  }
+
+  /* 会見の結果を適用する。★ 表示用の lr.manager.popularity/trust の内訳にも
+   * 「記者会見」を足すので、次のコマ（今週の成果）に因果がそのまま出る。 */
+  function _applyPress(lr, ch) {
+    if (!_state || !_state.manager || !ch) return null;
+    // ★ 冪等: 同じ試合の会見は1度だけ効かせる（再生・再入で二重に加算しない）
+    if (lr.press && lr.press.choiceId) return lr.press.effects;
+    var m = _state.manager;
+    var out = { pop: 0, trust: 0, squad: 0, momOnly: !!ch.momOnly, names: [] };
+
+    if (ch.pop) {
+      m.params.popularity = Math.max(PRESS_TUNING.POP_MIN,
+        Math.min(MANAGER_TUNING.CAP, (m.params.popularity || 0) + ch.pop));
+      out.pop = ch.pop;
+      var P = lr.manager && lr.manager.popularity;
+      if (P) {
+        P.delta = Math.round((P.delta + ch.pop) * 10) / 10;
+        P.value = m.params.popularity;
+        // 既存の 'press' は置き換える（内訳に同じ行が並ぶのを防ぐ）
+        P.parts = (P.parts || []).filter(function (x) { return x.k !== 'press'; })
+          .concat([{ k: 'press', v: ch.pop }]);
+      }
+    }
+    if (ch.trust) {
+      var base = (typeof m.clubTrust === 'number') ? m.clubTrust : MANAGER_TUNING.TRUST_START;
+      m.clubTrust = Math.max(PRESS_TUNING.TRUST_MIN, Math.min(PRESS_TUNING.TRUST_MAX, base + ch.trust));
+      out.trust = ch.trust;
+      var T = lr.manager && lr.manager.trust;
+      if (T) {
+        T.delta = Math.round((T.delta + ch.trust) * 10) / 10;
+        T.value = m.clubTrust;
+        T.parts = (T.parts || []).filter(function (x) { return x.k !== 'press'; })
+          .concat([{ k: 'press', v: ch.trust }]);
+      }
+    }
+    // ★ MG-12（選手の信頼）をここで初めて「効く数値」にする（→ 個人練習の伸びに乗る）
+    if (ch.squad) {
+      out.squad = ch.squad;
+      var myId = lr.mine.me;
+      function bump(key) {
+        var e = _squadEntry(myId, key);
+        e.trust = Math.max(PRESS_TUNING.SQUAD_MIN,
+          Math.min(PRESS_TUNING.SQUAD_MAX, ((typeof e.trust === 'number') ? e.trust : MANAGER_TUNING.TRUST_START) + ch.squad));
+      }
+      if (ch.momOnly && lr.mine.mom) {
+        // ★ MOM は表示名(p.name)で記録される。squads のキーは _playerKey(=long_name||name)
+        //   なので、名前をそのまま渡すと別キーの幽霊エントリが増えて誰にも当たらない。
+        bump(_squadKeyByName(myId, lr.mine.mom.name));
+        out.names = [lr.mine.mom.name];
+      } else {
+        var td = _clubData(myId);
+        if (td && td.players) td.players.forEach(function (p) { bump(_playerKey(p)); });
+      }
+    }
+
+    lr.press = { qid: lr.press && lr.press.qid, choiceId: ch.id, effects: out };
+    _save();
+    return out;
+  }
+
+  function _pressHTML(q, lr) {
+    var opts = q.choices.map(function (ch, idx) {
+      return '<button type="button" class="lg-press-opt" data-press="' + idx + '">' +
+        '<span class="lg-press-say">「' + _t(ch.ja, ch.en) + '」</span></button>';
+    }).join('');
+    return '<div class="lg-card lg-press">' +
+      '<canvas class="lg-press-bg" data-labart="press_wall"></canvas>' +
+      '<div class="lg-press-fg">' +
+        '<div class="lgp-kicker">' + _t('記者会見', 'PRESS CONFERENCE') + '</div>' +
+        '<div class="lg-press-q"><span class="lg-press-mic">🎙</span>' +
+          '<span class="lg-press-qt">' + _pressQuestionText(q, lr) + '</span></div>' +
+        '<div class="lg-press-opts">' + opts + '</div>' +
+      '</div></div>';
+  }
+
+  function _pressResultHTML(ch, eff) {
+    function chip(label, v) {
+      if (!v) return '';
+      return '<span class="lg-press-eff ' + (v > 0 ? 'up' : 'down') + '">' + label + ' ' +
+        (v > 0 ? '+' : '') + v + '</span>';
+    }
+    var who = (eff.momOnly && eff.names.length) ? eff.names[0] + _t('の信頼', ' trust')
+                                                : _t('選手の信頼', 'Squad trust');
+    return '<div class="lg-card lg-press answered">' +
+      '<canvas class="lg-press-bg" data-labart="press_wall"></canvas>' +
+      '<div class="lg-press-fg">' +
+        '<div class="lgp-kicker">' + _t('記者会見', 'PRESS CONFERENCE') + '</div>' +
+        '<div class="lg-press-said">「' + _t(ch.ja, ch.en) + '」</div>' +
+        '<div class="lg-press-effs">' +
+          chip(_t('人気', 'Popularity'), eff.pop) +
+          chip(_t('クラブの信頼', 'Club trust'), eff.trust) +
+          chip(who, eff.squad) +
+        '</div>' +
+        '<button type="button" class="lg-btn sec lg-press-next">' + _t('続ける', 'Continue') + '</button>' +
+      '</div></div>';
+  }
+
+  /* 会見コマの配線。答えるまで next() を呼ばない＝シーケンスは止まったまま。 */
+  function _bindPress(el, q, lr, next) {
+    var answered = false;
+    el.addEventListener('click', function (e) {
+      e.stopPropagation();   // ★ オーバーレイのタップ送りへ伝播させない
+      var t = e.target;
+      var opt = (t && t.closest) ? t.closest('.lg-press-opt') : null;
+      if (opt && !answered) {
+        answered = true;
+        var ch = q.choices[parseInt(opt.getAttribute('data-press'), 10)];
+        if (!ch) { next(); return; }
+        var eff = _applyPress(lr, ch) || { pop: 0, trust: 0, squad: 0, momOnly: false, names: [] };
+        if (_juiceOn() && Juice.flash) Juice.flash(el, { count: 4 });
+        el.innerHTML = _pressResultHTML(ch, eff);
+        _paintPortraitCanvases(el);
+        if (_juiceOn()) Juice.reveal(el.querySelector('.lg-press-said'), { dur: 320 });
+        return;
+      }
+      if (answered && t && t.closest && t.closest('.lg-press-next')) next();
+    });
+  }
+
   /* UX-04: 試合後を「今節の号」として1コマずつ開く。
    * 各パネルの HTML は既存ビルダをそのまま再利用＝文言・ロジックを二重管理しない。 */
   function _postMatchPanels(lr) {
@@ -1936,12 +2299,27 @@
       }
     });
 
-    // ⑤ 今週の成果（成長・人気・信頼）— 戦術習得はファンファーレ
-    var growth = _managerGrowthHTML(lr);
-    if (growth) {
+    // ⑤ PC-01 記者会見（毎試合・答えるまで先へ進まない）
+    //    ★ ここで人気/クラブ信頼/選手信頼が動き、次の「今週の成果」に即反映される。
+    var pq = _pressQuestion(lr);
+    if (pq) {
+      panels.push({
+        id: 'press', sfx: 'flash',
+        html: function () { return _pressHTML(pq, lr); },
+        onShow: function (el) {
+          _paintPortraitCanvases(el);
+          if (_juiceOn() && Juice.flash) Juice.flash(el, { count: 3 });
+        },
+        await: function (el, next) { _bindPress(el, pq, lr, next); }
+      });
+    }
+
+    // ⑥ 今週の成果（成長・人気・信頼）— 戦術習得はファンファーレ
+    //    ★ html を関数にして「表示する瞬間」に組む＝会見の結果が数字に乗る。
+    if (_managerGrowthHTML(lr)) {
       panels.push({
         id: 'growth', sfx: (lr.manager && lr.manager.unlocked) ? 'fanfare' : 'coin',
-        html: '<div class="lg-card">' + growth + '</div>'
+        html: function () { return '<div class="lg-card">' + _managerGrowthHTML(lr) + '</div>'; }
       });
     }
 
@@ -2436,9 +2814,13 @@
   function _traineeSelectHTML(idx, clubId, cur) {
     var td = _clubData(clubId); if (!td) return '';
     if (_lgOn() && LgUI.playerPicker) {
+      // ★ 各カードに「監督への信頼」を出す（MG-12）。記者会見で動いた値がここに
+      //   見えることで、「選手をかばう」の意味と練習効率の関係が読める。
       var list = td.players.map(function (p) {
         var k = _playerKey(p);
-        return { key: k, name: p.name, portrait: k };
+        var e = _peekSquadEntry(clubId, k);
+        var tr = (e && typeof e.trust === 'number') ? e.trust : MANAGER_TUNING.TRUST_START;
+        return { key: k, name: p.name, portrait: k, sub: '♥' + Math.round(tr) };
       });
       return '<div class="lg-slotsub">' +
         LgUI.playerPicker(list, cur, 'leagueSetTrainee', idx,
@@ -2516,6 +2898,7 @@
       if (p.k === 'gd') return (p.v > 0 ? _t('快勝の内容', 'Convincing') : _t('大敗の内容', 'Heavy defeat'));
       if (p.k === 'rival') return (p.v > 0 ? _t('宿敵撃破', 'Derby win') : _t('宿敵に屈す', 'Derby loss'));
       if (p.k === 'streak') return (p.v > 0 ? _t(p.n + '連勝', p.n + '-game win run') : _t(p.n + '連敗', p.n + '-game losing run'));
+      if (p.k === 'press') return _t('記者会見での発言', 'What you said to the press');   // PC-01
       return '';
     }).filter(Boolean).join('・');
     var mood = flat ? _t('世論は静観', 'The public is unmoved')
@@ -2536,6 +2919,7 @@
     var why = tr.parts.map(function (p) {
       if (p.k === 'on_track') return _t('目標圏内', 'On track');
       if (p.k === 'off_track') return _t('目標に' + p.gap + 'つ足りない', p.gap + ' places off target');
+      if (p.k === 'press') return _t('記者会見での発言', 'What you said to the press');   // PC-01
       return '';
     }).filter(Boolean).join('・');
     return '<div class="lg-mini" style="margin-top:4px;text-align:center">' +
@@ -2765,6 +3149,9 @@
       rivalLine + '</div>' +
       '</div></div>';
 
+    // BD-01: 開幕はボードとの面談から。約束を交わすまで試合に進めない＝1年の入口。
+    if (!_state.finished) html += _boardTalkHTML();
+
     // 行動フェーズ（MG-03）＝試合の前に「今日は何をするか」を1つ決める
     if (!_state.finished) html += _actionPhaseHTML();
 
@@ -2823,7 +3210,10 @@
           '<div class="mid">VS</div>' +
           '<div class="side"><div class="crest">' + oppDef2.crest + '</div><div class="nm">' + _clubName(oppId) + '</div></div>' +
         '</div></div>';
-      if (_lockedToday()) {
+      if (_boardTalkPending()) {
+        // BD-01: 面談が終わるまでキックオフさせない（約束してからシーズンが始まる）
+        html += '<button class="lg-btn" disabled>' + _t('まずボードと話す', 'Speak to the board first') + '</button>';
+      } else if (_lockedToday()) {
         html += '<button class="lg-btn" disabled>' + _t('本日は消化済み — また明日', 'Played today — come back tomorrow') + '</button>';
         html += '<div class="lg-mini" style="text-align:center;margin-top:6px">' + _t('1日1試合＝1週間。物語は毎日ひとつずつ進む。', 'One match a day — one week per day. The story advances daily.') + '</div>';
       } else {
@@ -2969,6 +3359,8 @@
   window.leagueShowHistory = function () { _showHistory(); };
   // UX-05: 本棚の背表紙から1冊を開く
   window.leagueOpenIssue = function (i) { _openIssue(i); };
+  // BD-01: ボードとの面談（accept / lower / raise）
+  window.leagueBoardTalk = function (kind) { _applyBoardTalk(kind); };
   /* UX-04 演出チューニング用（lab限定）: 直近の結果で「今節の号」をもう一度再生する。
    * 試合を消化し直さずにテンポ・音・コマ割りを確認できる（_scene_lab と同じ発想）。 */
   window.leagueReplayPostMatch = function () {

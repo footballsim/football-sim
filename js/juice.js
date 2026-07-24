@@ -105,7 +105,9 @@
     tick: function (ac) { _osc(ac, 'square', 1250, 1250, 0.035, 0.10, 0); },
     coin: function (ac) { _osc(ac, 'square', 988, 988, 0.07, 0.14, 0); _osc(ac, 'square', 1319, 1319, 0.16, 0.14, 0.07); },
     crowd: function (ac) { _noise(ac, 1.1, 0.10, -900, 0); },
-    lose: function (ac) { _osc(ac, 'sawtooth', 320, 130, 0.5, 0.16, 0); }
+    lose: function (ac) { _osc(ac, 'sawtooth', 320, 130, 0.5, 0.16, 0); },
+    // カメラのシャッター（記者会見のフラッシュ）
+    flash: function (ac) { _noise(ac, 0.035, 0.30, 3200, 0); _noise(ac, 0.09, 0.14, 1800, 0.04); }
   };
 
   /**
@@ -199,6 +201,37 @@
     } catch (e) { /* 演出の失敗で画面を壊さない */ }
   };
 
+  /* ── カメラのフラッシュ（記者会見）──────────────────────────────────── */
+  Juice.flash = function (host, opts) {
+    opts = opts || {};
+    if (!host || !Juice.ready()) return;
+    try {
+      if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+      var n = opts.count || 3;
+      for (var k = 0; k < n; k++) {
+        (function (idx) {
+          setTimeout(function () {
+            var f = document.createElement('div');
+            f.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:6;' +
+              'background:radial-gradient(60% 50% at ' + (18 + Math.random() * 64) + '% ' +
+              (14 + Math.random() * 30) + '%,rgba(255,255,255,.92),rgba(255,255,255,0) 70%);' +
+              'opacity:0;transition:opacity .07s ease-out';
+            host.appendChild(f);
+            requestAnimationFrame(function () {
+              f.style.opacity = '1';
+              setTimeout(function () {
+                f.style.transition = 'opacity .22s ease-in';
+                f.style.opacity = '0';
+                setTimeout(function () { if (f.parentNode) f.parentNode.removeChild(f); }, 240);
+              }, 45);
+            });
+            Juice.sfx('flash');
+          }, idx * 130 + Math.random() * 70);
+        })(k);
+      }
+    } catch (e) { /* 演出の失敗で画面を壊さない */ }
+  };
+
   /* ── 出現（単体 / 連続）──────────────────────────────────────────────── */
   Juice.reveal = function (el, opts) {
     opts = opts || {};
@@ -235,12 +268,14 @@
     panels = (panels || []).filter(Boolean);
     return new Promise(function (resolve) {
       if (!host) { if (opts.onDone) opts.onDone(); resolve(); return; }
-      var i = 0, waiting = false, finished = false;
+      var i = 0, waiting = false, finished = false, blocked = false;
 
       function build(p) {
         var el = document.createElement('div');
         el.className = 'lgj-panel' + (p.id ? ' lgj-' + p.id : '');
-        el.innerHTML = p.html || '';
+        // html は文字列でも関数でもよい。関数なら「表示する瞬間」に評価するので、
+        // 直前のコマ（記者会見など）の結果を反映した内容を出せる。
+        el.innerHTML = (typeof p.html === 'function') ? (p.html() || '') : (p.html || '');
         host.appendChild(el);
         try { if (p.onShow) p.onShow(el); } catch (e) { console.warn('[juice] onShow failed', e); }
         if (opts.onPanel) { try { opts.onPanel(el, p, i); } catch (e) {} }
@@ -271,14 +306,34 @@
         // 直前に開いたコマへスクロール（誌面が下に伸びる感覚）
         try { el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
         i++;
-        if (i >= panels.length) { waiting = false; setTimeout(finish, 260); return; }
+        var last = (i >= panels.length);
         waiting = false;
+
+        // ★ 入力待ちのコマ（記者会見など）＝答えるまでタップで先へ進ませない。
+        //   p.await(el, next) を呼び、コマ側が next() を呼んだ時だけ解除する。
+        if (typeof p.await === 'function') {
+          blocked = true;
+          var resumed = false;
+          try {
+            p.await(el, function () {
+              if (resumed || finished) return;
+              resumed = true;
+              blocked = false;
+              lastAt = 0;                     // 回答直後の1タップを throttle で潰さない
+              if (last) setTimeout(finish, 260); else showNext();
+            });
+          } catch (e) { blocked = false; console.warn('[juice] await failed', e); }
+          return;
+        }
+
+        if (last) { setTimeout(finish, 260); return; }
         if (opts.auto) setTimeout(advance, (p.hold || 0) + 900);
       }
 
       // 連打で飛ばされないよう最小間隔を設ける
       var lastAt = 0;
       function advance() {
+        if (blocked) return;                  // 入力待ちの間はタップを無視
         var now = (window.performance && performance.now) ? performance.now() : (lastAt + 999);
         if (now - lastAt < 260) return;
         lastAt = now;

@@ -21,15 +21,18 @@
   var DIR = 'img/lab/';
 
   /* CG発注リスト＝そのままスロット定義。desc は発注時の指示書になる。 */
+  // label:'corner' = UI が上に乗る「下地」系。中央に大きくラベルを出すと操作の邪魔に
+  //   なるので、破線枠＋隅の小さな注記だけにする。既定（省略時）は中央に仕様を大きく出す。
   LabArt.SLOTS = {
-    office_bg:     { w: 1280, h: 720,  desc: '監督室の背景（デスク越しの視点・ブラインド・戦術ボード）' },
-    office_desk:   { w: 1280, h: 260,  desc: 'デスク面のテクスチャ（下部に帯として敷く）' },
-    corkboard:     { w: 720,  h: 480,  desc: '掲示板（週の予定を貼る面）' },
+    office_bg:     { w: 1280, h: 720,  label: 'corner', desc: '監督室の背景（デスク越しの視点・ブラインド・戦術ボード）' },
+    office_desk:   { w: 1280, h: 260,  label: 'corner', desc: 'デスク面のテクスチャ（下部に帯として敷く）' },
+    corkboard:     { w: 720,  h: 480,  label: 'corner', desc: '掲示板（週の予定を貼る面）' },
     tunnel:        { w: 1280, h: 720,  desc: '入場トンネル（プレマッチ コマ1）' },
     stadium_night: { w: 1280, h: 720,  desc: 'スタジアム遠景・ナイター（プレマッチ コマ2）' },
-    press_wall:    { w: 1280, h: 720,  desc: '記者会見のバックパネル（試合後の見出しコマ）' },
-    paper_texture: { w: 1024, h: 1024, desc: '誌面の紙テクスチャ（tileable）' },
-    shelf_wood:    { w: 1024, h: 256,  desc: '本棚の棚板（バックナンバー）' },
+    press_wall:    { w: 1280, h: 720,  desc: '記者会見のバックパネル（PC-01 会見コマ）' },
+    boardroom:     { w: 1280, h: 720,  desc: 'ボードとの面談室（BD-01 開幕の面談）' },
+    paper_texture: { w: 1024, h: 1024, label: 'corner', desc: '誌面の紙テクスチャ（tileable）' },
+    shelf_wood:    { w: 1024, h: 256,  label: 'corner', desc: '本棚の棚板（バックナンバー）' },
     stamp_win:     { w: 512,  h: 512,  desc: '勝利スタンプ（透過PNG）' },
     stamp_draw:    { w: 512,  h: 512,  desc: '引き分けスタンプ（透過PNG）' },
     stamp_loss:    { w: 512,  h: 512,  desc: '敗戦スタンプ（透過PNG）' }
@@ -167,6 +170,26 @@
       for (var gy = y; gy < y + h; gy += step) { ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x + w, gy); ctx.stroke(); }
       ctx.restore();
     },
+    boardroom: function (ctx, x, y, w, h) {
+      _grad(ctx, x, y, w, h, [[0, '#1b1a24'], [1, '#0c0b12']]);
+      // 長机（下部の帯）と椅子の背もたれのシルエット
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect(x, y + h * 0.72, w, h * 0.28);
+      ctx.globalAlpha = 0.5; ctx.fillStyle = '#05040a';
+      for (var i = 0; i < 4; i++) {
+        var bx = x + w * (0.14 + i * 0.24);
+        ctx.beginPath();
+        ctx.ellipse(bx, y + h * 0.70, w * 0.055, h * 0.11, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+      // 背後の窓明かり
+      ctx.save(); ctx.globalAlpha = 0.10; ctx.fillStyle = '#cfe0ff';
+      ctx.fillRect(x + w * 0.08, y + h * 0.10, w * 0.34, h * 0.40);
+      ctx.fillRect(x + w * 0.58, y + h * 0.10, w * 0.34, h * 0.40);
+      ctx.restore();
+    },
     paper_texture: function (ctx, x, y, w, h) {
       _grad(ctx, x, y, w, h, [[0, '#f6f1e4'], [1, '#e6ddc9']]);
       ctx.save(); ctx.globalAlpha = 0.07; ctx.fillStyle = '#6b5a3a';
@@ -213,14 +236,96 @@
     x = x || 0; y = y || 0;
     try {
       var im = _img[key];
-      if (im) { ctx.drawImage(im, x, y, w, h); return; }
+      if (im) { ctx.drawImage(im, x, y, w, h); return; }   // 実アセットあり＝そのまま
       var fn = _PAINT[key];
-      if (fn) { fn(ctx, x, y, w, h); return; }
-      _grad(ctx, x, y, w, h, [[0, '#12305f'], [1, '#0a1730']]);
+      if (fn) fn(ctx, x, y, w, h);
+      else _grad(ctx, x, y, w, h, [[0, '#12305f'], [1, '#0a1730']]);
+      // ★ 未配置スロットは「明らかに未配置」と分かる枠を重ねる。
+      //   手続き描画だけだと完成した絵に見えてしまい、どこにCGが要るのか判別できない。
+      if (window.LABART_SHOW_SLOTS !== false) _slotFrame(ctx, key, x, y, w, h);
     } catch (e) {
       try { _grad(ctx, x, y, w, h, [[0, '#12305f'], [1, '#0a1730']]); } catch (e2) {}
     }
   };
+
+  /* 「ここに画像が入ります」枠。スロット名・用途・推奨サイズをその場に出すので、
+   * 画面を見るだけでCG発注の対象と仕様が分かる。実画像を置けば自動的に消える。 */
+  var _L = {
+    ja: { here: 'ここに画像が入ります', none: '（未配置）' },
+    en: { here: 'IMAGE GOES HERE', none: '(not placed)' }
+  };
+  function _slotFrame(ctx, key, x, y, w, h) {
+    var en = (typeof window !== 'undefined' && window.LANG === 'en');
+    var L = en ? _L.en : _L.ja;
+    var slot = LabArt.SLOTS[key] || {};
+    var corner = (slot.label === 'corner');
+    var pad = Math.max(4, Math.min(18, w * 0.03));
+    ctx.save();
+    // 下地を少し沈めて、重ねる文字と枠を読ませる（下地系は UI が上に乗るので控えめ）
+    ctx.fillStyle = corner ? 'rgba(4,10,22,0.22)' : 'rgba(4,10,22,0.42)';
+    ctx.fillRect(x, y, w, h);
+    // 破線の枠
+    ctx.strokeStyle = corner ? 'rgba(122,208,255,0.42)' : 'rgba(122,208,255,0.75)';
+    ctx.lineWidth = Math.max(1, Math.min(3, w * 0.004));
+    if (ctx.setLineDash) ctx.setLineDash([Math.max(5, w * 0.018), Math.max(4, w * 0.014)]);
+    ctx.strokeRect(x + pad, y + pad, Math.max(1, w - pad * 2), Math.max(1, h - pad * 2));
+    if (ctx.setLineDash) ctx.setLineDash([]);
+
+    var cx = x + w / 2, cy = y + h / 2;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // 下地系＝左上の隅に小さく（UI の可読性を落とさない）
+    if (corner) {
+      var cs = Math.max(10, Math.min(15, w * 0.011));
+      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      var tx = x + pad + cs * 0.7, ty = y + pad + cs * 0.6;
+      ctx.fillStyle = 'rgba(4,10,22,0.62)';
+      ctx.fillRect(tx - cs * 0.5, ty - cs * 0.35, cs * 22, cs * 2.6);
+      ctx.fillStyle = 'rgba(122,208,255,0.92)';
+      ctx.font = '800 ' + Math.round(cs) + 'px "Noto Sans JP",sans-serif';
+      ctx.fillText('🖼 ' + L.here + '  ' + key, tx, ty);
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '700 ' + Math.round(cs * 0.85) + 'px monospace';
+      ctx.fillText((slot.w || '') + '×' + (slot.h || '') + '  ' + L.none, tx, ty + cs * 1.35);
+      ctx.restore();
+      return;
+    }
+
+    if (w >= 240 && h >= 120) {
+      // 大きい枠＝発注仕様まで全部出す
+      var s = Math.max(11, Math.min(20, w * 0.019));
+      ctx.fillStyle = 'rgba(122,208,255,0.95)';
+      ctx.font = '800 ' + Math.round(s * 1.15) + 'px "Noto Sans JP",sans-serif';
+      ctx.fillText('🖼 ' + L.here, cx, cy - s * 1.5);
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.font = '700 ' + Math.round(s) + 'px monospace';
+      ctx.fillText(key, cx, cy);
+      if (slot.desc && !en) {
+        ctx.fillStyle = 'rgba(255,255,255,0.66)';
+        ctx.font = '400 ' + Math.round(s * 0.82) + 'px "Noto Sans JP",sans-serif';
+        ctx.fillText(slot.desc, cx, cy + s * 1.4);
+      }
+      if (slot.w) {
+        ctx.fillStyle = 'rgba(122,208,255,0.75)';
+        ctx.font = '700 ' + Math.round(s * 0.78) + 'px monospace';
+        ctx.fillText(slot.w + '×' + slot.h + '  ' + L.none, cx, cy + s * 2.7);
+      }
+    } else if (w >= 96) {
+      var s2 = Math.max(9, Math.min(13, w * 0.09));
+      ctx.fillStyle = 'rgba(122,208,255,0.95)';
+      ctx.font = '800 ' + Math.round(s2) + 'px "Noto Sans JP",sans-serif';
+      ctx.fillText('🖼 ' + L.here, cx, cy - s2 * 0.7);
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.font = '700 ' + Math.round(s2 * 0.85) + 'px monospace';
+      ctx.fillText(key, cx, cy + s2 * 0.7);
+    } else {
+      ctx.fillStyle = 'rgba(122,208,255,0.9)';
+      ctx.font = '800 ' + Math.max(9, Math.round(w * 0.22)) + 'px sans-serif';
+      ctx.fillText('🖼', cx, cy);
+    }
+    ctx.restore();
+  }
 
   /**
    * canvas を「実際に描画されている箱のサイズ」に合わせて塗る。
