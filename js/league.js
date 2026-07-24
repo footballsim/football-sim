@@ -323,40 +323,84 @@
     return td;
   }
 
-  /* 欠場者を除いた lineup を組む。先発 11 人の穴は「ベンチ→未登録選手」の順で埋める。
-   * 詰み防止（§3.3）: それでも 11 人に満たないなら欠場残り節数を 0 に clamp して解除する。 */
+  /* 欠場者を除いた lineup を組む（AI・他会場用。ユーザーのチームは keepAbsent で不使用）。
+   * ★ 欠場枠は「その枠のポジションに合う・出場可能な最良の選手」で埋める（適性→能力の順）。
+   *   旧実装は default_lineup を順に詰めるだけで、穴をロスター先頭の出場可能者で埋めていた
+   *   ＝守備的MF がCFに入る等、配置が崩れた（2026-07-24 ユーザー指摘）。位置を保ったまま
+   *   適性重視で補充することで、相手AIの布陣が自然になる。
+   * 詰み防止: それでも埋まらない（出場可能者が11人未満）なら欠場残り節数を0にして復帰。 */
   function _availableLineup(src, td, unavailable, clubId) {
     var base = (src.default_lineup || []).slice();
     var total = td.players.length;
-    var used = {}, out = [];
 
-    function _push(i) { if (i == null || used[i]) return false; used[i] = true; out.push(i); return true; }
+    // フォーメーション各枠のポジション名（適性マッチ用）
+    var posNames = null;
+    if (typeof system_data !== 'undefined') {
+      for (var si = 0; si < system_data.length; si++) {
+        if (system_data[si].name === src.default_system) { posNames = system_data[si].positions; break; }
+      }
+    }
+    function _strength(pl) {
+      if (!pl || !pl.params || !pl.params.length) return 0;
+      var s = 0; for (var k = 0; k < pl.params.length; k++) s += pl.params[k];
+      return s / pl.params.length;
+    }
+    function _fits(pl, posName) {
+      if (!pl || !pl.positions || !posName) return false;
+      if (pl.positions.indexOf(posName) >= 0) return true;
+      var b = (posName.charAt(0) === '左' || posName.charAt(0) === '右') ? posName.slice(1) : posName;
+      return b !== posName && pl.positions.indexOf(b) >= 0;
+    }
+    function _bestFor(posName) {   // 適性(+1000)優先、次に能力平均の高い順
+      var best = -1, bestScore = -1;
+      for (var i = 0; i < total; i++) {
+        if (used[i] || unavailable[i]) continue;
+        var score = (_fits(td.players[i], posName) ? 1000 : 0) + _strength(td.players[i]);
+        if (score > bestScore) { bestScore = score; best = i; }
+      }
+      return best;
+    }
 
-    // ① 既存 lineup の順序を尊重して、出場可能な選手だけ拾う
-    for (var b = 0; b < base.length; b++) if (!unavailable[base[b]]) _push(base[b]);
-    // ② 11 人に足りなければ、未登録の出場可能な選手で補充（GK 以外の並びは engine が解決）
-    for (var i2 = 0; i2 < total && out.length < 11; i2++) if (!unavailable[i2]) _push(i2);
-
-    // ③ 詰み防止: 出場可能者が 11 人未満 → 欠場を軽い順に強制解除して復帰させる
-    if (out.length < SEASON_TUNING.MIN_AVAILABLE) {
+    var used = {};
+    var lineup = base.slice(0, 11);   // 既定の11枠（位置を保つ）
+    // ① 出場可能な既定スタメンは自分の枠にそのまま残す（欠場枠は null で穴あけ）
+    for (var p = 0; p < 11; p++) {
+      var idx = lineup[p];
+      if (idx != null && !unavailable[idx]) used[idx] = true; else lineup[p] = null;
+    }
+    // ② 欠場枠を「その枠のポジションに合う・出場可能な最良の選手」で埋める
+    for (var pos = 0; pos < 11; pos++) {
+      if (lineup[pos] != null) continue;
+      var repl = _bestFor(posNames ? posNames[pos] : null);
+      if (repl >= 0) { lineup[pos] = repl; used[repl] = true; }
+    }
+    // ③ 詰み防止: まだ穴（＝出場可能者が11人未満）→ 欠場を軽い順に強制復帰して埋める
+    var holes = 0; for (var h = 0; h < 11; h++) if (lineup[h] == null) holes++;
+    if (holes > 0) {
       var outs = [];
       for (var i3 = 0; i3 < total; i3++) {
-        if (!unavailable[i3]) continue;
+        if (!unavailable[i3] || used[i3]) continue;
         var e = _peekSquadEntry(clubId, _playerKey(td.players[i3]));
         outs.push({ idx: i3, rest: e ? ((e.injuryOut || 0) + (e.suspendOut || 0)) : 0, entry: e });
       }
       outs.sort(function (a, b2) { return a.rest - b2.rest; });   // 残りが短い＝軽い順に復帰
-      for (var o = 0; o < outs.length && out.length < SEASON_TUNING.MIN_AVAILABLE; o++) {
-        if (outs[o].entry) { outs[o].entry.injuryOut = 0; outs[o].entry.suspendOut = 0; }
-        _push(outs[o].idx);
+      var oi = 0;
+      for (var pos2 = 0; pos2 < 11 && oi < outs.length; pos2++) {
+        if (lineup[pos2] != null) continue;
+        var pick = outs[oi++];
+        if (pick.entry) { pick.entry.injuryOut = 0; pick.entry.suspendOut = 0; }
+        lineup[pos2] = pick.idx; used[pick.idx] = true;
       }
     }
-
-    // ④ ベンチ（12人目以降）＝元 lineup の残りを順序どおりに積む（欠場者は入れない）。
-    //    ベンチ枠の大きさは元データと同じ（=base.length）に保つ＝交代枠の挙動を変えない。
+    // ④ ベンチ（12人目以降）＝残りの出場可能な選手を default_lineup 順に積む（欠場者は入れない）
+    var out = lineup.slice();
     var size = Math.max(base.length, 11);
-    for (var i4 = 0; i4 < base.length && out.length < size; i4++) if (!unavailable[base[i4]]) _push(base[i4]);
-    for (var i5 = 0; i5 < total && out.length < size; i5++) if (!unavailable[i5]) _push(i5);
+    for (var i4 = 0; i4 < base.length && out.length < size; i4++) {
+      var b4 = base[i4]; if (b4 != null && !unavailable[b4] && !used[b4]) { used[b4] = true; out.push(b4); }
+    }
+    for (var i5 = 0; i5 < total && out.length < size; i5++) {
+      if (!unavailable[i5] && !used[i5]) { used[i5] = true; out.push(i5); }
+    }
     return out;
   }
 
