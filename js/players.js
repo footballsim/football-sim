@@ -589,7 +589,8 @@ function applyLang() {
   _setText('screen-multi-title',        t('screenMulti'));
   _setText('screen-player-detail-title',t('screenPlayerDetail'));
   _setText('screen-players-title',      t('screenPlayers'));
-  _setText('setting-title-text',        t('screenSetting'));
+  // ★ リーグ（MD-01）は対戦カード、単一/W杯は汎用ラベル。settingTitleText が両者を判定。
+  _setText('setting-title-text',        (typeof settingTitleText === 'function') ? settingTitleText() : t('screenSetting'));
   // W杯統計画面
   _setText('screen-worldcup-stats-title', t('wcStatsTitle'));
   _setText('btn-wc-stats', t('wcStatsBtnWC'));

@@ -1111,10 +1111,21 @@ function selectMatch(key) {
 // SETTING SCREEN
 // ============================================================
 
+// 設定画面ヘッダーの文言。★ リーグ（MD-01）だけ対戦カードを出す。単一/W杯は従来の
+//   汎用ラベル「試合設定」のまま（挙動不変）。applyLang からも同じ関数を呼ぶので、
+//   言語切替でも対戦カードが現在の言語で追従する（applyLang の上書きで消えない）。
+function settingTitleText() {
+  const isLeague = (typeof window !== 'undefined' && window._leagueInMatch);
+  if (isLeague && typeof team1Data !== 'undefined' && team1Data &&
+      typeof team2Data !== 'undefined' && team2Data && typeof getTeamName === 'function') {
+    return `${getTeamName(team1Data)} vs ${getTeamName(team2Data)}`;
+  }
+  return t('screenSetting');
+}
+
 function initSettingScreen() {
-  // Title
-  document.getElementById('setting-title-text').textContent =
-    `${getTeamName(team1Data)} vs ${getTeamName(team2Data)}`;
+  // Title（リーグは対戦カード／単一・W杯は汎用ラベル）
+  document.getElementById('setting-title-text').textContent = settingTitleText();
 
   // Init state（W杯モード第2戦以降は前試合の設定を引き継ぐ）
   // ★ リーグ（MD-01）は playToday が team1State を「習得済み戦術」に制約して組むので上書きしない。
