@@ -1710,24 +1710,31 @@ function renderBench() {
     if (inLineup.has(idx)) return;
 
     const isSubbedOff = _subbedOff.has(idx);
+    // MD-01: リーグの離脱者（怪我/出場停止）はベンチから起用できない＝グレー＋ドラッグ不可。
+    const absence = (typeof leaguePlayerAbsence === 'function') ? leaguePlayerAbsence(idx) : null;
+    const blocked = isSubbedOff || !!absence;
 
     const item = document.createElement('div');
     item.className = 'bench-item';
     item.dataset.playerIdx = idx;
-    if (isSubbedOff) {
+    if (blocked) {
       item.style.opacity = '0.35';
       item.style.cursor = 'default';
-      item.title = '出場済み（再出場不可）';
+      item.title = isSubbedOff ? '出場済み（再出場不可）'
+        : (absence.kind === 'injury' ? '怪我で今節は起用不可（あと' + absence.weeks + '週）'
+                                     : '出場停止で今節は起用不可（あと' + absence.weeks + '週）');
     }
 
     const circle = document.createElement('div');
     circle.className = 'bench-item-circle';
-    circle.style.background = isSubbedOff ? '#bbb' : '#888';
+    circle.style.background = blocked ? '#bbb' : '#888';
     circle.textContent = POS_ABBR[p.positions[0]] || p.positions[0].replace(/[左右]/g,'').substring(0,2);
 
     const name = document.createElement('div');
     name.className = 'bench-item-name';
-    name.textContent = getPlayerName(p);
+    // 離脱理由をベンチ名に添える（モバイルは title が見えないため可視マーカーで示す）
+    const _absMark = absence ? (absence.kind === 'injury' ? ' 🩹' + absence.weeks + '週' : ' 🟥出停') : '';
+    name.textContent = getPlayerName(p) + _absMark;
 
     const posLabel = document.createElement('div');
     posLabel.className = 'bench-item-pos';
@@ -1741,7 +1748,7 @@ function renderBench() {
     item.onclick = () => { if (!dragState.dragging) showPlayerDetail(getTeam1DataKey(), idx); };
 
     item.addEventListener('touchstart', e => {
-      if (_subbedOff.has(idx)) return; // 再出場不可
+      if (blocked) return; // 再出場不可 / リーグ離脱者（怪我・出停）はドラッグ不可
       e.preventDefault();
       dragState.dragging = false;
       dragState.sourceType = 'bench';
@@ -1780,6 +1787,7 @@ function renderBench() {
     }, { passive: false });
 
     item.addEventListener('mousedown', e => {
+      if (blocked) return; // 再出場不可 / リーグ離脱者（怪我・出停）はドラッグ不可
       e.preventDefault();
       dragState.dragging = false;
       dragState.sourceType = 'bench';
@@ -1867,6 +1875,18 @@ function applyDrop(x, y) {
     const _liveOutP = gameState.team1.players[targetPlayerIdx];
     if (_liveOutP && (_liveOutP._sentOff || _liveOutP._discExcluded)) {
       alert(t('discSubBlockedOut'));
+      return;
+    }
+  }
+
+  // MD-01 リーグ: 怪我/出場停止の選手はベンチから起用できない（設定画面）。
+  //   ★ 入力方法（touch/mouse）に依らない最終防波堤＝どの経路でも離脱者は XI に入れない。
+  if (dragState.sourceType === 'bench' && typeof leaguePlayerAbsence === 'function') {
+    const _abs = leaguePlayerAbsence(dragState.sourcePlayerIdx);
+    if (_abs) {
+      alert(_abs.kind === 'injury'
+        ? (window.LANG === 'en' ? 'Injured — unavailable this match.' : '怪我のため今節は起用できません。')
+        : (window.LANG === 'en' ? 'Suspended — unavailable this match.' : '出場停止のため今節は起用できません。'));
       return;
     }
   }

@@ -3516,6 +3516,21 @@
   window.leagueSetWeekSlot = function (idx, kind) { _setWeekSlot(idx, kind); };
   window.leagueSetTrainee = function (idx, key) { _setTraineeTarget(idx, key); };
   window.leagueAutoWeek = function () { _autoWeek(); };
+  /* MD-01 設定画面のベンチ用: 現在の自チーム team1Data(overlay clone)の idx 番選手が
+   * 怪我/出場停止で離脱中か。{kind:'injury'|'suspend', weeks} または null。
+   * リーグの試合準備中(window._leagueInMatch)のみ有効＝single/WC のベンチには効かない。
+   * ★ これで設定画面のベンチが離脱者を「起用不可」にできる（以前は起用できてしまった）。 */
+  window.leaguePlayerAbsence = function (idx) {
+    if (!(typeof window !== 'undefined' && window._leagueInMatch)) return null;
+    if (typeof team1Data === 'undefined' || !team1Data || !team1Data._srcKey) return null;
+    var p = team1Data.players && team1Data.players[idx];
+    if (!p) return null;
+    var e = _peekSquadEntry(team1Data._srcKey, _playerKey(p));
+    if (!e) return null;
+    if (e.injuryOut > 0) return { kind: 'injury', weeks: e.injuryOut };
+    if (e.suspendOut > 0) return { kind: 'suspend', weeks: e.suspendOut };
+    return null;
+  };
   /* UX-07: ハブのタブ切替。★ ハブ全体ではなくパネルの中身だけ差し替える
    * （主役の試合カードを毎回描き直さない＝チラつかない）。 */
   window.leagueSetHubTab = function (t) {
