@@ -665,9 +665,17 @@
   }
   function _weekActionLabel(kind) { var d = _weekActionDef(kind); return d ? (d.icon + ' ' + _t(d.ja, d.en)) : ''; }
 
-  /* 相手の攻め筋を「リーグ平均比」の高い順に並べる（_opponentThreat の一般形）。
+  /* 相手の攻め筋を「実際の強さ（能力値）」の高い順に、詳細つきで並べる。
+   *   val  = その攻め筋を担う先発の平均能力（実際の“強さ”）
+   *   rel  = リーグ平均比（参考。＋なら平均より得意）
+   *   pct  = 表示バーの割合（0..1）。このチームの6つの中で min→max を 0..1 に伸ばす
+   *          ＝「このチームがどの攻め筋にどれだけ寄っているか」が読める weight
+   * ★ 以前は rel（リーグ平均比）順だった。だが強豪バランス型（例ブラジル）は全項目が
+   *   平均以下で順位が無意味になり、アルゼンチンは能力81のショートパスより75のクロスが
+   *   上位に来て直感と食い違った。実際に封じるべきは“実際に強い攻め筋”なので val 順にした。
+   * ★ 表示順もビデオ学習の対策順も、この val 順で統一する（順位とバーが必ず一致）。
    * ビデオ学習を重ねると 1本目・2本目・3本目 と封じる武器が増える＝重ねがけの意味。 */
-  function _opponentThreats(oppId) {
+  function _opponentThreatsRanked(oppId) {
     var mine = _threatProfile(oppId);
     var ids = CLUB_DEFS.map(function (d) { return d.id; });
     var sums = THREAT_ACTIONS.map(function () { return 0; });
@@ -678,11 +686,24 @@
     var scored = [];
     for (var a2 = 0; a2 < THREAT_ACTIONS.length; a2++) {
       var mean = sums[a2] / (ids.length || 1);
-      scored.push({ id: THREAT_ACTIONS[a2].id, rel: mean ? (mine[a2] - mean) / mean : -Infinity, ord: a2 });
+      scored.push({
+        id: THREAT_ACTIONS[a2].id,
+        val: mine[a2],
+        rel: mean ? (mine[a2] - mean) / mean : 0,
+        ord: a2
+      });
     }
-    // 同値は THREAT_ACTIONS の並び順で決着＝決定論（rng 不使用）
-    scored.sort(function (x, y) { return (y.rel - x.rel) || (x.ord - y.ord); });
-    return scored.map(function (s) { return s.id; });
+    // 実際の強さ（val）の高い順。同値は THREAT_ACTIONS の並び順で決着＝決定論（rng 不使用）
+    scored.sort(function (x, y) { return (y.val - x.val) || (x.ord - y.ord); });
+    // バー割合＝このチーム内で min→max を 0..1 に伸ばす（尖りを可視化）。最小でも少し見せる。
+    var hi = scored[0] ? scored[0].val : 0;
+    var lo = scored[scored.length - 1] ? scored[scored.length - 1].val : 0;
+    var span = Math.max(1, hi - lo);
+    scored.forEach(function (s) { s.pct = 0.14 + 0.86 * ((s.val - lo) / span); });
+    return scored;
+  }
+  function _opponentThreats(oppId) {
+    return _opponentThreatsRanked(oppId).map(function (s) { return s.id; });
   }
 
   /* 今週の準備（無ければ null）。★ 旧形式 {round,kind,target} のセーブも読める（形の正規化のみ）。 */
@@ -2764,6 +2785,44 @@
 
   function _resultColor(res) { return res === 'W' ? '#2ecc71' : res === 'L' ? '#e74c3c' : '#f1c40f'; }
 
+  /* ── 偵察レポート（相手の攻め筋を上位3つ・ウェイトつきで見せる）──────────
+   * ★ 準備の判断材料。ここを読んで「📹 ビデオ学習」で何を封じるかを決める。
+   *   今週すでに封じている攻め筋には ✓ を付ける（対策済みが一目で分かる）。 */
+  function _scoutHTML(oppId) {
+    if (!oppId) return '';
+    var ranked = _opponentThreatsRanked(oppId).slice(0, 3);
+    if (!ranked.length) return '';
+    // 今週のビデオ学習が対策している攻め筋を集める
+    var covered = {};
+    var pa = _pendingWeek();
+    if (pa && pa.slots) {
+      for (var i = 0; i < pa.slots.length; i++) {
+        var s = pa.slots[i];
+        if (s && s.kind === 'video_study' && s.target) covered[s.target] = true;
+      }
+    }
+    var rows = ranked.map(function (r, i) {
+      var pct = Math.round(r.pct * 100);
+      var on = !!covered[r.id];
+      var rank = ['①', '②', '③'][i] || '';
+      return '<div class="lg-scout-row' + (on ? ' covered' : '') + '">' +
+        '<span class="lg-scout-rank">' + rank + '</span>' +
+        '<span class="lg-scout-name">' + _threatLabel(r.id) +
+          (on ? ' <span class="lg-scout-chk">✓' + _t('対策', 'set') + '</span>' : '') + '</span>' +
+        '<span class="lg-scout-bar"><i style="width:' + pct + '%"></i></span>' +
+        '<span class="lg-scout-val">' + Math.round(r.val) + '</span>' +
+        '</div>';
+    }).join('');
+    var anyCovered = ranked.some(function (r) { return covered[r.id]; });
+    var hint = anyCovered
+      ? _t('封じた攻め筋は今週の試合で弱まる', 'Countered threats are weakened this match')
+      : _t('📹 ビデオ学習で上から順に封じられる', '📹 Video study shuts these down, top-down');
+    return '<div class="lg-h">' + _t('偵察レポート', 'Scouting') +
+        '<span class="lg-badge">' + _t('相手の攻め筋', 'Their threats') + '</span></div>' +
+      '<div class="lg-card lg-scout">' + rows +
+        '<div class="lg-scout-hint">' + hint + '</div></div>';
+  }
+
   /* ── 今週の準備（MG-03b・週プラン）───────────────────────────────────
    * 月〜金を3コマに圧縮し、各コマに何を置くかを決める。同じものを重ねてよい＝重点配分。
    * 効果の主語は常にユーザー＝コーチ助言(MG-06)と違い、これは監督自身の決断。 */
@@ -3152,9 +3211,14 @@
     if (_hubTab === 'table') return _standingsTableHTML(_sortedStandings(), myId);
     if (_hubTab === 'manager') return _managerCardHTML();
     if (_hubTab === 'record') return _hubRecordHTML();
-    // prep（既定）＝今週の準備＋離脱者
+    // prep（既定）＝偵察レポート → 今週の準備 → 離脱者。
+    //   ★ 攻め筋を「試合時」でなく「準備段階」で見せ、それを元にコマを選ばせる。
     var h = '';
-    if (!_state.finished) h += _actionPhaseHTML() + _absenteeHTML(myId);
+    if (!_state.finished) {
+      var fx0 = _myFixtureThisRound();
+      var oppId0 = fx0 ? ((fx0.home === myId) ? fx0.away : fx0.home) : null;
+      h += _scoutHTML(oppId0) + _actionPhaseHTML() + _absenteeHTML(myId);
+    }
     if (!h) h = '<div class="lg-card lg-mini" style="text-align:center">' +
       _t('シーズンは終了しました', 'The season is over') + '</div>';
     return h;
@@ -3289,9 +3353,9 @@
           '<div class="lg-vs-pos">' + _position(id) + _t('位', '') + ' · ' + st.pts + _t('pt', 'pts') + '</div>' +
           '</div>';
       }
+      // ★ 相手の攻め筋は「準備」タブの偵察レポートへ移した（準備の判断材料なので）。
+      //   試合カードには結果の流れ（前節・調子・要求）だけ残す。
       var infoRows = [];
-      infoRows.push('<span class="lg-ni-k">' + _t('相手の攻め筋', 'Their threat') + '</span>' +
-        '<b>' + _threatLabel(_opponentThreat(oppId)) + '</b>');
       var prev = _state.lastResult && _state.lastResult.mine;
       if (prev) {
         infoRows.push('<span class="lg-ni-k">' + _t('前節', 'Last') + '</span>' +
@@ -3503,6 +3567,7 @@
     absentees: _absentees,
     opponentThreat: _opponentThreat,
     opponentThreats: _opponentThreats,
+    opponentThreatsRanked: _opponentThreatsRanked,
     beginMatchCtx: _beginManagerMatchCtx,
     endMatchCtx: _endManagerMatchCtx,
     nextUnlearnedTactic: _nextUnlearnedTactic,
