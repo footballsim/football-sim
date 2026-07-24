@@ -1672,8 +1672,23 @@ function renderFormation() {
   }
 }
 
-// team1DataのTEAM_DATAキーを返す
+// team1DataのTEAM_DATAキーを返す。
+// ★ 根治（選手詳細が日本選手に飛ぶバグ・3回目/2026-07-24）: リーグは team1Data を
+//   overlay clone（実クラブ）に差し替えるが _team1DataKey の同期は startManagerMatch 内
+//   でしか行われず、その手前（設定画面など新しい入口）では古い日本キーのまま残る。
+//   → 参照する瞬間に team1Data._srcKey を最優先で解決する＝同期タイミングに依存しない。
+//   これで今後どこから選手詳細を開いても、常に現在の team1Data に整合する。
 function getTeam1DataKey() {
+  if (typeof team1Data !== 'undefined' && team1Data && team1Data._srcKey &&
+      typeof TEAM_DATA !== 'undefined' && TEAM_DATA[team1Data._srcKey]) {
+    return team1Data._srcKey;
+  }
+  // clone でない通常時（single/WC）は参照一致でも引ける。最後に従来の保存キー。
+  if (typeof team1Data !== 'undefined' && team1Data && typeof TEAM_DATA !== 'undefined') {
+    for (var k in TEAM_DATA) {
+      if (Object.prototype.hasOwnProperty.call(TEAM_DATA, k) && TEAM_DATA[k] === team1Data) return k;
+    }
+  }
   return _team1DataKey;
 }
 
