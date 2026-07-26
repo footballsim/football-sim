@@ -1028,3 +1028,513 @@
   body.league-mode .lg-shelf-books { min-height: 96px; }
   body.league-mode .lg-spine { height: 88px; width: 30px; }
 }
+
+/* =============================================================================
+ * SN-03 最終話：シーズン終了の専用全幅フロー（読み物「1冊」体裁・2026-07-24）
+ * -----------------------------------------------------------------------------
+ * ハブの固定2カラム（landscape で overflow:hidden・flex で子が潰れる）に読み物量を
+ * 詰めると破綻する。finished 時は _renderFinale がこの全幅・内部スクロール版へ分岐。
+ * ★ スクロール領域は block flow（flex-shrink 潰れを避ける＝元バグの再発防止）。
+ * ========================================================================== */
+.lg-finale { width: 100%; }
+.lg-finale-col {
+  max-width: 640px; margin: 0 auto; padding: 10px 16px 28px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+@media (orientation: landscape) {
+  body.league-mode .lg-finale {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto; display: block;
+  }
+  body.league-mode .lg-finale::-webkit-scrollbar { width: 6px; }
+  body.league-mode .lg-finale::-webkit-scrollbar-thumb { background: var(--lg-surface-3); border-radius: 3px; }
+}
+
+/* ① マストヘッド（結果） */
+.lg-fin-hero {
+  text-align: center; padding: 24px 18px 20px; border-radius: var(--lg-r-l);
+  background:
+    radial-gradient(125% 95% at 50% -12%, rgba(255, 255, 255, .10), rgba(0, 0, 0, .30)),
+    linear-gradient(160deg, var(--lg-bg-1), var(--lg-bg-2));
+  border: 1px solid var(--lg-line); box-shadow: var(--lg-shadow);
+}
+.lg-finale.won .lg-fin-hero {
+  background:
+    radial-gradient(125% 95% at 50% -12%, rgba(245, 197, 24, .24), rgba(0, 0, 0, .32)),
+    linear-gradient(160deg, #2a2410, #16120a);
+  border-color: rgba(245, 197, 24, .55);
+  box-shadow: var(--lg-shadow-l), inset 0 0 0 1px rgba(245, 197, 24, .18);
+}
+.lg-fin-emblem { font-size: 46px; line-height: 1; filter: drop-shadow(0 3px 7px rgba(0, 0, 0, .45)); }
+.lg-fin-eyebrow {
+  margin-top: 8px; font-size: 10px; font-weight: 800; letter-spacing: 3px;
+  color: var(--lg-text-mute); text-transform: uppercase;
+}
+.lg-finale.won .lg-fin-eyebrow { color: var(--lg-gold-2); }
+.lg-fin-title { margin: 4px 0 0; font-size: 22px; font-weight: 900; letter-spacing: .4px; line-height: 1.25; }
+.lg-finale.won .lg-fin-title { color: var(--lg-gold); }
+.lg-fin-sub { margin-top: 8px; font-size: 13.5px; color: var(--lg-text-dim); }
+.lg-finale.won .lg-fin-sub { color: var(--lg-warn); font-weight: 700; }
+.lg-fin-mine {
+  display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 16px; padding: 8px 16px; border-radius: 999px;
+  background: var(--lg-surface); border: 1px solid var(--lg-line);
+}
+.lg-fin-crest { font-size: 18px; line-height: 1; }
+.lg-fin-mine-name { font-weight: 800; font-size: 13.5px; }
+.lg-fin-pos {
+  font-weight: 900; font-size: 12px; color: var(--lg-ink);
+  background: var(--lg-gold); border-radius: 5px; padding: 1px 8px;
+}
+.lg-fin-rec { font-size: 12px; color: var(--lg-text-dim); }
+
+/* 各セクション（読み物カード） */
+.lg-fin-sec {
+  padding: 15px 16px; border-radius: var(--lg-r-m);
+  background: var(--lg-surface); border: 1px solid var(--lg-line);
+}
+.lg-fin-h {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--lg-text-mute); margin-bottom: 11px;
+}
+.lg-fin-h::after { content: ""; flex: 1; height: 1px; background: var(--lg-line); }
+.lg-fin-review { font-size: 13.5px; line-height: 1.9; color: var(--lg-text-dim); }
+
+/* ③ Team of the Season＝主役。中の .lg-sp / .lg-card が体裁を持つのでセクション枠は透明に */
+.lg-fin-tots { padding: 0; background: transparent; border: none; }
+.lg-fin-tots > .lg-card,
+.lg-fin-tots > .lg-sp { margin-top: 0; }
+
+/* サブ見出し（総評内の個人タイトル・契約内のオファー等） */
+.lg-fin-subh {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--lg-text-mute); margin-bottom: 10px;
+}
+
+/* ② 個人タイトル：総評の narrative の下に、格を出すメダルカードの3連 */
+.lg-fin-awards-wrap { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--lg-line-soft); }
+.lg-fin-awards { display: flex; flex-wrap: wrap; gap: 8px; }
+.lg-fin-award {
+  flex: 1 1 96px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 12px 8px 11px; border-radius: var(--lg-r-s);
+  background: var(--lg-surface); border: 1px solid var(--lg-line);
+}
+.lg-fin-award-medal { font-size: 22px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .4)); }
+.lg-fin-award-role {
+  font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--lg-gold-2);
+}
+.lg-fin-award-who {
+  font-size: 13.5px; font-weight: 800; color: var(--lg-text); text-align: center;
+  line-height: 1.25; word-break: keep-all;
+}
+.lg-fin-award-val { font-size: 12px; font-weight: 700; color: var(--lg-text-dim); }
+
+/* ⑤ クラブの評価：達成/未達バッジ ＋ 信頼/人気デルタのタイル（普通の .lg-fin-sec カード） */
+.lg-fin-vd { display: flex; flex-direction: column; gap: 13px; }
+.lg-fin-vd-head { display: flex; align-items: center; gap: 12px; }
+.lg-fin-vd-icon {
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 900; background: var(--lg-surface-2);
+}
+.lg-fin-vd.ok .lg-fin-vd-icon { color: var(--lg-good); background: color-mix(in srgb, var(--lg-good) 16%, transparent); }
+.lg-fin-vd.ng .lg-fin-vd-icon { color: var(--lg-bad); background: color-mix(in srgb, var(--lg-bad) 16%, transparent); }
+.lg-fin-vd-txt { display: flex; flex-direction: column; gap: 2px; }
+.lg-fin-vd-badge { font-size: 15px; font-weight: 800; color: var(--lg-text); }
+.lg-fin-vd.ok .lg-fin-vd-badge { color: var(--lg-good); }
+.lg-fin-vd.ng .lg-fin-vd-badge { color: var(--lg-bad); }
+.lg-fin-vd-goal { font-size: 12px; color: var(--lg-text-dim); }
+.lg-fin-vd-stats { display: flex; gap: 8px; }
+.lg-fin-vd-stat {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 10px 8px; border-radius: var(--lg-r-s);
+  background: var(--lg-surface); border: 1px solid var(--lg-line);
+}
+.lg-fin-vd-k { font-size: 10px; font-weight: 700; letter-spacing: .5px; color: var(--lg-text-mute); }
+.lg-fin-vd-v { font-size: 18px; font-weight: 900; color: var(--lg-text-dim); font-variant-numeric: tabular-nums; }
+.lg-fin-vd-stat.up .lg-fin-vd-v { color: var(--lg-good); }
+.lg-fin-vd-stat.down .lg-fin-vd-v { color: var(--lg-bad); }
+
+/* ⑥ この先へ：解任通告・オファー行・残留ボタン */
+.lg-fin-sacked {
+  display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; align-items: center;
+  padding: 14px; margin-bottom: 14px; border-radius: var(--lg-r-m);
+  background: var(--lg-surface);
+  background: color-mix(in srgb, var(--lg-bad) 12%, var(--lg-surface));
+  border: 1px solid var(--lg-line);
+  border-color: color-mix(in srgb, var(--lg-bad) 42%, transparent);
+}
+.lg-fin-sacked-icon { grid-row: span 2; font-size: 24px; }
+.lg-fin-sacked-ttl { font-size: 15px; font-weight: 800; color: var(--lg-bad); align-self: end; }
+.lg-fin-sacked-body { font-size: 12px; line-height: 1.7; color: var(--lg-text-dim); align-self: start; }
+
+.lg-fin-offers { display: flex; flex-direction: column; gap: 8px; }
+.lg-fin-offer {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  padding: 12px 14px; border-radius: var(--lg-r-m);
+  background: var(--lg-surface); border: 1px solid var(--lg-line);
+  color: var(--lg-text); font-family: inherit; cursor: pointer;
+  transition: transform var(--lg-t-fast) var(--lg-ease), background var(--lg-t-fast), border-color var(--lg-t-fast);
+}
+.lg-fin-offer:hover { background: var(--lg-surface-2); }
+.lg-fin-offer:active { transform: scale(.99); }
+.lg-fin-offer-crest { font-size: 22px; line-height: 1; flex: 0 0 auto; }
+.lg-fin-offer-body { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.lg-fin-offer-name { font-size: 15px; font-weight: 800; }
+.lg-fin-offer-str { font-size: 12px; color: var(--lg-text-mute); }
+.lg-fin-offer-str b { color: var(--lg-text-dim); font-weight: 800; }
+.lg-fin-offer-go { color: var(--lg-text-faint); font-size: 12px; flex: 0 0 auto; }
+.lg-fin-renew { margin-top: 14px; }
+.lg-fin-contract .lg-fin-subh { margin-top: 0; }
+
+/* =============================================================================
+ * SN-03改2：シーズン終了＝3ゾーン＋下部コマンドバー（据置ゲーム級・スクロール廃止）
+ * -----------------------------------------------------------------------------
+ * 2026-07-25 確定の「レトロ・ドット絵ハイブリッド」方向（Codex H2_season_end_retro）。
+ * レイアウトは据置級のまま、チャンクなドット枠・ピクセル徽章・薄い CRT スキャンライン・
+ * 限定パレット＝本作のドット絵世界と美術整合。ドット頭は portrait.js の実描画（.lg-sp-face）。
+ * ★ 固定フレーム＝#screen-home.season-end-mode（landscape 既定の overflow:auto を止める）。
+ * ========================================================================== */
+body.league-mode #screen-home.season-end-mode {
+  overflow: hidden; display: flex; flex-direction: column;
+  align-items: stretch; justify-content: flex-start; padding: 0;
+}
+body.league-mode #screen-home.season-end-mode > #league-body {
+  flex: 1 1 auto; min-height: 0; display: flex; width: 100%;
+}
+/* 最終話は全面の固定UI＝監督室の背景アートは伏せる（隙間からの覗き込み・プレースホルダ文字を消す） */
+#screen-home.season-end-mode .lg-office-backdrop { display: none; }
+
+.lg-se {
+  /* 最終話ローカルの限定パレット（:root を触らず scoped に持つ） */
+  --se-edge: rgba(0, 0, 0, .5);
+  --se-panel: rgba(255, 255, 255, .05);
+  --se-panel-2: rgba(255, 255, 255, .09);
+  --se-pitch-a: #1d5232; --se-pitch-b: #143c23; --se-pitch-line: rgba(255, 255, 255, .16);
+  flex: 1 1 auto; min-height: 0; width: 100%; position: relative;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding: clamp(8px, 1.6vh, 14px);
+  gap: clamp(7px, 1.4vh, 12px);
+  font-feature-settings: "tnum" 1;
+}
+/* 薄い CRT スキャンライン（レトロ質感・要所だけ・可読性を潰さない） */
+.lg-se::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 6;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .10) 0 1px, transparent 1px 3px);
+  opacity: .3; mix-blend-mode: overlay;
+}
+@media (prefers-reduced-motion: reduce) { .lg-se::after { opacity: .16; } }
+
+/* ── ヘッダー：マストヘッド＋4ステップのパンくず ── */
+.lg-se-top {
+  flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+.lg-se-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.lg-se-emblem {
+  font-size: clamp(22px, 4.4vh, 30px); line-height: 1;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .5));
+}
+.lg-se-brandtx { display: flex; flex-direction: column; min-width: 0; }
+.lg-se-h1 {
+  margin: 0; font-size: clamp(17px, 3.1vh, 23px); font-weight: 900; letter-spacing: 1px;
+  line-height: 1.05; color: var(--lg-text);
+}
+.lg-se.won .lg-se-h1 { color: var(--lg-gold); }
+.lg-se-hsub {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--lg-text-mute); margin-top: 2px;
+}
+.lg-se-steps { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.lg-se-step {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 800; color: var(--lg-text-mute);
+  padding: 3px 9px 3px 4px; border-radius: 4px;
+  border: 1.5px solid var(--lg-line); background: var(--se-panel);
+}
+.lg-se-step > i {
+  font-style: normal; width: 16px; height: 16px; border-radius: 3px;
+  display: grid; place-items: center; font-size: 10px; font-weight: 900;
+  background: var(--lg-surface-3); color: var(--lg-text-dim);
+}
+.lg-se-step.on {
+  color: var(--lg-gold); border-color: var(--lg-gold-2);
+  background: color-mix(in srgb, var(--lg-gold) 14%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--lg-gold) 30%, transparent);
+}
+.lg-se-step.on > i { background: var(--lg-gold); color: var(--lg-ink); }
+.lg-se-arrow { color: var(--lg-text-faint); font-size: 11px; font-weight: 900; }
+
+/* ── 本体：横3ゾーン（左=総括 / 中=ベスト11 / 右=評価）── */
+.lg-se-main {
+  flex: 1 1 auto; min-height: 0;
+  display: grid; gap: clamp(7px, 1.3vh, 11px);
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.24fr) minmax(0, 0.92fr);
+}
+.lg-se-zone {
+  min-height: 0; overflow: hidden;
+  display: flex; flex-direction: column; gap: clamp(6px, 1.1vh, 9px);
+  padding: clamp(8px, 1.5vh, 12px);
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  border: 2px solid var(--lg-line);
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 3px 0 var(--se-edge);
+}
+.lg-se-ztitle {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 7px;
+  font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--lg-gold); white-space: nowrap;
+}
+.lg-se-ztitle::before, .lg-se-ztitle::after { content: "◆"; font-size: 6px; color: var(--lg-gold-2); opacity: .8; }
+.lg-se-ztitle::after { flex: 1; content: ""; height: 1.5px; background: linear-gradient(90deg, var(--lg-gold-2), transparent); opacity: .5; }
+.lg-se-ztitle.sm { font-size: 9px; letter-spacing: 1.5px; color: var(--lg-text-mute); }
+.lg-se-ztitle.sm::before, .lg-se-ztitle.sm::after { color: var(--lg-line); }
+
+/* ── 左ゾーン：シーズン総括 ── */
+.lg-se-sum { justify-content: flex-start; }
+.lg-se-champ {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px; border-radius: 4px;
+  background: color-mix(in srgb, var(--lg-gold) 12%, var(--se-panel));
+  border: 1.5px solid color-mix(in srgb, var(--lg-gold) 40%, transparent);
+}
+.lg-se-cup { font-size: clamp(24px, 4.6vh, 32px); line-height: 1; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .45)); }
+.lg-se-champ-tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.lg-se-champ-lbl { font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--lg-gold-2); }
+.lg-se-champ-name { font-size: clamp(13px, 2.3vh, 16px); font-weight: 900; color: var(--lg-text); line-height: 1.15; }
+
+.lg-se-mine {
+  flex: 0 0 auto; padding: 7px 10px; border-radius: 4px;
+  background: var(--se-panel-2); border: 1.5px solid var(--lg-line);
+}
+.lg-se-mine-head { display: flex; align-items: center; gap: 8px; }
+.lg-se-mine-crest { font-size: clamp(15px, 2.6vh, 19px); line-height: 1; }
+.lg-se-mine-name { flex: 1; min-width: 0; font-size: clamp(12px, 2.1vh, 15px); font-weight: 800; color: var(--lg-text); }
+.lg-se-mine-pos {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(24px, 4.6vh, 34px); line-height: .85;
+  font-weight: 400; color: var(--lg-gold); letter-spacing: 1px;
+}
+.lg-se-mine-pos > i { font-style: normal; font-size: 11px; font-family: inherit; margin-left: 1px; }
+.lg-se-mine-stats {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  margin-top: 7px; padding-top: 7px; border-top: 1px solid var(--lg-line-soft);
+  font-size: 11px; color: var(--lg-text-dim);
+}
+.lg-se-mine-rec b { color: var(--lg-text); font-weight: 900; font-size: 13px; }
+.lg-se-mine-grade { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; color: var(--lg-text-mute); }
+.lg-se-mine-grade b {
+  font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .5px; font-weight: 400;
+  color: var(--lg-ink); background: var(--lg-gold); border-radius: 3px; padding: 0 7px; line-height: 1.2;
+}
+
+.lg-se-chair {
+  flex: 1 1 auto; min-height: 0; display: flex; gap: 8px; align-items: flex-start;
+  padding: 7px 9px; border-radius: 4px; overflow: hidden;
+  background: var(--se-panel); border: 1.5px solid var(--lg-line);
+}
+.lg-se-chair-av {
+  flex: 0 0 auto; font-size: 20px; line-height: 1; width: 32px; height: 32px;
+  display: grid; place-items: center; border-radius: 3px;
+  background: var(--lg-surface-2); border: 1.5px solid var(--lg-line);
+}
+.lg-se-chair-tx { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.lg-se-chair-lbl { font-size: 9px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--lg-text-mute); }
+.lg-se-chair-body {
+  margin: 0; font-size: 11px; line-height: 1.5; color: var(--lg-text-dim);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* ── 中央ゾーン：ベストイレブン（実ドット頭）＋個人タイトル ── */
+.lg-se-team { min-width: 0; }
+.lg-se-pitch {
+  flex: 1 1 auto; min-height: 0; overflow: hidden; position: relative;
+  border-radius: 4px; padding: clamp(3px, 0.8vh, 7px) 4px;
+  display: flex; flex-direction: column; justify-content: center;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 11%, rgba(255, 255, 255, .03) 11% 12%),
+    linear-gradient(170deg, var(--se-pitch-a), var(--se-pitch-b));
+  border: 1.5px solid rgba(0, 0, 0, .35);
+  box-shadow: inset 0 0 0 1px var(--se-pitch-line), inset 0 0 30px rgba(0, 0, 0, .35);
+}
+.lg-se-pitch::before {   /* センターサークル＋ハーフウェイの淡い印 */
+  content: ""; position: absolute; left: 50%; top: 50%; width: 34%; aspect-ratio: 1;
+  transform: translate(-50%, -50%); border: 1.5px solid var(--se-pitch-line); border-radius: 50%;
+  pointer-events: none; opacity: .55;
+}
+.lg-se-empty { margin: auto; color: rgba(255, 255, 255, .7); font-size: 11px; }
+/* bestXISpread(.lg-sp season) を枠に馴染ませる（自前ヘッダ/枠を消し、顔を高さ基準で縮小） */
+.lg-se-pitch .lg-sp { margin: 0; background: transparent; border: none; position: relative; z-index: 1; }
+.lg-se-pitch .lg-sp-head { display: none; }
+.lg-se-pitch .lg-sp-pitch { padding: 0; }
+.lg-se-pitch .lg-sp-line { margin-top: clamp(1px, 0.5vh, 5px); gap: 5px; }
+.lg-se-pitch .lg-sp-line:first-child { margin-top: 0; }
+.lg-se-pitch .lg-sp-lbl {
+  flex: 0 0 1.7em; font-size: 8px; font-weight: 900; letter-spacing: 1px; text-align: center;
+  color: var(--lg-ink); background: rgba(255, 255, 255, .82); border-radius: 3px; padding: 1px 0;
+}
+.lg-se-pitch .lg-sp-row { gap: clamp(3px, 0.8vw, 8px); }
+.lg-se-pitch .lg-sp-card { min-width: 0; gap: 0; }
+.lg-se-pitch .lg-sp-face { max-width: clamp(15px, 3.7vh, 36px); }
+/* 狭い横並びピッチでは国旗/クラブ徽章は省く（名前で識別が付く・行高を1段稼ぐ） */
+.lg-se-pitch .lg-sp-crest { display: none; }
+.lg-se-pitch .lg-sp-name { font-size: clamp(7.5px, 1.25vh, 10px); line-height: 1.05; margin-top: 1px; text-shadow: 0 1px 2px rgba(0, 0, 0, .75); }
+.lg-se-pitch .lg-sp-rate { font-size: clamp(7.5px, 1.25vh, 10px); margin-top: 1px; }
+.lg-se-pitch .lg-sp-stat { display: none; }
+
+/* 個人タイトルは薄い2行カード（左＝メダル / 右上＝役名 / 右下＝受賞者＋数値）＝縦を食わない */
+.lg-se-awards { flex: 0 0 auto; }
+.lg-se-awards .lg-fin-awards { gap: 5px; }
+.lg-se-awards .lg-fin-award {
+  flex: 1 1 0; min-width: 0; display: grid; align-items: center;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "medal role val" "medal who who";
+  gap: 1px 6px; padding: 4px 8px 4px 6px; border-width: 1.5px; border-radius: 4px;
+}
+.lg-se-awards .lg-fin-award-medal { grid-area: medal; font-size: 15px; }
+.lg-se-awards .lg-fin-award-role {
+  grid-area: role; min-width: 0; font-size: 8px; text-align: left; color: var(--lg-gold-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.lg-se-awards .lg-fin-award-who {
+  grid-area: who; min-width: 0; font-size: 10px; text-align: left; font-weight: 800; color: var(--lg-text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.lg-se-awards .lg-fin-award-val { grid-area: val; font-size: 9px; white-space: nowrap; justify-self: end; color: var(--lg-text-dim); }
+
+/* ── 右ゾーン：クラブ評価（目標結果＋信頼＋人気）── */
+.lg-se-vd { justify-content: flex-start; }
+.lg-se-goal {
+  flex: 0 0 auto; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 8px;
+  padding: 9px 11px; border-radius: 4px;
+  background: var(--se-panel-2); border: 1.5px solid var(--lg-line);
+}
+.lg-se-goal.ok { border-color: color-mix(in srgb, var(--lg-good) 45%, transparent); }
+.lg-se-goal.ng { border-color: color-mix(in srgb, var(--lg-bad) 45%, transparent); }
+.lg-se-goal-k { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--lg-text-mute); }
+.lg-se-goal-badge {
+  grid-row: 1 / span 2; align-self: center; justify-self: end;
+  font-size: 15px; font-weight: 900; padding: 3px 10px; border-radius: 4px; line-height: 1.2;
+}
+.lg-se-goal.ok .lg-se-goal-badge { color: var(--lg-good); background: color-mix(in srgb, var(--lg-good) 16%, transparent); }
+.lg-se-goal.ng .lg-se-goal-badge { color: var(--lg-bad); background: color-mix(in srgb, var(--lg-bad) 16%, transparent); }
+.lg-se-goal-tx { font-size: 12px; font-weight: 700; color: var(--lg-text); }
+
+.lg-se-meter {
+  flex: 0 0 auto; padding: 9px 11px; border-radius: 4px;
+  background: var(--se-panel); border: 1.5px solid var(--lg-line);
+}
+.lg-se-meter-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.lg-se-meter-k { font-size: 11px; font-weight: 800; color: var(--lg-text); }
+.lg-se-meter-d { font-size: 13px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--lg-text-mute); }
+.lg-se-meter.up .lg-se-meter-d { color: var(--lg-good); }
+.lg-se-meter.down .lg-se-meter-d { color: var(--lg-bad); }
+.lg-se-bar {
+  position: relative; height: 15px; border-radius: 3px; overflow: hidden;
+  background: rgba(0, 0, 0, .3); border: 1px solid var(--lg-line);
+}
+.lg-se-fill {
+  display: block; height: 100%; width: 0; border-radius: 0;
+  background: linear-gradient(90deg, var(--lg-info-2), var(--lg-info));
+  transition: width var(--lg-t-slow) var(--lg-ease);
+}
+.lg-se-meter.up .lg-se-fill { background: linear-gradient(90deg, #1f9d57, var(--lg-win)); }
+.lg-se-meter.down .lg-se-fill { background: linear-gradient(90deg, #b23a2c, var(--lg-loss)); }
+.lg-se-meter-v {
+  position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+  font-size: 10px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--lg-text);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .8);
+}
+.lg-se-meter-v > i { font-style: normal; font-weight: 700; opacity: .6; font-size: 8px; }
+
+/* ── 下部コマンドバー：契約選択 ── */
+.lg-se-cmd {
+  flex: 0 0 auto; padding: clamp(7px, 1.2vh, 10px) 0 0;
+  border-top: 2px solid var(--se-edge);
+}
+.lg-se-cmd-h {
+  text-align: center; font-size: 10px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--lg-gold); margin-bottom: 7px;
+}
+.lg-se-cmd-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(7px, 1.3vw, 12px); }
+.lg-se-card {
+  display: flex; flex-direction: column; gap: 2px; text-align: left;
+  min-height: 44px; padding: 8px 12px; border-radius: 5px;
+  border: 2px solid var(--lg-line); background: var(--se-panel-2); color: var(--lg-text);
+  font-family: inherit; cursor: pointer;
+  box-shadow: 0 3px 0 var(--se-edge);
+  transition: transform var(--lg-t-fast) var(--lg-ease), background var(--lg-t-fast), border-color var(--lg-t-fast), box-shadow var(--lg-t-fast);
+}
+.lg-se-card:hover { background: var(--lg-surface-3); }
+.lg-se-card:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--se-edge); }
+.lg-se-card-ico { font-size: 17px; line-height: 1; }
+.lg-se-card-h { font-size: 13.5px; font-weight: 800; line-height: 1.2; }
+.lg-se-card-h b { color: var(--lg-gold); font-weight: 900; }
+.lg-se-card-s { font-size: 9.5px; color: var(--lg-text-mute); line-height: 1.35; }
+.lg-se-card.primary {
+  border-color: var(--lg-gold-2); background: color-mix(in srgb, var(--lg-gold) 16%, var(--se-panel-2));
+}
+.lg-se-card.primary .lg-se-card-h { color: var(--lg-gold); }
+.lg-se-card.leave { border-color: color-mix(in srgb, var(--lg-loss) 38%, var(--lg-line)); }
+.lg-se-card.leave .lg-se-card-h { color: var(--lg-bad); }
+.lg-se-card.disabled {
+  cursor: default; opacity: .5; box-shadow: none; border-style: dashed;
+}
+.lg-se-card.disabled:hover { background: var(--se-panel-2); }
+.lg-se-card.disabled:active { transform: none; }
+
+/* ── オファー選択オーバーレイ ── */
+.lg-se-ovl {
+  position: absolute; inset: 0; z-index: 12;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: rgba(3, 8, 20, .78); backdrop-filter: blur(2px);
+}
+.lg-se-ovl[hidden] { display: none; }
+.lg-se-ovl-panel {
+  width: 100%; max-width: 440px; max-height: 100%; overflow-y: auto;
+  padding: 14px; border-radius: 6px;
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  border: 2px solid var(--lg-line); box-shadow: var(--lg-shadow-l), 0 4px 0 var(--se-edge);
+}
+.lg-se-ovl-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px;
+  font-size: 13px; font-weight: 900; color: var(--lg-text);
+}
+.lg-se-ovl-head > span { display: inline-flex; align-items: center; gap: 8px; }
+.lg-se-ovl-x {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 4px; cursor: pointer;
+  border: 1.5px solid var(--lg-line); background: var(--se-panel); color: var(--lg-text);
+  font-size: 14px; font-weight: 900;
+}
+.lg-se-ovl-x:hover { background: var(--lg-surface-3); }
+
+/* ── 縦持ち／狭幅フォールバック：3ゾーンを縦積みし、本体だけ内部スクロールを許す ── */
+@media (max-width: 660px), (orientation: portrait) {
+  .lg-se-main {
+    grid-template-columns: 1fr; grid-auto-rows: min-content;
+    overflow-y: auto; overscroll-behavior: contain;
+  }
+  .lg-se-zone { overflow: visible; }
+  .lg-se-chair { flex: 0 0 auto; }
+  .lg-se-chair-body { -webkit-line-clamp: 3; }
+  .lg-se-pitch { min-height: 190px; }
+  .lg-se-cmd-row { grid-template-columns: 1fr; }
+  .lg-se-card { flex-direction: row; align-items: center; gap: 10px; }
+  .lg-se-card-s { display: none; }
+}
+
+/* ── 低フレーム高（横持ちスマホ）で各ゾーンを詰める＝ヘッダ／コマンドバーを薄くして本体に高さを回す ── */
+@media (max-height: 470px) and (orientation: landscape) {
+  .lg-se { gap: 6px; padding: 7px; }
+  .lg-se-hsub { display: none; }
+  .lg-se-emblem { font-size: 22px; }
+  .lg-se-chair-body { -webkit-line-clamp: 3; }
+  .lg-se-cmd { padding-top: 6px; }
+  .lg-se-cmd-h { margin-bottom: 4px; font-size: 9px; letter-spacing: 2px; }
+  .lg-se-card-s { display: none; }
+  .lg-se-card { min-height: 32px; padding: 6px 10px; flex-direction: row; align-items: center; gap: 8px; box-shadow: 0 2px 0 var(--se-edge); }
+  .lg-se-card-h { font-size: 12.5px; }
+  .lg-se-pitch { padding: 2px 4px; }
+  .lg-se-pitch .lg-sp-face { max-width: clamp(15px, 3.5vh, 34px); }
+}

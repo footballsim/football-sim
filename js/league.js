@@ -3104,6 +3104,7 @@
         '<div class="lg-pick">' + cards + '</div>' +
       '</div>';
     _hubMode(false);             // 8枚並ぶのでこの画面はスクロールさせる
+    _seasonEndMode(false);       // 最終話の固定フレーム化が残っていたら解く
     _paintPickPortraits(defs);   // data-club の顔（クラブカラー指定つき）
     _afterRender();              // 監督室の背景・その他の canvas・バー
   }
@@ -3358,6 +3359,24 @@
       rows.join('<br>') + '</div>';
   }
 
+  /* 最終話の個人タイトル（SN-03）＝メダルカードの showcase 版。
+     _seasonAwardsHTML はバックナンバー用の圧縮版として温存し、こちらは総評セクションに載せる。 */
+  function _finAwardsHTML(top) {
+    if (!top || (!top.scorer && !top.assister && !top.iron)) return '';
+    function card(medal, roleJa, roleEn, who, val) {
+      return '<div class="lg-fin-award">' +
+        '<span class="lg-fin-award-medal">' + medal + '</span>' +
+        '<span class="lg-fin-award-role">' + _t(roleJa, roleEn) + '</span>' +
+        '<span class="lg-fin-award-who">' + who + '</span>' +
+        '<span class="lg-fin-award-val">' + val + '</span></div>';
+    }
+    var cards = [];
+    if (top.scorer) cards.push(card('👑', '得点王', 'Top scorer', top.scorer.name, top.scorer.n + _t('点', ' G')));
+    if (top.assister) cards.push(card('🎯', 'アシスト王', 'Top assists', top.assister.name, top.assister.n + _t('回', ' A')));
+    if (top.iron) cards.push(card('🛡️', '皆勤賞', 'Ever-present', top.iron.name, top.iron.n + _t('試合', ' apps')));
+    return '<div class="lg-fin-awards">' + cards.join('') + '</div>';   // 見出しは呼び出し側（最終話の中央ゾーン）が持つ
+  }
+
   /* ── ベストイレブンの描画（BX）──────────────────────────────────
    * FW→MF→DF→GK の順に上から並べるピッチ風レイアウト（前線が上＝紙面の花形）。
    * mode 'weekly' = サッカー専門誌風（黄×黒のマストヘッド・見出しの勢い）
@@ -3406,58 +3425,68 @@
       '</div>';
   }
 
-  /* 契約の分岐（SN-04/SN-05）。解任＝現クラブ残留不可・オファーから必ず選ぶ（ゲームオーバーにしない）。 */
+  /* 契約の分岐（SN-04/SN-05）。解任＝現クラブ残留不可・オファーから必ず選ぶ（ゲームオーバーにしない）。
+     ※ 最終話専用。体裁はトークン化した .lg-fin-* クラスで持つ（生値インライン廃止）。 */
   function _contractBranchHTML() {
     var br = _contractBranch();
     if (!br) return '';
     var html = '';
 
     if (br.sacked) {
-      html += '<div class="lg-card" style="margin-top:8px;border-color:#e74c3c99;background:rgba(120,20,20,0.25);text-align:center">' +
-        '<div style="font-size:22px">📋</div>' +
-        '<div style="font-weight:800;font-size:15px;margin-top:3px;color:#ff9a8f">' + _t('解任通告', 'Sacked') + '</div>' +
-        '<div class="lg-mini" style="margin-top:4px;line-height:1.7">' +
-          _t('目標未達と信頼の低下を受け、クラブはあなたとの契約を打ち切った。<br>だが、あなたの挑戦はここで終わらない。', 'The club has terminated your contract.<br>But your story does not end here.') + '</div></div>';
+      html += '<div class="lg-fin-sacked">' +
+        '<span class="lg-fin-sacked-icon">📋</span>' +
+        '<span class="lg-fin-sacked-ttl">' + _t('解任通告', 'Sacked') + '</span>' +
+        '<span class="lg-fin-sacked-body">' +
+          _t('目標未達と信頼の低下を受け、クラブはあなたとの契約を打ち切った。だが、あなたの挑戦はここで終わらない。',
+             'The club has terminated your contract — but your story does not end here.') + '</span></div>';
     }
 
     // オファー一覧（解任時は必須の選択肢・残留可なら「移籍する」の選択肢）
     if (br.offers.length) {
       var offerRows = br.offers.map(function (o) {
         var def = _clubDef(o.clubId);
-        return '<button class="lg-btn sec" style="display:flex;align-items:center;gap:8px;text-align:left" ' +
-          'onclick="leagueAcceptOffer(\'' + o.clubId + '\')">' +
-          '<span style="font-size:18px">' + def.crest + '</span>' +
-          '<span style="flex:1"><b>' + _clubName(o.clubId) + '</b>' +
-          '<span class="lg-mini" style="display:block">' + _t('チーム力', 'Strength') + ' ' + o.strength + '</span></span>' +
-          '<span style="opacity:.6">▶</span></button>';
+        return '<button type="button" class="lg-fin-offer" onclick="leagueAcceptOffer(\'' + o.clubId + '\')">' +
+          '<span class="lg-fin-offer-crest">' + def.crest + '</span>' +
+          '<span class="lg-fin-offer-body">' +
+            '<span class="lg-fin-offer-name">' + _clubName(o.clubId) + '</span>' +
+            '<span class="lg-fin-offer-str">' + _t('チーム力', 'Strength') + ' <b>' + o.strength + '</b></span></span>' +
+          '<span class="lg-fin-offer-go">▶</span></button>';
       }).join('');
-      html += '<div class="lg-h" style="margin-top:8px">' + _t('届いたオファー', 'Offers on the table') +
-        '<span class="lg-badge">' + br.offers.length + '</span></div>' + offerRows;
+      html += '<div class="lg-fin-subh">' + _t('届いたオファー', 'Offers on the table') +
+        '<span class="lg-badge">' + br.offers.length + '</span></div>' +
+        '<div class="lg-fin-offers">' + offerRows + '</div>';
     }
 
     if (br.canRenew) {
-      html += '<button class="lg-btn" onclick="leagueConfirmNewSeason()">' +
-        _t('残留して次のシーズンへ（今季を記録に残す）', 'Stay and start next season') + '</button>';
+      html += '<button class="lg-btn lg-fin-renew" onclick="leagueConfirmNewSeason()">' +
+        _t('残留して次のシーズンへ', 'Stay and start next season') + '</button>';
     }
     return html;
   }
 
-  /* シーズン終了の達成判定（SN-02）。 */
+  /* シーズン終了の達成判定（SN-02）。最終話専用＝トークン化した .lg-fin-vd で組む。 */
   function _seasonVerdictHTML(sv) {
     if (!sv) return '';
     var ok = sv.achieved;
-    var col = ok ? '#8fe3a4' : '#ff9a8f';
-    return '<div class="lg-card" style="margin-top:8px;border-color:' + col + '66;background:rgba(0,0,0,0.2);text-align:center">' +
-      '<div style="font-size:10px;color:rgba(255,255,255,0.5);letter-spacing:1px">' + _t('クラブの評価', 'Club verdict') + '</div>' +
-      '<div style="font-weight:800;font-size:15px;margin-top:3px;color:' + col + '">' +
-        (ok ? _t('目標達成', 'Target achieved') : _t('目標未達', 'Target missed')) + '</div>' +
-      '<div class="lg-mini" style="margin-top:3px">' +
-        _t('要求 ' + (sv.goal <= 1 ? '優勝' : sv.goal + '位以内') + ' ／ 結果 ' + sv.finalPos + '位',
-           'Expected ' + (sv.goal <= 1 ? 'the title' : 'top ' + sv.goal) + ' / finished ' + sv.finalPos) + '</div>' +
-      '<div class="lg-mini" style="margin-top:4px">' +
-        _t('クラブの信頼', 'Club trust') + ' <b style="color:' + col + '">' + (sv.trustDelta > 0 ? '+' : '') + sv.trustDelta + '</b>' +
-        '　' + _t('人気', 'Popularity') + ' <b style="color:' + col + '">' + (sv.popDelta > 0 ? '+' : '') + sv.popDelta + '</b></div>' +
-      '</div>';
+    var goalTxt = _t('要求 ' + (sv.goal <= 1 ? '優勝' : sv.goal + '位以内') + ' ／ 結果 ' + sv.finalPos + '位',
+                     'Expected ' + (sv.goal <= 1 ? 'the title' : 'top ' + sv.goal) + ' · finished ' + sv.finalPos);
+    function stat(labelJa, labelEn, delta) {
+      var cls = delta > 0 ? ' up' : (delta < 0 ? ' down' : '');
+      var sign = delta > 0 ? '+' : '';
+      return '<div class="lg-fin-vd-stat' + cls + '">' +
+        '<span class="lg-fin-vd-k">' + _t(labelJa, labelEn) + '</span>' +
+        '<span class="lg-fin-vd-v">' + sign + delta + '</span></div>';
+    }
+    return '<div class="lg-fin-vd' + (ok ? ' ok' : ' ng') + '">' +
+      '<div class="lg-fin-vd-head">' +
+        '<span class="lg-fin-vd-icon">' + (ok ? '✔' : '✕') + '</span>' +
+        '<span class="lg-fin-vd-txt">' +
+          '<span class="lg-fin-vd-badge">' + (ok ? _t('目標達成', 'Target achieved') : _t('目標未達', 'Target missed')) + '</span>' +
+          '<span class="lg-fin-vd-goal">' + goalTxt + '</span></span></div>' +
+      '<div class="lg-fin-vd-stats">' +
+        stat('クラブの信頼', 'Club trust', sv.trustDelta) +
+        stat('人気', 'Popularity', sv.popDelta) +
+      '</div></div>';
   }
 
   /* 監督ステータス（MG-03/MG-05 の可視化・数字が動いていることを読ませる最小表示） */
@@ -3595,13 +3624,209 @@
                    : _t('🔒 テスト：1日1回制限 ON（タップで解除）', '🔒 TEST: daily limit ON (tap to disable)');
       h += '<button class="lg-btn sec" style="border:1px dashed rgba(255,255,255,0.35);font-size:12px;' +
         (tOn ? 'color:#ffd479' : '') + '" onclick="leagueToggleTestLock()">' + tl + '</button>';
+      if (!_state.finished) {
+        h += '<button class="lg-btn sec" style="border:1px dashed rgba(255,255,255,0.35);font-size:12px" ' +
+          'onclick="leagueDebugSimSeason()">⏩ ' + _t('テスト：シーズン終了まで飛ばす', 'TEST: skip to season end') + '</button>';
+      }
     }
     h += '<button class="lg-btn sec" onclick="leagueBackToTitle()">' + _t('← タイトルへ戻る', '← Back to title') + '</button>';
     return h;
   }
 
+  /* ── SN-03改2 最終話：3ゾーン＋下部コマンドバー（据置ゲーム級・スクロール廃止）──────
+   * 2026-07-25 確定の「レトロ・ドット絵ハイブリッド」方向（Codex H2_season_end_retro）。
+   * 固定フレームに ①シーズン総括 ②ベストイレブン＋個人タイトル ③クラブ評価 を横3ゾーンで並べ、
+   * 下部に「契約選択」コマンドバー（残留／オファー／退任）を据える。ページ送りもスクロールもしない。
+   * ドット頭は本作の実ポートレート（portrait.js）を bestXISpread 経由で描く（モックの写真は不使用）。 */
+
+  /* 順位から総評グレードを導く（順位の要約＝データの捏造ではない）。優勝=S。 */
+  function _seasonGrade(pos, total, sv) {
+    if (pos <= 1) return 'S';
+    var achieved = !!(sv && sv.achieved);
+    var q = total ? pos / total : 1;
+    if (achieved) return q <= 0.375 ? 'A' : 'B+';
+    if (q <= 0.5) return 'B';
+    if (q <= 0.75) return 'C';
+    return 'D';
+  }
+
+  /* 最終話だけ #screen-home を固定フレーム化する（landscape 既定の overflow-y:auto を止める）。 */
+  function _seasonEndMode(on) {
+    var s = document.getElementById('screen-home'); if (!s) return;
+    s.classList.toggle('season-end-mode', !!on);
+  }
+
+  /* 右ゾーン＝クラブ評価（目標結果＋信頼＋人気）。予算は本作に無いので出さない（数値を捏造しない）。 */
+  function _finaleVerdictZone(sv) {
+    var m = _state.manager || {};
+    var pop = m.params ? Math.round(m.params.popularity) : 0;
+    var trust = Math.round((typeof m.clubTrust === 'number') ? m.clubTrust : 0);
+    var ok = !!(sv && sv.achieved);
+    var goalTxt = sv ? _t((sv.goal <= 1 ? '優勝' : sv.goal + '位以内'),
+                          (sv.goal <= 1 ? 'Win title' : 'Top ' + sv.goal)) : '—';
+    function meter(icon, labelJa, labelEn, val, delta) {
+      var cls = delta > 0 ? ' up' : (delta < 0 ? ' down' : '');
+      var sign = delta > 0 ? '+' : '';
+      var pct = Math.max(0, Math.min(100, val));
+      return '<div class="lg-se-meter' + cls + '">' +
+        '<div class="lg-se-meter-top">' +
+          '<span class="lg-se-meter-k">' + icon + ' ' + _t(labelJa, labelEn) + '</span>' +
+          '<span class="lg-se-meter-d">' + (delta === 0 ? '±0' : sign + delta) + '</span></div>' +
+        '<div class="lg-se-bar"><i class="lg-stat-fill lg-se-fill" data-pct="' + pct.toFixed(1) + '"></i>' +
+          '<span class="lg-se-meter-v">' + Math.round(val) + '<i>/100</i></span></div>' +
+        '</div>';
+    }
+    return '<section class="lg-se-zone lg-se-vd">' +
+      '<div class="lg-se-ztitle">' + _t('クラブ評価', 'Club verdict') + '</div>' +
+      '<div class="lg-se-goal ' + (ok ? 'ok' : 'ng') + '">' +
+        '<span class="lg-se-goal-k">' + _t('目標結果', 'Target') + '</span>' +
+        '<span class="lg-se-goal-badge">' + (ok ? _t('達成', 'Met') + ' ✓' : _t('未達', 'Missed') + ' ✕') + '</span>' +
+        '<span class="lg-se-goal-tx">' + goalTxt + '</span>' +
+      '</div>' +
+      meter('🤝', 'クラブの信頼', 'Trust', trust, sv ? sv.trustDelta : 0) +
+      meter('📣', '人気', 'Popularity', pop, sv ? sv.popDelta : 0) +
+    '</section>';
+  }
+
+  /* 下部コマンドバー＝契約選択（残留／オファー／退任）。解任時は残留不可・オファーが主導線。 */
+  function _finaleCommandHTML(br) {
+    var offers = (br && br.offers) || [];
+    var canRenew = !!(br && br.canRenew);
+    var sacked = !!(br && br.sacked);
+    var stay = canRenew
+      ? '<button type="button" class="lg-se-card stay' + (sacked ? '' : ' primary') + '" onclick="leagueConfirmNewSeason()">' +
+          '<span class="lg-se-card-ico">🤝</span>' +
+          '<span class="lg-se-card-h">' + _t('残留する', 'Stay') + '</span>' +
+          '<span class="lg-se-card-s">' + _t('このクラブで次のシーズンへ', 'Continue with this club') + '</span></button>'
+      : '<div class="lg-se-card disabled">' +
+          '<span class="lg-se-card-ico">🚫</span>' +
+          '<span class="lg-se-card-h">' + _t('残留する', 'Stay') + '</span>' +
+          '<span class="lg-se-card-s">' + _t('契約は継続されない', 'Not offered') + '</span></div>';
+    var offer = offers.length
+      ? '<button type="button" class="lg-se-card offer' + (sacked ? ' primary' : '') + '" onclick="leagueSeasonOffers(1)">' +
+          '<span class="lg-se-card-ico">📄</span>' +
+          '<span class="lg-se-card-h">' + _t('オファーを見る', 'View offers') + '<b>（' + offers.length + '）</b></span>' +
+          '<span class="lg-se-card-s">' + _t('他クラブからの誘い', 'Move to another club') + '</span></button>'
+      : '<div class="lg-se-card disabled">' +
+          '<span class="lg-se-card-ico">📄</span>' +
+          '<span class="lg-se-card-h">' + _t('オファー', 'Offers') + '</span>' +
+          '<span class="lg-se-card-s">' + _t('今季は届いていない', 'None received') + '</span></div>';
+    var leave = '<button type="button" class="lg-se-card leave" onclick="leagueSeasonLeave()">' +
+        '<span class="lg-se-card-ico">🚪</span>' +
+        '<span class="lg-se-card-h">' + (sacked ? _t('解任を受け入れる', 'Accept sacking') : _t('退任する', 'Step down')) + '</span>' +
+        '<span class="lg-se-card-s">' + _t('クラブを去りタイトルへ', 'Leave to title screen') + '</span></button>';
+    return '<div class="lg-se-cmd">' +
+      '<div class="lg-se-cmd-h">' + _t('契約選択', 'Your next contract') + '</div>' +
+      '<div class="lg-se-cmd-row">' + stay + offer + leave + '</div>' +
+    '</div>';
+  }
+
+  /* オファー選択のオーバーレイ（コマンドバー「オファーを見る」で開く・.lg-fin-offer を流用）。 */
+  function _finaleOffersOverlay(br) {
+    var offers = (br && br.offers) || [];
+    if (!offers.length) return '';
+    var rows = offers.map(function (o) {
+      var def = _clubDef(o.clubId);
+      return '<button type="button" class="lg-fin-offer" onclick="leagueAcceptOffer(\'' + o.clubId + '\')">' +
+        '<span class="lg-fin-offer-crest">' + def.crest + '</span>' +
+        '<span class="lg-fin-offer-body">' +
+          '<span class="lg-fin-offer-name">' + _clubName(o.clubId) + '</span>' +
+          '<span class="lg-fin-offer-str">' + _t('チーム力', 'Strength') + ' <b>' + o.strength + '</b></span></span>' +
+        '<span class="lg-fin-offer-go">▶</span></button>';
+    }).join('');
+    return '<div class="lg-se-ovl" id="lg-se-ovl" hidden>' +
+      '<div class="lg-se-ovl-panel">' +
+        '<div class="lg-se-ovl-head"><span>' + _t('届いたオファー', 'Offers on the table') +
+          '<span class="lg-badge">' + offers.length + '</span></span>' +
+          '<button type="button" class="lg-se-ovl-x" onclick="leagueSeasonOffers(0)">✕</button></div>' +
+        '<div class="lg-fin-offers">' + rows + '</div>' +
+      '</div></div>';
+  }
+
+  function _renderFinale() {
+    _ensureStyle();
+    var myId = _state.myClub, myDef = _clubDef(myId);
+    var rows = _sortedStandings();
+    var champ = rows[0], champDef = _clubDef(champ.id), won = champ.id === myId;
+    var fin = _seasonSummary();
+    var rec = fin.myRecord || { w: 0, d: 0, l: 0, pts: 0 };
+    var seasonNo = _state.season || 1;
+    var rounds = (_state.fixtures && _state.fixtures.length) || 14;
+    var sv = (_state.lastResult && _state.lastResult.season) || fin.verdict;
+    var br = _contractBranch();
+    var grade = _seasonGrade(fin.myPos, rows.length, sv);
+
+    // ── ヘッダー：マストヘッド＋4ステップのパンくず（＝3ゾーン＋決定の見出し）──
+    var steps = [['1', '総評', 'Review'], ['2', '個人タイトル', 'Honours'],
+                 ['3', 'ベストイレブン', 'Team'], ['4', '契約判断', 'Contract']];
+    var stepChips = steps.map(function (s, i) {
+      return '<span class="lg-se-step' + (i === 3 ? ' on' : '') + '"><i>' + s[0] + '</i>' + _t(s[1], s[2]) + '</span>';
+    }).join('<span class="lg-se-arrow">›</span>');
+    var head = '<header class="lg-se-top">' +
+      '<div class="lg-se-brand">' +
+        '<span class="lg-se-emblem">' + (won ? '👑' : '🏁') + '</span>' +
+        '<div class="lg-se-brandtx"><h1 class="lg-se-h1">' + _t('シーズン終了', 'Season Complete') + '</h1>' +
+        '<span class="lg-se-hsub">' + _t(rounds + '節終了', rounds + ' rounds played') + ' · Season ' + seasonNo + '</span></div>' +
+      '</div>' +
+      '<nav class="lg-se-steps">' + stepChips + '</nav>' +
+    '</header>';
+
+    // ── 左ゾーン：シーズン総括（王者／自クラブ最終結果／会長コメント）──
+    var zoneL = '<section class="lg-se-zone lg-se-sum">' +
+      '<div class="lg-se-ztitle">' + _t('シーズン総括', 'Season review') + '</div>' +
+      '<div class="lg-se-champ' + (won ? ' me' : '') + '">' +
+        '<span class="lg-se-cup">🏆</span>' +
+        '<div class="lg-se-champ-tx"><span class="lg-se-champ-lbl">' + _t('優勝', 'Champions') + '</span>' +
+          '<span class="lg-se-champ-name">' + champDef.crest + ' ' + _clubName(champ.id) + '</span></div>' +
+      '</div>' +
+      '<div class="lg-se-mine">' +
+        '<div class="lg-se-mine-head">' +
+          '<span class="lg-se-mine-crest">' + myDef.crest + '</span>' +
+          '<span class="lg-se-mine-name">' + _clubName(myId) + '</span>' +
+          '<span class="lg-se-mine-pos">' + fin.myPos + '<i>' + _t('位', '') + '</i></span>' +
+        '</div>' +
+        '<div class="lg-se-mine-stats">' +
+          '<span class="lg-se-mine-rec"><b>' + rec.w + '</b>' + _t('勝', 'W') + ' <b>' + rec.d + '</b>' + _t('分', 'D') + ' <b>' + rec.l + '</b>' + _t('敗', 'L') + '</span>' +
+          '<span class="lg-se-mine-grade">' + _t('総評', 'Grade') + ' <b>' + grade + '</b></span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="lg-se-chair">' +
+        '<span class="lg-se-chair-av">🧑‍💼</span>' +
+        '<div class="lg-se-chair-tx"><span class="lg-se-chair-lbl">' + _t('会長コメント', 'Chairman') + '</span>' +
+          '<p class="lg-se-chair-body">' + _seasonReviewText(fin) + '</p></div>' +
+      '</div>' +
+    '</section>';
+
+    // ── 中央ゾーン：ベストイレブン＋個人タイトル（実ドット頭を bestXISpread で描画）──
+    var pitch = _bestXIHTML(_seasonBestXI(), 'season',
+      'シーズンベストイレブン', 'Team of the Season', 'リーグ協会 公式発表', 'OFFICIAL');
+    var awards = _finAwardsHTML(fin.top);
+    var zoneC = '<section class="lg-se-zone lg-se-team">' +
+      '<div class="lg-se-ztitle">' + _t('ベストイレブン', 'Team of the Season') + '</div>' +
+      '<div class="lg-se-pitch">' + (pitch || '<div class="lg-se-empty">' + _t('選出データなし', 'No data') + '</div>') + '</div>' +
+      (awards ? '<div class="lg-se-awards">' + awards + '</div>' : '') +
+    '</section>';
+
+    // ── 右ゾーン：クラブ評価 ──
+    var zoneR = _finaleVerdictZone(sv);
+
+    var html = '<div class="lg-se' + (won ? ' won' : '') + (br && br.sacked ? ' sacked' : '') + '">' +
+      head +
+      '<div class="lg-se-main">' + zoneL + zoneC + zoneR + '</div>' +
+      _finaleCommandHTML(br) +
+      _finaleOffersOverlay(br) +
+    '</div>';
+
+    _body().innerHTML = html;
+    _hubMode(false);
+    _seasonEndMode(true);
+    _afterRender();
+  }
+
   function _renderHub(showBanner) {
     _ensureStyle();
+    if (_state.finished) { _renderFinale(); return; }   // SN-03: 最終話は専用の固定フレーム（2カラムハブをバイパス）
+    _seasonEndMode(false);   // 通常ハブでは最終話の固定フレーム化を解く
     var myId = _state.myClub;
     var myDef = _clubDef(myId);
     var rows = _sortedStandings();
@@ -3648,41 +3873,10 @@
     // ★ クラブ情報は上のステータスバーへ、今週の準備は右カラムの「準備」タブへ移した。
     //   左カラムには「次にやること」だけを残す＝主役が画面外に押し出されない。
     //   状態ごとにモディファイアを付ける（CSS 側で高さの配り方を変えるため）
-    var mbMod = _state.finished ? ' lg-mb-final' : (_boardTalkPending() ? ' lg-mb-board' : ' lg-mb-next');
+    // finished（最終話）は _renderFinale へ早期分岐済み。ここは通常ハブ（開幕面談 or 次戦）のみ。
+    var mbMod = _boardTalkPending() ? ' lg-mb-board' : ' lg-mb-next';
     html += '<div class="lg-match-block' + mbMod + '">';
-    if (_state.finished) {
-      var champ = rows[0];
-      var champDef = _clubDef(champ.id);
-      var won = champ.id === myId;
-      // SN-03: シーズン終了フロー＝優勝はセレモニー・非優勝は振り返りの「最終話」を1枚で見せる。
-      //   個人タイトル（得点王/アシスト王/皆勤）と総評テンプレは _seasonSummary と同じソース。
-      var fin = _seasonSummary();
-      var heroBg = won ? 'linear-gradient(135deg,#d4a01766,#7a2ffc22,rgba(0,0,0,0.3))' : 'linear-gradient(135deg,' + myDef.color + '33,rgba(0,0,0,0.35))';
-      var heroBorder = won ? '#ffd24a' : 'rgba(255,255,255,0.25)';
-      html += '<div class="lg-hero" style="background:' + heroBg + ';border:1px solid ' + heroBorder + ';text-align:center">' +
-        '<div style="font-size:34px">' + (won ? '🏆' : '📖') + '</div>' +
-        '<div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.55);margin-top:2px">' +
-          _t('最終話', 'SEASON FINALE') + '</div>' +
-        '<div style="font-size:16px;font-weight:800;margin-top:2px">' +
-          (won ? _t('王者、' + _clubName(myId) + '！', _clubName(myId) + ' — Champions!')
-               : _t('シーズン' + (_state.season || 1) + '、閉幕', 'Season ' + (_state.season || 1) + ' ends')) + '</div>' +
-        (won ? '<div style="color:#ffd24a;font-weight:800;margin-top:5px">' + _t('シャーレを掲げ、街はクラブカラーに染まった。', 'The trophy is lifted; the town wears your colours.') + '</div>'
-             : '<div style="margin-top:5px;font-size:13px">' + _t('優勝', 'Champions') + '：' + champDef.crest + ' <b>' + _clubName(champ.id) + '</b>　' + _t('自クラブ', 'You') + '：<b>' + fin.myPos + _t('位', '') + '</b></div>') +
-        // 総評（テンプレ・軽LLM化は後日）
-        '<div class="lg-mini" style="margin-top:8px;text-align:left;line-height:1.8;border-top:1px solid rgba(255,255,255,0.14);padding-top:8px">' +
-          '<div style="font-size:10px;color:rgba(255,255,255,0.5);text-align:center;margin-bottom:3px">' + _t('シーズン総評', 'Season review') + '</div>' +
-          _seasonReviewText(fin) + '</div>' +
-        // 個人タイトル
-        _seasonAwardsHTML(fin.top) +
-        '</div>' +
-        // BX: シーズンベストイレブン＝リーグ協会からの公式発表（通年平均・最低出場数つき）
-        _bestXIHTML(_seasonBestXI(), 'season',
-          'シーズンベストイレブン', 'Team of the Season',
-          'リーグ協会 公式発表', 'OFFICIAL — LEAGUE ASSOCIATION') +
-        // SN-02: クラブの評価（達成/未達）→ SN-04/05: 契約の分岐（再契約/オファー/解任）
-        _seasonVerdictHTML(_state.lastResult && _state.lastResult.season) +
-        _contractBranchHTML();
-    } else if (_boardTalkPending()) {
+    if (_boardTalkPending()) {
       // BD-01: 開幕はボードとの面談から。約束を交わすまでは**これだけ**を見せる
       //   （試合カードと並べると、やるべき1つがぼやける）。
       html += _boardTalkHTML();
@@ -3834,6 +4028,17 @@
   window.leaguePickClub = function (id) { _newSeason(id); _renderHub(false); };
   window.leaguePlayToday = function () { playToday(); };
   window.leagueShowHub = function () { _renderHub(false); };
+  // SN-03改2: 最終話コマンドバー「オファーを見る」でオファー一覧オーバーレイを開閉。
+  window.leagueSeasonOffers = function (show) {
+    var o = document.getElementById('lg-se-ovl'); if (!o) return;
+    if (show) o.removeAttribute('hidden'); else o.setAttribute('hidden', '');
+  };
+  // SN-03改2: 最終話コマンドバー「退任／解任を受け入れる」＝クラブを去りタイトルへ。
+  window.leagueSeasonLeave = function () {
+    if (confirm(_t('クラブを去り、タイトル画面へ戻りますか？', 'Leave the club and return to the title screen?'))) {
+      window.leagueBackToTitle();
+    }
+  };
   // 今週の準備（MG-03b）: kind='' でそのコマを空に戻す
   window.leagueSetWeekSlot = function (idx, kind) { _setWeekSlot(idx, kind); };
   window.leagueSetTrainee = function (idx, key) { _setTraineeTarget(idx, key); };
@@ -3916,6 +4121,29 @@
   window.leagueDebugUnlock = function () { if (_state) { _state.lastPlayedDate = null; _save(); _renderHub(false); } };
   // テスト用（lab限定）：1日1回制限のON/OFFトグル（毎回プレイ可にする）
   window.leagueToggleTestLock = function () { if (_state) { _state.testUnlock = !_state.testUnlock; _save(); _renderHub(false); } };
+  // 【一時デバッグ・完了前に削除】全節を無音消化してシーズン終了へジャンプ（最終話の再設計イテレーション用）。
+  window.leagueDebugSimSeason = function () {
+    if (!_state || !_state.fixtures) { console.warn('[league] pick a club first'); return; }
+    while (_state.round < _state.fixtures.length) {
+      var ms = _state.fixtures[_state.round], roundRatings = {};
+      for (var i = 0; i < ms.length; i++) {
+        var m = ms[i]; if (m.played) continue;
+        try {
+          var r = playMatch(_overlaySquad(m.home), _overlaySquad(m.away));
+          m.played = true; m.hs = r.result.home; m.as = r.result.away;
+          _applyResult(m.home, m.away, r.result.home, r.result.away);
+          var rr = _rateMatch(r.home, r.away, r.chanceResults, m.home, m.away);
+          roundRatings[m.home] = rr[m.home]; roundRatings[m.away] = rr[m.away];
+        } catch (e) { console.warn('[league] debug sim match failed', e); }
+      }
+      _accumulateRatings(roundRatings);
+      _state.round++;
+    }
+    _state.finished = true;
+    _state.lastResult = _state.lastResult || {};
+    _state.lastResult.season = _settleSeason(_position(_state.myClub));
+    _save(); _renderHub(false);
+  };
   /* 検証用 seam（lab限定・UI からは使わない）。
    * v4 スキーマ層（移行/オーバーレイ/持ち越し）を headless で機械検証するための入口。
    * → tools/league-save-v4-test.js。挙動には一切影響しない（読み書きは既存関数のみ）。 */
