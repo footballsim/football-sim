@@ -3623,6 +3623,10 @@ function _showHalfTimeModal() {
     }, 80);
   }
 
+  // HT-01: リーグのハーフタイム采配（コーチ助言→鼓舞→個別アドバイス）を差し込む。
+  //   ★ typeof ガードの no-op フック＝league.js 非同梱の公開版とシングル/W杯は挙動不変。
+  if (typeof leagueOnHalfTime === 'function') leagueOnHalfTime();
+
   document.getElementById('halftime-modal').style.display = 'flex';
   document.getElementById('next-btn').disabled = true;
   document.getElementById('all-btn').disabled = true;

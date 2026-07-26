@@ -1496,6 +1496,175 @@
   }
   function _endManagerMatchCtx() { _mgMatchCtx = null; }
 
+  /* ══ HT-01 ハーフタイムの監督アクション（2026-07-26 ユーザー指示）════════════════
+   * 順番は固定：①コーチから助言をもらう → ②選手を鼓舞 → ③選手個別にアドバイス。
+   * 効果はすべて **既存の係数フックに相乗り**（新しい判定式もチャンス数の変更も作らない）：
+   *   ① managerParamFactor … 相手が前半に最も使った攻め筋を、後半だけ封じる（分析力に比例）
+   *   ② mentalParamFactor  … チーム morale を上げる（モチベーターに比例）
+   *   ③ mentalParamFactor  … 指名した1人の morale を上げ、苛立ちを消す（モチベーターに比例）
+   * ★ リーグの試合中だけ（_leagueMatchActive）＝シングル/W杯のハーフタイムには出さない。
+   * ★ rng は新規消費しない。前半の確定データ（chanceResults）を読むだけ。 */
+  var HT_TUNING = {
+    ADVICE_BUFF_MAX: MANAGER_TUNING.BUFF_MAX,   // 対策の効き幅（ビデオ学習と同じ上限＝[0.95,1.05]内）
+    ROUSE_BASE: 0.10, ROUSE_GAIN: 0.25,         // チーム morale：0→+0.10 / 100→+0.35
+    ADVISE_BASE: 0.30, ADVISE_GAIN: 0.40        // 個人 morale：0→+0.30 / 100→+0.70
+  };
+  var _htState = null;   // { advice:null|{action,n}, rouse:false, advise:null|{name} }
+
+  function _htReset() { _htState = { advice: null, rouse: false, advise: null }; }
+
+  function _mgrParam(key) {
+    var m = _state && _state.manager;
+    return (m && m.params && typeof m.params[key] === 'number') ? m.params[key] : 0;
+  }
+
+  /* 前半に相手が最も多く仕掛けた攻め筋を、確定済みの chanceResults から数える。 */
+  function _htTopOpponentAction() {
+    if (typeof chanceResults === 'undefined' || !chanceResults || !gameState) return null;
+    var opp = gameState.team2, count = {}, best = null;
+    for (var i = 0; i < chanceResults.length; i++) {
+      var cr = chanceResults[i];
+      if (!cr || !cr.scenes) continue;
+      for (var j = 0; j < cr.scenes.length; j++) {
+        var sc = cr.scenes[j];
+        if (!sc || sc.offence !== opp || !sc.action) continue;
+        count[sc.action] = (count[sc.action] || 0) + 1;
+      }
+    }
+    var keys = Object.keys(count).sort();   // 同数は名前順で決着＝決定論
+    for (var k = 0; k < keys.length; k++) {
+      if (!best || count[keys[k]] > best.n) best = { action: keys[k], n: count[keys[k]] };
+    }
+    return best;
+  }
+
+  /* ①コーチから助言をもらう。相手の最頻攻め筋を割り出し、後半だけ対策 buff を足す。 */
+  window.leagueHtAdvice = function () {
+    if (!_leagueMatchActive || !_htState || _htState.advice) return;
+    var top = _htTopOpponentAction();
+    if (!top) { _htState.advice = { action: null, n: 0 }; _renderHtActions(); return; }
+    // ビデオ学習と同じ器（_mgMatchCtx）に相乗り。無ければここで作る。
+    if (!_mgMatchCtx) {
+      _mgMatchCtx = {
+        myTeamName: (gameState && gameState.team1) ? gameState.team1.name : null,
+        counterActions: {}, buff: 0
+      };
+    }
+    _mgMatchCtx.counterActions['対' + top.action] = true;
+    // 助言の効き＝分析力に比例。既にビデオ学習の buff があれば強い方を採る（重ねがけで上限は動かさない）。
+    var adviceBuff = HT_TUNING.ADVICE_BUFF_MAX * (_mgrParam('analysis') / MANAGER_TUNING.CAP);
+    if (adviceBuff > _mgMatchCtx.buff) _mgMatchCtx.buff = adviceBuff;
+    _htState.advice = top;
+    _renderHtActions();
+  };
+
+  /* ②選手を鼓舞。チーム全体の morale を上げる（モチベーターに比例）。 */
+  window.leagueHtRouse = function () {
+    if (!_leagueMatchActive || !_htState || _htState.rouse || !_htState.advice) return;
+    var t = gameState && gameState.team1; if (!t) return;
+    var add = HT_TUNING.ROUSE_BASE + HT_TUNING.ROUSE_GAIN * (_mgrParam('motivator') / MANAGER_TUNING.CAP);
+    t.morale = Math.max(-1, Math.min(1, (t.morale || 0) + add));
+    _htState.rouse = true;
+    _renderHtActions();
+  };
+
+  /* ③選手個別にアドバイス。指名した1人の morale を上げ、苛立ちを消す。 */
+  window.leagueHtAdvise = function (pos) {
+    if (!_leagueMatchActive || !_htState || _htState.advise || !_htState.rouse) return;
+    var t = gameState && gameState.team1; if (!t) return;
+    var p = t.players[t.lineup[pos]]; if (!p) return;
+    var add = HT_TUNING.ADVISE_BASE + HT_TUNING.ADVISE_GAIN * (_mgrParam('motivator') / MANAGER_TUNING.CAP);
+    p.morale = Math.max(-1, Math.min(1, (p.morale || 0) + add));
+    p.frustration = 0;   // 苛立ちを落として後半のファール/カードを減らす
+    _htState.advise = { name: (_isEn() && p.en_name) ? p.en_name : p.name };
+    _renderHtActions();
+  };
+
+  /* ハーフタイムのアクション面。共有の HT モーダルへ **リーグの試合中だけ** 差し込む。 */
+  function _htActionsHTML() {
+    var st = _htState || { advice: null, rouse: false, advise: null };
+    var h = '<div class="lg-ht-h">🎬 ' + _t('ハーフタイムの采配', 'Half-time actions') + '</div>';
+
+    // ① コーチから助言をもらう
+    h += '<div class="lg-ht-step' + (st.advice ? ' done' : ' now') + '">' +
+      '<span class="lg-ht-no">1</span>' +
+      '<div class="lg-ht-body"><span class="lg-ht-t">' + _t('コーチから助言をもらう', 'Ask your coach') + '</span>';
+    if (st.advice) {
+      h += '<p class="lg-ht-r">' + (st.advice.action
+        ? _t('相手は前半「' + _threatLabel(st.advice.action) + '」を' + st.advice.n + '回仕掛けている。後半はここを潰す。',
+             'They went with "' + _threatLabel(st.advice.action) + '" ' + st.advice.n + ' times — we shut it down now.')
+        : _t('前半のデータがまだ足りない。', 'Not enough data from the first half.')) + '</p>';
+    } else {
+      h += '<button type="button" class="lg-ht-btn" onclick="leagueHtAdvice()">' +
+        _t('助言を聞く', 'Listen') + '</button>';
+    }
+    h += '</div></div>';
+
+    // ② 選手を鼓舞
+    h += '<div class="lg-ht-step' + (st.rouse ? ' done' : (st.advice ? ' now' : ' lock')) + '">' +
+      '<span class="lg-ht-no">2</span>' +
+      '<div class="lg-ht-body"><span class="lg-ht-t">' + _t('選手を鼓舞する', 'Rouse the squad') + '</span>';
+    if (st.rouse) {
+      h += '<p class="lg-ht-r">' + _t('ロッカールームが沸いた。チーム全体の士気が上がった。',
+        'The dressing room lifts — team morale is up.') + '</p>';
+    } else if (st.advice) {
+      h += '<button type="button" class="lg-ht-btn" onclick="leagueHtRouse()">' +
+        _t('鼓舞する', 'Rouse') + '</button>';
+    } else {
+      h += '<p class="lg-ht-r lock">' + _t('まずコーチの話を聞く', 'Hear the coach first') + '</p>';
+    }
+    h += '</div></div>';
+
+    // ③ 選手個別にアドバイス
+    h += '<div class="lg-ht-step' + (st.advise ? ' done' : (st.rouse ? ' now' : ' lock')) + '">' +
+      '<span class="lg-ht-no">3</span>' +
+      '<div class="lg-ht-body"><span class="lg-ht-t">' + _t('選手個別にアドバイス', 'A word with one player') + '</span>';
+    if (st.advise) {
+      h += '<p class="lg-ht-r">' + _t(st.advise.name + ' が顔を上げた。',
+        st.advise.name + ' lifts his head.') + '</p>';
+    } else if (st.rouse) {
+      var t = gameState && gameState.team1;
+      var picks = '';
+      if (t) {
+        for (var i = 0; i < 11; i++) {
+          var p = t.players[t.lineup[i]];
+          if (!p) continue;
+          var nm = (_isEn() && p.en_name) ? p.en_name : p.name;
+          // 士気が低い選手ほど効く＝伸びしろを目印として出す
+          var low = ((p.morale || 0) < -0.05);
+          picks += '<button type="button" class="lg-ht-pick' + (low ? ' low' : '') + '" ' +
+            'onclick="leagueHtAdvise(' + i + ')">' + nm + (low ? ' <i>▼</i>' : '') + '</button>';
+        }
+      }
+      h += '<div class="lg-ht-picks">' + picks + '</div>';
+    } else {
+      h += '<p class="lg-ht-r lock">' + _t('まず全体を鼓舞する', 'Rouse the squad first') + '</p>';
+    }
+    h += '</div></div>';
+    return h;
+  }
+
+  function _renderHtActions() {
+    var host = document.getElementById('lg-ht-actions');
+    if (host) host.innerHTML = _htActionsHTML();
+  }
+
+  /* simulate.js の _showHalfTimeModal から typeof ガードで呼ばれる（公開版は league.js 非同梱＝no-op）。 */
+  window.leagueOnHalfTime = function () {
+    if (!_leagueMatchActive) return;   // シングル/W杯のハーフタイムには出さない
+    var advice = document.getElementById('ht-duel-advice');
+    if (!advice || !advice.parentNode) return;
+    var host = document.getElementById('lg-ht-actions');
+    if (!host) {
+      host = document.createElement('div');
+      host.id = 'lg-ht-actions';
+      host.className = 'lg-ht-actions';
+      advice.parentNode.insertBefore(host, advice);   // 采配はコーチのデュエル分析より前に置く
+    }
+    if (!_htState) _htReset();
+    _renderHtActions();
+  };
+
   window.managerParamFactor = function (team, p, action) {
     if (typeof window !== 'undefined' && window.MANAGER_ENABLED === false) return 1.0;   // キルスイッチ
     var c = _mgMatchCtx;
@@ -3015,6 +3184,7 @@
 
     // MG-03b: 📹 ビデオ学習で対策した攻め筋を、この試合の間だけ係数として効かせる
     _beginManagerMatchCtx(myId);
+    _htReset();   // HT-01: ハーフタイムの采配は1試合につき1回ずつ
 
     // 試合終了フック（_mvFinish が拾う。1回で自動解除）
     window._leagueOnMatchFinish = function () { _onMatchFinish(myId, oppId, iAmHome, fx); };
