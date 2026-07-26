@@ -5226,7 +5226,12 @@
    * リーグの試合準備中(window._leagueInMatch)のみ有効＝single/WC のベンチには効かない。
    * ★ これで設定画面のベンチが離脱者を「起用不可」にできる（以前は起用できてしまった）。 */
   window.leaguePlayerAbsence = function (idx) {
-    if (!(typeof window !== 'undefined' && window._leagueInMatch)) return null;
+    // ★ 2026-07-26 修正: 以前は「試合前の準備中（_leagueInMatch）」だけを見ていたため、
+    //   キックオフでフラグが落ちた後（ハーフタイム采配・試合中の交代画面）は離脱者が
+    //   ベンチで通常表示になり、そのままピッチへ入れられてしまっていた。
+    //   離脱は**その試合を通して**有効なので、リーグの試合中（_leagueMatchActive）も見る。
+    var inLeague = (typeof window !== 'undefined' && window._leagueInMatch) || _leagueMatchActive;
+    if (!inLeague) return null;
     if (typeof team1Data === 'undefined' || !team1Data || !team1Data._srcKey) return null;
     var p = team1Data.players && team1Data.players[idx];
     if (!p) return null;
