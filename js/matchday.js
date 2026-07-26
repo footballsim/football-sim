@@ -162,15 +162,12 @@
       ov = _mkOverlay('lg-md-post');
       // ★ 積み上げ式（下に伸びる誌面）をやめ、**1ビート=1画面のカードデッキ**にする。
       //   ヘッダ / デッキ / ナビ の3段固定で、本文はスクロールで伸びない。
-      // ★ 2026-07-26: 上部のマストヘッド帯（タイトル/号/進行ドット）は撤去。
-      //   進行は下部ナビの「6 / 9」と同じ情報の二重表示で、カードの縦を食っていた。
-      //   閉じる ✕ だけ残し、帯ではなく右上に浮かせる（デッキが縦いっぱい使える）。
+      // ★ 2026-07-26: 上部のマストヘッド帯（タイトル/号/進行ドット）と閉じる ✕ を撤去。
+      //   進行は下部ナビの「n / N」と重複していた。デッキから出るのは最終カードの
+      //   「監督室へ戻る」＝1本に絞る（途中で閉じる導線は置かない）。
       ov.innerHTML =
         // 5% で敷くだけの紙テクスチャ。読めない濃さなのでスロットのラベルは出さない
         '<div class="lg-md-paper" aria-hidden="true"><canvas data-labart="paper_texture" data-labart-quiet></canvas></div>' +
-        '<div class="lg-md-head">' +
-          '<button type="button" class="lg-md-quit" aria-label="close">✕</button>' +
-        '</div>' +
         '<div class="lg-md-deck"></div>' +
         '<div class="lg-md-nav">' +
           '<button type="button" class="lg-md-prev" aria-label="prev">◀</button>' +
@@ -185,7 +182,6 @@
       var stepEl = ov.querySelector('.lg-md-step');
       var prevB = ov.querySelector('.lg-md-prev');
       var nextB = ov.querySelector('.lg-md-next');
-      var quitB = ov.querySelector('.lg-md-quit');
 
       function close() {
         var j2 = _juice();
@@ -231,7 +227,6 @@
         if (stepEl) stepEl.textContent = panels.length + ' / ' + panels.length;
         if (nextB) { nextB.textContent = opts.closeLabel || 'CLOSE'; nextB.className = 'lg-md-next final'; nextB.addEventListener('click', close); }
       }
-      if (quitB) quitB.addEventListener('click', function (e) { e.stopPropagation(); close(); });
     } catch (e) {
       console.warn('[matchday] post-match failed, falling back', e);
       _kill(ov);

@@ -696,36 +696,12 @@
 .lg-md-post {
   background: linear-gradient(170deg, #08122a 0%, #050b18 100%);
   display: grid;
-  /* ★ 2026-07-26: マストヘッド帯の撤去で .lg-md-head を absolute にした＝グリッドの流れから
-     外れたので、行は デッキ / ナビ の2本にする（3本のままだとデッキが auto に落ちて
-     カードが上に張り付き、ナビが 1fr で間延びした）。 */
+  /* ★ 2026-07-26: 上部のマストヘッド帯（タイトル/号/進行ドット/✕）を撤去したので
+     行は デッキ / ナビ の2本。 */
   grid-template-rows: 1fr auto;         /* デッキ / ナビ */
 }
 .lg-md-paper { position: absolute; inset: 0; z-index: 0; opacity: .05; pointer-events: none; }
 .lg-md-paper canvas { width: 100%; height: 100%; }
-
-/* ★ 2026-07-26: マストヘッド帯は撤去。閉じる ✕ を右上に浮かせるだけの層にする
-   （帯が縦を食っていた／進行ドットは下部ナビの「n / N」と重複していた）。 */
-.lg-md-head {
-  position: absolute; top: 0; right: 0; z-index: 5;
-  padding: 0; border: 0; background: none;
-}
-.lg-md-quit {
-  position: absolute; top: 8px; right: 10px;
-  width: 30px; height: 30px; border-radius: var(--lg-r-s);
-  background: var(--lg-surface-2); border: 1px solid var(--lg-line);
-  color: var(--lg-text-dim); font-size: 13px; cursor: pointer; font-family: inherit;
-}
-.lg-md-quit:hover { background: var(--lg-surface-3); color: var(--lg-text); }
-/* 進行ドット＝「あと何ビート残っているか」が一目で分かる（儀式に長さを与える） */
-.lg-md-dots { display: flex; justify-content: center; gap: 5px; margin-top: 7px; }
-.lg-md-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: rgba(255, 255, 255, .20);
-  transition: background var(--lg-t-mid), width var(--lg-t-mid), border-radius var(--lg-t-mid);
-}
-.lg-md-dot.past { background: rgba(245, 197, 24, .45); }
-.lg-md-dot.on { background: var(--lg-gold); width: 18px; border-radius: 3px; }
 
 /* デッキ＝カード1枚が中央に置かれる面。短いカードは中央、背の高いカード（詳細スタッツ）は
  * 上詰めでデッキ内スクロール。★ margin:auto トリック＝短い時は中央寄せ・溢れた時は上を
