@@ -2471,3 +2471,56 @@ body.league-mode #screen-home.season-end-mode > #league-body {
   .lg-ht-cards { grid-template-columns: minmax(0, 1fr); overflow-y: auto; }
   .lg-hts-row { grid-template-columns: 3em minmax(0, 1fr) 6em minmax(0, 1fr) 3em; gap: 5px; }
 }
+
+/* ==========================================================================
+ * SN-03改4 — 個人表彰の「上位10名」ランキング（2026-07-26）
+ * --------------------------------------------------------------------------
+ * 表彰カードをタップ → 同じページ枠でランキングに差し替え → 戻るで表彰面へ。
+ * ========================================================================== */
+/* 表彰カードは押せる面になったので、ボタン化に伴う既定スタイルを打ち消す */
+button.lg-se-award { font-family: inherit; cursor: pointer; text-align: center; }
+button.lg-se-award:hover { border-color: var(--lg-gold-2); }
+button.lg-se-award:active { transform: translateY(2px); box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 1px 0 var(--se-edge); }
+.lg-se-aw-more {
+  margin-top: auto; font-size: 9.5px; font-weight: 800; letter-spacing: .8px; color: var(--lg-gold);
+  border-top: 1.5px solid var(--lg-line); padding-top: 5px; width: 100%;
+}
+
+.lg-rk-list {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.lg-rk-row {
+  display: grid; align-items: center; gap: 9px;
+  grid-template-columns: 2.2em auto minmax(0, 1.5fr) minmax(0, 1fr) 6em;
+  padding: 4px 9px; border-radius: 4px;
+  border: 1.5px solid var(--lg-line); background: var(--se-panel, rgba(255,255,255,.05));
+}
+.lg-rk-row.top { border-color: var(--lg-gold); background: color-mix(in srgb, var(--lg-gold) 12%, transparent); }
+.lg-rk-row.me { box-shadow: inset 3px 0 0 var(--lg-gold); }
+.lg-rk-no {
+  font-size: clamp(12px, 2.2vh, 16px); font-weight: 900; color: var(--lg-text-dim); text-align: center;
+  font-feature-settings: "tnum" 1;
+}
+.lg-rk-row.top .lg-rk-no { color: var(--lg-gold); }
+.lg-rk-face {
+  width: clamp(22px, 3.6vh, 34px); height: auto; aspect-ratio: 1;
+  image-rendering: pixelated; border-radius: 3px;
+  border: 1.5px solid var(--lg-line); background: rgba(0, 0, 0, .3);
+}
+.lg-rk-nm {
+  font-size: clamp(12px, 2.2vh, 15px); font-weight: 900; color: var(--lg-text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.lg-rk-cl {
+  font-size: clamp(10px, 1.8vh, 12px); font-weight: 700; color: var(--lg-text-mute);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.lg-rk-v {
+  text-align: right; font-size: clamp(12px, 2.2vh, 16px); font-weight: 900; color: var(--lg-gold);
+  font-feature-settings: "tnum" 1;
+}
+@media (max-width: 720px), (max-height: 430px) {
+  .lg-rk-row { grid-template-columns: 2em auto minmax(0, 1fr) 5.5em; }
+  .lg-rk-cl { display: none; }
+}

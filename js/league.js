@@ -1927,13 +1927,13 @@
    *   MVP              … 平均レーティング最大（協会ベストイレブンと同じ最低出場数を課す）
    *   新人賞           … 同上を U23（SN-08a の年齢モデル）に限定
    * ★ 確定データの読み出しのみ＝rng 不使用・エンジン不変。同値は clubId|key 順で決着＝決定論。 */
-  function _leagueAwards() {
+  /* リーグ全体の選手を1本の配列に均す（表彰・ランキングの共通素材）。
+   * ★ クラブ順・選手キー順に舐めるので並びは決定論。 */
+  function _leaguePlayerPool() {
     var sm = _state && _state.seasonMeta;
     var pr = sm && sm.playerRatings;
-    var out = { scorer: null, assister: null, mvp: null, rookie: null };
-    if (!pr) return out;
-    var minApps = BESTXI_TUNING.SEASON_MIN_APPS;
     var all = [];
+    if (!pr) return all;
     var cids = Object.keys(pr).sort();
     for (var ci = 0; ci < cids.length; ci++) {
       var cid = cids[ci], keys = Object.keys(pr[cid]).sort();
@@ -1946,16 +1946,60 @@
         });
       }
     }
-    function best(list, val) {
-      var top = null;
-      for (var i = 0; i < list.length; i++) if (val(list[i]) > 0 && (!top || val(list[i]) > val(top))) top = list[i];
-      return top;
+    return all;
+  }
+
+  /* 表彰の種別ごとの定義（1位＝表彰カード／上位10名＝ランキングページ で同じ式を使う）。
+   *   value  … 順位付けに使う値
+   *   filter … 対象の絞り込み（MVP/新人賞は最低出場数、新人賞はさらに U23）
+   *   fmt    … 表示する値の文字列 */
+  var AWARD_DEFS = {
+    scorer: {
+      ja: '得点王', en: 'Top scorer', ico: '👑',
+      value: function (p) { return p.goals; },
+      filter: function (p) { return p.goals > 0; },
+      fmt: function (p) { return _t(p.goals + '点', p.goals + ' G'); }
+    },
+    assister: {
+      ja: 'アシスト王', en: 'Top assists', ico: '🎯',
+      value: function (p) { return p.assists; },
+      filter: function (p) { return p.assists > 0; },
+      fmt: function (p) { return _t(p.assists + '回', p.assists + ' A'); }
+    },
+    mvp: {
+      ja: 'MVP', en: 'MVP', ico: '🏅',
+      value: function (p) { return p.avg; },
+      filter: function (p) { return p.n >= BESTXI_TUNING.SEASON_MIN_APPS; },
+      fmt: function (p) { return _t('平均 ', 'avg ') + p.avg.toFixed(2); }
+    },
+    rookie: {
+      ja: '新人賞', en: 'Young Player', ico: '🌟',
+      value: function (p) { return p.avg; },
+      filter: function (p) { return p.n >= BESTXI_TUNING.SEASON_MIN_APPS && p.age <= AGE_TUNING.U23; },
+      fmt: function (p) { return _t('平均 ', 'avg ') + p.avg.toFixed(2); }
     }
-    out.scorer = best(all, function (p) { return p.goals; });
-    out.assister = best(all, function (p) { return p.assists; });
-    var rated = all.filter(function (p) { return p.n >= minApps; });
-    out.mvp = best(rated, function (p) { return p.avg; });
-    out.rookie = best(rated.filter(function (p) { return p.age <= AGE_TUNING.U23; }), function (p) { return p.avg; });
+  };
+
+  /* 種別ごとの上位 n 名。同値は 得点→アシスト→平均→キー の順で決着＝決定論。 */
+  function _awardRanking(kind, n) {
+    var d = AWARD_DEFS[kind]; if (!d) return [];
+    var list = _leaguePlayerPool().filter(d.filter);
+    list.sort(function (a, b) {
+      var dv = d.value(b) - d.value(a); if (dv) return dv;
+      if (b.goals !== a.goals) return b.goals - a.goals;
+      if (b.assists !== a.assists) return b.assists - a.assists;
+      if (b.avg !== a.avg) return b.avg - a.avg;
+      return a.key < b.key ? -1 : 1;
+    });
+    return list.slice(0, n || 10);
+  }
+
+  function _leagueAwards() {
+    var out = {};
+    ['scorer', 'assister', 'mvp', 'rookie'].forEach(function (k) {
+      var top = _awardRanking(k, 1);
+      out[k] = top.length ? top[0] : null;
+    });
     return out;
   }
 
@@ -4368,8 +4412,9 @@
   var _finPage = 0;      // シーズン終了の何ページ目か（0..4）
   var _prePage = -1;     // -1 = シーズン終了フロー中／0.. = シーズン前フロー
   var _preTarget = null; // シーズン前で選んでいるクラブ {clubId, incumbent, salary}
+  var _finRank = null;   // ②個人表彰から開いた上位10名ページ（null=表彰面）
 
-  function _finReset() { _finPage = 0; _prePage = -1; _preTarget = null; _roundView = null; }
+  function _finReset() { _finPage = 0; _prePage = -1; _preTarget = null; _roundView = null; _finRank = null; }
 
   /* 共通ヘッダー（マストヘッド＋現在地のパンくず）。 */
   function _finHeadHTML(kind, idx, won) {
@@ -4428,39 +4473,59 @@
     '</section>';
   }
 
-  /* ── ②個人表彰（リーグ全体）───────────────────────────────────── */
+  /* ── ②個人表彰（リーグ全体）─────────────────────────────────────
+   * 各表彰カードはタップで「上位10名」のランキングページへ（戻るで表彰面に返る）。 */
   function _finPageHonours() {
     var a = _leagueAwards();
-    function card(ico, ja, en, p, valJa, valEn, note) {
+    function card(kind, p, note) {
+      var d = AWARD_DEFS[kind];
       if (!p) {
-        return '<div class="lg-se-award empty"><span class="lg-se-aw-ico">' + ico + '</span>' +
-          '<span class="lg-se-aw-t">' + _t(ja, en) + '</span>' +
+        return '<div class="lg-se-award empty"><span class="lg-se-aw-ico">' + d.ico + '</span>' +
+          '<span class="lg-se-aw-t">' + _t(d.ja, d.en) + '</span>' +
           '<span class="lg-se-aw-n">' + _t('該当なし', 'Not awarded') + '</span></div>';
       }
       var def = _clubDef(p.clubId);
-      return '<div class="lg-se-award">' +
-        '<span class="lg-se-aw-ico">' + ico + '</span>' +
-        '<span class="lg-se-aw-t">' + _t(ja, en) + '</span>' +
+      return '<button type="button" class="lg-se-award" onclick="leagueFinRank(\'' + kind + '\')">' +
+        '<span class="lg-se-aw-ico">' + d.ico + '</span>' +
+        '<span class="lg-se-aw-t">' + _t(d.ja, d.en) + '</span>' +
         '<span class="lg-se-aw-n">' + p.name + '</span>' +
         '<span class="lg-se-aw-c">' + (def ? def.crest + ' ' + _clubName(p.clubId) : '') + '</span>' +
-        '<span class="lg-se-aw-v">' + _t(valJa, valEn) + '</span>' +
+        '<span class="lg-se-aw-v">' + d.fmt(p) + '</span>' +
         (note ? '<span class="lg-se-aw-s">' + note + '</span>' : '') +
-      '</div>';
+        '<span class="lg-se-aw-more">' + _t('上位10名', 'Top 10') + ' ›</span>' +
+      '</button>';
     }
     var cards =
-      card('👑', '得点王', 'Top scorer', a.scorer,
-           a.scorer ? a.scorer.goals + '点' : '', a.scorer ? a.scorer.goals + ' goals' : '') +
-      card('🎯', 'アシスト王', 'Top assists', a.assister,
-           a.assister ? a.assister.assists + '回' : '', a.assister ? a.assister.assists + ' assists' : '') +
-      card('🏅', 'MVP', 'MVP', a.mvp,
-           a.mvp ? '平均 ' + a.mvp.avg.toFixed(2) : '', a.mvp ? 'avg ' + a.mvp.avg.toFixed(2) : '') +
-      card('🌟', '新人賞', 'Young Player', a.rookie,
-           a.rookie ? '平均 ' + a.rookie.avg.toFixed(2) : '', a.rookie ? 'avg ' + a.rookie.avg.toFixed(2) : '',
-           a.rookie ? _t(a.rookie.age + '歳', 'age ' + a.rookie.age) : _t('23歳以下', 'U23'));
+      card('scorer', a.scorer) +
+      card('assister', a.assister) +
+      card('mvp', a.mvp) +
+      card('rookie', a.rookie, a.rookie ? _t(a.rookie.age + '歳', 'age ' + a.rookie.age) : _t('23歳以下', 'U23'));
     return '<section class="lg-se-zone lg-se-wide">' +
       '<div class="lg-se-ztitle">' + _t('個人表彰', 'Individual honours') +
         '<span class="lg-badge">' + _t('リーグ協会 発表', 'OFFICIAL') + '</span></div>' +
       '<div class="lg-se-awardgrid">' + cards + '</div>' +
+    '</section>';
+  }
+
+  /* ②-詳細: 表彰の上位10名。表彰カードから開き、戻るで表彰面へ返る。 */
+  function _finPageRanking(kind) {
+    var d = AWARD_DEFS[kind]; if (!d) return '';
+    var rows = _awardRanking(kind, 10);
+    var body = rows.map(function (p, i) {
+      var def = _clubDef(p.clubId);
+      return '<div class="lg-rk-row' + (p.clubId === _state.myClub ? ' me' : '') + (i === 0 ? ' top' : '') + '">' +
+        '<span class="lg-rk-no">' + (i + 1) + '</span>' +
+        '<canvas class="lg-rk-face" width="72" height="72" data-portrait="' + p.name + '" data-team="' + p.clubId + '"></canvas>' +
+        '<span class="lg-rk-nm">' + p.name + '</span>' +
+        '<span class="lg-rk-cl">' + ((def && def.crest) || '') + ' ' + _clubName(p.clubId) + '</span>' +
+        '<span class="lg-rk-v">' + d.fmt(p) + '</span>' +
+      '</div>';
+    }).join('');
+    return '<section class="lg-se-zone lg-se-wide">' +
+      '<div class="lg-se-ztitle">' + d.ico + ' ' + _t(d.ja, d.en) +
+        '<span class="lg-badge">' + _t('上位10名', 'Top 10') + '</span></div>' +
+      (rows.length ? '<div class="lg-rk-list">' + body + '</div>'
+                   : '<div class="lg-se-empty">' + _t('該当者がいません', 'No qualifiers') + '</div>') +
     '</section>';
   }
 
@@ -4666,7 +4731,17 @@
     var back = idx > 0 ? 'leagueFinPage(' + (idx - 1) + ')' : null;
 
     if (idx === 0)      { body = _finPageTable(ctx);   nav = _finNavHTML(back, 'leagueFinPage(1)', '次へ：個人表彰', 'Next: Honours'); }
-    else if (idx === 1) { body = _finPageHonours();    nav = _finNavHTML(back, 'leagueFinPage(2)', '次へ：ベストイレブン', 'Next: Team of the Season'); }
+    else if (idx === 1) {
+      if (_finRank) {
+        // 表彰カードから開いた上位10名。戻る＝表彰面へ（節の順送りは進めない）。
+        body = _finPageRanking(_finRank);
+        // 出口は1つだけ（左右に同じ「戻る」を並べない）。
+        nav = _finNavHTML(null, 'leagueFinRank(0)', '← 個人表彰へ戻る', '← Back to honours');
+      } else {
+        body = _finPageHonours();
+        nav = _finNavHTML(back, 'leagueFinPage(2)', '次へ：ベストイレブン', 'Next: Team of the Season');
+      }
+    }
     else if (idx === 2) { body = _finPageBestXI();     nav = _finNavHTML(back, 'leagueFinPage(3)', '次へ：自チーム成績', 'Next: Club record'); }
     else if (idx === 3) { body = _finPageMine(ctx);    nav = _finNavHTML(back, 'leagueFinPage(4)', '次へ：クラブ評価', 'Next: Club verdict'); }
     else {
@@ -5247,7 +5322,13 @@
   window.leagueRoundView = function (v) { _roundView = v; _renderRoundView(); };
   window.leagueRoundHome = function () { _roundView = null; _renderHub(false); };
 
-  window.leagueFinPage = function (n) { _prePage = -1; _finPage = n; _renderFinale(); };
+  window.leagueFinPage = function (n) { _prePage = -1; _finRank = null; _finPage = n; _renderFinale(); };
+  /* ②個人表彰 ⇄ 上位10名。kind に 0/null を渡すと表彰面へ戻る。 */
+  window.leagueFinRank = function (kind) {
+    _finRank = (kind && AWARD_DEFS[kind]) ? kind : null;
+    _finPage = 1;
+    _renderFinale();
+  };
   window.leaguePreEnter = function () { _prePage = 0; _preTarget = null; _renderPreseason(); };
   window.leaguePrePage = function (n) { _prePage = n; _renderPreseason(); };
   window.leaguePreSelect = function (clubId, inc) {
