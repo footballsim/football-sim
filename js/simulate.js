@@ -4471,6 +4471,19 @@ function buildPositionMap(positions) {
   return svg;
 }
 
+/* PS-05: 選手プロフィールの「性格」行。
+ * ★ mental.js は lab 限定なので typeof ガード＝公開版では行ごと出ない（挙動不変）。
+ * ★ mentalPersonalityByName はキャッシュを書かない読み取り専用の入口。
+ *   TEAM_DATA の生データに _mentalPersonality を焼かないためにこちらを使う。 */
+function _playerPersonalityHTML(player, isEn) {
+  if (typeof mentalPersonalityByName !== 'function') return '';
+  const ps = mentalPersonalityByName(player.name, player.en_name);
+  if (!ps) return '';
+  const label = isEn ? (ps.en_name || ps.name) : ps.name;
+  return '<div>' + (isEn ? 'Personality: ' : '性格：')
+    + '<b style="color:#1a3a6b">' + label + '</b></div>';
+}
+
 function showPlayerDetail(teamKey, playerIdx) {
   const activeScreen = document.querySelector('.screen.active');
   _playerDetailOrigin = activeScreen ? activeScreen.id.replace('screen-', '') : 'title';
@@ -4538,6 +4551,7 @@ function showPlayerDetail(teamKey, playerIdx) {
     + '<div style="padding:12px;font-size:13px;line-height:2">'
     + '<div><b>' + (_isEn && player.en_name ? player.en_name : (ex.longName || player.long_name)) + '</b></div>'
     + '<div>' + (_isEn ? 'Height: ' : '身長：') + heightStr + (_isEn ? '  Weight: ' : '　体重：') + weightStr + '</div>'
+    + _playerPersonalityHTML(player, _isEn)
     + '</div>'
     + '</div>'
     + (profile ? '<div style="padding:10px 12px;font-size:12px;line-height:1.7;border-top:1px solid #ccc;background:#fafafa">' + profile + '</div>' : '')

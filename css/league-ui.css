@@ -2426,11 +2426,30 @@ body.league-mode #screen-home.season-end-mode > #league-body {
   box-shadow: 0 3px 0 var(--ht-edge);
 }
 .lg-ht-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ht-edge); }
+/* PS-05 声かけ（褒める/叱る）。叱るは「効く相手を選ぶ」ので同格に見せ、色だけ分ける。 */
+.lg-ht-tones { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.lg-ht-toneq { flex: 1 1 100%; font-size: clamp(10px, 1.8vh, 12px); font-weight: 800; color: var(--lg-text-mute); }
+.lg-ht-btn.scold {
+  border-color: #c0392b;
+  background: linear-gradient(165deg, #b8342a, #8e2820);
+  color: #ffe9e5;
+}
+.lg-ht-r .up { color: var(--lg-good); }
+.lg-ht-r .down { color: var(--lg-bad); }
+.lg-ht-r.bad { color: #ff9a8c; }
+/* 選手ボタンの性格バッジ */
+.lg-ht-ps {
+  font-size: clamp(7.5px, 1.3vh, 9px); font-weight: 800; letter-spacing: .2px;
+  color: var(--lg-gold); border: 1px solid var(--lg-line); border-radius: 3px;
+  padding: 0 4px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.lg-ht-pick.on .lg-ht-ps { border-color: var(--lg-gold-2); }
 
 /* ③ 先発11人（ドット頭＋名前） */
 .lg-ht-picks {
   flex: 1 1 auto; min-height: 0; display: grid; gap: 5px; align-content: start;
-  grid-template-columns: repeat(auto-fit, minmax(clamp(52px, 6vw, 78px), 1fr));
+  /* 11人が必ず2行に収まる固定6列（auto-fit だと3行になり11人目が見切れた・2026-07-26） */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   overflow-y: auto; scrollbar-width: thin;
 }
 .lg-ht-pick {
@@ -2443,7 +2462,7 @@ body.league-mode #screen-home.season-end-mode > #league-body {
 .lg-ht-pick.off { cursor: default; }
 .lg-ht-pick.off:hover { border-color: var(--lg-line); }
 .lg-ht-face {
-  width: 100%; max-width: clamp(30px, 4.6vh, 46px); height: auto; aspect-ratio: 1;
+  width: 100%; max-width: clamp(26px, 4vh, 40px); height: auto; aspect-ratio: 1;
   image-rendering: pixelated; border-radius: 3px;
 }
 .lg-ht-pn {

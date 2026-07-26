@@ -52,16 +52,33 @@ const MENTAL_TUNING = {
 };
 
 /* ── 2. 性格（受動・状態の動き方。MENTAL_DESIGN.md 2章） ─────────────
- * hash%10: 0-1=hot_headed(20%) / 2-3=streaky(20%) / 4-5=cool(20%) / 6-9=normal(40%)
+ * hash%10: 0-1=怒りやすい(20%) / 2-3=調子に乗りやすい(20%) / 4-5=冷静(20%)
+ *          6=陽気(10%) / 7=献身的(10%) / 8=繊細(10%) / 9=ふつう(10%)
+ *   ★ 2026-07-26 拡張: 旧「ふつう40%」の帯だけを4分割して 陽気/献身的/繊細 を足した。
+ *     0-5（怒りやすい/調子に乗りやすい/冷静）の割当は**一切動かしていない**＝既存選手の
+ *     性格が入れ替わる範囲を最小にするため。
  *   moraleGain       … morale 変化の増幅率 P
  *   frustrationGain  … frustration 蓄積の増幅率 P
- *   frustrationDecay … 減衰の上書き（null=既定 0.85。hot_headed は減衰量半分=×0.925 相当）
+ *   frustrationDecay … 減衰の上書き（null=既定 0.85。怒りやすいは減衰量半分=×0.925 相当）
+ *   talk             … 監督の声かけへの反応（league.js のハーフタイム対話が読む・PS-05）
+ *                      praise/scold それぞれ { morale: 効き倍率, frust: 苛立ちの動き }。
+ *                      morale が負＝逆効果／frust が正＝逆撫でして苛立ちが増える。
  */
 const MENTAL_PERSONALITIES = {
-  hot_headed: { id: 'hot_headed', name: '怒りやすい',       en_name: 'Hot-headed', moraleGain: 1.0, frustrationGain: 2.0, frustrationDecay: 0.925 },
-  streaky:    { id: 'streaky',    name: '調子に乗りやすい', en_name: 'Streaky',    moraleGain: 2.0, frustrationGain: 1.0, frustrationDecay: null },
-  cool:       { id: 'cool',       name: '冷静',             en_name: 'Cool',       moraleGain: 0.5, frustrationGain: 0.5, frustrationDecay: null },
-  normal:     { id: 'normal',     name: 'ふつう',           en_name: 'Normal',     moraleGain: 1.0, frustrationGain: 1.0, frustrationDecay: null },
+  hot_headed: { id: 'hot_headed', name: '怒りやすい',       en_name: 'Hot-headed', moraleGain: 1.0, frustrationGain: 2.0, frustrationDecay: 0.925,
+                talk: { praise: { morale: 1.0, frust: -1.5 }, scold: { morale: -0.8, frust: 1.5 } } },
+  streaky:    { id: 'streaky',    name: '調子に乗りやすい', en_name: 'Streaky',    moraleGain: 2.0, frustrationGain: 1.0, frustrationDecay: null,
+                talk: { praise: { morale: 1.6, frust: -0.5 }, scold: { morale: -0.6, frust: 0.5 } } },
+  cool:       { id: 'cool',       name: '冷静',             en_name: 'Cool',       moraleGain: 0.5, frustrationGain: 0.5, frustrationDecay: null,
+                talk: { praise: { morale: 0.6, frust: -0.6 }, scold: { morale: 0.6, frust: -0.6 } } },
+  cheerful:   { id: 'cheerful',   name: '陽気',             en_name: 'Cheerful',   moraleGain: 1.3, frustrationGain: 0.7, frustrationDecay: 0.80,
+                talk: { praise: { morale: 1.3, frust: -1.2 }, scold: { morale: 0.2, frust: 0.0 } } },
+  dedicated:  { id: 'dedicated',  name: '献身的',           en_name: 'Dedicated',  moraleGain: 1.0, frustrationGain: 0.8, frustrationDecay: null,
+                talk: { praise: { morale: 1.0, frust: -0.8 }, scold: { morale: 0.8, frust: -0.3 } } },
+  sensitive:  { id: 'sensitive',  name: '繊細',             en_name: 'Sensitive',  moraleGain: 1.6, frustrationGain: 1.4, frustrationDecay: null,
+                talk: { praise: { morale: 1.4, frust: -0.8 }, scold: { morale: -1.2, frust: 1.2 } } },
+  normal:     { id: 'normal',     name: 'ふつう',           en_name: 'Normal',     moraleGain: 1.0, frustrationGain: 1.0, frustrationDecay: null,
+                talk: { praise: { morale: 1.0, frust: -0.7 }, scold: { morale: 0.3, frust: 0.2 } } },
 };
 
 /**
@@ -104,6 +121,29 @@ function mentalHash(str) {
  * 優先順: MENTAL_OVERRIDES > 名前ハッシュ。
  * @returns {object} MENTAL_PERSONALITIES のエントリ
  */
+/**
+ * 性格 id を名前から決定論で引く（**キャッシュを書かない**読み取り専用）。
+ * ★ 選手プロフィール等、TEAM_DATA の生データを渡す場所から呼ぶための入口。
+ *   mentalPersonality() は clone に _mentalPersonality を焼くので生データには使わない。
+ * @returns {string} MENTAL_PERSONALITIES のキー
+ */
+function mentalPersonalityId(name, enName) {
+  if (!name) return 'normal';
+  const ov = MENTAL_OVERRIDES[name];
+  if (ov && ov.personality && MENTAL_PERSONALITIES[ov.personality]) return ov.personality;
+  const r = mentalHash(name + '|' + (enName || '')) % 10;
+  return (r <= 1) ? 'hot_headed' : (r <= 3) ? 'streaky' : (r <= 5) ? 'cool'
+       : (r === 6) ? 'cheerful' : (r === 7) ? 'dedicated' : (r === 8) ? 'sensitive' : 'normal';
+}
+
+/**
+ * 性格エントリを名前から引く（表示用。キャッシュを書かない）。
+ * @returns {object} MENTAL_PERSONALITIES のエントリ
+ */
+function mentalPersonalityByName(name, enName) {
+  return MENTAL_PERSONALITIES[mentalPersonalityId(name, enName)] || MENTAL_PERSONALITIES.normal;
+}
+
 function mentalPersonality(p) {
   if (!p || !p.name) return MENTAL_PERSONALITIES.normal;
   if (p._mentalPersonality && MENTAL_PERSONALITIES[p._mentalPersonality]) {
@@ -112,10 +152,7 @@ function mentalPersonality(p) {
   let id = null;
   const ov = MENTAL_OVERRIDES[p.name];
   if (ov && ov.personality && MENTAL_PERSONALITIES[ov.personality]) id = ov.personality;
-  if (!id) {
-    const r = mentalHash(p.name + '|' + (p.en_name || '')) % 10;
-    id = (r <= 1) ? 'hot_headed' : (r <= 3) ? 'streaky' : (r <= 5) ? 'cool' : 'normal';
-  }
+  if (!id) id = mentalPersonalityId(p.name, p.en_name);
   p._mentalPersonality = id;   // 遅延キャッシュ（buildTeam のクローンごと）
   return MENTAL_PERSONALITIES[id];
 }
@@ -541,7 +578,7 @@ function mentalRenderDebugBand(sc, res) {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     MENTAL_TUNING, MENTAL_PERSONALITIES, MENTAL_OVERRIDES, SKILL_DEFS,
-    mentalHash, mentalPersonality, mentalResetTeam,
+    mentalHash, mentalPersonality, mentalPersonalityId, mentalPersonalityByName, mentalResetTeam,
     mentalOnDuel, mentalOnGoal, mentalOnFoul, mentalOnChanceEnd,
     mentalParamFactor, mentalFoulFactor,
     FATIGUE_TUNING, fatigueOnChanceEnd, fatigueParamFactor, labParamFactor,

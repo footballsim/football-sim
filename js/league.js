@@ -1507,11 +1507,12 @@
   var HT_TUNING = {
     ADVICE_BUFF_MAX: MANAGER_TUNING.BUFF_MAX,   // 対策の効き幅（ビデオ学習と同じ上限＝[0.95,1.05]内）
     ROUSE_BASE: 0.10, ROUSE_GAIN: 0.25,         // チーム morale：0→+0.10 / 100→+0.35
-    ADVISE_BASE: 0.30, ADVISE_GAIN: 0.40        // 個人 morale：0→+0.30 / 100→+0.70
+    ADVISE_BASE: 0.30, ADVISE_GAIN: 0.40,       // 個人 morale：0→+0.30 / 100→+0.70
+    FRUST_UNIT: 0.35                            // 声かけ1回で動く苛立ちの基準量（talk.frust に掛ける）
   };
   var _htState = null;   // { advice:null|{action,n}, rouse:false, advise:null|{name} }
 
-  function _htReset() { _htState = { advice: null, rouse: false, advise: null }; }
+  function _htReset() { _htState = { advice: null, rouse: null, advise: null, pick: null }; }
 
   function _mgrParam(key) {
     var m = _state && _state.manager;
@@ -1559,24 +1560,61 @@
   };
 
   /* ②選手を鼓舞。チーム全体の morale を上げる（モチベーターに比例）。 */
-  window.leagueHtRouse = function () {
+  /* PS-05 声かけの反応。性格ごとの talk 表（mental.js）を読んで効き方を変える。
+   * tone: 'praise'（褒める）/ 'scold'（叱る）。
+   * ★ 返り値は {morale, frust} の実数。倍率の出どころは mental.js に一本化する。 */
+  function _talkResponse(p, tone, baseMorale) {
+    var ps = (typeof mentalPersonality === 'function') ? mentalPersonality(p) : null;
+    var t = (ps && ps.talk && ps.talk[tone]) ? ps.talk[tone] : { morale: 1.0, frust: 0 };
+    return { morale: baseMorale * t.morale, frust: HT_TUNING.FRUST_UNIT * t.frust, ps: ps };
+  }
+  function _applyTalk(p, tone, baseMorale) {
+    var r = _talkResponse(p, tone, baseMorale);
+    p.morale = Math.max(-1, Math.min(1, (p.morale || 0) + r.morale));
+    p.frustration = Math.max(0, Math.min(1, (p.frustration || 0) + r.frust));
+    return r;
+  }
+
+  /* ②選手とMTG。褒める/叱るを選び、**先発11人それぞれが性格に応じて反応する**。
+   * チーム全体の morale も動かす（響いた人数から算出＝別の乱数は引かない）。 */
+  window.leagueHtRouse = function (tone) {
     if (!_leagueMatchActive || !_htState || _htState.rouse || !_htState.advice) return;
+    if (tone !== 'praise' && tone !== 'scold') return;
     var t = gameState && gameState.team1; if (!t) return;
-    var add = HT_TUNING.ROUSE_BASE + HT_TUNING.ROUSE_GAIN * (_mgrParam('motivator') / MANAGER_TUNING.CAP);
-    t.morale = Math.max(-1, Math.min(1, (t.morale || 0) + add));
-    _htState.rouse = true;
+    var base = HT_TUNING.ROUSE_BASE + HT_TUNING.ROUSE_GAIN * (_mgrParam('motivator') / MANAGER_TUNING.CAP);
+    var up = 0, down = 0, sum = 0;
+    for (var i = 0; i < 11; i++) {
+      var p = t.players[t.lineup[i]]; if (!p) continue;
+      var r = _applyTalk(p, tone, base);
+      sum += r.morale;
+      if (r.morale > 0) up++; else if (r.morale < 0) down++;
+    }
+    // 全体の空気＝個々の反応の平均（響いた人が多いほどチーム morale が上がる）
+    t.morale = Math.max(-1, Math.min(1, (t.morale || 0) + sum / 11));
+    _htState.rouse = { tone: tone, up: up, down: down };
     _renderHtActions();
   };
 
   /* ③選手個別にアドバイス。指名した1人の morale を上げ、苛立ちを消す。 */
-  window.leagueHtAdvise = function (pos) {
+  /* ③個別アドバイス。まず選手を選び（leagueHtPick）、次に褒める/叱るを選ぶ。 */
+  window.leagueHtPick = function (pos) {
     if (!_leagueMatchActive || !_htState || _htState.advise || !_htState.rouse) return;
+    _htState.pick = pos;
+    _renderHtActions();
+  };
+  window.leagueHtAdvise = function (tone) {
+    if (!_leagueMatchActive || !_htState || _htState.advise || !_htState.rouse) return;
+    if (_htState.pick == null) return;
+    if (tone !== 'praise' && tone !== 'scold') return;
     var t = gameState && gameState.team1; if (!t) return;
+    var pos = _htState.pick;
     var p = t.players[t.lineup[pos]]; if (!p) return;
-    var add = HT_TUNING.ADVISE_BASE + HT_TUNING.ADVISE_GAIN * (_mgrParam('motivator') / MANAGER_TUNING.CAP);
-    p.morale = Math.max(-1, Math.min(1, (p.morale || 0) + add));
-    p.frustration = 0;   // 苛立ちを落として後半のファール/カードを減らす
-    _htState.advise = { name: (_isEn() && p.en_name) ? p.en_name : p.name, pos: pos };
+    var base = HT_TUNING.ADVISE_BASE + HT_TUNING.ADVISE_GAIN * (_mgrParam('motivator') / MANAGER_TUNING.CAP);
+    var r = _applyTalk(p, tone, base);
+    _htState.advise = {
+      name: (_isEn() && p.en_name) ? p.en_name : p.name, pos: pos, tone: tone,
+      good: r.morale > 0, ps: r.ps ? ((_isEn() && r.ps.en_name) ? r.ps.en_name : r.ps.name) : ''
+    };
     _renderHtActions();
   };
 
@@ -1644,14 +1682,21 @@
     }
     c1 += '</section>';
 
-    // ②選手とMTG
+    // ②選手とMTG（褒める/叱る。性格ごとに響き方が違う）
     var c2 = '<section class="lg-ht-card' + (st.rouse ? ' done' : (st.advice ? ' now' : ' lock')) + '">' +
       '<div class="lg-ht-ct"><span class="lg-ht-no">2</span>' + _t('選手とMTG', 'Team talk') + '</div>';
     if (st.rouse) {
-      c2 += '<p class="lg-ht-r">' + _t('ロッカールームが沸いた。チーム全体の士気が上がった。',
-        'The dressing room lifts — team morale is up.') + '</p>';
+      var toneTx = (st.rouse.tone === 'praise') ? _t('称えた', 'praised them') : _t('activate', 'activate');
+      c2 += '<p class="lg-ht-r">' + (st.rouse.tone === 'praise'
+        ? _t('ロッカールームを称えた。', 'You praised the dressing room.')
+        : _t('ロッカールームで叱咤した。', 'You laid into the dressing room.')) + '</p>' +
+        '<p class="lg-ht-r"><b class="up">' + st.rouse.up + _t('人が応えた', ' responded') + '</b>' +
+        (st.rouse.down ? '　<b class="down">' + st.rouse.down + _t('人が反発', ' pushed back') + '</b>' : '') + '</p>';
     } else if (st.advice) {
-      c2 += '<button type="button" class="lg-ht-btn" onclick="leagueHtRouse()">' + _t('MTGを開く', 'Talk') + '</button>';
+      c2 += '<div class="lg-ht-tones">' +
+        '<button type="button" class="lg-ht-btn praise" onclick="leagueHtRouse(\'praise\')">👏 ' + _t('褒める', 'Praise') + '</button>' +
+        '<button type="button" class="lg-ht-btn scold" onclick="leagueHtRouse(\'scold\')">🗯 ' + _t('叱る', 'Scold') + '</button>' +
+      '</div>';
     } else {
       c2 += '<p class="lg-ht-r lock">🔒 ' + _t('まずコーチの話を聞く', 'Hear the coach first') + '</p>';
     }
@@ -1668,20 +1713,36 @@
         var p = t.players[t.lineup[i]];
         if (!p) continue;
         var nm = (_isEn() && p.en_name) ? p.en_name : p.name;
-        var chosen = !!(st.advise && st.advise.pos === i);
+        var ps = (typeof mentalPersonality === 'function') ? mentalPersonality(p) : null;
+        var psName = ps ? ((_isEn() && ps.en_name) ? ps.en_name : ps.name) : '';
+        var sel = (st.advise ? (st.advise.pos === i) : (st.pick === i));
         var dis = (st.advise || !st.rouse);
-        picks += '<button type="button" class="lg-ht-pick' + (chosen ? ' on' : '') + (dis ? ' off' : '') + '" ' +
-          (dis ? '' : 'onclick="leagueHtAdvise(' + i + ')"') + '>' +
+        picks += '<button type="button" class="lg-ht-pick' + (sel ? ' on' : '') + (dis ? ' off' : '') + '" ' +
+          (dis ? '' : 'onclick="leagueHtPick(' + i + ')"') + '>' +
           '<canvas class="lg-ht-face" width="72" height="72" data-portrait="' + (p.long_name || p.name) + '"' +
             (teamKey ? ' data-team="' + teamKey + '"' : '') + '></canvas>' +
-          '<span class="lg-ht-pn">' + nm + '</span></button>';
+          '<span class="lg-ht-pn">' + nm + '</span>' +
+          (psName ? '<span class="lg-ht-ps">' + psName + '</span>' : '') + '</button>';
       }
       c3 += '<div class="lg-ht-picks">' + picks + '</div>';
     }
     if (st.advise) {
-      c3 += '<p class="lg-ht-r">▶ ' + _t(st.advise.name + ' が顔を上げた。', st.advise.name + ' lifts his head.') + '</p>';
+      c3 += '<p class="lg-ht-r' + (st.advise.good ? '' : ' bad') + '">▶ ' +
+        (st.advise.good
+          ? _t(st.advise.name + '（' + st.advise.ps + '）は顔を上げた。', st.advise.name + ' (' + st.advise.ps + ') lifts his head.')
+          : _t(st.advise.name + '（' + st.advise.ps + '）は納得していない。逆効果だ。',
+               st.advise.name + ' (' + st.advise.ps + ') is not having it — that backfired.')) + '</p>';
     } else if (!st.rouse) {
       c3 += '<p class="lg-ht-r lock">🔒 ' + _t('まず選手とMTGを行う', 'Hold the team talk first') + '</p>';
+    } else if (st.pick != null) {
+      var pp = t && t.players[t.lineup[st.pick]];
+      var pnm = pp ? ((_isEn() && pp.en_name) ? pp.en_name : pp.name) : '';
+      c3 += '<div class="lg-ht-tones"><span class="lg-ht-toneq">' + pnm + _t(' に何と言う？', ' — what do you say?') + '</span>' +
+        '<button type="button" class="lg-ht-btn praise" onclick="leagueHtAdvise(\'praise\')">👏 ' + _t('褒める', 'Praise') + '</button>' +
+        '<button type="button" class="lg-ht-btn scold" onclick="leagueHtAdvise(\'scold\')">🗯 ' + _t('叱る', 'Scold') + '</button>' +
+      '</div>';
+    } else {
+      c3 += '<p class="lg-ht-r lock">' + _t('声をかける選手を選ぶ', 'Pick a player to talk to') + '</p>';
     }
     c3 += '</section>';
 
