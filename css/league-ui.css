@@ -696,16 +696,19 @@
 .lg-md-post {
   background: linear-gradient(170deg, #08122a 0%, #050b18 100%);
   display: grid;
-  grid-template-rows: auto 1fr auto;    /* ヘッダ / デッキ / ナビ */
+  /* ★ 2026-07-26: マストヘッド帯の撤去で .lg-md-head を absolute にした＝グリッドの流れから
+     外れたので、行は デッキ / ナビ の2本にする（3本のままだとデッキが auto に落ちて
+     カードが上に張り付き、ナビが 1fr で間延びした）。 */
+  grid-template-rows: 1fr auto;         /* デッキ / ナビ */
 }
 .lg-md-paper { position: absolute; inset: 0; z-index: 0; opacity: .05; pointer-events: none; }
 .lg-md-paper canvas { width: 100%; height: 100%; }
 
+/* ★ 2026-07-26: マストヘッド帯は撤去。閉じる ✕ を右上に浮かせるだけの層にする
+   （帯が縦を食っていた／進行ドットは下部ナビの「n / N」と重複していた）。 */
 .lg-md-head {
-  position: relative; z-index: 2;
-  padding: 10px 16px 8px; text-align: center;
-  border-bottom: 2px solid var(--lg-gold);
-  background: linear-gradient(180deg, rgba(0, 0, 0, .45), rgba(0, 0, 0, .08));
+  position: absolute; top: 0; right: 0; z-index: 5;
+  padding: 0; border: 0; background: none;
 }
 .lg-md-quit {
   position: absolute; top: 8px; right: 10px;
@@ -714,9 +717,6 @@
   color: var(--lg-text-dim); font-size: 13px; cursor: pointer; font-family: inherit;
 }
 .lg-md-quit:hover { background: var(--lg-surface-3); color: var(--lg-text); }
-.lg-md-mast { font-family: "Bebas Neue", sans-serif; font-size: 21px; letter-spacing: 4px; color: var(--lg-gold); }
-.lg-md-issue { font-size: 10px; letter-spacing: 2px; color: var(--lg-text-mute); margin-top: 1px; }
-
 /* 進行ドット＝「あと何ビート残っているか」が一目で分かる（儀式に長さを与える） */
 .lg-md-dots { display: flex; justify-content: center; gap: 5px; margin-top: 7px; }
 .lg-md-dot {
@@ -1016,9 +1016,6 @@
 @media (orientation: landscape) {
   /* 横長は画面が低いので、カードデッキを詰めて1枚が収まりやすくする */
   body.league-mode .lg-md-post .lgj-stage { max-width: 620px; }
-  body.league-mode .lg-md-head { padding: 6px 16px 5px; }
-  body.league-mode .lg-md-mast { font-size: 17px; }
-  body.league-mode .lg-md-dots { margin-top: 5px; }
   body.league-mode .lg-md-deck { padding: 8px 14px; }
   body.league-mode .lg-md-nav { padding: 7px 14px 9px; }
   body.league-mode .lg-md-deck .lg-sp-face { max-width: 38px; }

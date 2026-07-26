@@ -162,16 +162,14 @@
       ov = _mkOverlay('lg-md-post');
       // ★ 積み上げ式（下に伸びる誌面）をやめ、**1ビート=1画面のカードデッキ**にする。
       //   ヘッダ / デッキ / ナビ の3段固定で、本文はスクロールで伸びない。
-      var dots = '';
-      for (var d = 0; d < panels.length; d++) dots += '<i class="lg-md-dot"></i>';
+      // ★ 2026-07-26: 上部のマストヘッド帯（タイトル/号/進行ドット）は撤去。
+      //   進行は下部ナビの「6 / 9」と同じ情報の二重表示で、カードの縦を食っていた。
+      //   閉じる ✕ だけ残し、帯ではなく右上に浮かせる（デッキが縦いっぱい使える）。
       ov.innerHTML =
         // 5% で敷くだけの紙テクスチャ。読めない濃さなのでスロットのラベルは出さない
         '<div class="lg-md-paper" aria-hidden="true"><canvas data-labart="paper_texture" data-labart-quiet></canvas></div>' +
         '<div class="lg-md-head">' +
           '<button type="button" class="lg-md-quit" aria-label="close">✕</button>' +
-          '<div class="lg-md-mast">' + (opts.title || '') + '</div>' +
-          (opts.sub ? '<div class="lg-md-issue">' + opts.sub + '</div>' : '') +
-          '<div class="lg-md-dots">' + dots + '</div>' +
         '</div>' +
         '<div class="lg-md-deck"></div>' +
         '<div class="lg-md-nav">' +
