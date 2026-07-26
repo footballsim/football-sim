@@ -3220,6 +3220,11 @@
     if (typeof window._mvTeardown === 'function') { try { window._mvTeardown(); } catch (e) {} }
     showScreen('home');
 
+    // MD-03: 試合が終わったら順送りの現在地（'match'）を必ず畳む。
+    //   ★ ここで畳まないと、以降の _renderHub がキックオフ直前の「試合へ」を描き直してしまい、
+    //     「監督室へ戻る」でホーム画面に戻れない（2026-07-26 ユーザー報告の再発防止）。
+    _roundView = null;
+
     // UX-04: 試合後は「今節の号」を1コマずつ開く。
     //   ★ 先に監督室を描いておく＝号を閉じた瞬間に最新のハブが見えている状態にする。
     //   Matchday 未搭載／演出OFF／例外時は、従来どおりの一括バナー（_renderHub(true)）へ。
@@ -3237,7 +3242,6 @@
         return;
       } catch (e) { console.warn('[league] post-match sequence failed, using banner', e); }
     }
-    _roundView = null;   // MD-03: 試合が終わったら必ずホーム画面（試合後バナー）に戻す
     _renderHub(true);
   }
 
