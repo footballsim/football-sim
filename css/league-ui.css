@@ -2307,48 +2307,175 @@ body.league-mode #screen-home.season-end-mode > #league-body {
 }
 
 /* ==========================================================================
- * HT-01 — ハーフタイムの監督アクション（2026-07-26）
+ * HT-01 — ハーフタイム画面（2026-07-26・Codexモック R_halftime_retro_v3 準拠）
  * --------------------------------------------------------------------------
- * 共有の HT モーダル（白地）へリーグの試合中だけ差し込むので、他画面のような
- * 紺地ではなく **モーダルの地に馴染む配色** にする。順番は 1→2→3 の固定。
+ * 上=スコア／中=両チームの基本スタッツ対比／下=采配3枚／最下部=コマンドバー。
+ * ★ #halftime-modal はシングル/W杯と共有。league.js が付ける `.league-ht` で
+ *   スコープし、試合が終わる/準備を抜けるときに必ず外す（他モードは白モーダルのまま）。
  * ========================================================================== */
-.lg-ht-actions { margin: 0 0 14px; display: flex; flex-direction: column; gap: 7px; }
-.lg-ht-h {
-  font-size: 12px; font-weight: 800; color: #1a3a6b; letter-spacing: .5px; margin-bottom: 2px;
+/* ★ 共有モーダルは **インライン style** で白カードを組んでいる（index.html）。
+   インラインは通常のセレクタに勝つので、衝突するプロパティだけ !important で上書きする。 */
+#halftime-modal.league-ht {
+  --ht-edge: rgba(0, 0, 0, .5);
+  --ht-panel: rgba(255, 255, 255, .05);
+  background: #050c1c !important;
+  padding: 0 !important;
+  /* 共有モーダルは中央寄せ（align/justify:center）。全画面化では両端の帯になるので伸ばす。 */
+  align-items: stretch !important; justify-content: stretch !important;
 }
-.lg-ht-step {
-  display: flex; align-items: flex-start; gap: 9px;
-  padding: 9px 11px; border-radius: 9px;
-  border: 2px solid #e3e8f0; background: #f7f9fc;
+/* 白いカード → 全画面の紺地パネルへ */
+#halftime-modal.league-ht > div {
+  width: 100% !important; max-width: none !important; max-height: none !important; height: 100% !important;
+  border-radius: 0 !important;
+  background: linear-gradient(165deg, #0a1730, #0d2246 55%, #0a1930) !important;
+  position: relative; overflow: hidden;
 }
-.lg-ht-step.now { border-color: #1a3a6b; background: #fff; box-shadow: 0 2px 8px rgba(26, 58, 107, .12); }
-.lg-ht-step.done { border-color: #cfe3d4; background: #f3faf5; }
-.lg-ht-step.lock { opacity: .55; }
+#halftime-modal.league-ht > div::after {   /* 薄い CRT スキャンライン */
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 6;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .10) 0 1px, transparent 1px 3px);
+  opacity: .28; mix-blend-mode: overlay;
+}
+/* 本文＝スクロールさせない（fit-to-screen） */
+#halftime-modal.league-ht > div > div:first-child {
+  overflow: hidden !important; display: flex; flex-direction: column;
+  gap: clamp(6px, 1.3vh, 11px);
+  padding: clamp(8px, 1.8vh, 14px) clamp(10px, 1.6vw, 18px) 0 !important;
+}
+#halftime-modal.league-ht #ht-modal-title {
+  color: var(--lg-gold) !important; font-size: clamp(15px, 3vh, 24px) !important;
+  font-weight: 900; letter-spacing: 3px; margin: 0 !important;
+}
+#halftime-modal.league-ht #ht-score {
+  color: var(--lg-text) !important; font-size: clamp(15px, 2.9vh, 23px) !important;
+  font-weight: 900; letter-spacing: 1px; margin: 0 !important;
+  padding-bottom: clamp(4px, 1vh, 8px); border-bottom: 2px solid var(--lg-gold-2);
+}
+/* デュエル10行はこの構成では出さない（スタッツのデュエル勝率に集約） */
+#halftime-modal.league-ht #ht-duel-advice { display: none !important; }
+
+.lg-ht-actions { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: clamp(6px, 1.3vh, 11px); }
+
+/* ── 両チームの基本スタッツ（対比）── */
+.lg-hts {
+  flex: 0 0 auto; display: flex; flex-direction: column; gap: 3px;
+  padding: clamp(7px, 1.4vh, 12px) clamp(9px, 1.4vw, 14px);
+  border: 2px solid var(--lg-gold-2); border-radius: 5px;
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 3px 0 var(--ht-edge);
+}
+.lg-hts-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 4px; margin-bottom: 3px; border-bottom: 1.5px solid var(--lg-line);
+  font-size: clamp(11px, 2vh, 14px); font-weight: 900; color: var(--lg-text);
+}
+.lg-hts-row {
+  display: grid; align-items: center; gap: 8px;
+  grid-template-columns: 3.4em minmax(0, 1fr) 7.5em minmax(0, 1fr) 3.4em;
+}
+.lg-hts-v {
+  font-size: clamp(12px, 2.3vh, 17px); font-weight: 900; color: var(--lg-text);
+  font-feature-settings: "tnum" 1;
+}
+.lg-hts-v.me { text-align: right; }
+.lg-hts-v.opp { text-align: left; }
+.lg-hts-k {
+  text-align: center; font-size: clamp(9.5px, 1.8vh, 12px); font-weight: 800;
+  letter-spacing: 1px; color: var(--lg-gold); white-space: nowrap;
+}
+.lg-hts-bar {
+  height: clamp(8px, 1.5vh, 12px); border-radius: 2px; overflow: hidden; display: block;
+  background: rgba(0, 0, 0, .45); border: 1.5px solid var(--lg-line);
+  display: flex;
+}
+.lg-hts-bar > i { display: block; height: 100%; transition: width .5s ease; }
+.lg-hts-bar.me { justify-content: flex-end; }
+.lg-hts-bar.me > i { background: linear-gradient(90deg, #2f6fd0, #6aa8ff); }
+.lg-hts-bar.opp > i { background: linear-gradient(90deg, #c0392b, #e2685a); }
+
+/* ── 采配3枚（①②が細・③が広）── */
+.lg-ht-cards {
+  flex: 1 1 auto; min-height: 0; display: grid; gap: clamp(6px, 1.2vh, 10px);
+  grid-template-columns: minmax(0, .85fr) minmax(0, .85fr) minmax(0, 2fr);
+}
+.lg-ht-card {
+  min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 6px;
+  padding: clamp(7px, 1.4vh, 12px) clamp(8px, 1.2vw, 12px);
+  border: 2px solid var(--lg-line); border-radius: 5px;
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 3px 0 var(--ht-edge);
+}
+.lg-ht-card.now { border-color: var(--lg-gold); box-shadow: inset 0 0 0 1px rgba(255,255,255,.05), 0 0 0 1px rgba(230,194,104,.3), 0 3px 0 var(--ht-edge); }
+.lg-ht-card.done { border-color: color-mix(in srgb, var(--lg-good) 55%, var(--lg-line)); }
+.lg-ht-card.lock { opacity: .5; }
+.lg-ht-ct {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 7px;
+  font-size: clamp(11px, 2vh, 14px); font-weight: 900; letter-spacing: 1px; color: var(--lg-gold);
+}
 .lg-ht-no {
-  flex: 0 0 auto; width: 20px; height: 20px; border-radius: 5px;
-  display: grid; place-items: center; font-size: 11px; font-weight: 900;
-  background: #d7dfeb; color: #4a5b78;
+  width: 19px; height: 19px; flex: 0 0 auto; border-radius: 4px; display: grid; place-items: center;
+  font-size: 11px; font-weight: 900; background: var(--lg-surface-3); color: var(--lg-text-dim);
 }
-.lg-ht-step.now .lg-ht-no { background: #1a3a6b; color: #fff; }
-.lg-ht-step.done .lg-ht-no { background: #2d7a3a; color: #fff; }
-.lg-ht-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
-.lg-ht-t { font-size: 13px; font-weight: 800; color: #1a3a6b; }
-.lg-ht-r { margin: 0; font-size: 12px; line-height: 1.6; color: #4a5b78; }
-.lg-ht-r.lock { font-size: 11px; color: #8a97ad; }
+.lg-ht-card.now .lg-ht-no { background: var(--lg-gold); color: var(--lg-ink); }
+.lg-ht-card.done .lg-ht-no { background: var(--lg-good); color: var(--lg-ink); }
+.lg-ht-r { margin: 0; font-size: clamp(11px, 1.9vh, 13px); line-height: 1.6; color: var(--lg-text-dim); }
+.lg-ht-r.lock { color: var(--lg-text-mute); }
 .lg-ht-btn {
-  align-self: flex-start; cursor: pointer;
-  padding: 7px 16px; border-radius: 8px; border: none;
-  background: #1a3a6b; color: #fff;
-  font-size: 12.5px; font-weight: 800; font-family: inherit;
+  align-self: flex-start; cursor: pointer; padding: 7px 16px; border-radius: 5px;
+  border: 2px solid var(--lg-gold); background: linear-gradient(165deg, var(--lg-gold), var(--lg-gold-2));
+  color: var(--lg-ink); font-size: clamp(11px, 2vh, 13px); font-weight: 900; font-family: inherit;
+  box-shadow: 0 3px 0 var(--ht-edge);
 }
-.lg-ht-btn:active { transform: translateY(1px); }
-.lg-ht-picks { display: flex; flex-wrap: wrap; gap: 5px; }
+.lg-ht-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ht-edge); }
+
+/* ③ 先発11人（ドット頭＋名前） */
+.lg-ht-picks {
+  flex: 1 1 auto; min-height: 0; display: grid; gap: 5px; align-content: start;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(52px, 6vw, 78px), 1fr));
+  overflow-y: auto; scrollbar-width: thin;
+}
 .lg-ht-pick {
-  cursor: pointer; padding: 5px 9px; border-radius: 7px;
-  border: 1.5px solid #c9d4e4; background: #fff; color: #1a3a6b;
-  font-size: 11.5px; font-weight: 700; font-family: inherit;
+  display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0;
+  padding: 4px 3px; border-radius: 4px; cursor: pointer;
+  border: 1.5px solid var(--lg-line); background: var(--ht-panel); font-family: inherit;
 }
-.lg-ht-pick:hover { border-color: #1a3a6b; }
-/* 士気が落ちている選手＝効きが大きい目印 */
-.lg-ht-pick.low { border-color: #e0a33a; background: #fff8ec; }
-.lg-ht-pick.low > i { font-style: normal; color: #c07a00; font-size: 10px; }
+.lg-ht-pick:hover { border-color: var(--lg-gold-2); }
+.lg-ht-pick.on { border-color: var(--lg-gold); background: color-mix(in srgb, var(--lg-gold) 16%, transparent); }
+.lg-ht-pick.off { cursor: default; }
+.lg-ht-pick.off:hover { border-color: var(--lg-line); }
+.lg-ht-face {
+  width: 100%; max-width: clamp(30px, 4.6vh, 46px); height: auto; aspect-ratio: 1;
+  image-rendering: pixelated; border-radius: 3px;
+}
+.lg-ht-pn {
+  font-size: clamp(8.5px, 1.5vh, 10.5px); font-weight: 800; color: var(--lg-text-dim);
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ── 下部コマンドバー（既存の2ボタンをそのまま使う）── */
+#halftime-modal.league-ht > div > div:last-child {
+  flex-shrink: 0; border-top: 2px solid var(--lg-gold-2) !important;
+  display: grid !important; gap: 10px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  padding: clamp(8px, 1.6vh, 13px) clamp(10px, 1.6vw, 18px) !important;
+}
+#halftime-modal.league-ht #ht-btn-lineup {
+  width: auto !important; padding: 0 14px !important; min-height: clamp(36px, 6.2vh, 48px);
+  border-radius: 5px !important; border: 2px solid var(--lg-line) !important;
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2)) !important;
+  color: var(--lg-text-dim) !important; font-size: clamp(12px, 2.1vh, 15px) !important; font-weight: 900;
+  box-shadow: 0 3px 0 var(--ht-edge);
+}
+#halftime-modal.league-ht #ht-btn-kickoff {
+  width: auto !important; padding: 0 14px !important; min-height: clamp(36px, 6.2vh, 48px);
+  border-radius: 5px !important; border: 2px solid var(--lg-gold) !important;
+  background: linear-gradient(165deg, var(--lg-gold), var(--lg-gold-2)) !important;
+  color: var(--lg-ink) !important; font-size: clamp(14px, 2.7vh, 20px) !important;
+  font-weight: 900; letter-spacing: 2px; box-shadow: 0 3px 0 var(--ht-edge);
+}
+#halftime-modal.league-ht #ht-btn-lineup:active,
+#halftime-modal.league-ht #ht-btn-kickoff:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ht-edge); }
+
+/* 縦持ちでは采配3枚を縦に積む（横に潰すより読ませる） */
+@media (orientation: portrait), (max-width: 620px) {
+  .lg-ht-cards { grid-template-columns: minmax(0, 1fr); overflow-y: auto; }
+  .lg-hts-row { grid-template-columns: 3em minmax(0, 1fr) 6em minmax(0, 1fr) 3em; gap: 5px; }
+}

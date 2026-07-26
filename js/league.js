@@ -1576,82 +1576,136 @@
     var add = HT_TUNING.ADVISE_BASE + HT_TUNING.ADVISE_GAIN * (_mgrParam('motivator') / MANAGER_TUNING.CAP);
     p.morale = Math.max(-1, Math.min(1, (p.morale || 0) + add));
     p.frustration = 0;   // 苛立ちを落として後半のファール/カードを減らす
-    _htState.advise = { name: (_isEn() && p.en_name) ? p.en_name : p.name };
+    _htState.advise = { name: (_isEn() && p.en_name) ? p.en_name : p.name, pos: pos };
     _renderHtActions();
   };
+
+  /* ── 前半の基本スタッツ（両チーム対比）──────────────────────────────
+   * 素材は _computeMatchStats()＝確定済みの chanceResults の集計。
+   * ★ ポゼッションはボール保持時間ではなく **攻撃シーンの本数比**（本シムは保持時間を持たない）。
+   * ★ ここに出すのは5項目だけ。パス成功率・走行距離のような持っていない数字は作らない。 */
+  function _htStatRows() {
+    var s = _computeMatchStats();
+    if (!s) return null;
+    function duelRate(map) {
+      var w = 0, l = 0;
+      for (var k in map) { if (!Object.prototype.hasOwnProperty.call(map, k)) continue; w += map[k].w || 0; l += map[k].l || 0; }
+      return (w + l) ? Math.round(w / (w + l) * 100) : 0;
+    }
+    var at = s.t1.atk + s.t2.atk;
+    var pos1 = at ? Math.round(s.t1.atk / at * 100) : 50;
+    return [
+      { ja: 'シュート数', en: 'Shots', v1: s.t1.sh, v2: s.t2.sh },
+      { ja: '決定機', en: 'Big chances', v1: s.t1.ch, v2: s.t2.ch },
+      { ja: 'ポゼッション', en: 'Possession', v1: pos1, v2: 100 - pos1, pct: true },
+      { ja: 'デュエル勝率', en: 'Duels won', v1: duelRate(s.duels1), v2: duelRate(s.duels2), pct: true },
+      { ja: 'GKセーブ', en: 'Saves', v1: s.t1.gk, v2: s.t2.gk }
+    ];
+  }
+
+  function _htStatsHTML() {
+    var rows = _htStatRows();
+    if (!rows) return '';
+    var body = rows.map(function (r) {
+      var tot = (r.v1 + r.v2) || 1;
+      var w1 = Math.round(r.v1 / tot * 100), w2 = 100 - w1;
+      var u = r.pct ? '%' : '';
+      return '<div class="lg-hts-row">' +
+        '<span class="lg-hts-v me">' + r.v1 + u + '</span>' +
+        '<span class="lg-hts-bar me"><i style="width:' + w1 + '%"></i></span>' +
+        '<span class="lg-hts-k">' + _t(r.ja, r.en) + '</span>' +
+        '<span class="lg-hts-bar opp"><i style="width:' + w2 + '%"></i></span>' +
+        '<span class="lg-hts-v opp">' + r.v2 + u + '</span>' +
+      '</div>';
+    }).join('');
+    var d1 = _clubDef(team1Data && team1Data._srcKey) , d2 = _clubDef(team2Data && team2Data._srcKey);
+    return '<section class="lg-hts">' +
+      '<div class="lg-hts-head">' +
+        '<span class="me">' + ((d1 && d1.crest) || '') + ' ' + getTeamName(team1Data) + '</span>' +
+        '<span class="opp">' + getTeamName(team2Data) + ' ' + ((d2 && d2.crest) || '') + '</span>' +
+      '</div>' + body +
+    '</section>';
+  }
 
   /* ハーフタイムのアクション面。共有の HT モーダルへ **リーグの試合中だけ** 差し込む。 */
   function _htActionsHTML() {
     var st = _htState || { advice: null, rouse: false, advise: null };
-    var h = '<div class="lg-ht-h">🎬 ' + _t('ハーフタイムの采配', 'Half-time actions') + '</div>';
 
-    // ① コーチから助言をもらう
-    h += '<div class="lg-ht-step' + (st.advice ? ' done' : ' now') + '">' +
-      '<span class="lg-ht-no">1</span>' +
-      '<div class="lg-ht-body"><span class="lg-ht-t">' + _t('コーチから助言をもらう', 'Ask your coach') + '</span>';
+    // ①コーチの助言
+    var c1 = '<section class="lg-ht-card' + (st.advice ? ' done' : ' now') + '">' +
+      '<div class="lg-ht-ct"><span class="lg-ht-no">1</span>' + _t('コーチの助言', 'Coach\'s read') + '</div>';
     if (st.advice) {
-      h += '<p class="lg-ht-r">' + (st.advice.action
+      c1 += '<p class="lg-ht-r">' + (st.advice.action
         ? _t('相手は前半「' + _threatLabel(st.advice.action) + '」を' + st.advice.n + '回仕掛けている。後半はここを潰す。',
              'They went with "' + _threatLabel(st.advice.action) + '" ' + st.advice.n + ' times — we shut it down now.')
         : _t('前半のデータがまだ足りない。', 'Not enough data from the first half.')) + '</p>';
     } else {
-      h += '<button type="button" class="lg-ht-btn" onclick="leagueHtAdvice()">' +
-        _t('助言を聞く', 'Listen') + '</button>';
+      c1 += '<button type="button" class="lg-ht-btn" onclick="leagueHtAdvice()">' + _t('助言を聞く', 'Listen') + '</button>';
     }
-    h += '</div></div>';
+    c1 += '</section>';
 
-    // ② 選手を鼓舞
-    h += '<div class="lg-ht-step' + (st.rouse ? ' done' : (st.advice ? ' now' : ' lock')) + '">' +
-      '<span class="lg-ht-no">2</span>' +
-      '<div class="lg-ht-body"><span class="lg-ht-t">' + _t('選手を鼓舞する', 'Rouse the squad') + '</span>';
+    // ②選手とMTG
+    var c2 = '<section class="lg-ht-card' + (st.rouse ? ' done' : (st.advice ? ' now' : ' lock')) + '">' +
+      '<div class="lg-ht-ct"><span class="lg-ht-no">2</span>' + _t('選手とMTG', 'Team talk') + '</div>';
     if (st.rouse) {
-      h += '<p class="lg-ht-r">' + _t('ロッカールームが沸いた。チーム全体の士気が上がった。',
+      c2 += '<p class="lg-ht-r">' + _t('ロッカールームが沸いた。チーム全体の士気が上がった。',
         'The dressing room lifts — team morale is up.') + '</p>';
     } else if (st.advice) {
-      h += '<button type="button" class="lg-ht-btn" onclick="leagueHtRouse()">' +
-        _t('鼓舞する', 'Rouse') + '</button>';
+      c2 += '<button type="button" class="lg-ht-btn" onclick="leagueHtRouse()">' + _t('MTGを開く', 'Talk') + '</button>';
     } else {
-      h += '<p class="lg-ht-r lock">' + _t('まずコーチの話を聞く', 'Hear the coach first') + '</p>';
+      c2 += '<p class="lg-ht-r lock">🔒 ' + _t('まずコーチの話を聞く', 'Hear the coach first') + '</p>';
     }
-    h += '</div></div>';
+    c2 += '</section>';
 
-    // ③ 選手個別にアドバイス
-    h += '<div class="lg-ht-step' + (st.advise ? ' done' : (st.rouse ? ' now' : ' lock')) + '">' +
-      '<span class="lg-ht-no">3</span>' +
-      '<div class="lg-ht-body"><span class="lg-ht-t">' + _t('選手個別にアドバイス', 'A word with one player') + '</span>';
-    if (st.advise) {
-      h += '<p class="lg-ht-r">' + _t(st.advise.name + ' が顔を上げた。',
-        st.advise.name + ' lifts his head.') + '</p>';
-    } else if (st.rouse) {
-      var t = gameState && gameState.team1;
+    // ③個別アドバイス（先発11人）
+    var c3 = '<section class="lg-ht-card wide' + (st.advise ? ' done' : (st.rouse ? ' now' : ' lock')) + '">' +
+      '<div class="lg-ht-ct"><span class="lg-ht-no">3</span>' + _t('個別アドバイス', 'A word with one player') + '</div>';
+    var t = gameState && gameState.team1;
+    if (t) {
+      var teamKey = (team1Data && team1Data._srcKey) || '';
       var picks = '';
-      if (t) {
-        for (var i = 0; i < 11; i++) {
-          var p = t.players[t.lineup[i]];
-          if (!p) continue;
-          var nm = (_isEn() && p.en_name) ? p.en_name : p.name;
-          // 士気が低い選手ほど効く＝伸びしろを目印として出す
-          var low = ((p.morale || 0) < -0.05);
-          picks += '<button type="button" class="lg-ht-pick' + (low ? ' low' : '') + '" ' +
-            'onclick="leagueHtAdvise(' + i + ')">' + nm + (low ? ' <i>▼</i>' : '') + '</button>';
-        }
+      for (var i = 0; i < 11; i++) {
+        var p = t.players[t.lineup[i]];
+        if (!p) continue;
+        var nm = (_isEn() && p.en_name) ? p.en_name : p.name;
+        var chosen = !!(st.advise && st.advise.pos === i);
+        var dis = (st.advise || !st.rouse);
+        picks += '<button type="button" class="lg-ht-pick' + (chosen ? ' on' : '') + (dis ? ' off' : '') + '" ' +
+          (dis ? '' : 'onclick="leagueHtAdvise(' + i + ')"') + '>' +
+          '<canvas class="lg-ht-face" width="72" height="72" data-portrait="' + (p.long_name || p.name) + '"' +
+            (teamKey ? ' data-team="' + teamKey + '"' : '') + '></canvas>' +
+          '<span class="lg-ht-pn">' + nm + '</span></button>';
       }
-      h += '<div class="lg-ht-picks">' + picks + '</div>';
-    } else {
-      h += '<p class="lg-ht-r lock">' + _t('まず全体を鼓舞する', 'Rouse the squad first') + '</p>';
+      c3 += '<div class="lg-ht-picks">' + picks + '</div>';
     }
-    h += '</div></div>';
-    return h;
+    if (st.advise) {
+      c3 += '<p class="lg-ht-r">▶ ' + _t(st.advise.name + ' が顔を上げた。', st.advise.name + ' lifts his head.') + '</p>';
+    } else if (!st.rouse) {
+      c3 += '<p class="lg-ht-r lock">🔒 ' + _t('まず選手とMTGを行う', 'Hold the team talk first') + '</p>';
+    }
+    c3 += '</section>';
+
+    return _htStatsHTML() + '<div class="lg-ht-cards">' + c1 + c2 + c3 + '</div>';
   }
 
   function _renderHtActions() {
     var host = document.getElementById('lg-ht-actions');
-    if (host) host.innerHTML = _htActionsHTML();
+    if (!host) return;
+    host.innerHTML = _htActionsHTML();
+    _paintPortraitCanvases(host);   // ドット頭（portrait.js）を塗る
+  }
+
+  /* リーグのハーフタイムだけ、共有モーダルを全画面のレトロ面に切り替える。
+   * ★ シングル/W杯へ持ち越さないよう、試合が終わる/準備を抜けるときに必ず外す。 */
+  function _htDecorate(on) {
+    var m = document.getElementById('halftime-modal'); if (!m) return;
+    if (on) m.classList.add('league-ht'); else m.classList.remove('league-ht');
   }
 
   /* simulate.js の _showHalfTimeModal から typeof ガードで呼ばれる（公開版は league.js 非同梱＝no-op）。 */
   window.leagueOnHalfTime = function () {
-    if (!_leagueMatchActive) return;   // シングル/W杯のハーフタイムには出さない
+    if (!_leagueMatchActive) { _htDecorate(false); return; }   // シングル/W杯のハーフタイムには出さない
+    _htDecorate(true);
     var advice = document.getElementById('ht-duel-advice');
     if (!advice || !advice.parentNode) return;
     var host = document.getElementById('lg-ht-actions');
@@ -1659,8 +1713,11 @@
       host = document.createElement('div');
       host.id = 'lg-ht-actions';
       host.className = 'lg-ht-actions';
-      advice.parentNode.insertBefore(host, advice);   // 采配はコーチのデュエル分析より前に置く
+      advice.parentNode.insertBefore(host, advice);   // 采配はデュエル分析（リーグでは非表示）より前
     }
+    // 再開ボタンの文言はリーグだけ「試合再開」に（共有 HTML は「後半キックオフ」）。
+    var kick = document.getElementById('ht-btn-kickoff');
+    if (kick) kick.textContent = '▶ ' + _t('試合再開', 'Resume');
     if (!_htState) _htReset();
     _renderHtActions();
   };
@@ -3335,6 +3392,7 @@
    * ★ 回復日の healing は冪等（_applyWeekRecovery が preApplied で管理）なので触らない。 */
   window.leagueCancelPrep = function () {
     _decorateSettingScreen(false);   // MD-04: 共有画面を元に戻す
+    _htDecorate(false);
     window._leagueInMatch = false;
     _leagueMatchActive = false;
     _endManagerMatchCtx();
@@ -3476,6 +3534,7 @@
     _save();
 
     // 監督ビューアの後片付け → リーグホームへ
+    _htDecorate(false);   // HT-01: 共有のハーフタイムモーダルを元の見た目へ戻す
     if (typeof window._mvTeardown === 'function') { try { window._mvTeardown(); } catch (e) {} }
     showScreen('home');
 
