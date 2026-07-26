@@ -796,9 +796,12 @@ var _GK_DIVE_HW = 334 / 440;   // 2026-07-23 新ダイビング絵（アスペ�
 // GKダイブ絵のバリアント（2026-07-24 別ポーズ追加）。各絵はリカラー色窓共通・ポーズ別＝アスペクト/グローブアンカー/描画幅倍率が異なる。
 //   hw=高さ/幅, gx/gy=reaching glove の絵内フラクション（ボール到達点アンカー）, ws=pose0基準の描画幅倍率。
 //   シーン入場時に _pickGkDive() で1回だけ選択（frame内で毎回変えない＝アニメ中の絵ブレ防止）。表示層のみ＝エンジンrng不使用。
+//   id=リカラー/ピクセル化キャッシュのキーに混ぜるポーズ識別子。**必ずポーズ別にすること**：
+//   MangaRecolor と _csPixelate は spriteKey でベース画像ごとキャッシュするため、キーが同じだと
+//   最初に描かれたポーズが焼き付き、以降どちらを抽選しても同じ絵が返る（2026-07-26 修正）。
 var _GK_DIVES = [
-  { src: _MANGA_GK_DIVE_SRC, hw: _GK_DIVE_HW, gx: 0.85, gy: 0.13, ws: 1.00, rise: true, sc3Rev: false },          // pose0: 斜め上へ横っ飛び（reaching glove=右上・scene3は下→上の対角モーション）
-  { src: 'img/cutscenes/manga_gk_dive2.png?v=2', hw: 185 / 440, gx: 0.08, gy: 0.82, ws: 1.42, rise: false, sc3Rev: true, sc3: { x0: 195, x1: 160, y: 92 }, bg: 'img/cutscenes/gkdive2_bg_01.png' }  // pose1: 水平ダイブ（反転済・reaching glove=左下）。横長ゆえ幅1.42倍。scene3は縦移動なし＋専用配置（ゴールライン上・少し前＝左下）＋専用背景（ゴール裏フィールド）
+  { id: 'p0', src: _MANGA_GK_DIVE_SRC, hw: _GK_DIVE_HW, gx: 0.85, gy: 0.13, ws: 1.00, rise: true, sc3Rev: false },          // pose0: 斜め上へ横っ飛び（reaching glove=右上・scene3は下→上の対角モーション）
+  { id: 'p1', src: 'img/cutscenes/manga_gk_dive2.png?v=2', hw: 185 / 440, gx: 0.08, gy: 0.82, ws: 1.42, rise: false, sc3Rev: true, sc3: { x0: 195, x1: 160, y: 92 }, bg: 'img/cutscenes/gkdive2_bg_01.png' }  // pose1: 水平ダイブ（反転済・reaching glove=左下）。横長ゆえ幅1.42倍。scene3は縦移動なし＋専用配置（ゴールライン上・少し前＝左下）＋専用背景（ゴール裏フィールド）
 ];
 function _pickGkDive() {
   var o = (typeof window !== 'undefined') ? window._LAB_GK_DIVE : undefined;   // ラボ限定の強制選択（本番は未定義＝ランダム）
@@ -1035,8 +1038,8 @@ function _renderShotDuelScene(sc) {
   var gkColor = _pickGkColor(accent, sc.defence && sc.defence.team_color);
   var gkP0 = sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[0]];
   var _gkCols = _gkDiveColors(gkColor, _mangaFeat(gkP0 ? (gkP0.long_name || gkP0.name || '') : '').skin);
-  var _gkKey = 'gkdive|' + gkColor + '|' + _gkCols.skin;
   var _dive = _pickGkDive();
+  var _gkKey = 'gkdive|' + _dive.id + '|' + gkColor + '|' + _gkCols.skin;   // ポーズ別キー（共通キーだと先勝ちの絵が焼き付く）
   var gkImg = _loadCutsceneImg(_dive.src);
 
   // ジオメトリ（native: 右=シューター/左=GK・ボール右→左）
@@ -1315,8 +1318,8 @@ function _renderShotScene(sc, entry) {
   var _svGkManga = isSave && (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);   // GKスプライトは新素材（従来演出の上に描く・2026-07-15）
   var _svGkP = isSave && sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[0]];
   var _svGkCols = _svGkManga ? _gkDiveColors(gkColor, _mangaFeat(_svGkP ? (_svGkP.long_name || _svGkP.name || '') : '').skin) : null;
-  var _svGkKey = _svGkManga ? ('gkdive|' + gkColor + '|' + _svGkCols.skin) : null;
   var _svDive = _svGkManga ? _pickGkDive() : _GK_DIVES[0];   // マンガGK時のみランダム別ポーズ（従来スプライトはpose0のアンカーを使う）
+  var _svGkKey = _svGkManga ? ('gkdive|' + _svDive.id + '|' + gkColor + '|' + _svGkCols.skin) : null;   // ポーズ別キー（共通キーだと先勝ちの絵が焼き付く）
   var gkImg = isSave ? (_svGkManga ? _loadCutsceneImg(_svDive.src) : _loadCutsceneImg('img/cutscenes/gk_' + gkColor + '_01.png')) : null;
 
   // ── 漫画2拍演出（lab・北極星カンプ）────────────────────────────────
@@ -2426,8 +2429,8 @@ function _renderGkScene(sc, mode) {
   var gkP0 = sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[0]];
   var _gkManga = (typeof MangaRecolor !== 'undefined' && MangaRecolor.render);   // GKスプライトは新素材（従来演出の上に描く・2026-07-15）
   var _gkCols = _gkManga ? _gkDiveColors(gkColor, _mangaFeat(gkP0 ? (gkP0.long_name || gkP0.name || '') : '').skin) : null;
-  var _gkKey = _gkManga ? ('gkdive|' + gkColor + '|' + _gkCols.skin) : null;
   var _dive = _gkManga ? _pickGkDive() : _GK_DIVES[0];   // マンガGK時のみランダム別ポーズ
+  var _gkKey = _gkManga ? ('gkdive|' + _dive.id + '|' + gkColor + '|' + _gkCols.skin) : null;   // ポーズ別キー（共通キーだと先勝ちの絵が焼き付く）
   var gkImg = _gkManga ? _loadCutsceneImg(_dive.src) : _loadCutsceneImg('img/cutscenes/gk_' + gkColor + '_01.png');
   if (_gkManga && _dive.bg) bgImg = _loadCutsceneImg(_dive.bg);   // pose1は専用背景（ゴール裏フィールド）に差し替え
   var accent = defColor || '#e36b1f';                          // GK=守備側 → 守備色をアクセントに
