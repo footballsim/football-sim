@@ -67,6 +67,20 @@ let _htMode = false; // ハーフタイム選手変更中フラグ
 let _subbedOff = new Set(); // 一度交代で退いた選手のインデックス（再出場不可）
 let _pendingSubLog = []; // 交代ログ一時保留 [{out, outEn, in, inEn}]
 
+/* 出場時間の刻み（league.js SN-08b「選手別 総出場時間」の土台・2026-07-26）。
+ * 本エンジンの時間単位は「チャンス」なので、ピッチを出た/入った時点の currentChanceIdx を
+ * 選手オブジェクトに残しておき、集計側で 90 分へ写像する（_recordTeamCarryover）。
+ * ★ 純粋なマーカー＝読むのは集計だけ。判定・rng・結果には一切関与しない。
+ * ★ 選手オブジェクトは試合ごとの clone なので TEAM_DATA は汚さない。 */
+function stampSubTime(team, outIdx, inIdx) {
+  if (!team || !team.players) return;
+  const at = (typeof currentChanceIdx === 'number') ? currentChanceIdx : 0;
+  const out = (outIdx != null) ? team.players[outIdx] : null;
+  const inP = (inIdx != null) ? team.players[inIdx] : null;
+  if (out && out._offAtChance == null) out._offAtChance = at;
+  if (inP && inP._onAtChance == null) inP._onAtChance = at;
+}
+
 // ============================================================
 // SCREEN MANAGEMENT
 // ============================================================
@@ -1918,6 +1932,9 @@ function applyDrop(x, y) {
       }
       // 退く選手を交代済みセットに追加（再出場不可）
       _subbedOff.add(targetPlayerIdx);
+      // 出場時間の刻み（league.js SN-08b）: エンジンの時間単位＝チャンス。退場/投入の時点を選手に残す。
+      //   ★ 表示専用のマーカー＝シミュレーション結果には一切関与しない。
+      stampSubTime(team1Data, targetPlayerIdx, dragState.sourcePlayerIdx);
       htSubsCount++;
       _updateHtSubsLabel();
     }

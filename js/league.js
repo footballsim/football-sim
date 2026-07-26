@@ -191,7 +191,16 @@
     TRUST_SACK_THRESHOLD: 35,   // 未達 かつ 信頼がこれ未満 → 解任
     OFFER_POP_HIGH: 60,         // 人気がこれ以上 → 上位クラブも候補に入る
     OFFER_POP_MID: 30,          // これ以上 → 中位クラブまで／未満 → 下位のみ（救済1件保証）
-    OFFER_MAX: 3                // 提示するオファーの最大数
+    OFFER_MAX: 3,               // 提示するオファーの最大数
+    // ── SN-08c 年俸（2026-07-26 新設・シーズン前「オファー年俸」の土台）──
+    //   単位は万円/年。クラブの戦力と監督の人気・信頼から決定論で決まる（rng 不使用）。
+    //   ゲーム内の通貨であって実在クラブの実額ではない（クラブ自体が仮＝FN-01）。
+    SALARY_BASE: 3000,
+    SALARY_PER_STRENGTH: 220,   // クラブ戦力（上位11平均）1 あたり
+    SALARY_PER_POP: 40,         // 監督の人気 1 あたり
+    SALARY_PER_TRUST: 16,       // 現クラブ残留時のみ効く（積み上げた信頼が待遇に乗る）
+    SALARY_STEP: 50,            // 提示額の刻み
+    SALARY_MIN: 1200, SALARY_MAX: 15000
   };
 
   var SEASON_TUNING = {
@@ -257,7 +266,8 @@
       injuryOut: 0,    // 怪我による欠場残り節数
       suspendOut: 0,   // 出場停止の残り節数
       yellowAccum: 0,  // イエロー累積（SEASON_TUNING.YELLOW_ACCUM で停止）
-      apps: 0, goals: 0, assists: 0   // シーズン統計（RW-02・成長入力）
+      apps: 0, goals: 0, assists: 0,  // シーズン統計（RW-02・成長入力）
+      minutes: 0                      // 総出場時間（分・SN-08b／自クラブの対話モード試合のみ加算）
     };
   }
 
@@ -275,6 +285,42 @@
   function _peekSquadEntry(clubId, playerKey) {
     var c = _state && _state.squads && _state.squads[clubId];
     return (c && c[playerKey]) || null;
+  }
+
+  /* ── SN-08a 年齢モデル（2026-07-26 新設・シーズン終了「新人賞（23歳以下）」の土台）────
+   * 本作の選手データは生年月日を持たない。年齢は「選手キーから決まる基準年齢 ＋ 経過シーズン」で
+   * 決定論的に導く＝保存不要・どの端末でも同一・周回するたび必ず1つ増える。
+   * ★ これはゲーム内の年齢であって実在選手の実年齢ではない（クラブ自体が仮＝FN-01 で差し替わる）。
+   * ★ squads[].age に明示値があればそちらを優先＝将来の新人生成／移籍加入の入口を塞がない。 */
+  var AGE_TUNING = { MIN: 18, PEAK_MAX: 33, CAP: 38, U23: 23 };
+  function _hash32(s) {
+    var h = 2166136261;
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 16777619) >>> 0; }
+    return h >>> 0;
+  }
+  function _baseAge(playerKey) {
+    var h = _hash32('age|' + playerKey);
+    // 三角分布（一様2つの平均）＝中央（26前後）が厚く両端が薄い、自然な年齢構成になる
+    var a = (h % 1024) / 1024, b = ((h >>> 11) % 1024) / 1024;
+    return AGE_TUNING.MIN + Math.round(((a + b) / 2) * (AGE_TUNING.PEAK_MAX - AGE_TUNING.MIN));
+  }
+  function _playerAge(clubId, playerKey) {
+    var e = _peekSquadEntry(clubId, playerKey);
+    if (e && typeof e.age === 'number') return e.age;
+    var season = (_state && _state.season) ? _state.season : 1;
+    return Math.min(AGE_TUNING.CAP, _baseAge(playerKey) + (season - 1));
+  }
+
+  /* ── SN-08b 出場時間（2026-07-26 新設・「選手別出場数（総出場時間）」の土台）──────
+   * エンジンの時間単位は「チャンス」。simulate.js の stampSubTime が交代/退場の時点を
+   * 選手へ刻むので、ここで 90 分へ写像して分に直す。刻みが無い＝フル出場（90分）。
+   * ★ 記録するのは自クラブの対話モード試合だけ（相手/AI 同士は交代の刻みが取れないため）。 */
+  function _matchMinutes(p, chances) {
+    var total = (chances && chances.length) ? chances.length : 32;
+    function mins(i) { return Math.max(0, Math.min(90, Math.round(90 * i / total))); }
+    var on = (typeof p._onAtChance === 'number') ? mins(p._onAtChance) : 0;
+    var off = (typeof p._offAtChance === 'number') ? mins(p._offAtChance) : 90;
+    return Math.max(0, off - on);
   }
 
   /* ── オーバーレイ適用済みクラブデータ（§2.2） ─────────────────────────
@@ -476,7 +522,14 @@
       var touched = !!appeared[idx] || !!p._injured || !!p._sentOff || (p._yellowCards > 0);
       if (!touched) continue;
       var e = _squadEntry(clubId, _playerKey(p));
-      if (appeared[idx] || p._injured || p._sentOff) e.apps++;
+      if (appeared[idx] || p._injured || p._sentOff) {
+        e.apps++;
+        // SN-08b 総出場時間。交代の刻みが取れるのは対話モードの自クラブだけ（useSubbedOff）。
+        if (useSubbedOff) {
+          var _chs = (typeof chanceResults !== 'undefined') ? chanceResults : null;
+          e.minutes = (e.minutes || 0) + _matchMinutes(p, _chs);
+        }
+      }
 
       if (statsByName) {
         var st = statsByName[p.name];
@@ -1209,8 +1262,41 @@
     var pool = ranked.slice(from);
     if (!pool.length) pool = [ranked[n - 1]];   // 救済＝最低1件（最下位クラブ）
     return pool.slice(0, C.OFFER_MAX).map(function (c, i) {
-      return { clubId: c.id, strength: c.s, rank: from + i + 1 };
+      return { clubId: c.id, strength: c.s, rank: from + i + 1, salary: _offerSalary(c.id, false) };
     });
+  }
+
+  /* SN-08c 提示年俸（万円/年）。クラブ戦力＋監督の人気（残留なら信頼も）から決定論で導く。
+   * incumbent=true は現クラブ残留の提示＝積み上げた信頼が上乗せされる。 */
+  function _offerSalary(clubId, incumbent) {
+    var C = CONTRACT_TUNING;
+    var m = (_state && _state.manager) || null;
+    var pop = (m && m.params) ? m.params.popularity : 50;
+    var trust = (m && typeof m.clubTrust === 'number') ? m.clubTrust : 50;
+    var v = C.SALARY_BASE
+      + (_clubStrength(clubId) - 60) * C.SALARY_PER_STRENGTH
+      + (pop - 50) * C.SALARY_PER_POP
+      + (incumbent ? (trust - 50) * C.SALARY_PER_TRUST : 0);
+    v = Math.max(C.SALARY_MIN, Math.min(C.SALARY_MAX, v));
+    return Math.round(v / C.SALARY_STEP) * C.SALARY_STEP;
+  }
+
+  /* 年俸の表示文字列（万円 → 「1億2,000万円」/ en は「¥120M」）。 */
+  function _salaryText(man) {
+    if (!man && man !== 0) return '—';
+    if (_isEn()) return '¥' + (man / 100).toFixed(man % 100 ? 1 : 0) + 'M';
+    var oku = Math.floor(man / 10000), rest = man % 10000;
+    if (oku > 0) return oku + '億' + (rest ? rest.toLocaleString() + '万円' : '円');
+    return man.toLocaleString() + '万円';
+  }
+
+  /* まだ就任していないクラブの「今季の目標」を先読みする（_ensureSeasonGoal と同じ式）。 */
+  function _goalTargetFor(clubId) {
+    return GOAL_TUNING.TARGET_FOR_RANK(_strengthRank(clubId), CLUB_DEFS.length);
+  }
+  function _goalTextFor(clubId) {
+    var t = _goalTargetFor(clubId);
+    return t <= 1 ? _t('優勝', 'Win the title') : _t(t + '位以内', 'Top ' + t + ' finish');
   }
 
   /* 契約の分岐（シーズン終了画面が読む）。 */
@@ -1519,6 +1605,20 @@
    * ★ すべて確定済みデータの読み出しのみ＝rng 不使用・エンジン不変。
    * ========================================================================= */
 
+  /* _rateMatch の1クラブ分（key→{name,goals,assists,...}）を _recordTeamCarryover が読む
+   * 「選手名 → 得点/アシスト」の形へ写す。得点者内訳を持たない経路（ヘッドレス消化）でも
+   * 同じ確定データから内訳を復元できる。 */
+  function _statsFromRatings(byKey) {
+    if (!byKey) return null;
+    var out = {};
+    for (var k in byKey) {
+      if (!Object.prototype.hasOwnProperty.call(byKey, k)) continue;
+      var e = byKey[k];
+      if (e && e.name) out[e.name] = { goals: e.goals || 0, assists: e.assists || 0 };
+    }
+    return out;
+  }
+
   /* 自クラブの当季 個人記録トップ（得点王/アシスト王/皆勤）。squads は疎なので実在選手だけ拾う。 */
   function _seasonTopPlayers() {
     var myId = _state.myClub;
@@ -1532,6 +1632,65 @@
       if (e.apps > 0 && (!top.iron || e.apps > top.iron.n)) top.iron = { name: pk, n: e.apps };
     }
     return top;
+  }
+
+  /* ── SN-03改3 リーグ全体の個人表彰（2026-07-26・スライド「②個人表彰」）─────────
+   * 素材は seasonMeta.playerRatings＝全クラブ・全節ぶんの確定記録（_accumulateRatings）。
+   *   得点王/アシスト王 … goals / assists の最大
+   *   MVP              … 平均レーティング最大（協会ベストイレブンと同じ最低出場数を課す）
+   *   新人賞           … 同上を U23（SN-08a の年齢モデル）に限定
+   * ★ 確定データの読み出しのみ＝rng 不使用・エンジン不変。同値は clubId|key 順で決着＝決定論。 */
+  function _leagueAwards() {
+    var sm = _state && _state.seasonMeta;
+    var pr = sm && sm.playerRatings;
+    var out = { scorer: null, assister: null, mvp: null, rookie: null };
+    if (!pr) return out;
+    var minApps = BESTXI_TUNING.SEASON_MIN_APPS;
+    var all = [];
+    var cids = Object.keys(pr).sort();
+    for (var ci = 0; ci < cids.length; ci++) {
+      var cid = cids[ci], keys = Object.keys(pr[cid]).sort();
+      for (var ki = 0; ki < keys.length; ki++) {
+        var pk = keys[ki], e = pr[cid][pk];
+        all.push({
+          clubId: cid, key: pk, name: e.name, n: e.n,
+          goals: e.goals || 0, assists: e.assists || 0,
+          avg: e.n ? (e.sum / e.n) : 0, age: _playerAge(cid, pk)
+        });
+      }
+    }
+    function best(list, val) {
+      var top = null;
+      for (var i = 0; i < list.length; i++) if (val(list[i]) > 0 && (!top || val(list[i]) > val(top))) top = list[i];
+      return top;
+    }
+    out.scorer = best(all, function (p) { return p.goals; });
+    out.assister = best(all, function (p) { return p.assists; });
+    var rated = all.filter(function (p) { return p.n >= minApps; });
+    out.mvp = best(rated, function (p) { return p.avg; });
+    out.rookie = best(rated.filter(function (p) { return p.age <= AGE_TUNING.U23; }), function (p) { return p.avg; });
+    return out;
+  }
+
+  /* 自クラブの選手別 出場記録（スライド「④自チーム成績」）。出場数の多い順。
+   * minutes は自クラブの対話モード試合でのみ積まれる（SN-08b）。 */
+  function _myPlayerLog() {
+    var myId = _state && _state.myClub;
+    var c = (_state && _state.squads && _state.squads[myId]) || {};
+    var rows = [];
+    for (var pk in c) {
+      if (!Object.prototype.hasOwnProperty.call(c, pk)) continue;
+      var e = c[pk];
+      if (!e || !e.apps) continue;
+      rows.push({
+        key: pk, name: pk, apps: e.apps, minutes: e.minutes || 0,
+        goals: e.goals || 0, assists: e.assists || 0, age: _playerAge(myId, pk)
+      });
+    }
+    rows.sort(function (a, b) {
+      return (b.apps - a.apps) || (b.minutes - a.minutes) || (a.name < b.name ? -1 : 1);
+    });
+    return rows;
   }
 
   /* シーズン総評（テンプレ）。順位・目標・宿敵・得点力から1〜2文を組む。 */
@@ -2912,6 +3071,7 @@
     _state.lastPlayedDate = _todayStr();
     if (_state.round >= _state.fixtures.length) {
       _state.finished = true;
+      _finReset();   // SN-03改3: シーズンが終わった瞬間は必ず①リーグ戦順位から見せる
       // SN-02 [SEASON_END]: 目標の達成判定と清算（信頼度・人気が大きく動く）。
       //   解任/オファーへの分岐は SN-05/SN-04 で、この結果（manager.lastSeasonResult）を読む。
       _state.lastResult.season = _settleSeason(_position(myId));
@@ -2939,6 +3099,7 @@
         return;
       } catch (e) { console.warn('[league] post-match sequence failed, using banner', e); }
     }
+    _roundStep = -1;   // MD-03: 試合が終わったら必ずホーム画面（試合後バナー）に戻す
     _renderHub(true);
   }
 
@@ -3548,14 +3709,6 @@
    * 骨格（.lg-cols / .lg-col-main / .lg-col-side）は style.css の横長2カラムを
    * 壊さないためそのまま使い、中身だけを差し替える。
    * ═══════════════════════════════════════════════════════════════════════ */
-  var _hubTab = 'prep';
-  var HUB_TABS = [
-    { id: 'prep', ja: '準備', en: 'Prep' },
-    { id: 'table', ja: '順位', en: 'Table' },
-    { id: 'manager', ja: '監督', en: 'Manager' },
-    { id: 'record', ja: '記録', en: 'Records' }
-  ];
-
   /* 固定ステータスバー＝「自分が誰で、今どこにいるか」を常に1行で見せる。 */
   function _statusBarHTML(myId, myPos, myRow) {
     var d = _clubDef(myId);
@@ -3573,38 +3726,15 @@
       rival + '</div>';
   }
 
-  function _hubTabsHTML() {
-    var pa = _pendingWeek();
-    var chosen = (pa && pa.slots) ? pa.slots.filter(Boolean).length : 0;
-    return '<div class="lg-tabs">' + HUB_TABS.map(function (t) {
-      var badge = '';
-      // 未設定のコマが残っていれば「準備」に赤点＝開かなくても要対応が分かる
-      if (t.id === 'prep' && !_state.finished && chosen < WEEK_SLOTS) badge = '<i class="lg-tab-dot"></i>';
-      if (t.id === 'record' && _state.history && _state.history.length) {
-        badge = '<span class="lg-tab-n">' + _state.history.length + '</span>';
-      }
-      return '<button type="button" class="lg-tab' + (_hubTab === t.id ? ' on' : '') + '" ' +
-        'data-tab="' + t.id + '" onclick="leagueSetHubTab(\'' + t.id + '\')">' +
-        _t(t.ja, t.en) + badge + '</button>';
-    }).join('') + '</div>';
-  }
-
-  function _hubTabBodyHTML() {
-    var myId = _state.myClub;
-    if (_hubTab === 'table') return _standingsTableHTML(_sortedStandings(), myId);
-    if (_hubTab === 'manager') return _managerCardHTML();
-    if (_hubTab === 'record') return _hubRecordHTML();
-    // prep（既定）＝偵察レポート → 今週の準備 → 離脱者。
-    //   ★ 攻め筋を「試合時」でなく「準備段階」で見せ、それを元にコマを選ばせる。
-    var h = '';
-    if (!_state.finished) {
-      var fx0 = _myFixtureThisRound();
-      var oppId0 = fx0 ? ((fx0.home === myId) ? fx0.away : fx0.home) : null;
-      h += _scoutHTML(oppId0) + _actionPhaseHTML() + _absenteeHTML(myId);
-    }
-    if (!h) h = '<div class="lg-card lg-mini" style="text-align:center">' +
-      _t('シーズンは終了しました', 'The season is over') + '</div>';
-    return h;
+  /* MD-03 ホーム画面の右カラム＝俯瞰の3ブロック（順位／監督ステータス／記録）。
+   * 「次にやること」は左カラムの試合カードと「次へ」に集約されているので、ここは読むだけの面。 */
+  function _homeSideHTML() {
+    // ★ _managerCardHTML / _hubRecordHTML は自前の見出しを持つので二重に付けない。
+    return '<div class="lg-h">' + _t('順位', 'Table') + '</div>' +
+      _standingsTableHTML(_sortedStandings(), _state.myClub) +
+      _managerCardHTML() +
+      '<div class="lg-h">' + _t('記録', 'Records') + '</div>' +
+      _hubRecordHTML();
   }
 
   function _hubRecordHTML() {
@@ -3689,142 +3819,555 @@
   }
 
   /* 下部コマンドバー＝契約選択（残留／オファー／退任）。解任時は残留不可・オファーが主導線。 */
-  function _finaleCommandHTML(br) {
-    var offers = (br && br.offers) || [];
-    var canRenew = !!(br && br.canRenew);
-    var sacked = !!(br && br.sacked);
-    var stay = canRenew
-      ? '<button type="button" class="lg-se-card stay' + (sacked ? '' : ' primary') + '" onclick="leagueConfirmNewSeason()">' +
-          '<span class="lg-se-card-ico">🤝</span>' +
-          '<span class="lg-se-card-h">' + _t('残留する', 'Stay') + '</span>' +
-          '<span class="lg-se-card-s">' + _t('このクラブで次のシーズンへ', 'Continue with this club') + '</span></button>'
-      : '<div class="lg-se-card disabled">' +
-          '<span class="lg-se-card-ico">🚫</span>' +
-          '<span class="lg-se-card-h">' + _t('残留する', 'Stay') + '</span>' +
-          '<span class="lg-se-card-s">' + _t('契約は継続されない', 'Not offered') + '</span></div>';
-    var offer = offers.length
-      ? '<button type="button" class="lg-se-card offer' + (sacked ? ' primary' : '') + '" onclick="leagueSeasonOffers(1)">' +
-          '<span class="lg-se-card-ico">📄</span>' +
-          '<span class="lg-se-card-h">' + _t('オファーを見る', 'View offers') + '<b>（' + offers.length + '）</b></span>' +
-          '<span class="lg-se-card-s">' + _t('他クラブからの誘い', 'Move to another club') + '</span></button>'
-      : '<div class="lg-se-card disabled">' +
-          '<span class="lg-se-card-ico">📄</span>' +
-          '<span class="lg-se-card-h">' + _t('オファー', 'Offers') + '</span>' +
-          '<span class="lg-se-card-s">' + _t('今季は届いていない', 'None received') + '</span></div>';
-    var leave = '<button type="button" class="lg-se-card leave" onclick="leagueSeasonLeave()">' +
-        '<span class="lg-se-card-ico">🚪</span>' +
-        '<span class="lg-se-card-h">' + (sacked ? _t('解任を受け入れる', 'Accept sacking') : _t('退任する', 'Step down')) + '</span>' +
-        '<span class="lg-se-card-s">' + _t('クラブを去りタイトルへ', 'Leave to title screen') + '</span></button>';
-    return '<div class="lg-se-cmd">' +
-      '<div class="lg-se-cmd-h">' + _t('契約選択', 'Your next contract') + '</div>' +
-      '<div class="lg-se-cmd-row">' + stay + offer + leave + '</div>' +
-    '</div>';
-  }
+  /* ── SN-03改3 ページ順送り（2026-07-26・ユーザー提供スライド「リーグ戦ページ遷移」準拠）──
+   * シーズン終了 = ①リーグ戦順位 → ②個人表彰 → ③ベストイレブン → ④自チーム成績 → ⑤クラブ評価
+   * シーズン前(2年目以降) = ①オファークラブリスト → ②オファークラブ詳細 → ③クラブ決定 → ④選手獲得・放出
+   * どちらも「1画面1テーマ・次へで送る」。固定フレーム(.season-end-mode)と .lg-se-* は流用する。
+   * ★ 画面遷移だけの層＝集計関数はすべて確定データの読み出し（rng 不使用・エンジン不変）。 */
+  var FIN_PAGES = [
+    { id: 'table',   ja: 'リーグ戦順位',   en: 'League table' },
+    { id: 'honours', ja: '個人表彰',       en: 'Honours' },
+    { id: 'bestxi',  ja: 'ベストイレブン', en: 'Team of the Season' },
+    { id: 'mine',    ja: '自チーム成績',   en: 'Club record' },
+    { id: 'verdict', ja: 'クラブ評価',     en: 'Club verdict' }
+  ];
+  var PRE_PAGES = [
+    { id: 'offers', ja: 'オファー',       en: 'Offers' },
+    { id: 'detail', ja: 'クラブ詳細',     en: 'Club detail' },
+    { id: 'decide', ja: 'クラブ決定',     en: 'Decision' },
+    { id: 'squad',  ja: '選手獲得・放出', en: 'Transfers' }
+  ];
+  var _finPage = 0;      // シーズン終了の何ページ目か（0..4）
+  var _prePage = -1;     // -1 = シーズン終了フロー中／0.. = シーズン前フロー
+  var _preTarget = null; // シーズン前で選んでいるクラブ {clubId, incumbent, salary}
 
-  /* オファー選択のオーバーレイ（コマンドバー「オファーを見る」で開く・.lg-fin-offer を流用）。 */
-  function _finaleOffersOverlay(br) {
-    var offers = (br && br.offers) || [];
-    if (!offers.length) return '';
-    var rows = offers.map(function (o) {
-      var def = _clubDef(o.clubId);
-      return '<button type="button" class="lg-fin-offer" onclick="leagueAcceptOffer(\'' + o.clubId + '\')">' +
-        '<span class="lg-fin-offer-crest">' + def.crest + '</span>' +
-        '<span class="lg-fin-offer-body">' +
-          '<span class="lg-fin-offer-name">' + _clubName(o.clubId) + '</span>' +
-          '<span class="lg-fin-offer-str">' + _t('チーム力', 'Strength') + ' <b>' + o.strength + '</b></span></span>' +
-        '<span class="lg-fin-offer-go">▶</span></button>';
-    }).join('');
-    return '<div class="lg-se-ovl" id="lg-se-ovl" hidden>' +
-      '<div class="lg-se-ovl-panel">' +
-        '<div class="lg-se-ovl-head"><span>' + _t('届いたオファー', 'Offers on the table') +
-          '<span class="lg-badge">' + offers.length + '</span></span>' +
-          '<button type="button" class="lg-se-ovl-x" onclick="leagueSeasonOffers(0)">✕</button></div>' +
-        '<div class="lg-fin-offers">' + rows + '</div>' +
-      '</div></div>';
-  }
+  function _finReset() { _finPage = 0; _prePage = -1; _preTarget = null; _roundStep = -1; }
 
-  function _renderFinale() {
-    _ensureStyle();
-    var myId = _state.myClub, myDef = _clubDef(myId);
-    var rows = _sortedStandings();
-    var champ = rows[0], champDef = _clubDef(champ.id), won = champ.id === myId;
-    var fin = _seasonSummary();
-    var rec = fin.myRecord || { w: 0, d: 0, l: 0, pts: 0 };
+  /* 共通ヘッダー（マストヘッド＋現在地のパンくず）。 */
+  function _finHeadHTML(kind, idx, won) {
+    var pages = (kind === 'pre') ? PRE_PAGES : FIN_PAGES;
+    var chips = pages.map(function (p, i) {
+      var cls = (i === idx) ? ' on' : (i < idx ? ' done' : '');
+      return '<span class="lg-se-step' + cls + '"><i>' + (i + 1) + '</i>' + _t(p.ja, p.en) + '</span>';
+    }).join('<span class="lg-se-arrow">›</span>');
     var seasonNo = _state.season || 1;
     var rounds = (_state.fixtures && _state.fixtures.length) || 14;
-    var sv = (_state.lastResult && _state.lastResult.season) || fin.verdict;
-    var br = _contractBranch();
-    var grade = _seasonGrade(fin.myPos, rows.length, sv);
-
-    // ── ヘッダー：マストヘッド＋4ステップのパンくず（＝3ゾーン＋決定の見出し）──
-    var steps = [['1', '総評', 'Review'], ['2', '個人タイトル', 'Honours'],
-                 ['3', 'ベストイレブン', 'Team'], ['4', '契約判断', 'Contract']];
-    var stepChips = steps.map(function (s, i) {
-      return '<span class="lg-se-step' + (i === 3 ? ' on' : '') + '"><i>' + s[0] + '</i>' + _t(s[1], s[2]) + '</span>';
-    }).join('<span class="lg-se-arrow">›</span>');
-    var head = '<header class="lg-se-top">' +
+    var isPre = (kind === 'pre');
+    // シーズン前は「これから戦う季」を出す。決定（_startNextSeason）前は season がまだ旧季なので +1。
+    var upcoming = seasonNo + (_state.finished ? 1 : 0);
+    var sub = isPre
+      ? _t('Season ' + upcoming + ' へ向けて', 'Heading into Season ' + upcoming)
+      : _t(rounds + '節終了', rounds + ' rounds played') + ' · Season ' + seasonNo;
+    return '<header class="lg-se-top">' +
       '<div class="lg-se-brand">' +
-        '<span class="lg-se-emblem">' + (won ? '👑' : '🏁') + '</span>' +
-        '<div class="lg-se-brandtx"><h1 class="lg-se-h1">' + _t('シーズン終了', 'Season Complete') + '</h1>' +
-        '<span class="lg-se-hsub">' + _t(rounds + '節終了', rounds + ' rounds played') + ' · Season ' + seasonNo + '</span></div>' +
+        '<span class="lg-se-emblem">' + (isPre ? '📝' : (won ? '👑' : '🏁')) + '</span>' +
+        '<div class="lg-se-brandtx">' +
+          '<h1 class="lg-se-h1">' + (isPre ? _t('シーズン前', 'Pre-season') : _t('シーズン終了', 'Season Complete')) + '</h1>' +
+          '<span class="lg-se-hsub">' + sub + '</span></div>' +
       '</div>' +
-      '<nav class="lg-se-steps">' + stepChips + '</nav>' +
+      '<nav class="lg-se-steps">' + chips + '</nav>' +
     '</header>';
+  }
 
-    // ── 左ゾーン：シーズン総括（王者／自クラブ最終結果／会長コメント）──
-    var zoneL = '<section class="lg-se-zone lg-se-sum">' +
-      '<div class="lg-se-ztitle">' + _t('シーズン総括', 'Season review') + '</div>' +
-      '<div class="lg-se-champ' + (won ? ' me' : '') + '">' +
-        '<span class="lg-se-cup">🏆</span>' +
-        '<div class="lg-se-champ-tx"><span class="lg-se-champ-lbl">' + _t('優勝', 'Champions') + '</span>' +
-          '<span class="lg-se-champ-name">' + champDef.crest + ' ' + _clubName(champ.id) + '</span></div>' +
-      '</div>' +
-      '<div class="lg-se-mine">' +
-        '<div class="lg-se-mine-head">' +
-          '<span class="lg-se-mine-crest">' + myDef.crest + '</span>' +
-          '<span class="lg-se-mine-name">' + _clubName(myId) + '</span>' +
-          '<span class="lg-se-mine-pos">' + fin.myPos + '<i>' + _t('位', '') + '</i></span>' +
-        '</div>' +
-        '<div class="lg-se-mine-stats">' +
-          '<span class="lg-se-mine-rec"><b>' + rec.w + '</b>' + _t('勝', 'W') + ' <b>' + rec.d + '</b>' + _t('分', 'D') + ' <b>' + rec.l + '</b>' + _t('敗', 'L') + '</span>' +
-          '<span class="lg-se-mine-grade">' + _t('総評', 'Grade') + ' <b>' + grade + '</b></span>' +
-        '</div>' +
-      '</div>' +
-      '<div class="lg-se-chair">' +
-        '<span class="lg-se-chair-av">🧑‍💼</span>' +
-        '<div class="lg-se-chair-tx"><span class="lg-se-chair-lbl">' + _t('会長コメント', 'Chairman') + '</span>' +
-          '<p class="lg-se-chair-body">' + _seasonReviewText(fin) + '</p></div>' +
-      '</div>' +
-    '</section>';
+  /* 共通フッター＝下部コマンドバー。左=戻る／中=任意の副操作／右=次へ。 */
+  function _finNavHTML(backJs, nextJs, nextJa, nextEn, midHTML) {
+    var back = backJs
+      ? '<button type="button" class="lg-se-nb back" onclick="' + backJs + '">' + _t('← 戻る', '← Back') + '</button>'
+      : '<span class="lg-se-nb ghost"></span>';
+    var next = nextJs
+      ? '<button type="button" class="lg-se-nb next" onclick="' + nextJs + '">' + _t(nextJa, nextEn) + '</button>'
+      : '<span class="lg-se-nb ghost"></span>';
+    return '<div class="lg-se-nav">' + back + (midHTML || '<span class="lg-se-nb-mid"></span>') + next + '</div>';
+  }
 
-    // ── 中央ゾーン：ベストイレブン＋個人タイトル（実ドット頭を bestXISpread で描画）──
-    var pitch = _bestXIHTML(_seasonBestXI(), 'season',
-      'シーズンベストイレブン', 'Team of the Season', 'リーグ協会 公式発表', 'OFFICIAL');
-    var awards = _finAwardsHTML(fin.top);
-    var zoneC = '<section class="lg-se-zone lg-se-team">' +
-      '<div class="lg-se-ztitle">' + _t('ベストイレブン', 'Team of the Season') + '</div>' +
-      '<div class="lg-se-pitch">' + (pitch || '<div class="lg-se-empty">' + _t('選出データなし', 'No data') + '</div>') + '</div>' +
-      (awards ? '<div class="lg-se-awards">' + awards + '</div>' : '') +
-    '</section>';
-
-    // ── 右ゾーン：クラブ評価 ──
-    var zoneR = _finaleVerdictZone(sv);
-
-    var html = '<div class="lg-se' + (won ? ' won' : '') + (br && br.sacked ? ' sacked' : '') + '">' +
-      head +
-      '<div class="lg-se-main">' + zoneL + zoneC + zoneR + '</div>' +
-      _finaleCommandHTML(br) +
-      _finaleOffersOverlay(br) +
+  /* ページ枠を組んで描く（全ページ共通の出口＝描画後処理を1か所に閉じる）。 */
+  function _finPaint(kind, idx, won, sacked, bodyHTML, navHTML) {
+    _body().innerHTML = '<div class="lg-se lg-se-paged' + (won ? ' won' : '') + (sacked ? ' sacked' : '') + '">' +
+      _finHeadHTML(kind, idx, won) +
+      '<div class="lg-se-page">' + bodyHTML + '</div>' +
+      navHTML +
     '</div>';
-
-    _body().innerHTML = html;
     _hubMode(false);
     _seasonEndMode(true);
     _afterRender();
   }
 
+  /* ── ①リーグ戦順位 ───────────────────────────────────────────── */
+  function _finPageTable(ctx) {
+    return '<section class="lg-se-zone lg-se-wide">' +
+      '<div class="lg-se-ztitle">' + _t('リーグ戦 最終順位', 'Final standings') + '</div>' +
+      '<div class="lg-se-tablewrap">' + _standingsTableHTML(ctx.rows, ctx.myId) + '</div>' +
+    '</section>';
+  }
+
+  /* ── ②個人表彰（リーグ全体）───────────────────────────────────── */
+  function _finPageHonours() {
+    var a = _leagueAwards();
+    function card(ico, ja, en, p, valJa, valEn, note) {
+      if (!p) {
+        return '<div class="lg-se-award empty"><span class="lg-se-aw-ico">' + ico + '</span>' +
+          '<span class="lg-se-aw-t">' + _t(ja, en) + '</span>' +
+          '<span class="lg-se-aw-n">' + _t('該当なし', 'Not awarded') + '</span></div>';
+      }
+      var def = _clubDef(p.clubId);
+      return '<div class="lg-se-award">' +
+        '<span class="lg-se-aw-ico">' + ico + '</span>' +
+        '<span class="lg-se-aw-t">' + _t(ja, en) + '</span>' +
+        '<span class="lg-se-aw-n">' + p.name + '</span>' +
+        '<span class="lg-se-aw-c">' + (def ? def.crest + ' ' + _clubName(p.clubId) : '') + '</span>' +
+        '<span class="lg-se-aw-v">' + _t(valJa, valEn) + '</span>' +
+        (note ? '<span class="lg-se-aw-s">' + note + '</span>' : '') +
+      '</div>';
+    }
+    var cards =
+      card('👑', '得点王', 'Top scorer', a.scorer,
+           a.scorer ? a.scorer.goals + '点' : '', a.scorer ? a.scorer.goals + ' goals' : '') +
+      card('🎯', 'アシスト王', 'Top assists', a.assister,
+           a.assister ? a.assister.assists + '回' : '', a.assister ? a.assister.assists + ' assists' : '') +
+      card('🏅', 'MVP', 'MVP', a.mvp,
+           a.mvp ? '平均 ' + a.mvp.avg.toFixed(2) : '', a.mvp ? 'avg ' + a.mvp.avg.toFixed(2) : '') +
+      card('🌟', '新人賞', 'Young Player', a.rookie,
+           a.rookie ? '平均 ' + a.rookie.avg.toFixed(2) : '', a.rookie ? 'avg ' + a.rookie.avg.toFixed(2) : '',
+           a.rookie ? _t(a.rookie.age + '歳', 'age ' + a.rookie.age) : _t('23歳以下', 'U23'));
+    return '<section class="lg-se-zone lg-se-wide">' +
+      '<div class="lg-se-ztitle">' + _t('個人表彰', 'Individual honours') +
+        '<span class="lg-badge">' + _t('リーグ協会 発表', 'OFFICIAL') + '</span></div>' +
+      '<div class="lg-se-awardgrid">' + cards + '</div>' +
+    '</section>';
+  }
+
+  /* ── ③ベストイレブン ─────────────────────────────────────────── */
+  function _finPageBestXI() {
+    var pitch = _bestXIHTML(_seasonBestXI(), 'season',
+      'シーズンベストイレブン', 'Team of the Season', 'リーグ協会 公式発表', 'OFFICIAL');
+    return '<section class="lg-se-zone lg-se-wide lg-se-team">' +
+      '<div class="lg-se-ztitle">' + _t('ベストイレブン', 'Team of the Season') + '</div>' +
+      '<div class="lg-se-pitch big">' +
+        (pitch || '<div class="lg-se-empty">' + _t('選出データなし', 'No data') + '</div>') + '</div>' +
+    '</section>';
+  }
+
+  /* ── ④自チーム成績（戦績と順位／チーム内得点王・アシスト王／選手別出場数）───── */
+  function _finPageMine(ctx) {
+    var rec = ctx.fin.myRecord || { w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 };
+    var gd = rec.gf - rec.ga;
+    function kv(k, v) { return '<div class="lg-se-kv"><span>' + k + '</span><b>' + v + '</b></div>'; }
+    var recBox = '<div class="lg-se-recgrid c6">' +
+      kv(_t('最終順位', 'Position'), ctx.fin.myPos + _t('位', '')) +
+      kv(_t('勝分敗', 'W-D-L'), rec.w + '-' + rec.d + '-' + rec.l) +
+      kv(_t('勝点', 'Points'), rec.pts) +
+      kv(_t('得点', 'For'), rec.gf) +
+      kv(_t('失点', 'Against'), rec.ga) +
+      kv(_t('得失点', 'GD'), (gd > 0 ? '+' : '') + gd) +
+    '</div>';
+
+    var top = ctx.fin.top || {};
+    function inner(ico, ja, en, o, unitJa, unitEn) {
+      if (!o) return '';
+      return '<div class="lg-se-inner"><span>' + ico + ' ' + _t(ja, en) + '</span>' +
+        '<b>' + o.name + '</b><i>' + o.n + _t(unitJa, unitEn) + '</i></div>';
+    }
+    var innerBox = (top.scorer || top.assister)
+      ? '<div class="lg-se-innerrow">' +
+          inner('👑', 'チーム内得点王', 'Club top scorer', top.scorer, '点', ' G') +
+          inner('🎯', 'チーム内アシスト王', 'Club top assists', top.assister, '回', ' A') +
+        '</div>'
+      : '';
+
+    var log = _myPlayerLog();
+    var rows = log.map(function (p) {
+      return '<tr><td class="nm">' + p.name + '</td>' +
+        '<td>' + p.apps + '</td>' +
+        '<td>' + (p.minutes ? p.minutes + "'" : '—') + '</td>' +
+        '<td>' + (p.goals || '') + '</td>' +
+        '<td>' + (p.assists || '') + '</td></tr>';
+    }).join('');
+    var table = log.length
+      ? '<table class="lg-se-plog"><thead><tr>' +
+          '<th class="nm">' + _t('選手', 'Player') + '</th>' +
+          '<th>' + _t('出場', 'Apps') + '</th>' +
+          '<th>' + _t('時間', 'Mins') + '</th>' +
+          '<th>' + _t('得点', 'G') + '</th>' +
+          '<th>' + _t('アシスト', 'A') + '</th></tr></thead><tbody>' + rows + '</tbody></table>'
+      : '<div class="lg-se-empty">' + _t('出場記録なし', 'No appearances') + '</div>';
+
+    return '<section class="lg-se-zone lg-se-wide">' +
+      '<div class="lg-se-ztitle">' + ctx.myDef.crest + ' ' + _clubName(ctx.myId) +
+        '<span class="lg-badge">' + _t('自チーム成績', 'Club record') + '</span></div>' +
+      recBox + innerBox +
+      '<div class="lg-se-ztitle sub">' + _t('選手別 出場記録', 'Appearances') + '</div>' +
+      '<div class="lg-se-plogwrap">' + table + '</div>' +
+    '</section>';
+  }
+
+  /* ── ⑤クラブ評価（会長コメント／クラブの信頼／残留 or 解任）──────────────── */
+  function _finPageVerdict(ctx) {
+    var br = ctx.br;
+    var notice = br && br.sacked
+      ? '<div class="lg-se-notice ng"><span class="lg-se-notice-ico">📋</span>' +
+          '<div><span class="lg-se-notice-t">' + _t('解任', 'Sacked') + '</span>' +
+          '<p class="lg-se-notice-b">' + _t('目標未達と信頼の低下を受け、クラブはあなたとの契約を打ち切った。だが挑戦はここで終わらない。',
+            'The club has terminated your contract — but your story does not end here.') + '</p></div></div>'
+      : '<div class="lg-se-notice ok"><span class="lg-se-notice-ico">🤝</span>' +
+          '<div><span class="lg-se-notice-t">' + _t('契約継続', 'Contract renewed') + '</span>' +
+          '<p class="lg-se-notice-b">' + _t('クラブはあなたの続投を望んでいる。来季の去就は、シーズン前に決めればいい。',
+            'The club wants you to stay. You can settle your future in pre-season.') + '</p></div></div>';
+    var chair = '<div class="lg-se-chair">' +
+      '<span class="lg-se-chair-av">🧑‍💼</span>' +
+      '<div class="lg-se-chair-tx"><span class="lg-se-chair-lbl">' + _t('会長コメント', 'Chairman') + '</span>' +
+        '<p class="lg-se-chair-body">' + _seasonReviewText(ctx.fin) + '</p></div></div>';
+    return '<div class="lg-se-vdrow">' +
+      '<section class="lg-se-zone lg-se-sum">' +
+        '<div class="lg-se-ztitle">' + _t('シーズン総括', 'Season review') + '</div>' +
+        notice + chair +
+      '</section>' +
+      _finaleVerdictZone(ctx.sv) +
+    '</div>';
+  }
+
+  /* ── シーズン前①：オファークラブリスト（残留カード＋他クラブの誘い）────────── */
+  function _prePageOffers(br) {
+    var cards = [];
+    if (br.canRenew) {
+      var myId = _state.myClub, myDef = _clubDef(myId);
+      cards.push('<button type="button" class="lg-pre-club stay" onclick="leaguePreSelect(\'' + myId + '\',1)">' +
+        '<span class="lg-pre-crest">' + myDef.crest + '</span>' +
+        '<span class="lg-pre-body"><span class="lg-pre-name">' + _clubName(myId) +
+          '<em>' + _t('残留', 'Stay') + '</em></span>' +
+          '<span class="lg-pre-meta">' + _t('チーム力', 'Strength') + ' <b>' + _clubStrength(myId) + '</b>' +
+            ' · ' + _t('年俸', 'Wage') + ' <b>' + _salaryText(_offerSalary(myId, true)) + '</b></span></span>' +
+        '<span class="lg-pre-go">▶</span></button>');
+    }
+    (br.offers || []).forEach(function (o) {
+      var def = _clubDef(o.clubId);
+      cards.push('<button type="button" class="lg-pre-club" onclick="leaguePreSelect(\'' + o.clubId + '\',0)">' +
+        '<span class="lg-pre-crest">' + def.crest + '</span>' +
+        '<span class="lg-pre-body"><span class="lg-pre-name">' + _clubName(o.clubId) + '</span>' +
+          '<span class="lg-pre-meta">' + _t('チーム力', 'Strength') + ' <b>' + o.strength + '</b>' +
+            ' · ' + _t('年俸', 'Wage') + ' <b>' + _salaryText(o.salary) + '</b></span></span>' +
+        '<span class="lg-pre-go">▶</span></button>');
+    });
+    var body = cards.length
+      ? '<div class="lg-pre-list">' + cards.join('') + '</div>'
+      : '<div class="lg-se-empty">' + _t('どのクラブからも声がかからなかった。', 'No club came calling.') + '</div>';
+    return '<section class="lg-se-zone lg-se-wide">' +
+      '<div class="lg-se-ztitle">' + _t('オファークラブ', 'Clubs on the table') +
+        '<span class="lg-badge">' + cards.length + '</span></div>' + body +
+    '</section>';
+  }
+
+  /* ── シーズン前②：オファークラブ詳細（概要／昨季成績／今季の目標／年俸）──────── */
+  function _prePageDetail() {
+    var t = _preTarget; if (!t) return '';
+    var id = t.clubId, def = _clubDef(id);
+    var st = (_state.standings && _state.standings[id]) || _emptyStanding();
+    var pos = _position(id);
+    var gd = st.gf - st.ga;
+    function kv(k, v) { return '<div class="lg-se-kv"><span>' + k + '</span><b>' + v + '</b></div>'; }
+    return '<section class="lg-se-zone lg-se-wide">' +
+      '<div class="lg-se-ztitle">' + def.crest + ' ' + _clubName(id) +
+        (t.incumbent ? '<span class="lg-badge">' + _t('現クラブ', 'Current club') + '</span>' : '') + '</div>' +
+      '<div class="lg-se-ztitle sub">' + _t('クラブ概要', 'Club profile') + '</div>' +
+      '<div class="lg-se-recgrid c2">' +
+        kv(_t('チーム力', 'Strength'), _clubStrength(id)) +
+        kv(_t('戦力順位', 'Squad rank'), _strengthRank(id) + _t('位', '')) +
+      '</div>' +
+      '<div class="lg-se-ztitle sub">' + _t('昨シーズン成績', 'Last season') + '</div>' +
+      '<div class="lg-se-recgrid c4">' +
+        kv(_t('最終順位', 'Position'), pos + _t('位', '')) +
+        kv(_t('勝分敗', 'W-D-L'), st.w + '-' + st.d + '-' + st.l) +
+        kv(_t('勝点', 'Points'), st.pts) +
+        kv(_t('得失点', 'GD'), (gd > 0 ? '+' : '') + gd) +
+      '</div>' +
+      '<div class="lg-pre-terms">' +
+        '<div class="lg-pre-term"><span>' + _t('今季の目標', 'Season target') + '</span><b>' + _goalTextFor(id) + '</b></div>' +
+        '<div class="lg-pre-term wage"><span>' + _t('オファー年俸', 'Wage offered') + '</span><b>' + _salaryText(t.salary) + '</b></div>' +
+      '</div>' +
+    '</section>';
+  }
+
+  /* ── シーズン前③：クラブ決定（最終確認）───────────────────────────── */
+  function _prePageDecide() {
+    var t = _preTarget; if (!t) return '';
+    var def = _clubDef(t.clubId);
+    return '<section class="lg-se-zone lg-se-wide lg-pre-decide">' +
+      '<div class="lg-pre-bigcrest">' + def.crest + '</div>' +
+      '<div class="lg-pre-bigname">' + _clubName(t.clubId) + '</div>' +
+      '<p class="lg-pre-lead">' + (t.incumbent
+        ? _t('このクラブで、もう1シーズン戦う。', 'One more season with this club.')
+        : _t('新天地で、もう一度ゼロから積み上げる。', 'A new club — and a new start.')) + '</p>' +
+      '<div class="lg-pre-terms">' +
+        '<div class="lg-pre-term"><span>' + _t('今季の目標', 'Season target') + '</span><b>' + _goalTextFor(t.clubId) + '</b></div>' +
+        '<div class="lg-pre-term wage"><span>' + _t('年俸', 'Wage') + '</span><b>' + _salaryText(t.salary) + '</b></div>' +
+      '</div>' +
+    '</section>';
+  }
+
+  /* ── シーズン前④：選手獲得・放出（スキップ可能・枠のみ）────────────────
+   * ★ 移籍サブシステムは未実装（2026-07-26 ユーザー判断＝今回は遷移上の枠だけ確保）。
+   *   ここで実際の獲得/放出を行えるようになるまでは「スキップ」で通過する。 */
+  function _prePageSquad() {
+    var myId = _state.myClub, def = _clubDef(myId);
+    return '<section class="lg-se-zone lg-se-wide lg-pre-squad">' +
+      '<div class="lg-se-ztitle">' + def.crest + ' ' + _clubName(myId) +
+        '<span class="lg-badge">' + _t('シーズン' + (_state.season || 1), 'Season ' + (_state.season || 1)) + '</span></div>' +
+      '<div class="lg-pre-soon">' +
+        '<span class="lg-pre-soon-ico">🔁</span>' +
+        '<span class="lg-pre-soon-t">' + _t('選手獲得・放出', 'Transfers') + '</span>' +
+        '<p class="lg-pre-soon-b">' + _t('補強と放出はまだ準備中。今季はこのスカッドで戦う。',
+          'The transfer market is not open yet — you go with this squad.') + '</p>' +
+      '</div>' +
+    '</section>';
+  }
+
+  /* ── フローの入口（_renderHub から呼ばれる唯一の出口）──────────────────── */
+  function _renderFinale() {
+    _ensureStyle();
+    if (_prePage >= 0) { _renderPreseason(); return; }
+
+    var myId = _state.myClub, myDef = _clubDef(myId);
+    var rows = _sortedStandings();
+    var champ = rows[0], won = champ && champ.id === myId;
+    var fin = _seasonSummary();
+    var sv = (_state.lastResult && _state.lastResult.season) || fin.verdict;
+    var br = _contractBranch();
+    var ctx = { myId: myId, myDef: myDef, rows: rows, fin: fin, sv: sv, br: br, won: won };
+
+    var idx = Math.max(0, Math.min(FIN_PAGES.length - 1, _finPage));
+    var body, nav;
+    var back = idx > 0 ? 'leagueFinPage(' + (idx - 1) + ')' : null;
+
+    if (idx === 0)      { body = _finPageTable(ctx);   nav = _finNavHTML(back, 'leagueFinPage(1)', '次へ：個人表彰', 'Next: Honours'); }
+    else if (idx === 1) { body = _finPageHonours();    nav = _finNavHTML(back, 'leagueFinPage(2)', '次へ：ベストイレブン', 'Next: Team of the Season'); }
+    else if (idx === 2) { body = _finPageBestXI();     nav = _finNavHTML(back, 'leagueFinPage(3)', '次へ：自チーム成績', 'Next: Club record'); }
+    else if (idx === 3) { body = _finPageMine(ctx);    nav = _finNavHTML(back, 'leagueFinPage(4)', '次へ：クラブ評価', 'Next: Club verdict'); }
+    else {
+      body = _finPageVerdict(ctx);
+      var leave = '<button type="button" class="lg-se-nb mid" onclick="leagueSeasonLeave()">' +
+        (br && br.sacked ? _t('退任してタイトルへ', 'Leave to title') : _t('退任する', 'Step down')) + '</button>';
+      nav = _finNavHTML(back, 'leaguePreEnter()', '次へ：シーズン前', 'Next: Pre-season', leave);
+    }
+    _finPaint('fin', idx, won, br && br.sacked, body, nav);
+  }
+
+  /* シーズン前フロー（2年目以降）。①〜③は旧シーズンの状態を読むので必ず遷移の確定より前に描く。 */
+  function _renderPreseason() {
+    _ensureStyle();
+    var idx = Math.max(0, Math.min(PRE_PAGES.length - 1, _prePage));
+    var br = _state.finished ? _contractBranch() : null;
+    var body, nav;
+
+    if (idx === 0) {
+      body = _prePageOffers(br || { canRenew: false, offers: [] });
+      var leave = '<button type="button" class="lg-se-nb mid" onclick="leagueSeasonLeave()">' +
+        _t('退任する', 'Step down') + '</button>';
+      nav = _finNavHTML('leagueFinPage(4)', null, '', '', leave);
+    } else if (idx === 1) {
+      body = _prePageDetail();
+      nav = _finNavHTML('leaguePrePage(0)', 'leaguePrePage(2)', 'このクラブに決める', 'Choose this club');
+    } else if (idx === 2) {
+      body = _prePageDecide();
+      nav = _finNavHTML('leaguePrePage(1)', 'leaguePreCommit()', '決定して次へ', 'Confirm');
+    } else {
+      // 移籍サブシステムが入るまでは操作が無いので「スキップ＝開始」。導線は1本に絞る。
+      body = _prePageSquad();
+      nav = _finNavHTML(null, 'leaguePreFinish()', 'スキップしてシーズン開始', 'Skip — start the season');
+    }
+    _finPaint('pre', idx, false, br && br.sacked, body, nav);
+  }
+
+  /* ══ MD-03 シーズン中の順送り（2026-07-26・スライド「シーズン中」準拠）════════════
+   * ①ホーム画面（順位/次の試合/監督ステータス/次へ）
+   *   → ②順位 → ②次の試合（対戦チーム概要/予想スタメン/分析スタッフコメント）
+   *   → ②練習メニュー → ③試合へ
+   * ホームは俯瞰、順送りは1画面1テーマの深掘り。枠は最終話と同じ固定フレームを流用する。 */
+  var ROUND_STEPS = [
+    { id: 'table', ja: '順位',       en: 'Table' },
+    { id: 'next',  ja: '次の試合',   en: 'Next match' },
+    { id: 'prep',  ja: '練習メニュー', en: 'Training' },
+    { id: 'match', ja: '試合へ',     en: 'Matchday' }
+  ];
+  var _roundStep = -1;   // -1 = ホーム画面／0.. = 順送りの何ページ目か
+
+  /* 順送りページのヘッダー（節と対戦カードを常に出す＝今どの一戦の準備かを見失わない）。 */
+  function _roundHeadHTML(idx, oppId) {
+    var chips = ROUND_STEPS.map(function (p, i) {
+      var cls = (i === idx) ? ' on' : (i < idx ? ' done' : '');
+      return '<span class="lg-se-step' + cls + '"><i>' + (i + 1) + '</i>' + _t(p.ja, p.en) + '</span>';
+    }).join('<span class="lg-se-arrow">›</span>');
+    var rounds = (_state.fixtures && _state.fixtures.length) || 14;
+    var sub = _t('第' + (_state.round + 1) + '節 / ' + rounds, 'Round ' + (_state.round + 1) + ' / ' + rounds) +
+      (oppId ? ' · vs ' + _clubName(oppId) : '');
+    return '<header class="lg-se-top">' +
+      '<div class="lg-se-brand">' +
+        '<span class="lg-se-emblem">' + _clubDef(_state.myClub).crest + '</span>' +
+        '<div class="lg-se-brandtx"><h1 class="lg-se-h1">' + _clubName(_state.myClub) + '</h1>' +
+        '<span class="lg-se-hsub">' + sub + '</span></div>' +
+      '</div>' +
+      '<nav class="lg-se-steps">' + chips + '</nav>' +
+    '</header>';
+  }
+
+  /* ②次の試合：対戦チーム概要 ── 順位/勝点/戦力/直近の調子。 */
+  function _oppProfileHTML(oppId) {
+    var st = _state.standings[oppId] || _emptyStanding();
+    var gd = st.gf - st.ga;
+    function kv(k, v) { return '<div class="lg-se-kv"><span>' + k + '</span><b>' + v + '</b></div>'; }
+    return '<div class="lg-se-ztitle sub">' + _t('対戦チーム概要', 'Opponent profile') + '</div>' +
+      '<div class="lg-se-recgrid c6">' +
+        kv(_t('順位', 'Pos'), _position(oppId) + _t('位', '')) +
+        kv(_t('勝点', 'Pts'), st.pts) +
+        kv(_t('勝分敗', 'W-D-L'), st.w + '-' + st.d + '-' + st.l) +
+        kv(_t('得点', 'For'), st.gf) +
+        kv(_t('失点', 'Against'), st.ga) +
+        kv(_t('チーム力', 'Strength'), _clubStrength(oppId)) +
+      '</div>';
+  }
+
+  /* ②次の試合：予想スタメン ── 実際に相手が組む XI（離脱者を外した後の布陣）をそのまま出す。
+   * ★ 別の推定式を作らない＝キックオフで対峙する11人と必ず一致する。 */
+  function _oppLineupHTML(oppId) {
+    var td = _overlaySquad(oppId);
+    if (!td || !td.players || !td.default_lineup) return '';
+    var sysName = td.default_system || '';
+    // system_data は配列＝name で引く（_overlaySquad の補充ロジックと同じ引き方に揃える）。
+    var posNames = null;
+    if (typeof system_data !== 'undefined') {
+      for (var si = 0; si < system_data.length; si++) {
+        if (system_data[si].name === sysName) { posNames = system_data[si].positions; break; }
+      }
+    }
+    var cells = td.default_lineup.slice(0, 11).map(function (idx, i) {
+      var p = td.players[idx];
+      if (!p) return '';
+      var pos = (posNames && posNames[i]) ? posNames[i] : (i === 0 ? 'GK' : '');
+      // 英語表示は左右の漢字が読めないので既存の略称表（POS_ABBR）に寄せる。
+      if (_isEn() && pos) {
+        pos = (typeof POS_ABBR !== 'undefined' && POS_ABBR[pos]) ? POS_ABBR[pos] : pos.replace(/[左右]/g, '');
+      }
+      return '<div class="lg-xi-cell">' +
+        '<span class="lg-xi-pos">' + pos + '</span>' +
+        '<span class="lg-xi-nm">' + (_isEn() ? (p.en_name || p.name) : p.name) + '</span></div>';
+    }).join('');
+    return '<div class="lg-se-ztitle sub">' + _t('予想スタメン', 'Predicted XI') +
+        (sysName ? '<span class="lg-badge">' + sysName + '</span>' : '') + '</div>' +
+      '<div class="lg-xi-grid">' + cells + '</div>';
+  }
+
+  /* ②次の試合：分析スタッフのコメント ── 攻め筋・順位差・直近の流れという確定データを一文にまとめる。
+   * ★ 数値を作らない＝すべて既存の集計の言い換え。 */
+  function _analystCommentHTML(oppId) {
+    var lines = [];
+    var ranked = _opponentThreatsRanked(oppId);
+    if (ranked && ranked.length) {
+      lines.push(_t('警戒すべきは' + _threatLabel(ranked[0].id) + '。ここを断てば形が崩れます。',
+        'Their main route is ' + _threatLabel(ranked[0].id) + ' — shut it down and they lose shape.'));
+    }
+    var myPos = _position(_state.myClub), oppPos = _position(oppId);
+    if (oppPos < myPos) {
+      lines.push(_t('順位は向こうが上（' + oppPos + '位 vs ' + myPos + '位）。真正面からの殴り合いは分が悪い。',
+        'They sit above us (' + oppPos + ' vs ' + myPos + ') — a straight shootout favours them.'));
+    } else if (oppPos > myPos) {
+      lines.push(_t('順位は我々が上（' + myPos + '位 vs ' + oppPos + '位）。取りこぼしだけは避けたい。',
+        'We sit above them (' + myPos + ' vs ' + oppPos + ') — the danger is dropping points.'));
+    }
+    var abs = _absentees(oppId);
+    if (abs.length) {
+      lines.push(_t('相手は' + abs.length + '名を欠く。空いた枠は必ず穴になります。',
+        'They are without ' + abs.length + ' — the replacements are where the gaps will be.'));
+    }
+    if (_isRival(oppId)) {
+      var h = _h2h(_state.myClub, oppId);
+      lines.push(_t('宿敵戦です。通算' + h.w + '勝' + h.d + '分' + h.l + '敗。',
+        'This is the derby — ' + h.w + '-' + h.d + '-' + h.l + ' all-time.'));
+    }
+    if (!lines.length) return '';
+    // 日本語は句点で繋がるので詰める／英語は文の切れ目に空白が要る。
+    var text = lines.join(_isEn() ? ' ' : '');
+    return '<div class="lg-se-ztitle sub">' + _t('分析スタッフ', 'Analyst') + '</div>' +
+      '<div class="lg-analyst"><span class="lg-analyst-av">🧑‍💻</span>' +
+        '<p class="lg-analyst-b">' + text + '</p></div>';
+  }
+
+  function _renderRoundStep() {
+    _ensureStyle();
+    var myId = _state.myClub;
+    var fx = _myFixtureThisRound();
+    var oppId = fx ? ((fx.home === myId) ? fx.away : fx.home) : null;
+    var idx = Math.max(0, Math.min(ROUND_STEPS.length - 1, _roundStep));
+    var body, nav;
+    var back = idx > 0 ? 'leagueRoundStep(' + (idx - 1) + ')' : 'leagueRoundHome()';
+
+    if (idx === 0) {
+      body = '<section class="lg-se-zone lg-se-wide">' +
+        '<div class="lg-se-ztitle">' + _t('リーグ戦 順位', 'League table') + '</div>' +
+        '<div class="lg-se-tablewrap">' + _standingsTableHTML(_sortedStandings(), myId) + '</div>' +
+      '</section>';
+      nav = _finNavHTML(back, 'leagueRoundStep(1)', '次へ：次の試合', 'Next: Next match');
+    } else if (idx === 1) {
+      body = '<section class="lg-se-zone lg-se-wide lg-rd-scroll">' +
+        '<div class="lg-se-ztitle">' + (oppId ? _clubDef(oppId).crest + ' ' + _clubName(oppId) : _t('次の試合', 'Next match')) + '</div>' +
+        (oppId ? _oppProfileHTML(oppId) + _oppLineupHTML(oppId) + _analystCommentHTML(oppId) : '') +
+      '</section>';
+      nav = _finNavHTML(back, 'leagueRoundStep(2)', '次へ：練習メニュー', 'Next: Training');
+    } else if (idx === 2) {
+      // ★ 偵察レポート（相手の攻め筋）はここに置く＝ビデオ学習でどれを封じるかの判断材料。
+      body = '<section class="lg-se-zone lg-se-wide lg-rd-scroll">' +
+        '<div class="lg-se-ztitle">' + _t('今週の練習メニュー', "This week's training") + '</div>' +
+        (oppId ? _scoutHTML(oppId) : '') + _actionPhaseHTML() + _absenteeHTML(myId) +
+      '</section>';
+      nav = _finNavHTML(back, 'leagueRoundStep(3)', '次へ：試合へ', 'Next: Matchday');
+    } else {
+      body = _roundPageMatch(myId, oppId, fx);
+      nav = _lockedToday()
+        ? _finNavHTML(back, null, '', '')
+        : _finNavHTML(back, 'leaguePlayToday()', '▶ キックオフ', '▶ Kick off');
+    }
+
+    _body().innerHTML = '<div class="lg-se lg-se-paged lg-rd">' +
+      _roundHeadHTML(idx, oppId) +
+      '<div class="lg-se-page">' + body + '</div>' + nav +
+    '</div>';
+    _hubMode(false);
+    _seasonEndMode(true);
+    _afterRender();
+  }
+
+  /* ③試合へ ── 最後の確認面。ここまでの選択（布陣は設定画面）を確定してキックオフする。 */
+  function _roundPageMatch(myId, oppId, fx) {
+    if (!oppId) return '<div class="lg-se-empty">' + _t('今節の対戦がありません', 'No fixture this round') + '</div>';
+    var myDef = _clubDef(myId), oppDef = _clubDef(oppId);
+    var iAmHome = (fx.home === myId);
+    var pa = _pendingWeek();
+    var chosen = (pa && pa.slots) ? pa.slots.filter(Boolean).length : 0;
+    var warn = (chosen < WEEK_SLOTS)
+      ? '<div class="lg-rd-warn">⚠ ' + _t('今週の練習が' + (WEEK_SLOTS - chosen) + 'コマ空いています',
+          (WEEK_SLOTS - chosen) + ' training slot(s) still empty') + '</div>' : '';
+    var lock = _lockedToday()
+      ? '<div class="lg-rd-warn">' + _t('本日は消化済み — また明日', 'Played today — come back tomorrow') + '</div>' : '';
+    return '<section class="lg-se-zone lg-se-wide lg-rd-kick">' +
+      '<div class="lg-rd-vs">' +
+        '<div class="lg-rd-side"><span class="lg-rd-crest">' + myDef.crest + '</span>' +
+          '<span class="lg-rd-nm">' + _clubName(myId) + '</span>' +
+          '<span class="lg-rd-ha">' + (iAmHome ? _t('ホーム', 'HOME') : _t('アウェイ', 'AWAY')) + '</span></div>' +
+        '<span class="lg-rd-mid">VS</span>' +
+        '<div class="lg-rd-side"><span class="lg-rd-crest">' + oppDef.crest + '</span>' +
+          '<span class="lg-rd-nm">' + _clubName(oppId) + '</span>' +
+          '<span class="lg-rd-ha">' + _position(oppId) + _t('位', '') + '</span></div>' +
+      '</div>' +
+      '<div class="lg-pre-terms">' +
+        '<div class="lg-pre-term"><span>' + _t('クラブの要求', 'Club target') + '</span><b>' + _seasonGoalText() + '</b></div>' +
+        '<div class="lg-pre-term wage"><span>' + _t('今週の準備', 'Prep done') + '</span><b>' + chosen + ' / ' + WEEK_SLOTS + '</b></div>' +
+      '</div>' + warn + lock +
+    '</section>';
+  }
+
   function _renderHub(showBanner) {
     _ensureStyle();
+    // SN-03改3: シーズン前フローの途中は、次シーズンを開始済み（finished=false）でもそちらを描く。
+    if (_prePage >= 0) { _renderPreseason(); return; }
+    // MD-03: シーズン中の順送りページ（ホーム画面から「次へ」で入る）。
+    if (!_state.finished && _roundStep >= 0 && !_boardTalkPending()) { _renderRoundStep(); return; }
     if (_state.finished) { _renderFinale(); return; }   // SN-03: 最終話は専用の固定フレーム（2カラムハブをバイパス）
     _seasonEndMode(false);   // 通常ハブでは最終話の固定フレーム化を解く
     var myId = _state.myClub;
@@ -3926,20 +4469,24 @@
           return '<div class="lg-ni-row">' + x + '</div>';
         }).join('') + '</div>' +
         '</div>';
+      // MD-03: ホームからは直接キックオフせず「次へ」で順送りに入る
+      //   （順位 → 次の試合 → 練習メニュー → 試合へ）。消化済みの日でも中身は読める。
+      html += '<button class="lg-btn" onclick="leagueRoundStep(0)">' +
+        _t('次へ ▶', 'Next ▶') + '</button>';
       if (_lockedToday()) {
-        html += '<button class="lg-btn" disabled>' + _t('本日は消化済み — また明日', 'Played today — come back tomorrow') + '</button>';
-        html += '<div class="lg-mini" style="text-align:center;margin-top:6px">' + _t('1日1試合＝1週間。物語は毎日ひとつずつ進む。', 'One match a day — one week per day. The story advances daily.') + '</div>';
-      } else {
-        html += '<button class="lg-btn" onclick="leaguePlayToday()">▶ ' + _t('週末の試合へ（監督モード）', 'To the weekend match (Manager mode)') + '</button>';
+        html += '<div class="lg-mini" style="text-align:center;margin-top:6px">' +
+          _t('本日は消化済み — また明日。1日1試合＝1週間、物語は毎日ひとつずつ進む。',
+             'Played today — come back tomorrow. One match a day, one week per day.') + '</div>';
       }
     }
     html += '</div>';   // /lg-match-block
 
     // ── ここまでが左カラム（主役）。右カラムは**タブで入れ替わる**パネル ──────
     //   順位表 / 今週の準備 / 監督 / 記録 を縦に積むのをやめ、1つずつ見せる。
+    // MD-03: タブ切替をやめ、ホームは「順位・監督ステータス・記録」の俯瞰に固定する。
+    //   深掘り（順位表の精読／偵察／練習）は「次へ」の順送りが受け持つ＝役割が重ならない。
     html += '</div><div class="lg-col lg-col-side">';
-    html += _hubTabsHTML();
-    html += '<div id="lg-tabbody" class="lg-tabbody">' + _hubTabBodyHTML() + '</div>';
+    html += '<div class="lg-tabbody lg-home-side">' + _homeSideHTML() + '</div>';
     html += '</div></div></div>';   // /lg-col-side /lg-cols /lg-wrap
     _body().innerHTML = html;
     // UX-07: ハブは1画面固定。ただし**シーズン終了（最終話）は長文の読み物**で
@@ -4025,10 +4572,36 @@
   }
 
   window.showLeague = showLeague;
-  window.leaguePickClub = function (id) { _newSeason(id); _renderHub(false); };
+  window.leaguePickClub = function (id) { _finReset(); _newSeason(id); _renderHub(false); };
   window.leaguePlayToday = function () { playToday(); };
   window.leagueShowHub = function () { _renderHub(false); };
   // SN-03改2: 最終話コマンドバー「オファーを見る」でオファー一覧オーバーレイを開閉。
+  /* ── SN-03改3 シーズン終了／シーズン前の順送り操作（2026-07-26 スライド準拠）────── */
+  /* MD-03 シーズン中の順送り。ホーム ⇄ 順位/次の試合/練習/試合へ。 */
+  window.leagueRoundStep = function (n) { _roundStep = n; _renderRoundStep(); };
+  window.leagueRoundHome = function () { _roundStep = -1; _renderHub(false); };
+
+  window.leagueFinPage = function (n) { _prePage = -1; _finPage = n; _renderFinale(); };
+  window.leaguePreEnter = function () { _prePage = 0; _preTarget = null; _renderPreseason(); };
+  window.leaguePrePage = function (n) { _prePage = n; _renderPreseason(); };
+  window.leaguePreSelect = function (clubId, inc) {
+    var incumbent = !!Number(inc);
+    _preTarget = { clubId: clubId, incumbent: incumbent, salary: _offerSalary(clubId, incumbent) };
+    _prePage = 1;
+    _renderPreseason();
+  };
+  /* ③クラブ決定＝ここで初めて周回を確定する（残留 or 移籍）。確定後は新シーズンの状態で④を描く。 */
+  window.leaguePreCommit = function () {
+    var t = _preTarget; if (!t) return;
+    if (t.incumbent) _startNextSeason();
+    else _acceptOffer(t.clubId);   // ★ _state.finished が真のうちに呼ぶ（オファーの正当性検証がそれを見る）
+    _preTarget = null;
+    _finPage = 0;
+    _prePage = 3;                  // ④選手獲得・放出（スキップ可能）
+    _renderPreseason();
+  };
+  window.leaguePreFinish = function () { _finReset(); _renderHub(false); };
+
   window.leagueSeasonOffers = function (show) {
     var o = document.getElementById('lg-se-ovl'); if (!o) return;
     if (show) o.removeAttribute('hidden'); else o.setAttribute('hidden', '');
@@ -4058,23 +4631,9 @@
     if (e.suspendOut > 0) return { kind: 'suspend', weeks: e.suspendOut };
     return null;
   };
-  /* UX-07: ハブのタブ切替。★ ハブ全体ではなくパネルの中身だけ差し替える
-   * （主役の試合カードを毎回描き直さない＝チラつかない）。 */
-  window.leagueSetHubTab = function (t) {
-    _hubTab = t;
-    var body = document.getElementById('lg-tabbody');
-    if (!body) { _renderHub(false); return; }
-    body.innerHTML = _hubTabBodyHTML();
-    var btns = document.querySelectorAll('#league-body .lg-tab');
-    Array.prototype.forEach.call(btns, function (b) {
-      if (b.getAttribute('data-tab') === t) b.classList.add('on'); else b.classList.remove('on');
-    });
-    _paintPortraitCanvases(body);
-    _growBars(body);
-    if (_juiceOn()) { Juice.sfx('tick'); Juice.reveal(body, { dur: 220 }); }
-  };
   window.leagueBackToTitle = function () {
     // MD-01: リーグを離れるので試合準備フラグを必ず落とす（single/WC へ漏らさない）
+    _finReset();   // SN-03改3: 順送りの現在地も畳む（次に入った時に1ページ目から）
     window._leagueInMatch = false;
     _leagueMatchActive = false;
     _pendingMatch = null;
@@ -4134,12 +4693,17 @@
           _applyResult(m.home, m.away, r.result.home, r.result.away);
           var rr = _rateMatch(r.home, r.away, r.chanceResults, m.home, m.away);
           roundRatings[m.home] = rr[m.home]; roundRatings[m.away] = rr[m.away];
+          // 出場/得点/アシストの持ち越しも書く＝この導線で飛ばしても「④自チーム成績」が空にならない。
+          //   ★ 総出場時間だけは交代の刻みが取れないので入らない（実際に指揮した試合でのみ積む）。
+          _recordTeamCarryover(m.home, r.home, _statsFromRatings(rr[m.home]));
+          _recordTeamCarryover(m.away, r.away, _statsFromRatings(rr[m.away]));
         } catch (e) { console.warn('[league] debug sim match failed', e); }
       }
       _accumulateRatings(roundRatings);
       _state.round++;
     }
     _state.finished = true;
+    _finReset();
     _state.lastResult = _state.lastResult || {};
     _state.lastResult.season = _settleSeason(_position(_state.myClub));
     _save(); _renderHub(false);

@@ -142,6 +142,8 @@ function _discExternalSubs(team) {
 function _discMarkPlayerOut(team, pos) {
   const p = team.players[team.lineup[pos]];
   if (p) p._discExcluded = true;
+  // 退場/枠切れでピッチを去った時点も出場時間の刻みに含める（表示専用マーカー）。
+  if (typeof stampSubTime === 'function') stampSubTime(team, team.lineup[pos], null);
 }
 
 /**
@@ -374,6 +376,7 @@ function disciplineOnChanceEnd(team1, team2) {
         if (_discIsInteractiveTeam1(t) &&
             typeof _subbedOff !== 'undefined' && _subbedOff && typeof _subbedOff.add === 'function') {
           _subbedOff.add(pd.outIdx);
+          if (typeof stampSubTime === 'function') stampSubTime(t, pd.outIdx, null);   // 出場時間の刻み（表示専用）
         }
         continue;
       }
@@ -389,6 +392,7 @@ function disciplineOnChanceEnd(team1, team2) {
           if (typeof _subbedOff !== 'undefined' && _subbedOff && typeof _subbedOff.add === 'function') {
             _subbedOff.add(pd.outIdx);                     // 退いた選手は再出場不可（既存セマンティクス）
           }
+          if (typeof stampSubTime === 'function') stampSubTime(t, pd.outIdx, pd.inIdx);   // 出場時間の刻み（表示専用）
         } else {
           t._discSubsUsed = (t._discSubsUsed || 0) + 1;
         }

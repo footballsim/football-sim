@@ -1538,3 +1538,279 @@ body.league-mode #screen-home.season-end-mode > #league-body {
   .lg-se-pitch { padding: 2px 4px; }
   .lg-se-pitch .lg-sp-face { max-width: clamp(15px, 3.5vh, 34px); }
 }
+
+/* ==========================================================================
+ * SN-03改3 — シーズン終了／シーズン前の「順送りページ」（2026-07-26）
+ * --------------------------------------------------------------------------
+ * ユーザー提供スライド「リーグ戦ページ遷移」準拠＝1画面1テーマ・下部コマンドバーで送る。
+ * 3ゾーン版の意匠（.lg-se 一式）をそのまま流用し、ページ枠とナビだけを足す。
+ * ページ自体はスクロールしない。表など丈の伸びる中身だけ内側で送る。
+ * ========================================================================== */
+.lg-se-paged .lg-se-page {
+  flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
+  gap: clamp(7px, 1.3vh, 11px);
+}
+.lg-se-wide { flex: 1 1 auto; min-height: 0; }
+.lg-se-ztitle.sub { margin-top: 2px; }
+.lg-se-step.done { color: var(--lg-text-dim); border-color: var(--lg-line); }
+.lg-se-step.done > i { background: var(--lg-gold-2); color: var(--lg-ink); opacity: .75; }
+
+/* 内側スクロール（順位表・出場記録）。ページ枠自体は動かさない。 */
+.lg-se-tablewrap, .lg-se-plogwrap {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden;
+  scrollbar-width: thin;
+  display: grid; align-content: center;   /* 収まる時は縦中央・溢れたら先頭から送る */
+}
+.lg-se-plogwrap { align-content: start; }
+
+/* ── 下部コマンドバー（戻る／副操作／次へ）── */
+.lg-se-nav {
+  flex: 0 0 auto; display: grid; align-items: center; gap: 8px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1.4fr);
+}
+.lg-se-nb {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: clamp(34px, 6.2vh, 44px); padding: 6px 14px;
+  border-radius: 5px; border: 2px solid var(--lg-line);
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  color: var(--lg-text); font-size: clamp(12px, 2.1vh, 14px); font-weight: 800;
+  letter-spacing: .4px; cursor: pointer; text-align: center;
+  box-shadow: 0 3px 0 var(--se-edge); transition: transform .08s ease, box-shadow .08s ease;
+}
+.lg-se-nb:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--se-edge); }
+.lg-se-nb.back { color: var(--lg-text-mute); }
+.lg-se-nb.mid { color: var(--lg-text-dim); font-size: clamp(11px, 1.9vh, 13px); }
+.lg-se-nb.next {
+  color: var(--lg-ink); border-color: var(--lg-gold);
+  background: linear-gradient(165deg, var(--lg-gold), var(--lg-gold-2));
+}
+.lg-se-nb.ghost, .lg-se-nb-mid { border: 0; background: none; box-shadow: none; min-height: 0; }
+
+/* ── ②個人表彰 ── */
+.lg-se-awardgrid {
+  flex: 1 1 auto; min-height: 0;
+  display: grid; gap: clamp(7px, 1.3vh, 11px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* 賞状は伸ばさず、余白は上下に均等に配る（間延びしない） */
+  align-content: center; align-items: stretch;   /* 4枚の丈を揃える（賞ごとに情報量が違う） */
+}
+.lg-se-award { min-height: clamp(170px, 46vh, 320px); }
+.lg-se-award {
+  min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; padding: clamp(8px, 1.6vh, 14px) 8px; text-align: center;
+  border: 2px solid var(--lg-line); border-radius: 5px;
+  background: linear-gradient(165deg, var(--se-panel-2), var(--se-panel));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 3px 0 var(--se-edge);
+}
+.lg-se-award.empty { opacity: .5; }
+.lg-se-aw-ico { font-size: clamp(20px, 3.8vh, 30px); line-height: 1; filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
+.lg-se-aw-t {
+  font-size: 9.5px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--lg-gold);
+}
+.lg-se-aw-n {
+  font-size: clamp(13px, 2.4vh, 17px); font-weight: 900; line-height: 1.15; color: var(--lg-text);
+  overflow-wrap: anywhere;
+}
+.lg-se-aw-c { font-size: 10.5px; font-weight: 700; color: var(--lg-text-mute); }
+.lg-se-aw-v {
+  margin-top: 2px; font-size: clamp(11px, 2vh, 13px); font-weight: 900; color: var(--lg-text-dim);
+  font-feature-settings: "tnum" 1;
+}
+.lg-se-aw-s {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .6px; color: var(--lg-text-faint);
+  border: 1.5px solid var(--lg-line); border-radius: 3px; padding: 1px 6px; margin-top: 2px;
+}
+
+/* ── ③ベストイレブン（1ページ専有なのでピッチを大きく使う）── */
+.lg-se-pitch.big { flex: 1 1 auto; min-height: 0; }
+.lg-se-pitch.big .lg-sp-face { max-width: clamp(26px, 6.4vh, 60px); }
+
+/* ── ④自チーム成績 ── */
+.lg-se-recgrid {
+  flex: 0 0 auto; display: grid; gap: 6px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+/* 項目数に合わせて列を明示する（余った列に寄って左詰めに見えるのを避ける） */
+.lg-se-recgrid.c2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lg-se-recgrid.c4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.lg-se-recgrid.c6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.lg-se-kv {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 6px 4px; border-radius: 4px;
+  border: 1.5px solid var(--lg-line); background: var(--se-panel);
+}
+.lg-se-kv > span {
+  font-size: 9px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase;
+  color: var(--lg-text-mute); white-space: nowrap;
+}
+.lg-se-kv > b { font-size: clamp(14px, 2.6vh, 19px); font-weight: 900; color: var(--lg-text); }
+
+.lg-se-innerrow { flex: 0 0 auto; display: grid; gap: 6px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lg-se-inner {
+  display: flex; align-items: baseline; gap: 7px; padding: 5px 10px; border-radius: 4px;
+  border: 1.5px solid var(--lg-line); background: var(--se-panel); min-width: 0;
+}
+.lg-se-inner > span {
+  font-size: 9.5px; font-weight: 800; letter-spacing: 1px; color: var(--lg-gold); white-space: nowrap;
+}
+.lg-se-inner > b { font-size: 13px; font-weight: 900; color: var(--lg-text); overflow-wrap: anywhere; }
+.lg-se-inner > i { margin-left: auto; font-style: normal; font-size: 12px; font-weight: 900; color: var(--lg-text-dim); }
+
+.lg-se-plog { width: 100%; border-collapse: collapse; font-feature-settings: "tnum" 1; }
+.lg-se-plog th {
+  position: sticky; top: 0; z-index: 1;
+  padding: 4px 6px; font-size: 9px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--lg-text-mute); text-align: right; background: var(--lg-bg-2);
+  border-bottom: 1.5px solid var(--lg-line);
+}
+.lg-se-plog th.nm, .lg-se-plog td.nm { text-align: left; }
+.lg-se-plog td {
+  padding: 4px 6px; font-size: 12px; font-weight: 700; color: var(--lg-text-dim); text-align: right;
+  border-bottom: 1px solid color-mix(in srgb, var(--lg-line) 55%, transparent);
+}
+.lg-se-plog td.nm { color: var(--lg-text); font-weight: 800; overflow-wrap: anywhere; }
+.lg-se-plog tbody tr:nth-child(odd) td { background: rgba(255, 255, 255, .022); }
+
+/* ── ⑤クラブ評価 ── */
+.lg-se-vdrow {
+  flex: 1 1 auto; min-height: 0; display: grid; gap: clamp(7px, 1.3vh, 11px);
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+}
+.lg-se-notice {
+  flex: 0 0 auto; display: flex; align-items: flex-start; gap: 10px;
+  padding: 9px 11px; border-radius: 4px; border: 2px solid var(--lg-line); background: var(--se-panel);
+}
+.lg-se-notice.ok { border-color: color-mix(in srgb, var(--lg-gold) 45%, var(--lg-line)); }
+.lg-se-notice.ng { border-color: color-mix(in srgb, #e05a4a 55%, var(--lg-line)); }
+.lg-se-notice-ico { font-size: clamp(18px, 3.2vh, 26px); line-height: 1; }
+.lg-se-notice-t {
+  display: block; font-size: 11px; font-weight: 900; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--lg-gold);
+}
+.lg-se-notice.ng .lg-se-notice-t { color: #ff9a8c; }
+.lg-se-notice-b { margin: 3px 0 0; font-size: 12px; line-height: 1.5; color: var(--lg-text-dim); }
+
+/* ── シーズン前：オファークラブ ── */
+.lg-pre-list {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.lg-pre-club {
+  display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+  padding: 9px 12px; border-radius: 5px; cursor: pointer;
+  border: 2px solid var(--lg-line);
+  background: linear-gradient(165deg, var(--se-panel-2), var(--se-panel));
+  box-shadow: 0 3px 0 var(--se-edge); transition: transform .08s ease, box-shadow .08s ease;
+}
+.lg-pre-club:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--se-edge); }
+.lg-pre-club.stay { border-color: color-mix(in srgb, var(--lg-gold) 50%, var(--lg-line)); }
+.lg-pre-crest { font-size: clamp(20px, 3.6vh, 28px); line-height: 1; }
+.lg-pre-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.lg-pre-name {
+  display: flex; align-items: center; gap: 7px;
+  font-size: clamp(13px, 2.4vh, 16px); font-weight: 900; color: var(--lg-text);
+}
+.lg-pre-name > em {
+  font-style: normal; font-size: 9.5px; font-weight: 800; letter-spacing: 1.2px;
+  color: var(--lg-ink); background: var(--lg-gold); border-radius: 3px; padding: 1px 6px;
+}
+.lg-pre-meta { font-size: 11px; font-weight: 700; color: var(--lg-text-mute); }
+.lg-pre-meta b { color: var(--lg-text-dim); }
+.lg-pre-go { margin-left: auto; color: var(--lg-gold); font-size: 12px; font-weight: 900; }
+
+.lg-pre-terms { flex: 0 0 auto; display: grid; gap: 7px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 2px; }
+.lg-pre-term {
+  display: flex; flex-direction: column; gap: 2px; padding: 8px 11px; border-radius: 4px;
+  border: 2px solid var(--lg-line); background: var(--se-panel);
+}
+.lg-pre-term > span {
+  font-size: 9.5px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--lg-text-mute);
+}
+.lg-pre-term > b { font-size: clamp(15px, 2.8vh, 20px); font-weight: 900; color: var(--lg-text); }
+.lg-pre-term.wage { border-color: color-mix(in srgb, var(--lg-gold) 45%, var(--lg-line)); }
+.lg-pre-term.wage > b { color: var(--lg-gold); }
+
+.lg-pre-decide { align-items: center; justify-content: center; text-align: center; }
+.lg-pre-bigcrest { font-size: clamp(40px, 9vh, 76px); line-height: 1; filter: drop-shadow(0 3px 5px rgba(0,0,0,.5)); }
+.lg-pre-bigname { font-size: clamp(19px, 3.6vh, 28px); font-weight: 900; color: var(--lg-text); letter-spacing: .5px; }
+.lg-pre-lead { margin: 0; font-size: clamp(12px, 2.1vh, 14px); color: var(--lg-text-dim); }
+.lg-pre-decide .lg-pre-terms { width: min(560px, 100%); }
+
+.lg-pre-squad { justify-content: flex-start; }
+.lg-pre-soon {
+  flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px; text-align: center;
+  border: 2px dashed var(--lg-line); border-radius: 5px; padding: 14px;
+}
+.lg-pre-soon-ico { font-size: clamp(26px, 5vh, 40px); line-height: 1; opacity: .8; }
+.lg-pre-soon-t { font-size: 11px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: var(--lg-gold); }
+.lg-pre-soon-b { margin: 0; font-size: clamp(12px, 2.1vh, 14px); color: var(--lg-text-mute); max-width: 46ch; line-height: 1.55; }
+
+/* 縦持ち・低い画面では列を畳む（横並びの窮屈さより読めることを優先） */
+@media (max-width: 720px), (max-height: 430px) {
+  .lg-se-awardgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lg-se-recgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lg-se-vdrow { grid-template-columns: minmax(0, 1fr); }
+  .lg-se-nav { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .lg-se-nb.mid { grid-column: 1 / -1; order: 3; }
+  .lg-pre-terms { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ==========================================================================
+ * MD-03 — シーズン中の順送り（2026-07-26）
+ * --------------------------------------------------------------------------
+ * ホーム画面（俯瞰）→ 順位 → 次の試合 → 練習メニュー → 試合へ。
+ * 順送りページは最終話と同じ固定フレーム（.lg-se .lg-se-paged）に相乗りする。
+ * ========================================================================== */
+/* ホーム右カラム＝順位/監督/記録の俯瞰。1画面固定なので中身だけ送る。 */
+.lg-home-side { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; scrollbar-width: thin; }
+
+/* 中身の丈が読めないページ（次の試合・練習）は内側で送る */
+.lg-rd-scroll { overflow-y: auto; scrollbar-width: thin; }
+
+/* ② 予想スタメン */
+.lg-xi-grid {
+  flex: 0 0 auto; display: grid; gap: 5px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.lg-xi-cell {
+  display: flex; align-items: baseline; gap: 6px; min-width: 0;
+  padding: 4px 8px; border-radius: 4px;
+  border: 1.5px solid var(--lg-line); background: var(--se-panel, rgba(255,255,255,.05));
+}
+.lg-xi-pos {
+  flex: 0 0 auto; min-width: 38px; font-size: 9px; font-weight: 900; letter-spacing: .6px;
+  color: var(--lg-gold); text-align: center;
+  border-right: 1.5px solid var(--lg-line); padding-right: 5px;
+}
+.lg-xi-nm {
+  font-size: 12px; font-weight: 700; color: var(--lg-text-dim);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ② 分析スタッフのコメント */
+.lg-analyst {
+  flex: 0 0 auto; display: flex; align-items: flex-start; gap: 9px;
+  padding: 9px 11px; border-radius: 4px;
+  border: 2px solid var(--lg-line); background: var(--se-panel, rgba(255,255,255,.05));
+}
+.lg-analyst-av { font-size: clamp(17px, 3vh, 24px); line-height: 1; }
+.lg-analyst-b { margin: 0; font-size: 12.5px; line-height: 1.65; color: var(--lg-text-dim); }
+
+/* ③ 試合へ（キックオフ前の確認面） */
+.lg-rd-kick { align-items: center; justify-content: center; gap: clamp(10px, 2vh, 18px); }
+.lg-rd-vs { display: flex; align-items: center; justify-content: center; gap: clamp(14px, 4vw, 48px); }
+.lg-rd-side { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; }
+.lg-rd-crest { font-size: clamp(34px, 8vh, 64px); line-height: 1; filter: drop-shadow(0 3px 4px rgba(0,0,0,.5)); }
+.lg-rd-nm { font-size: clamp(14px, 2.6vh, 19px); font-weight: 900; color: var(--lg-text); }
+.lg-rd-ha {
+  font-size: 9.5px; font-weight: 800; letter-spacing: 1.4px; color: var(--lg-text-mute);
+  border: 1.5px solid var(--lg-line); border-radius: 3px; padding: 1px 8px;
+}
+.lg-rd-mid { font-size: clamp(15px, 3vh, 22px); font-weight: 900; color: var(--lg-gold); letter-spacing: 2px; }
+.lg-rd-kick .lg-pre-terms { width: min(560px, 100%); }
+.lg-rd-warn {
+  font-size: 12px; font-weight: 700; color: var(--lg-text-mute); text-align: center;
+  border: 1.5px dashed var(--lg-line); border-radius: 4px; padding: 6px 12px;
+}
