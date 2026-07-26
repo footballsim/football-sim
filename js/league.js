@@ -3099,7 +3099,7 @@
         return;
       } catch (e) { console.warn('[league] post-match sequence failed, using banner', e); }
     }
-    _roundStep = -1;   // MD-03: 試合が終わったら必ずホーム画面（試合後バナー）に戻す
+    _roundView = null;   // MD-03: 試合が終わったら必ずホーム画面（試合後バナー）に戻す
     _renderHub(true);
   }
 
@@ -3730,8 +3730,12 @@
    * 「次にやること」は左カラムの試合カードと「次へ」に集約されているので、ここは読むだけの面。 */
   function _homeSideHTML() {
     // ★ _managerCardHTML / _hubRecordHTML は自前の見出しを持つので二重に付けない。
-    return '<div class="lg-h">' + _t('順位', 'Table') + '</div>' +
-      _standingsTableHTML(_sortedStandings(), _state.myClub) +
+    //   順位はタップで②順位（フル表示）へ＝ホームでは俯瞰だけ見せる。
+    return '<div class="lg-h">' + _t('順位', 'Table') +
+        '<button type="button" class="lg-h-more" onclick="leagueRoundView(\'table\')">' +
+        _t('詳しく', 'Open') + ' ▸</button></div>' +
+      '<div class="lg-tapwrap" role="button" tabindex="0" onclick="leagueRoundView(\'table\')">' +
+        _standingsTableHTML(_sortedStandings(), _state.myClub) + '</div>' +
       _managerCardHTML() +
       '<div class="lg-h">' + _t('記録', 'Records') + '</div>' +
       _hubRecordHTML();
@@ -3841,7 +3845,7 @@
   var _prePage = -1;     // -1 = シーズン終了フロー中／0.. = シーズン前フロー
   var _preTarget = null; // シーズン前で選んでいるクラブ {clubId, incumbent, salary}
 
-  function _finReset() { _finPage = 0; _prePage = -1; _preTarget = null; _roundStep = -1; }
+  function _finReset() { _finPage = 0; _prePage = -1; _preTarget = null; _roundView = null; }
 
   /* 共通ヘッダー（マストヘッド＋現在地のパンくず）。 */
   function _finHeadHTML(kind, idx, won) {
@@ -4176,25 +4180,36 @@
     _finPaint('pre', idx, false, br && br.sacked, body, nav);
   }
 
-  /* ══ MD-03 シーズン中の順送り（2026-07-26・スライド「シーズン中」準拠）════════════
-   * ①ホーム画面（順位/次の試合/監督ステータス/次へ）
-   *   → ②順位 → ②次の試合（対戦チーム概要/予想スタメン/分析スタッフコメント）
-   *   → ②練習メニュー → ③試合へ
-   * ホームは俯瞰、順送りは1画面1テーマの深掘り。枠は最終話と同じ固定フレームを流用する。 */
-  var ROUND_STEPS = [
-    { id: 'table', ja: '順位',       en: 'Table' },
-    { id: 'next',  ja: '次の試合',   en: 'Next match' },
+  /* ══ MD-03 シーズン中の画面構成（2026-07-26・スライド「シーズン中」準拠）══════════
+   * ①ホーム画面（順位／次の試合／監督ステータス／次へボタン）が常に起点。
+   *   ├ 「順位」を開く      → ②順位（見たら戻る）
+   *   ├ 「次の試合」を開く  → ②次の試合（見たら戻る）
+   *   └ 「次へ」を押す      → ②練習メニュー → ③試合へ  ← 試合に進むのはこの1本だけ
+   * ★ 順位/次の試合は寄り道＝本線に割り込ませない（2026-07-26 ユーザー指摘で修正）。
+   * 深掘りページの枠は最終話と同じ固定フレームを流用する。 */
+  var MATCH_LINE = [
     { id: 'prep',  ja: '練習メニュー', en: 'Training' },
-    { id: 'match', ja: '試合へ',     en: 'Matchday' }
+    { id: 'match', ja: '試合へ',       en: 'Matchday' }
   ];
-  var _roundStep = -1;   // -1 = ホーム画面／0.. = 順送りの何ページ目か
+  var SIDE_VIEWS = {
+    table: { ja: '順位',     en: 'Table' },
+    next:  { ja: '次の試合', en: 'Next match' }
+  };
+  var _roundView = null;   // null = ホーム画面／'table'|'next'|'prep'|'match'
 
-  /* 順送りページのヘッダー（節と対戦カードを常に出す＝今どの一戦の準備かを見失わない）。 */
-  function _roundHeadHTML(idx, oppId) {
-    var chips = ROUND_STEPS.map(function (p, i) {
-      var cls = (i === idx) ? ' on' : (i < idx ? ' done' : '');
-      return '<span class="lg-se-step' + cls + '"><i>' + (i + 1) + '</i>' + _t(p.ja, p.en) + '</span>';
-    }).join('<span class="lg-se-arrow">›</span>');
+  /* 深掘りページのヘッダー。本線（練習→試合）は2ステップのパンくず、
+   * 寄り道（順位／次の試合）は単票のラベルだけ＝本線の進み具合と混同させない。 */
+  function _roundHeadHTML(view, oppId) {
+    var chips;
+    if (view === 'prep' || view === 'match') {
+      chips = MATCH_LINE.map(function (p, i) {
+        var cls = (p.id === view) ? ' on' : (view === 'match' && i === 0 ? ' done' : '');
+        return '<span class="lg-se-step' + cls + '"><i>' + (i + 1) + '</i>' + _t(p.ja, p.en) + '</span>';
+      }).join('<span class="lg-se-arrow">›</span>');
+    } else {
+      var v = SIDE_VIEWS[view] || { ja: '', en: '' };
+      chips = '<span class="lg-se-step on"><i>◆</i>' + _t(v.ja, v.en) + '</span>';
+    }
     var rounds = (_state.fixtures && _state.fixtures.length) || 14;
     var sub = _t('第' + (_state.round + 1) + '節 / ' + rounds, 'Round ' + (_state.round + 1) + ' / ' + rounds) +
       (oppId ? ' · vs ' + _clubName(oppId) : '');
@@ -4289,43 +4304,46 @@
         '<p class="lg-analyst-b">' + text + '</p></div>';
   }
 
-  function _renderRoundStep() {
+  function _renderRoundView() {
     _ensureStyle();
     var myId = _state.myClub;
     var fx = _myFixtureThisRound();
     var oppId = fx ? ((fx.home === myId) ? fx.away : fx.home) : null;
-    var idx = Math.max(0, Math.min(ROUND_STEPS.length - 1, _roundStep));
+    var view = _roundView;
     var body, nav;
-    var back = idx > 0 ? 'leagueRoundStep(' + (idx - 1) + ')' : 'leagueRoundHome()';
+    var home = 'leagueRoundHome()';
 
-    if (idx === 0) {
+    if (view === 'table') {
+      // 寄り道①：順位。ここから試合へは進めない＝見たらホームへ戻る。
       body = '<section class="lg-se-zone lg-se-wide">' +
         '<div class="lg-se-ztitle">' + _t('リーグ戦 順位', 'League table') + '</div>' +
         '<div class="lg-se-tablewrap">' + _standingsTableHTML(_sortedStandings(), myId) + '</div>' +
       '</section>';
-      nav = _finNavHTML(back, 'leagueRoundStep(1)', '次へ：次の試合', 'Next: Next match');
-    } else if (idx === 1) {
+      nav = _finNavHTML(home, home, 'ホームへ戻る', 'Back to home');
+    } else if (view === 'next') {
+      // 寄り道②：次の試合（対戦チーム概要／予想スタメン／分析スタッフコメント）。
       body = '<section class="lg-se-zone lg-se-wide lg-rd-scroll">' +
         '<div class="lg-se-ztitle">' + (oppId ? _clubDef(oppId).crest + ' ' + _clubName(oppId) : _t('次の試合', 'Next match')) + '</div>' +
         (oppId ? _oppProfileHTML(oppId) + _oppLineupHTML(oppId) + _analystCommentHTML(oppId) : '') +
       '</section>';
-      nav = _finNavHTML(back, 'leagueRoundStep(2)', '次へ：練習メニュー', 'Next: Training');
-    } else if (idx === 2) {
-      // ★ 偵察レポート（相手の攻め筋）はここに置く＝ビデオ学習でどれを封じるかの判断材料。
+      nav = _finNavHTML(home, home, 'ホームへ戻る', 'Back to home');
+    } else if (view === 'prep') {
+      // 本線①：練習メニュー。★ 偵察レポートはここ＝ビデオ学習でどれを封じるかの判断材料。
       body = '<section class="lg-se-zone lg-se-wide lg-rd-scroll">' +
         '<div class="lg-se-ztitle">' + _t('今週の練習メニュー', "This week's training") + '</div>' +
         (oppId ? _scoutHTML(oppId) : '') + _actionPhaseHTML() + _absenteeHTML(myId) +
       '</section>';
-      nav = _finNavHTML(back, 'leagueRoundStep(3)', '次へ：試合へ', 'Next: Matchday');
+      nav = _finNavHTML(home, 'leagueRoundView(\'match\')', '次へ：試合へ', 'Next: Matchday');
     } else {
+      // 本線②：試合へ。
       body = _roundPageMatch(myId, oppId, fx);
       nav = _lockedToday()
-        ? _finNavHTML(back, null, '', '')
-        : _finNavHTML(back, 'leaguePlayToday()', '▶ キックオフ', '▶ Kick off');
+        ? _finNavHTML('leagueRoundView(\'prep\')', null, '', '')
+        : _finNavHTML('leagueRoundView(\'prep\')', 'leaguePlayToday()', '▶ キックオフ', '▶ Kick off');
     }
 
     _body().innerHTML = '<div class="lg-se lg-se-paged lg-rd">' +
-      _roundHeadHTML(idx, oppId) +
+      _roundHeadHTML(view, oppId) +
       '<div class="lg-se-page">' + body + '</div>' + nav +
     '</div>';
     _hubMode(false);
@@ -4367,7 +4385,7 @@
     // SN-03改3: シーズン前フローの途中は、次シーズンを開始済み（finished=false）でもそちらを描く。
     if (_prePage >= 0) { _renderPreseason(); return; }
     // MD-03: シーズン中の順送りページ（ホーム画面から「次へ」で入る）。
-    if (!_state.finished && _roundStep >= 0 && !_boardTalkPending()) { _renderRoundStep(); return; }
+    if (!_state.finished && _roundView && !_boardTalkPending()) { _renderRoundView(); return; }
     if (_state.finished) { _renderFinale(); return; }   // SN-03: 最終話は専用の固定フレーム（2カラムハブをバイパス）
     _seasonEndMode(false);   // 通常ハブでは最終話の固定フレーム化を解く
     var myId = _state.myClub;
@@ -4461,18 +4479,20 @@
       }
       infoRows.push('<span class="lg-ni-k">' + _t('クラブの要求', 'Target') + '</span><b>' + _seasonGoalText() + '</b>');
 
-      html += '<div class="lg-hero" style="background:linear-gradient(135deg,' + myDef.color + '33,' + oppDef2.color + '33)' +
+      // MD-03: 試合カードそのものを「次の試合」への入口にする（タップで詳細＝寄り道）。
+      html += '<div class="lg-hero lg-hero-tap" role="button" tabindex="0" onclick="leagueRoundView(\'next\')" ' +
+        'style="background:linear-gradient(135deg,' + myDef.color + '33,' + oppDef2.color + '33)' +
         (oppIsRival ? ';border:1px solid #c0392b99' : '') + '">' +
         (oppIsRival ? '<div style="text-align:center;color:#e8776f;font-weight:800;font-size:12px;margin-bottom:4px">🔥 ' + _t('宿敵対決', 'RIVALRY') + '　' + (function () { var h = _h2h(myId, oppId); return _t('通算 ' + h.w + '勝' + h.d + '分' + h.l + '敗', h.w + '-' + h.d + '-' + h.l); })() + '</div>' : '') +
         '<div class="lg-vs">' + _sideHTML(myId, myDef) + '<div class="mid">VS</div>' + _sideHTML(oppId, oppDef2) + '</div>' +
         '<div class="lg-nextinfo">' + infoRows.map(function (x) {
           return '<div class="lg-ni-row">' + x + '</div>';
         }).join('') + '</div>' +
+        '<div class="lg-tapmore">' + _t('タップで対戦相手を詳しく見る', 'Tap for the full opponent report') + ' ▸</div>' +
         '</div>';
-      // MD-03: ホームからは直接キックオフせず「次へ」で順送りに入る
-      //   （順位 → 次の試合 → 練習メニュー → 試合へ）。消化済みの日でも中身は読める。
-      html += '<button class="lg-btn" onclick="leagueRoundStep(0)">' +
-        _t('次へ ▶', 'Next ▶') + '</button>';
+      // MD-03: 「次へ」は本線＝練習メニューへ直行する（順位/次の試合は寄り道なので割り込ませない）。
+      html += '<button class="lg-btn" onclick="leagueRoundView(\'prep\')">' +
+        _t('次へ：練習メニュー ▶', 'Next: Training ▶') + '</button>';
       if (_lockedToday()) {
         html += '<div class="lg-mini" style="text-align:center;margin-top:6px">' +
           _t('本日は消化済み — また明日。1日1試合＝1週間、物語は毎日ひとつずつ進む。',
@@ -4578,8 +4598,8 @@
   // SN-03改2: 最終話コマンドバー「オファーを見る」でオファー一覧オーバーレイを開閉。
   /* ── SN-03改3 シーズン終了／シーズン前の順送り操作（2026-07-26 スライド準拠）────── */
   /* MD-03 シーズン中の順送り。ホーム ⇄ 順位/次の試合/練習/試合へ。 */
-  window.leagueRoundStep = function (n) { _roundStep = n; _renderRoundStep(); };
-  window.leagueRoundHome = function () { _roundStep = -1; _renderHub(false); };
+  window.leagueRoundView = function (v) { _roundView = v; _renderRoundView(); };
+  window.leagueRoundHome = function () { _roundView = null; _renderHub(false); };
 
   window.leagueFinPage = function (n) { _prePage = -1; _finPage = n; _renderFinale(); };
   window.leaguePreEnter = function () { _prePage = 0; _preTarget = null; _renderPreseason(); };

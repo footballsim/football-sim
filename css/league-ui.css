@@ -1814,3 +1814,20 @@ body.league-mode #screen-home.season-end-mode > #league-body {
   font-size: 12px; font-weight: 700; color: var(--lg-text-mute); text-align: center;
   border: 1.5px dashed var(--lg-line); border-radius: 4px; padding: 6px 12px;
 }
+
+/* MD-03 修正（2026-07-26）: ホームの「順位」「次の試合」は寄り道への入口＝タップできると分かる形にする。
+ * 本線（次へ→練習メニュー→試合へ）と混ざらないよう、押下感は控えめに留める。 */
+.lg-hero-tap, .lg-tapwrap { cursor: pointer; position: relative; }
+.lg-hero-tap { transition: transform .08s ease, filter .12s ease; }
+.lg-hero-tap:hover, .lg-tapwrap:hover { filter: brightness(1.08); }
+.lg-hero-tap:active { transform: translateY(1px); }
+.lg-tapmore {
+  margin-top: 8px; text-align: center;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .6px; color: var(--lg-text-mute);
+}
+.lg-h-more {
+  margin-left: auto; padding: 2px 9px; border-radius: 3px; cursor: pointer;
+  border: 1.5px solid var(--lg-line); background: transparent;
+  font-size: 10px; font-weight: 800; letter-spacing: .8px; color: var(--lg-text-mute);
+}
+.lg-h-more:hover { color: var(--lg-gold); border-color: var(--lg-gold-2); }
