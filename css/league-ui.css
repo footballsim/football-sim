@@ -2145,3 +2145,163 @@ body.league-mode #screen-home.season-end-mode > #league-body {
   .lg-sh-brand { font-size: 14px; letter-spacing: 1px; }
   .lg-sh-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* ==========================================================================
+ * MD-04 — 試合前「布陣設定画面」（2026-07-26・Codexモック R_lineup_setting_retro 準拠）
+ * --------------------------------------------------------------------------
+ * 3ゾーン（ピッチ／控え／設定）＋下部コマンドバー（戻る・自動編成・キックオフ）。
+ * ★ #screen-setting はシングル/W杯/ハーフタイム采配と共有。必ず `.league-prep`
+ *   （league.js が試合前だけ付ける）でスコープし、他モードには一切波及させない。
+ * ★ style.css の landscape 用2カラム最適化を上書きするので同じ @media に入れる。
+ * ========================================================================== */
+@media (orientation: landscape) {
+  body.league-mode #screen-setting.league-prep {
+    --pr-edge: rgba(0, 0, 0, .5);
+    --pr-panel: rgba(255, 255, 255, .05);
+    background: linear-gradient(165deg, #0a1730, #0d2246 55%, #0a1930);
+  }
+  /* 薄い CRT スキャンライン（他画面と同じ質感） */
+  body.league-mode #screen-setting.league-prep::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 30;
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .10) 0 1px, transparent 1px 3px);
+    opacity: .28; mix-blend-mode: overlay;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body.league-mode #screen-setting.league-prep::after { opacity: .14; }
+  }
+
+  /* ── ヘッダー：金の下罫＋対戦カード ── */
+  body.league-mode #screen-setting.league-prep .screen-header {
+    background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+    border-bottom: 2px solid var(--lg-gold-2);
+  }
+  body.league-mode #screen-setting.league-prep .screen-title-text {
+    color: var(--lg-text); font-weight: 900; letter-spacing: 1px;
+  }
+  body.league-mode #screen-setting.league-prep .back-btn {
+    border: 2px solid var(--lg-line); border-radius: 4px;
+    background: var(--pr-panel); color: var(--lg-text-dim); font-weight: 800;
+  }
+
+  /* ── 本文：左=ピッチ+控え（内部で2ゾーン）／右=設定4枚／最下段=コマンドバー ── */
+  body.league-mode #screen-setting.league-prep .setting-content {
+    grid-template-columns: minmax(0, 2.15fr) minmax(0, 0.85fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    align-content: stretch;
+    row-gap: clamp(6px, 1.2vh, 10px);
+    padding: clamp(8px, 1.8vh, 13px) clamp(10px, 1.6vw, 16px) clamp(9px, 1.8vh, 13px);
+  }
+  body.league-mode #screen-setting.league-prep #label-starting {
+    color: var(--lg-gold) !important;
+    font-size: 11px !important; font-weight: 900 !important; letter-spacing: 2px !important;
+  }
+  body.league-mode #screen-setting.league-prep #formation-view { grid-column: 1; grid-row: 2; }
+  body.league-mode #screen-setting.league-prep .setting-btn-grid {
+    grid-column: 2; grid-row: 1 / span 2; align-self: stretch;
+    display: flex; flex-direction: column; justify-content: center;
+    gap: clamp(7px, 1.4vh, 12px);
+  }
+  /* 重複していたキックオフ／監督モード／📊 は下部コマンドバーへ集約したので出さない */
+  body.league-mode #screen-setting.league-prep #btn-kickoff-top,
+  body.league-mode #screen-setting.league-prep #btn-manager,
+  body.league-mode #screen-setting.league-prep .setting-content > div:has(#btn-kickoff-bottom) {
+    display: none !important;
+  }
+
+  /* ── ゾーン共通の枠（紺地＋金の二重罫・チャンクなドット縁）── */
+  body.league-mode #screen-setting.league-prep .field-panel,
+  body.league-mode #screen-setting.league-prep .bench-panel {
+    padding: clamp(7px, 1.4vh, 11px);
+    border: 2px solid var(--lg-gold-2); border-radius: 5px;
+    background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 3px 0 var(--pr-edge);
+  }
+  body.league-mode #screen-setting.league-prep .bench-panel-label {
+    color: var(--lg-gold); font-size: 10px; font-weight: 900; letter-spacing: 2px;
+  }
+  /* ピッチ＝限定色のフラットな芝（ツヤ無し）。ラインは白の細罫のまま活かす。 */
+  body.league-mode #screen-setting.league-prep .field-container {
+    border: 2px solid var(--lg-line); border-radius: 4px; overflow: hidden;
+    background: repeating-linear-gradient(0deg, #1d5232 0 14px, #1a4a2d 14px 28px);
+  }
+  body.league-mode #screen-setting.league-prep .oop-legend,
+  body.league-mode #screen-setting.league-prep .hint {
+    color: var(--lg-text-mute); font-weight: 700;
+  }
+
+  /* ピッチは確定高さのまま少しだけ低くする。
+     ★ flex で伸ばそうとすると aspect-ratio 由来の幅が解けず 0 に潰れる（2026-07-26 実測）。
+       高さ→幅の依存があるので「高さは確定値」を守る。 */
+  body.league-mode #screen-setting.league-prep .field-container {
+    height: min(54vh, 430px);
+  }
+  /* ── 控え：全員を一覧（名前を1行に収める）── */
+  body.league-mode #screen-setting.league-prep .bench-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(5px, 1vh, 8px);
+    max-height: none;
+  }
+  body.league-mode #screen-setting.league-prep .bench-item {
+    flex-direction: row; align-items: center; gap: 6px;
+    padding: 5px 7px; border-radius: 4px;
+    border: 1.5px solid var(--lg-line);
+    background: var(--pr-panel); color: var(--lg-text);
+  }
+  body.league-mode #screen-setting.league-prep .bench-item-circle {
+    width: 22px; height: 22px; flex: 0 0 auto; border-radius: 3px;
+    font-size: 9px; font-weight: 900; color: var(--lg-ink);
+  }
+  body.league-mode #screen-setting.league-prep .bench-item-name {
+    flex: 1 1 auto; min-width: 0; text-align: left;
+    max-width: none;   /* style.css の max-width:64px が「…」の原因。横並びなので解除する */
+    font-size: 11px; font-weight: 800; color: var(--lg-text-dim);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;   /* 折り返して読めなくなるのを防ぐ */
+  }
+
+  /* 3ゾーンを枠の高さいっぱいに伸ばす（下に大きな余白が空くのを防ぐ） */
+  body.league-mode #screen-setting.league-prep #formation-view,
+  body.league-mode #screen-setting.league-prep .formation-layout { height: 100%; min-height: 0; }
+  body.league-mode #screen-setting.league-prep .field-panel { justify-content: center; }
+  body.league-mode #screen-setting.league-prep .bench-panel { justify-content: flex-start; }
+
+  /* ── 右ゾーン：システム／戦術／キープレイヤー／要注意プレイヤー ── */
+  body.league-mode #screen-setting.league-prep .setting-nav-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    padding: clamp(9px, 2vh, 14px) 10px;
+    border: 2px solid var(--lg-gold-2); border-radius: 5px;
+    background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 3px 0 var(--pr-edge);
+  }
+  body.league-mode #screen-setting.league-prep .setting-nav-btn-label {
+    font-size: 10px; font-weight: 900; letter-spacing: 1.6px; color: var(--lg-gold);
+  }
+  body.league-mode #screen-setting.league-prep .setting-nav-btn-value {
+    font-size: clamp(14px, 2.6vh, 19px); font-weight: 900; color: var(--lg-text);
+  }
+
+  /* ── 下部コマンドバー（戻る／自動編成／キックオフ）── */
+  body.league-mode #screen-setting.league-prep .setting-content > .lg-prep-cmd {
+    grid-column: 1 / -1; grid-row: 3;
+    display: grid; gap: 8px;
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1fr) minmax(0, 2fr);
+  }
+  body.league-mode #screen-setting.league-prep .lg-prep-nb {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: clamp(36px, 6.4vh, 48px); padding: 6px 14px; cursor: pointer;
+    border-radius: 5px; border: 2px solid var(--lg-line);
+    background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+    color: var(--lg-text-dim);
+    font-size: clamp(12px, 2.2vh, 15px); font-weight: 900; letter-spacing: .6px;
+    box-shadow: 0 3px 0 var(--pr-edge); transition: transform .08s ease, box-shadow .08s ease;
+  }
+  body.league-mode #screen-setting.league-prep .lg-prep-nb:active {
+    transform: translateY(2px); box-shadow: 0 1px 0 var(--pr-edge);
+  }
+  body.league-mode #screen-setting.league-prep .lg-prep-nb.auto { color: var(--lg-text); }
+  body.league-mode #screen-setting.league-prep .lg-prep-nb.auto:hover { border-color: var(--lg-gold-2); }
+  body.league-mode #screen-setting.league-prep .lg-prep-nb.kick {
+    color: var(--lg-ink); border-color: var(--lg-gold);
+    background: linear-gradient(165deg, var(--lg-gold), var(--lg-gold-2));
+    font-size: clamp(14px, 2.8vh, 20px); letter-spacing: 2px;
+  }
+}

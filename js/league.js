@@ -3028,8 +3028,95 @@
     window._leagueInMatch = true;
     _settingBackScreen = 'home';   // フォールバック（実際の戻るは settingBack→leagueCancelPrep）
     if (typeof initSettingScreen === 'function') initSettingScreen();
+    _decorateSettingScreen(true);   // MD-04: モック準拠の3ゾーン＋下部コマンドバーへ
     if (typeof showScreen === 'function') showScreen('setting');
   }
+
+  /* ══ MD-04 試合前の布陣設定画面（2026-07-26・Codexモック R_lineup_setting_retro 準拠）══
+   * 共有画面（#screen-setting）なので **DOM は増やさず**、下部コマンドバーだけを注入し
+   * レイアウトと仕上げは league-ui.css の `.league-prep` スコープで行う。
+   * リーグを抜けるときは必ず外す＝シングル/W杯/ハーフタイム采配には一切波及させない。 */
+  function _decorateSettingScreen(on) {
+    var s = document.getElementById('screen-setting'); if (!s) return;
+    var bar = document.getElementById('lg-prep-cmd');
+    if (!on) {
+      s.classList.remove('league-prep');
+      if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+      return;
+    }
+    s.classList.add('league-prep');
+    if (!bar) {
+      var host = s.querySelector('.setting-content'); if (!host) return;
+      bar = document.createElement('div');
+      bar.id = 'lg-prep-cmd';
+      bar.className = 'lg-prep-cmd';
+      host.appendChild(bar);
+    }
+    bar.innerHTML =
+      '<button type="button" class="lg-prep-nb back" onclick="settingBack()">' +
+        _t('← 戻る', '← Back') + '</button>' +
+      '<button type="button" class="lg-prep-nb auto" onclick="leagueAutoLineup()">' +
+        '👥 ' + _t('自動編成', 'Auto pick') + '</button>' +
+      '<button type="button" class="lg-prep-nb kick" onclick="startGame()">' +
+        '⚽ ' + _t('キックオフ！', 'KICK OFF!') + '</button>';
+  }
+
+  /* MD-04 自動編成。いま選んでいるシステムの各枠に、出場可能な選手から
+   * 「適性 → 能力平均」の順で最良を当てる。
+   * ★ 評価式は欠場補充（_availableLineup）と同じ＝相手AIの布陣と判断基準が揃う。
+   * ★ 触るのは布陣だけ。システム/戦術/キープレイヤーは監督の判断として残す。 */
+  window.leagueAutoLineup = function () {
+    if (!(typeof window !== 'undefined' && window._leagueInMatch)) return;
+    if (typeof team1Data === 'undefined' || !team1Data || !team1Data.players) return;
+    if (typeof team1State === 'undefined' || !team1State) return;
+    var clubId = team1Data._srcKey || (_pendingMatch && _pendingMatch.myId);
+    var players = team1Data.players;
+
+    // 離脱者（怪我／出場停止）は起用しない
+    var unavailable = {};
+    for (var i = 0; i < players.length; i++) {
+      var e = _peekSquadEntry(clubId, _playerKey(players[i]));
+      if (e && ((e.injuryOut > 0) || (e.suspendOut > 0))) unavailable[i] = true;
+    }
+    var sys = (typeof system_data !== 'undefined') ? system_data[team1State.systemIdx] : null;
+    var posNames = sys ? sys.positions : null;
+
+    function strength(pl) {
+      if (!pl || !pl.params || !pl.params.length) return 0;
+      var t = 0; for (var k = 0; k < pl.params.length; k++) t += pl.params[k];
+      return t / pl.params.length;
+    }
+    function fits(pl, posName) {
+      if (!pl || !pl.positions || !posName) return false;
+      if (pl.positions.indexOf(posName) >= 0) return true;
+      var b = (posName.charAt(0) === '左' || posName.charAt(0) === '右') ? posName.slice(1) : posName;
+      return b !== posName && pl.positions.indexOf(b) >= 0;
+    }
+    var used = {};
+    function pick(posName, allowAbsent) {
+      var best = -1, bestScore = -1;
+      for (var j = 0; j < players.length; j++) {
+        if (used[j]) continue;
+        if (!allowAbsent && unavailable[j]) continue;
+        var sc = (fits(players[j], posName) ? 1000 : 0) + strength(players[j]);
+        if (sc > bestScore) { bestScore = sc; best = j; }
+      }
+      return best;
+    }
+
+    var lineup = [];
+    for (var pos = 0; pos < 11; pos++) {
+      var nm = posNames ? posNames[pos] : null;
+      var idx = pick(nm, false);
+      if (idx < 0) idx = pick(nm, true);   // 詰み防止（出場可能者が11人未満）
+      if (idx < 0) return;                 // 11人揃わない＝何もしない
+      lineup.push(idx); used[idx] = true;
+    }
+    team1State.lineup = lineup;
+    if (typeof renderFormation === 'function') renderFormation();
+    if (typeof renderBench === 'function') renderBench();
+    if (typeof updateSettingBtnValues === 'function') updateSettingBtnValues();
+  };
 
   /* MD-01: 設定画面の「キックオフ」から呼ばれる。ここで導入コマ→試合へ。
    * startGame(simulate.js) が window._leagueInMatch を見てこれに委譲する。 */
@@ -3054,6 +3141,7 @@
       return;   // 試合を始めない（設定画面に留まる）
     }
     var pm = _pendingMatch;
+    _decorateSettingScreen(false);   // MD-04: ここから先はハーフタイム采配等で同じ画面を使うので装飾を外す
     // MD-02: 実際に試合を始めた布陣を記憶（次節に復元）。marked_player は相手依存なので保存しない。
     if (typeof team1State !== 'undefined' && team1State && team1State.lineup) {
       if (!_state.lineups) _state.lineups = {};
@@ -3076,6 +3164,7 @@
    * 準備で仕込んだもの（戦術buff・終了フック・pending）を全て巻き戻す。
    * ★ 回復日の healing は冪等（_applyWeekRecovery が preApplied で管理）なので触らない。 */
   window.leagueCancelPrep = function () {
+    _decorateSettingScreen(false);   // MD-04: 共有画面を元に戻す
     window._leagueInMatch = false;
     _leagueMatchActive = false;
     _endManagerMatchCtx();
