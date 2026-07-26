@@ -1831,3 +1831,317 @@ body.league-mode #screen-home.season-end-mode > #league-body {
   font-size: 10px; font-weight: 800; letter-spacing: .8px; color: var(--lg-text-mute);
 }
 .lg-h-more:hover { color: var(--lg-gold); border-color: var(--lg-gold-2); }
+
+/* ==========================================================================
+ * SH-01 — シーズンハブ（2026-07-26・ユーザー提供モック準拠）
+ * --------------------------------------------------------------------------
+ * 上段＝1本のステータスバー／下段＝横3パネル（現在順位・次の試合・監督ステータス）。
+ * 意匠はレトロ・ドット絵ハイブリッド＝紺地／金の二重罫／角のブラケット。
+ * 固定フレーム（#screen-home.season-end-mode）に相乗りしてスクロールしない。
+ * .lg-sh-slot = 画像スロット。徽章・監督の顔が入るまでは枠だけ確保しておく。
+ * ========================================================================== */
+.lg-sh {
+  --sh-edge: rgba(0, 0, 0, .5);
+  --sh-panel: rgba(255, 255, 255, .05);
+  --sh-panel-2: rgba(255, 255, 255, .09);
+  flex: 1 1 auto; min-height: 0; width: 100%; position: relative;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding: clamp(8px, 1.6vh, 14px); gap: clamp(7px, 1.4vh, 12px);
+  font-feature-settings: "tnum" 1;
+}
+.lg-sh::after {   /* 薄い CRT スキャンライン（最終話と同じ質感） */
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 6;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .10) 0 1px, transparent 1px 3px);
+  opacity: .3; mix-blend-mode: overlay;
+}
+@media (prefers-reduced-motion: reduce) { .lg-sh::after { opacity: .16; } }
+
+/* ── 上段：シーズンハブのステータスバー ── */
+.lg-sh-top { flex: 0 0 auto; display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; }
+.lg-sh-brand, .lg-sh-bar {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 12px; border-radius: 5px;
+  border: 2px solid var(--lg-gold-2);
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04), 0 3px 0 var(--sh-edge);
+}
+.lg-sh-brand {
+  flex: 0 0 auto; color: var(--lg-gold);
+  font-size: clamp(14px, 2.6vh, 19px); font-weight: 900; letter-spacing: 2px;
+}
+.lg-sh-brand-ico {
+  width: 22px; height: 22px; border-radius: 4px; display: grid; place-items: center;
+  background: var(--lg-gold); color: var(--lg-ink); font-size: 13px;
+}
+.lg-sh-bar { flex: 1 1 auto; min-width: 0; flex-wrap: wrap; }
+.lg-sh-div { width: 2px; align-self: stretch; background: var(--lg-line); border-radius: 1px; }
+.lg-sh-club { font-size: clamp(12px, 2.2vh, 16px); font-weight: 900; color: var(--lg-text); white-space: nowrap; }
+.lg-sh-day { font-size: clamp(11px, 2vh, 14px); font-weight: 800; color: var(--lg-text-dim); white-space: nowrap; }
+.lg-sh-day em { font-style: normal; color: var(--lg-gold-2); margin: 0 3px; }
+.lg-sh-rec { font-size: clamp(11px, 2vh, 14px); font-weight: 900; color: var(--lg-good); white-space: nowrap; }
+.lg-sh-meter { display: flex; align-items: center; gap: 6px; min-width: 116px; }
+.lg-sh-meter-k {
+  font-size: 10px; font-weight: 800; letter-spacing: .8px; color: var(--lg-text-mute); white-space: nowrap;
+}
+.lg-sh-meter-v { font-size: 13px; font-weight: 900; color: var(--lg-text); }
+.lg-sh-meter-bar {
+  flex: 1 1 auto; min-width: 44px; height: 7px; border-radius: 2px; overflow: hidden;
+  background: rgba(0, 0, 0, .45); border: 1.5px solid var(--lg-line); display: block;
+}
+.lg-sh-meter-bar > s { display: block; height: 100%; width: 0; text-decoration: none; transition: width .5s ease; }
+.lg-sh-meter.trust .lg-sh-meter-bar > s { background: linear-gradient(90deg, #2fd6c0, #7af0e0); }
+.lg-sh-meter.pop .lg-sh-meter-bar > s { background: linear-gradient(90deg, #3f7fe0, #7ab4ff); }
+.lg-sh-gear {
+  margin-left: auto; width: 30px; height: 30px; flex: 0 0 auto; cursor: pointer;
+  border-radius: 4px; border: 1.5px solid var(--lg-line); background: var(--sh-panel);
+  color: var(--lg-text-mute); font-size: 15px; line-height: 1;
+}
+.lg-sh-gear:hover { color: var(--lg-gold); border-color: var(--lg-gold-2); }
+
+/* ── 下段：横3パネル ── */
+.lg-sh-cols {
+  flex: 1 1 auto; min-height: 0; display: grid; gap: clamp(7px, 1.3vh, 11px);
+  grid-template-columns: minmax(0, .92fr) minmax(0, 1.3fr) minmax(0, .95fr);
+}
+.lg-sh-panel {
+  min-height: 0; overflow: hidden; position: relative;
+  display: flex; flex-direction: column; gap: clamp(5px, 1vh, 9px);
+  padding: clamp(9px, 1.7vh, 14px) clamp(9px, 1.5vh, 13px);
+  border: 2px solid var(--lg-gold-2); border-radius: 5px;
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 3px 0 var(--sh-edge);
+}
+/* パネル見出し＝両側に罫を引いた中央寄せ（モックの「─ 現在順位 ─」） */
+.lg-sh-ph {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 8px; justify-content: center;
+  font-size: clamp(10px, 1.9vh, 13px); font-weight: 900; letter-spacing: 2px; color: var(--lg-gold);
+  white-space: nowrap;
+}
+.lg-sh-ph::before, .lg-sh-ph::after {
+  content: ""; flex: 1 1 auto; height: 2px; border-radius: 1px;
+  background: linear-gradient(90deg, transparent, var(--lg-gold-2));
+}
+.lg-sh-ph::after { background: linear-gradient(90deg, var(--lg-gold-2), transparent); }
+
+/* 画像スロット（徽章・顔）。絵が入るまではブランクの枠として置く。 */
+.lg-sh-slot {
+  display: grid; place-items: center; border-radius: 4px;
+  border: 1.5px solid var(--lg-line); background: rgba(0, 0, 0, .3);
+}
+
+/* ── 左：現在順位 ── */
+.lg-sh-crest { width: 26px; height: 26px; font-size: 15px; flex: 0 0 auto; }
+.lg-sh-bigpos {
+  flex: 0 0 auto; display: flex; align-items: center; justify-content: center; gap: 8px;
+  cursor: pointer; padding: 2px 0;
+}
+.lg-sh-bigpos .k { font-size: 11px; font-weight: 800; color: var(--lg-text-mute); }
+.lg-sh-bigpos .n {
+  font-size: clamp(30px, 7.4vh, 58px); font-weight: 900; line-height: .95; color: var(--lg-gold);
+  text-shadow: 0 3px 0 var(--sh-edge);
+}
+.lg-sh-bigpos .u { font-size: clamp(13px, 2.4vh, 18px); font-weight: 900; color: var(--lg-text); }
+.lg-sh-bigpos .cup { font-size: clamp(20px, 4vh, 32px); filter: drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+.lg-sh-kv2 { flex: 0 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.lg-sh-kv2 > div {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 4px; border-radius: 4px; border: 1.5px solid var(--lg-line); background: var(--sh-panel);
+}
+.lg-sh-kv2 span { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: var(--lg-text-mute); }
+.lg-sh-kv2 b { font-size: clamp(15px, 2.8vh, 21px); font-weight: 900; color: var(--lg-text); }
+
+.lg-sh-mini { flex: 0 0 auto; width: 100%; border-collapse: collapse; }
+.lg-sh-mini th {
+  padding: 3px 4px; font-size: 8.5px; font-weight: 800; letter-spacing: .8px;
+  color: var(--lg-text-mute); border-bottom: 1.5px solid var(--lg-line); text-align: right;
+}
+.lg-sh-mini th.nm, .lg-sh-mini td.nm { text-align: left; }
+.lg-sh-mini th.p, .lg-sh-mini td.p { text-align: left; white-space: nowrap; }
+.lg-sh-mini td {
+  padding: 4px; font-size: 11.5px; font-weight: 800; color: var(--lg-text-dim); text-align: right;
+  border-bottom: 1px solid color-mix(in srgb, var(--lg-line) 55%, transparent);
+}
+.lg-sh-mini td.nm {
+  color: var(--lg-text); display: flex; align-items: center; gap: 5px;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.lg-sh-mini .lg-sh-slot.sm { width: 17px; height: 17px; font-size: 10px; flex: 0 0 auto; }
+.lg-sh-mini tr.me td { background: color-mix(in srgb, var(--lg-gold) 15%, transparent); }
+.lg-sh-mini tr.me td:first-child { box-shadow: inset 2px 0 0 var(--lg-gold); }
+.lg-sh-mini .mv { margin-left: 3px; font-size: 8px; }
+.lg-sh-mini .mv.up { color: var(--lg-good); }
+.lg-sh-mini .mv.dn { color: var(--lg-bad); }
+.lg-sh-mini .mv.fl { color: var(--lg-text-faint); }
+
+.lg-sh-more {
+  margin-top: auto; flex: 0 0 auto; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 7px 10px; border-radius: 4px;
+  border: 2px solid var(--lg-line); background: var(--sh-panel);
+  color: var(--lg-text-dim); font-size: 11.5px; font-weight: 800; letter-spacing: .5px;
+}
+.lg-sh-more span { margin-left: auto; color: var(--lg-gold); font-weight: 900; }
+.lg-sh-more:hover { border-color: var(--lg-gold-2); color: var(--lg-text); }
+
+/* ── 中央：次の試合 ── */
+.lg-sh-nm {
+  flex: 0 0 auto; text-align: center; color: var(--lg-gold);
+  font-size: clamp(17px, 3.6vh, 30px); font-weight: 900; letter-spacing: 3px; line-height: 1;
+  text-shadow: 0 3px 0 var(--sh-edge);
+}
+.lg-sh-rival {
+  flex: 0 0 auto; align-self: center; padding: 2px 12px; border-radius: 3px;
+  background: #c0392b; color: #fff; font-size: 10.5px; font-weight: 900; letter-spacing: 2px;
+  border: 1.5px solid #e2685a;
+}
+.lg-sh-vs {
+  flex: 1 1 auto; min-height: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: clamp(8px, 2.4vw, 26px);
+}
+.lg-sh-team { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; }
+.lg-sh-shield {
+  width: clamp(48px, 11vh, 96px); height: clamp(48px, 11vh, 96px);
+  font-size: clamp(26px, 6vh, 50px); border-width: 2px; border-color: var(--lg-gold-2);
+}
+.lg-sh-team .nm {
+  font-size: clamp(11px, 2.1vh, 15px); font-weight: 900; color: var(--lg-text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 14ch;
+}
+.lg-sh-vsmid { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.lg-sh-vsmid .x {
+  font-size: clamp(18px, 4vh, 34px); font-weight: 900; color: var(--lg-text); letter-spacing: 2px;
+}
+.lg-sh-when {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 4px 12px; border-radius: 4px;
+  border: 2px solid color-mix(in srgb, #2fd6c0 55%, var(--lg-line)); background: rgba(0, 0, 0, .3);
+}
+.lg-sh-when i { font-style: normal; font-size: 10.5px; font-weight: 900; letter-spacing: 1.4px; color: #7af0e0; }
+.lg-sh-when b { font-size: 12px; font-weight: 900; color: var(--lg-text); }
+
+.lg-sh-scouth {
+  flex: 0 0 auto; font-size: 10px; font-weight: 800; letter-spacing: 1.4px; color: var(--lg-gold);
+}
+.lg-sh-tiles {
+  flex: 0 0 auto; cursor: pointer; display: grid; gap: 6px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.lg-sh-tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  padding: 6px 4px; border-radius: 4px; text-align: center;
+  border: 2px solid var(--lg-line); background: var(--sh-panel);
+}
+.lg-sh-tile .k { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: var(--lg-text-mute); }
+.lg-sh-tile .v {
+  font-size: clamp(13px, 2.4vh, 19px); font-weight: 900; color: var(--lg-text); line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.lg-sh-tile .sub {
+  font-size: 9px; font-weight: 900; letter-spacing: .6px; color: var(--lg-gold);
+  border: 1.5px solid var(--lg-line); border-radius: 3px; padding: 0 5px; white-space: nowrap;
+}
+.lg-sh-tile.atk .v { color: #7af0e0; }
+.lg-sh-tile.def .v { color: #7ab4ff; }
+.lg-sh-tile.form .v { white-space: nowrap; font-size: clamp(11px, 2vh, 15px); }
+.lg-sh-tile.form.up .v { color: var(--lg-good); }
+.lg-sh-tile.form.down .v { color: var(--lg-bad); }
+.lg-sh-tile.warn { border-color: #c0392b; }
+.lg-sh-tile.warn .k { color: #ff9a8c; }
+.lg-sh-tile.warn .v { font-size: clamp(11px, 2vh, 15px); }
+.lg-sh-boardwrap { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+
+/* ── 右：監督ステータス ── */
+.lg-sh-mgrtop { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; }
+.lg-sh-face {
+  width: clamp(46px, 10vh, 82px); height: clamp(52px, 12vh, 96px); flex: 0 0 auto;
+  border-width: 2px; border-style: dashed;
+}
+.lg-sh-lv { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.lg-sh-lv .k { font-size: 9.5px; font-weight: 800; letter-spacing: 1.2px; color: var(--lg-text-mute); }
+.lg-sh-lv .lv {
+  font-size: clamp(19px, 4vh, 30px); font-weight: 900; color: var(--lg-gold); line-height: 1;
+  text-shadow: 0 2px 0 var(--sh-edge);
+}
+.lg-sh-lv .bar {
+  height: 7px; border-radius: 2px; overflow: hidden; display: block; margin-top: 2px;
+  background: rgba(0, 0, 0, .45); border: 1.5px solid var(--lg-line);
+}
+.lg-sh-lv .bar > s {
+  display: block; height: 100%; width: 0; text-decoration: none; transition: width .5s ease;
+  background: linear-gradient(90deg, var(--lg-gold-2), var(--lg-gold));
+}
+.lg-sh-lv .next { font-size: 9.5px; font-weight: 700; color: var(--lg-text-mute); }
+.lg-sh-lv .next b { color: var(--lg-text-dim); }
+
+.lg-sh-stats { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: clamp(5px, 1.3vh, 11px); }
+.lg-sh-stat { display: flex; align-items: center; gap: 7px; }
+.lg-sh-stat .k {
+  flex: 0 0 auto; width: 7.5em; font-size: 10.5px; font-weight: 800; color: var(--lg-text-dim);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.lg-sh-stat .bar {
+  flex: 1 1 auto; min-width: 30px; height: 8px; border-radius: 2px; overflow: hidden; display: block;
+  background: rgba(0, 0, 0, .45); border: 1.5px solid var(--lg-line);
+}
+.lg-sh-stat .bar > s { display: block; height: 100%; width: 0; text-decoration: none; transition: width .5s ease; }
+.lg-sh-stat.c1 .bar > s { background: linear-gradient(90deg, #2fd6c0, #7af0e0); }
+.lg-sh-stat.c2 .bar > s { background: linear-gradient(90deg, #3f7fe0, #7ab4ff); }
+.lg-sh-stat.c3 .bar > s { background: linear-gradient(90deg, #3fbf60, #86e69a); }
+.lg-sh-stat.c4 .bar > s { background: linear-gradient(90deg, #d8a72a, #f5d76a); }
+.lg-sh-stat .v { flex: 0 0 auto; width: 2.2em; text-align: right; font-size: 13px; font-weight: 900; color: var(--lg-text); }
+
+.lg-sh-cta {
+  margin-top: auto; flex: 0 0 auto; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: clamp(36px, 6.4vh, 48px); padding: 6px 12px;
+  border-radius: 5px; border: 2px solid var(--lg-gold);
+  background: linear-gradient(165deg, var(--lg-gold), var(--lg-gold-2));
+  color: var(--lg-ink); font-size: clamp(12px, 2.2vh, 15px); font-weight: 900; letter-spacing: .6px;
+  box-shadow: 0 3px 0 var(--sh-edge); transition: transform .08s ease, box-shadow .08s ease;
+}
+.lg-sh-cta:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--sh-edge); }
+.lg-sh-cta.disabled {
+  background: var(--sh-panel); border-color: var(--lg-line); color: var(--lg-text-mute); cursor: default;
+  box-shadow: none;
+}
+
+/* ── オーバーレイ（⚙メニュー／試合後レポート）── */
+.lg-sh-ovl {
+  position: absolute; inset: 0; z-index: 20; display: grid; place-items: center;
+  background: rgba(4, 8, 20, .78); padding: clamp(10px, 3vh, 28px);
+}
+.lg-sh-ovl[hidden] { display: none; }
+.lg-sh-ovl-panel {
+  width: min(460px, 100%); max-height: 100%; display: flex; flex-direction: column;
+  border: 2px solid var(--lg-gold-2); border-radius: 5px;
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  box-shadow: 0 6px 0 var(--sh-edge);
+}
+.lg-sh-ovl-panel.wide { width: min(720px, 100%); }
+.lg-sh-ovl-head {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-bottom: 2px solid var(--lg-line);
+  font-size: 12px; font-weight: 900; letter-spacing: 1.4px; color: var(--lg-gold);
+}
+.lg-sh-ovl-head .lg-se-ovl-x { margin-left: auto; }
+.lg-sh-ovl-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 10px 12px; scrollbar-width: thin; }
+.lg-sh-ovl-ok {
+  flex: 0 0 auto; margin: 0 12px 12px; cursor: pointer; min-height: 38px; border-radius: 5px;
+  border: 2px solid var(--lg-gold); background: linear-gradient(165deg, var(--lg-gold), var(--lg-gold-2));
+  color: var(--lg-ink); font-size: 13px; font-weight: 900;
+}
+
+/* 畳むのは本当に縦長のときだけ（本作は landscape 前提＝幅が狭くても横並びを保つ）。
+ * 横並びのまま潰すと NEXT MATCH と徽章が重なるので、畳む時は各パネルを content 丈にする。 */
+@media (orientation: portrait), (max-width: 560px) {
+  .lg-sh-cols {
+    grid-template-columns: minmax(0, 1fr); grid-auto-rows: min-content;
+    overflow-y: auto; scrollbar-width: thin;
+  }
+  .lg-sh-panel { min-height: auto; overflow: visible; }
+  .lg-sh-vs { flex: 0 0 auto; }
+  .lg-sh-stats { flex: 0 0 auto; }
+  .lg-sh-more, .lg-sh-cta { margin-top: 8px; }
+  .lg-sh-brand { font-size: 14px; letter-spacing: 1px; }
+  .lg-sh-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

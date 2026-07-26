@@ -1812,6 +1812,144 @@
     return rows;
   }
 
+  /* ══ SH-01 シーズンハブの集計（2026-07-26・ユーザー提供モック準拠）════════════════
+   * ホーム画面が出す「順位変動 ▲▼／相手の攻撃・守備・調子／要注意選手／監督レベル」を
+   * すべて確定済みデータから導く。★ rng 不使用・新しい保存項目も作らない。 */
+
+  /* 指定節数ぶんだけ消化した時点の順位表を fixtures から組み直す（▲▼ の基準）。 */
+  function _standingsAsOfRound(rounds) {
+    var st = {};
+    _state.clubs.forEach(function (id) { st[id] = _emptyStanding(); });
+    for (var r = 0; r < rounds && r < _state.fixtures.length; r++) {
+      var ms = _state.fixtures[r];
+      for (var i = 0; i < ms.length; i++) {
+        var m = ms[i]; if (!m.played) continue;
+        var H = st[m.home], A = st[m.away];
+        H.p++; A.p++; H.gf += m.hs; H.ga += m.as; A.gf += m.as; A.ga += m.hs;
+        if (m.hs > m.as) { H.w++; A.l++; H.pts += 3; }
+        else if (m.hs < m.as) { A.w++; H.l++; A.pts += 3; }
+        else { H.d++; A.d++; H.pts++; A.pts++; }
+      }
+    }
+    var rows = _state.clubs.map(function (id) {
+      var s = st[id];
+      return { id: id, pts: s.pts, gd: s.gf - s.ga, gf: s.gf };
+    });
+    rows.sort(function (a, b) {
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      if (b.gd !== a.gd) return b.gd - a.gd;
+      if (b.gf !== a.gf) return b.gf - a.gf;
+      return _clubName(a.id) < _clubName(b.id) ? -1 : 1;
+    });
+    return rows;
+  }
+
+  /* 前節終了時との順位差（正=上昇）。開幕前後は全クラブ 0。 */
+  function _rankMoves() {
+    var out = {};
+    _state.clubs.forEach(function (id) { out[id] = 0; });
+    if (!_state.round || _state.round < 1) return out;
+    var prev = _standingsAsOfRound(_state.round - 1);
+    var now = _sortedStandings();
+    var pi = {};
+    prev.forEach(function (r, i) { pi[r.id] = i; });
+    now.forEach(function (r, i) { out[r.id] = (pi[r.id] != null) ? (pi[r.id] - i) : 0; });
+    return out;
+  }
+
+  // 攻撃/守備の指標に使う param（CLAUDE.md のパラメータ体系に対応）。
+  var ATK_IDX = [11, 12, 13, 7, 9, 17];   // シュート精度/センス/技術・ドリブル精度・ショートパス・オフェンシブ
+  var DEF_IDX = [18, 19, 20, 21, 22];     // パスカット・タックル・マンマーキング・カバーリング・チェイシング
+  var GK_DEF_IDX = [23, 24, 26];          // セービング・ハイボール処理・ポジショニング
+
+  /* クラブの攻撃力/守備力（先発11の平均）。スカウティング表示用の要約であって
+   * 試合エンジンの計算には一切使わない（エンジンは選手個々の param を直接読む）。 */
+  function _clubAtkDef(clubId) {
+    var td = _overlaySquad(clubId);
+    if (!td || !td.players || !td.default_lineup) return { atk: 0, def: 0 };
+    var lu = td.default_lineup.slice(0, 11);
+    var a = 0, an = 0, d = 0, dn = 0;
+    for (var i = 0; i < lu.length; i++) {
+      var p = td.players[lu[i]];
+      if (!p || !p.params) continue;
+      var idxs = (i === 0) ? GK_DEF_IDX : DEF_IDX;
+      for (var k = 0; k < idxs.length; k++) { var dv = p.params[idxs[k]]; if (dv != null) { d += dv; dn++; } }
+      if (i === 0) continue;   // GK は攻撃側の平均に混ぜない
+      for (var j = 0; j < ATK_IDX.length; j++) { var av = p.params[ATK_IDX[j]]; if (av != null) { a += av; an++; } }
+    }
+    return { atk: an ? Math.round(a / an) : 0, def: dn ? Math.round(d / dn) : 0 };
+  }
+
+  /* クラブの調子＝直近3節の勝点で上向き/横ばい/下降を判定する。 */
+  function _clubForm(clubId) {
+    var out = [];
+    for (var r = 0; r < _state.fixtures.length; r++) {
+      var ms = _state.fixtures[r];
+      for (var i = 0; i < ms.length; i++) {
+        var m = ms[i];
+        if (!m.played || (m.home !== clubId && m.away !== clubId)) continue;
+        var mine = (m.home === clubId) ? m.hs : m.as;
+        var opp = (m.home === clubId) ? m.as : m.hs;
+        out.push(mine > opp ? 'W' : (mine < opp ? 'L' : 'D'));
+      }
+    }
+    var last = out.slice(-3);
+    if (!last.length) return { dir: 'flat', ja: '—', en: '—', results: [] };
+    var pts = last.reduce(function (s, r) { return s + (r === 'W' ? 3 : (r === 'D' ? 1 : 0)); }, 0);
+    if (pts >= 7) return { dir: 'up', ja: '上向き', en: 'Rising', results: last };
+    if (pts <= 2) return { dir: 'down', ja: '下降', en: 'Falling', results: last };
+    return { dir: 'flat', ja: '横ばい', en: 'Steady', results: last };
+  }
+
+  /* 要注意選手＝当季の最多得点者。まだ記録が無い開幕時は先発11の総合最高値で代用する。 */
+  function _keyPlayer(clubId) {
+    var td = _overlaySquad(clubId);
+    if (!td || !td.players) return null;
+    function posOf(name) {
+      for (var i = 0; i < td.players.length; i++) {
+        var p = td.players[i];
+        if (p && (p.name === name || p.long_name === name)) {
+          return (p.positions && p.positions[0]) ? p.positions[0] : '';
+        }
+      }
+      return '';
+    }
+    var pr = _state.seasonMeta && _state.seasonMeta.playerRatings && _state.seasonMeta.playerRatings[clubId];
+    var best = null;
+    if (pr) {
+      var keys = Object.keys(pr).sort();   // 同値は key 順で決着＝決定論
+      for (var ki = 0; ki < keys.length; ki++) {
+        var e = pr[keys[ki]];
+        if (!e.goals) continue;
+        if (!best || e.goals > best.goals) best = { name: e.name, goals: e.goals };
+      }
+    }
+    if (best) return { name: best.name, pos: posOf(best.name), note: best.goals, kind: 'goals' };
+    // 開幕時のフォールバック＝先発11で総合が最も高い選手
+    var lu = (td.default_lineup || []).slice(0, 11), top = null;
+    for (var li = 0; li < lu.length; li++) {
+      var pl = td.players[lu[li]];
+      if (!pl || !pl.params) continue;
+      var s = 0; for (var pi2 = 0; pi2 < pl.params.length; pi2++) s += pl.params[pi2];
+      var avg = s / pl.params.length;
+      if (!top || avg > top.avg) top = { name: pl.name, avg: avg, pos: (pl.positions && pl.positions[0]) || '' };
+    }
+    return top ? { name: top.name, pos: top.pos, note: Math.round(top.avg), kind: 'rating' } : null;
+  }
+
+  /* 監督レベル＝4能力（人気を除く）の平均。整数部がレベル・小数部が次までの進捗。
+   * ★ 新しい経験値は作らない＝既にある能力値の言い換えなので数値が二重管理にならない。 */
+  function _managerLevel() {
+    var m = _state.manager;
+    if (!m || !m.params) return null;
+    var keys = ['tactical', 'analysis', 'motivator', 'conditioning'];
+    var sum = 0;
+    for (var i = 0; i < keys.length; i++) sum += (m.params[keys[i]] || 0);
+    var avg = sum / keys.length;
+    var lv = Math.floor(avg);
+    return { lv: lv, pct: (avg - lv) * 100, toNext: Math.round((lv + 1 - avg) * 10) / 10 };
+  }
+
   function _myFixtureThisRound() {
     if (!_state || _state.round >= _state.fixtures.length) return null;
     var ms = _state.fixtures[_state.round];
@@ -3748,6 +3886,9 @@
     }
     if (_state.lastResult && _matchdayOn()) {
       h += '<button class="lg-btn sec" onclick="leagueReplayPostMatch()">🗞 ' + _t('前回の「号」をもう一度読む', 'Re-read the last issue') + '</button>';
+    } else if (_state.lastResult && _state.lastResult.mine) {
+      // Matchday 演出が無い環境ではオーバーレイのレポートを開き直す（SH-01 の試合後レポート）。
+      h += '<button class="lg-btn sec" onclick="leagueShowReport()">🗞 ' + _t('前回のレポートを見る', 'Re-open the last report') + '</button>';
     }
     if (_state.history && _state.history.length) {
       h += '<button class="lg-btn sec" onclick="leagueShowHistory()">📚 ' + _t('バックナンバー（' + _state.history.length + '冊）', 'Back issues (' + _state.history.length + ')') + '</button>';
@@ -4223,6 +4364,13 @@
     '</header>';
   }
 
+  /* ポジション表記。英語表示では左右の漢字が読めないので既存の略称表（POS_ABBR）に寄せる。 */
+  function _posLabel(pos) {
+    if (!pos) return '';
+    if (!_isEn()) return pos;
+    return (typeof POS_ABBR !== 'undefined' && POS_ABBR[pos]) ? POS_ABBR[pos] : pos.replace(/[左右]/g, '');
+  }
+
   /* ②次の試合：対戦チーム概要 ── 順位/勝点/戦力/直近の調子。 */
   function _oppProfileHTML(oppId) {
     var st = _state.standings[oppId] || _emptyStanding();
@@ -4255,11 +4403,7 @@
     var cells = td.default_lineup.slice(0, 11).map(function (idx, i) {
       var p = td.players[idx];
       if (!p) return '';
-      var pos = (posNames && posNames[i]) ? posNames[i] : (i === 0 ? 'GK' : '');
-      // 英語表示は左右の漢字が読めないので既存の略称表（POS_ABBR）に寄せる。
-      if (_isEn() && pos) {
-        pos = (typeof POS_ABBR !== 'undefined' && POS_ABBR[pos]) ? POS_ABBR[pos] : pos.replace(/[左右]/g, '');
-      }
+      var pos = _posLabel((posNames && posNames[i]) ? posNames[i] : (i === 0 ? 'GK' : ''));
       return '<div class="lg-xi-cell">' +
         '<span class="lg-xi-pos">' + pos + '</span>' +
         '<span class="lg-xi-nm">' + (_isEn() ? (p.en_name || p.name) : p.name) + '</span></div>';
@@ -4380,139 +4524,247 @@
     '</section>';
   }
 
+  /* ══ SH-01 シーズンハブ（2026-07-26・ユーザー提供モック準拠）════════════════════
+   * 上段＝1本のステータスバー（クラブ／Day・節／戦績／信頼／人気／設定）
+   * 下段＝横3パネル（現在順位／次の試合／監督ステータス）＋右下に大きなコマンドボタン
+   * ★ 画像枠（クラブ徽章・監督の顔）は「空スロット」として寸法だけ確保する。
+   *   絵が入るまでは既存のフラグ絵文字とブランク枠で埋める（2026-07-26 ユーザー了承）。
+   * ★ 順位パネルと試合パネルはタップで寄り道（②順位／②次の試合）へ。
+   *   試合へ進む本線は右下のコマンドボタン1本だけ＝MD-03 の導線を崩さない。 */
+
+  function _shTopHTML(myId, myRow) {
+    var d = _clubDef(myId), m = _state.manager || {};
+    var trust = Math.round((typeof m.clubTrust === 'number') ? m.clubTrust : 0);
+    var pop = (m.params) ? Math.round(m.params.popularity) : 0;
+    var day = (_state.round || 0) + 1;
+    function meter(ico, ja, en, v, cls) {
+      return '<span class="lg-sh-meter ' + cls + '">' +
+        '<span class="lg-sh-meter-k">' + ico + ' ' + _t(ja, en) + '</span>' +
+        '<b class="lg-sh-meter-v">' + v + '</b>' +
+        '<i class="lg-sh-meter-bar"><s class="lg-stat-fill" data-pct="' + Math.max(0, Math.min(100, v)) + '"></s></i></span>';
+    }
+    return '<header class="lg-sh-top">' +
+      '<div class="lg-sh-brand"><span class="lg-sh-brand-ico">★</span>' + _t('シーズンハブ', 'SEASON HUB') + '</div>' +
+      '<div class="lg-sh-bar">' +
+        '<span class="lg-sh-crest lg-sh-slot">' + d.crest + '</span>' +
+        '<span class="lg-sh-club">' + _clubName(myId) + '</span>' +
+        '<i class="lg-sh-div"></i>' +
+        '<span class="lg-sh-day">Day ' + day + ' <em>/</em> ' + _t('第' + day + '節', 'R' + day) + '</span>' +
+        '<i class="lg-sh-div"></i>' +
+        '<span class="lg-sh-rec">' + myRow.w + _t('勝', 'W') + ' ' + myRow.d + _t('分', 'D') + ' ' + myRow.l + _t('敗', 'L') + '</span>' +
+        '<i class="lg-sh-div"></i>' +
+        meter('🤝', '信頼', 'Trust', trust, 'trust') +
+        meter('📣', '人気', 'Popularity', pop, 'pop') +
+        '<button type="button" class="lg-sh-gear" onclick="leagueHubMenu(1)" ' +
+          'aria-label="' + _t('メニュー', 'Menu') + '">⚙</button>' +
+      '</div>' +
+    '</header>';
+  }
+
+  /* 左：現在順位（大きな順位＋勝点/得失＋自分の周りだけのミニ表＋順位ページへの導線）。 */
+  function _shRankPanel(myId, rows, myPos, myRow) {
+    var moves = _rankMoves();
+    var gd = myRow.gf - myRow.ga;
+    var idx = myPos - 1;
+    var start = Math.max(0, Math.min(idx - 2, rows.length - 4));
+    var view = rows.slice(start, start + 4);
+    var body = view.map(function (r, i) {
+      var def = _clubDef(r.id), mv = moves[r.id] || 0;
+      var arrow = mv > 0 ? '<span class="mv up">▲</span>' : (mv < 0 ? '<span class="mv dn">▼</span>' : '<span class="mv fl">–</span>');
+      var g = (r.gd > 0 ? '+' : '') + r.gd;
+      return '<tr class="' + (r.id === myId ? 'me' : '') + '">' +
+        '<td class="p">' + (start + i + 1) + arrow + '</td>' +
+        '<td class="nm"><span class="lg-sh-slot sm">' + def.crest + '</span>' + _clubName(r.id) + '</td>' +
+        '<td class="pt">' + r.pts + '</td>' +
+        '<td class="gd">' + g + '</td></tr>';
+    }).join('');
+    return '<section class="lg-sh-panel lg-sh-rank">' +
+      '<div class="lg-sh-ph">' + _t('現在順位', 'Standing') + '</div>' +
+      '<div class="lg-sh-bigpos" role="button" tabindex="0" onclick="leagueRoundView(\'table\')">' +
+        '<span class="k">' + _t('現在', 'Now') + '</span>' +
+        '<b class="n">' + myPos + '</b><span class="u">' + _t('位', '') + '</span>' +
+        '<span class="cup">🏆</span>' +
+      '</div>' +
+      '<div class="lg-sh-kv2">' +
+        '<div><span>' + _t('勝点', 'Pts') + '</span><b>' + myRow.pts + '</b></div>' +
+        '<div><span>' + _t('得失', 'GD') + '</span><b>' + (gd > 0 ? '+' : '') + gd + '</b></div>' +
+      '</div>' +
+      '<table class="lg-sh-mini"><thead><tr>' +
+        '<th class="p">' + _t('順位', '#') + '</th><th class="nm">' + _t('チーム', 'Team') + '</th>' +
+        '<th class="pt">' + _t('勝点', 'Pts') + '</th><th class="gd">' + _t('得失', 'GD') + '</th>' +
+      '</tr></thead><tbody>' + body + '</tbody></table>' +
+      '<button type="button" class="lg-sh-more" onclick="leagueRoundView(\'table\')">' +
+        '📊 ' + _t('リーグ順位を確認', 'Full league table') + ' <span>›</span></button>' +
+    '</section>';
+  }
+
+  /* 中央：次の試合（NEXT MATCH ＋ 対戦相手スカウティング）。開幕はボード面談を出す。 */
+  function _shMatchPanel(myId) {
+    if (_boardTalkPending()) {
+      return '<section class="lg-sh-panel lg-sh-match board">' +
+        '<div class="lg-sh-ph">' + _t('ボードとの面談', 'Board meeting') + '</div>' +
+        '<div class="lg-sh-boardwrap">' + _boardTalkHTML() + '</div>' +
+      '</section>';
+    }
+    var fx = _myFixtureThisRound();
+    if (!fx) {
+      return '<section class="lg-sh-panel lg-sh-match">' +
+        '<div class="lg-sh-ph">' + _t('次の試合', 'Next match') + '</div>' +
+        '<div class="lg-se-empty">' + _t('今節の対戦がありません', 'No fixture this round') + '</div></section>';
+    }
+    var oppId = (fx.home === myId) ? fx.away : fx.home;
+    var iAmHome = (fx.home === myId);
+    var myDef = _clubDef(myId), oppDef = _clubDef(oppId);
+    var ad = _clubAtkDef(oppId), form = _clubForm(oppId), key = _keyPlayer(oppId);
+    var dirIco = form.dir === 'up' ? '⬆' : (form.dir === 'down' ? '⬇' : '➡');
+
+    // sub＝値の上に置く小さな添え字（ポジション等）。値と同じ行に混ぜると折り返して読めなくなる。
+    function tile(ja, en, val, cls, sub) {
+      return '<div class="lg-sh-tile ' + (cls || '') + '">' +
+        '<span class="k">' + _t(ja, en) + '</span>' +
+        (sub ? '<span class="sub">' + sub + '</span>' : '') +
+        '<b class="v">' + val + '</b></div>';
+    }
+
+    return '<section class="lg-sh-panel lg-sh-match">' +
+      '<div class="lg-sh-ph">' + _t('次の試合', 'Next match') + '</div>' +
+      '<div class="lg-sh-nm">NEXT MATCH</div>' +
+      (_isRival(oppId) ? '<div class="lg-sh-rival">' + _t('宿敵', 'RIVAL') + '</div>' : '') +
+      '<div class="lg-sh-vs" role="button" tabindex="0" onclick="leagueRoundView(\'next\')">' +
+        '<div class="lg-sh-team"><span class="lg-sh-shield lg-sh-slot">' + myDef.crest + '</span>' +
+          '<span class="nm">' + _clubName(myId) + '</span></div>' +
+        '<div class="lg-sh-vsmid"><span class="x">VS</span>' +
+          '<span class="lg-sh-when"><i>' + (iAmHome ? '🏟 HOME' : '✈ AWAY') + '</i>' +
+          '<b>' + (_lockedToday() ? _t('明日', 'Tomorrow') : _t('今日', 'Today')) + '</b></span></div>' +
+        '<div class="lg-sh-team"><span class="lg-sh-shield lg-sh-slot">' + oppDef.crest + '</span>' +
+          '<span class="nm">' + _clubName(oppId) + '</span></div>' +
+      '</div>' +
+      '<div class="lg-sh-scouth">' + _t('対戦相手スカウティング', 'Opponent scouting') + '</div>' +
+      '<div class="lg-sh-tiles" role="button" tabindex="0" onclick="leagueRoundView(\'next\')">' +
+        tile('攻撃', 'Attack', ad.atk, 'atk') +
+        tile('守備', 'Defence', ad.def, 'def') +
+        tile('調子', 'Form', dirIco + ' ' + _t(form.ja, form.en), 'form ' + form.dir) +
+        tile('要注意', 'Danger', key ? key.name : '—', 'warn', _posLabel(key && key.pos)) +
+      '</div>' +
+    '</section>';
+  }
+
+  /* 右：監督ステータス（顔スロット＋レベル＋能力4本）＋本線のコマンドボタン。 */
+  function _shManagerPanel() {
+    var m = _state.manager || {};
+    var lv = _managerLevel();
+    var defs = [
+      ['tactical', '戦術眼', 'Tactics', 'c1'],
+      ['analysis', '分析力', 'Analysis', 'c2'],
+      ['motivator', 'モチベーター', 'Motivation', 'c3'],
+      ['conditioning', 'フィジカル管理', 'Conditioning', 'c4']
+    ];
+    var stats = defs.map(function (d) {
+      var v = Math.round((m.params && m.params[d[0]]) || 0);
+      return '<div class="lg-sh-stat ' + d[3] + '">' +
+        '<span class="k">' + _t(d[1], d[2]) + '</span>' +
+        '<i class="bar"><s class="lg-stat-fill" data-pct="' + Math.max(0, Math.min(100, v)) + '"></s></i>' +
+        '<b class="v">' + v + '</b></div>';
+    }).join('');
+    var lvBox = lv
+      ? '<div class="lg-sh-lv">' +
+          '<span class="k">' + _t('監督レベル', 'Manager level') + '</span>' +
+          '<b class="lv">Lv.' + lv.lv + '</b>' +
+          '<i class="bar"><s class="lg-stat-fill" data-pct="' + lv.pct.toFixed(1) + '"></s></i>' +
+          '<span class="next">' + _t('次のレベルまで', 'To next level') + ' <b>' + lv.toNext + '</b></span>' +
+        '</div>'
+      : '';
+    // ★ 画像枠。監督の顔絵はまだ無いのでブランクのまま寸法だけ確保する。
+    var face = '<div class="lg-sh-face lg-sh-slot" aria-hidden="true"></div>';
+    var cta = _boardTalkPending()
+      ? '<div class="lg-sh-cta disabled">' + _t('まず会長と話す', 'Talk to the board first') + '</div>'
+      : '<button type="button" class="lg-sh-cta" onclick="leagueRoundView(\'prep\')">' +
+          '⚽ ' + _t('次へ：練習メニュー', 'Next: Training') + '</button>';
+    return '<section class="lg-sh-panel lg-sh-mgr">' +
+      '<div class="lg-sh-ph">' + _t('監督ステータス', 'Manager') + '</div>' +
+      '<div class="lg-sh-mgrtop">' + face + lvBox + '</div>' +
+      '<div class="lg-sh-stats">' + stats + '</div>' +
+      cta +
+    '</section>';
+  }
+
+  /* ⚙ メニュー＝記録まわり（試合ログ／号の読み返し／バックナンバー／テスト／タイトルへ）。
+   * ステータスバーに全部並べると読めなくなるので、ここへ畳む。 */
+  function _shMenuOverlay() {
+    return '<div class="lg-sh-ovl" id="lg-sh-ovl" hidden>' +
+      '<div class="lg-sh-ovl-panel">' +
+        '<div class="lg-sh-ovl-head"><span>' + _t('メニュー', 'Menu') + '</span>' +
+          '<button type="button" class="lg-se-ovl-x" onclick="leagueHubMenu(0)">✕</button></div>' +
+        '<div class="lg-sh-ovl-body">' + _hubRecordHTML() + '</div>' +
+      '</div></div>';
+  }
+
+  /* 試合後レポートはハブを崩さないようオーバーレイで重ねる（Matchday 演出が使えない時の道）。 */
+  function _shBannerOverlay(lr, myId, myDef) {
+    var oppDef = _clubDef(lr.mine.opp);
+    var resTxt = lr.mine.res === 'W' ? _t('勝利！', 'WIN!') : lr.mine.res === 'L' ? _t('敗戦', 'LOSS') : _t('引き分け', 'DRAW');
+    var h = '<div class="lg-hero" style="background:linear-gradient(135deg,' + _resultColor(lr.mine.res) + '33,rgba(0,0,0,0.25));border:1px solid ' + _resultColor(lr.mine.res) + '66">' +
+      '<div style="text-align:center;color:' + _resultColor(lr.mine.res) + '" class="lg-resbadge">' + resTxt + '</div>' +
+      '<div class="lg-vs">' +
+        '<div class="side"><div class="crest">' + myDef.crest + '</div><div class="nm">' + _clubName(myId) + '</div></div>' +
+        '<div class="mid">' + lr.mine.ms + ' - ' + lr.mine.os + '</div>' +
+        '<div class="side"><div class="crest">' + oppDef.crest + '</div><div class="nm">' + _clubName(lr.mine.opp) + '</div></div>' +
+      '</div>' +
+      '<div style="text-align:center;font-weight:800;font-size:14px;margin:10px 4px 4px">' + _headlineText(lr) + '</div>' +
+      '<div class="lg-mini" style="text-align:center;line-height:1.7">' + _reportRowsHTML(lr) + '</div>' +
+      _managerGrowthHTML(lr);
+    if (lr.others && lr.others.length) {
+      var ot = lr.others.map(function (o) {
+        return _clubName(o.home) + ' <b>' + o.hs + '-' + o.as + '</b> ' + _clubName(o.away);
+      }).join('<br>');
+      h += '<div class="lg-mini" style="margin-top:8px;text-align:center;border-top:1px solid rgba(255,255,255,0.12);padding-top:8px">' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px">' + _t('他会場', 'Other results') + '</div>' + ot + '</div>';
+    }
+    h += '</div>';
+    if (lr.bestXI) {
+      h += _bestXIHTML(lr.bestXI, 'weekly', 'WEEKLY BEST XI', 'WEEKLY BEST XI',
+        '第' + (lr.round + 1) + '節号', 'Round ' + (lr.round + 1) + ' issue');
+    }
+    h += _previewHTML();
+    return '<div class="lg-sh-ovl" id="lg-sh-report">' +
+      '<div class="lg-sh-ovl-panel wide">' +
+        '<div class="lg-sh-ovl-head"><span>' + _t('第' + (lr.round + 1) + '節 レポート', 'Round ' + (lr.round + 1) + ' report') + '</span>' +
+          '<button type="button" class="lg-se-ovl-x" onclick="leagueCloseReport()">✕</button></div>' +
+        '<div class="lg-sh-ovl-body">' + h + '</div>' +
+        '<button type="button" class="lg-sh-ovl-ok" onclick="leagueCloseReport()">' +
+          _t('シーズンハブへ戻る', 'Back to the hub') + '</button>' +
+      '</div></div>';
+  }
+
   function _renderHub(showBanner) {
     _ensureStyle();
     // SN-03改3: シーズン前フローの途中は、次シーズンを開始済み（finished=false）でもそちらを描く。
     if (_prePage >= 0) { _renderPreseason(); return; }
     // MD-03: シーズン中の順送りページ（ホーム画面から「次へ」で入る）。
     if (!_state.finished && _roundView && !_boardTalkPending()) { _renderRoundView(); return; }
-    if (_state.finished) { _renderFinale(); return; }   // SN-03: 最終話は専用の固定フレーム（2カラムハブをバイパス）
-    _seasonEndMode(false);   // 通常ハブでは最終話の固定フレーム化を解く
+    if (_state.finished) { _renderFinale(); return; }   // SN-03: 最終話は専用の固定フレーム
+    _seasonEndMode(false);
+
     var myId = _state.myClub;
     var myDef = _clubDef(myId);
     var rows = _sortedStandings();
     var myPos = rows.findIndex(function (r) { return r.id === myId; }) + 1;
     var myRow = rows[myPos - 1];
 
-    // UX-07: 上に固定ステータスバー → 左カラム＝次の試合（主役）／右カラム＝タブ。
-    var html = '<div class="lg-wrap lg-hub">' + _statusBarHTML(myId, myPos, myRow) +
-      '<div class="lg-cols"><div class="lg-col lg-col-main">';
+    var html = '<div class="lg-sh">' +
+      _shTopHTML(myId, myRow) +
+      '<div class="lg-sh-cols">' +
+        _shRankPanel(myId, rows, myPos, myRow) +
+        _shMatchPanel(myId) +
+        _shManagerPanel() +
+      '</div>' +
+      _shMenuOverlay() +
+      ((showBanner && _state.lastResult && _state.lastResult.mine) ? _shBannerOverlay(_state.lastResult, myId, myDef) : '') +
+    '</div>';
 
-    // 試合後バナー
-    if (showBanner && _state.lastResult) {
-      var lr = _state.lastResult;
-      var oppDef = _clubDef(lr.mine.opp);
-      var resTxt = lr.mine.res === 'W' ? _t('勝利！', 'WIN!') : lr.mine.res === 'L' ? _t('敗戦', 'LOSS') : _t('引き分け', 'DRAW');
-      html += '<div class="lg-hero" style="background:linear-gradient(135deg,' + _resultColor(lr.mine.res) + '33,rgba(0,0,0,0.25));border:1px solid ' + _resultColor(lr.mine.res) + '66">' +
-        '<div style="text-align:center;color:' + _resultColor(lr.mine.res) + '" class="lg-resbadge">' + resTxt + '</div>' +
-        '<div class="lg-vs">' +
-          '<div class="side"><div class="crest">' + myDef.crest + '</div><div class="nm">' + _clubName(myId) + '</div></div>' +
-          '<div class="mid">' + lr.mine.ms + ' - ' + lr.mine.os + '</div>' +
-          '<div class="side"><div class="crest">' + oppDef.crest + '</div><div class="nm">' + _clubName(lr.mine.opp) + '</div></div>' +
-        '</div>';
-      // 見出し＋MOM＋得点者＋順位変動（試合後レポート）
-      html += '<div style="text-align:center;font-weight:800;font-size:14px;margin:10px 4px 4px">' + _headlineText(lr) + '</div>' +
-        '<div class="lg-mini" style="text-align:center;line-height:1.7">' + _reportRowsHTML(lr) + '</div>';
-      html += _managerGrowthHTML(lr);   // MG-03: 監督の成長／戦術解放（MG-08 で演出化する土台）
-      if (lr.others && lr.others.length) {
-        var ot = lr.others.map(function (o) {
-          return _clubName(o.home) + ' <b>' + o.hs + '-' + o.as + '</b> ' + _clubName(o.away);
-        }).join('<br>');
-        html += '<div class="lg-mini" style="margin-top:8px;text-align:center;border-top:1px solid rgba(255,255,255,0.12);padding-top:8px">' +
-          '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px">' + _t('他会場', 'Other results') + '</div>' + ot + '</div>';
-      }
-      html += '</div>';
-      // BX: 今節のベストイレブン（サッカー専門誌風・第N節号）
-      if (lr.bestXI) {
-        html += _bestXIHTML(lr.bestXI, 'weekly',
-          'WEEKLY BEST XI', 'WEEKLY BEST XI',
-          '第' + (lr.round + 1) + '節号', 'Round ' + (lr.round + 1) + ' issue');
-      }
-      html += _previewHTML();   // 次回予告
-    }
-
-    // ★ クラブ情報は上のステータスバーへ、今週の準備は右カラムの「準備」タブへ移した。
-    //   左カラムには「次にやること」だけを残す＝主役が画面外に押し出されない。
-    //   状態ごとにモディファイアを付ける（CSS 側で高さの配り方を変えるため）
-    // finished（最終話）は _renderFinale へ早期分岐済み。ここは通常ハブ（開幕面談 or 次戦）のみ。
-    var mbMod = _boardTalkPending() ? ' lg-mb-board' : ' lg-mb-next';
-    html += '<div class="lg-match-block' + mbMod + '">';
-    if (_boardTalkPending()) {
-      // BD-01: 開幕はボードとの面談から。約束を交わすまでは**これだけ**を見せる
-      //   （試合カードと並べると、やるべき1つがぼやける）。
-      html += _boardTalkHTML();
-    } else {
-      var fx = _myFixtureThisRound();
-      var oppId = (fx.home === myId) ? fx.away : fx.home;
-      var oppDef2 = _clubDef(oppId);
-      var iAmHome = (fx.home === myId);
-      var haBadge = iAmHome ? _t('HOME', 'HOME') : _t('AWAY', 'AWAY');
-      var oppIsRival = _isRival(oppId);
-      var rivalBadge = oppIsRival ? '<span class="lg-badge" style="background:#c0392b">' + _t('宿敵', 'RIVAL') + '</span>' : '';
-      // 1節 = 1週間・試合は週末（MG-03b）。週表記にすると怪我「あと3週」等と単位が揃う。
-      html += '<div class="lg-h">' + _t('第' + (_state.round + 1) + '節 / 14　<span style="opacity:.55;font-weight:400">週末の一戦</span>',
-        'Round ' + (_state.round + 1) + ' / 14　<span style="opacity:.55;font-weight:400">Matchday</span>') +
-        '<span class="lg-badge">' + haBadge + '</span>' + rivalBadge + '</div>';
-      // ★ ただの VS 札ではなく「試合プレビュー」にする。箱だけ伸ばして中が空だと間延びする。
-      function _sideHTML(id, def) {
-        var st = _state.standings[id] || { pts: 0 };
-        return '<div class="side">' +
-          '<div class="crest">' + def.crest + '</div>' +
-          '<div class="nm">' + _clubName(id) + '</div>' +
-          '<div class="lg-vs-pos">' + _position(id) + _t('位', '') + ' · ' + st.pts + _t('pt', 'pts') + '</div>' +
-          '</div>';
-      }
-      // ★ 相手の攻め筋は「準備」タブの偵察レポートへ移した（準備の判断材料なので）。
-      //   試合カードには結果の流れ（前節・調子・要求）だけ残す。
-      var infoRows = [];
-      var prev = _state.lastResult && _state.lastResult.mine;
-      if (prev) {
-        infoRows.push('<span class="lg-ni-k">' + _t('前節', 'Last') + '</span>' +
-          '<b style="color:' + _resultColor(prev.res) + '">' + prev.ms + '-' + prev.os + '</b>' +
-          ' <span style="opacity:.7">vs ' + _clubName(prev.opp) + '</span>');
-      }
-      var st2 = _currentStreak();
-      if (st2.n >= 2 && (st2.res === 'W' || st2.res === 'L')) {
-        infoRows.push('<span class="lg-ni-k">' + _t('調子', 'Form') + '</span>' +
-          '<b style="color:' + (st2.res === 'W' ? 'var(--lg-good)' : 'var(--lg-bad)') + '">' +
-          (st2.res === 'W' ? '🔥 ' + _t(st2.n + '連勝', st2.n + 'W') : '💧 ' + _t(st2.n + '連敗', st2.n + 'L')) + '</b>');
-      }
-      infoRows.push('<span class="lg-ni-k">' + _t('クラブの要求', 'Target') + '</span><b>' + _seasonGoalText() + '</b>');
-
-      // MD-03: 試合カードそのものを「次の試合」への入口にする（タップで詳細＝寄り道）。
-      html += '<div class="lg-hero lg-hero-tap" role="button" tabindex="0" onclick="leagueRoundView(\'next\')" ' +
-        'style="background:linear-gradient(135deg,' + myDef.color + '33,' + oppDef2.color + '33)' +
-        (oppIsRival ? ';border:1px solid #c0392b99' : '') + '">' +
-        (oppIsRival ? '<div style="text-align:center;color:#e8776f;font-weight:800;font-size:12px;margin-bottom:4px">🔥 ' + _t('宿敵対決', 'RIVALRY') + '　' + (function () { var h = _h2h(myId, oppId); return _t('通算 ' + h.w + '勝' + h.d + '分' + h.l + '敗', h.w + '-' + h.d + '-' + h.l); })() + '</div>' : '') +
-        '<div class="lg-vs">' + _sideHTML(myId, myDef) + '<div class="mid">VS</div>' + _sideHTML(oppId, oppDef2) + '</div>' +
-        '<div class="lg-nextinfo">' + infoRows.map(function (x) {
-          return '<div class="lg-ni-row">' + x + '</div>';
-        }).join('') + '</div>' +
-        '<div class="lg-tapmore">' + _t('タップで対戦相手を詳しく見る', 'Tap for the full opponent report') + ' ▸</div>' +
-        '</div>';
-      // MD-03: 「次へ」は本線＝練習メニューへ直行する（順位/次の試合は寄り道なので割り込ませない）。
-      html += '<button class="lg-btn" onclick="leagueRoundView(\'prep\')">' +
-        _t('次へ：練習メニュー ▶', 'Next: Training ▶') + '</button>';
-      if (_lockedToday()) {
-        html += '<div class="lg-mini" style="text-align:center;margin-top:6px">' +
-          _t('本日は消化済み — また明日。1日1試合＝1週間、物語は毎日ひとつずつ進む。',
-             'Played today — come back tomorrow. One match a day, one week per day.') + '</div>';
-      }
-    }
-    html += '</div>';   // /lg-match-block
-
-    // ── ここまでが左カラム（主役）。右カラムは**タブで入れ替わる**パネル ──────
-    //   順位表 / 今週の準備 / 監督 / 記録 を縦に積むのをやめ、1つずつ見せる。
-    // MD-03: タブ切替をやめ、ホームは「順位・監督ステータス・記録」の俯瞰に固定する。
-    //   深掘り（順位表の精読／偵察／練習）は「次へ」の順送りが受け持つ＝役割が重ならない。
-    html += '</div><div class="lg-col lg-col-side">';
-    html += '<div class="lg-tabbody lg-home-side">' + _homeSideHTML() + '</div>';
-    html += '</div></div></div>';   // /lg-col-side /lg-cols /lg-wrap
     _body().innerHTML = html;
-    // UX-07: ハブは1画面固定。ただし**シーズン終了（最終話）は長文の読み物**で
-    //   表彰・Team of the Season・契約分岐まで続くため、固定すると切れて操作不能に
-    //   なる。ここだけはページスクロールを許す。
-    _hubMode(!_state.finished);
+    _hubMode(false);
+    _seasonEndMode(true);   // シーズンハブも1画面固定（最終話と同じ固定フレームを流用）
     _afterRender();
   }
 
@@ -4597,6 +4849,17 @@
   window.leagueShowHub = function () { _renderHub(false); };
   // SN-03改2: 最終話コマンドバー「オファーを見る」でオファー一覧オーバーレイを開閉。
   /* ── SN-03改3 シーズン終了／シーズン前の順送り操作（2026-07-26 スライド準拠）────── */
+  /* SH-01 シーズンハブの ⚙ メニュー／試合後レポートの開閉。 */
+  window.leagueHubMenu = function (show) {
+    var o = document.getElementById('lg-sh-ovl'); if (!o) return;
+    if (show) o.removeAttribute('hidden'); else o.setAttribute('hidden', '');
+  };
+  window.leagueShowReport = function () { leagueHubMenu(0); _renderHub(true); };
+  window.leagueCloseReport = function () {
+    var o = document.getElementById('lg-sh-report');
+    if (o && o.parentNode) o.parentNode.removeChild(o);
+  };
+
   /* MD-03 シーズン中の順送り。ホーム ⇄ 順位/次の試合/練習/試合へ。 */
   window.leagueRoundView = function (v) { _roundView = v; _renderRoundView(); };
   window.leagueRoundHome = function () { _roundView = null; _renderHub(false); };
