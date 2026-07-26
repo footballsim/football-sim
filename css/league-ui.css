@@ -2524,3 +2524,60 @@ button.lg-se-award:active { transform: translateY(2px); box-shadow: inset 0 0 0 
   .lg-rk-row { grid-template-columns: 2em auto minmax(0, 1fr) 5.5em; }
   .lg-rk-cl { display: none; }
 }
+
+/* ==========================================================================
+ * MD-04 追補 — スマホ横持ち（縦が短い画面）の布陣設定（2026-07-26 ユーザー報告）
+ * --------------------------------------------------------------------------
+ * 症状: ①ピッチが小さいのに選手ドットが固定サイズ（円36px＋名前60px）なので
+ *       4バックが横に並びきらず重なる ②控えの行が高く、8行目以降が切れて押せない。
+ * 方針: ドットは**ピッチ幅に追従**させ（コンテナクエリ）、控えは縦が短い時だけ
+ *       行を詰めて15人が収まるようにする。どちらも .league-prep 内だけに閉じる。
+ * ========================================================================== */
+@media (orientation: landscape) {
+  /* ピッチを「箱に収まる範囲で最大」にする。flex-shrink を許して枠から溢れさせない
+     （高さ→aspect-ratio→幅 の順で決まるので、縮めば幅も一緒に縮む）。 */
+  body.league-mode #screen-setting.league-prep .field-container {
+    flex: 0 1 auto; min-height: 0;
+    container-type: inline-size;   /* 選手ドットの寸法の基準にする */
+  }
+  /* ドット＝ピッチ幅に対する比率で決める。4バックが並ぶ幅（1枠あたり約25cqw）に収める。 */
+  body.league-mode #screen-setting.league-prep .player-circle {
+    width: clamp(15px, 16cqw, 36px); height: clamp(15px, 16cqw, 36px);
+    font-size: clamp(6.5px, 6cqw, 10px);
+  }
+  /* 名前札の幅が実質のドット幅＝重なりの主因。4バックの間隔（ピッチ幅の25%）未満に抑える。 */
+  body.league-mode #screen-setting.league-prep .player-name-tag {
+    font-size: clamp(6px, 5.6cqw, 11px) !important;
+    max-width: clamp(28px, 23cqw, 60px);
+    margin-top: 1px;
+  }
+  /* 凡例は枠内に収める（はみ出して「ドラッグで選手入れ替え」が外に落ちていた） */
+  body.league-mode #screen-setting.league-prep .field-panel { overflow: hidden; }
+  body.league-mode #screen-setting.league-prep .field-panel > div:last-child {
+    flex: 0 0 auto; font-size: 10px; line-height: 1.35;
+  }
+  body.league-mode #screen-setting.league-prep .oop-legend,
+  body.league-mode #screen-setting.league-prep .hint { font-size: 10px; }
+}
+
+/* 縦が短い画面（スマホ横持ち）＝控え15人を「切らずに」収める。
+   行の丈と文字を詰めるだけで、押せる面積（最低28px）は確保する。 */
+@media (orientation: landscape) and (max-height: 560px) {
+  body.league-mode #screen-setting.league-prep .bench-list {
+    /* 2列だと 8 行になり、いちばん短い端末（390px級）で下 2 行が切れて押せなかった。
+       3列＝5行にすれば縦が最も短い端末でも全員が収まる。 */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px; padding: 2px 2px 3px;
+  }
+  body.league-mode #screen-setting.league-prep .bench-item {
+    min-height: 27px; padding: 2px 6px; gap: 5px;
+  }
+  body.league-mode #screen-setting.league-prep .bench-item-circle {
+    width: 18px; height: 18px; font-size: 8px;
+  }
+  body.league-mode #screen-setting.league-prep .bench-item-name { font-size: 10px; }
+  body.league-mode #screen-setting.league-prep .bench-panel-label { font-size: 9px; }
+  /* 控えが3列＝5行に収まったぶん、ピッチは大きめに取れる（名前が読める）。
+     ドットはコンテナクエリでピッチ幅に追従するので、大きくしても重ならない。 */
+  body.league-mode #screen-setting.league-prep .field-container { height: min(56vh, 430px); }
+}
