@@ -5526,6 +5526,20 @@
   }
 
   window.showLeague = showLeague;
+
+  /* 保険: リーグ稼働中（body.league-mode）は、共有DOMに残るW杯モードの隠しボタン
+   * #wc-btn-next（onWCNextBtn→未装飾の#screen-settingへ直行）に画面を乗っ取らせない。
+   * 人の指では押せないが、ヘッドレス操作がテキスト「次へ」でこの隠しボタンを踏み、
+   * 練習メニュー/試合前確認を飛ばしたように見える事故が実在（2026-07-27 新規セーブ初日調査）。
+   * league.js は narration.js より後に読まれる前提（dist-lab のスクリプト順）。 */
+  if (typeof window.onWCNextBtn === 'function') {
+    var _wcNextOrig = window.onWCNextBtn;
+    window.onWCNextBtn = function () {
+      if (document.body && document.body.classList.contains('league-mode')) return;
+      return _wcNextOrig.apply(this, arguments);
+    };
+  }
+
   window.leaguePickClub = function (id) { _finReset(); _newSeason(id); _renderHub(false); };
   window.leaguePlayToday = function () { playToday(); };
   window.leagueShowHub = function () { _renderHub(false); };
