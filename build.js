@@ -170,5 +170,14 @@ fs.writeFileSync(path.join(LAB, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
   fs.writeFileSync(path.join(LAB, 'manga-viewer.html'), viewer);
 }
 
+// 端末プレビュー（lab限定・/device-preview.html）。PCからスマホ/タブレットの見え方を確認する台。
+//   ★ iframe 方式が必須。メディアクエリは実ウィンドウを見るので、単に枠を小さく描いても
+//     スマホ用CSSは発火しない（iframe は中身が独立したビューポートを持つ）。
+{
+  const dp = fs.readFileSync(path.join(ROOT, 'lab', 'device-preview.html'), 'utf8')
+    .replace(/\{\{V\}\}/g, BUILD_VER);
+  fs.writeFileSync(path.join(LAB, 'device-preview.html'), dp);
+}
+
 console.log(`Done (lab dist-lab/). asset version = ?v=${BUILD_VER}`);
 console.log('NOTE: docs/=公開(リーグ無し) / dist-lab/=非公開(リーグ) 。編集は root の js/ で行い、再度 npm run build すること。');

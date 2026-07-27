@@ -429,21 +429,42 @@
   };
 
   /* ── 画面差し替えのフェード ──────────────────────────────────────────── */
+  /* 画面の入れ替えを暗転のピークで行う。
+   * ★ fn は「演出のついで」ではなく **進行そのもの**（次の画面へ進む処理）が渡ってくる。
+   *   requestAnimationFrame はタブが非表示だと発火しないので、rAF に載せたままだと
+   *   「バックグラウンドにした瞬間コールバックが永久に来ない＝進行が止まる」が起きる。
+   *   実害: 試合前カットシーン中に画面を離れるとキックオフできなくなる（リロードするまで復帰不能）。
+   *   → fn は一度きり保証＋タイマーの保険を必ず持たせ、演出が動かなくても進行だけは通す。 */
   Juice.screenSwap = function (fn, opts) {
     opts = opts || {};
-    if (!Juice.ready()) { if (fn) fn(); return Promise.resolve(); }
+    var ran = false;
+    function runFn() {
+      if (ran) return;
+      ran = true;
+      try { if (fn) fn(); } catch (e) { console.warn('[juice] screenSwap fn failed', e); }
+    }
+    if (!Juice.ready()) { runFn(); return Promise.resolve(); }
     var host = opts.host || document.body;
     return new Promise(function (resolve) {
+      var done = false;
+      function finish(ov) {
+        if (done) return;
+        done = true;
+        if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
+        resolve();
+      }
       var ov = document.createElement('div');
       ov.style.cssText = 'position:fixed;inset:0;z-index:9000;background:#050b18;opacity:0;' +
         'pointer-events:none;transition:opacity .16s ease';
       host.appendChild(ov);
+      // 保険：rAF が来なくても必ず進行させる（暗転の見栄えは捨てても進行は捨てない）
+      var guard = setTimeout(function () { runFn(); finish(ov); }, 900);
       requestAnimationFrame(function () {
         ov.style.opacity = '1';
         setTimeout(function () {
-          try { if (fn) fn(); } catch (e) { console.warn('[juice] screenSwap fn failed', e); }
+          runFn();
           ov.style.opacity = '0';
-          setTimeout(function () { if (ov.parentNode) ov.parentNode.removeChild(ov); resolve(); }, 180);
+          setTimeout(function () { clearTimeout(guard); finish(ov); }, 180);
         }, 170);
       });
     });

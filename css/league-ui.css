@@ -1174,6 +1174,11 @@ body.league-mode #screen-home.season-end-mode {
   overflow: hidden; display: flex; flex-direction: column;
   align-items: stretch; justify-content: flex-start; padding: 0;
 }
+/* ★ .active を伴わない時は必ず畳む。この display:flex は `.screen{display:none}` に勝つので、
+ * 布陣設定・試合中でもハブが下に積まれたまま残り、document 高が2倍(780px)になって
+ * ページごと縦スクロールできてしまっていた。布陣設定は選手をドラッグする画面＝
+ * 縦スワイプで簡単にその崩れ状態へ落ちるので、実機タッチでは特に致命的だった。 */
+body.league-mode #screen-home.season-end-mode:not(.active) { display: none; }
 body.league-mode #screen-home.season-end-mode > #league-body {
   flex: 1 1 auto; min-height: 0; display: flex; width: 100%;
 }
@@ -1532,7 +1537,10 @@ body.league-mode #screen-home.season-end-mode > #league-body {
 .lg-se-tablewrap, .lg-se-plogwrap {
   flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden;
   scrollbar-width: thin;
-  display: grid; align-content: center;   /* 収まる時は縦中央・溢れたら先頭から送る */
+  /* ★ safe center 必須。素の center は「溢れた分を上下に等分」するので、はみ出した
+   * 先頭（＝列見出し行）がスクロール範囲の外に出て永久に読めなくなる。safe は溢れた
+   * 瞬間だけ start に落ちるので「収まる時は縦中央・溢れたら先頭から送る」が実現する。 */
+  display: grid; align-content: safe center;
 }
 .lg-se-plogwrap { align-content: start; }
 
@@ -1720,13 +1728,24 @@ body.league-mode #screen-home.season-end-mode > #league-body {
 .lg-pre-soon-t { font-size: 11px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: var(--lg-gold); }
 .lg-pre-soon-b { margin: 0; font-size: clamp(12px, 2.1vh, 14px); color: var(--lg-text-mute); max-width: 46ch; line-height: 1.55; }
 
-/* 縦持ち・低い画面では列を畳む（横並びの窮屈さより読めることを優先） */
-@media (max-width: 720px), (max-height: 430px) {
+/* 幅が狭い時だけ列を畳む（横並びの窮屈さより読めることを優先）。
+ * ★ 高さ条件（旧 max-height:430px）は外した。横持ちスマホは「幅は余っていて高さだけ
+ *   足りない」ので、列を畳むと縦に伸びて足りない軸をさらに削る＝逆効果だった。
+ *   実害: シーズン前クラブ詳細で年俸が画面外／順送り全ページで主CTAが2段目に落ちる。 */
+@media (max-width: 720px) {
   .lg-se-awardgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lg-se-recgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .lg-se-vdrow { grid-template-columns: minmax(0, 1fr); }
   .lg-se-nav { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .lg-se-nb.mid { grid-column: 1 / -1; order: 3; }
+  /* ★ 中央スロットは _finNavHTML が2形態を出す＝副操作ボタン `.lg-se-nb.mid` と、
+   *   何も無い時の詰め物 `<span class="lg-se-nb-mid">`。後者を1セル占有させると
+   *   主CTAが次の行に押し出されるので、空の詰め物はセルごと消す。 */
+  .lg-se-nb.mid, .lg-se-nb-mid:not(:empty) { grid-column: 1 / -1; order: 3; }
+  .lg-se-nb-mid:empty { display: none; }
+}
+/* 「今季の目標 / オファー年俸」は2枚だけなので、畳むのは本当に狭い時だけ。
+ * 720px で畳むと iPhone SE 横(667)でクラブ詳細が40px溢れて年俸が切れた。 */
+@media (orientation: portrait), (max-width: 560px) {
   .lg-pre-terms { grid-template-columns: minmax(0, 1fr); }
 }
 
@@ -1877,7 +1896,10 @@ body.league-mode #screen-home.season-end-mode > #league-body {
   grid-template-columns: minmax(0, .92fr) minmax(0, 1.3fr) minmax(0, .95fr);
 }
 .lg-sh-panel {
-  min-height: 0; overflow: hidden; position: relative;
+  /* ★ overflow:hidden だと低いフレーム（横持ちスマホ 360px 等）で下端が「到達不能」に
+   * なる（実害: 順位パネルの「リーグ順位を確認」が消えて順位への導線が断たれた）。
+   * 下の MOBILE-01 で中身を詰めた上で、最後の保険として縦だけスクロールを許す。 */
+  min-height: 0; overflow-x: hidden; overflow-y: auto; position: relative;
   display: flex; flex-direction: column; gap: clamp(5px, 1vh, 9px);
   padding: clamp(9px, 1.7vh, 14px) clamp(9px, 1.5vh, 13px);
   border: 2px solid var(--lg-gold-2); border-radius: 5px;
@@ -2365,59 +2387,6 @@ body.league-mode #screen-home.season-end-mode > #league-body {
 .lg-hts-bar.me > i { background: linear-gradient(90deg, #2f6fd0, #6aa8ff); }
 .lg-hts-bar.opp > i { background: linear-gradient(90deg, #c0392b, #e2685a); }
 
-/* ── 采配3枚（①②が細・③が広）── */
-.lg-ht-cards {
-  flex: 1 1 auto; min-height: 0; display: grid; gap: clamp(6px, 1.2vh, 10px);
-  grid-template-columns: minmax(0, .85fr) minmax(0, .85fr) minmax(0, 2fr);
-}
-.lg-ht-card {
-  min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 6px;
-  padding: clamp(7px, 1.4vh, 12px) clamp(8px, 1.2vw, 12px);
-  border: 2px solid var(--lg-line); border-radius: 5px;
-  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 3px 0 var(--ht-edge);
-}
-.lg-ht-card.now { border-color: var(--lg-gold); box-shadow: inset 0 0 0 1px rgba(255,255,255,.05), 0 0 0 1px rgba(230,194,104,.3), 0 3px 0 var(--ht-edge); }
-.lg-ht-card.done { border-color: color-mix(in srgb, var(--lg-good) 55%, var(--lg-line)); }
-.lg-ht-card.lock { opacity: .5; }
-.lg-ht-ct {
-  flex: 0 0 auto; display: flex; align-items: center; gap: 7px;
-  font-size: clamp(11px, 2vh, 14px); font-weight: 900; letter-spacing: 1px; color: var(--lg-gold);
-}
-.lg-ht-no {
-  width: 19px; height: 19px; flex: 0 0 auto; border-radius: 4px; display: grid; place-items: center;
-  font-size: 11px; font-weight: 900; background: var(--lg-surface-3); color: var(--lg-text-dim);
-}
-.lg-ht-card.now .lg-ht-no { background: var(--lg-gold); color: var(--lg-ink); }
-.lg-ht-card.done .lg-ht-no { background: var(--lg-good); color: var(--lg-ink); }
-.lg-ht-r { margin: 0; font-size: clamp(11px, 1.9vh, 13px); line-height: 1.6; color: var(--lg-text-dim); }
-.lg-ht-r.lock { color: var(--lg-text-mute); }
-.lg-ht-btn {
-  align-self: flex-start; cursor: pointer; padding: 7px 16px; border-radius: 5px;
-  border: 2px solid var(--lg-gold); background: linear-gradient(165deg, var(--lg-gold), var(--lg-gold-2));
-  color: var(--lg-ink); font-size: clamp(11px, 2vh, 13px); font-weight: 900; font-family: inherit;
-  box-shadow: 0 3px 0 var(--ht-edge);
-}
-.lg-ht-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ht-edge); }
-/* PS-05 声かけ（褒める/叱る）。叱るは「効く相手を選ぶ」ので同格に見せ、色だけ分ける。 */
-.lg-ht-tones { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.lg-ht-toneq { flex: 1 1 100%; font-size: clamp(10px, 1.8vh, 12px); font-weight: 800; color: var(--lg-text-mute); }
-.lg-ht-btn.scold {
-  border-color: #c0392b;
-  background: linear-gradient(165deg, #b8342a, #8e2820);
-  color: #ffe9e5;
-}
-.lg-ht-r .up { color: var(--lg-good); }
-.lg-ht-r .down { color: var(--lg-bad); }
-.lg-ht-r.bad { color: #ff9a8c; }
-/* 選手ボタンの性格バッジ */
-.lg-ht-ps {
-  font-size: clamp(7.5px, 1.3vh, 9px); font-weight: 800; letter-spacing: .2px;
-  color: var(--lg-gold); border: 1px solid var(--lg-line); border-radius: 3px;
-  padding: 0 4px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.lg-ht-pick.on .lg-ht-ps { border-color: var(--lg-gold-2); }
-
 /* ③ 先発11人（ドット頭＋名前） */
 .lg-ht-picks {
   flex: 1 1 auto; min-height: 0; display: grid; gap: 5px; align-content: start;
@@ -2449,6 +2418,10 @@ body.league-mode #screen-home.season-end-mode > #league-body {
   display: grid !important; gap: 10px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
   padding: clamp(8px, 1.6vh, 13px) clamp(10px, 1.6vw, 18px) !important;
 }
+/* HT-02: 共有フッターは順送りの最終ページだけ出す。上の display:grid が !important なので、
+ * JS の inline display:none では勝てない。JS は .lg-ht-hidefoot をルート側に付け、
+ * こちらで同じ強さで打ち消す（インライン style に依存しない＝順序の事故が起きない）。 */
+#halftime-modal.league-ht.lg-ht-hidefoot > div > div:last-child { display: none !important; }
 #halftime-modal.league-ht #ht-btn-lineup {
   width: auto !important; padding: 0 14px !important; min-height: clamp(36px, 6.2vh, 48px);
   border-radius: 5px !important; border: 2px solid var(--lg-line) !important;
@@ -2466,11 +2439,198 @@ body.league-mode #screen-home.season-end-mode > #league-body {
 #halftime-modal.league-ht #ht-btn-lineup:active,
 #halftime-modal.league-ht #ht-btn-kickoff:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ht-edge); }
 
-/* 縦持ちでは采配3枚を縦に積む（横に潰すより読ませる） */
+/* 狭い画面ではスタッツ行のラベル幅を詰める（采配3枚の並べ替えは順送り化で不要になった） */
 @media (orientation: portrait), (max-width: 620px) {
-  .lg-ht-cards { grid-template-columns: minmax(0, 1fr); overflow-y: auto; }
   .lg-hts-row { grid-template-columns: 3em minmax(0, 1fr) 6em minmax(0, 1fr) 3em; gap: 5px; }
 }
+
+/* ==========================================================================
+ * HT-02 — ハーフタイムを「1画面1ビート」の順送りへ（2026-07-27 ユーザー指示）
+ * --------------------------------------------------------------------------
+ * 旧構成は3つの采配（助言／MTG／個別）を1画面に並べ、そこで全部完結させていた。
+ * ユーザー指摘＝**1つの画面で複数の情報処理を完結させようとするとゲームの迫力が死ぬ**。
+ * → 1画面につき「問いか、結果か」どちらか一方だけを大きく出し、タップで次の画面へ送る。
+ *
+ * ★ このページ群に要素を足さないこと。足したくなったら「次のページを作る」が正解。
+ * ★ 文字は大きく・余白は多く。詰めると即座に「文書」に戻る。
+ * ========================================================================== */
+.lg-ht-actions { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+
+/* ── 上部：①②③ のどこに居るか ── */
+.lg-ht2-steps {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
+  padding: 2px 0 clamp(4px, 1.2vh, 10px);
+}
+.lg-ht2-dot {
+  width: clamp(20px, 3.4vh, 26px); height: clamp(20px, 3.4vh, 26px);
+  flex: 0 0 auto; border-radius: 5px; display: grid; place-items: center;
+  font-size: clamp(11px, 1.9vh, 14px); font-weight: 900;
+  background: var(--lg-surface-3); color: var(--lg-text-mute);
+  border: 2px solid transparent;
+}
+.lg-ht2-dot.done { background: var(--lg-good); color: var(--lg-ink); }
+.lg-ht2-dot.on { background: var(--lg-gold); color: var(--lg-ink); border-color: #fff6d8; }
+.lg-ht2-dash { flex: 0 0 12px; height: 2px; background: var(--lg-line); border-radius: 1px; }
+.lg-ht2-stepname {
+  margin-left: 6px; font-size: clamp(12px, 2.2vh, 16px); font-weight: 900;
+  letter-spacing: 1.5px; color: var(--lg-gold);
+}
+
+/* ── 本文：1画面1ビート。中身は縦中央に置いて「1つのことを言っている」感を出す ── */
+.lg-ht2-page {
+  flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto;
+  display: flex; flex-direction: column; align-items: center; justify-content: safe center;
+  gap: clamp(8px, 2vh, 18px); text-align: center;
+  padding: clamp(4px, 1vh, 10px) 0;
+}
+.lg-ht2-page.recap, .lg-ht2-page.who { justify-content: safe center; }
+/* ★ .lg-ht2-page は align-items:center（＝子は内容幅）。スタッツ表のように
+ *   「バーが 1fr で伸びる」中身は、明示的に幅を与えないと軸が 0 に潰れる。 */
+.lg-ht2-page > .lg-hts { width: 100%; max-width: 720px; align-self: center; }
+
+/* 問い（何を決めるのか）。この画面の主語。 */
+.lg-ht2-ask {
+  margin: 0; max-width: 34ch;
+  font-size: clamp(15px, 3.4vh, 26px); font-weight: 900; line-height: 1.45;
+  color: var(--lg-text); text-shadow: 0 2px 0 rgba(0, 0, 0, .45);
+}
+.lg-ht2-ask.sm { font-size: clamp(13px, 2.6vh, 19px); color: var(--lg-text-dim); }
+
+/* 結果のセリフ。ハーフタイムの「聞かせどころ」なので一番大きい。 */
+.lg-ht2-say {
+  margin: 0; max-width: 30ch;
+  font-size: clamp(17px, 4vh, 32px); font-weight: 900; line-height: 1.4;
+  color: #fff6d8; text-shadow: 0 3px 0 rgba(0, 0, 0, .5);
+}
+.lg-ht2-say.quiet { color: var(--lg-text-mute); font-size: clamp(15px, 3vh, 22px); }
+.lg-ht2-say.bad { color: #ff9a8c; }
+
+/* 効果の1行（何が変わったか）。セリフの添え物なので必ず小さく1行。 */
+.lg-ht2-eff {
+  margin: 0; font-size: clamp(12px, 2.2vh, 16px); font-weight: 800; letter-spacing: .5px;
+  padding: 5px 14px; border-radius: 999px; border: 2px solid var(--lg-line);
+  background: rgba(0, 0, 0, .3);
+}
+.lg-ht2-eff.up { color: var(--lg-good); border-color: color-mix(in srgb, var(--lg-good) 55%, var(--lg-line)); }
+.lg-ht2-eff.down { color: var(--lg-bad); border-color: color-mix(in srgb, var(--lg-bad) 55%, var(--lg-line)); }
+
+/* ── 大きな選択肢（褒める / 叱る など）── */
+.lg-ht2-choices {
+  display: grid; gap: clamp(8px, 1.8vw, 16px); width: 100%; max-width: 620px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.lg-ht2-choices.one { grid-template-columns: minmax(0, 1fr); max-width: 380px; }
+.lg-ht2-choice {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; min-height: clamp(64px, 13vh, 104px); padding: 10px 12px;
+  border-radius: 8px; border: 2px solid var(--lg-gold); cursor: pointer; font-family: inherit;
+  background: linear-gradient(165deg, var(--lg-gold), var(--lg-gold-2)); color: var(--lg-ink);
+  box-shadow: 0 4px 0 var(--ht-edge); transition: transform .08s ease, box-shadow .08s ease;
+}
+.lg-ht2-choice:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ht-edge); }
+.lg-ht2-choice .ico { font-size: clamp(20px, 3.6vh, 30px); line-height: 1 }
+.lg-ht2-choice .tx { font-size: clamp(15px, 2.9vh, 22px); font-weight: 900; letter-spacing: 1px }
+.lg-ht2-choice .sub { font-size: clamp(10px, 1.7vh, 12.5px); font-weight: 700; opacity: .72 }
+.lg-ht2-choice.scold {
+  border-color: #c0392b; background: linear-gradient(165deg, #b8342a, #8e2820); color: #ffe9e5;
+}
+
+/* ── ②の結果：何人が応えたか。数字で殴る。 ── */
+.lg-ht2-tally { display: flex; gap: clamp(14px, 4vw, 40px); align-items: flex-end }
+.lg-ht2-tally > div { display: flex; flex-direction: column; align-items: center; line-height: 1 }
+.lg-ht2-tally b { font-size: clamp(34px, 9vh, 72px); font-weight: 900; text-shadow: 0 4px 0 rgba(0,0,0,.5) }
+.lg-ht2-tally span { font-size: clamp(11px, 1.9vh, 14px); font-weight: 800; color: var(--lg-text-mute); margin-top: 4px }
+.lg-ht2-tally .up b { color: var(--lg-good) }
+.lg-ht2-tally .down b { color: var(--lg-bad) }
+
+/* ── ③の相手を大写しにする ── */
+.lg-ht2-solo { display: flex; align-items: center; gap: clamp(8px, 2vw, 16px) }
+.lg-ht2-soloface {
+  width: clamp(46px, 11vh, 88px); height: auto; aspect-ratio: 1;
+  image-rendering: pixelated; border-radius: 6px;
+  border: 2px solid var(--lg-gold-2); background: rgba(0, 0, 0, .35);
+}
+.lg-ht2-solotx { text-align: left; display: flex; flex-direction: column; gap: 2px }
+.lg-ht2-solotx b { font-size: clamp(16px, 3.2vh, 26px); font-weight: 900; color: var(--lg-text) }
+.lg-ht2-solotx span {
+  font-size: clamp(10.5px, 1.9vh, 13px); font-weight: 800; color: var(--lg-gold);
+  border: 1px solid var(--lg-line); border-radius: 4px; padding: 1px 6px; align-self: flex-start;
+}
+
+/* ── ⑤ 後半へ：3つの采配の結果を1行ずつ ── */
+.lg-ht2-page.resume { gap: clamp(5px, 1.2vh, 9px) }
+.lg-ht2-sum {
+  display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center;
+  gap: 10px; width: 100%; max-width: 620px; text-align: left;
+  padding: clamp(6px, 1.4vh, 11px) clamp(9px, 1.4vw, 14px);
+  border-radius: 6px; border: 2px solid var(--lg-line); background: rgba(0, 0, 0, .28);
+  opacity: .55;
+}
+.lg-ht2-sum.done { opacity: 1; border-color: color-mix(in srgb, var(--lg-good) 45%, var(--lg-line)) }
+.lg-ht2-sum .no {
+  width: 20px; height: 20px; border-radius: 4px; display: grid; place-items: center;
+  font-size: 11px; font-weight: 900; background: var(--lg-surface-3); color: var(--lg-text-dim);
+}
+.lg-ht2-sum.done .no { background: var(--lg-good); color: var(--lg-ink) }
+.lg-ht2-sum .lb { font-size: clamp(11.5px, 2vh, 14px); font-weight: 900; color: var(--lg-gold) }
+.lg-ht2-sum .tx {
+  font-size: clamp(11.5px, 2vh, 14px); font-weight: 700; color: var(--lg-text-dim);
+  text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ── 下部コマンドバー（戻る／次へ）── */
+.lg-ht2-nav {
+  flex: 0 0 auto; display: grid; gap: 10px; padding-top: clamp(5px, 1.2vh, 10px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+}
+.lg-ht2-nb {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: clamp(38px, 6.4vh, 48px); padding: 6px 14px; border-radius: 6px;
+  border: 2px solid var(--lg-line); font-family: inherit; cursor: pointer;
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2)); color: var(--lg-text);
+  font-size: clamp(13px, 2.3vh, 16px); font-weight: 900; letter-spacing: 1px;
+  box-shadow: 0 3px 0 var(--ht-edge); transition: transform .08s ease, box-shadow .08s ease;
+}
+.lg-ht2-nb:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ht-edge) }
+.lg-ht2-nb.back { color: var(--lg-text-mute) }
+.lg-ht2-nb.next {
+  border-color: var(--lg-gold); color: var(--lg-ink);
+  background: linear-gradient(165deg, var(--lg-gold), var(--lg-gold-2));
+}
+.lg-ht2-nb.ghost { border: 0; background: none; box-shadow: none; cursor: default }
+
+/* ③の選手グリッドは順送りになって面を独占できるので、指で押せる大きさに戻す */
+.lg-ht2-page.who .lg-ht-picks {
+  flex: 0 0 auto; width: 100%; gap: clamp(5px, 1.2vw, 10px);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.lg-ht2-page.who .lg-ht-pick { padding: 6px 4px; gap: 3px; min-height: clamp(58px, 13vh, 96px) }
+.lg-ht2-page.who .lg-ht-face { max-width: clamp(30px, 7vh, 56px) }
+.lg-ht2-page.who .lg-ht-pn { font-size: clamp(10px, 1.8vh, 13px) }
+.lg-ht2-page.who .lg-ht-ps { font-size: clamp(9px, 1.5vh, 11px) }
+
+/* 縦持ちは6列だと1人が細すぎるので4列に */
+@media (orientation: portrait) {
+  .lg-ht2-page.who .lg-ht-picks { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+  .lg-ht2-choices { grid-template-columns: minmax(0, 1fr) }
+}
+/* 低い枠（横持ちスマホ）では11人の2行目が数px溢れる。名札の行間だけ詰めて全員を収める
+ * ★ 顔とタップ面は削らない（③は「誰を選ぶか」が主役なので押しやすさが最優先）。 */
+@media (orientation: landscape) and (max-height: 430px) {
+  .lg-ht2-steps { padding-bottom: 3px }
+  .lg-ht2-page.who { gap: 5px }
+  .lg-ht2-page.who .lg-ht-pick { padding: 4px 3px; gap: 1px }
+  .lg-ht2-page.who .lg-ht-pn { line-height: 1.15 }
+  .lg-ht2-page.who .lg-ht-ps { padding: 0 3px }
+  /* ⑤後半へ：3行＋見出しで十数px溢れるので行の余白だけ詰める */
+  .lg-ht2-page.resume { gap: 4px }
+  .lg-ht2-page.resume .lg-ht2-sum { padding: 4px 10px }
+}
+
+/* 順送りで面に余裕ができたので、旧レイアウト時代の「潰すための小さい字」を戻す。
+ * （C-2 の下限 10.5px に合わせる＝スマホで読める大きさ） */
+#halftime-modal.league-ht .lg-hts-k { font-size: 10.5px }
+.lg-ht2-page.who .lg-ht-ps { font-size: clamp(10px, 1.6vh, 12px) }
 
 /* ==========================================================================
  * SN-03改4 — 個人表彰の「上位10名」ランキング（2026-07-26）
@@ -2580,4 +2740,261 @@ button.lg-se-award:active { transform: translateY(2px); box-shadow: inset 0 0 0 
   /* 控えが3列＝5行に収まったぶん、ピッチは大きめに取れる（名前が読める）。
      ドットはコンテナクエリでピッチ幅に追従するので、大きくしても重ならない。 */
   body.league-mode #screen-setting.league-prep .field-container { height: min(56vh, 430px); }
+}
+
+/* ==========================================================================
+ * MOBILE-01 — 横持ちスマホ実機の総点検で出た不備の修正（2026-07-27）
+ * --------------------------------------------------------------------------
+ * 実測サイズ: 844×390(iPhone 14/15 横) / 800×360(Android 横) / 667×375(SE 横)。
+ * 大原則 ―― 横持ちスマホは【幅は余っていて高さだけが足りない】。
+ *   ✅ 足りない高さを削る（帯・余白・字送りを詰める／横に並べる）
+ *   ❌ 高さが足りないからと列を畳む（＝縦に伸びて逆効果。B-1 で撤去済み）
+ * すべて lab 限定。共有CSS(css/style.css)には触れていない。
+ * ========================================================================== */
+
+/* ── B-3: 実機スマホにPCの「端末枠シミュレート」を出さない ──
+ * css/style.css の `@media (min-width:600px)` は横持ちスマホ(幅667〜932)にも当たるため、
+ * 実機なのに body が clamp(760px,94vw,920px) に絞られ、左右に黒帯＋角丸の偽装フレームが
+ * 出て貴重な幅を捨てていた（844幅で左右25pxずつ）。カットシーンのスキップボタンが
+ * 枠から11pxはみ出して縁で切れていたのもこれが原因。
+ * 判定は「タッチ端末」または「横持ちで高さが極端に低い」＝実機横持ちとみなす。 */
+@media (orientation: landscape) and (pointer: coarse),
+       (orientation: landscape) and (max-height: 500px) {
+  body.league-mode {
+    width: 100%; max-width: none;
+    height: 100vh; height: 100dvh; max-height: none;
+    border-radius: 0; box-shadow: none;
+  }
+}
+
+/* ── 低フレーム高（横持ちスマホ全般）＝高さを1pxずつ取り戻す ── */
+@media (orientation: landscape) and (max-height: 430px) {
+
+  /* A-3 仕上げ: 8クラブの順位表は行31px×8＋見出しで32px溢れていた。行を4px詰めれば
+   * 全8クラブが1画面に収まる＝シーズン最終順位をスクロールなしで一望できる。 */
+  .lg-tbl-row { padding: 4px 2px; }
+
+  /* A-4 仕上げ（iPhone SE 横 667×375）: マストヘッドが「シーズンハブ」バッジ＋ステータス帯で
+   * 1行に収まらず2段に折り返し、その50pxぶん下のパネルが押されて「リーグ順位を確認」が
+   * 画面外に落ちていた。バッジの文字は畳んでアイコンだけ残し、必ず1行に収める
+   * （★ 折り返しを許すと「幅が足りない→縦に伸びる」という B-1 と同じ失敗になる）。 */
+  .lg-sh-top { flex-wrap: nowrap; }
+  .lg-sh-brand, .lg-sh-bar { padding: 4px 10px; }
+  /* A-4: ハブ左「現在順位」。中身293px/枠241px で「リーグ順位を確認」が消えていた。
+   * 大きい順位数字・勝点チップ・表の行間を詰めて 50px ほど返す。 */
+  .lg-sh-cols { gap: 8px; }
+  .lg-sh-panel { padding: 6px 8px; gap: 4px; }
+  .lg-sh-ph { font-size: 10px; letter-spacing: 1.4px; }
+  .lg-sh-bigpos { padding: 0; gap: 6px; }
+  .lg-sh-bigpos .n { font-size: clamp(22px, 5.6vh, 34px); }
+  .lg-sh-bigpos .cup { font-size: clamp(16px, 3.2vh, 24px); }
+  .lg-sh-kv2 { gap: 4px; }
+  .lg-sh-kv2 > div { padding: 2px; }
+  .lg-sh-kv2 b { font-size: clamp(13px, 2.3vh, 17px); }
+  .lg-sh-mini th { padding: 2px 4px; }
+  .lg-sh-mini td { padding: 2px 4px; font-size: 11px; }
+  .lg-sh-more { padding: 5px 9px; }
+
+  /* A-1: ハーフタイム。スタッツ帯を薄くして采配3枚に高さを回す（②の「叱る」対策）。 */
+  #halftime-modal.league-ht .lg-ht-actions { gap: 5px; }
+  #halftime-modal.league-ht .lg-hts { padding: 4px 9px; gap: 0; }
+  #halftime-modal.league-ht .lg-hts-head { padding-bottom: 1px; margin-bottom: 1px; font-size: 10.5px; }
+  #halftime-modal.league-ht .lg-hts-v { font-size: 11.5px; }
+  #halftime-modal.league-ht .lg-hts-bar { height: 6px; }
+  /* ③個別アドバイスの選手ピッカーは 16px に潰れて顔の上端しか出ていなかった。
+   * 1枚を小さくして 11人×2行が実際に収まる寸法に落とす。 */
+  /* ③が解放済みの時の一行ヒント（「声をかける選手を選ぶ」）は、番号付きの見出しがある以上
+   * 冗長。この16pxが無いと11人の2行目が名前ごと切れるので、指示文より操作面を優先する。
+   * ロック中（.lock）の「まず選手とMTGを行う」は理由の説明なので必ず残す。 */
+
+  /* A-5: クラブ評価。会長コメントが半分・評価ゾーンが103px分消えていた。 */
+  .lg-se-chair { overflow: visible; }
+  .lg-se-chair-body { -webkit-line-clamp: 2; }
+  .lg-se-zone.lg-se-vd, .lg-se-zone.lg-se-sum { overflow-x: hidden; overflow-y: auto; }
+
+  /* A-6: ベストイレブン。4段(FW/MF/DF/GK)で 518px あり 333px の面に対して 185px 溢れ、
+   * 11人目のGKが名前・採点ごと切れていた（＝10人しか見えない）。1人ぶんの札を丸ごと
+   * 小さくして4段を収める。★ .lg-sp-face は landscape ブロックの
+   * `body.league-mode .lg-md-deck .lg-sp-face{max-width:38px}` に勝つ必要があるので
+   * 同じ具体度（body + 3クラス）で書く。 */
+  .lg-se-pitch .lg-sp-line, body.league-mode .lg-md-deck .lg-sp-line { margin-top: 1px; gap: 4px; }
+  body.league-mode .lg-se-pitch .lg-sp-face,
+  body.league-mode .lg-md-deck .lg-sp-face { max-width: clamp(17px, 4.8vh, 28px); }
+  body.league-mode .lg-md-deck .lg-sp-card, .lg-se-pitch .lg-sp-card { padding: 1px 3px; }
+  body.league-mode .lg-md-deck .lg-sp-name, .lg-se-pitch .lg-sp-name { font-size: 10px; line-height: 1.25; }
+  body.league-mode .lg-md-deck .lg-sp-rate, .lg-se-pitch .lg-sp-rate {
+    font-size: 10px; padding: 0 4px; line-height: 1.35;
+  }
+  body.league-mode .lg-md-deck .lg-sp-stat, .lg-se-pitch .lg-sp-stat { font-size: 9px; margin-top: 0; }
+  body.league-mode .lg-md-deck .lg-sp-crest, .lg-se-pitch .lg-sp-crest { font-size: 9px; line-height: 1; margin-top: 0; }
+  body.league-mode .lg-md-deck .lg-sp-head.weekly { margin-bottom: 1px; padding-bottom: 3px; }
+  body.league-mode .lg-md-deck .lg-sp-pitch, .lg-se-pitch .lg-sp-pitch { padding: 1px 6px; }
+  .lg-se-pitch { padding: 1px 4px; }
+  body.league-mode .lg-md-deck .lg-sp-stat, .lg-se-pitch .lg-sp-stat { line-height: 1.2; }
+  /* デッキ面と下部ナビの余白も削って本体に高さを回す */
+  body.league-mode .lg-md-deck { padding: 4px 12px; }
+  body.league-mode .lg-md-nav { padding: 5px 12px 6px; }
+
+  /* ボード面談（開幕の目標交渉＝初回プレイ最初の分岐）。3択が全部フォールド下だった。
+   * ハブ中央パネルは 257px しか無く「絵＋3択」を全部入れるのは物理的に無理なので、
+   *   ①絵は幅だけ縮める（16:5 は保つ＝スロットの形は実アセットと同じまま）
+   *   ②選択肢の余白を詰めて【3つ目が必ず画面に顔を出す】ところまで押し上げる
+   * ＋下端フェード（.is-scrollable）で「まだ下がある」を明示する、の合わせ技にする。
+   * ★ 3つ目が完全に隠れていると存在に気づけない＝少しでも覗いていることが要件。 */
+  .lg-sh-boardwrap .lg-board-art { width: 58%; margin: 0 auto; border-radius: 4px; }
+  .lg-sh-boardwrap .lg-board-opts { gap: 5px; }
+  .lg-sh-boardwrap .lg-board-opt { padding: 6px 10px; }
+  .lg-sh-boardwrap .lg-board-q { margin-bottom: 2px; }
+
+  /* A-7 仕上げ: 週3コマのカード。チップを 44→40px に落としてもまだ 30px 溢れるので、
+   * 行の上下余白とカード内の余白を詰めて「おまかせ」まで1画面に入れる。 */
+  .lg-slotrow { padding: .15em 0; }
+  .lg-card.lg-week, .lg-rd-prepcol > .lg-card { padding: 7px 10px; }
+  .lg-scout { padding: 7px 10px; }
+
+  /* 下部コマンドバー。★ 指で押す面なので高さは削りすぎない（32pxまで落としていたのを
+   * 36pxへ戻す）。そのぶんの4pxはページ枠の gap/padding から回収する。 */
+  .lg-se { gap: 5px; padding: 6px; }
+  .lg-se-nav { gap: 6px; }
+  .lg-se-nb { min-height: clamp(36px, 6vh, 44px); padding: 4px 12px; }
+}
+
+/* ── さらに低い枠（800×360 の Android 横持ち等）──
+ * 390px 用の詰めでは③個別アドバイスの2行目が名前ごと切れたので、あと25px 取り戻す。
+ * スタッツ帯（読み物）から削り、選手ピッカー（操作面）を優先する。 */
+@media (orientation: landscape) and (max-height: 380px) {
+  #halftime-modal.league-ht .lg-hts { padding: 3px 8px; }
+  #halftime-modal.league-ht .lg-hts-head { font-size: 10px; padding-bottom: 0; margin-bottom: 0; }
+  #halftime-modal.league-ht .lg-hts-v { font-size: 11px; }
+  #halftime-modal.league-ht .lg-hts-bar { height: 5px; }
+  #halftime-modal.league-ht .lg-hts-row { gap: 6px; }
+  /* 行の実高は line-height が支配していた（フォントを下げても縮まらなかった原因）。 */
+  #halftime-modal.league-ht .lg-hts-v,
+  #halftime-modal.league-ht .lg-hts-k { line-height: 1.15; }
+
+  /* ハーフタイム⑤「後半へ」の3行が 360px 枠でわずかに溢れる。行の余白だけ詰める。 */
+  .lg-ht2-page.resume .lg-ht2-sum { padding: 3px 9px; }
+  .lg-ht2-page.resume .lg-ht2-ask.sm { font-size: 12px; }
+
+  /* 試合後デッキの WEEKLY BEST XI も 360px 枠では GK の採点が切れる。あと15pxぶん詰める。 */
+  body.league-mode .lg-md-deck .lg-sp-face { max-width: 15px; }
+  body.league-mode .lg-md-deck .lg-sp-name,
+  body.league-mode .lg-md-deck .lg-sp-rate { font-size: 9.5px; }
+  body.league-mode .lg-md-deck .lg-sp-line { margin-top: 0; }
+}
+
+/* ── 低フレーム高 かつ 幅も狭い（iPhone SE 横 667×375 など）──
+ * マストヘッドの中身が1行に収まらず折り返し、その50pxぶんパネルが押し下げられて
+ * 「リーグ順位を確認」が画面外に落ちていた。文字ラベルと軸の長さだけを譲る。 */
+@media (orientation: landscape) and (max-height: 430px) and (max-width: 720px) {
+  .lg-sh-brand { font-size: 0; letter-spacing: 0; padding: 4px 8px; }  /* ラベルを畳みアイコンだけ残す */
+  .lg-sh-brand-ico { font-size: 15px; }
+  /* 帯の中も折り返させない。折り返すと ⚙ が2段目に落ちて帯だけで85pxになる。
+   * 詰めるのはメーターの軸（数値とラベルは残す）＝情報は落とさず幅だけ譲る。 */
+  .lg-sh-bar { flex-wrap: nowrap; }
+  .lg-sh-meter { min-width: 0; flex: 0 1 auto; gap: 4px; }
+  .lg-sh-meter-bar { min-width: 22px; }
+}
+
+/* ── A-7 / A-2: 「幅が余っているなら横に並べる」＝縦を使わない ── */
+@media (orientation: landscape) and (min-width: 640px) {
+  /* A-7: 練習メニュー。偵察レポートだけで1画面を使い切り、肝心の週3コマが
+   * 画面外（可視48%）だった。左に偵察・右に3コマを並べて1画面に収める。 */
+  .lg-rd-prepgrid {
+    display: grid; gap: clamp(8px, 1.6vw, 14px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    align-items: start;
+  }
+  .lg-rd-prepgrid > .lg-rd-prepcol { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+
+  /* A-2: 記者会見の3択。①しか見えず②が帯の裏・③は画面外だった。
+   * ★ 絵の高さは max-height で縛らない（aspect-ratio を上書きしてスロットの形が
+   *   実アセットと食い違う＝過去に踏んだ罠。css/league-ui.css:844 の注記参照）。
+   *   触ってよいのは幅だけなので、余っている幅を使って【絵は左・問答は右】に割る。
+   *   絵は 16:5 のまま列幅ぶん小さくなり、右列に選択肢3つ分の高さが丸ごと空く。 */
+  body.league-mode .lg-md-post .lgj-stage { max-width: min(96%, 760px); }
+  body.league-mode .lg-md-deck .lg-press {
+    display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  }
+  body.league-mode .lg-md-deck .lg-press > .lg-press-art {
+    align-self: center;   /* stretch は不可（aspect-ratio が効かなくなる）。余白は上下に等分 */
+    border-bottom: 0;     /* 縦罫は中央寄せだと絵の丈しか伸びず中途半端な線になるので引かない */
+  }
+  body.league-mode .lg-md-deck .lg-press > .lg-press-art::after { display: none; }
+}
+
+/* ── C: タッチ／可読性 ── */
+
+/* C-1: 週の練習3コマのチップが 32×32px（iOS推奨44・Material48 を大きく下回る）。
+ * 右側は4割空いていたので、指で押せる寸法まで広げる。 */
+.lg-slotchips { max-width: none; gap: 6px; }
+.lg-slotchip { width: 44px; height: 44px; font-size: 20px; }
+@media (orientation: landscape) and (max-height: 430px) {
+  .lg-slotchip { width: 40px; height: 40px; font-size: 18px; }
+}
+/* 縦持ちは幅が 390px しかなく、44px×6 だと 2 行に折り返して行番号との対応が読めなくなる。
+ * 1行に並ぶことの方が「3コマ×6種の表」として重要なので、縦持ちだけ 36px に落とす。 */
+@media (orientation: portrait) {
+  .lg-slotchip { width: 36px; height: 36px; font-size: 17px; }
+  .lg-slotchips { gap: 4px; }
+}
+/* 選択内容のラベルは、幅が足りないと1文字ずつ縦に潰れて読めなくなる（667px 横で発生）。
+ * 潰すくらいならチップの下へ回り込ませる＝行は2段になるが文章として読める。 */
+.lg-slotrow { flex-wrap: wrap; }
+.lg-slottext { min-width: 6em; }
+@media (max-width: 760px) {
+  .lg-slottext { flex: 1 0 100%; margin-left: 1.8em; }
+  /* ラベルが1段増えたぶん、チップを一回り小さくして「おまかせ」まで画面に残す */
+  .lg-slotchip { width: 36px; height: 36px; font-size: 17px; }
+  .lg-slotchips { gap: 5px; }
+  .lg-slottext { margin-top: -3px; line-height: 1.15; font-size: 10.5px; }
+  .lg-slotrow { padding: .05em 0; }
+}
+/* 同じく指で押す面。⚙ が 30×30、順位ショートカットが高さ24px しかなかった。
+ * ハブ左パネルには 45px 以上の余りがあるので、そこから高さを回して押しやすくする。 */
+.lg-sh-gear { width: 38px; height: 38px; }
+.lg-sh-more { min-height: 38px; }
+.lg-sh-bigpos { min-height: 34px; }
+
+/* C-2: 最小フォントの底上げ。実測で 8.0px〜9.5px が広く点在していた（順位変動▲▼=8.0、
+ * ベストイレブンのポジション記号=8.0、表ヘッダ=8.5、スカウティング/成績タイルのラベル=9.0）。
+ * ラベル類の下限を 10.5px に揃える。★ 例外＝ベストイレブンの選手名/採点は 10px 据置。
+ * ここを上げると11人（GK含む）が1画面に収まらなくなり、A-6 の修正を打ち消してしまう。 */
+.lg-tbl-head { font-size: 10.5px; }
+.lg-sh-mini th { font-size: 10.5px; }
+.lg-sh-mini .mv { font-size: 10px; }
+.lg-sh-meter-k { font-size: 11px; }
+.lg-scout-h, .lg-sh-scouth { font-size: 11px; }
+.lg-sh-stat .k, .lg-sh-stat .sub { font-size: 10.5px; }
+.lg-sh-mgr .k, .lg-sh-mgr .next { font-size: 10.5px; }
+.lg-se-aw-more, .lg-se-aw-t, .lg-se-aw-s { font-size: 10.5px; }
+.lg-se-chair-lbl, .lg-se-ztitle, .lg-badge { font-size: 10.5px; }
+.lg-sp-lbl, .lg-sp-sub, .lg-se-pitch .lg-sp-lbl { font-size: 10.5px; }
+.lg-se-kv > span, .lg-pre-term > span, .lg-se-inner, .lg-se-inner > span { font-size: 10.5px; }
+.lg-se-plog th { font-size: 10.5px; }
+.lg-sh-kv2 span { font-size: 10.5px; }
+.lg-sh-tile .k, .lg-sh-tile .sub { font-size: 10.5px; }
+.lg-xi-pos { font-size: 10.5px; }
+.lg-rd-ha { font-size: 10.5px; }
+.lg-pre-name em { font-size: 10.5px; }
+.lg-se-meter-v i { font-size: 10px; }   /* 「/100」は数値の添え字なので1段だけ小さくてよい */
+.lg-se-step > i { font-size: 10.5px; }
+
+/* C-3: スクロール手がかり。横持ちでは内側スクロール領域が「切れているだけ」に見えて
+ * 続きの存在に気づけない（分析スタッフ／出場記録／BEST XI／ボード面談の選択肢）。
+ * 下端をフェードさせて「まだ下がある」を示す。
+ * ★ opt-in（.is-scrollable が付いた時だけ）。JS が実測して付ける＝万一 JS 側が動かなくても
+ *   「収まっているのに切れて見える」という新しい誤読を生まない安全側に倒れる。 */
+.lg-rd-scroll.is-scrollable, .lg-sh-boardwrap.is-scrollable, .lg-se-plogwrap.is-scrollable,
+.lg-md-deck.is-scrollable, .bench-list.is-scrollable, .lg-sh-panel.is-scrollable {
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(180deg, #000 calc(100% - 24px), transparent 100%);
+}
+
+/* C-4: ピッチ上の選手名が「ベリン…／アンダ…」と潰れる。横持ちは幅が余っているので
+ * ドット1個あたりの名札幅を広げる（.league-prep スコープ＝他モードに波及しない）。 */
+@media (orientation: landscape) {
+  body.league-mode #screen-setting.league-prep .player-name-tag {
+    max-width: min(9em, 74px); font-size: 9px;
+  }
 }

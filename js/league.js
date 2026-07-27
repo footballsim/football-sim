@@ -1510,9 +1510,21 @@
     ADVISE_BASE: 0.30, ADVISE_GAIN: 0.40,       // 個人 morale：0→+0.30 / 100→+0.70
     FRUST_UNIT: 0.35                            // 声かけ1回で動く苛立ちの基準量（talk.frust に掛ける）
   };
-  var _htState = null;   // { advice:null|{action,n}, rouse:false, advise:null|{name} }
+  /* ── 画面構成（2026-07-27 ユーザー指示で全面変更）────────────────────────
+   * 旧: 3つの采配を1画面に並べて全部そこで完結させていた（＝情報処理が同居して
+   *     「文書」に見え、ゲームとしての迫力が出ない）。
+   * 新: **1画面1ビートの順送り**。1つの画面では1つのことだけを聞き、タップで次へ送る。
+   *     0 前半のスタッツ → 1 コーチの助言 → 2 選手とMTG → 3 誰に声をかける
+   *     → 4 その選手に何と言う → 5 後半へ
+   * ★ 采配は元々すべて任意。順送りにしても「やらずに次へ」で飛ばせることを保つ。 */
+  var HT_STEP = { RECAP: 0, ADVICE: 1, TALK: 2, WHO: 3, WORD: 4, RESUME: 5 };
+  var HT_LAST = HT_STEP.RESUME;
 
-  function _htReset() { _htState = { advice: null, rouse: null, advise: null, pick: null }; }
+  var _htState = null;   // { advice:null|{action,n}, rouse:null, advise:null, pick:null, step:0 }
+
+  function _htReset() {
+    _htState = { advice: null, rouse: null, advise: null, pick: null, step: HT_STEP.RECAP };
+  }
 
   function _mgrParam(key) {
     var m = _state && _state.manager;
@@ -1544,6 +1556,8 @@
     if (!_leagueMatchActive || !_htState || _htState.advice) return;
     var top = _htTopOpponentAction();
     if (!top) { _htState.advice = { action: null, n: 0 }; _renderHtActions(); return; }
+    /* ★ ステップ制になったので「前の采配が済んでいるか」の相互ガードは持たない。
+     *   各画面は自分の1件だけを見る（二重適用の防止＝自分の done フラグのみ）。 */
     // ビデオ学習と同じ器（_mgMatchCtx）に相乗り。無ければここで作る。
     if (!_mgMatchCtx) {
       _mgMatchCtx = {
@@ -1578,7 +1592,7 @@
   /* ②選手とMTG。褒める/叱るを選び、**先発11人それぞれが性格に応じて反応する**。
    * チーム全体の morale も動かす（響いた人数から算出＝別の乱数は引かない）。 */
   window.leagueHtRouse = function (tone) {
-    if (!_leagueMatchActive || !_htState || _htState.rouse || !_htState.advice) return;
+    if (!_leagueMatchActive || !_htState || _htState.rouse) return;
     if (tone !== 'praise' && tone !== 'scold') return;
     var t = gameState && gameState.team1; if (!t) return;
     var base = HT_TUNING.ROUSE_BASE + HT_TUNING.ROUSE_GAIN * (_mgrParam('motivator') / MANAGER_TUNING.CAP);
@@ -1597,13 +1611,15 @@
 
   /* ③選手個別にアドバイス。指名した1人の morale を上げ、苛立ちを消す。 */
   /* ③個別アドバイス。まず選手を選び（leagueHtPick）、次に褒める/叱るを選ぶ。 */
+  /* 選手を選んだ時点で「何と言う？」の画面へ送る＝選択そのものが画面遷移になる。 */
   window.leagueHtPick = function (pos) {
-    if (!_leagueMatchActive || !_htState || _htState.advise || !_htState.rouse) return;
+    if (!_leagueMatchActive || !_htState || _htState.advise) return;
     _htState.pick = pos;
+    _htState.step = HT_STEP.WORD;
     _renderHtActions();
   };
   window.leagueHtAdvise = function (tone) {
-    if (!_leagueMatchActive || !_htState || _htState.advise || !_htState.rouse) return;
+    if (!_leagueMatchActive || !_htState || _htState.advise) return;
     if (_htState.pick == null) return;
     if (tone !== 'praise' && tone !== 'scold') return;
     var t = gameState && gameState.team1; if (!t) return;
@@ -1665,102 +1681,244 @@
     '</section>';
   }
 
-  /* ハーフタイムのアクション面。共有の HT モーダルへ **リーグの試合中だけ** 差し込む。 */
-  function _htActionsHTML() {
-    var st = _htState || { advice: null, rouse: false, advise: null };
+  /* ══ ハーフタイムの順送りページ ═══════════════════════════════════════════
+   * 1画面＝1ビート。見出し・問い・選択肢・結果のどれか1組だけを大きく出す。
+   * ★ 迫力は「余白と文字の大きさ」で出す。詰め込むと即座に文書に戻るので、
+   *   このページ群には情報を足さないこと（足したくなったら次のページを作る）。 */
 
-    // ①コーチの助言
-    var c1 = '<section class="lg-ht-card' + (st.advice ? ' done' : ' now') + '">' +
-      '<div class="lg-ht-ct"><span class="lg-ht-no">1</span>' + _t('コーチの助言', 'Coach\'s read') + '</div>';
-    if (st.advice) {
-      c1 += '<p class="lg-ht-r">' + (st.advice.action
-        ? _t('相手は前半「' + _threatLabel(st.advice.action) + '」を' + st.advice.n + '回仕掛けている。後半はここを潰す。',
-             'They went with "' + _threatLabel(st.advice.action) + '" ' + st.advice.n + ' times — we shut it down now.')
-        : _t('前半のデータがまだ足りない。', 'Not enough data from the first half.')) + '</p>';
-    } else {
-      c1 += '<button type="button" class="lg-ht-btn" onclick="leagueHtAdvice()">' + _t('助言を聞く', 'Listen') + '</button>';
-    }
-    c1 += '</section>';
-
-    // ②選手とMTG（褒める/叱る。性格ごとに響き方が違う）
-    var c2 = '<section class="lg-ht-card' + (st.rouse ? ' done' : (st.advice ? ' now' : ' lock')) + '">' +
-      '<div class="lg-ht-ct"><span class="lg-ht-no">2</span>' + _t('選手とMTG', 'Team talk') + '</div>';
-    if (st.rouse) {
-      var toneTx = (st.rouse.tone === 'praise') ? _t('称えた', 'praised them') : _t('activate', 'activate');
-      c2 += '<p class="lg-ht-r">' + (st.rouse.tone === 'praise'
-        ? _t('ロッカールームを称えた。', 'You praised the dressing room.')
-        : _t('ロッカールームで叱咤した。', 'You laid into the dressing room.')) + '</p>' +
-        '<p class="lg-ht-r"><b class="up">' + st.rouse.up + _t('人が応えた', ' responded') + '</b>' +
-        (st.rouse.down ? '　<b class="down">' + st.rouse.down + _t('人が反発', ' pushed back') + '</b>' : '') + '</p>';
-    } else if (st.advice) {
-      c2 += '<div class="lg-ht-tones">' +
-        '<button type="button" class="lg-ht-btn praise" onclick="leagueHtRouse(\'praise\')">👏 ' + _t('褒める', 'Praise') + '</button>' +
-        '<button type="button" class="lg-ht-btn scold" onclick="leagueHtRouse(\'scold\')">🗯 ' + _t('叱る', 'Scold') + '</button>' +
-      '</div>';
-    } else {
-      c2 += '<p class="lg-ht-r lock">🔒 ' + _t('まずコーチの話を聞く', 'Hear the coach first') + '</p>';
-    }
-    c2 += '</section>';
-
-    // ③個別アドバイス（先発11人）
-    var c3 = '<section class="lg-ht-card wide' + (st.advise ? ' done' : (st.rouse ? ' now' : ' lock')) + '">' +
-      '<div class="lg-ht-ct"><span class="lg-ht-no">3</span>' + _t('個別アドバイス', 'A word with one player') + '</div>';
-    var t = gameState && gameState.team1;
-    if (t) {
-      var teamKey = (team1Data && team1Data._srcKey) || '';
-      var picks = '';
-      for (var i = 0; i < 11; i++) {
-        var p = t.players[t.lineup[i]];
-        if (!p) continue;
-        var nm = (_isEn() && p.en_name) ? p.en_name : p.name;
-        var ps = (typeof mentalPersonality === 'function') ? mentalPersonality(p) : null;
-        var psName = ps ? ((_isEn() && ps.en_name) ? ps.en_name : ps.name) : '';
-        var sel = (st.advise ? (st.advise.pos === i) : (st.pick === i));
-        var dis = (st.advise || !st.rouse);
-        picks += '<button type="button" class="lg-ht-pick' + (sel ? ' on' : '') + (dis ? ' off' : '') + '" ' +
-          (dis ? '' : 'onclick="leagueHtPick(' + i + ')"') + '>' +
-          '<canvas class="lg-ht-face" width="72" height="72" data-portrait="' + (p.long_name || p.name) + '"' +
-            (teamKey ? ' data-team="' + teamKey + '"' : '') + '></canvas>' +
-          '<span class="lg-ht-pn">' + nm + '</span>' +
-          (psName ? '<span class="lg-ht-ps">' + psName + '</span>' : '') + '</button>';
-      }
-      c3 += '<div class="lg-ht-picks">' + picks + '</div>';
-    }
-    if (st.advise) {
-      c3 += '<p class="lg-ht-r' + (st.advise.good ? '' : ' bad') + '">▶ ' +
-        (st.advise.good
-          ? _t(st.advise.name + '（' + st.advise.ps + '）は顔を上げた。', st.advise.name + ' (' + st.advise.ps + ') lifts his head.')
-          : _t(st.advise.name + '（' + st.advise.ps + '）は納得していない。逆効果だ。',
-               st.advise.name + ' (' + st.advise.ps + ') is not having it — that backfired.')) + '</p>';
-    } else if (!st.rouse) {
-      c3 += '<p class="lg-ht-r lock">🔒 ' + _t('まず選手とMTGを行う', 'Hold the team talk first') + '</p>';
-    } else if (st.pick != null) {
-      var pp = t && t.players[t.lineup[st.pick]];
-      var pnm = pp ? ((_isEn() && pp.en_name) ? pp.en_name : pp.name) : '';
-      c3 += '<div class="lg-ht-tones"><span class="lg-ht-toneq">' + pnm + _t(' に何と言う？', ' — what do you say?') + '</span>' +
-        '<button type="button" class="lg-ht-btn praise" onclick="leagueHtAdvise(\'praise\')">👏 ' + _t('褒める', 'Praise') + '</button>' +
-        '<button type="button" class="lg-ht-btn scold" onclick="leagueHtAdvise(\'scold\')">🗯 ' + _t('叱る', 'Scold') + '</button>' +
-      '</div>';
-    } else {
-      c3 += '<p class="lg-ht-r lock">' + _t('声をかける選手を選ぶ', 'Pick a player to talk to') + '</p>';
-    }
-    c3 += '</section>';
-
-    return _htStatsHTML() + '<div class="lg-ht-cards">' + c1 + c2 + c3 + '</div>';
+  function _htStepDefs() {
+    return [
+      { k: 'recap',  no: '',  ja: '前半のスタッツ',   en: 'First half' },
+      { k: 'advice', no: '1', ja: 'コーチの助言',     en: "Coach's read" },
+      { k: 'talk',   no: '2', ja: '選手とMTG',        en: 'Team talk' },
+      { k: 'who',    no: '3', ja: '個別アドバイス',   en: 'A word with one' },
+      { k: 'word',   no: '3', ja: '個別アドバイス',   en: 'A word with one' },
+      { k: 'resume', no: '',  ja: '後半へ',           en: 'Second half' }
+    ];
   }
+
+  /* 上部のステップ表示（①②③のどこに居るか）。resume/recap では出さない。 */
+  function _htStepsHTML(step) {
+    var defs = _htStepDefs();
+    var marks = [
+      { no: '1', on: step === HT_STEP.ADVICE, done: !!(_htState && _htState.advice) },
+      { no: '2', on: step === HT_STEP.TALK,   done: !!(_htState && _htState.rouse) },
+      { no: '3', on: step === HT_STEP.WHO || step === HT_STEP.WORD, done: !!(_htState && _htState.advise) }
+    ];
+    var html = marks.map(function (m) {
+      return '<span class="lg-ht2-dot' + (m.on ? ' on' : '') + (m.done ? ' done' : '') + '">' + m.no + '</span>';
+    }).join('<i class="lg-ht2-dash"></i>');
+    var d = defs[step];
+    return '<nav class="lg-ht2-steps">' + html +
+      '<span class="lg-ht2-stepname">' + _t(d.ja, d.en) + '</span></nav>';
+  }
+
+  /* 大きな2択（褒める / 叱る）。ハーフタイムの選択肢はこの形に統一する。 */
+  function _htToneChoicesHTML(fn) {
+    return '<div class="lg-ht2-choices">' +
+      '<button type="button" class="lg-ht2-choice praise" onclick="' + fn + '(\'praise\')">' +
+        '<span class="ico">👏</span><span class="tx">' + _t('褒める', 'Praise') + '</span>' +
+        '<span class="sub">' + _t('自信を与える', 'Lift them up') + '</span></button>' +
+      '<button type="button" class="lg-ht2-choice scold" onclick="' + fn + '(\'scold\')">' +
+        '<span class="ico">🗯</span><span class="tx">' + _t('叱る', 'Scold') + '</span>' +
+        '<span class="sub">' + _t('相手を選ぶ劇薬', 'Cuts both ways') + '</span></button>' +
+    '</div>';
+  }
+
+  function _htPlayerAt(pos) {
+    var t = gameState && gameState.team1;
+    return (t && t.players[t.lineup[pos]]) || null;
+  }
+  function _htName(p) { return p ? ((_isEn() && p.en_name) ? p.en_name : p.name) : ''; }
+
+  /* ── 各ページの中身 ── */
+
+  function _htPageRecap() {
+    return '<div class="lg-ht2-page recap">' + (_htStatsHTML() || '') + '</div>';
+  }
+
+  function _htPageAdvice() {
+    var st = _htState;
+    var body;
+    if (!st.advice) {
+      body = '<p class="lg-ht2-ask">' + _t('ベンチのコーチが、前半のデータを持って手招きしている。',
+                                           'Your coach is waving you over with the first-half data.') + '</p>' +
+        '<div class="lg-ht2-choices one">' +
+          '<button type="button" class="lg-ht2-choice" onclick="leagueHtAdvice()">' +
+            '<span class="ico">🎧</span><span class="tx">' + _t('助言を聞く', 'Listen') + '</span></button>' +
+        '</div>';
+    } else if (st.advice.action) {
+      body = '<p class="lg-ht2-say">' +
+        _t('「相手は前半、' + _threatLabel(st.advice.action) + 'を' + st.advice.n + '回。後半はここを潰す」',
+           '"They went at us with ' + _threatLabel(st.advice.action) + ' ' + st.advice.n + ' times. We shut it down now."') +
+        '</p>' +
+        '<p class="lg-ht2-eff up">▲ ' + _t(_threatLabel(st.advice.action) + ' への守備が後半だけ上がる',
+                                            'Your defence against ' + _threatLabel(st.advice.action) + ' improves for the second half') + '</p>';
+    } else {
+      body = '<p class="lg-ht2-say quiet">' + _t('「前半のデータがまだ足りない」', '"Not enough data yet."') + '</p>';
+    }
+    return '<div class="lg-ht2-page">' + body + '</div>';
+  }
+
+  function _htPageTalk() {
+    var st = _htState;
+    if (!st.rouse) {
+      return '<div class="lg-ht2-page">' +
+        '<p class="lg-ht2-ask">' + _t('ロッカールームが静まり返っている。何と言う？',
+                                      'The dressing room has gone quiet. What do you say?') + '</p>' +
+        _htToneChoicesHTML('leagueHtRouse') + '</div>';
+    }
+    var head = (st.rouse.tone === 'praise')
+      ? _t('ロッカールームを称えた。', 'You praised the dressing room.')
+      : _t('ロッカールームで叱咤した。', 'You laid into the dressing room.');
+    return '<div class="lg-ht2-page">' +
+      '<p class="lg-ht2-say">' + head + '</p>' +
+      '<div class="lg-ht2-tally">' +
+        '<div class="up"><b>' + st.rouse.up + '</b><span>' + _t('人が応えた', 'responded') + '</span></div>' +
+        (st.rouse.down
+          ? '<div class="down"><b>' + st.rouse.down + '</b><span>' + _t('人が反発', 'pushed back') + '</span></div>'
+          : '') +
+      '</div></div>';
+  }
+
+  function _htPageWho() {
+    var t = gameState && gameState.team1;
+    if (!t) return '<div class="lg-ht2-page"></div>';
+    var teamKey = (team1Data && team1Data._srcKey) || '';
+    var picks = '';
+    for (var i = 0; i < 11; i++) {
+      var p = _htPlayerAt(i); if (!p) continue;
+      var ps = (typeof mentalPersonality === 'function') ? mentalPersonality(p) : null;
+      var psName = ps ? ((_isEn() && ps.en_name) ? ps.en_name : ps.name) : '';
+      var done = !!(_htState && _htState.advise);
+      var sel = done && _htState.advise.pos === i;
+      picks += '<button type="button" class="lg-ht-pick' + (sel ? ' on' : '') + (done ? ' off' : '') + '"' +
+        (done ? '' : ' onclick="leagueHtPick(' + i + ')"') + '>' +
+        '<canvas class="lg-ht-face" width="72" height="72" data-portrait="' + (p.long_name || p.name) + '"' +
+          (teamKey ? ' data-team="' + teamKey + '"' : '') + '></canvas>' +
+        '<span class="lg-ht-pn">' + _htName(p) + '</span>' +
+        (psName ? '<span class="lg-ht-ps">' + psName + '</span>' : '') + '</button>';
+    }
+    var ask = (_htState && _htState.advise)
+      ? _t('声をかけたのは ' + _htState.advise.name, 'You spoke to ' + _htState.advise.name)
+      : _t('誰に声をかける？', 'Who do you pull aside?');
+    return '<div class="lg-ht2-page who">' +
+      '<p class="lg-ht2-ask sm">' + ask + '</p>' +
+      '<div class="lg-ht-picks">' + picks + '</div></div>';
+  }
+
+  function _htPageWord() {
+    var st = _htState;
+    if (st.pick == null) {
+      return '<div class="lg-ht2-page">' +
+        '<p class="lg-ht2-ask">' + _t('先に声をかける選手を選ぶ。', 'Pick a player first.') + '</p></div>';
+    }
+    var p = _htPlayerAt(st.pick);
+    var ps = (typeof mentalPersonality === 'function') ? mentalPersonality(p) : null;
+    var psName = ps ? ((_isEn() && ps.en_name) ? ps.en_name : ps.name) : '';
+    var teamKey = (team1Data && team1Data._srcKey) || '';
+    var face = '<div class="lg-ht2-solo">' +
+      '<canvas class="lg-ht2-soloface" width="72" height="72" data-portrait="' + (p ? (p.long_name || p.name) : '') + '"' +
+        (teamKey ? ' data-team="' + teamKey + '"' : '') + '></canvas>' +
+      '<div class="lg-ht2-solotx"><b>' + _htName(p) + '</b>' +
+        (psName ? '<span>' + psName + '</span>' : '') + '</div></div>';
+
+    if (!st.advise) {
+      return '<div class="lg-ht2-page word">' + face +
+        '<p class="lg-ht2-ask sm">' + _htName(p) + _t(' に何と言う？', ' — what do you say?') + '</p>' +
+        _htToneChoicesHTML('leagueHtAdvise') + '</div>';
+    }
+    return '<div class="lg-ht2-page word">' + face +
+      '<p class="lg-ht2-say' + (st.advise.good ? '' : ' bad') + '">' +
+        (st.advise.good
+          ? _t(st.advise.name + 'は顔を上げた。', st.advise.name + ' lifts his head.')
+          : _t(st.advise.name + 'は納得していない。逆効果だ。', st.advise.name + ' is not having it — that backfired.')) +
+      '</p>' +
+      '<p class="lg-ht2-eff ' + (st.advise.good ? 'up' : 'down') + '">' +
+        (st.advise.good ? '▲ ' + _t('気持ちが乗った', 'Morale up') : '▼ ' + _t('苛立ちが増した', 'Frustration up')) +
+      '</p></div>';
+  }
+
+  function _htPageResume() {
+    var st = _htState;
+    function row(no, label, done, text) {
+      return '<div class="lg-ht2-sum' + (done ? ' done' : '') + '">' +
+        '<span class="no">' + no + '</span>' +
+        '<span class="lb">' + label + '</span>' +
+        '<span class="tx">' + (done ? text : _t('見送った', 'skipped')) + '</span></div>';
+    }
+    var r1 = st.advice
+      ? (st.advice.action ? _threatLabel(st.advice.action) + _t(' を封じる', ' shut down') : _t('データ不足', 'no data'))
+      : '';
+    var r2 = st.rouse
+      ? (st.rouse.tone === 'praise' ? _t('褒めた', 'praised') : _t('叱った', 'scolded')) +
+        '（' + st.rouse.up + _t('人が反応', ' responded') + '）'
+      : '';
+    var r3 = st.advise ? st.advise.name + (st.advise.good ? _t('・好反応', ' — good') : _t('・逆効果', ' — backfired')) : '';
+    return '<div class="lg-ht2-page resume">' +
+      '<p class="lg-ht2-ask sm">' + _t('前半の采配', 'Your half-time calls') + '</p>' +
+      row('1', _t('コーチの助言', "Coach's read"), !!st.advice, r1) +
+      row('2', _t('選手とMTG', 'Team talk'), !!st.rouse, r2) +
+      row('3', _t('個別アドバイス', 'A word'), !!st.advise, r3) +
+    '</div>';
+  }
+
+  function _htPageHTML(step) {
+    switch (step) {
+      case HT_STEP.RECAP:  return _htPageRecap();
+      case HT_STEP.ADVICE: return _htPageAdvice();
+      case HT_STEP.TALK:   return _htPageTalk();
+      case HT_STEP.WHO:    return _htPageWho();
+      case HT_STEP.WORD:   return _htPageWord();
+      default:             return _htPageResume();
+    }
+  }
+
+  /* 下部コマンドバー（戻る／次へ）。
+   * ★ 采配は元々すべて任意なので「次へ」は常に押せる（＝やらずに飛ばせる）。
+   * ★ 最終ページでは「次へ」を出さない＝出口は共有フッターの「試合再開」1つだけにする。 */
+  function _htNavHTML(step) {
+    var back = (step > HT_STEP.RECAP)
+      ? '<button type="button" class="lg-ht2-nb back" onclick="leagueHtStep(' + (step - 1) + ')">' +
+          _t('← 戻る', '← Back') + '</button>'
+      : '<span class="lg-ht2-nb ghost"></span>';
+    var next = (step < HT_LAST)
+      ? '<button type="button" class="lg-ht2-nb next" onclick="leagueHtStep(' + (step + 1) + ')">' +
+          _t('次へ ▶', 'Next ▶') + '</button>'
+      : '<span class="lg-ht2-nb ghost"></span>';
+    return '<div class="lg-ht2-nav">' + back + next + '</div>';
+  }
+
+  window.leagueHtStep = function (n) {
+    if (!_htState) return;
+    _htState.step = Math.max(HT_STEP.RECAP, Math.min(HT_LAST, n));
+    _renderHtActions();
+  };
 
   function _renderHtActions() {
     var host = document.getElementById('lg-ht-actions');
     if (!host) return;
-    host.innerHTML = _htActionsHTML();
+    var step = (_htState && _htState.step) || HT_STEP.RECAP;
+    var last = (step === HT_LAST);
+
+    host.innerHTML = _htStepsHTML(step) + _htPageHTML(step) + _htNavHTML(step);
     _paintPortraitCanvases(host);   // ドット頭（portrait.js）を塗る
+
+    /* 共有フッターの2ボタン（戦術・システム・選手交代／試合再開）は **最後のページだけ** 出す。
+     * ★ 途中のページに出しておくと「今この画面で何を決めるのか」がぼやけて、
+     *   1画面1ビートが崩れる（順送りの出口は1つだけにする）。
+     * ★ フッターの display は CSS 側で !important 指定なので inline style では消せない。
+     *   クラスで切り替える（css/league-ui.css の .lg-ht-hidefoot）。 */
+    var m = document.getElementById('halftime-modal');
+    if (m) { if (last) m.classList.remove('lg-ht-hidefoot'); else m.classList.add('lg-ht-hidefoot'); }
   }
 
   /* リーグのハーフタイムだけ、共有モーダルを全画面のレトロ面に切り替える。
    * ★ シングル/W杯へ持ち越さないよう、試合が終わる/準備を抜けるときに必ず外す。 */
   function _htDecorate(on) {
     var m = document.getElementById('halftime-modal'); if (!m) return;
-    if (on) m.classList.add('league-ht'); else m.classList.remove('league-ht');
+    if (on) { m.classList.add('league-ht'); }
+    else { m.classList.remove('league-ht'); m.classList.remove('lg-ht-hidefoot'); }
   }
 
   /* simulate.js の _showHalfTimeModal から typeof ガードで呼ばれる（公開版は league.js 非同梱＝no-op）。 */
@@ -3288,6 +3446,11 @@
   function playToday() {
     if (!_state || _state.finished) return;
     if (_lockedToday()) return;
+    /* ★ このフラグは「試合前カットシーンが画面に出ている」の意味しか持たない。
+     *   演出側のコールバックが失われるとフラグだけが残り、以後キックオフが永久に
+     *   弾かれる（リロードするまで復帰不能）。オーバーレイが実在するかで突き合わせ、
+     *   古いフラグは捨てる＝立ったまま戻ってこない状態を作らない。 */
+    if (_preMatchRunning && !document.querySelector('.lg-md-ov.lg-md-pre')) _preMatchRunning = false;
     if (_preMatchRunning) return;   // 連打・二重呼び出しを弾く
     if (typeof startManagerMatch !== 'function') { alert('startManagerMatch 未ロード'); return; }
     var fx = _myFixtureThisRound();
@@ -3485,8 +3648,13 @@
     }
     window._leagueInMatch = false;   // 設定画面を抜けた＝試合へコミット
     // UX-03: 漫画のコマ送りで「ため」を作ってから試合へ（未搭載/OFF なら即キックオフ）。
+    // ★ コールバックは一度きりに保証する（スキップ連打・演出側の二重呼びで
+    //   startManagerMatch が2回走ると試合状態が壊れる）。
     _preMatchRunning = true;
+    var kicked = false;
     _playPreMatchThen(pm.myId, pm.oppId, pm.iAmHome, function () {
+      if (kicked) return;
+      kicked = true;
       _preMatchRunning = false;
       startManagerMatch();
     });
@@ -4931,9 +5099,15 @@
       nav = _finNavHTML(home, home, 'ホームへ戻る', 'Back to home');
     } else if (view === 'prep') {
       // 本線①：練習メニュー。★ 偵察レポートはここ＝ビデオ学習でどれを封じるかの判断材料。
+      // ★ 縦積みだと横持ちスマホで偵察レポートだけで1画面を使い切り、肝心の週3コマが
+      //   画面外に落ちていた（可視48%）。横持ちは幅が余るので【左=偵察 / 右=3コマ】に割る。
+      //   1カラムに戻す条件は CSS 側（.lg-rd-prepgrid の @media）に持たせ、DOMは常に同じ。
       body = '<section class="lg-se-zone lg-se-wide lg-rd-scroll">' +
         '<div class="lg-se-ztitle">' + _t('今週の練習メニュー', "This week's training") + '</div>' +
-        (oppId ? _scoutHTML(oppId) : '') + _actionPhaseHTML() + _absenteeHTML(myId) +
+        '<div class="lg-rd-prepgrid">' +
+          '<div class="lg-rd-prepcol">' + (oppId ? _scoutHTML(oppId) : '') + '</div>' +
+          '<div class="lg-rd-prepcol">' + _actionPhaseHTML() + _absenteeHTML(myId) + '</div>' +
+        '</div>' +
       '</section>';
       nav = _finNavHTML(home, 'leagueRoundView(\'match\')', '次へ：試合へ', 'Next: Matchday');
     } else {
@@ -5236,11 +5410,61 @@
     if (on) s.classList.add('hub-mode'); else s.classList.remove('hub-mode');
   }
 
+  /* ── MOBILE-01: 内側スクロール領域の「まだ下がある」表示 ─────────────────
+   * 横持ちスマホでは内側スクロール面が単に「切れている」ようにしか見えず、続きに
+   * 気づけない（分析スタッフ／出場記録／ボード面談の3択／BEST XI）。下端フェードを
+   * CSS に持たせ、ここで実測して .is-scrollable を付け外しする。
+   * ★ 収まっている面にフェードを出すと逆に「切れている」と誤読させるので必ず実測する。 */
+  var _SCROLLHINT_SEL = '.lg-rd-scroll, .lg-sh-boardwrap, .lg-se-plogwrap, .lg-md-deck,' +
+                        ' .bench-list, .lg-sh-panel';
+  var _hintQueued = false;
+
+  function _markScrollHints() {
+    _hintQueued = false;
+    var list = document.querySelectorAll(_SCROLLHINT_SEL);
+    // ★ 読み（レイアウト確定）と書き（class 変更）を分ける。混ぜると要素ごとに
+    //   レイアウトが無効化され直す＝毎フレーム回るこの処理でレイアウトスラッシングになる。
+    var i, need = [];
+    for (i = 0; i < list.length; i++) {
+      // 下端に 4px 以上残っている時だけ＝終端まで送ったらフェードは消える
+      need.push((list[i].scrollHeight - list[i].clientHeight - list[i].scrollTop) > 4);
+    }
+    for (i = 0; i < list.length; i++) {
+      if (need[i]) list[i].classList.add('is-scrollable');
+      else list[i].classList.remove('is-scrollable');
+    }
+  }
+
+  function _queueScrollHints() {
+    if (_hintQueued) return;
+    _hintQueued = true;
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(_markScrollHints);
+    else setTimeout(_markScrollHints, 16);
+  }
+
+  var _hintWired = false;
+  function _wireScrollHints() {
+    if (_hintWired) return;
+    _hintWired = true;
+    // scroll はバブルしないので capture で拾う
+    document.addEventListener('scroll', _queueScrollHints, true);
+    window.addEventListener('resize', _queueScrollHints);
+    window.addEventListener('orientationchange', _queueScrollHints);
+    // デッキ（matchday.js 側で描画）や控えリストなど league.js の描画経路を通らない面も
+    // 拾えるように DOM 変化を監視する。rAF で1フレーム1回に畳むので実質ノーコスト。
+    if (typeof MutationObserver === 'function') {
+      new MutationObserver(_queueScrollHints)
+        .observe(document.body, { childList: true, subtree: true });
+    }
+  }
+
   function _afterRender() {
     var body = _body(); if (!body) return;
     if (_lgOn() && LgUI.mountOffice) LgUI.mountOffice(document.getElementById('screen-home'));
     _paintPortraitCanvases(body);
     _growBars(body);
+    _wireScrollHints();
+    _queueScrollHints();
   }
 
   /* UX-06: 素の <table> をやめてゲームのリーグ表にする（LgUI 未搭載なら従来の表へ）。

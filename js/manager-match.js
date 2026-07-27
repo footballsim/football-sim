@@ -38,9 +38,32 @@
 (function () {
   'use strict';
 
-  // ── 自動再生の状態（このモジュール内のみ）────────────────────────────
-  var _mvPlaying = false;     // 自動再生中か
+  /* ── 再生の状態（このモジュール内のみ）────────────────────────────────
+   * ★ 既定は「手動送り」（2026-07-27 ユーザー指示で自動再生から戻した）。
+   *   1タップ＝1ビート。読む速さは人によって違うし、勝手に流れると
+   *   「読んでいる途中で次に行った」になる＝試合を追えない。
+   *   自動再生はオプションとして残し、選択は端末に憶えさせる。 */
+  var _MV_AUTO_KEY = 'fs_mv_autoplay';
+  var _mvAuto = false;        // 自動再生モードか（false=手動送り＝既定）
+  var _mvPlaying = false;     // 自動再生のタイマーが動いているか
   var _mvTimer = null;        // setTimeout ハンドル
+
+  function _mvLoadAutoPref() {
+    try { _mvAuto = (localStorage.getItem(_MV_AUTO_KEY) === '1'); } catch (e) { _mvAuto = false; }
+  }
+  function _mvSaveAutoPref() {
+    try { localStorage.setItem(_MV_AUTO_KEY, _mvAuto ? '1' : '0'); } catch (e) {}
+  }
+
+  /* 停止から復帰する時の共通口。自動なら再生を再開、手動なら「次へ」を押せる状態に戻すだけ。
+   * ★ 復帰点はゴール後・交代カット後・采配後・後半キックオフ後と複数ある。ここを1本に
+   *   まとめておかないと「手動なのに自動で走り出す」経路が必ず取り残される。 */
+  function _mvResume() {
+    if (!_managerMode) return;
+    if (_mvAuto) { _mvPlay(); return; }
+    _mvPlaying = false;
+    _mvUpdateControlBar();
+  }
   // 1ビートあたりの待ち(ms)。1× は最長アニメ（ワンツー 2200ms 等）を切らない尺にする。
   var _MV_SPEEDS = [2400, 1300, 700];  // 1x / 2x / 3x
   var _mvSpeedIdx = 0;        // 現在の速度段（0..2）
@@ -196,7 +219,11 @@
     _mvShowControls(true);
     _mvUpdateControlBar();
 
-    _mvPlay();   // キックオフ後すぐ自動再生
+    /* ★ キックオフ直後は「1ビート目を出して待つ」。既定は手動送りなので勝手に流さない。
+     *   自動再生を選んでいる端末だけ、そのまま流れ続ける。 */
+    _mvLoadAutoPref();
+    if (_mvAuto) _mvPlay();
+    else { _mvUpdateControlBar(); _mvStep(false); }
   }
 
   function _toggleNormalControls(show) {
@@ -222,9 +249,20 @@
     if (_mvTimer) { clearTimeout(_mvTimer); _mvTimer = null; }
     _mvUpdateControlBar();
   }
+  /* ⏯ ボタン＝自動再生の ON/OFF。手動送りが既定なので、これは「自動に切り替える」操作。 */
   function _mvTogglePlay() {
-    if (_mvPlaying) { _mvPause(); }
-    else { _mvHideDecision(); _mvPlay(); }
+    if (!_managerMode) return;
+    if (_mvAuto) { _mvAuto = false; _mvSaveAutoPref(); _mvPause(); return; }
+    _mvAuto = true; _mvSaveAutoPref();
+    _mvHideDecision(); _mvPlay();
+  }
+  /* ▶ 次へ＝1タップ1ビート（手動送り）。自動再生中は押せない。 */
+  function _mvNext() {
+    if (!_managerMode || _mvAuto) return;
+    if (!_gameActive()) return;
+    _mvHideDecision();
+    if (_mvTimer) { clearTimeout(_mvTimer); _mvTimer = null; }
+    _mvStep(false);
   }
   function _mvCycleSpeed() {
     _mvSpeedIdx = (_mvSpeedIdx + 1) % _MV_SPEEDS.length;
@@ -243,6 +281,13 @@
   function _mvTick() {
     _mvTimer = null;
     if (!_managerMode || !_mvPlaying) return;
+    _mvStep(true);
+  }
+
+  /* 1ビート進めて、停止条件（HT/ゴール/負傷交代/終了）を判定する共通処理。
+   * auto=true のときだけ末尾で次のティックを予約する＝手動送りは1回で必ず止まる。 */
+  function _mvStep(auto) {
+    if (!_managerMode) return;
     if (!_gameActive()) { _mvPause(); return; }   // 画面遷移時はタイマー停止
 
     if (_mvCtrl.isOver() && currentChanceIdx >= chanceResults.length) { _mvFinish(); return; }
@@ -290,7 +335,7 @@
     if (typeof MATCH_CHANCES !== 'undefined' && currentChanceIdx >= Math.floor(MATCH_CHANCES * 0.75) && !_mvLateChecked) {
       _mvLateChecked = true;
       _mvOpponentDecide(false);
-      if (_mvSubCutQueue.length) { _mvPause(); _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); }); return; }
+      if (_mvSubCutQueue.length) { _mvPause(); _mvPlaySubCutscenes(function () { _mvResume(); }); return; }
     }
 
     // ゴール停止（カットシーンの余韻＋交代カットを見せてから自動再生を続行）。
@@ -304,7 +349,7 @@
         // 失点シーンの“後”に発動カットイン＋トースト → 交代カット → 続行（時系列＝失点→発動）。
         _mvPlaySkillCutscenes(function () {
           if (!_managerMode) return;
-          _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); });
+          _mvPlaySubCutscenes(function () { _mvResume(); });
         });
       }, 3300);
       return;
@@ -327,7 +372,9 @@
       return;
     }
 
-    _mvTimer = setTimeout(_mvTick, _mvSpeed());
+    // ★ 手動送りはここで終わり。次のビートはユーザーの「次へ」を待つ。
+    if (auto) _mvTimer = setTimeout(_mvTick, _mvSpeed());
+    else _mvUpdateControlBar();
   }
 
   function _mvSyncHud() {
@@ -782,7 +829,7 @@
   }
   function _mvContinue() {
     _mvHideDecision();
-    _mvPlay();
+    _mvResume();
   }
 
   /* ── ハーフタイム: 既存 HT モーダルを再利用（デュエル状況＋コーチ助言＋戦術）──
@@ -833,8 +880,8 @@
     var _ab = document.getElementById('all-btn'); if (_ab) _ab.disabled = false;
     _toggleNormalControls(false);
     _mvShowControls(true);
-    if (_mvSubCutQueue.length) _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); });   // 自チーム交代のカット
-    else _mvPlay();
+    if (_mvSubCutQueue.length) _mvPlaySubCutscenes(function () { _mvResume(); });   // 自チーム交代のカット
+    else _mvResume();
   }
 
   /* ── 采配（設定画面を再利用）─ T-11/T-12 ＋ システム/キープレイヤー/要注意/入替 ──
@@ -982,8 +1029,8 @@
     // 試合画面へ戻り、そのまま自動再生を再開（采配ポイントの確認パネルは廃止＝余計な1クリック削減）。
     showScreen('game');
     _mvShowControls(true);
-    if (_mvSubCutQueue.length) _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); });   // 自チーム交代のカット → 続行
-    else _mvPlay();
+    if (_mvSubCutQueue.length) _mvPlaySubCutscenes(function () { _mvResume(); });   // 自チーム交代のカット → 続行
+    else _mvResume();
   }
 
   /* ── トースト／ログ ────────────────────────────────────────────── */
@@ -1004,10 +1051,23 @@
     if (bar) bar.style.display = show ? 'flex' : 'none';
   }
   function _mvUpdateControlBar() {
+    // ⏯＝自動再生トグル。ON の間は「次へ」と速度の役割が入れ替わる。
     var pp = document.getElementById('mv-pp');
-    if (pp) pp.textContent = _mvPlaying ? '⏸' : '▶';
+    if (pp) {
+      pp.textContent = _mvAuto ? '⏸' : '▶▶';
+      pp.title = _mvAuto ? _mvT('自動再生を止める', 'Stop autoplay')
+                         : _mvT('自動再生にする', 'Play automatically');
+      pp.classList.toggle('on', !!_mvAuto);
+    }
+    // 「次へ」は手動送り専用。自動再生中は押せない（押せると二重送りになる）。
+    var nx = document.getElementById('mv-next');
+    if (nx) { nx.disabled = !!_mvAuto; nx.classList.toggle('off', !!_mvAuto); }
+    // 速度は自動再生中しか意味を持たない。
     var sp = document.getElementById('mv-speed');
-    if (sp) sp.textContent = (_mvSpeedIdx + 1) + '×';
+    if (sp) {
+      sp.textContent = (_mvSpeedIdx + 1) + '×';
+      sp.disabled = !_mvAuto; sp.classList.toggle('off', !_mvAuto);
+    }
   }
 
   function _mvEnsureUI() {
@@ -1045,16 +1105,26 @@
         'box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 2px 6px rgba(0,0,0,.32);',
         'transition:transform .08s ease,filter .12s ease}',
         '.mv-btn:active{transform:translateY(1px) scale(.985);filter:brightness(.94)}',
-        /* ▶/⏸ ＝主役：緑グラデ＋発光、幅を持たせて構図の重心に */
-        '.mv-btn-main{flex:0 0 auto;min-width:clamp(66px,20vw,88px);',
-        'font-size:clamp(18px,5.2vw,22px);color:#fff;',
+        /* 「次へ」＝主役：緑グラデ＋発光、幅を持たせて構図の重心に（既定は手動送り） */
+        '.mv-btn-main{flex:0 0 auto;min-width:clamp(88px,26vw,132px);',
+        'font-size:clamp(15px,4.2vw,19px);color:#fff;letter-spacing:.5px;',
         'background:linear-gradient(180deg,#25a355,#178040);border-color:rgba(255,255,255,.28);',
         'box-shadow:inset 0 1px 0 rgba(255,255,255,.34),0 4px 14px rgba(23,128,64,.45)}',
+        /* 自動再生トグル。ON の間だけ点灯させて「今は勝手に進む」を明示する */
+        '.mv-btn-auto{flex:0 0 auto;min-width:clamp(46px,12vw,56px);color:#cfe0f5;',
+        'font-size:clamp(14px,3.8vw,17px);',
+        'background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));',
+        'box-shadow:inset 0 2px 5px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}',
+        '.mv-btn-auto.on{color:#fff;background:linear-gradient(180deg,#2f6fd0,#1f4f9c);',
+        'border-color:rgba(255,255,255,.30);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 3px 12px rgba(47,111,208,.45)}',
         /* 速度＝トグル感（内側に沈んだ地＋数字を明るく） */
-        '.mv-btn-speed{flex:0 0 auto;min-width:clamp(48px,13vw,58px);color:#9fe0ff;',
+        '.mv-btn-speed{flex:0 0 auto;min-width:clamp(44px,12vw,54px);color:#9fe0ff;',
         'font-size:clamp(15px,4.2vw,17px);font-weight:900;font-variant-numeric:tabular-nums;',
         'background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));',
         'box-shadow:inset 0 2px 5px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}',
+        /* 無効中（手動なら速度・自動なら次へ）は沈めて押せないことを示す */
+        '.mv-btn.off{opacity:.34;filter:saturate(.4);cursor:default}',
+        '.mv-btn.off:active{transform:none;filter:saturate(.4)}',
         /* 采配＝アクセント（琥珀） */
         '.mv-btn-int{flex:0 1 auto;color:#ffdf9e;',
         'background:linear-gradient(180deg,rgba(243,156,18,.24),rgba(243,156,18,.10));',
@@ -1101,7 +1171,10 @@
     var bar = document.createElement('div');
     bar.id = 'mv-controls';
     bar.innerHTML =
-      '<button class="mv-btn mv-btn-main" id="mv-pp" onclick="_mvTogglePlay()" aria-label="' + _mvT('再生／一時停止', 'Play / Pause') + '">⏸</button>' +
+      // ★ 主操作は「次へ」＝1タップ1ビートの手動送り（既定）。⏯ は自動再生の ON/OFF。
+      '<button class="mv-btn mv-btn-main" id="mv-next" onclick="_mvNext()" aria-label="' + _mvT('次へ', 'Next') + '">' +
+        _mvT('次へ ▶', 'Next ▶') + '</button>' +
+      '<button class="mv-btn mv-btn-auto" id="mv-pp" onclick="_mvTogglePlay()" aria-label="' + _mvT('自動再生', 'Autoplay') + '">▶▶</button>' +
       '<button class="mv-btn mv-btn-speed" id="mv-speed" onclick="_mvCycleSpeed()" aria-label="' + _mvT('再生速度', 'Playback speed') + '">1×</button>' +
       '<button class="mv-btn mv-btn-int" onclick="_mvOpenSetting()"><span class="mv-btn-ic">📋</span>' + _mvT('采配', 'Plan') + '</button>' +
       // 規律テストトグル: discipline.js 同梱時（＝lab）のみ表示。カード/退場/怪我を多発させて検証。
@@ -1165,6 +1238,7 @@
   var g = (typeof window !== 'undefined') ? window : this;
   g.startManagerMatch = startManagerMatch;
   g._mvTogglePlay = _mvTogglePlay;
+  g._mvNext = _mvNext;            // 手動送り（HTML onclick から呼ぶ）
   g._mvCycleSpeed = _mvCycleSpeed;
   g._mvOpenSetting = _mvOpenSetting;
   g._mvCloseSetting = _mvCloseSetting;
