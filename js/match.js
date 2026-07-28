@@ -56,7 +56,7 @@
    *   override.marked_player を明示した場合はそれを尊重（home/away 共通）。
    *
    * @param {object} data       TEAM_DATA のエントリ（buildTeam が受ける形）
-   * @param {object} [override] { system|systemIdx, tactics, lineup, keyplayer, marked_player }
+   * @param {object} [override] { system|systemIdx, tactics, lineup, keyplayer, marked_player, captain }
    * @param {boolean} isHome    home 側（= team1）か。marked_player の既定の非対称に使う。
    * @returns {object} buildTeam が返すチームオブジェクト
    */
@@ -85,6 +85,11 @@
       tactics: (override.tactics !== undefined) ? override.tactics : data.default_tactics,
       keyplayer: (override.keyplayer !== undefined) ? override.keyplayer : data.default_keyplayer,
       marked_player: (override.marked_player !== undefined) ? override.marked_player : markedDefault,
+      // キャプテン指名（2026-07-27）。未指定は data.captain → -1（mental.js の決定論選出）。
+      //   ★ ここを通さないと監督が選んだキャプテンが createMatch 経路（監督モード/リーグ）で
+      //     静かに落ちる。buildTeam 側で「スタメンに居るか」を検証する。
+      captain: (override.captain !== undefined) ? override.captain
+             : ((typeof data.captain === 'number') ? data.captain : -1),
       lineup: lineup
     };
 

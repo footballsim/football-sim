@@ -1150,6 +1150,8 @@ function initSettingScreen() {
       tactics: team1Data.default_tactics,
       keyplayer: team1Data.default_keyplayer,
       marked_player: -1,
+      // キャプテン指名（players 配列 index / -1 = おまかせ＝mental.js の決定論選出）
+      captain: (typeof team1Data.captain === 'number') ? team1Data.captain : -1,
       lineup: [...team1Data.default_lineup.slice(0, 11)]
     };
     if (team1State.systemIdx < 0) team1State.systemIdx = 0;
@@ -1174,9 +1176,39 @@ function initSettingScreen() {
   if (_bmgr) _bmgr.style.display = 'none';
 }
 
+/* ── キャプテン（2026-07-27）─────────────────────────────────────────────
+ * team1State.captain は players 配列 index（-1 = おまかせ）。
+ * ★「状態を書くタイミングで正さず、読む瞬間に導出する」（qa-reactive-detector-antipattern の教訓）
+ *   ＝スタメンから外れた指名は保持したまま、読む側で無効化して自動選出に落とす。
+ *   ドラッグ入替・自動編成・交代など「布陣が変わる入口」ごとに同期を足さなくてよい。 */
+/**
+ * 自動選出のキャプテン（players 配列 index）。
+ * スタメンのフィールドプレイヤー（GK除く lineup 1-10）で params[27]（メンタリティ）最大。
+ * ★ 式の正本はここ1箇所。mental.js の _mentalCaptainIdx（実効果側）も設定画面の
+ *   「おまかせ」表示もこの関数を読む＝表示と効果が割れない。
+ */
+function autoCaptainIdx(players, lineup) {
+  if (!players || !lineup) return -1;
+  let idx = -1, best = -Infinity;
+  for (let pos = 1; pos < 11; pos++) {
+    const p = players[lineup[pos]];
+    if (!p || !p.params) continue;
+    const v = p.params[typeof MENTALITY !== 'undefined' ? MENTALITY : 27];
+    if (v > best) { best = v; idx = lineup[pos]; }   // 同値は lineup 順で先＝ > のみ
+  }
+  return idx;
+}
+
+function effectiveCaptainIdx(state, data) {
+  if (!state || !state.lineup) return -1;
+  const c = (typeof state.captain === 'number') ? state.captain : -1;
+  if (c >= 0 && state.lineup.indexOf(c) >= 0) return c;
+  return data ? autoCaptainIdx(data.players, state.lineup) : -1;
+}
+
 function updateSettingBtnValues() {
   document.getElementById('setting-system-value').textContent =
-    system_data[team1State.systemIdx].name;
+    systemLabel(team1State.systemIdx);
   document.getElementById('setting-tactics-value').textContent =
     t('tacticsNames')[team1State.tactics] || TACTICS_NAMES[team1State.tactics];
   const kp = team1Data.players[team1State.lineup[team1State.keyplayer]];
@@ -1186,6 +1218,15 @@ function updateSettingBtnValues() {
     ? team2Data.players[team1State.marked_player] : null;
   const mp = mpPlayer ? getPlayerName(mpPlayer) : t('unset');
   document.getElementById('setting-marked-value').textContent = mp;
+  const capEl = document.getElementById('setting-captain-value');
+  if (capEl) {
+    const ci = effectiveCaptainIdx(team1State, team1Data);
+    const cp = ci >= 0 ? team1Data.players[ci] : null;
+    const isAuto = !(typeof team1State.captain === 'number' && team1State.captain >= 0 &&
+                     team1State.lineup.indexOf(team1State.captain) >= 0);
+    const autoTag = window.LANG === 'en' ? ' (' + t('captainAutoTag') + ')' : '（' + t('captainAutoTag') + '）';
+    capEl.textContent = cp ? (getPlayerName(cp) + (isAuto ? autoTag : '')) : t('unset');
+  }
 }
 
 // ポジション略称マッピング
@@ -1202,7 +1243,7 @@ const POS_ABBR = {
 };
 
 function openFormationSelect() {
-  renderFormationGrid();
+  renderFormationGrid(null);
   showScreen('formation');
 }
 
@@ -1211,6 +1252,11 @@ function closeFormationSelect() {
   renderFormation();
   renderBench();
   showScreen('setting');
+}
+
+// 型（②画面）から区分一覧（①画面）へ戻る
+function closeFormationVariant() {
+  showScreen('formation');
 }
 
 // 戦術選択
@@ -1289,6 +1335,59 @@ function openKeyPlayerSelect() {
   showScreen('keyplayer');
 }
 
+/* キャプテン選出（2026-07-27 ユーザー指示）
+ * スタメン11人から指名する。GK も選べる（現実のキャプテンGKに合わせる）。
+ * 「おまかせ」を選ぶと mental.js の決定論選出（スタメンのフィールドプレイヤーで
+ * メンタリティ最大）に戻る。効果＝キャプテンシー（失点時にチーム士気を立て直す）。 */
+function openCaptainSelect() {
+  const content = document.getElementById('captain-select-content');
+  content.innerHTML = '';
+  const sys = system_data[team1State.systemIdx];
+  const effective = effectiveCaptainIdx(team1State, team1Data);
+  const isAuto = !(typeof team1State.captain === 'number' && team1State.captain >= 0 &&
+                   team1State.lineup.indexOf(team1State.captain) >= 0);
+
+  const desc = document.createElement('div');
+  desc.className = 'captain-select-desc';
+  desc.style.cssText = 'font-size:12px;color:var(--text-dim);margin-bottom:14px;padding:10px;background:rgba(212,175,55,0.10);border-radius:8px';
+  desc.textContent = t('captainHint');
+  content.appendChild(desc);
+
+  // おまかせ（自動選出）
+  const auto = document.createElement('div');
+  auto.className = 'player-select-item captain-select-auto' + (isAuto ? ' current' : '');
+  // ★ ここは「おまかせにしたら誰になるか」＝自動選出の結果を出す（現在の指名者ではない）
+  const autoIdx = autoCaptainIdx(team1Data.players, team1State.lineup);
+  const autoName = autoIdx >= 0 ? getPlayerName(team1Data.players[autoIdx]) : '-';
+  auto.innerHTML = `
+    <div style="background:#8a8a8a;color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">🎲</div>
+    <div class="psi-name">${t('captainAuto')}<span style="font-size:11px;color:var(--text-dim);margin-left:6px">${autoName}</span></div>
+    ${isAuto ? '<span style="color:var(--gold);font-size:18px;margin-left:auto">Ⓒ</span>' : ''}
+  `;
+  auto.onclick = () => { team1State.captain = -1; closeSubSelect('captain'); };
+  content.appendChild(auto);
+
+  for (let pos = 0; pos < 11; pos++) {
+    const playerIdx = team1State.lineup[pos];
+    const p = team1Data.players[playerIdx];
+    if (!p) continue;
+    const isCap = !isAuto && playerIdx === effective;
+    const item = document.createElement('div');
+    item.className = 'player-select-item' + (isCap ? ' current' : '');
+    item.innerHTML = `
+      <div style="background:${team1Data.team_color};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${sys.positions[pos].replace(/[左右]/g,'').substring(0,2)}</div>
+      <div class="psi-name">${getPlayerName(p)}<span style="font-size:11px;color:var(--text-dim);margin-left:6px">${sys.positions[pos]}</span></div>
+      ${isCap ? '<span style="color:var(--gold);font-size:18px;margin-left:auto">Ⓒ</span>' : ''}
+    `;
+    item.onclick = () => {
+      team1State.captain = playerIdx;
+      closeSubSelect('captain');
+    };
+    content.appendChild(item);
+  }
+  showScreen('captain');
+}
+
 // 要注意プレイヤー選択
 function openMarkedPlayerSelect() {
   const content = document.getElementById('marked-select-content');
@@ -1312,7 +1411,7 @@ function openMarkedPlayerSelect() {
   // フォーメーション表示
   const fmLabel = document.createElement('div');
   fmLabel.style.cssText = 'font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:4px;text-align:center';
-  fmLabel.textContent = `${team2Data.flag} ${team2Data.name}  ${sys2.name}`;
+  fmLabel.textContent = `${team2Data.flag} ${team2Data.name}  ${systemLabel(t2sys >= 0 ? t2sys : 0)}`;
   content.appendChild(fmLabel);
 
   // 戦術表示
@@ -1405,53 +1504,108 @@ function openMarkedPlayerSelect() {
 
 function closeSubSelect(type) {
   updateSettingBtnValues();
+  // キャプテンはピッチ上の腕章に出るので描き直す（値の更新だけでは反映されない）
+  if (type === 'captain') renderFormation();
   showScreen('setting');
 }
 
+/* ══ システム選択＝2段構え（2026-07-27 ユーザー指示・1画面1ビート）══════════
+ *   ①「区分」画面（#screen-formation）… 4-4-2 / 4-2-3-1 / … の8枚
+ *   ②「型」画面（#screen-formation-variant）… 4-4-2A / 4-4-2B / … を選んで決定
+ * 決定後の戻り先は呼び出し元で変わる（設定画面 or ハーフタイム）ので、
+ * ①で受け取ったコールバックを②まで持ち回る。 */
+let _formationSelectCb = null;
+let _formationGroupIdx = 0;
+
+// ミニピッチ1枚（区分カード・型カードで共用）
+function _buildFormationMiniField(sysIdx) {
+  const sys = system_data[sysIdx];
+  const field = document.createElement('div');
+  field.className = 'formation-card-field';
+  field.innerHTML = `<svg class="formation-card-field-lines" viewBox="0 0 100 140" preserveAspectRatio="none" style="opacity:0.2">
+    <rect x="5" y="3" width="90" height="134" fill="none" stroke="white" stroke-width="1.5"/>
+    <line x1="5" y1="70" x2="95" y2="70" stroke="white" stroke-width="1"/>
+    <rect x="28" y="3" width="44" height="16" fill="none" stroke="white" stroke-width="1"/>
+    <rect x="28" y="121" width="44" height="16" fill="none" stroke="white" stroke-width="1"/>
+  </svg>`;
+  sys.positions.forEach((posName, pos) => {
+    const abbr = POS_ABBR[posName] || posName.replace(/[左右]/g,'').substring(0,2);
+    const dot = document.createElement('div');
+    dot.className = 'fcard-dot';
+    dot.style.left = sys.x[pos] + '%';
+    dot.style.top  = sys.y[pos] + '%';
+    dot.textContent = abbr;
+    field.appendChild(dot);
+  });
+  return field;
+}
+
+// ① 区分一覧。onSelectCallback を渡すと「型を決めた後」の戻り先になる（省略＝設定画面へ）。
 function renderFormationGrid(onSelectCallback) {
+  if (onSelectCallback !== undefined) _formationSelectCb = onSelectCallback || null;
   const grid = document.getElementById('formation-grid');
   grid.innerHTML = '';
+  _setText('formation-group-hint', t('formationGroupHint'));
 
-  system_data.forEach((sys, idx) => {
+  const cur = systemGroupPos(team1State.systemIdx);
+  SYSTEM_GROUPS.forEach((g, gi) => {
+    const card = document.createElement('div');
+    card.className = 'formation-card' + (cur && cur.gi === gi ? ' selected' : '');
+    card.onclick = () => openFormationVariant(gi);
+
+    // 代表（A）の形を見せる
+    card.appendChild(_buildFormationMiniField(g.members[0]));
+
+    const name = document.createElement('div');
+    name.className = 'formation-card-name';
+    name.textContent = g.key;
+    card.appendChild(name);
+
+    const sub = document.createElement('div');
+    sub.className = 'formation-card-sub';
+    sub.textContent = g.members.length + (window.LANG === 'en' ? ' ' : '') + t('formationVariantCount');
+    card.appendChild(sub);
+
+    grid.appendChild(card);
+  });
+}
+
+// ② 型一覧（4-4-2A / 4-4-2B / …）
+function openFormationVariant(gi) {
+  _formationGroupIdx = gi;
+  renderFormationVariantGrid();
+  showScreen('formation-variant');
+}
+
+function renderFormationVariantGrid() {
+  const g = SYSTEM_GROUPS[_formationGroupIdx];
+  const grid = document.getElementById('formation-variant-grid');
+  if (!g || !grid) return;
+  grid.innerHTML = '';
+  _setText('screen-formation-variant-title', g.key);
+  _setText('formation-variant-hint', t('formationVariantHint'));
+
+  g.members.forEach(idx => {
     const card = document.createElement('div');
     card.className = 'formation-card' + (idx === team1State.systemIdx ? ' selected' : '');
     card.onclick = () => {
       team1State.systemIdx = idx;
-      if (onSelectCallback) onSelectCallback();
+      if (_formationSelectCb) _formationSelectCb();
       else closeFormationSelect();
     };
 
-    // ミニフィールド
-    const field = document.createElement('div');
-    field.className = 'formation-card-field';
-
-    // フィールドライン（SVG）
-    field.innerHTML = `<svg class="formation-card-field-lines" viewBox="0 0 100 140" preserveAspectRatio="none" style="opacity:0.2">
-      <rect x="5" y="3" width="90" height="134" fill="none" stroke="white" stroke-width="1.5"/>
-      <line x1="5" y1="70" x2="95" y2="70" stroke="white" stroke-width="1"/>
-      <rect x="28" y="3" width="44" height="16" fill="none" stroke="white" stroke-width="1"/>
-      <rect x="28" y="121" width="44" height="16" fill="none" stroke="white" stroke-width="1"/>
-    </svg>`;
-
-    // ポジション円
-    sys.positions.forEach((posName, pos) => {
-      const x = sys.x[pos];
-      const y = sys.y[pos];
-      const abbr = POS_ABBR[posName] || posName.replace(/[左右]/g,'').substring(0,2);
-      const dot = document.createElement('div');
-      dot.className = 'fcard-dot';
-      dot.style.left = x + '%';
-      dot.style.top = y + '%';
-      dot.textContent = abbr;
-      field.appendChild(dot);
-    });
+    card.appendChild(_buildFormationMiniField(idx));
 
     const name = document.createElement('div');
     name.className = 'formation-card-name';
-    name.textContent = sys.name;
-
-    card.appendChild(field);
+    name.textContent = systemLabel(idx);
     card.appendChild(name);
+
+    const sub = document.createElement('div');
+    sub.className = 'formation-card-sub';
+    sub.textContent = systemVariantDesc(idx);
+    card.appendChild(sub);
+
     grid.appendChild(card);
   });
 }
@@ -1469,7 +1623,7 @@ function renderOpponentLineup() {
   const lineup = team2Data.default_lineup.slice(0, 11);
 
   document.getElementById('opponent-label').textContent =
-    `${team2Data.flag} ${team2Data.name} スターティングメンバー（${sys.name}）`;
+    `${team2Data.flag} ${team2Data.name} スターティングメンバー（${systemLabel(t2sys >= 0 ? t2sys : 0)}）`;
 
   container.innerHTML = '';
   lineup.forEach((playerIdx, pos) => {
@@ -1543,6 +1697,9 @@ function renderFormation() {
   const sys = system_data[team1State.systemIdx];
   display.innerHTML = '';
 
+  // 腕章の持ち主（players index）。ループ内で毎回導出しないよう1回だけ引く。
+  const _captainOnPitchIdx = effectiveCaptainIdx(team1State, team1Data);
+
   for (let pos = 0; pos < 11; pos++) {
     const x = sys.x[pos];
     const y = sys.y[pos];
@@ -1574,6 +1731,16 @@ function renderFormation() {
     const circleWrap = document.createElement('div');
     circleWrap.style.cssText = 'position:relative;display:inline-flex;';
     circleWrap.appendChild(circle);
+
+    // キャプテン（2026-07-27）: 誰が腕章を巻いているかをピッチ上で示す。
+    //   指名が無い／指名選手がスタメン外なら自動選出の選手に付く（読む瞬間に導出）。
+    if (playerIdx === _captainOnPitchIdx) {
+      const capBadge = document.createElement('div');
+      capBadge.className = 'captain-badge';
+      capBadge.textContent = 'C';
+      capBadge.title = window.LANG === 'en' ? 'Captain' : 'キャプテン';
+      circleWrap.appendChild(capBadge);
+    }
 
     // 規律（Sprint 2b・lab限定）: 交代画面で負傷/退場の当該選手を判別できるようマーカーを付ける。
     //   フラグはライブチーム（gameState.team1 のクローン）側に付く。discipline.js 非同梱の
@@ -2190,7 +2357,13 @@ function buildTeam(data, state) {
     tactics: state.tactics,
     keyplayer: state.keyplayer,
     marked_player: state.marked_player !== undefined ? state.marked_player : -1,
-    captain: data.captain !== undefined ? data.captain : -1, // キャプテン指名（PS-02・TEAM_DATA.captain を読むだけ。無指定は mental.js が決定論フォールバック）
+    // キャプテン指名（PS-02 → 2026-07-27 監督が選べるように拡張）。
+    //   state.captain（監督の指名・players index）が最優先。指名が無い／スタメン外なら
+    //   TEAM_DATA.captain、それも無ければ -1＝mental.js の決定論フォールバック。
+    captain: (state && typeof state.captain === 'number' && state.captain >= 0 &&
+              state.lineup.indexOf(state.captain) >= 0)
+             ? state.captain
+             : (data.captain !== undefined ? data.captain : -1),
     score: 0,
     chanceCounter: 0,
     shootCounter: 0,

@@ -134,6 +134,13 @@ const i18n = {
     labelStarting: 'スターティングメンバー', labelDrag: 'ドラッグで選手入れ替え',
     labelBench: '控え', labelSystem: 'システム', labelTactics: '戦術',
     labelKeyplayer: 'キープレイヤー', labelMarked: '要注意プレイヤー',
+    labelCaptain: 'キャプテン',
+    screenFormationVariant: 'システムの型', screenCaptain: 'キャプテン選出',
+    formationGroupHint: '⚽ まず布陣の並びを選びます',
+    formationVariantHint: '⚽ 同じ並びの中から型を選びます',
+    formationVariantCount: '型',
+    captainHint: 'Ⓒ キャプテンは失点時にチームを立て直します（試合中2回まで）',
+    captainAuto: 'おまかせ（自動選出）', captainAutoTag: '自動',
     chanceLabel: 'チャンス:', gameInProgress: '試合進行中',
     btnNextScene: '次のシーン ▶', btnAllEnd: '一気に試合終了', btnTactics: '采配',
     btnNextArrow: '次へ →', btnSeeResult: '結果を見る', attackLabel: '攻撃:',
@@ -331,6 +338,13 @@ const i18n = {
     labelStarting: 'Starting XI', labelDrag: 'Drag to swap players',
     labelBench: 'Bench', labelSystem: 'Formation', labelTactics: 'Tactics',
     labelKeyplayer: 'Key Player', labelMarked: 'Marked Player',
+    labelCaptain: 'Captain',
+    screenFormationVariant: 'Formation Variant', screenCaptain: 'Select Captain',
+    formationGroupHint: '⚽ First, pick the shape',
+    formationVariantHint: '⚽ Now pick the variant of that shape',
+    formationVariantCount: 'variants',
+    captainHint: 'Ⓒ The captain rallies the team after conceding (twice per match)',
+    captainAuto: 'Auto (pick for me)', captainAutoTag: 'AUTO',
     chanceLabel: 'Chance:', gameInProgress: 'Match in progress',
     btnNextScene: 'Next Scene ▶', btnAllEnd: 'Skip to Full Time', btnTactics: 'Tactics',
     btnNextArrow: 'Next →', btnSeeResult: 'See Result', attackLabel: 'Attack:',
@@ -563,6 +577,7 @@ function applyLang() {
   _setText('setting-tactics-label',   t('labelTactics'));
   _setText('setting-keyplayer-label', t('labelKeyplayer'));
   _setText('setting-marked-label',    t('labelMarked'));
+  _setText('setting-captain-label',   t('labelCaptain'));
   _setText('btn-kickoff-top',         t('btnKickoff'));
   _setText('btn-kickoff-bottom',      t('btnKickoff'));
   _setText('btn-manager',             t('btnManagerMode'));
@@ -582,6 +597,8 @@ function applyLang() {
   if (_tl1) { _tl1.dataset.built = ''; buildTeam1List && buildTeam1List(); }
   // スクリーンタイトル
   _setText('screen-formation-title',    t('screenFormation'));
+  _setText('screen-formation-variant-title', t('screenFormationVariant'));
+  _setText('screen-captain-title',      t('screenCaptain'));
   _setText('screen-tactics-title',      t('screenTactics'));
   _setText('screen-keyplayer-title',    t('screenKeyplayer'));
   _setText('screen-marked-title',       t('screenMarked'));
@@ -2359,6 +2376,88 @@ const system_data = [
   {name:"5-2-2-1",positions:["GK","CB","右SB","右CB","左CB","左SB","右DMF","左DMF","右OMF","左OMF","CF"],x:[50,50,87.5,62.5,37.5,12.5,70,30,70,30,50],y:[91,78,68,68,68,68,55,55,32,32,16]},
   {name:"5-4-1",positions:["GK","CB","右SB","右CB","左CB","左SB","右SMF","左SMF","右OMF","左OMF","CF"],x:[50,50,87.5,62.5,37.5,12.5,87.5,12.5,70,30,50],y:[91,78,68,68,68,68,45,45,32,32,16]}
 ];
+
+/* ══ システム区分（2026-07-27 ユーザー指示）═══════════════════════════════
+ * 22 ある system_data を「DF-MF-FW の並び」で 8 区分にまとめ、選択を2段にする。
+ *   ①区分を選ぶ（4-4-2 / 4-2-3-1 / …）→ ②区分の中の型を選ぶ（4-4-2A / 4-4-2B / …）
+ * 表示名は「区分名＋A/B/C…」。members の先頭が A＝その区分の代表（区分名と同じ形）。
+ *
+ * ★ system_data 本体（並び順・name）は絶対に変えない。
+ *    - name は TEAM_DATA.default_system の引き当てキー
+ *    - 配列 index はリーグのセーブ（_state.lineups[].systemIdx）のキー
+ *    並べ替え／改名すると、保存済みの布陣が静かに別フォーメーションへ化ける。
+ *    ＝「見せ方」だけをこの層で足し、データ側は不変に保つ。
+ * ★ 区分は 4-4-2 / 4-3-3 / 3-5-2 / 3-6-1 / 5-4-1 / 5-3-2 の6つ（ユーザー指定）に、
+ *    どこにも入らない 4-2-3-1系（22チームが採用）と 3-4-3系（5チーム）を足した8つ。
+ */
+const SYSTEM_GROUPS = [
+  { key: '4-4-2',   members: [ 2,  3,  1,  0] },   // 4-4-2 / 4-3-1-2 / 4-2-2-2 / 4-1-3-2
+  { key: '4-2-3-1', members: [ 5,  4,  6,  7] },   // 4-2-3-1 / 4-1-4-1 / 4-3-2-1A / 4-3-2-1B
+  { key: '4-3-3',   members: [ 8,  9] },           // 4-1-2-3 / 4-2-1-3
+  { key: '3-4-3',   members: [12, 10, 11] },       // 3-4-3 / 3-1-3-3 / 3-2-2-3
+  { key: '3-5-2',   members: [13, 14] },           // 3-3-2-2 / 3-2-3-2
+  { key: '3-6-1',   members: [16, 15] },           // 3-4-2-1 / 3-3-3-1
+  { key: '5-4-1',   members: [21, 19, 20] },       // 5-4-1 / 5-1-3-1 / 5-2-2-1
+  { key: '5-3-2',   members: [18, 17] },           // 5-2-1-2 / 5-1-2-2
+];
+
+// 型の一言説明（system_data の name で引く＝並びに依存しない）。日英とも短く、語彙を統一する。
+const SYSTEM_VARIANT_DESC = {
+  '4-4-2':     { ja: 'フラット',           en: 'Flat' },
+  '4-3-1-2':   { ja: 'ダイヤモンド',       en: 'Diamond' },
+  '4-2-2-2':   { ja: 'ボックス',           en: 'Box' },
+  '4-1-3-2':   { ja: 'アンカー',           en: 'Anchor' },
+  '4-2-3-1':   { ja: 'ダブルボランチ',     en: 'Double pivot' },
+  '4-1-4-1':   { ja: 'アンカー＋中盤4枚',  en: 'Anchor + flat four' },
+  '4-3-2-1A':  { ja: 'ワイドツリー',       en: 'Wide tree' },
+  '4-3-2-1B':  { ja: 'クリスマスツリー',   en: 'Christmas tree' },
+  '4-1-2-3':   { ja: 'アンカー',           en: 'Anchor' },
+  '4-2-1-3':   { ja: 'ダブルボランチ',     en: 'Double pivot' },
+  '3-4-3':     { ja: 'フラット',           en: 'Flat' },
+  '3-1-3-3':   { ja: 'アンカー',           en: 'Anchor' },
+  '3-2-2-3':   { ja: 'ボックス',           en: 'Box' },
+  '3-3-2-2':   { ja: '2シャドー',          en: 'Twin shadows' },
+  '3-2-3-2':   { ja: 'ダブルボランチ',     en: 'Double pivot' },
+  '3-4-2-1':   { ja: '2シャドー',          en: 'Twin shadows' },
+  '3-3-3-1':   { ja: '中盤3センター',      en: 'Triple centre' },
+  '5-4-1':     { ja: 'フラット',           en: 'Flat' },
+  '5-1-3-1':   { ja: 'アンカー',           en: 'Anchor' },
+  '5-2-2-1':   { ja: 'ダブルボランチ',     en: 'Double pivot' },
+  '5-2-1-2':   { ja: 'ダブルボランチ',     en: 'Double pivot' },
+  '5-1-2-2':   { ja: 'アンカー',           en: 'Anchor' },
+};
+
+const SYSTEM_VARIANT_LETTERS = 'ABCDEFGH';
+let _SYSTEM_GROUP_MAP = null;
+
+// systemIdx → {gi:区分index, mi:区分内の順番}（初回だけ構築）
+function systemGroupPos(systemIdx) {
+  if (!_SYSTEM_GROUP_MAP) {
+    _SYSTEM_GROUP_MAP = {};
+    for (let gi = 0; gi < SYSTEM_GROUPS.length; gi++) {
+      const mem = SYSTEM_GROUPS[gi].members;
+      for (let mi = 0; mi < mem.length; mi++) _SYSTEM_GROUP_MAP[mem[mi]] = { gi: gi, mi: mi };
+    }
+  }
+  return _SYSTEM_GROUP_MAP[systemIdx] || null;
+}
+
+/** 表示名（例: '4-4-2B'）。区分に載っていないシステムは素の name に落とす。 */
+function systemLabel(systemIdx) {
+  const p = systemGroupPos(systemIdx);
+  const raw = (system_data[systemIdx] && system_data[systemIdx].name) || '-';
+  if (!p) return raw;
+  const g = SYSTEM_GROUPS[p.gi];
+  return g.key + (g.members.length > 1 ? SYSTEM_VARIANT_LETTERS.charAt(p.mi) : '');
+}
+
+/** 型の一言説明（言語切替対応・未定義は空文字）。 */
+function systemVariantDesc(systemIdx) {
+  const s = system_data[systemIdx];
+  const d = s && SYSTEM_VARIANT_DESC[s.name];
+  if (!d) return '';
+  return (typeof window !== 'undefined' && window.LANG === 'en') ? d.en : d.ja;
+}
 
 const tactics_data = [
   {name:"ポゼッション"},{name:"プレス"},{name:"カウンター"},{name:"守備重視"},{name:"バランス重視"}

@@ -724,6 +724,31 @@ body {
   box-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 
+/* キャプテン腕章（2026-07-27）: 選手アイコン左下。
+   左上=規律マーカー(disc-badge)／右上=適正外(pos-badge) と場所が重ならないようにする。 */
+.captain-badge {
+  position: absolute;
+  bottom: -4px;
+  left: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: .5px;
+  color: #2b1d00;
+  background: linear-gradient(160deg, #ffe08a, var(--gold));
+  border: 1.5px solid rgba(255,255,255,0.85);
+  z-index: 21;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
 /* 案①: 適正外凡例 */
 .oop-legend {
   display: flex;
@@ -2443,6 +2468,13 @@ body {
   gap: 10px;
 }
 
+/* 区分一覧（8枚）は3列＝縦持ちでもスクロールせず1画面に収まる。
+   型一覧（2〜4枚）は2列のまま＝形を大きく見比べて選ぶ画面。 */
+#formation-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .formation-card {
   background: var(--surface);
   border: 2px solid rgba(0,0,0,0.1);
@@ -2464,6 +2496,9 @@ body {
   padding-bottom: 140%;
   overflow: hidden;
   margin-bottom: 4px;
+  /* ドットをピッチ幅に追従させる（列数・向きが変わっても潰れない）。
+     布陣設定のピッチで確立した作法をミニピッチにも適用（2026-07-27） */
+  container-type: inline-size;
 }
 
 .formation-card-field-lines {
@@ -2475,8 +2510,12 @@ body {
 .fcard-dot {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: 28px;
-  height: 28px;
+  width: 16cqw;
+  height: 16cqw;
+  min-width: 8px;
+  min-height: 8px;
+  max-width: 28px;
+  max-height: 28px;
   border-radius: 50%;
   background: var(--japan-blue);
   display: flex;
@@ -2486,6 +2525,12 @@ body {
   font-weight: 700;
   color: white;
   border: 1.5px solid rgba(255,255,255,0.6);
+}
+
+/* ミニピッチが小さい時（区分一覧の3列・横持ちの4列）はポジション略称を出さない。
+   読めない文字を詰め込むより「形」だけを見せる方が速く選べる。 */
+@container (max-width: 150px) {
+  .fcard-dot { font-size: 0; }
 }
 
 .formation-card.selected .fcard-dot {
@@ -2500,11 +2545,85 @@ body {
   color: var(--text);
 }
 
+/* 区分カードの「4型」／型カードの一言説明（2026-07-27 システム2段選択） */
+.formation-card-sub {
+  font-size: 9px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-dim);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 選択画面の一行ガイド（1画面1ビート＝この画面で答える問いを明示する） */
+.select-hint {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  background: rgba(0,48,135,0.05);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
 .setting-btn-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-bottom: 20px;
+}
+
+/* 5枚目（キャプテン）は2列ぶち抜き＝2列グリッドで最後が半端に余らないようにする */
+.setting-nav-btn-wide { grid-column: 1 / -1; }
+
+/* システム選択（区分8枚 / 型2〜4枚）を1画面に収める。
+   ★ リーグ（横持ち枠）限定＝`body.league-mode` でスコープする。素の
+     `@media (orientation: landscape)` はPCの縦長端末枠にも当たってしまう。
+   ★ 横持ちは幅が余り高さが足りない（AGENTS.md 10）＝列を増やして高さを抑える。
+   ★ ピッチは「確定高さ→アスペクト比→幅」の順で決める（padding-bottom で伸ばすと縦に暴れる）。 */
+@media (orientation: landscape) {
+  /* 区分8枚＝横1列に並べ切る（高さを使わない）。カード幅は画面幅に追従。 */
+  body.league-mode #formation-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: clamp(5px, 1vw, 8px);
+  }
+  /* 型2〜4枚＝カード幅を固定して中央寄せ（幅が余る横持ちで間延びさせない）。 */
+  body.league-mode #formation-variant-grid {
+    grid-template-columns: repeat(auto-fit, clamp(96px, 15vw, 124px));
+    justify-content: center;
+    gap: clamp(6px, 1.4vh, 10px);
+  }
+  body.league-mode #screen-formation .select-hint,
+  body.league-mode #screen-formation-variant .select-hint { padding: 6px 10px; margin-bottom: 8px; }
+  body.league-mode #screen-formation .formation-select-content,
+  body.league-mode #screen-formation-variant .formation-select-content {
+    padding: 10px 16px;
+    display: flex; flex-direction: column;
+  }
+  /* 余った縦を上下に散らして構図を中央に置く（`safe center`＝溢れても先頭が切れない） */
+  body.league-mode #formation-grid,
+  body.league-mode #formation-variant-grid { flex: 1 1 auto; align-content: safe center; }
+
+  /* キャプテン選出は12行＝縦持ちの1列だと横持ちで下端が見えない。幅が余るので3列に割る。 */
+  body.league-mode #captain-select-content {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 10px;
+    row-gap: 5px;
+    align-content: safe start;
+    padding: 12px 16px;
+  }
+  body.league-mode #captain-select-content .captain-select-desc,
+  body.league-mode #captain-select-content .captain-select-auto { grid-column: 1 / -1; }
+  /* ★ インライン style で組んだ要素はセレクタでは勝てない＝!important が要る */
+  body.league-mode #captain-select-content .captain-select-desc {
+    margin-bottom: 0 !important; padding: 7px 10px !important; font-size: 11px !important;
+  }
+  /* 高さ360pxの端末でも12行が1画面に収まるよう、行の高さを vh に追従させる */
+  body.league-mode #captain-select-content .player-select-item { padding: clamp(4px, 1.5vh, 8px) 10px; }
 }
 
 .setting-nav-btn {

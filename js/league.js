@@ -3490,6 +3490,7 @@
       tactics: startTactics,
       keyplayer: team1Data.default_keyplayer,
       marked_player: (team1Data.default_marked_player !== undefined) ? team1Data.default_marked_player : -1,
+      captain: (typeof team1Data.captain === 'number') ? team1Data.captain : -1,
       lineup: team1Data.default_lineup.slice(0, 11)
     };
 
@@ -3500,6 +3501,8 @@
     if (saved) {
       if (typeof saved.systemIdx === 'number' && system_data[saved.systemIdx]) team1State.systemIdx = saved.systemIdx;
       if (typeof saved.keyplayer === 'number') team1State.keyplayer = saved.keyplayer;
+      // キャプテンの指名も次節へ持ち越す（スタメン外なら読む側＝effectiveCaptainIdx が自動選出に落とす）
+      if (typeof saved.captain === 'number') team1State.captain = saved.captain;
       if (typeof saved.tactics === 'number' && _isTacticUnlocked(saved.tactics)) team1State.tactics = saved.tactics;
       if (Array.isArray(saved.lineup) && saved.lineup.length === 11 &&
           saved.lineup.every(function (i) { return typeof i === 'number' && i >= 0 && i < team1Data.players.length; })) {
@@ -3642,7 +3645,8 @@
       if (!_state.lineups) _state.lineups = {};
       _state.lineups[pm.myId] = {
         systemIdx: team1State.systemIdx, tactics: team1State.tactics,
-        keyplayer: team1State.keyplayer, lineup: team1State.lineup.slice(0, 11)
+        keyplayer: team1State.keyplayer, lineup: team1State.lineup.slice(0, 11),
+        captain: (typeof team1State.captain === 'number') ? team1State.captain : -1
       };
       _save();
     }

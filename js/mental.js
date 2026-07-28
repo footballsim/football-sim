@@ -185,17 +185,14 @@ function _mentalCaptainIdx(team) {
   if (!team) return -1;
   if (typeof team._captainIdx === 'number') return team._captainIdx;
   let idx = -1;
-  if (typeof team.captain === 'number' && team.captain >= 0 && team.captain < team.players.length) {
+  // 指名（監督の選出 or TEAM_DATA.captain）はスタメンに居る時だけ有効。
+  // 控えの選手が腕章を持ったまま「ピッチ上」条件で落ちるより、居る選手に渡すほうが自然。
+  if (typeof team.captain === 'number' && team.captain >= 0 && team.captain < team.players.length &&
+      team.lineup && team.lineup.indexOf(team.captain) >= 0) {
     idx = team.captain;
   } else {
-    let best = -Infinity;
-    for (let pos = 1; pos < 11; pos++) {
-      const pi = team.lineup[pos];
-      const p = team.players[pi];
-      if (!p || !p.params) continue;
-      const v = p.params[typeof MENTALITY !== 'undefined' ? MENTALITY : 27]; // メンタリティ（players.js の MENTALITY 定数）
-      if (v > best) { best = v; idx = pi; }   // 同値は lineup 順で先＝ > のみ
-    }
+    // 自動選出の式は simulate.js の autoCaptainIdx が正本（設定画面の「おまかせ」表示と共有）。
+    idx = autoCaptainIdx(team.players, team.lineup);
   }
   team._captainIdx = idx;
   return idx;

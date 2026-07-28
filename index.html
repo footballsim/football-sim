@@ -424,14 +424,27 @@
   </div>
 </div>
 
-<!-- FORMATION SELECT SCREEN -->
+<!-- FORMATION SELECT SCREEN（①区分＝4-4-2 / 4-2-3-1 …を選ぶ。型は次の画面） -->
 <div id="screen-formation" class="screen">
   <div class="screen-header">
     <button class="back-btn" onclick="closeFormationSelect()">← 戻る</button>
     <div class="screen-title-text" id="screen-formation-title">システム選択</div>
   </div>
   <div class="formation-select-content">
+    <div class="select-hint" id="formation-group-hint">⚽ まず布陣の並びを選びます</div>
     <div class="formation-grid" id="formation-grid"></div>
+  </div>
+</div>
+
+<!-- FORMATION VARIANT SCREEN（②区分の中の型＝4-4-2A / 4-4-2B …を選ぶ） -->
+<div id="screen-formation-variant" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="closeFormationVariant()">← 戻る</button>
+    <div class="screen-title-text" id="screen-formation-variant-title">システムの型</div>
+  </div>
+  <div class="formation-select-content">
+    <div class="select-hint" id="formation-variant-hint">⚽ 同じ並びの中から型を選びます</div>
+    <div class="formation-grid" id="formation-variant-grid"></div>
   </div>
 </div>
 
@@ -501,6 +514,10 @@
         <div class="setting-nav-btn-label" id="setting-marked-label">要注意プレイヤー</div>
         <div class="setting-nav-btn-value" id="setting-marked-value">-</div>
       </button>
+      <button class="setting-nav-btn setting-nav-btn-wide" onclick="openCaptainSelect()">
+        <div class="setting-nav-btn-label" id="setting-captain-label">キャプテン</div>
+        <div class="setting-nav-btn-value" id="setting-captain-value">-</div>
+      </button>
     </div>
 
     <button class="start-btn" id="btn-manager" style="width:100%;margin-bottom:10px;background:linear-gradient(135deg,#03245e,#1a7a3a)" onclick="startManagerMatch()">👔 監督モードで観戦</button>
@@ -530,6 +547,16 @@
     <button class="formation-decide-btn" onclick="closeSubSelect('keyplayer')">決定</button>
   </div>
   <div class="setting-content" id="keyplayer-select-content"></div>
+</div>
+
+<!-- CAPTAIN SELECT SCREEN -->
+<div id="screen-captain" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="closeSubSelect('captain')">← 戻る</button>
+    <div class="screen-title-text" id="screen-captain-title">キャプテン選出</div>
+    <button class="formation-decide-btn" onclick="closeSubSelect('captain')">決定</button>
+  </div>
+  <div class="setting-content" id="captain-select-content"></div>
 </div>
 
 <!-- MARKED PLAYER SELECT SCREEN -->

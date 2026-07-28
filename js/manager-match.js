@@ -844,6 +844,7 @@
       tactics: gameState.team1.tactics,
       keyplayer: gameState.team1.keyplayer,
       marked_player: gameState.team1.marked_player,
+      captain: (typeof gameState.team1.captain === 'number') ? gameState.team1.captain : -1,
       lineup: gameState.team1.lineup.slice()
     };
     _mvShowControls(false);
@@ -862,6 +863,10 @@
     home.keyplayer = team1State.keyplayer;
     home.marked_player = team1State.marked_player;
     home.lineup = team1State.lineup.slice();
+    // キャプテン（2026-07-27）: 指名がスタメンから外れていたら自動選出に戻す。
+    //   _captainIdx はキャッシュなので必ず落として次の参照で引き直させる。
+    home.captain = effectiveCaptainIdx(team1State, home);
+    home._captainIdx = undefined;
     subsCount += htSubsCount; htSubsCount = 0; _htMode = false;
     // 負傷交代の解決（Sprint 2b）: HT画面で交代済みなら続行、未交代なら10人で続行。
     if (typeof disciplineResolveUserSub === 'function' && gameState && gameState.team1) {
@@ -907,6 +912,7 @@
       tactics: gameState.team1.tactics,
       keyplayer: gameState.team1.keyplayer,
       marked_player: gameState.team1.marked_player,
+      captain: (typeof gameState.team1.captain === 'number') ? gameState.team1.captain : -1,
       lineup: gameState.team1.lineup.slice()
     };
 
@@ -993,6 +999,10 @@
     home.keyplayer = team1State.keyplayer;
     home.marked_player = team1State.marked_player;
     home.lineup = team1State.lineup.slice();
+    // キャプテン（2026-07-27）: 指名がスタメンから外れていたら自動選出に戻す。
+    //   _captainIdx はキャッシュなので必ず落として次の参照で引き直させる。
+    home.captain = effectiveCaptainIdx(team1State, home);
+    home._captainIdx = undefined;
 
     // 交代枠の消費を反映（表示用）。
     subsCount += htSubsCount;

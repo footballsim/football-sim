@@ -10,7 +10,12 @@ football-sim をゲーム化（[GAME_PLAN.md](GAME_PLAN.md)）するための複
 
 1. **デュエルカウント・ロジックに触れない**（既知の未解決バグ。怪我/退場は result を「フック」する加算実装に限定し、デュエル解決自体は書き換えない）。
 2. **`docs/` を手編集しない**。配信用の難読化成果物。変更は root の `js/` / `index.html` / `css/` を直して `npm run build` で再生成。
-3. **戦術・システムは実在するものだけ使う**。戦術は `POSSESSION / PRESS / COUNTER / CATENACCIO` の4種。`3-5-2` / `4-3-3` / `TACTICS_PRESSING` は存在しない。
+3. **戦術・システムは実在するものだけ使う**。戦術は `POSSESSION / PRESS / COUNTER / CATENACCIO` の4種。`TACTICS_PRESSING` は存在しない。
+   - システムは `system_data`（22件・js/players.js）に**載っている形だけ**。勝手に増やさない。
+   - **表示名は `SYSTEM_GROUPS` の8区分＋A/B/C…**（例: `4-4-2B`／`systemLabel()` で引く）。
+     `system_data[].name`（`4-3-1-2` 等）は**内部名**＝`TEAM_DATA.default_system` の引き当てキー。
+   - **`system_data` の並び順と name は変えない**。配列 index はリーグセーブ（`_state.lineups[].systemIdx`）の
+     キーなので、並べ替え/改名は保存済みの布陣を静かに別フォーメーションへ化けさせる。
 4. **i18n は日英の両方**を必ず更新（`i18n` / `t()`、js/players.js）。片方だけ追加しない。
 5. **新 screen は暗背景必須**（`linear-gradient(160deg,#003087,#0050cc,#1a7a3a)`）。白背景＋白文字は禁止。背景変更時は color も必ず明示。
 6. **選手プロフィール禁止語**（日英）: FIFA / ワールドカップ / W杯 / World Cup / チャンピオンズリーグ / Champions League / 特定クラブ名。
