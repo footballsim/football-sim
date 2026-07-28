@@ -3540,6 +3540,21 @@
     if (!on) {
       s.classList.remove('league-prep');
       if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+      ['lgp-power', 'lgp-mode', 'lgp-bench-count'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      });
+      // MD-04b: カードに注入した子要素とクラスを剥がす。HT采配/シングルは同じ DOM を
+      //   再利用するため、再描画を待たずにここで確実に素の姿へ戻す。
+      Array.prototype.forEach.call(
+        s.querySelectorAll('.lgp-top, .lgp-head, .lgp-bench-val'),
+        function (el) { if (el.parentNode) el.parentNode.removeChild(el); });
+      Array.prototype.forEach.call(
+        s.querySelectorAll('.lgp-card, .lgp-absent, .lgp-bench-card'),
+        function (el) { el.classList.remove('lgp-card'); el.classList.remove('lgp-absent'); el.classList.remove('lgp-bench-card'); });
+      Array.prototype.forEach.call(
+        s.querySelectorAll('.bench-item-circle.lgp-chip'),
+        function (el) { el.classList.remove('lgp-chip'); el.classList.remove('gk'); el.classList.remove('df'); el.classList.remove('mf'); el.classList.remove('fw'); });
       return;
     }
     s.classList.add('league-prep');
@@ -3557,6 +3572,209 @@
         '👥 ' + _t('自動編成', 'Auto pick') + '</button>' +
       '<button type="button" class="lg-prep-nb kick" onclick="startGame()">' +
         '⚽ ' + _t('キックオフ！', 'KICK OFF!') + '</button>';
+
+    // ── MD-04b（2026-07-27・R_lineup_setting_retro_v2 準拠）────────────────
+    // スタメン総合力パネル（右カラム先頭）
+    var grid = s.querySelector('.setting-btn-grid');
+    if (grid && !document.getElementById('lgp-power')) {
+      var pw = document.createElement('div');
+      pw.id = 'lgp-power'; pw.className = 'lgp-power';
+      pw.innerHTML =
+        '<div class="lgp-power-label">' + _t('スタメン総合力', 'STARTING XI') + '</div>' +
+        '<div class="lgp-power-num" id="lgp-power-num">-</div>' +
+        '<div class="lgp-power-delta" id="lgp-power-delta"></div>';
+      grid.insertBefore(pw, grid.firstChild);
+    }
+    _lgpPowerPrev = null;   // 開いた直後は差分を出さない（最初の入れ替えから）
+
+    // 表示切替（数値→調子→士気）＝GK横・ピッチ右下の1行ボタン
+    var fc = s.querySelector('.field-container');
+    if (fc && !document.getElementById('lgp-mode')) {
+      var mb = document.createElement('button');
+      mb.type = 'button'; mb.id = 'lgp-mode'; mb.className = 'lgp-mode';
+      mb.onclick = function () {
+        _lgpMode = _lgpMode === 'v' ? 'c' : _lgpMode === 'c' ? 'm' : 'v';
+        _lgpModeLabel();
+        // 再描画＝カードの値スロットが全部入れ替わる（装飾はrenderのフックで再適用）
+        if (typeof renderFormation === 'function') renderFormation();
+        if (typeof renderBench === 'function') renderBench();
+      };
+      fc.appendChild(mb);
+    }
+    _lgpModeLabel();
+
+    // 控え人数（applyLang が .bench-panel-label を書き換えても消えない独立ノード）
+    var bl = s.querySelector('.bench-panel-label');
+    if (bl && !document.getElementById('lgp-bench-count')) {
+      var bc = document.createElement('span');
+      bc.id = 'lgp-bench-count'; bc.className = 'lgp-bench-count';
+      bl.parentNode.insertBefore(bc, bl.nextSibling);
+    }
+
+    // initSettingScreen は league-prep が付く前に描画を済ませている＝クラスが付いた今、
+    // もう一度描いてカード装飾（lgPrepAfterRender）を効かせる。
+    if (typeof renderFormation === 'function') renderFormation();
+    if (typeof renderBench === 'function') renderBench();
+  }
+
+  /* ══ MD-04b 布陣設定のカード化（2026-07-27・Codexモック R_lineup_setting_retro_v2 準拠）══
+   * 選手ドット→ミニカード（ポジションチップ＋総合値＋ドット頭＋名前）／控え＝カード棚／
+   * スタメン総合力パネル／表示切替（数値/調子/士気）。
+   * simulate.js の renderFormation / renderBench 末尾のフック lgPrepAfterRender から呼ばれる。
+   * ★ .league-prep が付いている間だけ装飾＝シングル/W杯/ハーフタイム采配には一切出ない。
+   * ★ 既存 DOM に子要素を「足す」だけ＝ドラッグ入替・選手詳細タップのリスナーを壊さない。 */
+  var _lgpMode = 'v';        // 'v'=数値 / 'c'=調子 / 'm'=士気（セッション内のみ・保存しない）
+  var _lgpPowerPrev = null;  // 総合力の前回値（×10整数）。差分表示とカウントアップに使う
+
+  function _lgpOn() {
+    var s = document.getElementById('screen-setting');
+    return !!(s && s.classList.contains('league-prep'));
+  }
+
+  // ライン種別（チップの色分け用）: GK / DF / MF / FW
+  function _lgpLine(posName) {
+    var b = (posName && (posName.charAt(0) === '左' || posName.charAt(0) === '右')) ? posName.slice(1) : (posName || '');
+    if (b === 'GK') return 'gk';
+    if (b === 'CB' || b === 'SB' || b === 'SW') return 'df';
+    if (b === 'CF' || b === 'WG') return 'fw';
+    return 'mf';
+  }
+
+  // 実効総合値 = params平均。適正外はエンジン（getActionParam）と同じ -5% ＝「!」の意味が数字で読める
+  function _lgpRating(p, posName) {
+    if (!p || !p.params || !p.params.length) return 0;
+    var t = 0; for (var i = 0; i < p.params.length; i++) t += p.params[i];
+    var avg = t / p.params.length;
+    if (posName && p.positions) {
+      var b = (posName.charAt(0) === '左' || posName.charAt(0) === '右') ? posName.slice(1) : posName;
+      if (p.positions.indexOf(posName) < 0 && p.positions.indexOf(b) < 0) avg *= 0.95;
+    }
+    return avg;
+  }
+
+  /* 調子/士気の3段（高/中/低）。
+   * ★ 仮のデータ源＝決定論ハッシュ（選手×シーズン×節で毎週入れ替わる・保存不要）。
+   *   試合結果への効果はまだ無い（表示の骨組み）。コンディション系／PS-13 永続士気が
+   *   実装されたら、この関数の中身だけを実データ読みに差し替える。 */
+  function _lgpTri(p, salt) {
+    var season = (_state && _state.season) ? _state.season : 1;
+    var round = (_state && _state.round) ? _state.round : 1;
+    var r = _hash32(salt + '|' + _playerKey(p) + '|' + season + '|' + round) % 10;
+    return (r < 2) ? '低' : (r < 8) ? '中' : '高';
+  }
+
+  function _lgpValHtml(p, posName) {
+    if (_lgpMode === 'v') return '<span class="lgp-val">' + Math.round(_lgpRating(p, posName)) + '</span>';
+    var k = _lgpTri(p, _lgpMode === 'c' ? 'cond' : 'mot');
+    var cls = k === '高' ? 'hi' : k === '低' ? 'lo' : 'mid';
+    var mark = k === '高' ? '▲' : k === '低' ? '▼' : '●';
+    var label = (window.LANG === 'en')
+      ? (k === '高' ? 'Hi' : k === '低' ? 'Lo' : 'Mid')
+      : k;
+    return '<span class="lgp-val lgp-tri ' + cls + '">' + mark + label + '</span>';
+  }
+
+  function _lgpModeLabel() {
+    var mb = document.getElementById('lgp-mode'); if (!mb) return;
+    var nm = _lgpMode === 'v' ? _t('数値', 'Rating') : _lgpMode === 'c' ? _t('調子', 'Form') : _t('士気', 'Morale');
+    mb.innerHTML = nm + ' <span class="lgp-mode-ic">⟳</span>';
+  }
+
+  window.lgPrepAfterRender = function (what) {
+    if (!_lgpOn()) return;
+    if (typeof team1Data === 'undefined' || !team1Data || !team1Data.players) return;
+    if (typeof team1State === 'undefined' || !team1State || !team1State.lineup) return;
+    if (what === 'formation') { _lgpDecorateFormation(); _lgpUpdatePower(); _lgpModeLabel(); }
+    else if (what === 'bench') { _lgpDecorateBench(); }
+  };
+
+  function _lgpDecorateFormation() {
+    var display = document.getElementById('formation-display'); if (!display) return;
+    var sys = (typeof system_data !== 'undefined') ? system_data[team1State.systemIdx] : null;
+    Array.prototype.forEach.call(display.querySelectorAll('.player-dot'), function (dot) {
+      var pos = parseInt(dot.dataset.pos, 10);
+      var p = team1Data.players[team1State.lineup[pos]];
+      var wrap = dot.firstElementChild;                 // circleWrap（各種バッジの親）
+      if (!wrap || !p) return;
+      var posName = sys ? sys.positions[pos] : '';
+      // 行の重なりは「下の行ほど手前」＝上の行の選手名が下のカードの裏に回る（読みやすさ優先）
+      dot.style.zIndex = String(10 + Math.round(parseFloat(dot.style.top) || 0));
+      wrap.classList.add('lgp-card');
+      // 欠場者（怪我/出停）: 旧UIは丸をグレー化していたが丸は隠したので、カードごと沈める
+      //   （🩹/🟥の週数バッジは renderFormation が既に付けている）
+      if (typeof leaguePlayerAbsence === 'function' && leaguePlayerAbsence(team1State.lineup[pos])) {
+        wrap.classList.add('lgp-absent');
+      }
+      var top = document.createElement('div');
+      top.className = 'lgp-top';
+      top.innerHTML = '<span class="lgp-chip ' + _lgpLine(posName) + '">' +
+        (posName || '').replace(/[左右]/g, '').substring(0, 2) + '</span>' + _lgpValHtml(p, posName);
+      var cv = document.createElement('canvas');
+      cv.className = 'lgp-head';
+      cv.width = 48; cv.height = 48;
+      cv.setAttribute('data-portrait', p.long_name || p.name);
+      wrap.insertBefore(top, wrap.firstChild);
+      wrap.appendChild(cv);
+    });
+    _paintPortraitCanvases(display);
+  }
+
+  function _lgpDecorateBench() {
+    var bench = document.getElementById('bench-list'); if (!bench) return;
+    var count = 0;
+    Array.prototype.forEach.call(bench.querySelectorAll('.bench-item'), function (item) {
+      count++;
+      var idx = parseInt(item.dataset.playerIdx, 10);
+      var p = team1Data.players[idx]; if (!p) return;
+      item.classList.add('lgp-bench-card');
+      var cv = document.createElement('canvas');
+      cv.className = 'lgp-head'; cv.width = 40; cv.height = 40;
+      cv.setAttribute('data-portrait', p.long_name || p.name);
+      item.insertBefore(cv, item.firstChild);
+      var chip = item.querySelector('.bench-item-circle');   // 既存の丸をライン色チップとして再利用
+      if (chip) { chip.classList.add('lgp-chip'); chip.classList.add(_lgpLine(p.positions && p.positions[0])); }
+      var val = document.createElement('div');
+      val.className = 'lgp-bench-val';
+      val.innerHTML = _lgpValHtml(p, null);
+      item.appendChild(val);
+    });
+    var cnt = document.getElementById('lgp-bench-count');
+    if (cnt) cnt.textContent = count + _t('人', '');
+    _paintPortraitCanvases(bench);
+  }
+
+  // スタメン総合力 = 11人の実効総合値の平均（小数1桁）。入れ替えのたびに juice でカウントアップ＋差分表示。
+  function _lgpPowerNow() {
+    var sys = (typeof system_data !== 'undefined') ? system_data[team1State.systemIdx] : null;
+    var t = 0;
+    for (var pos = 0; pos < 11; pos++) {
+      t += _lgpRating(team1Data.players[team1State.lineup[pos]], sys ? sys.positions[pos] : null);
+    }
+    return Math.round(t / 11 * 10);   // ×10 の整数（Juice.countUp が整数刻みのため）
+  }
+
+  function _lgpUpdatePower() {
+    var el = document.getElementById('lgp-power-num'); if (!el) return;
+    var lb = document.querySelector('#lgp-power .lgp-power-label');
+    if (lb) lb.textContent = _t('スタメン総合力', 'STARTING XI');   // 言語切替に追従（描画のたびに引き直す）
+    var v10 = _lgpPowerNow();
+    var fmt = function (v) { return (v / 10).toFixed(1); };
+    var prev = _lgpPowerPrev;
+    if (prev === null || prev === v10 || typeof Juice === 'undefined' || !Juice.countUp) {
+      el.textContent = fmt(v10);
+    } else {
+      Juice.countUp(el, v10, { from: prev, dur: 500, fmt: fmt });
+    }
+    var dEl = document.getElementById('lgp-power-delta');
+    if (dEl) {
+      if (prev === null || prev === v10) { dEl.textContent = ''; dEl.className = 'lgp-power-delta'; }
+      else {
+        var d = (v10 - prev) / 10;
+        dEl.textContent = (d > 0 ? '▲ +' : '▼ ') + d.toFixed(1);
+        dEl.className = 'lgp-power-delta ' + (d > 0 ? 'up' : 'down');
+      }
+    }
+    _lgpPowerPrev = v10;
   }
 
   /* MD-04 自動編成。いま選んでいるシステムの各枠に、出場可能な選手から

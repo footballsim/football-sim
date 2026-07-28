@@ -1867,6 +1867,9 @@ function renderFormation() {
     dot.appendChild(nameTag);
     display.appendChild(dot);
   }
+
+  // リーグの試合前（.league-prep）のみ、ドットをミニカードへ装飾（league.js 側・非同梱は no-op）
+  if (typeof lgPrepAfterRender === 'function') lgPrepAfterRender('formation');
 }
 
 // team1DataのTEAM_DATAキーを返す。
@@ -1997,6 +2000,9 @@ function renderBench() {
 
     bench.appendChild(item);
   });
+
+  // リーグの試合前（.league-prep）のみ、控えをカード棚へ装飾（league.js 側・非同梱は no-op）
+  if (typeof lgPrepAfterRender === 'function') lgPrepAfterRender('bench');
 }
 function openPlayerParams(playerIdx) {
   const p = team1Data.players[playerIdx];

@@ -2165,36 +2165,31 @@ body.league-mode #screen-home.season-end-mode > #league-body {
     body.league-mode #screen-setting.league-prep::after { opacity: .14; }
   }
 
-  /* ── ヘッダー：金の下罫＋対戦カード ── */
-  body.league-mode #screen-setting.league-prep .screen-header {
-    background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
-    border-bottom: 2px solid var(--lg-gold-2);
-  }
-  body.league-mode #screen-setting.league-prep .screen-title-text {
-    color: var(--lg-text); font-weight: 900; letter-spacing: 1px;
-  }
-  body.league-mode #screen-setting.league-prep .back-btn {
-    border: 2px solid var(--lg-line); border-radius: 4px;
-    background: var(--pr-panel); color: var(--lg-text-dim); font-weight: 800;
-  }
+  /* ── ヘッダー：MD-04b（2026-07-27）で全撤去。戻るは下部コマンドバーに一本化。──
+     対戦カード・節/ホームは直前の「試合へ」画面で見せている＝ここでは繰り返さない。 */
+  body.league-mode #screen-setting.league-prep .screen-header { display: none; }
 
-  /* ── 本文：左=ピッチ+控え（内部で2ゾーン）／右=設定4枚／最下段=コマンドバー ── */
+  /* ── 本文（MD-04b）：左=控え棚／中央=ピッチ（主役）／右=総合力+設定5行／最下段=コマンドバー ──
+     .bench-panel と .field-panel は #formation-view > .formation-layout の中に居るので、
+     両ラッパーを display:contents にして 3カラムグリッドへ直接ぶら下げる（DOMは動かさない）。 */
   body.league-mode #screen-setting.league-prep .setting-content {
-    grid-template-columns: minmax(0, 2.15fr) minmax(0, 0.85fr);
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.55fr) minmax(0, 0.8fr);
+    grid-template-rows: minmax(0, 1fr) auto;
     align-content: stretch;
     row-gap: clamp(6px, 1.2vh, 10px);
+    column-gap: clamp(8px, 1.2vw, 14px);
     padding: clamp(8px, 1.8vh, 13px) clamp(10px, 1.6vw, 16px) clamp(9px, 1.8vh, 13px);
   }
-  body.league-mode #screen-setting.league-prep #label-starting {
-    color: var(--lg-gold) !important;
-    font-size: 11px !important; font-weight: 900 !important; letter-spacing: 2px !important;
-  }
-  body.league-mode #screen-setting.league-prep #formation-view { grid-column: 1; grid-row: 2; }
+  body.league-mode #screen-setting.league-prep #label-starting { display: none !important; }
+  body.league-mode #screen-setting.league-prep #formation-view,
+  body.league-mode #screen-setting.league-prep .formation-layout { display: contents; }
+  body.league-mode #screen-setting.league-prep .bench-panel { grid-column: 1; grid-row: 1; }
+  body.league-mode #screen-setting.league-prep .field-panel { grid-column: 2; grid-row: 1; }
   body.league-mode #screen-setting.league-prep .setting-btn-grid {
-    grid-column: 2; grid-row: 1 / span 2; align-self: stretch;
-    display: flex; flex-direction: column; justify-content: center;
+    grid-column: 3; grid-row: 1; align-self: stretch;
+    display: flex; flex-direction: column; justify-content: flex-start;
     gap: clamp(7px, 1.4vh, 12px);
+    margin-bottom: 0;
   }
   /* 重複していたキックオフ／監督モード／📊 は下部コマンドバーへ集約したので出さない */
   body.league-mode #screen-setting.league-prep #btn-kickoff-top,
@@ -2219,32 +2214,34 @@ body.league-mode #screen-home.season-end-mode > #league-body {
     border: 2px solid var(--lg-line); border-radius: 4px; overflow: hidden;
     background: repeating-linear-gradient(0deg, #1d5232 0 14px, #1a4a2d 14px 28px);
   }
+  /* MD-04b: 凡例とドラッグヒントはモック準拠で出さない（!バッジ＋数字の減衰で読める） */
   body.league-mode #screen-setting.league-prep .oop-legend,
-  body.league-mode #screen-setting.league-prep .hint {
-    color: var(--lg-text-mute); font-weight: 700;
-  }
+  body.league-mode #screen-setting.league-prep .hint { display: none; }
 
-  /* ピッチは確定高さのまま少しだけ低くする。
-     ★ flex で伸ばそうとすると aspect-ratio 由来の幅が解けず 0 に潰れる（2026-07-26 実測）。
-       高さ→幅の依存があるので「高さは確定値」を守る。 */
-  body.league-mode #screen-setting.league-prep .field-container {
-    height: min(54vh, 430px);
+  /* ピッチの寸法は「MD-04 追補」ブロック（ファイル末尾側）で width:100%＋flex に確定。
+     ここでは field-panel を flex 縦積みにして枠の高さを渡すだけ。 */
+  body.league-mode #screen-setting.league-prep .field-panel {
+    display: flex; flex-direction: column; min-height: 0;
   }
-  /* ── 控え：全員を一覧（名前を1行に収める）── */
+  /* ── 控え（MD-04b）：縦1列のカード棚＝はみ出しはこの棚の中だけスクロール ── */
+  body.league-mode #screen-setting.league-prep .bench-panel {
+    display: flex; flex-direction: column; min-height: 0;
+  }
   body.league-mode #screen-setting.league-prep .bench-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(5px, 1vh, 8px);
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(4px, 0.9vh, 7px);
     max-height: none;
+    flex: 1 1 auto; min-height: 0;
+    overflow-y: auto;
+    align-content: start;
+    padding-right: 3px;
   }
   body.league-mode #screen-setting.league-prep .bench-item {
     flex-direction: row; align-items: center; gap: 6px;
-    padding: 5px 7px; border-radius: 4px;
+    padding: 3px 6px; border-radius: 4px;
     border: 1.5px solid var(--lg-line);
     background: var(--pr-panel); color: var(--lg-text);
-  }
-  body.league-mode #screen-setting.league-prep .bench-item-circle {
-    width: 22px; height: 22px; flex: 0 0 auto; border-radius: 3px;
-    font-size: 9px; font-weight: 900; color: var(--lg-ink);
+    flex-shrink: 0;
   }
   body.league-mode #screen-setting.league-prep .bench-item-name {
     flex: 1 1 auto; min-width: 0; text-align: left;
@@ -2252,31 +2249,34 @@ body.league-mode #screen-home.season-end-mode > #league-body {
     font-size: 11px; font-weight: 800; color: var(--lg-text-dim);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;   /* 折り返して読めなくなるのを防ぐ */
   }
+  /* 重複表示になるポジション略ラベルは出さない（チップに一本化） */
+  body.league-mode #screen-setting.league-prep .bench-item-pos { display: none; }
 
-  /* 3ゾーンを枠の高さいっぱいに伸ばす（下に大きな余白が空くのを防ぐ） */
-  body.league-mode #screen-setting.league-prep #formation-view,
-  body.league-mode #screen-setting.league-prep .formation-layout { height: 100%; min-height: 0; }
   body.league-mode #screen-setting.league-prep .field-panel { justify-content: center; }
-  body.league-mode #screen-setting.league-prep .bench-panel { justify-content: flex-start; }
 
-  /* ── 右ゾーン：システム／戦術／キープレイヤー／要注意プレイヤー ── */
+  /* ── 右ゾーン（MD-04b）：総合力パネル＋設定5行（ラベル左・現在値右の1行） ── */
   body.league-mode #screen-setting.league-prep .setting-nav-btn {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-    padding: clamp(9px, 2vh, 14px) 10px;
+    display: flex; flex-direction: row; align-items: baseline; justify-content: space-between; gap: 6px;
+    padding: clamp(6px, 1.4vh, 11px) 10px;
     border: 2px solid var(--lg-gold-2); border-radius: 5px;
     background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 3px 0 var(--pr-edge);
   }
   body.league-mode #screen-setting.league-prep .setting-nav-btn-label {
-    font-size: 10px; font-weight: 900; letter-spacing: 1.6px; color: var(--lg-gold);
+    font-size: 9px; font-weight: 900; letter-spacing: 1.2px; color: var(--lg-gold);
+    white-space: nowrap;
   }
   body.league-mode #screen-setting.league-prep .setting-nav-btn-value {
-    font-size: clamp(14px, 2.6vh, 19px); font-weight: 900; color: var(--lg-text);
+    font-size: clamp(11px, 2.1vh, 15px); font-weight: 900; color: var(--lg-text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
   }
+  /* 右カラム＝総合力パネル＋設定5行。横持ちは高さが足りないので1行あたりを詰める
+     （列を畳むのは幅条件だけ＝AGENTS.md 10）。 */
+  body.league-mode #screen-setting.league-prep .setting-btn-grid { gap: clamp(4px, 0.9vh, 8px); }
 
   /* ── 下部コマンドバー（戻る／自動編成／キックオフ）── */
   body.league-mode #screen-setting.league-prep .setting-content > .lg-prep-cmd {
-    grid-column: 1 / -1; grid-row: 3;
+    grid-column: 1 / -1; grid-row: 2;
     display: grid; gap: 8px;
     grid-template-columns: minmax(0, .8fr) minmax(0, 1fr) minmax(0, 2fr);
   }
@@ -2300,6 +2300,120 @@ body.league-mode #screen-home.season-end-mode > #league-body {
     font-size: clamp(14px, 2.8vh, 20px); letter-spacing: 2px;
   }
 }
+
+/* ==========================================================================
+ * MD-04b — 布陣設定のカード化（2026-07-27・Codexモック R_lineup_setting_retro_v2 準拠）
+ * --------------------------------------------------------------------------
+ * 選手ドット→ミニカード／控え=カード棚／スタメン総合力／表示切替（数値/調子/士気）。
+ * DOM は league.js（lgPrepAfterRender / _decorateSettingScreen）が .league-prep 中だけ注入。
+ * ★ メディアクエリの外＝縦持ちでもカードは同じ見た目（並べ方だけ landscape 側で変える）。
+ * ========================================================================== */
+/* 従来の丸ドットはカードに置き換わるので隠す（バッジ類はカード上に残る） */
+body.league-mode #screen-setting.league-prep .player-circle { display: none; }
+
+/* 先発カード本体（circleWrap を転用＝Ⓒ/🩹/!バッジの絶対配置の親のまま） */
+body.league-mode #screen-setting.league-prep .lgp-card {
+  display: flex; flex-direction: column; align-items: stretch; gap: 0;
+  width: clamp(44px, 13.2cqw, 58px);
+  padding: 1px 3px 1px;
+  border: 1.5px solid rgba(255, 255, 255, .45); border-radius: 3px;
+  background: #0d1b38;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .55);
+}
+body.league-mode #screen-setting.league-prep .lgp-top {
+  display: flex; align-items: center; justify-content: space-between; gap: 2px;
+  flex-wrap: nowrap; white-space: nowrap;
+}
+body.league-mode #screen-setting.league-prep .lgp-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 3px; border-radius: 2px;
+  font-size: clamp(7px, 2.2cqw, 9px); font-weight: 900; color: #0b1020; line-height: 1.5;
+}
+body.league-mode #screen-setting.league-prep .lgp-chip.gk { background: #e05555; }
+body.league-mode #screen-setting.league-prep .lgp-chip.df { background: #4a9df0; }
+body.league-mode #screen-setting.league-prep .lgp-chip.mf { background: #53c06a; }
+body.league-mode #screen-setting.league-prep .lgp-chip.fw { background: #f0b429; }
+body.league-mode #screen-setting.league-prep .lgp-val {
+  font-size: clamp(10px, 3cqw, 13px); font-weight: 900; color: #fff;
+  font-feature-settings: "tnum" 1; line-height: 1.2;
+}
+body.league-mode #screen-setting.league-prep .lgp-tri { font-size: clamp(7px, 2.3cqw, 10px); letter-spacing: -0.5px; }
+body.league-mode #screen-setting.league-prep .lgp-tri.hi  { color: #53c06a; }
+body.league-mode #screen-setting.league-prep .lgp-tri.mid { color: #e8b93a; }
+body.league-mode #screen-setting.league-prep .lgp-tri.lo  { color: #ff6a6a; }
+body.league-mode #screen-setting.league-prep .lgp-card .lgp-head {
+  display: block; margin: 0 auto;
+  width: clamp(16px, 5.4cqw, 24px); height: clamp(16px, 5.4cqw, 24px);
+  image-rendering: pixelated;
+}
+/* 適正外はカード枠も橙にする（!バッジ＋数字-5%と三点で読める） */
+body.league-mode #screen-setting.league-prep .player-dot:has(.pos-badge) .lgp-card {
+  border-color: #e06a1f;
+}
+/* 欠場者（怪我/出停）がスタメンに残っている＝カードごと沈めて「入れ替えろ」を示す */
+body.league-mode #screen-setting.league-prep .lgp-card.lgp-absent {
+  opacity: .45; filter: grayscale(.7);
+  border-color: rgba(255, 255, 255, .25);
+}
+/* 選手名はカード下の白文字（ピッチ上に直接） */
+body.league-mode #screen-setting.league-prep .player-name-tag { color: #fff; }
+
+/* 控えカード（bench-item に追加要素を差し込む） */
+body.league-mode #screen-setting.league-prep .lgp-bench-card .lgp-head {
+  display: block; width: 20px; height: 20px; flex: 0 0 auto;
+  image-rendering: pixelated;
+}
+body.league-mode #screen-setting.league-prep .lgp-bench-card .bench-item-circle {
+  width: auto; min-width: 20px; height: 15px; border-radius: 2px;
+  font-size: 8.5px; padding: 0 3px;
+}
+body.league-mode #screen-setting.league-prep .lgp-bench-val {
+  flex: 0 0 auto; margin-left: auto;
+}
+body.league-mode #screen-setting.league-prep .lgp-bench-val .lgp-val { font-size: 11px; }
+body.league-mode #screen-setting.league-prep .lgp-bench-count {
+  color: var(--lg-text-mute); font-size: 10px; font-weight: 700; margin-left: 6px;
+}
+/* 棚の下端のスクロールヒント（承認モックにあり）。棚が縦スクロールになった目印。 */
+body.league-mode #screen-setting.league-prep .bench-panel::after {
+  content: "▼";
+  flex: 0 0 auto; text-align: center;
+  color: var(--lg-text-mute); font-size: 8px; line-height: 1.4; padding-top: 1px;
+}
+
+/* スタメン総合力パネル（右カラム先頭） */
+body.league-mode #screen-setting.league-prep .lgp-power {
+  padding: clamp(6px, 1.4vh, 10px) 6px;
+  border: 2px solid var(--lg-gold-2); border-radius: 5px;
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 3px 0 var(--pr-edge, rgba(0,0,0,.5));
+  text-align: center;
+}
+body.league-mode #screen-setting.league-prep .lgp-power-label {
+  color: var(--lg-gold); font-size: 9px; font-weight: 900; letter-spacing: 1.5px;
+}
+body.league-mode #screen-setting.league-prep .lgp-power-num {
+  color: #ffd23e; font-size: clamp(20px, 4.6vh, 30px); font-weight: 900; line-height: 1.15;
+  font-feature-settings: "tnum" 1;
+}
+body.league-mode #screen-setting.league-prep .lgp-power-delta {
+  font-size: 11px; font-weight: 800; min-height: 13px; line-height: 1.2;
+}
+body.league-mode #screen-setting.league-prep .lgp-power-delta.up   { color: #53c06a; }
+body.league-mode #screen-setting.league-prep .lgp-power-delta.down { color: #ff6a6a; }
+
+/* 表示切替（数値→調子→士気）＝ピッチ右下・GK横の1行ボタン */
+body.league-mode #screen-setting.league-prep .lgp-mode {
+  position: absolute; right: 6px; bottom: 8px; z-index: 30;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 9px; cursor: pointer;
+  border: 1.5px solid rgba(255, 255, 255, .45); border-radius: 3px;
+  background: rgba(10, 23, 48, .92); color: #fff;
+  font-size: 11px; font-weight: 800; font-family: inherit;
+}
+body.league-mode #screen-setting.league-prep .lgp-mode .lgp-mode-ic { color: var(--lg-gold); }
+/* .field-container は position 指定が無い＝ボタンの絶対配置の基準にする */
+body.league-mode #screen-setting.league-prep .field-container { position: relative; }
 
 /* ==========================================================================
  * HT-01 — ハーフタイム画面（2026-07-26・Codexモック R_halftime_retro_v3 準拠）
@@ -2694,52 +2808,31 @@ button.lg-se-award:active { transform: translateY(2px); box-shadow: inset 0 0 0 
  *       行を詰めて15人が収まるようにする。どちらも .league-prep 内だけに閉じる。
  * ========================================================================== */
 @media (orientation: landscape) {
-  /* ピッチを「箱に収まる範囲で最大」にする。flex-shrink を許して枠から溢れさせない
-     （高さ→aspect-ratio→幅 の順で決まるので、縮めば幅も一緒に縮む）。 */
+  /* MD-04b: ピッチはパネルいっぱいに広げる（縦長 aspect-ratio は廃止＝中央カラム全面が芝）。
+     style.css の `aspect-ratio:100/145`＋確定高さは旧2カラム時代の寸法なのでここで解除。
+     幅は width:100% で確定してから高さを flex で伸ばす＝「flexで幅0に潰れる」問題は起きない。 */
   body.league-mode #screen-setting.league-prep .field-container {
-    flex: 0 1 auto; min-height: 0;
-    container-type: inline-size;   /* 選手ドットの寸法の基準にする */
+    aspect-ratio: auto;
+    width: 100%; align-self: stretch;
+    height: auto; flex: 1 1 auto; min-height: 0;
+    container-type: inline-size;   /* 選手カードの寸法の基準にする */
   }
-  /* ドット＝ピッチ幅に対する比率で決める。4バックが並ぶ幅（1枠あたり約25cqw）に収める。 */
-  body.league-mode #screen-setting.league-prep .player-circle {
-    width: clamp(15px, 16cqw, 36px); height: clamp(15px, 16cqw, 36px);
-    font-size: clamp(6.5px, 6cqw, 10px);
-  }
-  /* 名前札の幅が実質のドット幅＝重なりの主因。4バックの間隔（ピッチ幅の25%）未満に抑える。 */
+  /* 名前札の幅が実質のカード幅＝重なりの主因。4バックの間隔（ピッチ幅の25%）未満に抑える。 */
   body.league-mode #screen-setting.league-prep .player-name-tag {
-    font-size: clamp(6px, 5.6cqw, 11px) !important;
-    max-width: clamp(28px, 23cqw, 60px);
+    font-size: clamp(6px, 3cqw, 10px) !important;
+    max-width: clamp(40px, 15cqw, 66px);
     margin-top: 1px;
   }
-  /* 凡例は枠内に収める（はみ出して「ドラッグで選手入れ替え」が外に落ちていた） */
   body.league-mode #screen-setting.league-prep .field-panel { overflow: hidden; }
-  body.league-mode #screen-setting.league-prep .field-panel > div:last-child {
-    flex: 0 0 auto; font-size: 10px; line-height: 1.35;
-  }
-  body.league-mode #screen-setting.league-prep .oop-legend,
-  body.league-mode #screen-setting.league-prep .hint { font-size: 10px; }
 }
 
-/* 縦が短い画面（スマホ横持ち）＝控え15人を「切らずに」収める。
-   行の丈と文字を詰めるだけで、押せる面積（最低28px）は確保する。 */
+/* 縦が短い画面（スマホ横持ち）＝控え棚（縦1列スクロール）の行を詰めて多く見せる。 */
 @media (orientation: landscape) and (max-height: 560px) {
-  body.league-mode #screen-setting.league-prep .bench-list {
-    /* 2列だと 8 行になり、いちばん短い端末（390px級）で下 2 行が切れて押せなかった。
-       3列＝5行にすれば縦が最も短い端末でも全員が収まる。 */
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 3px; padding: 2px 2px 3px;
-  }
   body.league-mode #screen-setting.league-prep .bench-item {
-    min-height: 27px; padding: 2px 6px; gap: 5px;
-  }
-  body.league-mode #screen-setting.league-prep .bench-item-circle {
-    width: 18px; height: 18px; font-size: 8px;
+    min-height: 26px; padding: 2px 5px; gap: 4px;
   }
   body.league-mode #screen-setting.league-prep .bench-item-name { font-size: 10px; }
   body.league-mode #screen-setting.league-prep .bench-panel-label { font-size: 9px; }
-  /* 控えが3列＝5行に収まったぶん、ピッチは大きめに取れる（名前が読める）。
-     ドットはコンテナクエリでピッチ幅に追従するので、大きくしても重ならない。 */
-  body.league-mode #screen-setting.league-prep .field-container { height: min(56vh, 430px); }
 }
 
 /* ==========================================================================
