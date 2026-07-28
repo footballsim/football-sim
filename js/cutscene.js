@@ -2316,15 +2316,23 @@ function _renderRunInScene(sc) {
   var labelCol = success ? '#ffe14a' : '#ff5a3c';
   var accent = success ? atkColor : defColor;
 
-  var runPh = 182, P = success ? 750 : 1700, zc = [230, 150];   // 成功=尺半分(750ms)・2026-07-23 ユーザー指定
-  // 走りループ6コマ（sprite-studio 2026-07-22・lab限定テスト）: MangaRecolor到達時のみ
-  //   単一静止画の平行移動 → 6コマのコマ送り（fps12・ホールド2＝約167ms/コマ）へ差し替える。
+  // ── 成功=2拍構成（2026-07-27 ユーザー指示・ドリブル演出と同じ作法）─────────────
+  //   旧: 6コマの走りループを尺いっぱい回し続け、しかも表示中はずっと回していた（＝「ずっと走った状態」）。
+  //   新: 拍1「溜め」＝**選手は1コマで静止**し、スルーパスだけがウラのスペースへ転がる。
+  //       拍2「決着」＝コマを差し替えて一息に追いつく。最後は**2コマ目のまま静止**（ループしない）。
+  //   尺の合計は従来と同じ 750ms（2026-07-23 ユーザー指定）。配分はドリブル2拍（460:240）と同比。
+  var _RI_HOLD = 490, _RI_CUT = 260;
+  var runPh = 182, P = success ? (_RI_HOLD + _RI_CUT) : 1700, zc = [230, 150];
+  // 走りアート（sprite-studio 2026-07-22）: MangaRecolor到達時のみ使う。
   //   素材: img/cutscenes/manga_run6/f1..f6.png（172x223・接地線y=217・ネイティブ左向き）。
+  //   使うのは2枚だけ = f6（溜め＝ひざを上げてコンパクトに構える）→ f4（決着＝最大ストライドで抜け出す）。
   //   未ロード/本番(MangaRecolor無し)は従来の _DRIBBLE_SRC 静止画へ自動フォールバック。
   var _r6Manga = success && (typeof MangaRecolor !== 'undefined') && MangaRecolor.render;
   var _r6Cols = _r6Manga ? _mangaColors(sc.offence, _mangaFeat(runP ? (runP.long_name || runP.name || '') : '').skin) : null;
-  var _r6Imgs = _r6Manga ? [1, 2, 3, 4, 5, 6].map(function (i) { return _loadCutsceneImg('img/cutscenes/manga_run6/f' + i + '.png?v=2'); }) : null;   // 画像差し替え時は?vを上げる
-  var _R6_W = 172, _R6_H = 223, _R6_FOOT = 217, _R6_BODY = 195, _R6_MS = 59;   // 17fps(59ms/コマ)＝2026-07-22 ユーザー指定
+  var _RI_FI_HOLD = 6, _RI_FI_CUT = 4;   // 使用コマ番号（キャッシュキーにも使う＝絵が違えばキーも違う）
+  var _riHoldImg = _r6Manga ? _loadCutsceneImg('img/cutscenes/manga_run6/f' + _RI_FI_HOLD + '.png?v=2') : null;   // 画像差し替え時は?vを上げる
+  var _riCutImg  = _r6Manga ? _loadCutsceneImg('img/cutscenes/manga_run6/f' + _RI_FI_CUT  + '.png?v=2') : null;
+  var _R6_W = 172, _R6_H = 223, _R6_FOOT = 217, _R6_BODY = 195;
   var flipH = !_csAttackRight(sc);                                 // 成功スプライト: ネイティブ=右攻め → team2(左)で反転
   var flipFail = _csAttackRight(sc);                               // 失敗タブロー: longpass_fail と同じ向き(ネイティブ=左攻め)
   var failBase = success ? null : _loadCutsceneImg(_LP_FAIL_SRC);  // 失敗=カット・タブロー（赤×緑の2人絵）
@@ -2346,27 +2354,39 @@ function _renderRunInScene(sc) {
     if (nm) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(nm, W - 12, H - 10); }
   }
 
-  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  // 計時の起点は「画面に出た最初のフレーム」（ドリブル演出と同じ理由）。
+  //   生成時点で始めると、canvas の挿入や初回リカラーに食われた分だけ**溜め拍が短く見える**。
+  var T0 = null;
   var started = false;
   function frame() {
     if (canvas.isConnected) started = true; else if (started) return;
     var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    if (T0 === null) {
+      if (!canvas.isConnected) { requestAnimationFrame(frame); return; }   // まだ誰も見ていない＝計時を始めない
+      T0 = now;
+    }
     var p = Math.min(1, (now - T0) / P);
     ctx.clearRect(0, 0, W, H);
     if (success) {
       // ===== 成功: 守備を振り切り、ランナー単独で前方のスルーパスへ走り込む（守備は描かない）=====
       var runSpr = _csRecolorBand(runImg, 'green', atkColor, 'drb');     // 緑→攻撃色（dribble と同一キャッシュ）
       var z = 1.0 + Math.min(1, p / 0.6) * 0.04;
-      var sprint = Math.min(1, p / 0.5) * (1 - Math.max(0, (p - 0.8) / 0.2));   // 疾走中だけ速度線（p0.8→1で消える）
-      var u = eo(p);
+      // 2拍（ドリブル演出と同作法）。拍1=溜め: 選手は静止し、動くのはボールだけ。拍2=決着: 一息に追いつく。
+      var el = now - T0;
+      var hold = el < _RI_HOLD;
+      var q = hold ? (el / _RI_HOLD) : Math.min(1, (el - _RI_HOLD) / _RI_CUT);
+      var sprint = hold ? 0 : (1 - q);                       // 速度線は決着拍だけ（抜けた瞬間が最大→消える）
+      // 前進量: 溜めでは 12% しか動かない（＝構えたまま）。決着で残り 88% を一気に使う。
+      var u = hold ? (0.12 * q * q) : (0.12 + 0.88 * (1 - Math.pow(1 - q, 2.4)));
       var runX = 90 + 150 * u;                               // 前進して画面中央(240)で終わる・2026-07-23
       var ballX = -24 + 340 * eo(p);                         // 左から速く転がり込み、止まらず走者の先を転がる途中で尺終了・2026-07-23
       ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(zc[0], zc[1]); ctx.scale(z, z); ctx.translate(-zc[0], -zc[1]);
       ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
       var _r6Drawn = false;
       if (_r6Manga) {
-        var _fi = Math.floor((now - T0) / _R6_MS) % 6;
-        var _im6 = _r6Imgs[_fi];
+        // ★ コマ送りではなく「拍ごとに1枚を静止」。同じ拍の間は同じ絵のまま動かさない。
+        var _fi = hold ? _RI_FI_HOLD : _RI_FI_CUT;
+        var _im6 = hold ? _riHoldImg : _riCutImg;
         if (_im6 && _im6.complete && _im6.naturalWidth) {
           var _k6 = 'run6|' + _fi + '|' + _r6Cols.shirt + _r6Cols.shorts + _r6Cols.socks + _r6Cols.accent + _r6Cols.skin;
           var _s6 = (runPh * CS_FIGURE_SCALE) / _R6_BODY;    // 等身縮小＝共通定数（2026-07-23）
@@ -2399,7 +2419,11 @@ function _renderRunInScene(sc) {
       if (flashF > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (flashF * 0.5) + ')'; ctx.fillRect(0, 0, W, H); }
     }
     hud();
-    if (p < 1 || (!success && failBase && !failBase.complete) || (_r6Manga && canvas.isConnected)) requestAnimationFrame(frame);
+    // ループしない: 尺 P の終わりで停止し、決着コマの絵を残したまま静止する（ドリブル演出と同流儀）。
+    //   旧実装の `_r6Manga && canvas.isConnected` は「表示中はずっと回す」＝走りっぱなしの原因だったので外す。
+    //   画像ロードが遅れた時だけ、最終フレームを描き切るために回し続ける。
+    var _riLoading = _r6Manga && (!_riHoldImg.complete || !_riCutImg.complete);
+    if (p < 1 || (!success && failBase && !failBase.complete) || _riLoading) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
   // 飛び出し=ランナー/タブローとも概ね中央（0.5）。既定 50% と同等だが明示。
