@@ -37,7 +37,7 @@ const JS_FILES = ['players.js', 'rng.js', 'simulate.js', 'events.js', 'match.js'
 //   league.js からは typeof ガードで呼ぶので、未搭載でも no-op（公開版の挙動は不変）。
 // ★ names.js（FN-00 表示名インダイレクション層）も lab 限定。既定は実名表示＝OFF なので
 //   読み込むだけでは挙動不変。?names=fiction / NAMES.toggle() で架空表示に切り替わる。
-const LAB_ONLY_JS = ['names.js', 'mental.js', 'discipline.js', 'portrait.js', 'manga_recolor.js',
+const LAB_ONLY_JS = ['names.js', 'sns.js', 'mental.js', 'discipline.js', 'portrait.js', 'manga_recolor.js',
   'juice.js', 'lab-art.js', 'lg-ui.js', 'matchday.js', 'league.js'];
 
 // 試合エンジン系: 最小化＋軽難読化
@@ -137,6 +137,8 @@ let labHtml = fs.readFileSync(path.join(DOCS, 'index.html'), 'utf8');
 const labInject =
   // FN-00: 表示名インダイレクション層は **最初**（TEAM_DATA の名前を読む前に適用する）。
   `<script src="js/names.js?v=${BUILD_VER}"></script>\n` +
+  // RW-01: SNS風フィードの文面生成（純関数）。league.js から typeof ガードで呼ぶ。
+  `<script src="js/sns.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/mental.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/discipline.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/portrait.js?v=${BUILD_VER}"></script>\n` +

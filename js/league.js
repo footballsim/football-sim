@@ -5505,7 +5505,8 @@
   ];
   var SIDE_VIEWS = {
     table: { ja: '順位',     en: 'Table' },
-    next:  { ja: '次の試合', en: 'Next match' }
+    next:  { ja: '次の試合', en: 'Next match' },
+    sns:   { ja: '世間の反応', en: 'The reaction' }   // RW-01
   };
   var _roundView = null;   // null = ホーム画面／'table'|'next'|'prep'|'match'
 
@@ -5633,6 +5634,14 @@
       body = '<section class="lg-se-zone lg-se-wide">' +
         '<div class="lg-se-ztitle">' + _t('リーグ戦 順位', 'League table') + '</div>' +
         '<div class="lg-se-tablewrap">' + _standingsTableHTML(_sortedStandings(), myId) + '</div>' +
+      '</section>';
+      nav = _finNavHTML(home, home, 'ホームへ戻る', 'Back to home');
+    } else if (view === 'sns') {
+      // 寄り道③：世間の反応（RW-01）。読み物なので寄り道扱い＝ここから試合へは進めない。
+      body = '<section class="lg-se-zone lg-se-wide lg-rd-scroll">' +
+        '<div class="lg-se-ztitle">🗣 ' + _t('世間の反応', 'The reaction') +
+          '<span class="lg-badge">' + _t('第' + (_state.round || 0) + '節', 'Round ' + (_state.round || 0)) + '</span></div>' +
+        _snsFeedHTML() +
       '</section>';
       nav = _finNavHTML(home, home, 'ホームへ戻る', 'Back to home');
     } else if (view === 'next') {
@@ -5770,9 +5779,116 @@
         '<th class="p">' + _t('順位', '#') + '</th><th class="nm">' + _t('チーム', 'Team') + '</th>' +
         '<th class="pt">' + _t('勝点', 'Pts') + '</th><th class="gd">' + _t('得失', 'GD') + '</th>' +
       '</tr></thead><tbody>' + body + '</tbody></table>' +
+      _snsTeaserHTML() +
       '<button type="button" class="lg-sh-more" onclick="leagueRoundView(\'table\')">' +
         '📊 ' + _t('リーグ順位を確認', 'Full league table') + ' <span>›</span></button>' +
     '</section>';
+  }
+
+  /* ===========================================================================
+   * RW-01 — SNS風フィード（世界の反応）
+   * ---------------------------------------------------------------------------
+   * 文面の生成は js/sns.js（純関数・決定論・lab限定）。ここは **ctx を組むだけ**。
+   * ★ sns.js 未搭載でも typeof ガードで完全 no-op（公開ビルドの挙動は不変）。
+   * ★ VISION の「寝ている間に世界が動いている」フック＝ハブに見出し2件、
+   *   全文は寄り道ページ（順位／次の試合と同じ扱い＝本線に割り込ませない）。
+   * ========================================================================= */
+  function _snsCtx() {
+    if (typeof SNS === 'undefined' || !SNS || !_state) return null;
+    var myId = _state.myClub;
+    var rows = _sortedStandings();
+    var lr = _state.lastResult;
+    var mine = lr && lr.mine;
+    var m = _state.manager || {};
+    var streak = _currentStreak();
+    var leader = rows[0] ? { id: rows[0].id, name: _clubName(rows[0].id) } : null;
+
+    // 番狂わせ＝首位が他会場で負けた（自分が倒した場合は結果側で語られるので除く）
+    var upset = false;
+    if (leader && lr && lr.others) {
+      upset = lr.others.some(function (o) {
+        return (o.home === leader.id && o.hs < o.as) || (o.away === leader.id && o.as < o.hs);
+      });
+    }
+    /* 記録された選手名（＝記録時の言語の表示名）を **いまの言語** の表示名へ直す。
+     * ★ そのまま出すと英語表示のときに日本語名が混ざる（MOM 等）。記録名 → squads のキー
+     *   （内部ID）→ 現在の表示名、と2段で引き直す（FN-00 の解決器に載せる）。 */
+    function pName(recorded) {
+      if (!recorded) return '';
+      var key = _squadKeyByName(myId, recorded);
+      return _keyDisplayName(key) || recorded;
+    }
+    // key（内部ID）も渡す＝**言語非依存のシード**。無いと日/英でテンプレ抽選が割れる。
+    function pKey(recorded) { return recorded ? _squadKeyByName(myId, recorded) : ''; }
+    var abs = _absentees(myId).map(function (a) { return { name: pName(a.name), key: pKey(a.name), kind: a.kind }; });
+
+    return {
+      lang: _isEn() ? 'en' : 'ja',
+      season: _state.season || 1,
+      round: _state.round || 0,
+      totalRounds: (_state.fixtures && _state.fixtures.length) || 14,
+      club: { id: myId, name: _clubName(myId) },
+      opp: mine ? { id: mine.opp, name: _clubName(mine.opp) } : null,
+      result: mine ? {
+        res: mine.res, gf: mine.ms, ga: mine.os, rival: !!mine.rival,
+        posBefore: mine.posBefore, posAfter: mine.posAfter
+      } : null,
+      mom: (mine && mine.mom)
+        ? { name: pName(mine.mom.name), key: pKey(mine.mom.name), goals: mine.mom.goals, assists: mine.mom.assists }
+        : null,
+      scorers: (mine && mine.scorers) ? mine.scorers.map(function (s) {
+        return { name: pName(s.name), key: pKey(s.name), goals: s.goals };
+      }) : [],
+      streak: (streak && streak.res !== 'D') ? { kind: streak.res, n: streak.n } : null,
+      leader: leader,
+      upset: upset,
+      manager: {
+        trust: Math.round(m.clubTrust || 0),
+        popularity: Math.round((m.params && m.params.popularity) || 0),
+        popularityUp: !!(lr && lr.manager && lr.manager.popularity && lr.manager.popularity.delta > 0)
+      },
+      absences: abs,
+      goalText: _seasonGoalText()
+    };
+  }
+
+  function _snsFeed() {
+    var ctx = _snsCtx();
+    if (!ctx) return [];
+    try { return SNS.build(ctx) || []; } catch (e) { console.warn('[league] sns build failed', e); return []; }
+  }
+
+  function _snsTeaserHTML() {
+    var feed = _snsFeed();
+    if (!feed.length) return '';
+    var n = (typeof SNS !== 'undefined' && SNS.TUNING) ? SNS.TUNING.TEASER : 2;
+    var items = feed.slice(0, n).map(function (p) {
+      return '<div class="lg-sns-t-row"><span class="ic">' + p.icon + '</span>' +
+        '<span class="tx">' + _escHtml(p.text) + '</span></div>';
+    }).join('');
+    return '<div class="lg-sns-teaser" role="button" tabindex="0" onclick="leagueRoundView(\'sns\')">' +
+      '<div class="lg-sns-t-head">🗣 ' + _t('世間の反応', 'The reaction') +
+        '<span class="lg-sns-t-more">' + _t('もっと見る', 'More') + ' ›</span></div>' +
+      items +
+    '</div>';
+  }
+
+  function _snsFeedHTML() {
+    var feed = _snsFeed();
+    if (!feed.length) {
+      return '<div class="lg-se-empty">' + _t('まだ何も起きていない。', 'Nothing has happened yet.') + '</div>';
+    }
+    return '<div class="lg-sns-list">' + feed.map(function (p) {
+      return '<article class="lg-sns-post tone' + p.tone + '">' +
+        '<div class="lg-sns-av">' + p.icon + '</div>' +
+        '<div class="lg-sns-body">' +
+          '<div class="lg-sns-meta"><b>' + _escHtml(p.name) + '</b>' +
+            '<span class="hd">' + _escHtml(p.handle) + '</span></div>' +
+          '<div class="lg-sns-text">' + _escHtml(p.text) + '</div>' +
+          '<div class="lg-sns-foot">♡ ' + p.likes.toLocaleString() + '</div>' +
+        '</div>' +
+      '</article>';
+    }).join('') + '</div>';
   }
 
   /* 中央：次の試合（NEXT MATCH ＋ 対戦相手スカウティング）。開幕はボード面談を出す。 */

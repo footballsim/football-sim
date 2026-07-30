@@ -177,11 +177,30 @@
       if (f.en_long_name && !REV.players[f.en_long_name]) REV.players[f.en_long_name] = id;
       if (f.en_name && !REV.players[f.en_name]) REV.players[f.en_name] = id;
     }
+    /* ★ **実名側も逆引きに載せる**。セーブやレポートには「記録した時点の表示名」が
+     *   短縮名で焼き付いている（MOM・得点者など）。実名モードで記録 → 架空モードで開く、
+     *   の順で読むと、内部ID（＝long_name）では引けず実名がそのまま画面に残る＝リーク。
+     *   実名の短縮名/en名からも内部IDへ戻せるようにして、その一群をまとめて塞ぐ。
+     *   ※ 架空名の登録を先に済ませてあるので、衝突時は架空側が優先（先勝ち）。 */
+    for (i = 0; i < PLAYER_IDS.length; i++) {
+      id = PLAYER_IDS[i];
+      var rp = REAL.players[id];
+      if (!rp) continue;
+      if (rp.name && !REV.players[rp.name]) REV.players[rp.name] = id;
+      if (rp.en_name && !REV.players[rp.en_name]) REV.players[rp.en_name] = id;
+    }
     for (i = 0; i < CLUB_IDS.length; i++) {
       id = CLUB_IDS[i]; f = FICT.clubs[id];
       if (!f) continue;
       if (!REV.clubs[f.name]) REV.clubs[f.name] = id;
       if (f.en_name && !REV.clubs[f.en_name]) REV.clubs[f.en_name] = id;
+    }
+    for (i = 0; i < CLUB_IDS.length; i++) {
+      id = CLUB_IDS[i];
+      var rc = REAL.clubs[id];
+      if (!rc) continue;
+      if (rc.name && !REV.clubs[rc.name]) REV.clubs[rc.name] = id;
+      if (rc.en_name && !REV.clubs[rc.en_name]) REV.clubs[rc.en_name] = id;
     }
   }
 
@@ -275,6 +294,11 @@
       r = REAL.players[id];
       if (r.long_name && r.long_name.length >= 3) out.push(r.long_name);
       if (r.en_name && r.en_name.length >= 4) out.push(r.en_name);
+      /* ★ 短縮名も見る。MOM・得点者はこちらで記録されるので、長い名前だけ見ていると
+       *   「ケイン」のような残留を取り逃す（2026-07-30 に RW-01 の検証で実際に発生）。
+       *   ⚠️ 2文字の姓（久保・本田など）は誤検出が多くなるので対象外＝そこは
+       *   逆引き（REV に実名を載せる）で塞ぐ。 */
+      if (r.name && r.name.length >= 3) out.push(r.name);
     }
     for (id in REAL.clubs) {
       if (!Object.prototype.hasOwnProperty.call(REAL.clubs, id)) continue;

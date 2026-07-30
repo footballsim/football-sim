@@ -3135,3 +3135,52 @@ button.lg-se-award:active { transform: translateY(2px); box-shadow: inset 0 0 0 
     max-width: min(9em, 74px); font-size: 9px;
   }
 }
+
+
+/* ═══ RW-01 SNS風フィード（世間の反応）═══════════════════════════════════
+ * ハブ左カラムの見出し（2件・タップで全文へ）と、寄り道ページの投稿リスト。
+ * ★ ハブ側は「順位表の下の余白」に収まる高さで止める＝パネルを押し出さない。 */
+.lg-sns-teaser {
+  flex: 0 0 auto; margin-top: 8px; padding: 8px 9px;
+  border: 1px solid var(--lg-line); border-radius: 5px;
+  background: rgba(255,255,255,.03); cursor: pointer;
+}
+.lg-sns-teaser:hover { background: rgba(255,255,255,.06); }
+.lg-sns-t-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  font-size: 10px; font-weight: 900; letter-spacing: 1.2px;
+  color: var(--lg-gold); margin-bottom: 5px;
+}
+.lg-sns-t-more { font-size: 9px; letter-spacing: .5px; color: var(--lg-text-mute); font-weight: 700; }
+.lg-sns-t-row {
+  display: flex; gap: 6px; align-items: flex-start;
+  font-size: clamp(10px, 1.7vh, 12px); line-height: 1.45; color: var(--lg-text-dim);
+  margin-top: 3px;
+}
+.lg-sns-t-row .ic { flex: 0 0 auto; }
+.lg-sns-t-row .tx {
+  flex: 1 1 auto; min-width: 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* 全文ページ */
+.lg-sns-list { display: flex; flex-direction: column; gap: 8px; }
+.lg-sns-post {
+  display: flex; gap: 10px; padding: 10px 12px;
+  border: 1px solid var(--lg-line); border-radius: 6px; background: rgba(255,255,255,.035);
+}
+.lg-sns-post.tone2 { border-color: rgba(224,121,111,.35); }   /* 辛口は縁の色でそれと分かるように */
+.lg-sns-av {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  background: rgba(255,255,255,.07); border: 1px solid var(--lg-line);
+}
+.lg-sns-body { flex: 1 1 auto; min-width: 0; }
+.lg-sns-meta { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.lg-sns-meta b { font-size: clamp(11px, 1.9vh, 13px); color: var(--lg-text); }
+.lg-sns-meta .hd { font-size: 10px; color: var(--lg-text-mute); }
+.lg-sns-text {
+  margin-top: 3px; font-size: clamp(12px, 2vh, 14px); line-height: 1.55; color: var(--lg-text-dim);
+  overflow-wrap: anywhere;
+}
+.lg-sns-foot { margin-top: 5px; font-size: 10px; color: var(--lg-text-mute); font-variant-numeric: tabular-nums; }
