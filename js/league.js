@@ -2273,6 +2273,9 @@
     }
     (_state.history || []).forEach(function (h) { if (h) { fixTop(h.top); fixXI(h.bestXI); } });
     if (_state.lastResult) fixXI(_state.lastResult.bestXI);
+    // SN-08a「オフの変化」も表示名を焼き付けている（rows は key を持つので貼り直せる）
+    var ag = _state.seasonMeta && _state.seasonMeta.aging;
+    if (ag) { (ag.grew || []).forEach(fixEntry); (ag.declined || []).forEach(fixEntry); }
   }
 
   function _save() { try { localStorage.setItem(LS_KEY, JSON.stringify(_state)); } catch (e) { console.warn('[league] save failed', e); } }
