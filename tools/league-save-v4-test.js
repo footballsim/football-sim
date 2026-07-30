@@ -14,44 +14,15 @@
  *   エンジン一式と同じ vm context に連結ロードする（tools/lib/load-engine.js と同じ作法）。
  */
 'use strict';
-const fs = require('fs');
 const vm = require('vm');
-const path = require('path');
-const { ROOT, JS_FILES } = require('./lib/load-engine.js');
+const { makeLeagueContext } = require('./lib/league-context.js');
 
-/* ── ブラウザ API スタブ（localStorage だけは本物同然の実体を持たせる） ── */
-const STUB = `
-class URLSearchParams{constructor(s){}get(k){return null;}}
-const _elStub={textContent:"",innerHTML:"",value:"",style:{},dataset:{},classList:{add:()=>{},remove:()=>{},toggle:()=>{},contains:()=>false},appendChild:()=>{},removeChild:()=>{},setAttribute:()=>{},getAttribute:()=>null,addEventListener:()=>{},querySelector:()=>null,querySelectorAll:()=>[],getContext:()=>null,focus:()=>{},remove:()=>{}};
-const document={getElementById:()=>(_elStub),querySelector:()=>null,querySelectorAll:()=>[],createElement:()=>(Object.assign({},_elStub)),createElementNS:()=>(Object.assign({},_elStub)),body:{appendChild:()=>{},classList:{add:()=>{},remove:()=>{}}},documentElement:{style:{},classList:{add:()=>{},remove:()=>{}}},addEventListener:()=>{},head:{appendChild:()=>{}}};
-const _lsData={};
-const localStorage={getItem:(k)=>(k in _lsData? _lsData[k]:null),setItem:(k,v)=>{_lsData[k]=String(v);},removeItem:(k)=>{delete _lsData[k];},_dump:()=>_lsData};
-const sessionStorage={getItem:()=>null,setItem:()=>{}};
-const window={addEventListener:()=>{},location:{hash:"",search:""},matchMedia:()=>({matches:false,addEventListener:()=>{}}),navigator:{language:"ja"},localStorage:localStorage};
-const navigator={language:"ja"};
-const firebase={initializeApp:()=>{},firestore:()=>({collection:()=>({doc:()=>({get:()=>Promise.resolve({exists:false,data:()=>({})}),set:()=>Promise.resolve(),update:()=>Promise.resolve()})})})};
-const gtag=()=>{};
-const alert=()=>{};
-const confirm=()=>true;
-function showScreen(){}
-function showWCStats(){}
-function startManagerMatch(){}
-`;
-
-let code = STUB + '\n';
-for (const f of JS_FILES) code += fs.readFileSync(path.join(ROOT, 'js', f), 'utf8') + '\n';
-code += fs.readFileSync(path.join(ROOT, 'js', 'league.js'), 'utf8') + '\n';
-
-const ctx = vm.createContext({
-  Math, console, parseInt, parseFloat, isNaN, isFinite,
-  setTimeout: (fn) => fn(), clearTimeout: () => {}, setInterval: () => 0, clearInterval: () => {},
-  Promise, JSON, Object, Array, String, Number, Boolean, Date, RegExp, Error, require, __dirname: ROOT,
-});
-vm.runInContext(code, ctx, { filename: 'league-concat.js' });
-
-const api = vm.runInContext('({ L: window._leagueTestAPI, TEAM_DATA: TEAM_DATA, ls: localStorage })', ctx);
-const L = api.L;
-const TEAM_DATA = api.TEAM_DATA;
+/* ── コンテキストは tools/lib/league-context.js に集約（aging-neutrality.js と共用） ── */
+const _c = makeLeagueContext();
+const ctx = _c.ctx;
+const api = { L: _c.L, ls: _c.ls };
+const L = _c.L;
+const TEAM_DATA = _c.TEAM_DATA;
 const LS_KEY = 'fs_league_v1';
 const MY = 'england2026';
 
@@ -210,10 +181,142 @@ check('当季の記録（apps/goals/assists）はリセット',
   !!c1 && c1.apps === 0 && c1.goals === 0 && c1.assists === 0);
 check('欠場カウンタもリセット',
   !!c1 && c1.injuryOut === 0 && c1.suspendOut === 0 && c1.yellowAccum === 0);
-check('中身が既定だけのエントリは保存しない（セーブを疎に保つ）',
-  !ns.squads[MY][keyOf(TEAM_DATA[MY].players[1])]);
+// ★ SN-08a 以降、周回後の squads には「加齢で growth が付いた選手」が並ぶ（＝空ではない）。
+//   _carrySquads 自体が疎を保つことは、関数を直接呼んで確かめる。
+check('中身が既定だけのエントリは保存しない（_carrySquads がセーブを疎に保つ）', (function () {
+  const src = {};
+  src[MY] = {};
+  src[MY][baseKey] = { growth: { 11: 3 }, trust: 70, age: 27, apps: 14, goals: 9, assists: 4, injuryOut: 0, suspendOut: 0, yellowAccum: 0 };
+  src[MY]['__default__'] = { growth: {}, trust: 50, age: null, apps: 9, goals: 0, assists: 0, injuryOut: 0, suspendOut: 0, yellowAccum: 0 };
+  const carried = L.carrySquads(src);
+  return !!carried[MY][baseKey] && !carried[MY]['__default__'];
+})());
 check('新シーズンの seasonMeta は初期化される',
   ns.seasonMeta && ns.seasonMeta.actionsLog.length === 0 && ns.seasonMeta.pendingAction === null);
+
+/* ── ⑥b SN-08a 年齢・成長・soft衰え ─────────────────────────────── */
+section('⑥b SN-08a 選手の年齢・成長・soft衰え（決定論・引退なし）');
+reset(); L.newSeason(MY);
+const G = L.GROWTH_TUNING, AT = L.AGE_TUNING;
+const outfield = TEAM_DATA[MY].players.find(function (p) { return p.positions[0] !== 'GK'; });
+const gkPlayer = TEAM_DATA[MY].players.find(function (p) { return p.positions[0] === 'GK'; });
+
+check('年齢は選手キーから決定論で決まる（同じキーなら常に同じ）',
+  L.baseAge('テスト太郎') === L.baseAge('テスト太郎'));
+check('年齢は ' + AT.MIN + '〜' + AT.PEAK_MAX + ' に収まる', (function () {
+  return TEAM_DATA[MY].players.every(function (p) {
+    const a = L.baseAge(keyOf(p));
+    return a >= AT.MIN && a <= AT.PEAK_MAX;
+  });
+})());
+check('年齢はシーズンが進むと 1 ずつ上がる（保存せず季から導出）', (function () {
+  const k = keyOf(outfield);
+  const a1 = L.playerAge(MY, k);
+  L.getState().season = 3;
+  const a3 = L.playerAge(MY, k);
+  L.getState().season = 1;
+  return a3 === a1 + 2;
+})());
+check('年齢は CAP(' + AT.CAP + ') で止まる', (function () {
+  L.getState().season = 60;
+  const a = L.playerAge(MY, keyOf(outfield));
+  L.getState().season = 1;
+  return a === AT.CAP;
+})());
+
+check('若手（18歳）は伸びる／ベテラン（36歳）は衰える', (function () {
+  const up = L.agingDelta(outfield, 18, 14, 14);
+  const dn = L.agingDelta(outfield, 36, 14, 14);
+  const upAll = Object.keys(up).every(function (i) { return up[i] > 0; });
+  const dnAny = Object.keys(dn).some(function (i) { return dn[i] < 0; });
+  return Object.keys(up).length > 0 && upAll && dnAny;
+})());
+check('ピーク年齢（' + G.PEAK + '歳）は変化しない', Object.keys(L.agingDelta(outfield, G.PEAK, 14, 14)).length === 0);
+check('同じ入力なら常に同じ Δ（rng 不使用＝seed 再現を壊さない）',
+  JSON.stringify(L.agingDelta(outfield, 20, 7, 14)) === JSON.stringify(L.agingDelta(outfield, 20, 7, 14)));
+check('出場が多いほど伸びが大きい', (function () {
+  const many = L.agingDelta(outfield, 20, 14, 14);
+  const few = L.agingDelta(outfield, 20, 0, 14);
+  return many[2] > few[2] && few[2] > 0;   // 控えでも PLAY_FLOOR ぶんは伸びる
+})());
+check('衰えは出場数に依存しない（ベンチのベテランも歳を取る）', (function () {
+  const played = L.agingDelta(outfield, 35, 14, 14);
+  const benched = L.agingDelta(outfield, 35, 0, 14);
+  return JSON.stringify(played) === JSON.stringify(benched);
+})());
+check('衰えはスピード系(idx2)がポジショニング(idx26)より大きい', (function () {
+  const d = L.agingDelta(outfield, 36, 14, 14);
+  return d[2] < 0 && !d[26];   // 26 は重み0＝経験で維持
+})());
+check('GK はピークが遅い（' + G.PEAK_GK + '歳）', (function () {
+  return Object.keys(L.agingDelta(gkPlayer, G.PEAK_GK, 14, 14)).length === 0 &&
+         Object.keys(L.agingDelta(gkPlayer, 28, 14, 14)).length > 0;   // 28歳はまだ伸びる
+})());
+check('GK は GK 用 param（4/5/10/23/24/26）だけ動く', (function () {
+  const d = L.agingDelta(gkPlayer, 22, 14, 14);
+  return Object.keys(d).length > 0 && Object.keys(d).every(function (i) {
+    return ['4', '5', '10', '23', '24', '26'].indexOf(i) >= 0;
+  });
+})());
+check('フィールド選手の GK 専用枠（23/24=50固定）は動かさない', (function () {
+  const d = L.agingDelta(outfield, 20, 14, 14);
+  return !d[23] && !d[24];
+})());
+
+// 累積の頭打ち（際限ない劣化を防ぐ安全弁）
+check('累積の伸びは +' + G.TOTAL_GROW + ' で頭打ち', (function () {
+  reset(); L.newSeason(MY);
+  const next = {}, prev = {};
+  const k = keyOf(outfield);
+  next[MY] = {}; next[MY][k] = { growth: { 2: G.TOTAL_GROW }, trust: 50, age: null, apps: 0, goals: 0, assists: 0, injuryOut: 0, suspendOut: 0, yellowAccum: 0 };
+  prev[MY] = {}; prev[MY][k] = { apps: 14 };
+  L.getState().season = 1;
+  L.applySeasonAging(next, prev, 14, MY);
+  return next[MY][k].growth[2] <= G.TOTAL_GROW;
+})());
+check('累積の衰えは -' + G.TOTAL_DECL + ' で頭打ち', (function () {
+  reset(); L.newSeason(MY);
+  const next = {}, prev = {};
+  const k = keyOf(outfield);
+  next[MY] = {}; next[MY][k] = { growth: { 2: -G.TOTAL_DECL }, trust: 50, age: null, apps: 0, goals: 0, assists: 0, injuryOut: 0, suspendOut: 0, yellowAccum: 0 };
+  prev[MY] = {}; prev[MY][k] = { apps: 14 };
+  L.getState().season = 40;   // 全員 CAP 年齢＝全力で衰える季
+  L.applySeasonAging(next, prev, 14, MY);
+  L.getState().season = 1;
+  return next[MY][k].growth[2] >= -G.TOTAL_DECL;
+})());
+
+// 周回で実際に効くこと（_startNextSeason 経由）
+reset(); L.newSeason(MY);
+(function () {
+  const st0 = L.getState();
+  st0.round = st0.fixtures.length; st0.finished = true;
+  L.startNextSeason();
+})();
+const aged = L.getState();
+check('周回すると growth が積まれる（加齢が実際に効く）', (function () {
+  const c = aged.squads[MY] || {};
+  return Object.keys(c).some(function (pk) { return c[pk].growth && Object.keys(c[pk].growth).length; });
+})());
+check('加齢後も param は [1,99] に収まる', (function () {
+  return aged.clubs.every(function (cid) {
+    return L.overlaySquad(cid).players.every(function (p) {
+      return p.params.every(function (v) { return v >= 1 && v <= 99; });
+    });
+  });
+})());
+check('加齢後も先発 11 人が組める（詰み防止）', (function () {
+  return aged.clubs.every(function (cid) { return L.overlaySquad(cid).default_lineup.slice(0, 11).length === 11; });
+})());
+check('自クラブの成長/衰えサマリーが残る（成長リザルト演出 MG-08 の素材）', (function () {
+  const a = aged.seasonMeta && aged.seasonMeta.aging;
+  return !!a && Array.isArray(a.grew) && Array.isArray(a.declined) && (a.grew.length + a.declined.length) > 0 &&
+         (a.grew.concat(a.declined)).every(function (r) { return typeof r.diff === 'number' && typeof r.overall === 'number'; });
+})());
+check('サマリーは上位8件までに絞られる（セーブ肥大化を防ぐ）', (function () {
+  const a = aged.seasonMeta.aging;
+  return a.grew.length <= 8 && a.declined.length <= 8;
+})());
 
 /* ── ⑦ MG-03b 週プラン（1節=1週間・月〜金を3コマ） ───────────────── */
 section('⑦ MG-03b 今週の準備（3コマ配分）');

@@ -1728,6 +1728,50 @@ body.league-mode #screen-home.season-end-mode > #league-body {
 .lg-pre-soon-t { font-size: 11px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: var(--lg-gold); }
 .lg-pre-soon-b { margin: 0; font-size: clamp(12px, 2.1vh, 14px); color: var(--lg-text-mute); max-width: 46ch; line-height: 1.55; }
 
+/* SN-08a オフの変化（伸びた／衰えた）。シーズン前「選手獲得・放出」の主役ブロック。
+ * ★ 2カラム＝伸び／衰えを一目で対比させる。行は「名前 … 齢・総合・増減」で右端を数値で揃える。
+ * ★ has-aging の時は SN-06 プレースホルダを1行に落とす（このページのビートを1つに保つ）。 */
+.lg-pre-squad.has-aging { justify-content: flex-start; gap: 10px; }
+.lg-age-wrap {
+  flex: 1 1 auto; min-height: 0;
+  display: flex; gap: clamp(10px, 2.4vw, 22px);
+}
+.lg-age-col {
+  flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 6px;
+}
+.lg-age-h {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase;
+  padding-bottom: 5px; border-bottom: 1px solid var(--lg-line);
+}
+.lg-age-ico { font-size: 13px; letter-spacing: 0; }
+.lg-age-h.up { color: var(--lg-gold); }
+.lg-age-h.dn { color: var(--lg-text-dim); }
+.lg-age-list { display: flex; flex-direction: column; gap: 2px; min-height: 0; overflow: auto; }
+.lg-age-row {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,.035);
+  font-size: clamp(12px, 2vh, 14px); line-height: 1.4;
+}
+.lg-age-nm {
+  flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--lg-text); font-weight: 700;
+}
+.lg-age-yr, .lg-age-ov {
+  flex: 0 0 auto; font-size: 10px; color: var(--lg-text-mute); font-variant-numeric: tabular-nums;
+}
+.lg-age-d {
+  flex: 0 0 auto; min-width: 3.4em; text-align: right;
+  font-weight: 900; font-variant-numeric: tabular-nums;
+}
+.lg-age-row.up .lg-age-d { color: #6fd08c; }
+.lg-age-row.dn .lg-age-d { color: #e0796f; }
+.lg-age-empty { font-size: 11px; color: var(--lg-text-mute); padding: 4px 8px; }
+.lg-pre-soonline {
+  flex: 0 0 auto; text-align: center; font-size: clamp(11px, 1.9vh, 13px);
+  color: var(--lg-text-mute); border: 1px dashed var(--lg-line); border-radius: 4px; padding: 7px 10px;
+}
+
 /* 幅が狭い時だけ列を畳む（横並びの窮屈さより読めることを優先）。
  * ★ 高さ条件（旧 max-height:430px）は外した。横持ちスマホは「幅は余っていて高さだけ
  *   足りない」ので、列を畳むと縦に伸びて足りない軸をさらに削る＝逆効果だった。

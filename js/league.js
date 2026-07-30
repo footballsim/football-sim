@@ -317,6 +317,158 @@
     var a = (h % 1024) / 1024, b = ((h >>> 11) % 1024) / 1024;
     return AGE_TUNING.MIN + Math.round(((a + b) / 2) * (AGE_TUNING.PEAK_MAX - AGE_TUNING.MIN));
   }
+  /* ── SN-08a 成長／soft衰えのチューニング（設計書 §4・案C＝引退なし）──────────
+   * 完全決定論（rng 不使用）＝ seed 再現を壊さない。入力は「年齢」と「今季の出場数」だけ。
+   * ★ 設計書 §4.1 からの意図的な差分（inflation を防ぐため）:
+   *   ①伸びの正規化を (PEAK-age)/PEAK → (PEAK-age)/(PEAK-MIN) に変更＝18歳で係数1.0になる
+   *     （原式だと 18歳でも 0.33 にしかならず、若手が伸びる実感が出ない）。
+   *   ②**衰えには出場係数を掛けない**。原式のまま playFactor を掛けると「ベンチのベテランは
+   *     永遠に衰えない」＝母集団の param 総和が上がり続ける（§4.2 の中立性が壊れる）。
+   *     歳は出番に関係なく取る、が実サッカーにも合う。
+   *   ③伸びにも下限 PLAY_FLOOR を置く＝出番の少ない若手も練習で少しは伸びる（MG-10 練習指示が
+   *     入ったらこの下限を練習量に置き換える差し込み口）。
+   * ★ 重みは「実サッカーで先に落ちるもの／歳でも落ちないもの」。スピード系から落ち、
+   *   ポジショニング・メンタリティ（経験）は落ちない。伸びは技術・判断が大きい。 */
+  var GROWTH_TUNING = {
+    PEAK: 27,            // 全盛期。ここを境に伸び→衰えへ反転
+    PEAK_GK: 30,         // GK は経験がものを言うので遅い（実サッカー準拠）
+    GROW: 3.4,           // 18歳・フル出場時の伸び基準値（重み1.0の param に対する点数）
+    DECL: 2.5,           // CAP(38)歳時の衰え基準値（同上）
+    PLAY_FLOOR: 0.25,    // 出場ゼロでも伸びる下限（＝練習ぶん）
+    MAX_STEP: 4,         // 1季1param あたりの変化上限（暴走防止）
+    /* ★ 累積の上限／下限（1param あたり・base からの総変化）。
+     * これが無いと**リーグが際限なく劣化する**: SN-08a は引退も新人 regen も無い（案C）ので
+     * 母集団は毎季そろって1歳ずつ old になる。衰えが青天井だと 10季で平均 param -7% まで落ち、
+     * 設計書 §4.2 の「母集団中立」が原理的に成立しない（中立は regen があって初めて成り立つ）。
+     * 累積を挟めば衰えは頭打ちになり、リーグは「少し下がって平らになる」＝壊れない。
+     * ⚠️ 恒久解＝ SN-08b（引退＋regen で年齢構成を定常化）。ここは v1.0 までの安全弁。 */
+    TOTAL_GROW: 10,      // 1param あたり最大 +10（若手の伸びしろ）
+    TOTAL_DECL: 8,       // 1param あたり最大 -8（ベテランの落ち幅）
+    // 伸びの重み（若手）: 技術・判断が大きく、素の速さは伸びにくい
+    GROW_W: {
+      0: 1.0, 1: 1.0, 2: 0.7, 3: 0.7, 4: 0.8, 5: 0.9, 6: 0.8,
+      7: 1.3, 8: 1.0, 9: 1.3, 10: 1.3, 11: 1.3, 12: 1.3, 13: 1.2, 14: 1.2, 15: 1.2, 16: 1.3,
+      17: 1.2, 18: 1.2, 19: 1.2, 20: 1.2, 21: 1.2, 22: 1.0,
+      23: 1.3, 24: 1.3, 25: 1.0, 26: 1.4, 27: 1.4, 28: 0.3
+    },
+    // 衰えの重み（ベテラン）: スピード系から落ちる。経験系（26/27）は落ちない
+    DECL_W: {
+      0: 0.8, 1: 1.5, 2: 2.0, 3: 1.9, 4: 1.2, 5: 1.4, 6: 1.6,
+      7: 0.8, 8: 1.5, 9: 0.3, 10: 0.3, 11: 0.5, 12: 0.5, 13: 0.5, 14: 0.2, 15: 0.2, 16: 0.4,
+      17: 0.6, 18: 0.6, 19: 0.7, 20: 0.6, 21: 0.5, 22: 1.3,
+      23: 0.6, 24: 0.7, 25: 0.8, 26: 0, 27: 0, 28: 0
+    }
+  };
+  // GK は 6 値だけが意味を持つ（他は 50 固定）。固定値を動かしても効果ゼロで表示だけ濁るので触らない。
+  var GK_PARAM_IDX = { 4: 1, 5: 1, 10: 1, 23: 1, 24: 1, 26: 1 };
+  // 逆にフィールド選手の セービング/ハイボール処理 は GK 専用の枠＝50 固定。こちらも動かさない。
+  var GK_ONLY_IDX = { 23: 1, 24: 1 };
+  function _isGK(p) { return !!(p && p.positions && p.positions[0] === 'GK'); }
+
+  /* 1選手・1シーズンぶんの Δparam（疎オブジェクト）。rng 不使用＝同じ入力なら常に同じ結果。 */
+  function _agingDelta(p, age, apps, seasonMatches) {
+    var G = GROWTH_TUNING;
+    var gk = _isGK(p);
+    var peak = gk ? G.PEAK_GK : G.PEAK;
+    var out = {};
+    if (age === peak) return out;
+    var growing = age < peak;
+    var mag;   // 基準変化量（正=伸び / 負=衰え）
+    if (growing) {
+      var span = Math.max(1, peak - AGE_TUNING.MIN);
+      var play = G.PLAY_FLOOR + (1 - G.PLAY_FLOOR) * Math.min(1, (apps || 0) / Math.max(1, seasonMatches));
+      mag = G.GROW * Math.max(0, (peak - age) / span) * play;
+    } else {
+      var dspan = Math.max(1, AGE_TUNING.CAP - peak);
+      mag = -G.DECL * Math.min(1, (age - peak) / dspan);   // 出場係数は掛けない（上記②）
+    }
+    var W = growing ? G.GROW_W : G.DECL_W;
+    var n = (p && p.params) ? p.params.length : 29;
+    for (var i = 0; i < n; i++) {
+      if (gk ? !GK_PARAM_IDX[i] : !!GK_ONLY_IDX[i]) continue;
+      var w = (W[i] === undefined) ? 1 : W[i];
+      if (!w) continue;
+      var d = mag * w;
+      if (d > G.MAX_STEP) d = G.MAX_STEP;
+      if (d < -G.MAX_STEP) d = -G.MAX_STEP;
+      d = Math.round(d * 100) / 100;                      // MG-13 と同じ小数精度で積む
+      if (d) out[i] = d;
+    }
+    return out;
+  }
+
+  /* シーズン境界で1回だけ、全クラブ・全選手に成長/衰えを適用する（設計書 §4.1）。
+   *   nextSquads … _carrySquads 済みの新シーズン squads（ここへ growth を積む）
+   *   prevSquads … 終わったシーズンの squads（apps＝出場数の入力元）
+   * 戻り = 自クラブぶんの変化サマリー（成長リザルト演出 MG-08/SN-03 が読む素材）。
+   * ★ growth は「base param への persistent な加算」なので _overlaySquad が [1,99] に clamp する。
+   * ★ squads に entry が無い＝一度も記録されていない選手にも適用する（控えも歳を取る）。 */
+
+  /* growth 適用後の「総合」。物差しは _clubStrength と同じ **全 param の平均**＝
+   * リーグ画面が既に使っている総合と揃う（simulate.js の calcStats は別スコープで見えない）。
+   * ★ サマリーに出すのは param の総和ではなく総合の増減。総和は 27param ぶん積み上がって
+   *   「+55.6」のような桁になり、プレイヤーには意味が読めない。 */
+  function _overallWith(p, growth) {
+    if (!p || !p.params) return 0;
+    var s = 0;
+    for (var i = 0; i < p.params.length; i++) {
+      var v = p.params[i];
+      var g = growth ? (growth[i] || growth[String(i)] || 0) : 0;
+      s += Math.max(1, Math.min(99, v + g));
+    }
+    return s / p.params.length;
+  }
+
+  function _applySeasonAging(nextSquads, prevSquads, seasonMatches, myId) {
+    var report = { grew: [], declined: [] };
+    if (!nextSquads) return report;
+    var ids = (_state && _state.clubs) ? _state.clubs : CLUB_DEFS.map(function (d) { return d.id; });
+    for (var ci = 0; ci < ids.length; ci++) {
+      var clubId = ids[ci];
+      var td = _clubData(clubId);
+      if (!td || !td.players) continue;
+      var prevC = (prevSquads && prevSquads[clubId]) || {};
+      for (var pi = 0; pi < td.players.length; pi++) {
+        var p = td.players[pi];
+        if (!p) continue;
+        var pk = _playerKey(p);
+        if (!pk) continue;
+        var apps = (prevC[pk] && prevC[pk].apps) || 0;
+        var age = _playerAge(clubId, pk);          // ★ 年齢は季から決定論で出る（保存しない）
+        var delta = _agingDelta(p, age, apps, seasonMatches);
+        var keys = Object.keys(delta);
+        if (!keys.length) continue;
+        if (!nextSquads[clubId]) nextSquads[clubId] = {};
+        var e = nextSquads[clubId][pk] || (nextSquads[clubId][pk] = _defaultSquadEntry());
+        if (!e.growth) e.growth = {};
+        var ovBefore = (clubId === myId) ? _overallWith(p, e.growth) : 0;
+        for (var ki = 0; ki < keys.length; ki++) {
+          var idx = keys[ki];
+          var before = e.growth[idx] || 0;
+          // 累積は [-TOTAL_DECL, +TOTAL_GROW] で頭打ち（際限ない劣化を防ぐ・上の注記参照）
+          var after = Math.max(-GROWTH_TUNING.TOTAL_DECL,
+                      Math.min(GROWTH_TUNING.TOTAL_GROW, before + delta[idx]));
+          after = Math.round(after * 100) / 100;
+          if (after) e.growth[idx] = after; else delete e.growth[idx];   // 0 は疎に戻す
+        }
+        if (clubId === myId) {
+          // サマリーは「総合」の増減で出す（＝選手カードと同じ物差し・頭打ちぶんも自動で反映）
+          var ovAfter = _overallWith(p, e.growth);
+          var diff = Math.round((ovAfter - ovBefore) * 10) / 10;
+          if (diff) {
+            report[diff > 0 ? 'grew' : 'declined'].push({
+              key: pk, name: _keyDisplayName(pk), age: age + 1,
+              overall: Math.round(ovAfter), diff: diff
+            });
+          }
+        }
+      }
+    }
+    report.grew.sort(function (a, b) { return b.diff - a.diff; });
+    report.declined.sort(function (a, b) { return a.diff - b.diff; });
+    return report;
+  }
+
   function _playerAge(clubId, playerKey) {
     var e = _peekSquadEntry(clubId, playerKey);
     if (e && typeof e.age === 'number') return e.age;
@@ -2295,6 +2447,11 @@
     //   季ごとにリセットするのは「当季の記録」= apps/goals/assists と欠場カウンタ・行動ログのみ。
     var manager = _state.manager || _defaultManager(my, nextSeason);
     var squads = _carrySquads(_state.squads);
+    // SN-08a: シーズン境界で1回だけ選手を加齢させる（若手は伸び・ベテランは衰える）。
+    //   ★ 順序が意味を持つ: _carrySquads で当季記録を捨てる **前** の squads から apps を読む。
+    //   ★ 年齢そのものは _playerAge が季から決定論で出すので保存しない（セーブを太らせない）。
+    var _agingSeasonMatches = (_state.fixtures && _state.fixtures.length) || 14;
+    var _aging = _applySeasonAging(squads, _state.squads, _agingSeasonMatches, my);
     _state = {
       version: SAVE_VERSION,
       season: nextSeason,
@@ -2312,6 +2469,9 @@
       seasonMeta: _defaultSeasonMeta(),
       squads: squads
     };
+    // SN-08a: 自クラブの成長/衰えサマリー。上位8名だけ残す（セーブ肥大化を避ける・1画面に収まる量）。
+    //   ★ 成長リザルトの「演出」は MG-08/SN-03 側（G 担当）。ここは素材の提供に徹する。
+    _state.seasonMeta.aging = { grew: _aging.grew.slice(0, 8), declined: _aging.declined.slice(0, 8) };
     // SN-02: 目標は季ごとに出し直す（戦力が変われば要求も変わる）。信頼度は在任が続く限り引き継ぐ。
     manager.seasonGoal = null;
     _ensureSeasonGoal();
@@ -4999,6 +5159,7 @@
     var log = _myPlayerLog();
     var rows = log.map(function (p) {
       return '<tr><td class="nm">' + p.name + '</td>' +
+        '<td>' + (p.age || '—') + '</td>' +
         '<td>' + p.apps + '</td>' +
         '<td>' + (p.minutes ? p.minutes + "'" : '—') + '</td>' +
         '<td>' + (p.goals || '') + '</td>' +
@@ -5007,6 +5168,7 @@
     var table = log.length
       ? '<table class="lg-se-plog"><thead><tr>' +
           '<th class="nm">' + _t('選手', 'Player') + '</th>' +
+          '<th>' + _t('齢', 'Age') + '</th>' +          // SN-08a: 加齢が見えるように
           '<th>' + _t('出場', 'Apps') + '</th>' +
           '<th>' + _t('時間', 'Mins') + '</th>' +
           '<th>' + _t('得点', 'G') + '</th>' +
@@ -5128,17 +5290,61 @@
   /* ── シーズン前④：選手獲得・放出（スキップ可能・枠のみ）────────────────
    * ★ 移籍サブシステムは未実装（2026-07-26 ユーザー判断＝今回は遷移上の枠だけ確保）。
    *   ここで実際の獲得/放出を行えるようになるまでは「スキップ」で通過する。 */
+  /* SN-08a: オフの間に選手がどう変わったかを1ブロックで見せる（伸びた／衰えた）。
+   * ★ ここは「素材の提示」まで。カード演出・数字のカウントアップは MG-08/SN-03 側（演出担当）。 */
+  // league.js には HTML エスケープが無く（名前は TEAM_DATA 由来＝信頼できる）そのまま埋めているが、
+  // FN-01 で名前が生成物になるのでここだけは通しておく。lg-ui.js の _esc は別 IIFE で見えない。
+  function _escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function _agingBlockHTML() {
+    var a = _state.seasonMeta && _state.seasonMeta.aging;
+    if (!a || (!(a.grew || []).length && !(a.declined || []).length)) return '';
+    function list(rows, cls, sign) {
+      if (!rows || !rows.length) {
+        return '<div class="lg-age-empty">' + _t('該当なし', 'None') + '</div>';
+      }
+      return rows.map(function (r) {
+        return '<div class="lg-age-row ' + cls + '">' +
+          '<span class="lg-age-nm">' + _escHtml(r.name) + '</span>' +
+          '<span class="lg-age-yr">' + r.age + _t('歳', '') + '</span>' +
+          '<span class="lg-age-ov">' + _t('総合', 'OVR') + ' ' + r.overall + '</span>' +
+          '<span class="lg-age-d">' + sign + Math.abs(r.diff).toFixed(1) + '</span>' +
+        '</div>';
+      }).join('');
+    }
+    return '<div class="lg-age-wrap">' +
+      '<div class="lg-age-col">' +
+        '<div class="lg-age-h up"><span class="lg-age-ico">📈</span>' + _t('伸びた選手', 'Improved') + '</div>' +
+        '<div class="lg-age-list">' + list(a.grew, 'up', '+') + '</div>' +
+      '</div>' +
+      '<div class="lg-age-col">' +
+        '<div class="lg-age-h dn"><span class="lg-age-ico">📉</span>' + _t('衰えた選手', 'Declined') + '</div>' +
+        '<div class="lg-age-list">' + list(a.declined, 'dn', '−') + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
   function _prePageSquad() {
     var myId = _state.myClub, def = _clubDef(myId);
-    return '<section class="lg-se-zone lg-se-wide lg-pre-squad">' +
+    var aging = _agingBlockHTML();
+    // SN-08a を入れた時点でこのページのビートは「オフの間にスカッドがどう変わったか」。
+    //   移籍（SN-06）はまだ空なので、その告知は下段の1行に落として主役を譲る（1画面1ビート）。
+    return '<section class="lg-se-zone lg-se-wide lg-pre-squad' + (aging ? ' has-aging' : '') + '">' +
       '<div class="lg-se-ztitle">' + def.crest + ' ' + _clubName(myId) +
-        '<span class="lg-badge">' + _t('シーズン' + (_state.season || 1), 'Season ' + (_state.season || 1)) + '</span></div>' +
-      '<div class="lg-pre-soon">' +
-        '<span class="lg-pre-soon-ico">🔁</span>' +
-        '<span class="lg-pre-soon-t">' + _t('選手獲得・放出', 'Transfers') + '</span>' +
-        '<p class="lg-pre-soon-b">' + _t('補強と放出はまだ準備中。今季はこのスカッドで戦う。',
-          'The transfer market is not open yet — you go with this squad.') + '</p>' +
-      '</div>' +
+        '<span class="lg-badge">' + _t('オフの変化', 'Off-season') + '</span></div>' +
+      aging +
+      (aging
+        ? '<div class="lg-pre-soonline">🔁 ' + _t('補強と放出はまだ準備中。今季はこのスカッドで戦う。',
+            'The transfer market is not open yet — you go with this squad.') + '</div>'
+        : '<div class="lg-pre-soon">' +
+            '<span class="lg-pre-soon-ico">🔁</span>' +
+            '<span class="lg-pre-soon-t">' + _t('選手獲得・放出', 'Transfers') + '</span>' +
+            '<p class="lg-pre-soon-b">' + _t('補強と放出はまだ準備中。今季はこのスカッドで戦う。',
+              'The transfer market is not open yet — you go with this squad.') + '</p>' +
+          '</div>') +
     '</section>';
   }
 
@@ -5969,6 +6175,13 @@
     newSeason: _newSeason,
     startNextSeason: _startNextSeason,
     overlaySquad: _overlaySquad,
+    // SN-08a 年齢・成長・soft衰え
+    playerAge: _playerAge,
+    baseAge: _baseAge,
+    agingDelta: _agingDelta,
+    applySeasonAging: _applySeasonAging,
+    AGE_TUNING: AGE_TUNING,
+    GROWTH_TUNING: GROWTH_TUNING,
     squadEntry: _squadEntry,
     tickCarryover: _tickCarryover,
     recordTeamCarryover: _recordTeamCarryover,
