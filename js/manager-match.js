@@ -116,8 +116,9 @@
     for (var pos = 1; pos < 11; pos++) {
       if (frontTypes.indexOf(t1.getPositionType(pos)) >= 0) {
         var p = t1.players[t1.lineup[pos]];
-        var of = (PLAYER_EXTRA[p.name] && PLAYER_EXTRA[p.name].of)
-          ? PLAYER_EXTRA[p.name].of
+        var ex = (typeof getPlayerExtra === 'function') ? getPlayerExtra(p) : PLAYER_EXTRA[p.name];
+        var of = (ex && ex.of)
+          ? ex.of
           : (p.params[11] + p.params[12] + p.params[13] + p.params[17]) / 4;
         cands.push({ pos: pos, rating: of });
       }

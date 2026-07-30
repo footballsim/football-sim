@@ -150,9 +150,14 @@ function mentalPersonality(p) {
     return MENTAL_PERSONALITIES[p._mentalPersonality];
   }
   let id = null;
-  const ov = MENTAL_OVERRIDES[p.name];
+  /* FN-00: 性格は「名前ハッシュ」で決まるゲーム値。表示名を架空化しても性格が変わらないよう、
+   *   NAMES があれば **実データの名前**（内部ID側）で引く。NAMES 不在なら従来どおり＝挙動不変。 */
+  const _real = (typeof NAMES !== 'undefined' && NAMES && NAMES.realOf) ? NAMES.realOf(p) : null;
+  const _nm = _real ? _real.name : p.name;
+  const _en = _real ? _real.en_name : p.en_name;
+  const ov = MENTAL_OVERRIDES[_nm];
   if (ov && ov.personality && MENTAL_PERSONALITIES[ov.personality]) id = ov.personality;
-  if (!id) id = mentalPersonalityId(p.name, p.en_name);
+  if (!id) id = mentalPersonalityId(_nm, _en);
   p._mentalPersonality = id;   // 遅延キャッシュ（buildTeam のクローンごと）
   return MENTAL_PERSONALITIES[id];
 }

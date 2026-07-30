@@ -2279,8 +2279,9 @@ function startGame() {
   for (let _pos = 1; _pos < 11; _pos++) {
     if (_frontTypes.includes(t1.getPositionType(_pos))) {
       const _p = t1.players[t1.lineup[_pos]];
-      const _ofRating = (PLAYER_EXTRA[_p.name] && PLAYER_EXTRA[_p.name].of)
-        ? PLAYER_EXTRA[_p.name].of
+      const _ex = getPlayerExtra(_p);   // FN-00: 架空名でも実データを引く
+      const _ofRating = (_ex && _ex.of)
+        ? _ex.of
         : (_p.params[11] + _p.params[12] + _p.params[13] + _p.params[17]) / 4;
       _frontCandidates.push({ pos: _pos, rating: _ofRating });
     }
@@ -4656,7 +4657,9 @@ function buildPositionMap(positions) {
  *   TEAM_DATA の生データに _mentalPersonality を焼かないためにこちらを使う。 */
 function _playerPersonalityHTML(player, isEn) {
   if (typeof mentalPersonalityByName !== 'function') return '';
-  const ps = mentalPersonalityByName(player.name, player.en_name);
+  // FN-00: 性格は実データの名前ハッシュ由来（表示名を架空化しても変わらない）
+  const _r = (typeof NAMES !== 'undefined' && NAMES && NAMES.realOf) ? NAMES.realOf(player) : null;
+  const ps = mentalPersonalityByName(_r ? _r.name : player.name, _r ? _r.en_name : player.en_name);
   if (!ps) return '';
   const label = isEn ? (ps.en_name || ps.name) : ps.name;
   return '<div>' + (isEn ? 'Personality: ' : '性格：')
@@ -4669,7 +4672,7 @@ function showPlayerDetail(teamKey, playerIdx) {
 
   const teamData = TEAM_DATA[teamKey];
   const player = teamData.players[playerIdx];
-  const ex = PLAYER_EXTRA[player.name] || {};
+  const ex = getPlayerExtra(player) || {};   // FN-00: 架空名でも身長/体重/プロフィールを引く
   const params = player.params;
   const _isEn = window.LANG === 'en';
 
@@ -4728,7 +4731,9 @@ function showPlayerDetail(teamKey, playerIdx) {
     + '<span style="font-size:40px">👤</span>'
     + '</div>'
     + '<div style="padding:12px;font-size:13px;line-height:2">'
-    + '<div><b>' + (_isEn && player.en_name ? player.en_name : (ex.longName || player.long_name)) + '</b></div>'
+    // FN-00: ex.longName は実データ側のフルネーム＝架空化ONでは使わない（実名が漏れる）
+    + '<div><b>' + (_isEn && player.en_name ? player.en_name
+        : ((typeof NAMES !== 'undefined' && NAMES && NAMES.isFiction()) ? player.long_name : (ex.longName || player.long_name))) + '</b></div>'
     + '<div>' + (_isEn ? 'Height: ' : '身長：') + heightStr + (_isEn ? '  Weight: ' : '　体重：') + weightStr + '</div>'
     + _playerPersonalityHTML(player, _isEn)
     + '</div>'

@@ -495,6 +495,16 @@ function getPlayerName(player) {
   return player.name;
 }
 
+/* PLAYER_EXTRA（身長/体重/プロフィール/OFレーティング）を選手オブジェクトから引く。
+ * ★ FN-00: PLAYER_EXTRA のキーは **実データの短縮名**。表示名を架空化すると p.name では
+ *   引けなくなる（身長も OF レーティングも静かに欠落する）ので、必ずここを通す。
+ *   NAMES 不在（公開ビルド）では従来どおり p.name＝挙動不変。 */
+function getPlayerExtra(player) {
+  if (!player || typeof PLAYER_EXTRA === 'undefined') return null;
+  var key = (typeof NAMES !== 'undefined' && NAMES && NAMES.extraKey) ? NAMES.extraKey(player) : player.name;
+  return PLAYER_EXTRA[key] || null;
+}
+
 function getTeamName(teamData) {
   if (!teamData) return '';
   if (window.LANG === 'en' && teamData.en_name) return teamData.en_name;

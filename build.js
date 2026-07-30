@@ -35,7 +35,9 @@ const JS_FILES = ['players.js', 'rng.js', 'simulate.js', 'events.js', 'match.js'
 //   simulate.js のフックは typeof ガード付きなので、不在の公開版では完全 no-op（公開挙動不変）。
 // ★ UX-01〜06（試合外のゲーム化 / LAB_UI_DESIGN.md）で追加した演出・UI 層も lab 限定。
 //   league.js からは typeof ガードで呼ぶので、未搭載でも no-op（公開版の挙動は不変）。
-const LAB_ONLY_JS = ['mental.js', 'discipline.js', 'portrait.js', 'manga_recolor.js',
+// ★ names.js（FN-00 表示名インダイレクション層）も lab 限定。既定は実名表示＝OFF なので
+//   読み込むだけでは挙動不変。?names=fiction / NAMES.toggle() で架空表示に切り替わる。
+const LAB_ONLY_JS = ['names.js', 'mental.js', 'discipline.js', 'portrait.js', 'manga_recolor.js',
   'juice.js', 'lab-art.js', 'lg-ui.js', 'matchday.js', 'league.js'];
 
 // 試合エンジン系: 最小化＋軽難読化
@@ -133,6 +135,8 @@ fs.cpSync(path.join(ROOT, 'img'), path.join(LAB, 'img'), { recursive: true });
 //   simulate.js の typeof ガード付きフックは試合実行時に有効化される）。
 let labHtml = fs.readFileSync(path.join(DOCS, 'index.html'), 'utf8');
 const labInject =
+  // FN-00: 表示名インダイレクション層は **最初**（TEAM_DATA の名前を読む前に適用する）。
+  `<script src="js/names.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/mental.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/discipline.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/portrait.js?v=${BUILD_VER}"></script>\n` +

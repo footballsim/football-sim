@@ -213,13 +213,26 @@
   };
 
   /* 選手識別キー（PT/PS と同じ決定論キー＝long_name 優先）。
-   * ⚠️ **オリジナルクラブ化の時に必ず見直すこと**（2026-07-22 ユーザー補足）:
-   *   いまリーグに入っている実チームは**あくまで仮**で、本番はオリジナルクラブに差し替わる（FN-01）。
-   *   このキーは squads（成長 delta / 怪我・停止の残り週 / 出場・得点記録）の**保存キー**なので、
-   *   選手名が変わると保存済みデータが**エラーも出さずに丸ごと迷子になる**（= 静かなデータ消失）。
-   *   → クラブ差し替えは β 公開前に済ませ、その時点でセーブを切り替える（BACKLOG FN-01 参照）。
-   *   → 名前だけを架空化する方式を採るなら、long_name は「内部ID」として据え置き、表示名だけ差し替える。 */
-  function _playerKey(p) { return (p && (p.long_name || p.name)) || ''; }
+   * このキーは squads（成長 delta / 怪我・停止の残り週 / 出場・得点記録）の**保存キー**なので、
+   * 値が動くと保存済みデータが**エラーも出さずに丸ごと迷子になる**（= 静かなデータ消失）。
+   * ✅ 2026-07-30（FN-00・DECISIONS 2026-07-30）: 表示名インダイレクション層 js/names.js を導入。
+   *   架空化しても内部ID（＝起動時の long_name）は据え置きなので、このキーは**永久に不変**。
+   *   NAMES があれば「いま表示中の（架空）名 → 内部ID」へ逆引きしてから返す。
+   *   NAMES 不在（公開ビルド）では従来どおり long_name||name＝挙動不変。 */
+  function _playerKey(p) {
+    if (!p) return '';
+    if (typeof NAMES !== 'undefined' && NAMES && NAMES.playerId) return NAMES.playerId(p);
+    return (p.long_name || p.name) || '';
+  }
+
+  /* 保存済みの選手キー（内部ID）→ 画面に出す表示名。架空化ONなら架空名になる。
+   * ★ セーブやランキングに積まれた「キー」をそのまま表示すると実名が漏れる。 */
+  function _keyDisplayName(key) {
+    if (typeof NAMES !== 'undefined' && NAMES && NAMES.displayName) {
+      return NAMES.displayName(key) || key;
+    }
+    return key;
+  }
 
   /* 表示名（p.name）→ squads のキー（_playerKey = long_name||name）を引く。
    * ★ MOM や得点者は p.name で記録されるので、そのまま _squadEntry に渡すと
@@ -2008,6 +2021,30 @@
     return rows.length;
   }
 
+  /* FN-00: セーブには「その時の表示名」が焼き付いている箇所がある（個人記録・ベスト11・
+   * 通年評価点）。実名⇔架空名を切り替えると古いモードの名前が残るので、ロード時に
+   * **内部ID（key）から表示名を貼り直す**。key を持たない旧セーブは name 自体が内部ID
+   * だった時期のものなので、それを key とみなして解決する。 */
+  function _refreshDisplayNames() {
+    if (typeof NAMES === 'undefined' || !NAMES || !NAMES.displayName || !_state) return;
+    function fixEntry(e) { if (e && (e.key || e.name)) e.name = _keyDisplayName(e.key || e.name); }
+    function fixXI(xi) {
+      if (!xi) return;
+      ['GK', 'DF', 'MF', 'FW'].forEach(function (g) { (xi[g] || []).forEach(fixEntry); });
+    }
+    function fixTop(top) { if (top) ['scorer', 'assister', 'iron'].forEach(function (k) { fixEntry(top[k]); }); }
+    var pr = _state.seasonMeta && _state.seasonMeta.playerRatings;
+    if (pr) for (var cid in pr) {
+      if (!Object.prototype.hasOwnProperty.call(pr, cid)) continue;
+      for (var pk in pr[cid]) {
+        if (!Object.prototype.hasOwnProperty.call(pr[cid], pk)) continue;
+        if (pr[cid][pk]) pr[cid][pk].name = _keyDisplayName(pk);
+      }
+    }
+    (_state.history || []).forEach(function (h) { if (h) { fixTop(h.top); fixXI(h.bestXI); } });
+    if (_state.lastResult) fixXI(_state.lastResult.bestXI);
+  }
+
   function _save() { try { localStorage.setItem(LS_KEY, JSON.stringify(_state)); } catch (e) { console.warn('[league] save failed', e); } }
   function _load() {
     try {
@@ -2037,6 +2074,7 @@
       if (!_state.seasonMeta) _state.seasonMeta = _defaultSeasonMeta();
       if (!_state.squads) _state.squads = {};   // 空 = 全選手 base のまま（delta なし）
       _ensureSeasonGoal();   // SN-02: 目標未設定の既存セーブにも開幕目標を生やす
+      _refreshDisplayNames();   // FN-00: セーブに焼き付いた表示名を「いまのモード」の名前へ貼り直す
       if (_prevVersion !== _state.version || !_hadV4) _save();   // 移行が起きた時だけ一度保存
     } catch (e) { _state = null; }
   }
@@ -2072,9 +2110,10 @@
     for (var pk in c) {
       if (!Object.prototype.hasOwnProperty.call(c, pk)) continue;
       var e = c[pk];
-      if (e.goals > 0 && (!top.scorer || e.goals > top.scorer.n)) top.scorer = { name: pk, n: e.goals };
-      if (e.assists > 0 && (!top.assister || e.assists > top.assister.n)) top.assister = { name: pk, n: e.assists };
-      if (e.apps > 0 && (!top.iron || e.apps > top.iron.n)) top.iron = { name: pk, n: e.apps };
+      // ★ pk は内部ID（実名）。画面に出すのは _keyDisplayName 経由＝架空化ONなら架空名（FN-00）
+      if (e.goals > 0 && (!top.scorer || e.goals > top.scorer.n)) top.scorer = { name: _keyDisplayName(pk), key: pk, n: e.goals };
+      if (e.assists > 0 && (!top.assister || e.assists > top.assister.n)) top.assister = { name: _keyDisplayName(pk), key: pk, n: e.assists };
+      if (e.apps > 0 && (!top.iron || e.apps > top.iron.n)) top.iron = { name: _keyDisplayName(pk), key: pk, n: e.apps };
     }
     return top;
   }
@@ -2172,7 +2211,7 @@
       var e = c[pk];
       if (!e || !e.apps) continue;
       rows.push({
-        key: pk, name: pk, apps: e.apps, minutes: e.minutes || 0,
+        key: pk, name: _keyDisplayName(pk), apps: e.apps, minutes: e.minutes || 0,
         goals: e.goals || 0, assists: e.assists || 0, age: _playerAge(myId, pk)
       });
     }
