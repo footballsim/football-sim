@@ -1,0 +1,245 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>デモ台 — Daily League（スマホ実寸）</title>
+<!--
+  デモ台（開発用・2026-07-30）
+  ------------------------------------------------------------------
+  「端末プレビュー（dist-lab/device-preview.html）」と「機能デモ操作」を1枚に統合したもの。
+  常にスマホ実寸で新機能を確認するための台。
+
+  ★ なぜ iframe なのか（device-preview.html から引き継いだ最重要点）
+    CSS のメディアクエリは「ブラウザの実ウィンドウ」を基準に評価される。画面の中に小さい
+    div を描いてアプリを入れても、スマホ用CSSは一切発火せず「小さいPC画面」が出るだけ。
+    iframe は中身が独立したビューポートを持つので、844×390 にすればその中では本当に
+    「844×390 の端末」としてメディアクエリが評価される。
+
+  ★ なぜ操作ボタンを外側に置くのか
+    ボタンを中（アプリ側）に置くと、検証したいスマホ幅のビューポートをボタンが食って
+    レイアウトが歪む。ここでは枠の外に置き、iframe の window.__demo を叩く。
+
+  中身 = _demo_app.html（root の素の js/ を読む＝ビルド不要で最新が出る）
+-->
+<style>
+  :root{
+    --bg:#11151f; --panel:#1a2233; --line:#2e3a52; --text:#e8eefc; --dim:#93a2bd;
+    --gold:#e6c268; --ink:#131a27; --act:#2f6fd0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:"Noto Sans JP",-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  header{
+    flex:0 0 auto; background:var(--panel); border-bottom:2px solid var(--line);
+    padding:8px 12px; display:flex; flex-direction:column; gap:7px;
+  }
+  .row{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+  .title{font-weight:900; letter-spacing:1px; color:var(--gold); font-size:13px; margin-right:2px}
+  .tag{
+    font-size:10px; font-weight:800; letter-spacing:.5px; color:var(--dim);
+    border:1px solid var(--line); border-radius:4px; padding:2px 6px; margin-right:2px;
+  }
+  .sep{width:1px; align-self:stretch; background:var(--line); margin:0 3px}
+  button{
+    font-family:inherit; font-size:12px; font-weight:700; color:var(--text);
+    background:#243050; border:1.5px solid var(--line); border-radius:6px;
+    padding:6px 10px; min-height:32px; cursor:pointer; white-space:nowrap;
+    transition:background .12s, border-color .12s, transform .06s;
+  }
+  button:hover{background:#2c3a5f; border-color:#4a5c80}
+  button:active{transform:translateY(1px)}
+  button.on{background:var(--gold); border-color:var(--gold); color:var(--ink)}
+  button.act{background:var(--act); border-color:#4a8ae6}
+  button.act:hover{background:#3a7de0}
+  label.chk{display:flex; align-items:center; gap:5px; font-size:11px; color:var(--dim); cursor:pointer; user-select:none}
+  label.chk input{width:14px; height:14px; cursor:pointer}
+  .readout{margin-left:auto; font-size:11px; color:var(--dim); font-variant-numeric:tabular-nums; display:flex; gap:10px}
+  .readout b{color:var(--text); font-weight:800}
+  #msg{font-size:11px; color:#8fa6cc; min-height:1em; padding-left:2px}
+  main{
+    flex:1 1 auto; min-height:0; position:relative; overflow:auto;
+    display:grid; place-items:center; padding:16px;
+    background:
+      linear-gradient(45deg,#0d1119 25%,transparent 25%) -8px 0/16px 16px,
+      linear-gradient(-45deg,#0d1119 25%,transparent 25%) -8px 0/16px 16px,
+      linear-gradient(45deg,transparent 75%,#0d1119 75%) -8px 0/16px 16px,
+      linear-gradient(-45deg,transparent 75%,#0d1119 75%) -8px 0/16px 16px,
+      #0a0e15;
+  }
+  #shell{position:relative; flex:0 0 auto}
+  #frame{
+    display:block; border:0; background:#000;
+    box-shadow:0 18px 60px rgba(0,0,0,.65), 0 0 0 1px var(--line);
+    transform-origin:top left;
+  }
+  #shell.dev #frame{border-radius:14px}
+</style>
+</head>
+<body>
+
+<header>
+  <!-- 1段目: 端末サイズ（常にスマホ実寸で見るための本体） -->
+  <div class="row">
+    <span class="title">📱 デモ台</span>
+    <span class="tag">端末</span>
+    <div class="row" id="presets"></div>
+    <span class="sep"></span>
+    <button id="rotate" title="縦横を入れ替える">🔄 回転</button>
+    <button id="reload" title="キャッシュを無視して読み直す">↻ 再読込</button>
+    <label class="chk" title="実機のタッチ端末と同じCSS評価にする"><input type="checkbox" id="touch" checked> タッチ端末</label>
+    <div class="readout">
+      <span>表示 <b id="sizeOut">–</b></span>
+      <span>倍率 <b id="scaleOut">100%</b></span>
+    </div>
+  </div>
+
+  <!-- 2段目: 機能デモの操作（中に置くとスマホ幅を食うので必ず外側） -->
+  <div class="row">
+    <span class="tag">デモ</span>
+    <button class="act" onclick="dm('reset')">① クラブ選び直し</button>
+    <button onclick="dm('round')">② 1節すすめる</button>
+    <button onclick="dm('season')">③ 1シーズン消化</button>
+    <button onclick="dm('rollover')">④ 次シーズンへ</button>
+    <span class="sep"></span>
+    <button onclick="dm('sns')">🗣 世間の反応</button>
+    <button onclick="dm('home')">🏠 ハブ</button>
+    <span class="sep"></span>
+    <button id="btn-fic" onclick="dm('fiction')">架空名 OFF</button>
+    <button id="btn-lang" onclick="dm('lang')">日本語</button>
+  </div>
+  <div id="msg"></div>
+</header>
+
+<main>
+  <div id="shell"><iframe id="frame" src="./_demo_app.html" title="preview"></iframe></div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* 端末プリセット。w×h は CSS ピクセル（＝メディアクエリが見る値）。
+   * ★ 既定はスマホ横（844×390）＝リーグUIの正系（DECISIONS 2026-07-14 で横長に転換）。 */
+  var PRESETS = [
+    { id:'ph-land', label:'スマホ横',      w:844,  h:390,  dev:true },   // iPhone 14/15
+    { id:'ph-sml',  label:'スマホ横(小)',  w:667,  h:375,  dev:true },   // iPhone SE
+    { id:'ph-and',  label:'Android横',     w:800,  h:360,  dev:true },
+    { id:'ph-port', label:'スマホ縦',      w:390,  h:844,  dev:true },
+    { id:'tb-land', label:'タブレット横',  w:1024, h:768,  dev:true },
+    { id:'pc',      label:'PC',            w:0,    h:0 }
+  ];
+
+  var frame = document.getElementById('frame');
+  var shell = document.getElementById('shell');
+  var stage = document.querySelector('main');
+  var sizeOut = document.getElementById('sizeOut');
+  var scaleOut = document.getElementById('scaleOut');
+  var msg = document.getElementById('msg');
+  var touchChk = document.getElementById('touch');
+  var cur = null;
+  var SAVE = 'lgDemoStage';
+
+  var bar = document.getElementById('presets');
+  PRESETS.forEach(function (p) {
+    var b = document.createElement('button');
+    b.textContent = p.label; b.dataset.id = p.id;
+    b.onclick = function () { apply({ id:p.id, w:p.w, h:p.h, dev:p.dev }); };
+    bar.appendChild(b);
+  });
+
+  /* 枠のサイズを当て、入りきらなければ縮小して見せる。
+   * ★ transform:scale は「見た目」だけ。iframe 内のビューポートは w×h のままなので
+   *   メディアクエリの判定は実寸で行われる＝小さく見えていても評価は正しい。 */
+  function layout() {
+    if (!cur) return;
+    var avail = { w: stage.clientWidth - 32, h: stage.clientHeight - 32 };
+    if (!cur.w) {
+      frame.style.width = avail.w + 'px'; frame.style.height = avail.h + 'px';
+      frame.style.transform = 'none';
+      shell.style.width = avail.w + 'px'; shell.style.height = avail.h + 'px';
+      shell.classList.remove('dev');
+      sizeOut.textContent = avail.w + ' × ' + avail.h; scaleOut.textContent = '100%';
+      return;
+    }
+    frame.style.width = cur.w + 'px'; frame.style.height = cur.h + 'px';
+    shell.classList.toggle('dev', !!cur.dev);
+    var s = Math.min(1, avail.w / cur.w, avail.h / cur.h);
+    frame.style.transform = s < 1 ? 'scale(' + s + ')' : 'none';
+    shell.style.width = Math.round(cur.w * s) + 'px';
+    shell.style.height = Math.round(cur.h * s) + 'px';
+    sizeOut.textContent = cur.w + ' × ' + cur.h;
+    scaleOut.textContent = Math.round(s * 100) + '%';
+  }
+
+  function apply(p) {
+    cur = p;
+    [].forEach.call(bar.children, function (b) { b.classList.toggle('on', b.dataset.id === p.id); });
+    try { localStorage.setItem(SAVE, JSON.stringify(p)); } catch (e) {}
+    layout(); syncTouch();
+  }
+
+  /* タッチ端末エミュレーション（device-preview.html と同じ）。
+   * マウスのPCでは @media (pointer: coarse) が偽になるため、実機で効く「端末枠を外して
+   * 全画面にする」ルールが出ない。同じ結果になる CSS を iframe へ流し込んで揃える。 */
+  function syncTouch() {
+    var doc; try { doc = frame.contentDocument; } catch (e) { return; }
+    if (!doc || !doc.head) return;
+    var ID = '__preview_touch__';
+    var old = doc.getElementById(ID); if (old) old.parentNode.removeChild(old);
+    if (!touchChk.checked || !cur || !cur.w) return;
+    var st = doc.createElement('style');
+    st.id = ID;
+    st.textContent =
+      '@media (orientation: landscape){' +
+      '  body.league-mode{width:100%;max-width:none;height:100vh;height:100dvh;' +
+      '  max-height:none;border-radius:0;box-shadow:none}' +
+      '}';
+    doc.head.appendChild(st);
+  }
+
+  function reload() {
+    var base = frame.src.split('?')[0].split('#')[0];
+    frame.src = base + '?_pv=' + Date.now();
+  }
+  document.getElementById('reload').onclick = reload;
+  document.getElementById('rotate').onclick = function () {
+    if (!cur || !cur.w) return;
+    apply({ id: cur.id, w: cur.h, h: cur.w, dev: cur.dev });
+  };
+  touchChk.onchange = syncTouch;
+  window.addEventListener('resize', layout);
+
+  /* ── デモ操作: iframe の window.__demo を叩く ───────────────────────── */
+  window.dm = function (action) {
+    var w = frame.contentWindow;
+    if (!w || !w.__demo) { msg.textContent = 'アプリの読み込み待ちです。数秒おいてもう一度。'; return; }
+    var r;
+    try { r = w.__demo[action](); } catch (e) { msg.textContent = 'エラー: ' + e.message; return; }
+    if (typeof r === 'string' && r) msg.textContent = r;
+    setTimeout(syncLabels, 60);
+  };
+
+  function syncLabels() {
+    var w = frame.contentWindow, fic = document.getElementById('btn-fic'), lang = document.getElementById('btn-lang');
+    if (!w || !w.__demo) return;
+    try {
+      var isF = w.__demo.isFiction();
+      fic.textContent = '架空名 ' + (isF ? 'ON' : 'OFF');
+      fic.classList.toggle('on', isF);
+      lang.textContent = w.__demo.isEn() ? 'English' : '日本語';
+    } catch (e) {}
+  }
+
+  frame.addEventListener('load', function () {
+    syncTouch(); syncLabels();
+    if (!msg.textContent) msg.textContent = '① からどうぞ（②で1節ずつ、③で1シーズン、④で周回して「オフの変化」）';
+  });
+
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(SAVE) || 'null'); } catch (e) {}
+  apply(saved && saved.w !== undefined ? saved : { id:'ph-land', w:844, h:390, dev:true });
+})();
+</script>
+</body></html>

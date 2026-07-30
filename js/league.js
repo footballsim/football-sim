@@ -6080,7 +6080,7 @@
    * CSS に持たせ、ここで実測して .is-scrollable を付け外しする。
    * ★ 収まっている面にフェードを出すと逆に「切れている」と誤読させるので必ず実測する。 */
   var _SCROLLHINT_SEL = '.lg-rd-scroll, .lg-sh-boardwrap, .lg-se-plogwrap, .lg-md-deck,' +
-                        ' .bench-list, .lg-sh-panel';
+                        ' .bench-list, .lg-sh-panel, .lg-age-list';   // lg-age-list = SN-08a オフの変化
   var _hintQueued = false;
 
   function _markScrollHints() {
@@ -6335,27 +6335,89 @@
   // テスト用（lab限定）：1日1回制限のON/OFFトグル（毎回プレイ可にする）
   window.leagueToggleTestLock = function () { if (_state) { _state.testUnlock = !_state.testUnlock; _save(); _renderHub(false); } };
   // 【一時デバッグ・完了前に削除】全節を無音消化してシーズン終了へジャンプ（最終話の再設計イテレーション用）。
+  /* 1節ぶんをまとめて消化する（自チームの試合も観戦せずに確定させる）。
+   * ★ 順位表・評価点・出場/得点の持ち越しまで正規の手順で書く＝「試合だけ飛ばした」状態を作る。
+   *   デバッグ台（端末プレビューのデモ操作）と leagueDebugSimSeason の共通部品。 */
+  function _debugSimRound() {
+    if (!_state || !_state.fixtures) return false;
+    var ms = _state.fixtures[_state.round];
+    if (!ms) return false;
+    var roundRatings = {};
+    var myId = _state.myClub;
+    var posBefore = _position(myId);
+    var mineFx = null, mineRes = null;
+    for (var i = 0; i < ms.length; i++) {
+      var m = ms[i]; if (m.played) continue;
+      try {
+        var r = playMatch(_overlaySquad(m.home), _overlaySquad(m.away));
+        m.played = true; m.hs = r.result.home; m.as = r.result.away;
+        _applyResult(m.home, m.away, r.result.home, r.result.away);
+        var rr = _rateMatch(r.home, r.away, r.chanceResults, m.home, m.away);
+        roundRatings[m.home] = rr[m.home]; roundRatings[m.away] = rr[m.away];
+        // 出場/得点/アシストの持ち越しも書く＝この導線で飛ばしても「④自チーム成績」が空にならない。
+        //   ★ 総出場時間だけは交代の刻みが取れないので入らない（実際に指揮した試合でのみ積む）。
+        _recordTeamCarryover(m.home, r.home, _statsFromRatings(rr[m.home]));
+        _recordTeamCarryover(m.away, r.away, _statsFromRatings(rr[m.away]));
+        if (m.home === myId || m.away === myId) { mineFx = m; mineRes = rr; }
+      } catch (e) { console.warn('[league] debug sim match failed', e); }
+    }
+    _accumulateRatings(roundRatings);
+    _state.round++;
+
+    /* ★ 自チームの試合を「観戦せずに確定させた」時も、実際に指揮した後と同じ形の
+     *   lastResult を残す。これが無いと試合後バナー・BEST XI・SNSフィード（RW-01）が
+     *   「まだ試合をしていない」状態のままになり、検証台で新機能が見えない。
+     *   ※ 出場時間・実況ログ・詳細スタッツは観戦しないと取れないので入らない。 */
+    if (mineFx) {
+      var oppId = (mineFx.home === myId) ? mineFx.away : mineFx.home;
+      var iAmHome = (mineFx.home === myId);
+      var myScore = iAmHome ? mineFx.hs : mineFx.as;
+      var oppScore = iAmHome ? mineFx.as : mineFx.hs;
+      var res = (myScore > oppScore) ? 'W' : (myScore < oppScore) ? 'L' : 'D';
+      var byKey = (mineRes && mineRes[myId]) || {};
+      var scorers = [], momRow = null;
+      Object.keys(byKey).sort().forEach(function (pk) {
+        var e = byKey[pk];
+        if (e.goals) scorers.push({ name: _keyDisplayName(pk), goals: e.goals });
+        if (!momRow || e.rating > momRow.rating) {
+          momRow = { name: _keyDisplayName(pk), rating: e.rating, goals: e.goals || 0, assists: e.assists || 0 };
+        }
+      });
+      var others = ms.filter(function (x) { return x !== mineFx; })
+        .map(function (x) { return { home: x.home, away: x.away, hs: x.hs, as: x.as }; });
+      _state.lastResult = {
+        bestXI: _pickBestXI(roundRatings),
+        round: _state.round,
+        mine: {
+          me: myId, opp: oppId, ms: myScore, os: oppScore, res: res, home: iAmHome,
+          rival: _isRival(oppId), posBefore: posBefore, posAfter: _position(myId),
+          mom: momRow ? { name: momRow.name, goals: momRow.goals, assists: momRow.assists } : null,
+          scorers: scorers
+        },
+        others: others
+      };
+    }
+    return true;
+  }
+
+  /* デモ/検証用: 1節だけ進める。ハブに順位と結果が反映された状態で止まる。 */
+  window.leagueDebugSimRound = function () {
+    if (!_state || !_state.fixtures) { console.warn('[league] pick a club first'); return false; }
+    if (_state.round >= _state.fixtures.length) return false;
+    _debugSimRound();
+    _state.lastPlayedDate = null;   // 1日1試合ロックを解いておく（検証台のため）
+    if (_state.round >= _state.fixtures.length) {
+      _state.finished = true; _finReset();
+      _state.lastResult = _state.lastResult || {};
+      _state.lastResult.season = _settleSeason(_position(_state.myClub));
+    }
+    _save(); _renderHub(false);
+    return true;
+  };
+
   window.leagueDebugSimSeason = function () {
     if (!_state || !_state.fixtures) { console.warn('[league] pick a club first'); return; }
-    while (_state.round < _state.fixtures.length) {
-      var ms = _state.fixtures[_state.round], roundRatings = {};
-      for (var i = 0; i < ms.length; i++) {
-        var m = ms[i]; if (m.played) continue;
-        try {
-          var r = playMatch(_overlaySquad(m.home), _overlaySquad(m.away));
-          m.played = true; m.hs = r.result.home; m.as = r.result.away;
-          _applyResult(m.home, m.away, r.result.home, r.result.away);
-          var rr = _rateMatch(r.home, r.away, r.chanceResults, m.home, m.away);
-          roundRatings[m.home] = rr[m.home]; roundRatings[m.away] = rr[m.away];
-          // 出場/得点/アシストの持ち越しも書く＝この導線で飛ばしても「④自チーム成績」が空にならない。
-          //   ★ 総出場時間だけは交代の刻みが取れないので入らない（実際に指揮した試合でのみ積む）。
-          _recordTeamCarryover(m.home, r.home, _statsFromRatings(rr[m.home]));
-          _recordTeamCarryover(m.away, r.away, _statsFromRatings(rr[m.away]));
-        } catch (e) { console.warn('[league] debug sim match failed', e); }
-      }
-      _accumulateRatings(roundRatings);
-      _state.round++;
-    }
+    while (_state.round < _state.fixtures.length) _debugSimRound();
     _state.finished = true;
     _finReset();
     _state.lastResult = _state.lastResult || {};

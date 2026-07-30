@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JEPGS2HPDE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-JEPGS2HPDE');
+</script>
+<!-- OGP / SNSシェア用メタタグ -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Football Sim">
+  <meta property="og:description" content="Simulate football matches with real player stats, tactics and formations. Japan NT vs England, Scotland &amp; more.">
+  <meta property="og:image" content="https://football-sim.com/img/title-hero.jpg">
+  <meta property="og:url" content="https://football-sim.com">
+  <meta property="og:site_name" content="Football Sim">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Football Sim">
+  <meta name="twitter:description" content="Simulate football matches with real player stats, tactics and formations.">
+  <meta name="twitter:image" content="https://football-sim.com/img/title-hero.jpg">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- ホーム画面に追加でフルスクリーン起動（Safariのタブ/アドレスバーを消す）＝横表示の可視領域を最大化 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Football Sim">
+<meta name="theme-color" content="#03245e">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- Firebase SDK（みんなの戦績 機能用） -->
+<script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<title>Football Sim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=20260625d">
+<script>document.write('<link rel="stylesheet" href="css/league-ui.css?v=' + Date.now() + '">');</script>
+</head>
+<body>
+
+<!-- TITLE SCREEN -->
+<div id="drag-ghost">
+      </div>
+
+<div id="screen-title" class="screen active">
+  <div class="title-content">
+    <!-- ヒーローセクション -->
+    <div class="title-hero">
+      <!-- 言語切り替えボタン -->
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:28px;position:relative">
+        <button id="lang-btn-ja" onclick="setLang('ja')" style="padding:5px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.4);background:transparent;color:rgba(255,255,255,0.65);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🇯🇵 日本語</button>
+        <button id="lang-btn-en" onclick="setLang('en')" style="padding:5px 14px;border-radius:20px;border:1px solid #fff;background:#fff;color:var(--japan-blue);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🇬🇧 English</button>
+      </div>
+
+      <div class="title-hero-banner">
+        <img class="title-hero-img" src="img/title-hero.jpg?v=20260617t" alt="Football Sim" width="1500" height="500">
+        <div class="title-hero-scrim"></div>
+        <div class="title-sub">Football Sim</div>
+      </div>
+
+      <!-- デバッグパネル（?debug=1 時のみ表示） -->
+      <div id="debug-panel" style="display:none;width:100%;max-width:380px;margin:12px auto 0;background:rgba(0,0,0,0.06);border:1px dashed #bbb;border-radius:8px;padding:10px 12px;box-sizing:border-box">
+        <div style="font-size:10px;color:#888;letter-spacing:1px;margin-bottom:6px;font-weight:700">🔧 DEBUG MODE</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button onclick="showWCR32(1)" style="padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid #bbb;background:#f0f0f0;color:#444;cursor:pointer;font-family:inherit;font-weight:700;text-align:left">🔧 R32: 日本vsモロッコ（1位通過）</button>
+          <button onclick="showWCR32(2)" style="padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid #bbb;background:#f0f0f0;color:#444;cursor:pointer;font-family:inherit;font-weight:700;text-align:left">🔧 R32: 日本vsブラジル（2位通過）</button>
+          <button onclick="debugShowR16(TEAM_DATA.mexico2026)" style="padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid #bbb;background:#f0f0f0;color:#444;cursor:pointer;font-family:inherit;font-weight:700;text-align:left">🔧 R16: 日本vsメキシコ</button>
+          <button onclick="debugShowR16(TEAM_DATA.norway2026)" style="padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid #bbb;background:#f0f0f0;color:#444;cursor:pointer;font-family:inherit;font-weight:700;text-align:left">🔧 R16: 日本vsノルウェー</button>
+          <button onclick="debugShowQF(TEAM_DATA.france2026)" style="padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid #bbb;background:#f0f0f0;color:#444;cursor:pointer;font-family:inherit;font-weight:700;text-align:left">🔧 QF: 日本vsフランス（1位ルート）</button>
+          <button onclick="debugShowQF(TEAM_DATA.england2026)" style="padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid #bbb;background:#f0f0f0;color:#444;cursor:pointer;font-family:inherit;font-weight:700;text-align:left">🔧 QF: 日本vsイングランド（2位ルート）</button>
+          <button onclick="debugShowSF(TEAM_DATA.spain2026)" style="padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid #bbb;background:#f0f0f0;color:#444;cursor:pointer;font-family:inherit;font-weight:700;text-align:left">🔧 SF: 日本vsスペイン（1位ルート）</button>
+          <button onclick="debugShowSF(TEAM_DATA.argentina2026)" style="padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid #bbb;background:#f0f0f0;color:#444;cursor:pointer;font-family:inherit;font-weight:700;text-align:left">🔧 SF: 日本vsアルゼンチン（2位ルート）</button>
+          <button onclick="debugShowF(TEAM_DATA.argentina2026)" style="padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid #bbb;background:#f0f0f0;color:#444;cursor:pointer;font-family:inherit;font-weight:700;text-align:left">🔧 F: 日本vsアルゼンチン（1位ルート）</button>
+          <button onclick="debugShowF(TEAM_DATA.france2026)" style="padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid #bbb;background:#f0f0f0;color:#444;cursor:pointer;font-family:inherit;font-weight:700;text-align:left">🔧 F: 日本vsフランス（2位ルート）</button>
+          <button onclick="debugForceDrawPK()" id="debug-forcedraw-btn" style="padding:6px 12px;font-size:12px;border-radius:6px;border:1px solid #bbb;background:#f0f0f0;color:#444;cursor:pointer;font-family:inherit;font-weight:700;text-align:left">🔧 延長PK強制（次のR32試合のみ）</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- トップメニュー -->
+    <div class="top-menu">
+      <div class="top-menu-card top-menu-wc" onclick="resetWCMode()">
+        <div class="top-menu-icon">🏆</div>
+        <div>
+          <div class="top-menu-label" id="top-lbl-wc">2026W杯モード<br>（日本代表）</div>
+          <div class="top-menu-desc" id="top-desc-wc">グループステージから頂点を目指す</div>
+        </div>
+      </div>
+      <div class="top-menu-card top-menu-wcsim" onclick="showWCSim()">
+        <div class="top-menu-icon">🌍</div>
+        <div>
+          <div class="top-menu-label" id="top-lbl-wcsim">W杯まるごとシミュレート</div>
+          <div class="top-menu-desc" id="top-desc-wcsim">実際の組み合わせで全104試合を一括演算</div>
+        </div>
+      </div>
+      <div class="top-menu-card top-menu-jwc" onclick="showJWC()">
+        <div class="top-menu-icon">🔮</div>
+        <div>
+          <div class="top-menu-label" id="top-lbl-jwc">日本代表・運命の分岐</div>
+          <div class="top-menu-desc" id="top-desc-jwc">予選1位・2位・3位、それぞれの未来を一括占う</div>
+        </div>
+      </div>
+      <div class="top-menu-card top-menu-single" onclick="showScreen('single')">
+        <div class="top-menu-icon">⚽</div>
+        <div>
+          <div class="top-menu-label" id="top-lbl-single">シングルマッチ</div>
+          <div class="top-menu-desc" id="top-desc-single">好きな対戦カードをシミュレート</div>
+        </div>
+      </div>
+      <div class="top-menu-card top-menu-players" onclick="showScreen('players')">
+        <div class="top-menu-icon">📋</div>
+        <div>
+          <div class="top-menu-label" id="top-lbl-players">選手データ</div>
+          <div class="top-menu-desc" id="top-desc-players">全選手のパラメータを確認</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="title-patreon-banner"></div>
+    <div class="disclaimer-box" id="disclaimer-text">
+      ⚠️ このシミュレーターは個人制作のファン向けコンテンツです。FIFA・JFA・各国サッカー協会・クラブチーム・選手本人とは一切関係ありません。選手名は識別目的のみで使用しており、実在の選手を代表・推薦・関連付けるものではありません。選手パラメータはすべて独自の創作設定であり、実際の能力・評価とは無関係です。本コンテンツは非商業的ファン活動として制作されています。
+    </div>
+    <div style="text-align:center;margin-top:14px;margin-bottom:4px">
+      <a href="https://x.com/footballsim_ai" target="_blank" rel="noopener noreferrer"
+        style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:#000;color:#fff;border-radius:24px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.3px;font-family:inherit">
+        <svg width="15" height="15" viewBox="0 0 1200 1227" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"/></svg>
+        <span id="x-follow-label">@footballsim_ai をフォロー</span>
+      </a>
+    </div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v2.7.1</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;letter-spacing:0.5px">© 2026 footballsim · All rights reserved</div>
+  </div>
+</div>
+
+<!-- WC FULL SIM SCREEN: W杯まるごとシミュレート -->
+<div id="screen-wcsim" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div class="screen-header" style="background:rgba(0,0,0,0.3);width:100%">
+    <button class="back-btn" style="color:#fff" onclick="showScreen('title')">← 戻る</button>
+    <div class="screen-title-text" style="color:#ffffff" id="wcsim-title">🌍 W杯まるごとシミュレート</div>
+  </div>
+  <div style="width:100%;max-width:880px;padding:14px 14px 48px;box-sizing:border-box">
+    <div id="wcsim-intro" style="text-align:center;color:rgba(255,255,255,0.78);font-size:12.5px;line-height:1.8;margin:4px auto 14px;max-width:560px"></div>
+    <div style="max-width:360px;margin:0 auto 20px">
+      <button id="wcsim-run-btn" class="start-btn" onclick="runWCSim()">🎲 大会まるごとシミュレート</button>
+    </div>
+    <div id="wcsim-content"></div>
+  </div>
+</div>
+
+<!-- WC FULL SIM STATS SCREEN: 大会スタッツ詳細 -->
+<div id="screen-wcsim-stats" class="screen" style="background:linear-gradient(160deg,#0d1117 0%,#0f1923 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div class="screen-header" style="background:rgba(0,0,0,0.4);width:100%">
+    <button class="back-btn" style="color:#fff" onclick="wcsimStatsBack()">← 戻る</button>
+    <div class="screen-title-text" style="color:#ffffff" id="wcsim-stats-title">📊 大会スタッツ詳細</div>
+  </div>
+  <div id="wcsim-stats-content" style="width:100%;max-width:880px;padding:14px 14px 48px;box-sizing:border-box"></div>
+</div>
+
+<!-- JWC SCREEN: 日本代表・運命の分岐（予選順位別シミュレート） -->
+<div id="screen-jwc" class="screen" style="background:linear-gradient(160deg,#06183f 0%,#0a275f 55%,#0d1b3e 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div class="screen-header" style="background:rgba(0,0,0,0.32);width:100%">
+    <button class="back-btn" style="color:#fff" onclick="showScreen('title')">← 戻る</button>
+    <div class="screen-title-text" style="color:#ffffff" id="jwc-title">🔮 運命の分岐</div>
+  </div>
+  <div style="width:100%;max-width:880px;padding:14px 14px 48px;box-sizing:border-box">
+    <div id="jwc-intro" style="text-align:center;color:rgba(255,255,255,0.8);font-size:12.5px;line-height:1.85;margin:4px auto 14px;max-width:600px"></div>
+    <div style="max-width:380px;margin:0 auto 18px">
+      <button id="jwc-run-btn" class="start-btn" onclick="runJWC()">🎲 3つの運命を一括シミュレート</button>
+    </div>
+    <div id="jwc-content"></div>
+  </div>
+</div>
+
+<!-- SINGLE MATCH SCREEN: チーム1選択 -->
+<div id="screen-single" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('title')">← 戻る</button>
+    <div class="screen-title-text" id="single-title1">⚽ チーム選択（1/2）</div>
+  </div>
+  <div class="title-content" style="padding-top:12px">
+    <div id="single-desc1" style="text-align:center;color:rgba(255,255,255,0.7);font-size:13px;margin-bottom:12px">操作するチームを選んでください</div>
+    <div class="team-select-grid" id="team1-select-list"></div>
+  </div>
+</div>
+
+<!-- SINGLE MATCH SCREEN: チーム2選択 -->
+<div id="screen-single2" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('single')">← 戻る</button>
+    <div class="screen-title-text" id="single-title2">⚽ チーム選択（2/2）</div>
+  </div>
+  <div class="title-content" style="padding-top:12px">
+    <div id="single-desc2" style="text-align:center;color:rgba(255,255,255,0.7);font-size:13px;margin-bottom:4px">対戦相手を選んでください</div>
+    <div style="text-align:center;font-size:20px;margin-bottom:12px" id="single2-team1-display"></div>
+    <div class="team-select-grid" id="team2-select-list"></div>
+  </div>
+</div>
+
+<!-- WORLDCUP SCREEN -->
+<div id="screen-worldcup" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('title')">← 戻る</button>
+    <div class="screen-title-text" id="wc-screen-title">🏆 W杯グループステージ</div>
+  </div>
+  <div class="title-content" style="padding-top:16px">
+    <div id="wc-group-label" style="text-align:center;font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:12px;letter-spacing:2px">GROUP C</div>
+    <div style="width:100%;max-width:400px;margin:0 auto 24px;background:rgba(0,0,0,0.55);border-radius:12px;padding:8px 4px;backdrop-filter:blur(4px)">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;color:#fff">
+      <thead>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.55)">
+          <th id="wc-th-team" style="text-align:left;padding:6px 4px">チーム</th>
+          <th id="wc-th-mp" style="padding:6px 8px">試</th>
+          <th id="wc-th-w" style="padding:6px 8px">勝</th>
+          <th id="wc-th-d" style="padding:6px 8px">分</th>
+          <th id="wc-th-l" style="padding:6px 8px">敗</th>
+          <th id="wc-th-gf" style="padding:6px 8px">得点</th>
+          <th id="wc-th-ga" style="padding:6px 8px">失点</th>
+          <th id="wc-th-gd" style="padding:6px 8px">得失</th>
+          <th id="wc-th-pts" style="padding:6px 8px;color:#ffd700">勝点</th>
+        </tr>
+      </thead>
+      <tbody id="wc-group-table">
+        <tr><td style="padding:7px 4px">🇯🇵 日本</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px;color:#ffd700;font-weight:700">0</td></tr>
+        <tr><td style="padding:7px 4px">🇳🇱 オランダ</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px;color:#ffd700;font-weight:700">0</td></tr>
+        <tr><td style="padding:7px 4px">🇹🇳 チュニジア</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px;color:#ffd700;font-weight:700">0</td></tr>
+        <tr><td style="padding:7px 4px">🇸🇪 スウェーデン</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px">0</td><td style="text-align:center;padding:7px 8px;color:#ffd700;font-weight:700">0</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div id="wc-done-matches" style="max-width:400px;margin:0 auto 8px;display:none;border-radius:10px;overflow:hidden"></div>
+    <div id="wc-auto-results" style="max-width:400px;margin:0 auto 12px;display:none;padding:6px 12px;background:rgba(0,0,0,0.35);border-radius:8px;font-size:11px;color:rgba(255,255,255,0.7);text-align:center;line-height:1.8"></div>
+    <div style="max-width:360px;margin:0 auto">
+      <button id="wc-btn-next" class="start-btn" onclick="onWCNextBtn()" style="color:#ffffff">⚽ 次へ：日本 vs オランダ</button>
+    </div>
+    <div style="max-width:360px;margin:8px auto 0">
+      <button id="btn-wc-stats" onclick="showWCStats()" style="width:100%;padding:10px;font-size:13px;font-weight:700;border:none;border-radius:10px;background:rgba(0,30,80,0.12);color:#1a3a6b;cursor:pointer;font-family:inherit;letter-spacing:0.5px;border:1px solid rgba(0,30,80,0.18)">📊 W杯シミュレーション統計</button>
+    </div>
+  </div>
+</div>
+
+<!-- WORLDCUP RESULT SCREEN -->
+<div id="screen-worldcup-result" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div class="screen-header" style="background:rgba(0,0,0,0.3);width:100%">
+    <div class="screen-title-text" id="wc-result-title" style="color:#ffffff">🏆 グループC 最終結果</div>
+  </div>
+  <div id="wc-result-content" style="width:100%;max-width:500px;padding:0 16px 8px;box-sizing:border-box"></div>
+  <div style="width:100%;max-width:360px;padding:0 16px 32px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px">
+    <button class="start-btn" id="wc-btn-tournament" style="display:none;background:linear-gradient(135deg,#b8860b,#ffd700);color:#1a1a1a">🏆 トーナメントへ</button>
+    <button class="start-btn" id="wc-btn-replay" onclick="resetWCMode()" style="color:#ffffff">🔄 もう一度グループステージ</button>
+    <button class="start-btn" id="wc-btn-home-title" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff">🏠 タイトルへ</button>
+  </div>
+</div>
+
+<!-- WC R32 SCREEN -->
+<div id="screen-worldcup-r32" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div class="screen-header" style="background:rgba(0,0,0,0.3);width:100%">
+    <button class="back-btn" style="color:#fff" onclick="showScreen('worldcup-result')" id="wc-r32-back-btn">← 戻る</button>
+    <div class="screen-title-text" style="color:#ffffff" id="wc-r32-title">🏆 ラウンド32</div>
+  </div>
+  <div id="wc-r32-content" style="width:100%;max-width:500px;padding:16px;box-sizing:border-box"></div>
+  <div style="width:100%;max-width:360px;padding:0 16px 32px;box-sizing:border-box">
+    <button class="start-btn" onclick="startWCR32Match()" style="color:#ffffff" id="wc-r32-start-btn">⚽ 試合を始める</button>
+  </div>
+</div>
+
+<div id="screen-worldcup-r16" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:center">
+  <div style="max-width:360px;width:100%;padding:0 16px">
+    <div id="wc-r16-content"></div>
+    <button class="start-btn" onclick="startWCR16Match()" style="color:#ffffff;margin-bottom:12px" id="wc-r16-start-btn">⚽ 試合開始</button>
+    <button class="start-btn" onclick="resetWCMode()" style="background:rgba(255,255,255,0.15);color:#ffffff;margin-bottom:12px" id="wc-r16-again-btn">🔄 もう一度</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-r16-title-btn">🏠 タイトルへ</button>
+  </div>
+</div>
+<!-- WC R16 WIN PLACEHOLDER -->
+<div id="screen-worldcup-r16-win" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:center">
+  <div style="text-align:center;padding:32px 24px;max-width:360px">
+    <div style="font-size:56px;margin-bottom:16px">🏆</div>
+    <div style="font-size:26px;font-weight:700;color:#ffd700;margin-bottom:8px" id="wc-r16-win-title">準々決勝進出！</div>
+    <div style="font-size:15px;color:rgba(255,255,255,0.8);margin-bottom:8px" id="wc-r16-win-congrats">おめでとうございます！</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:32px">続きは今後実装予定</div>
+    <button class="start-btn" onclick="resetWCMode()" style="color:#ffffff;margin-bottom:12px" id="wc-r16-win-again-btn">🔄 もう一度</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-r16-win-title-btn">🏠 タイトルへ</button>
+  </div>
+</div>
+
+<div id="screen-worldcup-qf" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:center">
+  <div style="max-width:360px;width:100%;padding:0 16px">
+    <div id="wc-qf-content"></div>
+    <button class="start-btn" onclick="startWCQFMatch()" style="color:#ffffff;margin-bottom:12px" id="wc-qf-start-btn">⚽ 試合開始</button>
+    <button class="start-btn" onclick="resetWCMode()" style="background:rgba(255,255,255,0.15);color:#ffffff;margin-bottom:12px" id="wc-qf-again-btn">🔄 もう一度</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-qf-title-btn">🏠 タイトルへ</button>
+  </div>
+</div>
+<div id="screen-worldcup-qf-win" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:center">
+  <div style="text-align:center;padding:32px 24px;max-width:360px">
+    <div style="font-size:56px;margin-bottom:16px">🏆</div>
+    <div style="font-size:26px;font-weight:700;color:#ffd700;margin-bottom:8px" id="wc-qf-win-title">準決勝進出！</div>
+    <div style="font-size:15px;color:rgba(255,255,255,0.8);margin-bottom:8px" id="wc-qf-win-congrats">おめでとうございます！</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:32px">続きは今後実装予定</div>
+    <button class="start-btn" onclick="resetWCMode()" style="color:#ffffff;margin-bottom:12px" id="wc-qf-win-again-btn">🔄 もう一度</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-qf-win-title-btn">🏠 タイトルへ</button>
+  </div>
+</div>
+<div id="screen-worldcup-sf" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:center">
+  <div style="max-width:360px;width:100%;padding:0 16px">
+    <div id="wc-sf-content"></div>
+    <button class="start-btn" onclick="startWCSFMatch()" style="color:#ffffff;margin-bottom:12px" id="wc-sf-start-btn">⚽ 試合開始</button>
+    <button class="start-btn" onclick="resetWCMode()" style="background:rgba(255,255,255,0.15);color:#ffffff;margin-bottom:12px" id="wc-sf-again-btn">🔄 もう一度</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-sf-title-btn">🏠 タイトルへ</button>
+  </div>
+</div>
+<div id="screen-worldcup-sf-win" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:center">
+  <div style="text-align:center;padding:32px 24px;max-width:360px">
+    <div style="font-size:56px;margin-bottom:16px">🏆</div>
+    <div style="font-size:26px;font-weight:700;color:#ffd700;margin-bottom:8px" id="wc-sf-win-title">決勝進出！</div>
+    <div style="font-size:15px;color:rgba(255,255,255,0.8);margin-bottom:8px" id="wc-sf-win-congrats">おめでとうございます！</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:32px">続きは今後実装予定</div>
+    <button class="start-btn" onclick="resetWCMode()" style="color:#ffffff;margin-bottom:12px" id="wc-sf-win-again-btn">🔄 もう一度</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-sf-win-title-btn">🏠 タイトルへ</button>
+  </div>
+</div>
+<div id="screen-worldcup-f" class="screen" style="background:linear-gradient(160deg,#003087 0%,#0050cc 50%,#1a7a3a 100%);align-items:center;justify-content:center">
+  <div style="max-width:360px;width:100%;padding:0 16px">
+    <div id="wc-f-content"></div>
+    <button class="start-btn" onclick="startWCFMatch()" style="color:#ffffff;margin-bottom:12px" id="wc-f-start-btn">⚽ 試合開始</button>
+    <button class="start-btn" onclick="resetWCMode()" style="background:rgba(255,255,255,0.15);color:#ffffff;margin-bottom:12px" id="wc-f-again-btn">🔄 もう一度</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-f-title-btn">🏠 タイトルへ</button>
+  </div>
+</div>
+<div id="screen-worldcup-champion" class="screen" style="background:linear-gradient(160deg,#7b5c00 0%,#c9960c 50%,#ffd700 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div style="text-align:center;padding:32px 20px 16px;max-width:420px;width:100%">
+    <div style="font-size:72px;margin-bottom:8px">🏆</div>
+    <div style="font-size:28px;font-weight:900;color:#fff;margin-bottom:4px;text-shadow:0 2px 8px rgba(0,0,0,0.3)" id="wc-champion-title">日本代表、世界一！</div>
+    <img id="champion-img" style="width:100%;max-width:380px;border-radius:12px;margin:12px 0 16px;display:block">
+  </div>
+  <div id="wc-champion-content" style="width:100%;max-width:420px;padding:0 16px 16px"></div>
+  <div style="width:100%;max-width:420px;padding:0 16px 32px">
+    <button class="start-btn" onclick="resetWCMode()" style="background:rgba(255,255,255,0.25);color:#fff;margin-bottom:12px" id="wc-champion-again-btn">🔄 もう一度</button>
+    <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#fff" id="wc-champion-title-btn">🏠 タイトルへ</button>
+  </div>
+</div>
+
+<!-- WC ELIMINATED SCREEN -->
+<div id="screen-worldcup-eliminated" class="screen" style="background:linear-gradient(160deg,#1a1a2e 0%,#16213e 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div style="width:100%;max-width:480px;padding:20px 16px 40px;box-sizing:border-box">
+    <div style="text-align:center;padding:20px 0 4px">
+      <div style="font-size:48px;margin-bottom:10px">😢</div>
+      <div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:4px" id="wc-eliminated-title">トーナメント敗退</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.5)" id="wc-eliminated-msg">W杯ラウンド32で敗退しました</div>
+    </div>
+    <div id="wc-eliminated-content" style="margin-top:16px"></div>
+    <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
+      <button class="start-btn" onclick="resetWCMode()" style="color:#ffffff" id="wc-eliminated-again-btn">🔄 もう一度</button>
+      <button class="start-btn" onclick="wcGoToTitle()" style="background:rgba(255,255,255,0.15);color:#ffffff" id="wc-eliminated-title-btn">🏠 タイトルへ</button>
+    </div>
+  </div>
+</div>
+
+<!-- WC PK SCREEN -->
+<div id="screen-worldcup-pk" class="screen" style="background:linear-gradient(160deg,#0a0a2e 0%,#1a0a3e 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div style="width:100%;max-width:480px;padding:24px 16px;box-sizing:border-box">
+    <div style="text-align:center;margin-bottom:16px">
+      <div id="pk-title-label" style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.6);margin-bottom:4px">🥅 PK戦</div>
+      <div id="pk-round-label" style="font-size:12px;color:rgba(255,255,255,0.45)"></div>
+    </div>
+    <div style="display:flex;justify-content:center;align-items:flex-start;gap:16px;margin-bottom:20px;background:rgba(0,0,0,0.45);border-radius:14px;padding:16px">
+      <div style="text-align:center;flex:1">
+        <div id="pk-name1" style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);margin-bottom:4px">JAPAN</div>
+        <div id="pk-score1" style="font-size:44px;font-weight:900;color:#fff;line-height:1">0</div>
+        <div id="pk-kicks1" style="font-size:13px;letter-spacing:1px;min-height:18px;color:#fff;margin-top:6px;word-break:break-all"></div>
+      </div>
+      <div style="font-size:24px;color:rgba(255,255,255,0.35);font-weight:900;padding-top:14px">-</div>
+      <div style="text-align:center;flex:1">
+        <div id="pk-name2" style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);margin-bottom:4px">相手</div>
+        <div id="pk-score2" style="font-size:44px;font-weight:900;color:#fff;line-height:1">0</div>
+        <div id="pk-kicks2" style="font-size:13px;letter-spacing:1px;min-height:18px;color:#fff;margin-top:6px;word-break:break-all"></div>
+      </div>
+    </div>
+    <div style="position:relative;min-height:168px;margin-bottom:16px">
+    <div id="pk-kicker-box" style="text-align:center;background:rgba(255,255,255,0.06);border-radius:16px;padding:24px 16px;position:absolute;top:0;left:0;right:0">
+      <div id="pk-team-label" style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:8px">のキック</div>
+      <div id="pk-player-flag" style="font-size:40px;margin-bottom:6px">🇯🇵</div>
+      <div id="pk-player-name" style="font-size:22px;font-weight:700;color:#fff;margin-bottom:4px">選手名</div>
+      <div id="pk-player-pos" style="font-size:12px;color:rgba(255,255,255,0.4)">FW</div>
+    </div>
+    <div id="pk-result-display" style="display:none;text-align:center;padding:16px 0;position:absolute;top:0;left:0;right:0">
+      <div id="pk-result-emoji" style="font-size:60px;margin-bottom:8px">⚽</div>
+      <div id="pk-result-text" style="font-size:22px;font-weight:700;color:#fff">ゴール！</div>
+    </div>
+    </div>
+    <div id="pk-result-img-wrap" style="display:none;width:100%;max-width:360px;margin:0 auto 16px;border-radius:12px;overflow:hidden">
+      <img id="pk-result-img" src="" alt="" style="width:100%;display:block">
+    </div>
+    <button id="pk-kick-btn" onclick="stepWCPK_kick()" style="width:100%;padding:18px;font-size:18px;font-weight:700;border:none;border-radius:14px;background:linear-gradient(135deg,#c8102e,#e63950);color:#fff;cursor:pointer;font-family:inherit;margin-bottom:10px;box-sizing:border-box"></button>
+    <button id="pk-next-btn" onclick="stepWCPK_next()" style="display:none;width:100%;padding:16px;font-size:16px;font-weight:700;border:none;border-radius:14px;background:linear-gradient(135deg,#1a7a3a,#27ae60);color:#fff;cursor:pointer;font-family:inherit;box-sizing:border-box"></button>
+  </div>
+</div>
+
+<!-- WC STATS SCREEN -->
+<div id="screen-worldcup-stats" class="screen" style="background:linear-gradient(160deg,#0d1117 0%,#0f1923 100%);align-items:center;justify-content:flex-start;overflow-y:auto">
+  <div class="screen-header" style="background:rgba(0,0,0,0.4);width:100%">
+    <button class="back-btn" style="color:#fff" onclick="showScreen('worldcup')">← 戻る</button>
+    <div class="screen-title-text" id="screen-worldcup-stats-title" style="color:#fff">📊 W杯シミュレーション統計</div>
+  </div>
+  <div style="width:100%;max-width:500px;padding:16px;box-sizing:border-box">
+    <div style="display:flex;background:rgba(255,255,255,0.07);border-radius:10px;padding:3px;margin-bottom:20px;gap:3px">
+      <button id="stats-tab-mc" onclick="switchStatsTab('mc')" style="flex:1;padding:9px 4px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#1a6bb5,#0d4a8a);color:#fff">🎲 シミュレーション確率</button>
+      <button id="stats-tab-real" onclick="switchStatsTab('real')" style="flex:1;padding:9px 4px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:transparent;color:rgba(255,255,255,0.45)">👥 みんなの戦績</button>
+    </div>
+    <div id="stats-content-mc">
+      <div id="stats-mc-status" style="text-align:center;color:rgba(255,255,255,0.45);font-size:13px;margin:24px 0">シミュレーション実行中...</div>
+      <div id="stats-mc-result" style="display:none"></div>
+      <button id="stats-mc-refresh-btn" onclick="refreshMCStats()" style="width:100%;margin-top:16px;padding:12px;font-size:13px;font-weight:700;border:none;border-radius:10px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);cursor:pointer;font-family:inherit">🔄 再シミュレーション（10000回）</button>
+    </div>
+    <div id="stats-content-real" style="display:none">
+      <div id="stats-real-status" style="text-align:center;color:rgba(255,255,255,0.45);font-size:13px;margin:24px 0">データ読み込み中...</div>
+      <div id="stats-real-result"></div>
+      <button id="stats-real-refresh-btn" onclick="loadRealStats()" style="width:100%;margin-top:16px;padding:12px;font-size:13px;font-weight:700;border:none;border-radius:10px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);cursor:pointer;font-family:inherit">🔄 データを更新</button>
+    </div>
+  </div>
+</div>
+
+<!-- FORMATION SELECT SCREEN（①区分＝4-4-2 / 4-2-3-1 …を選ぶ。型は次の画面） -->
+<div id="screen-formation" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="closeFormationSelect()">← 戻る</button>
+    <div class="screen-title-text" id="screen-formation-title">システム選択</div>
+  </div>
+  <div class="formation-select-content">
+    <div class="select-hint" id="formation-group-hint">⚽ まず布陣の並びを選びます</div>
+    <div class="formation-grid" id="formation-grid"></div>
+  </div>
+</div>
+
+<!-- FORMATION VARIANT SCREEN（②区分の中の型＝4-4-2A / 4-4-2B …を選ぶ） -->
+<div id="screen-formation-variant" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="closeFormationVariant()">← 戻る</button>
+    <div class="screen-title-text" id="screen-formation-variant-title">システムの型</div>
+  </div>
+  <div class="formation-select-content">
+    <div class="select-hint" id="formation-variant-hint">⚽ 同じ並びの中から型を選びます</div>
+    <div class="formation-grid" id="formation-variant-grid"></div>
+  </div>
+</div>
+
+<!-- SETTING SCREEN -->
+<div id="screen-setting" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="settingBack()">← 戻る</button>
+    <div class="screen-title-text" id="setting-title-text">試合設定</div>
+  </div>
+  <div class="setting-content">
+
+    <button class="start-btn" id="btn-kickoff-top" style="margin-bottom:16px" onclick="startGame()">⚽ キックオフ！</button>
+
+    <!-- スターティングメンバー -->
+    <div class="section-label" id="label-starting" style="text-align:center;font-size:16px;margin-bottom:12px">スターティングメンバー</div>
+    <div id="formation-view">
+      <div class="formation-layout">
+        <div class="field-panel">
+          <div class="field-container">
+            <svg class="field-lines field-svg" viewBox="0 0 100 145" preserveAspectRatio="none">
+              <rect x="0" y="0" width="100" height="145" fill="none"/>
+              <rect x="5" y="5" width="90" height="135" fill="none" stroke="white" stroke-width="0.8"/>
+              <line x1="5" y1="72.5" x2="95" y2="72.5" stroke="white" stroke-width="0.6"/>
+              <circle cx="50" cy="72.5" r="12" fill="none" stroke="white" stroke-width="0.6"/>
+              <circle cx="50" cy="72.5" r="0.8" fill="white"/>
+              <rect x="25" y="5" width="50" height="18" fill="none" stroke="white" stroke-width="0.6"/>
+              <rect x="35" y="5" width="30" height="9" fill="none" stroke="white" stroke-width="0.6"/>
+              <rect x="25" y="122" width="50" height="18" fill="none" stroke="white" stroke-width="0.6"/>
+              <rect x="35" y="127" width="30" height="13" fill="none" stroke="white" stroke-width="0.6"/>
+            </svg>
+            <div class="formation-display" id="formation-display"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+            <div class="oop-legend">
+              <span class="oop-legend-badge">!</span>
+              <span id="label-oop-legend">非得意ポジション（全能力5%ダウン）</span>
+            </div>
+            <div class="hint" id="label-drag">ドラッグで選手入れ替え</div>
+          </div>
+        </div>
+        <div class="bench-panel">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span class="bench-panel-label" style="flex:1">控え</span>
+            <button id="bench-prev" onclick="scrollBench(-1)" style="width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,0.15);background:var(--surface);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">‹</button>
+            <button id="bench-next" onclick="scrollBench(1)" style="width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,0.15);background:var(--surface);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">›</button>
+          </div>
+          <div class="bench-list" id="bench-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 設定ボタングリッド -->
+    <div class="setting-btn-grid">
+      <button class="setting-nav-btn" onclick="openFormationSelect()">
+        <div class="setting-nav-btn-label" id="setting-system-label">システム</div>
+        <div class="setting-nav-btn-value" id="setting-system-value">-</div>
+      </button>
+      <button class="setting-nav-btn" onclick="openTacticsSelect()">
+        <div class="setting-nav-btn-label" id="setting-tactics-label">戦術</div>
+        <div class="setting-nav-btn-value" id="setting-tactics-value">-</div>
+      </button>
+      <button class="setting-nav-btn" onclick="openKeyPlayerSelect()">
+        <div class="setting-nav-btn-label" id="setting-keyplayer-label">キープレイヤー</div>
+        <div class="setting-nav-btn-value" id="setting-keyplayer-value">-</div>
+      </button>
+      <button class="setting-nav-btn" onclick="openMarkedPlayerSelect()">
+        <div class="setting-nav-btn-label" id="setting-marked-label">要注意プレイヤー</div>
+        <div class="setting-nav-btn-value" id="setting-marked-value">-</div>
+      </button>
+      <button class="setting-nav-btn setting-nav-btn-wide" onclick="openCaptainSelect()">
+        <div class="setting-nav-btn-label" id="setting-captain-label">キャプテン</div>
+        <div class="setting-nav-btn-value" id="setting-captain-value">-</div>
+      </button>
+    </div>
+
+    <button class="start-btn" id="btn-manager" style="width:100%;margin-bottom:10px;background:linear-gradient(135deg,#03245e,#1a7a3a)" onclick="startManagerMatch()">👔 監督モードで観戦</button>
+    <div style="display:flex;gap:10px;margin-top:0">
+      <button class="start-btn" style="flex:2" id="btn-kickoff-bottom" onclick="startGame()">⚽ キックオフ！</button>
+      <button class="start-btn" style="flex:1;background:linear-gradient(135deg,#8B0000,#c0392b);font-size:13px" id="btn-multi" onclick="runMultiGame(10)">📊 10</button>
+      <button class="start-btn" style="flex:1;background:linear-gradient(135deg,#4a0080,#7b2cbf);font-size:13px" id="btn-multi100" onclick="runMultiGame(100)">📊 100</button>
+    </div>
+  </div>
+</div>
+
+<!-- TACTICS SELECT SCREEN -->
+<div id="screen-tactics" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="closeSubSelect('tactics')">← 戻る</button>
+    <div class="screen-title-text" id="screen-tactics-title">戦術選択</div>
+    <button class="formation-decide-btn" onclick="closeSubSelect('tactics')">決定</button>
+  </div>
+  <div class="setting-content" id="tactics-select-content"></div>
+</div>
+
+<!-- KEYPLAYER SELECT SCREEN -->
+<div id="screen-keyplayer" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="closeSubSelect('keyplayer')">← 戻る</button>
+    <div class="screen-title-text" id="screen-keyplayer-title">キープレイヤー選択</div>
+    <button class="formation-decide-btn" onclick="closeSubSelect('keyplayer')">決定</button>
+  </div>
+  <div class="setting-content" id="keyplayer-select-content"></div>
+</div>
+
+<!-- CAPTAIN SELECT SCREEN -->
+<div id="screen-captain" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="closeSubSelect('captain')">← 戻る</button>
+    <div class="screen-title-text" id="screen-captain-title">キャプテン選出</div>
+    <button class="formation-decide-btn" onclick="closeSubSelect('captain')">決定</button>
+  </div>
+  <div class="setting-content" id="captain-select-content"></div>
+</div>
+
+<!-- MARKED PLAYER SELECT SCREEN -->
+<div id="screen-marked" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="closeSubSelect('marked')">← 戻る</button>
+    <div class="screen-title-text" id="screen-marked-title">要注意プレイヤー選択</div>
+    <button class="formation-decide-btn" onclick="closeSubSelect('marked')">決定</button>
+  </div>
+  <div class="setting-content" id="marked-select-content"></div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="screen-game" class="screen">
+  <!-- ===== 没入レイアウト（Variant B）：カットインを全画面の背景に、HUD/実況/操作を半透明スクリムで重ねる =====
+       DOM論理構造は HUD / カットイン / 実況 / 操作 を分離（将来の横reflowの土台）。
+       既存 element ID・onclick は全保持（simulate.js が書き込む先）。 -->
+  <div class="match match--immersive">
+
+    <!-- === カットイン演出＝フルブリード背景（Canvasの中＝renderer-dev / 外側の額装のみ担当）=== -->
+    <div class="zone-center stage-bg">
+      <!-- LIVE FIELD: カットイン本体 -->
+      <div id="live-field-wrap" style="display:none"></div>
+    </div>
+
+    <!-- 上端スクリム（HUDの可読性を担保） -->
+    <div class="scrim scrim-top" aria-hidden="true"></div>
+    <!-- 下端スクリム（実況＋操作の可読性を担保） -->
+    <div class="scrim scrim-bottom" aria-hidden="true"></div>
+
+    <!-- ===== ZONE TOP: TV中継スコアバグ ＋ 試合時計 ＋ ポゼッション（重ね）===== -->
+    <div class="zone-top">
+      <div class="hud">
+        <div class="scoreboard">
+          <div class="team-score side-l">
+            <span class="team-chip" id="score-chip1"></span>
+            <div class="team-flag-name">
+              <span id="score-flag1">🇯🇵</span>
+              <span id="score-name1">日本</span>
+            </div>
+          </div>
+          <div class="score-divider">
+            <span class="score-num" id="score1">0</span>
+            <span class="score-colon">:</span>
+            <span class="score-num" id="score2">0</span>
+          </div>
+          <div class="team-score side-r">
+            <div class="team-flag-name">
+              <span id="score-name2">相手</span>
+              <span id="score-flag2">🇳🇱</span>
+            </div>
+            <span class="team-chip" id="score-chip2"></span>
+          </div>
+          <!-- 早送り（旧 一気に試合終了 = allChances）を退避: HUD隅の小アイコン -->
+          <button id="all-btn" class="skip-btn" onclick="allChances()" aria-label="一気に試合終了" title="一気に試合終了"></button>
+        </div>
+        <div class="hud-meta">
+          <span class="game-time" id="game-time-display">-</span>
+          <span class="poss-bar" aria-hidden="true"><i class="poss-h" id="poss-h"></i><i class="poss-a" id="poss-a"></i></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ZONE BOTTOM: 実況ネーム ＋ 操作（重ね）===== -->
+    <div class="zone-bottom">
+      <div class="game-content">
+        <div class="chance-counter-display">
+          <span id="chance-label-text">チャンス: </span><span id="chance-count">0</span>/<span id="chance-total">10</span></span>
+          <span id="chance-team-label">-</span>
+          <span id="game-in-progress-label">試合進行中</span>
+        </div>
+        <!-- 簡易フィールド図（カットシーン直下の独立バンド・ダーク背景の上＝はっきり見える） -->
+        <div id="mini-field-wrap" style="display:none"></div>
+        <!-- 話者ポートレート（監督モードの実況帯でのみ表示＝キャプ翼「顔窓」の近代化。
+             W杯モードでは display:none。将来 Portrait.render を ring 内へ差し込む前提の仮アイコン。 -->
+        <div id="mv-speaker" class="mv-speaker" aria-hidden="true">
+          <div class="mv-speaker-ring"><span class="mv-speaker-ph">🎙️</span></div>
+          <div class="mv-speaker-live"><i></i>LIVE</div>
+        </div>
+        <div class="log-area" id="log-area"></div>
+        <div class="game-controls">
+          <button class="sub-btn" id="sub-btn" onclick="openSecondHalfSub()" style="display:none"></button>
+          <div class="game-controls-row">
+            <button class="next-btn" id="next-btn" onclick="nextChance()">次のシーン ▶</button>
+            <button class="tactics-btn" id="tactics-btn" onclick="openSecondHalfSub()"><span class="tactics-ic">👔</span><span id="tactics-btn-label">采配</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HALFTIME MODAL -->
+<div id="halftime-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center">
+  <div style="background:white;border-radius:16px;width:92%;max-width:400px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden">
+    <!-- スクロール可能エリア -->
+    <div style="overflow-y:auto;flex:1;padding:20px 20px 12px">
+      <div id="ht-modal-title" style="font-size:18px;font-weight:800;color:#1a3a6b;text-align:center;margin-bottom:12px">⏸ ハーフタイム</div>
+      <div id="ht-score" style="text-align:center;font-size:22px;font-weight:800;color:#1a3a6b;margin-bottom:16px"></div>
+      <!-- コーチ デュエルアドバイス -->
+      <div id="ht-duel-advice"></div>
+    </div>
+    <!-- sticky フッター（常に表示） -->
+    <div style="flex-shrink:0;padding:12px 20px 16px;border-top:1px solid #eee;display:flex;flex-direction:column;gap:8px">
+      <button id="ht-btn-lineup" onclick="htOpenLineup()" style="width:100%;padding:11px;border-radius:10px;border:2px solid #1a3a6b;background:white;color:#1a3a6b;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">🔄 戦術・システム・選手交代</button>
+      <button id="ht-btn-kickoff" onclick="closeHalfTimeModal()" style="width:100%;padding:13px;background:#1a3a6b;color:white;border:none;border-radius:10px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer">▶ 後半キックオフ</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="screen-result" class="screen">
+  <div class="screen-header">
+    <div class="screen-title-text" id="screen-result-title">試合結果</div>
+  </div>
+  <div class="result-content">
+    <div class="result-headline">FINAL SCORE</div>
+    <div class="result-score-big">
+      <div class="result-team">
+        <div class="result-team-name" id="result-name1">日本</div>
+        <div class="result-team-score" id="result-score1" style="color:#003087">0</div>
+      </div>
+      <div class="result-vs">-</div>
+      <div class="result-team">
+        <div class="result-team-name" id="result-name2">相手</div>
+        <div class="result-team-score" id="result-score2" style="color:#CC6600">0</div>
+      </div>
+    </div>
+    <div class="result-winner" id="result-winner">引き分け</div>
+
+    <!-- ゴールスコアラー -->
+    <div id="result-scorers" style="margin:12px 0;font-size:13px;line-height:2"></div>
+
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <!-- 延長戦・PK戦結果（WCトーナメント用） -->
+    <div id="wc-et-pk-result" style="display:none;width:100%;max-width:480px;padding:4px 0;box-sizing:border-box"></div>
+
+    <!-- 結果画像 -->
+    <div class="result-img-wrap" id="result-img-wrap">
+      <img id="result-img" src="" alt="">
+    </div>
+
+    <div class="result-btns">
+      <button id="btn-retry" class="retry-btn" onclick="retryGame()">🔄 もう一度</button>
+      <button id="btn-home" class="home-btn" onclick="showScreen('title')">🏠 トップへ</button>
+      <button id="wc-result-back-btn" class="home-btn" style="display:none;background:linear-gradient(135deg,#003087,#0050cc);color:#ffffff" onclick="backToWCScreen()">🏆 グループへ</button>
+      <button id="wc-et-btn" class="start-btn" style="display:none;background:linear-gradient(135deg,#1a7a3a,#27ae60);color:#ffffff" onclick="onWCEtBtnClick()"></button>
+    </div>
+
+    <!-- シェアボタン群 -->
+    <div style="display:flex;gap:8px;margin-bottom:4px">
+      <button class="share-btn share-btn-x" onclick="shareToX()" style="flex:1">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <span id="share-x-label">Xでシェア</span>
+      </button>
+      <button class="share-btn" style="flex:1;background:#ff4500;color:white" onclick="shareToReddit('single')">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="white"><circle cx="10" cy="10" r="10" fill="#ff4500"/><path d="M16.67 10a1.46 1.46 0 0 0-2.47-1 7.12 7.12 0 0 0-3.85-1.23l.65-3.07 2.13.45a1 1 0 1 0 .14-.55l-2.38-.5a.26.26 0 0 0-.31.2l-.73 3.44a7.14 7.14 0 0 0-3.89 1.23 1.46 1.46 0 1 0-1.61 2.39 2.87 2.87 0 0 0 0 .44c0 2.24 2.61 4.06 5.83 4.06s5.83-1.82 5.83-4.06a2.87 2.87 0 0 0 0-.44 1.46 1.46 0 0 0 .57-1.36zM7.27 11a1 1 0 1 1 1 1 1 1 0 0 1-1-1zm5.58 2.64a3.56 3.56 0 0 1-2.85.5 3.56 3.56 0 0 1-2.85-.5.26.26 0 0 1 .37-.37 3.13 3.13 0 0 0 2.48.38 3.13 3.13 0 0 0 2.48-.38.26.26 0 0 1 .37.37zm-.17-1.64a1 1 0 1 1 1-1 1 1 0 0 1-1 1z" fill="white"/></svg>
+        <span id="share-reddit-label">Reddit (Link)</span>
+      </button>
+      <button class="share-btn" style="flex:1;background:linear-gradient(135deg,#1a3a6b,#0050cc);color:white" onclick="generateShareImage('single')">
+        <span id="share-img-label">📷 Save</span>
+      </button>
+    </div>
+
+    <!-- エリア勝率 -->
+    <div class="result-log-section">
+      <div class="result-log-header" id="header-area-win">【エリア別 日本の傾向】</div>
+      <div id="area-win-content" style="padding:8px 0"></div>
+    </div>
+
+    <!-- デュエル統計 -->
+    <div class="result-log-section">
+      <div class="result-log-header" id="header-duel">【デュエル傾向】</div>
+      <div id="duel-stats-content"></div>
+    </div>
+
+    <!-- AI総括 -->
+    <div class="result-log-section" id="summary-section">
+      <div class="result-log-header" style="display:flex;align-items:center;justify-content:space-between">
+        <span id="header-summary">【AI試合総括】</span>
+        <button id="summary-btn" onclick="generateSummary()" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:white;cursor:pointer;font-family:inherit;font-weight:700">✨ 生成</button>
+      </div>
+      <div id="summary-content" style="padding:8px 0;font-size:13px;line-height:1.8;color:var(--text)">
+        <span style="color:var(--text-dim);font-size:12px">「✨ 生成」ボタンを押すと、AIが試合を総括します</span>
+      </div>
+    </div>
+
+    <!-- ポゼッション -->
+    <div class="result-log-section">
+      <div class="result-log-header" id="header-possession">【ポゼッション】</div>
+      <div id="possession-content" style="padding:8px 0"></div>
+    </div>
+
+    <!-- 選手別出場ランキング（MVP） -->
+    <div class="result-log-section">
+      <div class="result-log-header" id="header-mvp">【選手別関与シーン数】</div>
+      <div id="mvp-content" style="padding:8px 0"></div>
+    </div>
+
+    <!-- 攻撃パターン別ゴール -->
+    <div class="result-log-section">
+      <div class="result-log-header" id="header-goal-pattern">【攻撃パターン別ゴール】</div>
+      <div id="goal-pattern-content" style="padding:8px 0"></div>
+    </div>
+
+    <!-- 試合詳細ログ -->
+    <div class="result-log-section">
+      <div class="result-log-header" id="header-detail">【試合詳細】</div>
+      <div id="result-log-content"></div>
+    </div>
+    <!-- Patreonバナー -->
+    <div id="patreon-banner-single"></div>
+  </div>
+</div>
+
+
+<!-- MULTI GAME SCREEN -->
+<div id="screen-multigame" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('title')">← 戻る</button>
+    <div class="screen-title-text" id="screen-multi-title">10試合シミュレーション</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:16px;background:#f5f7fa">
+    <div id="multigame-content"></div>
+  </div>
+</div>
+
+<!-- PLAYER DETAIL SCREEN -->
+<div id="screen-player-detail" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" id="player-detail-back-btn" onclick="showScreen(_playerDetailOrigin)">← 戻る</button>
+    <div class="screen-title-text" id="screen-player-detail-title">選手データ</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;background:#f5f7fa;padding-bottom:24px" id="player-detail-body">
+  </div>
+</div>
+
+<!-- PLAYERS 2026 SCREEN -->
+<div id="screen-players" class="screen">
+
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('title')">← 戻る</button>
+    <div class="screen-title-text" id="screen-players-title">選手データリスト</div>
+  </div>
+  <div class="players-screen" style="flex:1;overflow-y:auto;padding-bottom:20px">
+    <div class="players-screen-header">
+      <h1 id="players-h1">⚽ 選手データ一覧</h1>
+    </div>
+    <div class="players-screen-main" id="players2018-body"></div>
+  </div>
+</div>
+
+<!-- PLAYER SELECT MODAL -->
+
+<!-- DUEL DETAIL MODAL -->
+<div class="modal-overlay" id="modal-duel-detail">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modal-duel-detail')">×</button>
+    <div id="duel-detail-content"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-player">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modal-player')">×</button>
+    <div class="modal-title" id="modal-pos-name">ポジション</div>
+    <div class="modal-long-name">選手を選択してください</div>
+    <div class="player-select-list" id="player-select-list"></div>
+  </div>
+</div>
+
+<!-- PLAYER PARAMS MODAL -->
+<div class="modal-overlay" id="modal-params">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modal-params')">×</button>
+    <div class="params-header">
+      <div class="params-name" id="params-name"></div>
+      <div class="params-long-name" id="params-long-name"></div>
+      <div class="params-pos" id="params-pos"></div>
+    </div>
+    <div class="params-grid" id="params-grid"></div>
+  </div>
+</div>
+
+<!-- KEY PLAYER MODAL -->
+<div class="modal-overlay" id="modal-keyplayer">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modal-keyplayer')">×</button>
+    <div class="modal-title">キープレーヤー選択</div>
+    <div class="modal-long-name" style="margin-bottom:12px">注目選手 - 相手チームがマークを強化します</div>
+    <div class="player-select-list" id="keyplayer-select-list"></div>
+  </div>
+</div>
+
+<!-- GOAL ANIMATION -->
+<div class="goal-animation" id="goal-anim">GOAL!!</div>
+
+<script src="js/players.js?v=20260617t"></script>
+<script src="js/rng.js?v=20260629a"></script>
+<script src="js/simulate.js?v=20260625b"></script>
+<script src="js/events.js?v=20260629a"></script>
+<script src="js/match.js?v=20260630a"></script>
+<script src="js/cutscene.js?v=20260625c"></script>
+<script src="js/manager-match.js?v=20260630m"></script>
+<script src="js/narration.js?v=20260617t"></script>
+<script src="js/ui.js?v=20260622d"></script>
+<script src="js/tournament.js?v=20260622e"></script>
+<script src="js/japanwc.js?v=20260622r"></script>
+<div id="oop-toast"></div>
+
+<!-- lab 限定 js。★ 毎回ユニークな ?v= を付けて読む＝デモ台では常に最新のソースが出る
+     （固定の版数を焼き込むと、直したのに古いJSを掴んで「直っていない」と誤診する）。
+     document.write は実行順を保つので、依存順（names→sns→…→league）がそのまま守られる。 -->
+<script>
+(function () {
+  var v = Date.now();
+  var files = ['names', 'sns', 'mental', 'discipline', 'portrait', 'manga_recolor',
+               'juice', 'lab-art', 'lg-ui', 'matchday', 'wideshot', 'league'];
+  for (var i = 0; i < files.length; i++) {
+    document.write('<scr' + 'ipt src="js/' + files[i] + '.js?v=' + v + '"></scr' + 'ipt>');
+  }
+})();
+</script>
+
+<script>
+/* デモ台の中身（_demo.html の iframe に入る側）。
+ * ★ 操作ボタンは **外側の枠に置く**。中に置くとスマホ幅のビューポートを食って、
+ *   検証したいレイアウトが歪む。ここでは API だけを外へ公開する。 */
+window.CS_BG_TONE_ENABLED = true;
+window.LEAGUE_TEST_MODE = true;
+window.__demo = {
+  state: function () { try { return window._leagueTestAPI.getState(); } catch (e) { return null; } },
+  reset: function () { try { localStorage.removeItem('fs_league_v1'); } catch (e) {} location.reload(); },
+  round: function () {
+    if (!this.state()) return 'まずクラブを選んでください';
+    window.confirm = function () { return true; };
+    return window.leagueDebugSimRound() ? '1節ぶん消化しました' : '今季は消化済みです（④で次シーズンへ）';
+  },
+  season: function () {
+    if (!this.state()) return 'まずクラブを選んでください';
+    window.confirm = function () { return true; };
+    window.leagueDebugSimSeason();
+    return '1シーズン消化＝最終話を表示中';
+  },
+  rollover: function () {
+    var st = this.state();
+    if (!st) return 'まずクラブを選んでください';
+    if (!st.finished) return '先に「1シーズン消化」でシーズンを終わらせてください';
+    window.confirm = function () { return true; };
+    window.leaguePreEnter();
+    window.leaguePreSelect(st.myClub, true);
+    window.leaguePrePage(2);
+    window.leaguePreCommit();
+    return '周回しました＝「オフの変化」を表示中';
+  },
+  sns: function () {
+    if (!this.state()) return 'まずクラブを選んでください';
+    window.leagueRoundView('sns');
+    return '世間の反応（SNSフィード）';
+  },
+  home: function () { if (this.state()) { window.leagueRoundHome(); return 'ハブへ戻りました'; } return ''; },
+  fiction: function () { return (typeof NAMES !== 'undefined') ? NAMES.setFiction(!NAMES.isFiction()) : false; },
+  isFiction: function () { return (typeof NAMES !== 'undefined') && NAMES.isFiction(); },
+  lang: function () { window.setLang(window.LANG === 'en' ? 'ja' : 'en'); location.reload(); },
+  isEn: function () { return window.LANG === 'en'; }
+};
+(function () {
+  function boot() {
+    var tm = document.querySelector('.top-menu'); if (tm) tm.style.display = 'none';
+    if (typeof showLeague === 'function') showLeague();
+  }
+  if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+</body>
+</html>
