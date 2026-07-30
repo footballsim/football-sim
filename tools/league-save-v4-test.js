@@ -231,7 +231,9 @@ check('若手（18歳）は伸びる／ベテラン（36歳）は衰える', (fu
   const dnAny = Object.keys(dn).some(function (i) { return dn[i] < 0; });
   return Object.keys(up).length > 0 && upAll && dnAny;
 })());
-check('ピーク年齢（' + G.PEAK + '歳）は変化しない', Object.keys(L.agingDelta(outfield, G.PEAK, 14, 14)).length === 0);
+const ofTal = L.talentOf(keyOf(outfield), false);
+const gkTal = L.talentOf(keyOf(gkPlayer), true);
+check('ピーク年齢（この選手は' + ofTal.peak + '歳）は変化しない', Object.keys(L.agingDelta(outfield, ofTal.peak, 14, 14)).length === 0);
 check('同じ入力なら常に同じ Δ（rng 不使用＝seed 再現を壊さない）',
   JSON.stringify(L.agingDelta(outfield, 20, 7, 14)) === JSON.stringify(L.agingDelta(outfield, 20, 7, 14)));
 check('出場が多いほど伸びが大きい', (function () {
@@ -248,10 +250,9 @@ check('衰えはスピード系(idx2)がポジショニング(idx26)より大き
   const d = L.agingDelta(outfield, 36, 14, 14);
   return d[2] < 0 && !d[26];   // 26 は重み0＝経験で維持
 })());
-check('GK はピークが遅い（' + G.PEAK_GK + '歳）', (function () {
-  return Object.keys(L.agingDelta(gkPlayer, G.PEAK_GK, 14, 14)).length === 0 &&
-         Object.keys(L.agingDelta(gkPlayer, 28, 14, 14)).length > 0;   // 28歳はまだ伸びる
-})());
+check('GK はピークが遅い（基準' + G.PEAK_GK + '歳 > フィールド' + G.PEAK + '歳）',
+  G.PEAK_GK > G.PEAK && gkTal.peak > G.PEAK);
+check('GK も自分のピーク年齢では変化しない', Object.keys(L.agingDelta(gkPlayer, gkTal.peak, 14, 14)).length === 0);
 check('GK は GK 用 param（4/5/10/23/24/26）だけ動く', (function () {
   const d = L.agingDelta(gkPlayer, 22, 14, 14);
   return Object.keys(d).length > 0 && Object.keys(d).every(function (i) {
@@ -317,6 +318,105 @@ check('サマリーは上位8件までに絞られる（セーブ肥大化を防
   const a = aged.seasonMeta.aging;
   return a.grew.length <= 8 && a.declined.length <= 8;
 })());
+
+/* ── ⑥c SN-08a 素質（早熟/晩成・ポテンシャル・衰え耐性）───────────── */
+section('⑥c SN-08a 素質＝選手ごとの成長のばらつき（隠しパラメータ・保存しない）');
+const TT = L.TALENT_TUNING;
+
+check('素質は選手キーから決定論で決まる（同じキーなら常に同じ）',
+  JSON.stringify(L.talentOf('テスト太郎', false)) === JSON.stringify(L.talentOf('テスト太郎', false)));
+check('選手ごとに素質が違う（全員同じにならない）', (function () {
+  const set = {};
+  TEAM_DATA[MY].players.forEach(function (p) {
+    const t = L.talentOf(keyOf(p), p.positions[0] === 'GK');
+    set[t.arch + '/' + t.pot.toFixed(1)] = 1;
+  });
+  return Object.keys(set).length >= 10;
+})());
+check('型は 早熟／標準／晩成 の3種に収まる', (function () {
+  const ids = TT.ARCHETYPES.map(function (a) { return a.id; });
+  return TEAM_DATA[MY].players.every(function (p) {
+    return ids.indexOf(L.talentOf(keyOf(p), false).arch) >= 0;
+  });
+})());
+check('母集団の平均は素質なしと同じ＝インフレしない（pot平均≒' + L.GROWTH_TUNING.TOTAL_GROW + '）', (function () {
+  let sp = 0, sr = 0, n = 0;
+  L.getState().clubs.forEach(function (cid) {
+    TEAM_DATA[cid].players.forEach(function (p) {
+      const t = L.talentOf(keyOf(p), p.positions[0] === 'GK');
+      sp += t.pot; sr += t.floor; n++;
+    });
+  });
+  const potAvg = sp / n, floorAvg = sr / n;
+  return Math.abs(potAvg - L.GROWTH_TUNING.TOTAL_GROW) < 0.6 &&
+         Math.abs(floorAvg - L.GROWTH_TUNING.TOTAL_DECL) < 0.6;
+})());
+check('突き抜けた才能は稀（pot が上位1割に入るのは全体の15%未満）', (function () {
+  const pots = [];
+  L.getState().clubs.forEach(function (cid) {
+    TEAM_DATA[cid].players.forEach(function (p) { pots.push(L.talentOf(keyOf(p), false).pot); });
+  });
+  const hi = TT.POT_MIN + (TT.POT_MAX - TT.POT_MIN) * 0.9;
+  return pots.filter(function (x) { return x >= hi; }).length / pots.length < 0.15;
+})());
+
+// 型ごとの振る舞い（override で型を固定して比較＝ハッシュ運に左右されない）
+L.talentOverrides['__early__'] = { arch: 'early', pot: 10, res: 1.0 };
+L.talentOverrides['__late__'] = { arch: 'late', pot: 10, res: 1.0 };
+L.talentOverrides['__ageless__'] = { arch: 'normal', pot: 10, res: TT.RES_MIN };
+L.talentOverrides['__fragile__'] = { arch: 'normal', pot: 10, res: TT.RES_MAX };
+const tEarly = L.talentOf('__early__', false), tLate = L.talentOf('__late__', false);
+const tAgeless = L.talentOf('__ageless__', false), tFragile = L.talentOf('__fragile__', false);
+
+check('早熟はピークが早く、晩成は遅い', tEarly.peak < L.GROWTH_TUNING.PEAK && tLate.peak > L.GROWTH_TUNING.PEAK,
+  'early=' + tEarly.peak + ' late=' + tLate.peak);
+check('早熟は若いうちの伸びが晩成より大きい', (function () {
+  const e = L.agingDelta(outfield, 20, 14, 14, tEarly);
+  const l = L.agingDelta(outfield, 20, 14, 14, tLate);
+  return e[2] > l[2];
+})());
+check('晩成は早熟がもう衰える年齢（' + (tEarly.peak + 2) + '歳）でもまだ伸びる', (function () {
+  const age = tEarly.peak + 2;
+  const e = L.agingDelta(outfield, age, 14, 14, tEarly);
+  const l = L.agingDelta(outfield, age, 14, 14, tLate);
+  return e[2] < 0 && l[2] > 0;
+})());
+check('衰え耐性が高い選手は32歳での落ち幅が小さい', (function () {
+  const a = L.agingDelta(outfield, 32, 14, 14, tAgeless);
+  const f = L.agingDelta(outfield, 32, 14, 14, tFragile);
+  return a[2] < 0 && f[2] < 0 && Math.abs(a[2]) < Math.abs(f[2]) * 0.6;
+})());
+check('衰え耐性が高い選手は最終的な劣化の底も浅い', tAgeless.floor < tFragile.floor);
+check('ポテンシャルが高い選手ほど伸び続けられる（累積上限が高い）', (function () {
+  // いちばん若いフィールド選手を選び、シーズンを進めながら growth を積む
+  const young = TEAM_DATA[MY].players
+    .filter(function (p) { return p.positions[0] !== 'GK'; })
+    .sort(function (a, b) { return L.baseAge(keyOf(a)) - L.baseAge(keyOf(b)); })[0];
+  const yk = keyOf(young);
+  function grind(pot) {
+    reset(); L.newSeason(MY);
+    L.talentOverrides[yk] = { arch: 'normal', pot: pot, res: 1.0 };
+    const next = {}, prev = {};
+    next[MY] = {}; prev[MY] = {};
+    prev[MY][yk] = { apps: 14 };                      // 毎季フル出場
+    for (let s = 1; s <= 8; s++) {
+      L.getState().season = s;                        // ★ 年齢は季から導出されるので season を進める
+      L.applySeasonAging(next, prev, 14, null);
+    }
+    delete L.talentOverrides[yk];
+    return (next[MY][yk] && next[MY][yk].growth && next[MY][yk].growth[7]) || 0;   // ドリブル精度
+  }
+  const hi = grind(TT.POT_MAX), lo = grind(TT.POT_MIN);
+  return hi > lo && lo <= TT.POT_MIN + 0.01;
+})());
+check('TALENT_OVERRIDES で特定選手を手で固定できる（メッシ型の作り込み口）', (function () {
+  const k = keyOf(outfield);
+  L.talentOverrides[k] = { arch: 'late', pot: 17, res: 0.55 };
+  const t = L.talentOf(k, false);
+  delete L.talentOverrides[k];
+  return t.arch === 'late' && t.pot === 17 && t.floor < L.GROWTH_TUNING.TOTAL_DECL;
+})());
+['__early__', '__late__', '__ageless__', '__fragile__', '__hi__', '__lo__'].forEach(function (k) { delete L.talentOverrides[k]; });
 
 /* ── ⑦ MG-03b 週プラン（1節=1週間・月〜金を3コマ） ───────────────── */
 section('⑦ MG-03b 今週の準備（3コマ配分）');

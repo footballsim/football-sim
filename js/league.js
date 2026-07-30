@@ -342,8 +342,8 @@
      * 設計書 §4.2 の「母集団中立」が原理的に成立しない（中立は regen があって初めて成り立つ）。
      * 累積を挟めば衰えは頭打ちになり、リーグは「少し下がって平らになる」＝壊れない。
      * ⚠️ 恒久解＝ SN-08b（引退＋regen で年齢構成を定常化）。ここは v1.0 までの安全弁。 */
-    TOTAL_GROW: 10,      // 1param あたり最大 +10（若手の伸びしろ）
-    TOTAL_DECL: 8,       // 1param あたり最大 -8（ベテランの落ち幅）
+    TOTAL_GROW: 10,      // 1param あたり最大 +10（若手の伸びしろ）★選手ごとの素質で上下する
+    TOTAL_DECL: 8,       // 1param あたり最大 -8（ベテランの落ち幅）★同上
     // 伸びの重み（若手）: 技術・判断が大きく、素の速さは伸びにくい
     GROW_W: {
       0: 1.0, 1: 1.0, 2: 0.7, 3: 0.7, 4: 0.8, 5: 0.9, 6: 0.8,
@@ -365,11 +365,88 @@
   var GK_ONLY_IDX = { 23: 1, 24: 1 };
   function _isGK(p) { return !!(p && p.positions && p.positions[0] === 'GK'); }
 
-  /* 1選手・1シーズンぶんの Δparam（疎オブジェクト）。rng 不使用＝同じ入力なら常に同じ結果。 */
-  function _agingDelta(p, age, apps, seasonMatches) {
+  /* ===========================================================================
+   * SN-08a 素質（Talent）— 選手ごとの成長のばらつき（2026-07-30 ユーザー要望）
+   * ---------------------------------------------------------------------------
+   * 「早熟だった／晩成だった」「あいつは30を超えても衰えない」という物語を作るための
+   * **隠しパラメータ**。画面には一切出さない＝監督は「オフの変化」を何季も見て初めて
+   * 「こいつは伸びる」と気づく（＝発見が面白さになる。将来スカウトコーチ MG-11 で覗ける）。
+   *
+   * ★ 保存しない: 年齢と同じく **選手キー（FN-00 の内部ID）のハッシュから決定論**で導く。
+   *   セーブは1バイトも増えず、架空名に切り替えても同じ選手は同じ素質のまま。
+   * ★ 3つのダイヤル:
+   *   ①型（早熟/標準/晩成）… ピーク年齢のずれ＋伸びの速さ
+   *   ②ポテンシャル      … どこまで伸びるか（1param あたりの累積上限）
+   *   ③衰え耐性          … 落ちる速さと落ちきる深さ（小さいほど長持ち＝"30超えても衰えない"）
+   * ★ 分布は三角分布（一様2つの平均）＝平均的な選手が厚く、突き抜けた才能は稀。
+   *   平均が GROWTH_TUNING の既定値に一致するよう中心を置いている（母集団のインフレ防止）。 */
+  var TALENT_TUNING = {
+    // 型。w=出現比率。peakShift はピーク年齢のずれ、growMul は伸びの速さ、declMul は衰えの速さ。
+    ARCHETYPES: [
+      { id: 'early',  ja: '早熟', en: 'Early bloomer', w: 20, peakShift: -2, growMul: 1.40, declMul: 1.10 },
+      { id: 'normal', ja: '標準', en: 'Normal',        w: 55, peakShift:  0, growMul: 1.00, declMul: 1.00 },
+      { id: 'late',   ja: '晩成', en: 'Late bloomer',  w: 25, peakShift: +3, growMul: 0.70, declMul: 0.85 }
+    ],
+    POT_MIN: 3, POT_MAX: 17,       // ポテンシャル（累積上限）。平均10＝GROWTH_TUNING.TOTAL_GROW と一致
+    RES_MIN: 0.55, RES_MAX: 1.45   // 衰え耐性。平均1.0＝素質なしと同じ。0.55＝衰えが半分以下
+  };
+
+  /* 特定選手の素質を手で固定したい時の口（mental.js の MENTAL_OVERRIDES と同じ作法）。
+   * 例: TALENT_OVERRIDES['リオネル・メッシ'] = { arch:'late', pot:17, res:0.55 }
+   * キーは **内部ID（＝起動時の long_name）**。空のままなら全員ハッシュ任せ。 */
+  var TALENT_OVERRIDES = {};
+
+  /* 三角分布の 0..1 を返す（中央が厚い）。salt でダイヤルごとに独立した系列にする。 */
+  function _tri01(key, salt) {
+    var h = _hash32(salt + '|' + key);
+    var a = (h % 1024) / 1024, b = ((h >>> 11) % 1024) / 1024;
+    return (a + b) / 2;
+  }
+
+  /* 選手の素質。playerKey（内部ID）だけで決まる＝完全決定論・保存不要。 */
+  function _talentOf(p, gk) {
+    var key = (typeof p === 'string') ? p : _playerKey(p);
+    var T = TALENT_TUNING;
+    var ov = TALENT_OVERRIDES[key] || null;
+
+    // ①型: 出現比率つきの決定論抽選
+    var arch = T.ARCHETYPES[1];
+    if (ov && ov.arch) {
+      for (var ai = 0; ai < T.ARCHETYPES.length; ai++) if (T.ARCHETYPES[ai].id === ov.arch) arch = T.ARCHETYPES[ai];
+    } else {
+      var total = 0, i;
+      for (i = 0; i < T.ARCHETYPES.length; i++) total += T.ARCHETYPES[i].w;
+      var roll = _hash32('talent/arch|' + key) % total, acc = 0;
+      for (i = 0; i < T.ARCHETYPES.length; i++) {
+        acc += T.ARCHETYPES[i].w;
+        if (roll < acc) { arch = T.ARCHETYPES[i]; break; }
+      }
+    }
+    // ②ポテンシャル ③衰え耐性
+    var pot = (ov && typeof ov.pot === 'number') ? ov.pot
+      : T.POT_MIN + _tri01(key, 'talent/pot') * (T.POT_MAX - T.POT_MIN);
+    var res = (ov && typeof ov.res === 'number') ? ov.res
+      : T.RES_MIN + _tri01(key, 'talent/res') * (T.RES_MAX - T.RES_MIN);
+
+    var basePeak = gk ? GROWTH_TUNING.PEAK_GK : GROWTH_TUNING.PEAK;
+    return {
+      arch: arch.id, archJa: arch.ja, archEn: arch.en,
+      peak: basePeak + arch.peakShift,
+      growMul: arch.growMul,
+      declMul: arch.declMul * res,                                   // 型 × 個体差
+      pot: Math.round(pot * 10) / 10,                                // 伸びしろ（累積 +上限）
+      // 落ちきる深さも耐性で変わる＝長持ちする選手は最終的な劣化も浅い
+      floor: Math.round(GROWTH_TUNING.TOTAL_DECL * res * 10) / 10
+    };
+  }
+
+  /* 1選手・1シーズンぶんの Δparam（疎オブジェクト）。rng 不使用＝同じ入力なら常に同じ結果。
+   * ★ 素質（_talentOf）でピーク年齢と伸び/衰えの速さが選手ごとに変わる＝早熟・晩成が生まれる。 */
+  function _agingDelta(p, age, apps, seasonMatches, talent) {
     var G = GROWTH_TUNING;
     var gk = _isGK(p);
-    var peak = gk ? G.PEAK_GK : G.PEAK;
+    var tal = talent || _talentOf(p, gk);
+    var peak = tal.peak;
     var out = {};
     if (age === peak) return out;
     var growing = age < peak;
@@ -377,10 +454,11 @@
     if (growing) {
       var span = Math.max(1, peak - AGE_TUNING.MIN);
       var play = G.PLAY_FLOOR + (1 - G.PLAY_FLOOR) * Math.min(1, (apps || 0) / Math.max(1, seasonMatches));
-      mag = G.GROW * Math.max(0, (peak - age) / span) * play;
+      mag = G.GROW * Math.max(0, (peak - age) / span) * play * tal.growMul;
     } else {
       var dspan = Math.max(1, AGE_TUNING.CAP - peak);
-      mag = -G.DECL * Math.min(1, (age - peak) / dspan);   // 出場係数は掛けない（上記②）
+      // 出場係数は掛けない（上記②）。衰え耐性が低い選手＝30を超えても落ちにくい。
+      mag = -G.DECL * Math.min(1, (age - peak) / dspan) * tal.declMul;
     }
     var W = growing ? G.GROW_W : G.DECL_W;
     var n = (p && p.params) ? p.params.length : 29;
@@ -435,7 +513,8 @@
         if (!pk) continue;
         var apps = (prevC[pk] && prevC[pk].apps) || 0;
         var age = _playerAge(clubId, pk);          // ★ 年齢は季から決定論で出る（保存しない）
-        var delta = _agingDelta(p, age, apps, seasonMatches);
+        var tal = _talentOf(pk, _isGK(p));         // ★ 素質も同じく決定論（早熟/晩成・伸びしろ・耐性）
+        var delta = _agingDelta(p, age, apps, seasonMatches, tal);
         var keys = Object.keys(delta);
         if (!keys.length) continue;
         if (!nextSquads[clubId]) nextSquads[clubId] = {};
@@ -445,9 +524,8 @@
         for (var ki = 0; ki < keys.length; ki++) {
           var idx = keys[ki];
           var before = e.growth[idx] || 0;
-          // 累積は [-TOTAL_DECL, +TOTAL_GROW] で頭打ち（際限ない劣化を防ぐ・上の注記参照）
-          var after = Math.max(-GROWTH_TUNING.TOTAL_DECL,
-                      Math.min(GROWTH_TUNING.TOTAL_GROW, before + delta[idx]));
+          // 累積の頭打ち。上限＝その選手のポテンシャル／下限＝耐性で決まる劣化の底（上の注記参照）
+          var after = Math.max(-tal.floor, Math.min(tal.pot, before + delta[idx]));
           after = Math.round(after * 100) / 100;
           if (after) e.growth[idx] = after; else delete e.growth[idx];   // 0 は疎に戻す
         }
@@ -6180,8 +6258,11 @@
     baseAge: _baseAge,
     agingDelta: _agingDelta,
     applySeasonAging: _applySeasonAging,
+    talentOf: _talentOf,
+    talentOverrides: TALENT_OVERRIDES,
     AGE_TUNING: AGE_TUNING,
     GROWTH_TUNING: GROWTH_TUNING,
+    TALENT_TUNING: TALENT_TUNING,
     squadEntry: _squadEntry,
     tickCarryover: _tickCarryover,
     recordTeamCarryover: _recordTeamCarryover,
