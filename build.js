@@ -38,7 +38,9 @@ const JS_FILES = ['players.js', 'rng.js', 'simulate.js', 'events.js', 'match.js'
 // ★ names.js（FN-00 表示名インダイレクション層）も lab 限定。既定は実名表示＝OFF なので
 //   読み込むだけでは挙動不変。?names=fiction / NAMES.toggle() で架空表示に切り替わる。
 const LAB_ONLY_JS = ['names.js', 'sns.js', 'mental.js', 'discipline.js', 'portrait.js', 'manga_recolor.js',
-  'juice.js', 'lab-art.js', 'lg-ui.js', 'matchday.js', 'league.js'];
+  'juice.js', 'lab-art.js', 'lg-ui.js', 'matchday.js', 'league.js',
+  // MTG1（2026-08-03 第1回面白さMTG採用分・全てキルスイッチ付き）
+  'attribution.js', 'archetype.js', 'dramascore.js', 'rail.js', 'oshi.js'];
 
 // 試合エンジン系: 最小化＋軽難読化
 const LOGIC_OPTS = {
