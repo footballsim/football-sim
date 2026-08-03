@@ -3643,6 +3643,12 @@
       if (judgeHTML) panels.push({ id: 'judge', sfx: 'stamp', html: judgeHTML });
     }
 
+    // MTG1-#5 推しの今日 — oshi.js 非同梱/キルOFF/未指名/推しが出場していない試合は null
+    if (typeof oshiTodayPanel === 'function') {
+      var oshiPanel = oshiTodayPanel(lr);
+      if (oshiPanel) panels.push(oshiPanel);
+    }
+
     // ④ 順位変動＋他会場
     panels.push({
       id: 'table', sfx: 'tick',
@@ -4305,6 +4311,8 @@
     _state.lastResult = {
       bestXI: roundXI,   // 今節のベストイレブン（専門誌風カードが読む）
       manager: mg,   // 試合後バナーの成長表示用（MG-08 の演出はここを読む）
+      // MTG1-#5: 自クラブの選手評価点（推しの1試合を語るための素材。読む側が無ければ誰も見ない）
+      ratings: roundRatings[myId] || null,
       round: _state.round,
       mine: {
         me: myId, opp: oppId, ms: myScore, os: oppScore, res: res, home: iAmHome,
@@ -4738,8 +4746,11 @@
     }).filter(Boolean).join('・');
     var mood = flat ? _t('世論は静観', 'The public is unmoved')
       : (up ? _t('支持が高まっている', 'Support is rising') : _t('風当たりが強まっている', 'Pressure is building'));
+    // MTG1-#5 数値の言葉化: いまの立ち位置を5段階の一語で主役にし、増減と実数はその下に添える。
+    var word = (typeof oshiWordHTML === 'function') ? oshiWordHTML('pop', pop.value) : '';
     return '<div class="lg-mini" style="margin-top:6px;text-align:center;border-top:1px solid rgba(255,255,255,0.12);padding-top:8px">' +
       '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px">' + _t('世論', 'Public opinion') + '</div>' +
+      (word ? '<div class="lg-wordline">' + word + '</div>' : '') +
       '<div>' + _t('人気', 'Popularity') + ' <b style="color:' + col + '">' + sign + '</b>' +
       ' <span style="opacity:.6">（' + Math.round(pop.value) + '）</span>　' + mood + '</div>' +
       (why ? '<div style="opacity:.65;margin-top:2px">' + why + '</div>' : '') + '</div>';
@@ -4757,7 +4768,10 @@
       if (p.k === 'press') return _t('記者会見での発言', 'What you said to the press');   // PC-01
       return '';
     }).filter(Boolean).join('・');
+    // MTG1-#5 数値の言葉化: 会長の視線も一語で（境界＝解任判定の実閾値なので言葉が嘘をつかない）
+    var word = (typeof oshiWordHTML === 'function') ? oshiWordHTML('trust', tr.value) : '';
     return '<div class="lg-mini" style="margin-top:4px;text-align:center">' +
+      (word ? '<div class="lg-wordline sm">' + _t('会長', 'The board') + ' ' + word + '</div>' : '') +
       _t('クラブの信頼', 'Club trust') + ' <b style="color:' + col + '">' + sign + '</b>' +
       ' <span style="opacity:.6">（' + Math.round(tr.value) + '）</span>' +
       (why ? '　<span style="opacity:.65">' + why + '</span>' : '') + '</div>';
@@ -5748,10 +5762,12 @@
     var trust = Math.round((typeof m.clubTrust === 'number') ? m.clubTrust : 0);
     var pop = (m.params) ? Math.round(m.params.popularity) : 0;
     var day = (_state.round || 0) + 1;
-    function meter(ico, ja, en, v, cls) {
-      return '<span class="lg-sh-meter ' + cls + '">' +
+    // MTG1-#5 数値の言葉化: 読ませるのは「72」でなく「英雄扱い」。数字は消さず小さく併記する。
+    function meter(ico, ja, en, v, cls, kind) {
+      var w = (typeof oshiWordOf === 'function') ? oshiWordOf(kind, v) : null;
+      return '<span class="lg-sh-meter ' + cls + (w ? ' worded tone-' + w.tone : '') + '">' +
         '<span class="lg-sh-meter-k">' + ico + ' ' + _t(ja, en) + '</span>' +
-        '<b class="lg-sh-meter-v">' + v + '</b>' +
+        '<b class="lg-sh-meter-v">' + (w ? w.text + '<em>' + v + '</em>' : v) + '</b>' +
         '<i class="lg-sh-meter-bar"><s class="lg-stat-fill" data-pct="' + Math.max(0, Math.min(100, v)) + '"></s></i></span>';
     }
     return '<header class="lg-sh-top">' +
@@ -5764,8 +5780,8 @@
         '<i class="lg-sh-div"></i>' +
         '<span class="lg-sh-rec">' + myRow.w + _t('勝', 'W') + ' ' + myRow.d + _t('分', 'D') + ' ' + myRow.l + _t('敗', 'L') + '</span>' +
         '<i class="lg-sh-div"></i>' +
-        meter('🤝', '信頼', 'Trust', trust, 'trust') +
-        meter('📣', '人気', 'Popularity', pop, 'pop') +
+        meter('🤝', '信頼', 'Trust', trust, 'trust', 'trust') +
+        meter('📣', '人気', 'Popularity', pop, 'pop', 'pop') +
         '<button type="button" class="lg-sh-gear" onclick="leagueHubMenu(1)" ' +
           'aria-label="' + _t('メニュー', 'Menu') + '">⚙</button>' +
       '</div>' +
@@ -5998,10 +6014,13 @@
       ? '<div class="lg-sh-cta disabled">' + _t('まず会長と話す', 'Talk to the board first') + '</div>'
       : '<button type="button" class="lg-sh-cta" onclick="leagueRoundView(\'prep\')">' +
           '⚽ ' + _t('次へ：練習メニュー', 'Next: Training') + '</button>';
+    // MTG1-#5: 推しの1行（oshi.js 非同梱/キルOFFなら空文字＝従来の見た目のまま）
+    var oshiRow = (typeof oshiHubRow === 'function') ? oshiHubRow() : '';
     return '<section class="lg-sh-panel lg-sh-mgr">' +
       '<div class="lg-sh-ph">' + _t('監督ステータス', 'Manager') + '</div>' +
       '<div class="lg-sh-mgrtop">' + face + lvBox + '</div>' +
       '<div class="lg-sh-stats">' + stats + '</div>' +
+      oshiRow +
       cta +
     '</section>';
   }
@@ -6411,6 +6430,7 @@
         .map(function (x) { return { home: x.home, away: x.away, hs: x.hs, as: x.as }; });
       _state.lastResult = {
         bestXI: _pickBestXI(roundRatings),
+        ratings: (mineRes && mineRes[myId]) || null,   // MTG1-#5: 飛ばし観戦でも推しの記事は出す
         round: _state.round,
         mine: {
           me: myId, opp: oppId, ms: myScore, os: oppScore, res: res, home: iAmHome,
@@ -6457,6 +6477,14 @@
     goalText: _seasonGoalText, snsFeed: _snsFeed, headline: _headlineText,
     body: _body, after: _afterRender, frame: _seasonEndMode, hubMode: _hubMode,
     home: function () { _renderHub(false); }
+  };
+
+  /* MTG1-#5 推し指名（js/oshi.js）へ渡す読み出し口。★ #3 と同じく置くだけ＝oshi.js が遅延で拾う。 */
+  window._leagueOshiHost = {
+    state: function () { return _state; }, save: _save,
+    squad: function () { return _state ? _overlaySquad(_state.myClub) : null; },
+    key: _playerKey, displayName: _keyDisplayName, peek: _peekSquadEntry,
+    paint: _paintPortraitCanvases, home: function () { _renderHub(false); }
   };
 
   /* 検証用 seam（lab限定・UI からは使わない）。
