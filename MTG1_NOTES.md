@@ -44,3 +44,16 @@
 - #5 のうち SCOPE トレード（★C管理機能の格下げ・MG-13/14/15凍結・主人公選手の正式昇格）は**計画変更＝ユーザー+Sセッション専管**。ここでは実装のみ
 - engine-B（モメンタム資源戦）= Sprint 3 と統合設計で再上程
 - engine-C（終盤の賭け指示）= 4戦術ルール境界のユーザー承認待ち
+
+## 動作確認ページ（2026-08-04 追加）
+
+**遊ぶなら `_lab.html`**（`index.html` から生成＝本番と同じ全DOM＋lab用js＋MTG1の5本）。
+- `_lab_base.html` = MTG1の5本だけ抜いた比較用（「MTG1のせいか」を切り分ける時に使う）
+- 起動: worktree で `python3 -m http.server 5621` → http://localhost:5621/_lab.html
+
+### ⚠ `_league_dev.html` では試合に入れない（MTG1とは無関係の既存事象）
+`_league_dev.html` は「最終話再設計」用の最小シェルで、**`#screen-setting` を含む試合系DOMを持たない**（`.screen` は `screen-home` のみ）。
+そのため キックオフ → `playToday()` → `initSettingScreen()` が
+`Cannot set properties of null (setting 'textContent')`（simulate.js:1142）で沈黙のまま停止する。
+**MTG1のキルスイッチを全部OFFにしても・5本を読み込まなくても同じ**＝ハーネス側の元からの制約。
+検証は `_lab.html` で行うこと。
