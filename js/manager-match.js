@@ -294,6 +294,9 @@
     if (_mvCtrl.isOver() && currentChanceIdx >= chanceResults.length) { _mvFinish(); return; }
 
     _mvGoalShown = false;
+    // MTG1-#1 采配の答え合わせ: いま表示するビート位置（chance/scene）を控える（トースト判定用・表示のみ）
+    var _abC = (typeof currentChanceIdx !== 'undefined') ? currentChanceIdx : -1;
+    var _abS = (typeof currentSceneIdx !== 'undefined') ? currentSceneIdx : 0;
     try {
       nextChance();                     // 1ビート進める（内部で createMatch から遅延フェッチ）
     } catch (e) {
@@ -318,6 +321,8 @@
       }
     } else { _mvProgKey = _pk; _mvStallCount = 0; }
     _mvSyncHud();
+    // MTG1-#1: 決定的に効いた瞬間の一行トースト（attribution.js 非同梱/キルOFFは no-op・1試合最大3回）
+    if (typeof attributionOnBeat === 'function') attributionOnBeat(_abC, _abS, _mvToast);
 
     // ハーフタイム停止（前半ロスタイム完了＝currentChanceIdx===HALF_CHANCES の瞬間・1回のみ）。
     if (currentChanceIdx === HALF_CHANCES && !halfTimeShown && currentSceneIdx === 0 && _shootSubStep === 0) {

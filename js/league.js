@@ -3637,6 +3637,12 @@
       });
     }
 
+    // MTG1-#1 監督のジャッジ（采配の答え合わせ）— attribution.js 非同梱/キルOFF/介入なしは丸ごと省く
+    if (typeof attributionJudgePanel === 'function') {
+      var judgeHTML = attributionJudgePanel();
+      if (judgeHTML) panels.push({ id: 'judge', sfx: 'stamp', html: judgeHTML });
+    }
+
     // ④ 順位変動＋他会場
     panels.push({
       id: 'table', sfx: 'tick',
@@ -4158,6 +4164,11 @@
       if (kicked) return;
       kicked = true;
       _preMatchRunning = false;
+      // MTG1-#1 采配の答え合わせ: この試合の係数記録を開始（attribution.js 非同梱/キルOFFは no-op）。
+      //   getter 渡し＝HT助言で _mgMatchCtx/_htState が後から動いても「今の介入」を読める。
+      if (typeof attributionBeginMatch === 'function') {
+        attributionBeginMatch(function () { return { mg: _mgMatchCtx, ht: _htState }; });
+      }
       startManagerMatch();
     });
   };
@@ -4220,6 +4231,9 @@
     window._leagueOnMatchFinish = null;
     window._leagueInMatch = false;   // MD-01: 設定画面フラグの後始末（保険）
     _pendingMatch = null;
+    // MTG1-#1: 記録を確定して閉じる（★ _endManagerMatchCtx より前＝介入コンテキストが生きているうちに。
+    //   他会場の AI 消化が始まる前に必ず閉じる＝別試合の係数が混入しない）
+    if (typeof attributionEndMatch === 'function') attributionEndMatch();
     _endManagerMatchCtx();   // MG-03: 対策 buff はこの1試合限り（他会場の AI 消化前に必ず解除）
     _leagueMatchActive = false;   // MG-04: 戦術の制限もリーグの試合中だけ（シングル/W杯に漏らさない）
     // 自チーム = team1（gameState.team1）。得点は team.score。

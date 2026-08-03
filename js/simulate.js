@@ -2410,6 +2410,8 @@ function getActionParam(team, pos, action) {
   // 監督: ビデオ学習の対策 buff（MG-03・league.js。clamp[0.95,1.05] は返す側／リーグの試合中のみ・
   //   非同梱の公開版とシングル/W杯では常に 1.0＝完全 no-op）
   if (typeof managerParamFactor === 'function') f *= managerParamFactor(team, p, action);
+  // MTG1-#1 采配帰属: 係数読み取りを記録するだけ（判定・確率・rng 消費は不変。attribution.js 非同梱/キルOFFは no-op）
+  if (typeof attributionRecord === 'function') attributionRecord(team, pos, action, f);
 
   const adjusted = params.map(v => v * Math.max(f, 0.01));
 
@@ -3285,6 +3287,7 @@ function simulateChance(gs, chanceNo) {
   // メンタル: チャンス末尾フック（劣勢継続＋減衰。PS-04・rng 消費ゼロ）
   if (typeof mentalOnChanceEnd === 'function') mentalOnChanceEnd(team1, team2);
   if (typeof fatigueOnChanceEnd === 'function') fatigueOnChanceEnd(team1, team2);   // 疲労: 出場経過を加算（MENTAL_ENABLEDと独立）
+  if (typeof attributionOnChanceEnd === 'function') attributionOnChanceEnd(chanceNo, scenes, team1, team2);   // MTG1-#1: チャンス境界＝記録のグルーピングのみ（判定不変）
 
   // Convert scenes to text
   const textScenes = [];
