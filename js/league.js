@@ -3694,8 +3694,14 @@
     }
 
     // ⑦ 次回予告（クリフハンガー）
-    var prev = _previewHTML();
-    if (prev) panels.push({ id: 'preview', sfx: 'page', html: prev });
+    //   MTG1-#3: レール有効時は「終幕ビート」（緊張の在庫＋ストリーク＋また明日）に差し替える。
+    //   ★ 2枚並べない＝1画面1ビート。rail.js 未搭載/キルOFFなら従来の次回予告のまま。
+    var railFin = (typeof Rail !== 'undefined' && Rail.finalePanel) ? Rail.finalePanel() : null;
+    if (railFin) panels.push(railFin);
+    else {
+      var prev = _previewHTML();
+      if (prev) panels.push({ id: 'preview', sfx: 'page', html: prev });
+    }
 
     return panels;
   }
@@ -5708,8 +5714,10 @@
     var warn = (chosen < WEEK_SLOTS)
       ? '<div class="lg-rd-warn">⚠ ' + _t('今週の練習が' + (WEEK_SLOTS - chosen) + 'コマ空いています',
           (WEEK_SLOTS - chosen) + ' training slot(s) still empty') + '</div>' : '';
-    var lock = _lockedToday()
-      ? '<div class="lg-rd-warn">' + _t('本日は消化済み — また明日', 'Played today — come back tomorrow') + '</div>' : '';
+    // MTG1-#3: レール有効時はネガ文言を終幕トーン（ストリークをねぎらう言い方）へ差し替える
+    var lockTx = (typeof Rail !== 'undefined' && Rail.lockText && Rail.lockText())
+      || _t('本日は消化済み — また明日', 'Played today — come back tomorrow');
+    var lock = _lockedToday() ? '<div class="lg-rd-warn">' + lockTx + '</div>' : '';
     return '<section class="lg-se-zone lg-se-wide lg-rd-kick">' +
       '<div class="lg-rd-vs">' +
         '<div class="lg-rd-side"><span class="lg-rd-crest">' + myDef.crest + '</span>' +
@@ -6054,6 +6062,8 @@
     if (!_state.finished && _roundView && !_boardTalkPending()) { _renderRoundView(); return; }
     if (_state.finished) { _renderFinale(); return; }   // SN-03: 最終話は専用の固定フレーム
     _seasonEndMode(false);
+    // MTG1-#3: デイリーレール。節の初回だけ「朝刊」を挟む（rail.js 未搭載/キルOFFなら false）
+    if (typeof Rail !== 'undefined' && Rail.intercept && Rail.intercept()) return;
 
     var myId = _state.myClub;
     var myDef = _clubDef(myId);
@@ -6438,6 +6448,17 @@
     _state.lastResult.season = _settleSeason(_position(_state.myClub));
     _save(); _renderHub(false);
   };
+  /* MTG1-#3 デイリーレール（js/rail.js）へ渡す読み出し口。★ 置くだけ＝rail.js が遅延で拾う
+   * （rail.js は league.js より後に読まれるので、ここから直接呼ばない）。未搭載なら誰も見ない。 */
+  window._leagueRailHost = {
+    state: function () { return _state; }, save: _save,
+    standings: _sortedStandings, rankMoves: _rankMoves, h2h: _h2h, streak: _currentStreak,
+    clubName: _clubName, clubDef: _clubDef, fixture: _myFixtureThisRound, locked: _lockedToday,
+    goalText: _seasonGoalText, snsFeed: _snsFeed, headline: _headlineText,
+    body: _body, after: _afterRender, frame: _seasonEndMode, hubMode: _hubMode,
+    home: function () { _renderHub(false); }
+  };
+
   /* 検証用 seam（lab限定・UI からは使わない）。
    * v4 スキーマ層（移行/オーバーレイ/持ち越し）を headless で機械検証するための入口。
    * → tools/league-save-v4-test.js。挙動には一切影響しない（読み書きは既存関数のみ）。 */
