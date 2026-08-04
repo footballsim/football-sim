@@ -152,6 +152,14 @@ const labInject =
   `<script src="js/lg-ui.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/matchday.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/league.js?v=${BUILD_VER}"></script>\n` +
+  // MTG1（第1回面白さMTG採用分）。league.js の後＝league.js が typeof ガードで拾い、
+  //   こちら側は window._leagueRailHost / _leagueOshiHost 経由で遅延バインドする。
+  //   各ファイル先頭にキルスイッチ（MTG1_ANSWER / _ARCH / _DRAMA / _RAIL / _OSHI）。
+  `<script src="js/attribution.js?v=${BUILD_VER}"></script>\n` +
+  `<script src="js/archetype.js?v=${BUILD_VER}"></script>\n` +
+  `<script src="js/dramascore.js?v=${BUILD_VER}"></script>\n` +
+  `<script src="js/rail.js?v=${BUILD_VER}"></script>\n` +
+  `<script src="js/oshi.js?v=${BUILD_VER}"></script>\n` +
   `<script>window.LEAGUE_TEST_MODE=true;(function(){function boot(){var tm=document.querySelector('.top-menu');if(tm)tm.style.display='none';` +
   `if(typeof showLeague==='function')showLeague();}` +
   `if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',boot);else boot();})();</script>\n`;
