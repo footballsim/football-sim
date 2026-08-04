@@ -7,7 +7,11 @@
  *   を切り分ける。エンジンは一切改変せず、managerParamFactor（league.js と同じ純関数の形）
  *   を headless の global として差し込み、対策の有無で「対<攻め筋>」の阻止率を比較する。
  *
- * 使い方: node tools/mtg1-video-effect-probe.js [試合数]
+ * ⚠️ 2026-08-04: この計測が根拠となり「攻め筋への対策」自体がユーザー判断で廃止された
+ *   （効果 = 5%×戦術眼/100 ＝ 初期値+1%。実測4000試合で差 0.00pt、1試合のばらつき ±14.9pt）。
+ *   機能は既に無いので**このスクリプトは動かない**。廃止判断の根拠を残すための資料として保存する。
+ *
+ * 使い方（歴史的記録）: node tools/mtg1-video-effect-probe.js [試合数]
  */
 'use strict';
 const { loadEngine } = require('./lib/load-engine');

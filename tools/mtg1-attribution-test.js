@@ -2,15 +2,20 @@
 /**
  * mtg1-attribution-test.js — MTG1-#1「采配の答え合わせパック」(js/attribution.js) の機械検証。
  *
+ * ★ 2026-08-04: 「攻め筋に対策する」機能（📹ビデオ対策 / 🧑‍🏫HT助言）の廃止に伴い、
+ *   その2行のジャッジと対策トーストの検証を削除。代わりに「対策フックが完全に消えたこと」
+ *   （記録に manager 係数 g が載らない）と、マークマン行の判定を厚くして穴を埋めた。
+ *
  * 検証項目:
  *   T1 rng不変: 同一シードの playMatch が「記録ON」と「記録OFF」で完全一致
  *      （attribution は rng を新規消費せず、判定にも一切影響しないことの証明）。
- *   T2 記録: リーグ相当のコンテキストで係数読み取りが記録され、manager buff の
- *      内訳（g>1）が対策した攻め筋の守備読みだけに付くこと。judge が動くこと。
+ *   T2 記録: リーグ相当のコンテキストで係数読み取り（mental/fatigue）が記録され、
+ *      judge が動くこと。廃止した manager 対策係数はもう記録されないこと。
  *   T3 キルスイッチ: window.MTG1_ANSWER === false で記録・表示とも完全無効。
  *   T4 ジャッジ判定: 合成データで「刺さった / 効かなかった / 判定不能」が意図通り。
  *      交代・戦術変更の検出（チャンス境界の lineup/tactics 差分）も確認。
- *   T5 トースト: 決定的瞬間で発火・同一ビート/チャンスは重複なし・1試合最大3回・キルOFFで無効。
+ *   T5 トースト: 決定的瞬間（キープレイヤーのゴール／鼓舞後のゴール）で発火・
+ *      同一ビート/チャンスは重複なし・1試合最大3回・キルOFFで無効。
  *
  * 使い方: node tools/mtg1-attribution-test.js
  */
@@ -97,7 +102,7 @@ console.log('T1 rng不変（同一シード・記録ON vs OFF）');
   const r1 = off.__mtg1.playMatch(off.__mtg1.TEAM_DATA.japan2026vsNetherlands, off.__mtg1.TEAM_DATA.netherlands2026, null, seed);
 
   const on = makeCtx();
-  on.__mtg1.begin(function () { return { mg: { counterActions: { '対ドリブル突破': true }, buff: 0.04 }, ht: null }; });
+  on.__mtg1.begin(function () { return { ht: null }; });
   const r2 = on.__mtg1.playMatch(on.__mtg1.TEAM_DATA.japan2026vsNetherlands, on.__mtg1.TEAM_DATA.netherlands2026, null, seed);
 
   ok(sig(r1) === sig(r2), '記録ONでもイベント列・スコアが完全一致（rng新規消費ゼロ）',
@@ -108,28 +113,31 @@ console.log('T1 rng不変（同一シード・記録ON vs OFF）');
   ok(totalRecs > 0, '係数読み取りが記録された（自チーム分 ' + totalRecs + ' 件）');
 }
 
-/* ── T2: manager buff の内訳が対策した攻め筋の守備読みだけに付く ─────────── */
-console.log('T2 係数内訳の記録（manager buff seam 連結）');
+/* ── T2: 係数読み取りの記録（mental/fatigue のみ）＋対策フックの撤去確認 ───── */
+console.log('T2 係数内訳の記録');
 {
   const c = makeCtx();
-  // league.js の managerParamFactor と同契約のスタブ（window 代入＝グローバル関数）
-  vm.runInContext(
-    "window.managerParamFactor = function (team, p, action) { return action === '対ドリブル突破' ? 1.04 : 1.0; };", c);
-  c.__mtg1.begin(function () { return { mg: { counterActions: { '対ドリブル突破': true }, buff: 0.04 }, ht: null }; });
+  c.__mtg1.begin(function () { return { ht: null }; });
   c.__mtg1.playMatch(c.__mtg1.TEAM_DATA.japan2026vsNetherlands, c.__mtg1.TEAM_DATA.netherlands2026, null, 777);
   c.__mtg1.end();
   const st = c.__mtg1.state();
-  let buffed = 0, wrong = 0;
+  let recs = 0, badShape = 0, hasG = 0;
   st.chances.forEach(ch => ch.recs.forEach(r => {
-    if (r.g > 1) { buffed++; if (r.a !== '対ドリブル突破') wrong++; }
+    recs++;
+    if (typeof r.m !== 'number' || typeof r.fg !== 'number' || typeof r.f !== 'number') badShape++;
+    if ('g' in r) hasG++;
   }));
-  ok(buffed > 0, 'buff の乗った読み取りが記録された（' + buffed + ' 件）');
-  ok(wrong === 0, 'buff の内訳は対策した攻め筋(対ドリブル突破)のみ', wrong + ' 件が別アクション');
+  ok(recs > 0, '係数読み取りが記録された（' + recs + ' 件）');
+  ok(badShape === 0, '各記録は f / mental / fatigue の内訳を持つ', badShape + ' 件が不正な形');
+  // 廃止した「攻め筋対策」の係数（managerParamFactor）はもう読まない＝記録にも残らない
+  ok(hasG === 0, '廃止した manager 対策係数(g)は記録されない', hasG + ' 件に g が残っている');
+  ok(typeof c.managerParamFactor === 'undefined',
+     'league 非同梱の headless では managerParamFactor は未定義（typeof ガードで no-op）');
   const j = c.__mtg1.judge();
-  ok(!!j && j.items.some(it => it.kind === 'video'), '実試合データから video ジャッジが出る');
-  const vitem = j && j.items.find(it => it.kind === 'video');
-  ok(vitem && ['hit', 'miss', 'na'].indexOf(vitem.verdict) >= 0 && vitem.line.length > 0,
-     'ジャッジは verdict＋事実の言い換え1行を持つ', vitem && (vitem.verdict + ' / ' + vitem.line));
+  ok(!!j && j.items.some(it => it.kind === 'keyplayer'), '実試合データから keyplayer ジャッジが出る');
+  const kitem = j && j.items.find(it => it.kind === 'keyplayer');
+  ok(kitem && ['hit', 'miss', 'na'].indexOf(kitem.verdict) >= 0 && kitem.line.length > 0,
+     'ジャッジは verdict＋事実の言い換え1行を持つ', kitem && (kitem.verdict + ' / ' + kitem.line));
   const html = c.__mtg1.panel();
   ok(typeof html === 'string' && html.indexOf('監督のジャッジ') >= 0 && html.indexOf('lg-card') >= 0,
      'ジャッジカードHTML（lg-card 形式）が生成される');
@@ -140,7 +148,7 @@ console.log('T3 キルスイッチ');
 {
   const c = makeCtx();
   c.MTG1_ANSWER = false;
-  c.__mtg1.begin(function () { return { mg: { counterActions: { '対クロス': true }, buff: 0.04 }, ht: null }; });
+  c.__mtg1.begin(function () { return { ht: null }; });
   ok(c.__mtg1.state() === null, 'キルOFF中は begin しても記録が始まらない');
   c.__mtg1.playMatch(c.__mtg1.TEAM_DATA.japan2026vsNetherlands, c.__mtg1.TEAM_DATA.netherlands2026, null, 42);
   ok(c.__mtg1.state() === null, 'キルOFF中は試合を回しても何も記録されない');
@@ -148,7 +156,7 @@ console.log('T3 キルスイッチ');
 
   // 途中OFF: begin 後にスイッチを切ると以降の記録・表示が止まる
   const c2 = makeCtx();
-  c2.__mtg1.begin(function () { return { mg: null, ht: null }; });
+  c2.__mtg1.begin(function () { return { ht: null }; });
   c2.MTG1_ANSWER = false;
   const t1 = { name: 'MY', players: [{ name: 'A' }], lineup: [0,0,0,0,0,0,0,0,0,0,0], score: 0, keyplayer: -1, marked_player: -1, tactics: 0 };
   c2.__mtg1.rec(t1, 0, 'ショートパス', 1.0);
@@ -170,11 +178,11 @@ function duel(off, def, action, result, ofsPos, dfsPos) {
            ofsPos: ofsPos == null ? 5 : ofsPos, dfsPos: dfsPos == null ? 3 : dfsPos };
 }
 {
-  // ① 刺さった: 対策した突破を 5本中4本阻止 ＋ キープレイヤー(ofsPos9)がゴール ＋ 鼓舞後に後半勝率が上昇
+  // ① 刺さった: キープレイヤー(ofsPos9)がゴール ＋ 鼓舞後に後半のデュエル勝率が上昇
   const c = makeCtx();
   const t1 = mkTeam('MY'), t2 = mkTeam('OPP');
-  const ht = { advice: null, rouse: { tone: 'praise', up: 7, down: 1 }, advise: null };
-  c.__mtg1.begin(function () { return { mg: { counterActions: { '対ドリブル突破': true }, buff: 0.04 }, ht: ht }; });
+  const ht = { rouse: { tone: 'praise', up: 7, down: 1 }, advise: null };
+  c.__mtg1.begin(function () { return { ht: ht }; });
   // 前半: 相手の突破を止める＋自分のデュエルは負け越し（勝率33%）
   c.__mtg1.chanceEnd(0, [
     duel(t2, t1, 'ドリブル突破', '失敗'), duel(t2, t1, 'ドリブル突破', '失敗'),
@@ -191,40 +199,43 @@ function duel(off, def, action, result, ofsPos, dfsPos) {
   c.__mtg1.end();
   const j = c.__mtg1.judge();
   const by = {}; j.items.forEach(it => { by[it.kind] = it; });
-  ok(by.video && by.video.verdict === 'hit', 'ビデオ対策: 5本中4本阻止 → 刺さった', by.video && by.video.verdict);
+  ok(!by.video && !by.advice, '廃止した📹ビデオ対策 / 🧑‍🏫HT助言の行は出ない',
+     JSON.stringify(j.items.map(i => i.kind)));
   ok(by.keyplayer && by.keyplayer.verdict === 'hit', 'キープレイヤー: ゴール → 刺さった', by.keyplayer && by.keyplayer.verdict);
   ok(by.rouse && by.rouse.verdict === 'hit', '鼓舞: 後半勝率 33%→75% → 刺さった', by.rouse && by.rouse.verdict);
   const html = c.__mtg1.panel();
   ok(html.indexOf('刺さった') >= 0, 'カードに verdict バッジが載る');
 
-  // ② 効かなかった: 対策した突破を 4本中3本通される（正直に言い切る）
+  // ② 効かなかった: 指名したマークマン（相手 players[5]）に 4回中3回やられる（正直に言い切る）
   const cm = makeCtx();
   const m1 = mkTeam('MY'), m2 = mkTeam('OPP');
-  cm.__mtg1.begin(function () { return { mg: { counterActions: { '対ドリブル突破': true }, buff: 0.04 }, ht: null }; });
+  m1.marked_player = 5;   // ★ 相手の players 配列の index（lineup=[0..10] なので枠5に居る＝有効）
+  cm.__mtg1.begin(function () { return { ht: null }; });
   cm.__mtg1.chanceEnd(0, [
-    duel(m2, m1, 'ドリブル突破', '成功'), duel(m2, m1, 'ドリブル突破', '成功'),
-    duel(m2, m1, 'ドリブル突破', '成功'), duel(m2, m1, 'ドリブル突破', '失敗')
+    duel(m2, m1, 'ドリブル突破', '成功', 5), duel(m2, m1, 'ドリブル突破', '成功', 5),
+    duel(m2, m1, 'ドリブル突破', '成功', 5), duel(m2, m1, 'ドリブル突破', '失敗', 5)
   ], m1, m2);
   cm.__mtg1.end();
   const jm = cm.__mtg1.judge();
-  const vm_ = jm.items.find(it => it.kind === 'video');
-  ok(vm_ && vm_.verdict === 'miss', 'ビデオ対策: 4本中3本通された → 効かなかった（正直）', vm_ && vm_.verdict);
+  const vm_ = jm.items.find(it => it.kind === 'marked');
+  ok(vm_ && vm_.verdict === 'miss', 'マークマン: 4回中3回やられた → 効かなかった（正直）', vm_ && vm_.verdict);
   ok(vm_ && vm_.line.indexOf('効かなかった') >= 0, '「効かなかった」と言い切る文言');
 
-  // ③ 判定不能: 対策した攻め筋を相手が使わなかった
+  // ③ 判定不能: 指名したマークマンにボールが入らなかった
   const cn = makeCtx();
   const n1 = mkTeam('MY'), n2 = mkTeam('OPP');
-  cn.__mtg1.begin(function () { return { mg: { counterActions: { '対クロス': true }, buff: 0.04 }, ht: null }; });
-  cn.__mtg1.chanceEnd(0, [ duel(n2, n1, 'ショートパス', '成功') ], n1, n2);
+  n1.marked_player = 5;
+  cn.__mtg1.begin(function () { return { ht: null }; });
+  cn.__mtg1.chanceEnd(0, [ duel(n2, n1, 'ショートパス', '成功', 6) ], n1, n2);
   cn.__mtg1.end();
   const jn = cn.__mtg1.judge();
-  const vn = jn.items.find(it => it.kind === 'video');
-  ok(vn && vn.verdict === 'na', 'ビデオ対策: 相手が使わず(0本) → 判定不能', vn && vn.verdict);
+  const vn = jn.items.find(it => it.kind === 'marked');
+  ok(vn && vn.verdict === 'na', 'マークマン: ボールが入らず(0回) → 判定不能', vn && vn.verdict);
 
   // ④ 交代・戦術変更の検出（チャンス境界の lineup/tactics 差分）＋投入選手のゴール → 刺さった
   const cs = makeCtx();
   const s1 = mkTeam('MY'), s2 = mkTeam('OPP');
-  cs.__mtg1.begin(function () { return { mg: null, ht: null }; });
+  cs.__mtg1.begin(function () { return { ht: null }; });
   cs.__mtg1.chanceEnd(0, [ duel(s1, s2, 'ショートパス', '成功') ], s1, s2);
   s1.lineup[4] = 12;      // 交代: pos4 に控え12を投入
   s1.tactics = 2;         // 戦術変更
@@ -240,7 +251,7 @@ function duel(off, def, action, result, ofsPos, dfsPos) {
   const cz = makeCtx();
   const z1 = mkTeam('MY'), z2 = mkTeam('OPP');
   z1.keyplayer = -1;      // 指名なし
-  cz.__mtg1.begin(function () { return { mg: null, ht: null }; });
+  cz.__mtg1.begin(function () { return { ht: null }; });
   cz.__mtg1.chanceEnd(0, [ duel(z1, z2, 'ショートパス', '成功') ], z1, z2);
   cz.__mtg1.end();
   ok(cz.__mtg1.panel() === null, '介入なし → ジャッジカードなし（空カードを出さない）');
@@ -251,14 +262,14 @@ console.log('T5 トースト');
 {
   const c = makeCtx();
   const t1 = mkTeam('MY'), t2 = mkTeam('OPP');
-  const mg = { counterActions: { '対ドリブル突破': true }, buff: 0.04 };
-  c.__mtg1.begin(function () { return { mg: mg, ht: { rouse: { tone: 'praise', up: 6, down: 0 } } }; });
+  c.__mtg1.begin(function () { return { ht: { rouse: { tone: 'praise', up: 6, down: 0 } } }; });
   c.__mtg1.chanceEnd(0, [ duel(t1, t2, 'ショートパス', '成功') ], t1, t2);   // team1 確定用
 
   const toasts = [];
   const toastFn = (m) => toasts.push(m);
   const crs = [];
-  // chance0: 対策デュエルを断つ / chance1: キープレイヤーのゴール / chance2-4: 鼓舞後のゴール（後半扱いは17..）
+  // chance0: 廃止した対策トーストの素材（何も出ないこと）/ chance1: キープレイヤーのゴール
+  // chance17-19: 鼓舞後（後半＝16以降）のゴール
   crs[0] = { scenes: [ duel(t2, t1, 'ドリブル突破', '失敗') ] };
   crs[1] = { scenes: [ duel(t1, t2, '中央からシュート', 'ゴール！！', 9) ] };
   crs[17] = { scenes: [ duel(t1, t2, '中央からシュート', 'ゴール！！', 5) ] };
@@ -267,25 +278,26 @@ console.log('T5 トースト');
   c.__mtg1.setChanceResults(crs);
 
   c.__mtg1.beat(0, 0, toastFn);
-  ok(toasts.length === 1 && toasts[0].indexOf('📹') === 0, '対策デュエルを断った瞬間にトースト', toasts[0]);
-  c.__mtg1.beat(0, 0, toastFn);
-  ok(toasts.length === 1, '同一ビートの再表示（分割ビート）では重複しない');
+  ok(toasts.length === 0, '廃止した「📹対策が刺さった」トーストはもう出ない', JSON.stringify(toasts));
   c.__mtg1.beat(1, 0, toastFn);
-  ok(toasts.length === 2 && toasts[1].indexOf('⭐') === 0, 'キープレイヤーのゴールでトースト', toasts[1]);
+  ok(toasts.length === 1 && toasts[0].indexOf('⭐') === 0, 'キープレイヤーのゴールでトースト', toasts[0]);
+  c.__mtg1.beat(1, 0, toastFn);
+  ok(toasts.length === 1, '同一ビートの再表示（分割ビート）では重複しない');
   c.__mtg1.beat(17, 0, toastFn);
-  ok(toasts.length === 3 && toasts[2].indexOf('🗣') === 0, '鼓舞後の後半ゴールでトースト', toasts[2]);
+  ok(toasts.length === 2 && toasts[1].indexOf('🗣') === 0, '鼓舞後の後半ゴールでトースト', toasts[1]);
   c.__mtg1.beat(18, 0, toastFn);
+  ok(toasts.length === 3, '別チャンスなら次のトーストが出る', toasts.length + ' 回');
   c.__mtg1.beat(19, 0, toastFn);
   ok(toasts.length === 3, '1試合最大3回で打ち止め（1画面1ビート）', toasts.length + ' 回');
 
   // キルOFF
   const ck = makeCtx();
   const k1 = mkTeam('MY'), k2 = mkTeam('OPP');
-  ck.__mtg1.begin(function () { return { mg: mg, ht: null }; });
+  ck.__mtg1.begin(function () { return { ht: null }; });
   ck.__mtg1.chanceEnd(0, [ duel(k1, k2, 'ショートパス', '成功') ], k1, k2);
   ck.MTG1_ANSWER = false;
   const kt = [];
-  ck.__mtg1.setChanceResults([{ scenes: [ duel(k2, k1, 'ドリブル突破', '失敗') ] }]);
+  ck.__mtg1.setChanceResults([{ scenes: [ duel(k1, k2, '中央からシュート', 'ゴール！！', 9) ] }]);
   ck.__mtg1.beat(0, 0, (m) => kt.push(m));
   ok(kt.length === 0, 'キルOFF中はトーストも出ない');
 }

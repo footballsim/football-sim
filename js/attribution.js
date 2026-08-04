@@ -2,17 +2,20 @@
  * attribution.js — MTG1-#1「采配の答え合わせパック」= 采配帰属（Decision Attribution）層
  * ---------------------------------------------------------------------------
  * 第1回面白さMTG 採用案 #1。リーグの自試合について、監督の各介入
- *（📹ビデオ対策 / 🧑‍🏫HT助言 / ⭐キープレイヤー / 🎯マークマン / 🗣鼓舞 /
- *  💬個別アドバイス / 🔁交代 / 🧭戦術変更）が「刺さった / 効かなかった / 判定不能」
- * かを、**確定した試合データの言い換えだけ**で答え合わせする。
+ *（⭐キープレイヤー / 🎯マークマン / 🗣鼓舞 / 💬個別アドバイス / 🔁交代 / 🧭戦術変更）
+ * が「刺さった / 効かなかった / 判定不能」かを、**確定した試合データの言い換えだけ**で
+ * 答え合わせする。
+ *
+ * ★ 2026-08-04: 「攻め筋に対策する」機能（📹ビデオ対策 / 🧑‍🏫HT助言）がユーザー判断で廃止
+ *   されたため、その2行と対応する試合中トーストを削除した（判定ロジックは他行に影響なし）。
  *
  * ★ 絶対不可侵: デュエル解決式・カウント・rng には一切触れない。本ファイルは
  *   ① getActionParam の係数読み取りを「記録」する（attributionRecord）
  *   ② チャンス境界で記録をグルーピングする（attributionOnChanceEnd）
  *   ③ 試合後に確定データを言い換えて判定する（attributionJudge / attributionJudgePanel）
  *   ④ 監督ビューアの表示ビートに合わせて一行トーストを出す（attributionOnBeat・最大3回）
- *   の4つだけ。係数の「内訳」は mentalParamFactor / fatigueParamFactor /
- *   managerParamFactor（すべて純関数・rng 不使用）を読み直して復元する＝挙動不変。
+ *   の4つだけ。係数の「内訳」は mentalParamFactor / fatigueParamFactor
+ *   （いずれも純関数・rng 不使用）を読み直して復元する＝挙動不変。
  *
  * ★ キルスイッチ: window.MTG1_ANSWER === false で記録・表示とも完全無効（既定は有効）。
  * ★ 公開ビルドは非同梱（build.js の LAB_ONLY_JS）＝ simulate.js 側は typeof ガードで no-op。
@@ -41,20 +44,14 @@ var _abState = null;
 
 /**
  * 試合開始（league.js の leagueKickoff から typeof ガードで呼ばれる）。
- * @param ctxGetter () => { mg: _mgMatchCtx, ht: _htState, ... } — league 側クロージャの
- *   「今の介入コンテキスト」を返す getter。HT助言で mg が後から生えるので参照でなく getter。
+ * @param ctxGetter () => { ht: _htState, ... } — league 側クロージャの「今の介入コンテキスト」
+ *   を返す getter。ハーフタイムの采配が後から入るので参照でなく getter で受ける。
  */
 function attributionBeginMatch(ctxGetter) {
   if (!_abEnabled()) { _abState = null; return; }
-  var ctx = null;
-  try { ctx = (typeof ctxGetter === 'function') ? ctxGetter() : null; } catch (e) { ctx = null; }
-  var mg = ctx && ctx.mg;
   _abState = {
     active: true,
     ctxGetter: (typeof ctxGetter === 'function') ? ctxGetter : null,
-    // 📹 試合前ビデオ対策のスナップショット（HT助言と区別するため begin 時点で確定）
-    videoTargets: mg ? Object.keys(mg.counterActions || {}).map(function (k) { return k.replace(/^対/, ''); }) : [],
-    videoBuff: mg ? (mg.buff || 0) : 0,
     team1: null, team2: null,          // 最初のチャンス境界で確定
     chances: [],                       // per-chance: {no, half, recs, scenes, lineup, t2lineup, tactics, t1score, t2score}
     _buf: [],                          // 現在チャンスの記録バッファ（両チーム。境界で自チーム分だけ残す）
@@ -73,10 +70,7 @@ function attributionEndMatch() {
   st.active = false;
   var ctx = null;
   try { ctx = st.ctxGetter ? st.ctxGetter() : null; } catch (e) { ctx = null; }
-  st.endCtx = {
-    mg: ctx && ctx.mg ? { counterActions: ctx.mg.counterActions || {}, buff: ctx.mg.buff || 0 } : null,
-    ht: ctx && ctx.ht ? ctx.ht : null
-  };
+  st.endCtx = { ht: ctx && ctx.ht ? ctx.ht : null };
   if (st.team1) {
     st.keyplayerPos = (typeof st.team1.keyplayer === 'number') ? st.team1.keyplayer : null;
     st.marked = (typeof st.team1.marked_player === 'number') ? st.team1.marked_player : -1;
@@ -93,8 +87,7 @@ function attributionRecord(team, pos, action, f) {
   st._buf.push({
     team: team, a: action, pos: pos, pi: team.lineup[pos], f: f,
     m: (typeof mentalParamFactor === 'function') ? mentalParamFactor(team, p) : 1,
-    fg: (typeof fatigueParamFactor === 'function') ? fatigueParamFactor(team, p) : 1,
-    g: (typeof managerParamFactor === 'function') ? managerParamFactor(team, p, action) : 1
+    fg: (typeof fatigueParamFactor === 'function') ? fatigueParamFactor(team, p) : 1
   });
 }
 
@@ -109,7 +102,7 @@ function attributionOnChanceEnd(chanceNo, scenes, team1, team2) {
   var recs = [];
   for (var i = 0; i < st._buf.length; i++) {
     var r = st._buf[i];
-    if (r.team === team1) recs.push({ a: r.a, pos: r.pos, pi: r.pi, f: r.f, m: r.m, fg: r.fg, g: r.g });
+    if (r.team === team1) recs.push({ a: r.a, pos: r.pos, pi: r.pi, f: r.f, m: r.m, fg: r.fg });
   }
   st._buf = [];
   var prev = st.chances.length ? st.chances[st.chances.length - 1] : null;
@@ -160,44 +153,6 @@ function _abMyDuels(st, cond) {
   return { n: n, w: w, rate: n ? w / n : 0 };
 }
 
-/* 対策（攻め筋 target）の答え合わせ。halfOnly=true なら後半のみ（HT助言用） */
-function _abCounterFacts(st, target, halfOnly) {
-  var n = 0, stop = 0;
-  _abEachScene(st, function (sc, ch) {
-    if (halfOnly && !ch.half2) return;
-    if (sc.offence !== st.team2 || sc.action !== target) return;
-    if (_abOffLost(sc.result)) { n++; stop++; }
-    else if (_abOffWon(sc.result)) { n++; }
-  });
-  // 係数が実際に乗った回数と平均%（記録＝getActionParam の読み取りから）
-  var applied = 0, pctSum = 0;
-  for (var c = 0; c < st.chances.length; c++) {
-    var ch = st.chances[c];
-    if (halfOnly && !ch.half2) continue;
-    for (var i = 0; i < ch.recs.length; i++) {
-      var r = ch.recs[i];
-      if (r.a === '対' + target && r.g > 1) { applied++; pctSum += (r.g - 1); }
-    }
-  }
-  return { n: n, stop: stop, applied: applied, avgPct: applied ? Math.round(pctSum / applied * 1000) / 10 : 0 };
-}
-
-function _abCounterVerdict(fx, label, srcJa, srcEn) {
-  var coefJa = fx.applied ? '（対策係数+' + fx.avgPct + '%が' + fx.applied + '回働いた）' : '（係数の出番なし）';
-  var coefEn = fx.applied ? ' (the +' + fx.avgPct + '% boost kicked in ' + fx.applied + ' times)' : ' (the boost never applied)';
-  if (fx.n === 0) {
-    return { verdict: 'na', line: _abT('相手は' + label + 'をほぼ使わなかった（0本）— 答え合わせ不能', 'They barely tried ' + label + ' (0 duels) — nothing to verify') };
-  }
-  var rate = fx.stop / fx.n;
-  if (rate >= 0.6 && fx.n >= 2) {
-    return { verdict: 'hit', line: _abT('相手の' + label + ' ' + fx.n + '本中' + fx.stop + '本を阻止' + coefJa, 'Stopped ' + fx.stop + ' of ' + fx.n + ' of their ' + label + coefEn) };
-  }
-  if (rate <= 0.4) {
-    return { verdict: 'miss', line: _abT(label + 'を' + fx.n + '本中' + (fx.n - fx.stop) + '本通された — ' + srcJa + 'は効かなかった', 'Beaten on ' + (fx.n - fx.stop) + ' of ' + fx.n + ' ' + label + ' — the ' + srcEn + " didn't work") };
-  }
-  return { verdict: 'na', line: _abT(label + 'は' + fx.n + '本中' + fx.stop + '本阻止 — 五分。言い切れない', label + ': stopped ' + fx.stop + ' of ' + fx.n + ' — even. Too close to call') };
-}
-
 /* ── ③ 監督のジャッジ（構造化データ） ──────────────────────────────────
  * @returns null | { items: [{kind, icon, label, verdict:'hit'|'miss'|'na', line}] }
  */
@@ -205,23 +160,9 @@ function attributionJudge() {
   var st = _abState;
   if (!st || !_abEnabled() || !st.team1 || !st.chances.length) return null;
   var items = [];
-  var i, fx, v;
-
-  // 📹 試合前のビデオ対策（begin 時点のターゲットのみ＝HT助言と二重判定しない）
-  for (i = 0; i < st.videoTargets.length; i++) {
-    fx = _abCounterFacts(st, st.videoTargets[i], false);
-    v = _abCounterVerdict(fx, _abActionLabel(st.videoTargets[i]), 'ビデオ対策', 'video prep');
-    items.push({ kind: 'video', icon: '📹', label: _abT('ビデオ対策「' + _abActionLabel(st.videoTargets[i]) + '」', 'Video prep: ' + _abActionLabel(st.videoTargets[i])), verdict: v.verdict, line: v.line });
-  }
+  var i, v;
 
   var ht = st.endCtx && st.endCtx.ht;
-
-  // 🧑‍🏫 HTコーチ助言（後半のみで答え合わせ）
-  if (ht && ht.advice && ht.advice.action) {
-    fx = _abCounterFacts(st, ht.advice.action, true);
-    v = _abCounterVerdict(fx, _abActionLabel(ht.advice.action), 'コーチの読み', "coach's read");
-    items.push({ kind: 'advice', icon: '🧑‍🏫', label: _abT('HT助言「' + _abActionLabel(ht.advice.action) + 'を潰す」', "HT call: shut down " + _abActionLabel(ht.advice.action)), verdict: v.verdict, line: v.line });
-  }
 
   // ⭐ キープレイヤー指名（攻撃の起点回数と勝率・得点）
   var kp = (typeof st.team1.keyplayer === 'number') ? st.team1.keyplayer : (st.keyplayerPos != null ? st.keyplayerPos : null);
@@ -389,19 +330,13 @@ function attributionOnBeat(chanceIdx, sceneIdx, toastFn) {
   var half = (typeof HALF_CHANCES !== 'undefined') ? HALF_CHANCES : 16;
   var msg = null;
 
-  // A) 対策した攻め筋のデュエルを断った
-  if (ctx && ctx.mg && ctx.mg.counterActions && ctx.mg.counterActions['対' + sc.action] &&
-      sc.offence === st.team2 && _abOffLost(sc.result)) {
-    msg = '📹 ' + _abT('対策が刺さった — ' + _abActionLabel(sc.action) + 'を断った',
-                       'Homework pays off — stopped their ' + _abActionLabel(sc.action));
-  }
-  // B) キープレイヤーのゴール
-  else if (sc.result === 'ゴール！！' && sc.offence === st.team1 &&
+  // A) キープレイヤーのゴール
+  if (sc.result === 'ゴール！！' && sc.offence === st.team1 &&
            typeof st.team1.keyplayer === 'number' && sc.ofsPos === st.team1.keyplayer) {
     msg = '⭐ ' + _abT('キープレイヤー起用が的中 — ' + _abName(st.team1.players[st.team1.lineup[sc.ofsPos]]) + 'がゴール！',
                        'Key player call pays off — ' + _abName(st.team1.players[st.team1.lineup[sc.ofsPos]]) + ' scores!');
   }
-  // C) 鼓舞（HTのMTG）後の自チームのゴール
+  // B) 鼓舞（HTのMTG）後の自チームのゴール
   else if (sc.result === 'ゴール！！' && sc.offence === st.team1 &&
            chanceIdx >= half && ctx && ctx.ht && ctx.ht.rouse) {
     msg = '🗣 ' + _abT('ハーフタイムの声が効いた — ゴール！', 'The half-time talk lands — goal!');
