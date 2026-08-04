@@ -128,7 +128,6 @@
     GROWTH: {
       MATCH_ALL: 0.4,   // 試合を1つ指揮（結果不問）＝全 param 微増
       WIN: 1.0,         // 勝利 → tactical / motivator
-      VIDEO: 1.5,       // ビデオ学習 → tactical
       TACTIC: 1.0,      // 戦術勉強 → tactical（＋習得ゲージ）
       RECOVERY: 1.2,    // 回復日 → conditioning（設計 §1.2 の「休養」）
       TRAINING: 0.8,    // 個人練習 → analysis（選手を見る目）
@@ -142,9 +141,10 @@
     //   目安: 95の選手 ≈ +0.1/週（ほぼ伸びない）／70の選手 ≈ +0.7/週。
     //   ⚠️ 成長は persistent＝マルチシーズンの能力インフレに直結するので SN-10 の KPI 計測対象。
     TRAIN_BASE: 2.5,
-    // ビデオ学習の対策 buff（§6.1）。tactical に比例し、上限 +5%。
-    //   mental の [0.90,1.10] と乗算されるため、監督分は単独 ±5% から始める。
-    BUFF_MAX: 0.05,
+    /* ★ 2026-08-04 ユーザー判断で「攻め筋に対策する」機能（📹ビデオ学習 / HTコーチ助言）を廃止。
+     *   同時に対策 buff の定数（BUFF_MAX）と成長源 GROWTH.VIDEO も撤去した。
+     *   理由: 効果が 5%×戦術眼/100（初期値で +1%）＝4000試合の実測で有無の差 0.00pt と、
+     *   プレイヤーには原理的に観測できなかった。かつ実サッカーの感覚とも食い違う。 */
     TACTIC_GAIN: 25     // 戦術勉強1回あたりの習得ゲージ（tactical で ±・100 で解放）
   };
 
@@ -801,14 +801,14 @@
   /* ===========================================================================
    * MG-03 — 行動フェーズ MVP（試合前に1アクション・設計書 §1.2/§6.1）
    * ---------------------------------------------------------------------------
-   * 「今日は何をするか」の決断を1日1回。初期アクション2種:
-   *   📹 ビデオ学習 … 次戦の相手が最も得意な攻め筋を割り出し、その1本に対策 buff（試合内）
+   * 「今日は何をするか」の決断を1日1回。例:
    *   📖 戦術勉強   … 未習得戦術の習得ゲージを進める（100 で解放＝MG-04 が使う）
-   * ★ 効果は getActionParam の係数 seam に「1本だけ」相乗り（§6.1）。デュエル式・チャンス数は不可侵。
-   * ★ 決定論のみ（相手の得意筋は params から算出）＝ rng を新規消費しない。
+   * ★ 決定論のみ＝ rng を新規消費しない。
+   * ★ 2026-08-04: 「攻め筋に対策する」系（📹ビデオ学習）は廃止。攻め筋は**偵察で知る情報**
+   *   としてのみ残り、試合内の係数フックは持たない（＝エンジンへの介入は無し）。
    * ========================================================================= */
 
-  // 攻め筋 → 参照する param（getActionParam の攻撃側の式に合わせる）。対策の対象＝この6本。
+  // 攻め筋 → 参照する param（getActionParam の攻撃側の式に合わせる）。偵察で見せるのはこの6本。
   var THREAT_ACTIONS = [
     { id: 'ドリブル突破', en: 'Dribbling',      idx: [ACCELERATION, AGILITY, DRIBBLE_ACCURACY, DRIBBLE_SPEED] },
     { id: 'クロス',       en: 'Crossing',       idx: [LONGPASS, CURVE] },
@@ -941,22 +941,11 @@
    *   preMatch  fn(ctx, n)     … 試合の前に効く処理（n=そのコマ数。回復日など）
    *   consume   fn(slot, out)  … 週の終わりの処理（ゲージ加算・選手成長など）
    *   autoOnce  fn(ctx)        … おまかせで「1コマだけ」入れるか（優先度は配列順）
-   *   autoFill  true           … おまかせの残り枠を埋める種類
+   *   autoFill  1,2,3...       … おまかせの残り枠を埋める順（小さいほど先・足りなければ巡回）
    *
    * ⚠️ 各コマの**効果の大きさ・種類はまだ検討中**（BACKLOG MG-13）。数値は MANAGER_TUNING に
    *   集約してあるので、チューニングはこの表と定数だけを触れば済む。 */
   var WEEK_ACTION_DEFS = [
-    {
-      kind: 'video_study', icon: '📹', ja: 'ビデオ学習', en: 'Video study',
-      grow: { param: 'tactical', base: 'VIDEO' },
-      autoFill: true,
-      // 重ねがけ＝「1本目・2本目…」と封じる武器が増える（nth で対象が決まる）
-      target: function (ctx, nth) { var r = _opponentThreats(ctx.oppId); return r[nth] || r[r.length - 1]; },
-      text: function (slot) {
-        return _t('「' + _threatLabel(slot.target) + '」を封じる', 'Shut down "' + _threatLabel(slot.target) + '"');
-      },
-      summary: function (slot) { return _threatLabel(slot.target); }
-    },
     {
       kind: 'recovery', icon: '🏥', ja: '回復日', en: 'Recovery day',
       grow: { param: 'conditioning', base: 'RECOVERY' },
@@ -985,17 +974,20 @@
       //   効果配線は motivator の成長のみ（喝=PS-06 が入った時に初めて意味を持つ＝1param 1効果）。
       kind: 'speech_study', icon: '🗣️', ja: '話術勉強', en: 'Speech study',
       grow: { param: 'motivator', base: 'SPEECH' },
+      autoFill: 2,
       text: function () { return _t('選手を動かす言葉を磨く', 'Sharpen the words that move players'); }
     },
     {
       // MG-15（2026-07-23 名称確定）: フィジカル管理の自己研磨。回復・疲労・コンディションの科学。
       kind: 'sports_science', icon: '🧪', ja: 'スポーツ科学', en: 'Sports science',
       grow: { param: 'conditioning', base: 'SCIENCE' },
+      autoFill: 3,
       text: function () { return _t('回復と疲労の科学を学ぶ', 'Study recovery and fatigue science'); }
     },
     {
       kind: 'individual_training', icon: '🎯', ja: '個人練習', en: 'Individual training',
       grow: { param: 'analysis', base: 'TRAINING' },
+      autoFill: 1,
       picker: 'player', keepTarget: true,
       target: function (ctx) { return _defaultTrainee(ctx.myId); },
       text: function (slot, ctx) {
@@ -1024,8 +1016,7 @@
    * ★ 以前は rel（リーグ平均比）順だった。だが強豪バランス型（例ブラジル）は全項目が
    *   平均以下で順位が無意味になり、アルゼンチンは能力81のショートパスより75のクロスが
    *   上位に来て直感と食い違った。実際に封じるべきは“実際に強い攻め筋”なので val 順にした。
-   * ★ 表示順もビデオ学習の対策順も、この val 順で統一する（順位とバーが必ず一致）。
-   * ビデオ学習を重ねると 1本目・2本目・3本目 と封じる武器が増える＝重ねがけの意味。 */
+   * ★ 偵察レポートの表示順はこの val 順（順位とバーが必ず一致）。 */
   function _opponentThreatsRanked(oppId) {
     var mine = _threatProfile(oppId);
     var ids = CLUB_DEFS.map(function (d) { return d.id; });
@@ -1068,6 +1059,13 @@
     }
     while (pa.slots.length < WEEK_SLOTS) pa.slots.push(null);
     if (pa.slots.length > WEEK_SLOTS) pa.slots.length = WEEK_SLOTS;
+    /* ★ 旧セーブ互換: 廃止された種類（例 2026-08-04 に消した 'video_study'）が残っていても
+     *   壊れない。定義表に無い kind は **空きスロット扱い**にして捨てる（例外は出さない・
+     *   セーブ版数は上げない＝欠落補完と同じ扱い）。 */
+    for (var i = 0; i < pa.slots.length; i++) {
+      var s = pa.slots[i];
+      if (s && !_weekActionDef(s.kind)) pa.slots[i] = null;
+    }
     return pa;
   }
 
@@ -1151,9 +1149,13 @@
     _renderHub(false);
   }
 
-  /* 「おまかせ」＝ def の autoOnce を配列順に1コマずつ入れ、残りを autoFill で埋める。
+  /* 「おまかせ」＝ def の autoOnce を配列順に1コマずつ入れ、残りを autoFill 順で埋める。
    * 惰性プレイでも1日1回が成立するように（毎回3枠を悩ませない）。
-   * ★ 新しいコマを増やす時は def に autoOnce を書けばここへ自動で参加する。 */
+   * ★ 新しいコマを増やす時は def に autoOnce / autoFill を書けばここへ自動で参加する。
+   * ★ 2026-08-04: 埋め先だった 📹ビデオ学習 の廃止に伴い、埋め方を決定論の優先順に組み直した。
+   *   ①必要なら回復日 → ②戦術勉強（autoOnce・配列順）→ 残りを autoFill の小さい順
+   *   （🎯個人練習 → 🗣️話術勉強 → 🧪スポーツ科学）。枠が余れば同じ順を先頭から巡回する
+   *   ＝**全枠が必ず埋まる**。rng は使わない（同じ状況なら常に同じ答え）。 */
   function _autoWeek() {
     if (!_state || _state.finished) return;
     var ctx = _weekCtx(); if (!ctx) return;
@@ -1163,8 +1165,13 @@
       if (plan.length >= WEEK_SLOTS) return;
       if (d.autoOnce && d.autoOnce(ctx)) plan.push(d.kind);
     });
-    var filler = WEEK_ACTION_DEFS.filter(function (d) { return d.autoFill; })[0];
-    while (plan.length < WEEK_SLOTS && filler) plan.push(filler.kind);
+    // 残り枠の埋め順（autoFill 昇順・同値は定義表の並び順で決着＝安定ソート相当の決定論）
+    var fillers = WEEK_ACTION_DEFS
+      .map(function (d, i) { return { d: d, i: i }; })
+      .filter(function (x) { return typeof x.d.autoFill === 'number' && (!x.d.enabled || x.d.enabled(ctx)); })
+      .sort(function (a, b) { return (a.d.autoFill - b.d.autoFill) || (a.i - b.i); })
+      .map(function (x) { return x.d.kind; });
+    for (var fi = 0; plan.length < WEEK_SLOTS && fillers.length; fi++) plan.push(fillers[fi % fillers.length]);
     plan.length = Math.min(plan.length, WEEK_SLOTS);
     pa.slots = plan.map(function (k) { return { kind: k, target: null }; });
     while (pa.slots.length < WEEK_SLOTS) pa.slots.push(null);
@@ -1710,45 +1717,21 @@
              trust: Math.round(tr) };
   }
 
-  /* ── 試合内効果（§6.1）: getActionParam の係数チェーンに足す唯一のフック ──────
-   * ★ 返すのは「1つに合成済みの係数」。フックは1本だけ・clamp は返す側で行う。
-   * ★ league の試合中だけ有効（_mgMatchCtx が立っている時のみ）＝シングル/W杯は完全 no-op。
-   * ★ 公開 docs は league.js 非同梱＝typeof ガードで no-op（公開挙動不変）。 */
-  var _mgMatchCtx = null;
-
-  function _beginManagerMatchCtx(myId) {
-    var m = _state && _state.manager;
-    var pa = _pendingWeek();
-    _mgMatchCtx = null;
-    if (!m || !pa) return;
-    var targets = {};
-    var any = false;
-    for (var i = 0; i < pa.slots.length; i++) {
-      var s = pa.slots[i];
-      if (s && s.kind === 'video_study' && s.target) { targets['対' + s.target] = true; any = true; }
-    }
-    if (!any) return;
-    var td = _clubData(myId);
-    _mgMatchCtx = {
-      myTeamName: td ? td.name : null,
-      counterActions: targets,
-      // 対策の効き＝戦術眼に比例（0→0% / 100→+5%）。設計 §6.1 の [0.95,1.05] 内に収まる。
-      //   ★ 重ねがけは「封じる武器の本数」が増えるだけ＝1本あたりの上限は動かさない。
-      buff: MANAGER_TUNING.BUFF_MAX * (m.params.tactical / MANAGER_TUNING.CAP)
-    };
-  }
-  function _endManagerMatchCtx() { _mgMatchCtx = null; }
+  /* ★ 2026-08-04: 監督の「試合内係数フック」（_mgMatchCtx / window.managerParamFactor）は
+   *   攻め筋対策の廃止に伴って**まるごと撤去**した。リーグの監督采配がエンジンの係数へ
+   *   介入する経路はもう無い（残るのは morale 系＝mentalParamFactor と、交代/戦術/指名という
+   *   「入力」だけ）。simulate.js 側の `typeof managerParamFactor === 'function'` ガードは
+   *   共有ファイルの既存行なので触らない＝定義が消えたことで自動的に no-op になる。 */
 
   /* ══ HT-01 ハーフタイムの監督アクション（2026-07-26 ユーザー指示）════════════════
-   * 順番は固定：①コーチから助言をもらう → ②選手を鼓舞 → ③選手個別にアドバイス。
+   * 順番は固定：①選手を鼓舞 → ②選手個別にアドバイス。
    * 効果はすべて **既存の係数フックに相乗り**（新しい判定式もチャンス数の変更も作らない）：
-   *   ① managerParamFactor … 相手が前半に最も使った攻め筋を、後半だけ封じる（分析力に比例）
-   *   ② mentalParamFactor  … チーム morale を上げる（モチベーターに比例）
-   *   ③ mentalParamFactor  … 指名した1人の morale を上げ、苛立ちを消す（モチベーターに比例）
+   *   ① mentalParamFactor  … チーム morale を上げる（モチベーターに比例）
+   *   ② mentalParamFactor  … 指名した1人の morale を上げ、苛立ちを消す（モチベーターに比例）
+   * ★ 旧①「コーチの助言＝相手の攻め筋を後半だけ封じる」は 2026-08-04 に廃止（対策系の全廃）。
    * ★ リーグの試合中だけ（_leagueMatchActive）＝シングル/W杯のハーフタイムには出さない。
    * ★ rng は新規消費しない。前半の確定データ（chanceResults）を読むだけ。 */
   var HT_TUNING = {
-    ADVICE_BUFF_MAX: MANAGER_TUNING.BUFF_MAX,   // 対策の効き幅（ビデオ学習と同じ上限＝[0.95,1.05]内）
     ROUSE_BASE: 0.10, ROUSE_GAIN: 0.25,         // チーム morale：0→+0.10 / 100→+0.35
     ADVISE_BASE: 0.30, ADVISE_GAIN: 0.40,       // 個人 morale：0→+0.30 / 100→+0.70
     FRUST_UNIT: 0.35                            // 声かけ1回で動く苛立ちの基準量（talk.frust に掛ける）
@@ -1757,16 +1740,17 @@
    * 旧: 3つの采配を1画面に並べて全部そこで完結させていた（＝情報処理が同居して
    *     「文書」に見え、ゲームとしての迫力が出ない）。
    * 新: **1画面1ビートの順送り**。1つの画面では1つのことだけを聞き、タップで次へ送る。
-   *     0 前半のスタッツ → 1 コーチの助言 → 2 選手とMTG → 3 誰に声をかける
-   *     → 4 その選手に何と言う → 5 後半へ
+   *     0 前半のスタッツ → 1 選手とMTG → 2 誰に声をかける → 3 その選手に何と言う → 4 後半へ
+   * ★ 2026-08-04: 旧ステップ①「コーチの助言」を廃止し、番号を1つずつ前へ詰めた
+   *   （ビート番号は連番＝間を飛ばさない。HT_LAST も自動で追従する）。
    * ★ 采配は元々すべて任意。順送りにしても「やらずに次へ」で飛ばせることを保つ。 */
-  var HT_STEP = { RECAP: 0, ADVICE: 1, TALK: 2, WHO: 3, WORD: 4, RESUME: 5 };
+  var HT_STEP = { RECAP: 0, TALK: 1, WHO: 2, WORD: 3, RESUME: 4 };
   var HT_LAST = HT_STEP.RESUME;
 
-  var _htState = null;   // { advice:null|{action,n}, rouse:null, advise:null, pick:null, step:0 }
+  var _htState = null;   // { rouse:null, advise:null, pick:null, step:0 }
 
   function _htReset() {
-    _htState = { advice: null, rouse: null, advise: null, pick: null, step: HT_STEP.RECAP };
+    _htState = { rouse: null, advise: null, pick: null, step: HT_STEP.RECAP };
   }
 
   function _mgrParam(key) {
@@ -1774,49 +1758,7 @@
     return (m && m.params && typeof m.params[key] === 'number') ? m.params[key] : 0;
   }
 
-  /* 前半に相手が最も多く仕掛けた攻め筋を、確定済みの chanceResults から数える。 */
-  function _htTopOpponentAction() {
-    if (typeof chanceResults === 'undefined' || !chanceResults || !gameState) return null;
-    var opp = gameState.team2, count = {}, best = null;
-    for (var i = 0; i < chanceResults.length; i++) {
-      var cr = chanceResults[i];
-      if (!cr || !cr.scenes) continue;
-      for (var j = 0; j < cr.scenes.length; j++) {
-        var sc = cr.scenes[j];
-        if (!sc || sc.offence !== opp || !sc.action) continue;
-        count[sc.action] = (count[sc.action] || 0) + 1;
-      }
-    }
-    var keys = Object.keys(count).sort();   // 同数は名前順で決着＝決定論
-    for (var k = 0; k < keys.length; k++) {
-      if (!best || count[keys[k]] > best.n) best = { action: keys[k], n: count[keys[k]] };
-    }
-    return best;
-  }
-
-  /* ①コーチから助言をもらう。相手の最頻攻め筋を割り出し、後半だけ対策 buff を足す。 */
-  window.leagueHtAdvice = function () {
-    if (!_leagueMatchActive || !_htState || _htState.advice) return;
-    var top = _htTopOpponentAction();
-    if (!top) { _htState.advice = { action: null, n: 0 }; _renderHtActions(); return; }
-    /* ★ ステップ制になったので「前の采配が済んでいるか」の相互ガードは持たない。
-     *   各画面は自分の1件だけを見る（二重適用の防止＝自分の done フラグのみ）。 */
-    // ビデオ学習と同じ器（_mgMatchCtx）に相乗り。無ければここで作る。
-    if (!_mgMatchCtx) {
-      _mgMatchCtx = {
-        myTeamName: (gameState && gameState.team1) ? gameState.team1.name : null,
-        counterActions: {}, buff: 0
-      };
-    }
-    _mgMatchCtx.counterActions['対' + top.action] = true;
-    // 助言の効き＝分析力に比例。既にビデオ学習の buff があれば強い方を採る（重ねがけで上限は動かさない）。
-    var adviceBuff = HT_TUNING.ADVICE_BUFF_MAX * (_mgrParam('analysis') / MANAGER_TUNING.CAP);
-    if (adviceBuff > _mgMatchCtx.buff) _mgMatchCtx.buff = adviceBuff;
-    _htState.advice = top;
-    _renderHtActions();
-  };
-
-  /* ②選手を鼓舞。チーム全体の morale を上げる（モチベーターに比例）。 */
+  /* ①選手を鼓舞。チーム全体の morale を上げる（モチベーターに比例）。 */
   /* PS-05 声かけの反応。性格ごとの talk 表（mental.js）を読んで効き方を変える。
    * tone: 'praise'（褒める）/ 'scold'（叱る）。
    * ★ 返り値は {morale, frust} の実数。倍率の出どころは mental.js に一本化する。 */
@@ -1832,7 +1774,7 @@
     return r;
   }
 
-  /* ②選手とMTG。褒める/叱るを選び、**先発11人それぞれが性格に応じて反応する**。
+  /* ①選手とMTG。褒める/叱るを選び、**先発11人それぞれが性格に応じて反応する**。
    * チーム全体の morale も動かす（響いた人数から算出＝別の乱数は引かない）。 */
   window.leagueHtRouse = function (tone) {
     if (!_leagueMatchActive || !_htState || _htState.rouse) return;
@@ -1852,8 +1794,8 @@
     _renderHtActions();
   };
 
-  /* ③選手個別にアドバイス。指名した1人の morale を上げ、苛立ちを消す。 */
-  /* ③個別アドバイス。まず選手を選び（leagueHtPick）、次に褒める/叱るを選ぶ。 */
+  /* ②選手個別にアドバイス。指名した1人の morale を上げ、苛立ちを消す。 */
+  /* ②個別アドバイス。まず選手を選び（leagueHtPick）、次に褒める/叱るを選ぶ。 */
   /* 選手を選んだ時点で「何と言う？」の画面へ送る＝選択そのものが画面遷移になる。 */
   window.leagueHtPick = function (pos) {
     if (!_leagueMatchActive || !_htState || _htState.advise) return;
@@ -1932,21 +1874,19 @@
   function _htStepDefs() {
     return [
       { k: 'recap',  no: '',  ja: '前半のスタッツ',   en: 'First half' },
-      { k: 'advice', no: '1', ja: 'コーチの助言',     en: "Coach's read" },
-      { k: 'talk',   no: '2', ja: '選手とMTG',        en: 'Team talk' },
-      { k: 'who',    no: '3', ja: '個別アドバイス',   en: 'A word with one' },
-      { k: 'word',   no: '3', ja: '個別アドバイス',   en: 'A word with one' },
+      { k: 'talk',   no: '1', ja: '選手とMTG',        en: 'Team talk' },
+      { k: 'who',    no: '2', ja: '個別アドバイス',   en: 'A word with one' },
+      { k: 'word',   no: '2', ja: '個別アドバイス',   en: 'A word with one' },
       { k: 'resume', no: '',  ja: '後半へ',           en: 'Second half' }
     ];
   }
 
-  /* 上部のステップ表示（①②③のどこに居るか）。resume/recap では出さない。 */
+  /* 上部のステップ表示（①②のどこに居るか）。resume/recap では出さない。 */
   function _htStepsHTML(step) {
     var defs = _htStepDefs();
     var marks = [
-      { no: '1', on: step === HT_STEP.ADVICE, done: !!(_htState && _htState.advice) },
-      { no: '2', on: step === HT_STEP.TALK,   done: !!(_htState && _htState.rouse) },
-      { no: '3', on: step === HT_STEP.WHO || step === HT_STEP.WORD, done: !!(_htState && _htState.advise) }
+      { no: '1', on: step === HT_STEP.TALK,   done: !!(_htState && _htState.rouse) },
+      { no: '2', on: step === HT_STEP.WHO || step === HT_STEP.WORD, done: !!(_htState && _htState.advise) }
     ];
     var html = marks.map(function (m) {
       return '<span class="lg-ht2-dot' + (m.on ? ' on' : '') + (m.done ? ' done' : '') + '">' + m.no + '</span>';
@@ -1978,29 +1918,6 @@
 
   function _htPageRecap() {
     return '<div class="lg-ht2-page recap">' + (_htStatsHTML() || '') + '</div>';
-  }
-
-  function _htPageAdvice() {
-    var st = _htState;
-    var body;
-    if (!st.advice) {
-      body = '<p class="lg-ht2-ask">' + _t('ベンチのコーチが、前半のデータを持って手招きしている。',
-                                           'Your coach is waving you over with the first-half data.') + '</p>' +
-        '<div class="lg-ht2-choices one">' +
-          '<button type="button" class="lg-ht2-choice" onclick="leagueHtAdvice()">' +
-            '<span class="ico">🎧</span><span class="tx">' + _t('助言を聞く', 'Listen') + '</span></button>' +
-        '</div>';
-    } else if (st.advice.action) {
-      body = '<p class="lg-ht2-say">' +
-        _t('「相手は前半、' + _threatLabel(st.advice.action) + 'を' + st.advice.n + '回。後半はここを潰す」',
-           '"They went at us with ' + _threatLabel(st.advice.action) + ' ' + st.advice.n + ' times. We shut it down now."') +
-        '</p>' +
-        '<p class="lg-ht2-eff up">▲ ' + _t(_threatLabel(st.advice.action) + ' への守備が後半だけ上がる',
-                                            'Your defence against ' + _threatLabel(st.advice.action) + ' improves for the second half') + '</p>';
-    } else {
-      body = '<p class="lg-ht2-say quiet">' + _t('「前半のデータがまだ足りない」', '"Not enough data yet."') + '</p>';
-    }
-    return '<div class="lg-ht2-page">' + body + '</div>';
   }
 
   function _htPageTalk() {
@@ -2090,9 +2007,6 @@
         '<span class="lb">' + label + '</span>' +
         '<span class="tx">' + (done ? text : _t('見送った', 'skipped')) + '</span></div>';
     }
-    var r1 = st.advice
-      ? (st.advice.action ? _threatLabel(st.advice.action) + _t(' を封じる', ' shut down') : _t('データ不足', 'no data'))
-      : '';
     var r2 = st.rouse
       ? (st.rouse.tone === 'praise' ? _t('褒めた', 'praised') : _t('叱った', 'scolded')) +
         '（' + st.rouse.up + _t('人が反応', ' responded') + '）'
@@ -2100,16 +2014,14 @@
     var r3 = st.advise ? st.advise.name + (st.advise.good ? _t('・好反応', ' — good') : _t('・逆効果', ' — backfired')) : '';
     return '<div class="lg-ht2-page resume">' +
       '<p class="lg-ht2-ask sm">' + _t('前半の采配', 'Your half-time calls') + '</p>' +
-      row('1', _t('コーチの助言', "Coach's read"), !!st.advice, r1) +
-      row('2', _t('選手とMTG', 'Team talk'), !!st.rouse, r2) +
-      row('3', _t('個別アドバイス', 'A word'), !!st.advise, r3) +
+      row('1', _t('選手とMTG', 'Team talk'), !!st.rouse, r2) +
+      row('2', _t('個別アドバイス', 'A word'), !!st.advise, r3) +
     '</div>';
   }
 
   function _htPageHTML(step) {
     switch (step) {
       case HT_STEP.RECAP:  return _htPageRecap();
-      case HT_STEP.ADVICE: return _htPageAdvice();
       case HT_STEP.TALK:   return _htPageTalk();
       case HT_STEP.WHO:    return _htPageWho();
       case HT_STEP.WORD:   return _htPageWord();
@@ -2182,15 +2094,6 @@
     if (kick) kick.textContent = '▶ ' + _t('試合再開', 'Resume');
     if (!_htState) _htReset();
     _renderHtActions();
-  };
-
-  window.managerParamFactor = function (team, p, action) {
-    if (typeof window !== 'undefined' && window.MANAGER_ENABLED === false) return 1.0;   // キルスイッチ
-    var c = _mgMatchCtx;
-    if (!c || !team || team.name !== c.myTeamName) return 1.0;
-    if (!c.counterActions[action]) return 1.0;             // 対策した攻め筋を守る時だけ効く
-    var f = 1 + c.buff;
-    return Math.max(0.95, Math.min(1.05, f));              // clamp は返す側で（§6.1）
   };
 
   function _newSeason(myClubId) {
@@ -3737,6 +3640,62 @@
       '</div>';
   }
 
+  /* ══ MTG1: マーク対象の自動選択（2026-08-04 修正）═══════════════════════════
+   * ★ バグ: team1State.marked_player は「**相手チームの players 配列の index**」なのに、
+   *   出どころの TEAM_DATA[x].default_marked_player は **対戦相手を問わないチーム単位の既定値**
+   *   として持たれている。相手が変われば同じ index が相手の先発XIに居ないことが普通に起きる
+   *   （例 england2026.default_marked_player=10 → ベルギーの players[10]=ルカクは非先発）。
+   *   リーグ8クラブの総当り56通りのうち19通り（34%）で「ピッチにいない選手をマークし続ける」
+   *   死んだ采配になっていた（simulate.js の判定は offence.lineup[ofsPos] との一致を見るため、
+   *   ベンチの選手を指していると係数が一度も乗らない）。
+   * ★ 直し方: 実際の相手先発XI（_overlaySquad 適用後）に居ない指名は、**決定論で**選び直す。
+   *     ① 相手の default_keyplayer が先発XIに居ればそれ（＝最も危険な先発）
+   *     ② 居なければ攻撃系 param の合計が最大のフィールド先発（同点は lineup の並び順で安定）
+   *   GK（lineup の 0 番）は既存UIと同じ規約で対象外。rng は一切使わない。
+   * ⚠️ 同じ潜在バグは **シングルマッチ / W杯にも残っている**（js/simulate.js の
+   *   `marked_player: data.default_marked_player` 初期化・selectTeam2/startGame 経路）。
+   *   本番凍結中のため今回は触らず、修正はリーグ経路（この関数）に閉じる。 */
+  var MARK_ATTACK_IDX = [
+    DRIBBLE_ACCURACY, DRIBBLE_SPEED, SHORTPASS, LONGPASS,
+    SHOOT_ACCURACY, SHOOT_MAKING, SHOOT_TECH, BALL_TECH, OFFENSIVE
+  ];
+  function _markAttackScore(p) {
+    if (!p || !p.params) return -1;
+    var s = 0;
+    for (var i = 0; i < MARK_ATTACK_IDX.length; i++) {
+      var v = p.params[MARK_ATTACK_IDX[i]];
+      s += (typeof v === 'number') ? v : 0;
+    }
+    return s;
+  }
+  /* 相手の先発XI（GK除く）に居る player index だけを返す。異常な入力でも例外は投げず -1。 */
+  function _validMarkedPlayer(oppData, want) {
+    if (!oppData || !oppData.players || !Array.isArray(oppData.default_lineup)) return -1;
+    var lineup = oppData.default_lineup.slice(0, 11);
+    var field = {};   // GK（枠0）を除く先発の player index
+    for (var i = 1; i < lineup.length; i++) {
+      var idx = lineup[i];
+      if (typeof idx === 'number' && idx >= 0 && idx < oppData.players.length) field[idx] = true;
+    }
+    if (typeof want === 'number' && want >= 0 && field[want]) return want;   // 既に有効ならそのまま
+
+    // ① 相手のキープレイヤー（default_keyplayer は **lineup の枠番号**）が先発XIに居れば最優先
+    var kp = oppData.default_keyplayer;
+    if (typeof kp === 'number' && kp >= 1 && kp < lineup.length) {
+      var kpIdx = lineup[kp];
+      if (typeof kpIdx === 'number' && field[kpIdx]) return kpIdx;
+    }
+    // ② 攻撃系 param が最大のフィールド先発（同点は lineup の並び順で決着＝安定・決定論）
+    var best = -1, bestScore = -1;
+    for (var j = 1; j < lineup.length; j++) {
+      var pi = lineup[j];
+      if (typeof pi !== 'number' || !field[pi]) continue;
+      var sc = _markAttackScore(oppData.players[pi]);
+      if (sc > bestScore) { bestScore = sc; best = pi; }
+    }
+    return best;
+  }
+
   /* ── 試合起動（自チーム = 監督ビューア） ─────────────────────────────── */
   // UX-03: 導入の再生中に再入すると、オーバーレイが重なり startManagerMatch も二重に走る。
   var _preMatchRunning = false;
@@ -3806,10 +3765,14 @@
           saved.lineup.every(function (i) { return typeof i === 'number' && i >= 0 && i < team1Data.players.length; })) {
         team1State.lineup = saved.lineup.slice();
       }
+      // 将来セーブが marked を持つようになっても、入口でこの後の検証を必ず通す（MD-02 は未保存）
+      if (typeof saved.marked_player === 'number') team1State.marked_player = saved.marked_player;
     }
 
-    // MG-03b: 📹 ビデオ学習で対策した攻め筋を、この試合の間だけ係数として効かせる
-    _beginManagerMatchCtx(myId);
+    /* ★ マーク対象は「この試合の相手の実際の先発XI」に対して検証し、居なければ選び直す。
+     *   クラブ既定値（default_marked_player）もセーブ復元値も、必ずここを通す。 */
+    team1State.marked_player = _validMarkedPlayer(team2Data, team1State.marked_player);
+
     _htReset();   // HT-01: ハーフタイムの采配は1試合につき1回ずつ
 
     // 試合終了フック（_mvFinish が拾う。1回で自動解除）
@@ -4177,9 +4140,9 @@
       kicked = true;
       _preMatchRunning = false;
       // MTG1-#1 采配の答え合わせ: この試合の係数記録を開始（attribution.js 非同梱/キルOFFは no-op）。
-      //   getter 渡し＝HT助言で _mgMatchCtx/_htState が後から動いても「今の介入」を読める。
+      //   getter 渡し＝HT の采配で _htState が後から動いても「今の介入」を読める。
       if (typeof attributionBeginMatch === 'function') {
-        attributionBeginMatch(function () { return { mg: _mgMatchCtx, ht: _htState }; });
+        attributionBeginMatch(function () { return { ht: _htState }; });
       }
       startManagerMatch();
     });
@@ -4193,7 +4156,6 @@
     _htDecorate(false);
     window._leagueInMatch = false;
     _leagueMatchActive = false;
-    _endManagerMatchCtx();
     window._leagueOnMatchFinish = null;
     _pendingMatch = null;
     if (typeof showScreen === 'function') showScreen('home');
@@ -4243,10 +4205,8 @@
     window._leagueOnMatchFinish = null;
     window._leagueInMatch = false;   // MD-01: 設定画面フラグの後始末（保険）
     _pendingMatch = null;
-    // MTG1-#1: 記録を確定して閉じる（★ _endManagerMatchCtx より前＝介入コンテキストが生きているうちに。
-    //   他会場の AI 消化が始まる前に必ず閉じる＝別試合の係数が混入しない）
+    // MTG1-#1: 記録を確定して閉じる（★ 他会場の AI 消化が始まる前に必ず閉じる＝別試合の混入防止）
     if (typeof attributionEndMatch === 'function') attributionEndMatch();
-    _endManagerMatchCtx();   // MG-03: 対策 buff はこの1試合限り（他会場の AI 消化前に必ず解除）
     _leagueMatchActive = false;   // MG-04: 戦術の制限もリーグの試合中だけ（シングル/W杯に漏らさない）
     // 自チーム = team1（gameState.team1）。得点は team.score。
     var myScore = (gameState && gameState.team1) ? gameState.team1.score : 0;
@@ -4552,37 +4512,25 @@
   function _resultColor(res) { return res === 'W' ? '#2ecc71' : res === 'L' ? '#e74c3c' : '#f1c40f'; }
 
   /* ── 偵察レポート（相手の攻め筋を上位3つ・ウェイトつきで見せる）──────────
-   * ★ 準備の判断材料。ここを読んで「📹 ビデオ学習」で何を封じるかを決める。
-   *   今週すでに封じている攻め筋には ✓ を付ける（対策済みが一目で分かる）。 */
+   * ★ 2026-08-04: 「攻め筋に対策する」機能の廃止後も、**相手を知る情報**としてここは残す
+   *   （スカウティングの表示であって采配ではない）。✓対策マークと「封じられる」文言は撤去し、
+   *   中立な「相手の武器を読む」表現に直した。 */
   function _scoutHTML(oppId) {
     if (!oppId) return '';
     var ranked = _opponentThreatsRanked(oppId).slice(0, 3);
     if (!ranked.length) return '';
-    // 今週のビデオ学習が対策している攻め筋を集める
-    var covered = {};
-    var pa = _pendingWeek();
-    if (pa && pa.slots) {
-      for (var i = 0; i < pa.slots.length; i++) {
-        var s = pa.slots[i];
-        if (s && s.kind === 'video_study' && s.target) covered[s.target] = true;
-      }
-    }
     var rows = ranked.map(function (r, i) {
       var pct = Math.round(r.pct * 100);
-      var on = !!covered[r.id];
       var rank = ['①', '②', '③'][i] || '';
-      return '<div class="lg-scout-row' + (on ? ' covered' : '') + '">' +
+      return '<div class="lg-scout-row">' +
         '<span class="lg-scout-rank">' + rank + '</span>' +
-        '<span class="lg-scout-name">' + _threatLabel(r.id) +
-          (on ? ' <span class="lg-scout-chk">✓' + _t('対策', 'set') + '</span>' : '') + '</span>' +
+        '<span class="lg-scout-name">' + _threatLabel(r.id) + '</span>' +
         '<span class="lg-scout-bar"><i style="width:' + pct + '%"></i></span>' +
         '<span class="lg-scout-val">' + Math.round(r.val) + '</span>' +
         '</div>';
     }).join('');
-    var anyCovered = ranked.some(function (r) { return covered[r.id]; });
-    var hint = anyCovered
-      ? _t('封じた攻め筋は今週の試合で弱まる', 'Countered threats are weakened this match')
-      : _t('📹 ビデオ学習で上から順に封じられる', '📹 Video study shuts these down, top-down');
+    var hint = _t('相手が最も強い攻め筋（数字は先発の平均能力）',
+                  'Where they are strongest (average of their starters)');
 
     // 相手の欠場者（怪我/出場停止）＝相手も自動で欠場者を外して戦う、が見える化＝安心材料。
     var oppAbs = _absentees(oppId);
@@ -5689,7 +5637,7 @@
       '</section>';
       nav = _finNavHTML(home, home, 'ホームへ戻る', 'Back to home');
     } else if (view === 'prep') {
-      // 本線①：練習メニュー。★ 偵察レポートはここ＝ビデオ学習でどれを封じるかの判断材料。
+      // 本線①：練習メニュー。★ 偵察レポートはここ＝週末の相手がどこで強いかを知る情報。
       // ★ 縦積みだと横持ちスマホで偵察レポートだけで1画面を使い切り、肝心の週3コマが
       //   画面外に落ちていた（可視48%）。横持ちは幅が余るので【左=偵察 / 右=3コマ】に割る。
       //   1カラムに戻す条件は CSS 側（.lg-rd-prepgrid の @media）に持たせ、DOMは常に同じ。
@@ -6522,8 +6470,8 @@
     opponentThreat: _opponentThreat,
     opponentThreats: _opponentThreats,
     opponentThreatsRanked: _opponentThreatsRanked,
-    beginMatchCtx: _beginManagerMatchCtx,
-    endMatchCtx: _endManagerMatchCtx,
+    // MTG1: マーク対象の検証・自動選び直し（tools/mtg1-marked-fix-test.js）
+    validMarkedPlayer: _validMarkedPlayer,
     nextUnlearnedTactic: _nextUnlearnedTactic,
     // MG-04 戦術習得制
     isTacticUnlocked: _isTacticUnlocked,
