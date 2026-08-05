@@ -47,6 +47,7 @@
   var _mvAuto = false;        // 自動再生モードか（false=手動送り＝既定）
   var _mvPlaying = false;     // 自動再生のタイマーが動いているか
   var _mvTimer = null;        // setTimeout ハンドル
+  var _mvStepDone = false;    // MTG1-#2: 直近の _mvStep が停止条件を踏まずに完了したか（hold-to-skim 用）
 
   function _mvLoadAutoPref() {
     try { _mvAuto = (localStorage.getItem(_MV_AUTO_KEY) === '1'); } catch (e) { _mvAuto = false; }
@@ -177,6 +178,8 @@
     window._mvMatchSubs = [];   // 全交代（自/相手）のログ記録をリセット
     _mvSubCutQueue = [];   // 交代カットシーン待ち行列をリセット
     _mvSkillCutQueue = []; _mvSkillSeen = {};   // スキル発動カットイン待ち行列/既再生をリセット（PS-05）
+    // MTG1-#2 ドラマスコア: ティア消費・介入マーカーを1試合ぶんリセット（非同梱/キルOFFは no-op）
+    if (typeof dramaBeginMatch === 'function') dramaBeginMatch();
     _subbedOff = new Set();
     _pendingSubLog = [];
     _shootSubStep = 0;
@@ -270,6 +273,26 @@
     _mvUpdateControlBar();
   }
 
+  /* MTG1-#2 hold-to-skim の操作口（dramascore.js の帯押下ループから呼ばれる・表示のみ）。
+   * 1ビート送って true。停止条件（HT/ゴール/負傷交代/終了/采配パネル/HTモーダル）を
+   * 踏んだら false ＝ エンジン側の停止フローに委ね、skim 側はループを止める。 */
+  function _mvSkimTick() {
+    if (!_managerMode || !_gameActive()) return false;
+    var dec = document.getElementById('mv-decision');
+    if (dec && dec.style.display === 'flex') return false;
+    var htm = document.getElementById('halftime-modal');
+    if (htm && htm.style.display === 'flex') return false;
+    if (_mvTimer) { clearTimeout(_mvTimer); _mvTimer = null; }   // 自動再生の予約と二重送りしない
+    _mvStep(false);
+    return _mvStepDone;
+  }
+  /* 押下終了の後始末。engineStopped=true はエンジン停止（ゴール余韻→カット→再開等）が
+   * 進行中＝こちらから再開しない。それ以外は自動再生モードなら再開する。 */
+  function _mvSkimEnd(engineStopped) {
+    if (!_managerMode || engineStopped) return;
+    if (_mvAuto) _mvResume();
+  }
+
   // 再生ウォッチドッグ（P1凍結対策・2026-07-04）: 「再生中なのに何も進まない」を検出して
   // 回復可能な一時停止へ変換する。2026-07-04 に HT重複負傷の解決後で1度だけ発生した
   // 無言フリーズ（再現条件未特定）が再発しても、ユーザーは ▶ で再開でき、原因が
@@ -294,6 +317,12 @@
     if (_mvCtrl.isOver() && currentChanceIdx >= chanceResults.length) { _mvFinish(); return; }
 
     _mvGoalShown = false;
+    _mvStepDone = false;   // MTG1-#2: このビートが停止条件を踏まずに完了したか（hold-to-skim 判定用）
+    // MTG1-#1 采配の答え合わせ: いま表示するビート位置（chance/scene）を控える（トースト判定用・表示のみ）
+    var _abC = (typeof currentChanceIdx !== 'undefined') ? currentChanceIdx : -1;
+    var _abS = (typeof currentSceneIdx !== 'undefined') ? currentSceneIdx : 0;
+    // MTG1-#2: コーチカードのビートはシーンを表示しない（nextChance 早期 return）＝ティア判定対象外
+    var _dsCoach = (typeof _pendingCoachCardEl !== 'undefined') && !!_pendingCoachCardEl;
     try {
       nextChance();                     // 1ビート進める（内部で createMatch から遅延フェッチ）
     } catch (e) {
@@ -318,6 +347,11 @@
       }
     } else { _mvProgKey = _pk; _mvStallCount = 0; }
     _mvSyncHud();
+    // MTG1-#1: 決定的に効いた瞬間の一行トースト（attribution.js 非同梱/キルOFFは no-op・1試合最大3回）
+    if (typeof attributionOnBeat === 'function') attributionOnBeat(_abC, _abS, _mvToast);
+    // MTG1-#2 ドラマスコア×ティア演出: いま表示したビートを採点し FX を帯内に重ねる（表示のみ・エンジン不変）。
+    //   nextChance 後に _shootSubStep===0 ＝ このビートがシーンの結果打（分割シュートの最終ビート）。
+    if (!_dsCoach && typeof dramaOnBeat === 'function') dramaOnBeat(_abC, _abS, _shootSubStep === 0);
 
     // ハーフタイム停止（前半ロスタイム完了＝currentChanceIdx===HALF_CHANCES の瞬間・1回のみ）。
     if (currentChanceIdx === HALF_CHANCES && !halfTimeShown && currentSceneIdx === 0 && _shootSubStep === 0) {
@@ -373,8 +407,19 @@
       return;
     }
 
+    _mvStepDone = true;   // 停止条件を踏まずにビート完了（hold-to-skim は続行してよい）
+
     // ★ 手動送りはここで終わり。次のビートはユーザーの「次へ」を待つ。
-    if (auto) _mvTimer = setTimeout(_mvTick, _mvSpeed());
+    if (auto) {
+      var _dsDelay = _mvSpeed();
+      // MTG1-#2: ドラマティアに応じた可変テンポ。1×/2×/3× を「基準速度」としてティア倍率を乗算
+      //   （Tier1=約0.87で流し、Tier2/3は溜める）。dramascore.js 非同梱/キルOFFは倍率1.0。
+      if (typeof dramaBeatScale === 'function') {
+        var _dsRes = chanceResults[_abC];
+        _dsDelay = Math.round(_dsDelay * dramaBeatScale(_dsRes && _dsRes.scenes ? _dsRes.scenes[_abS] : null));
+      }
+      _mvTimer = setTimeout(_mvTick, _dsDelay);
+    }
     else _mvUpdateControlBar();
   }
 
@@ -884,6 +929,8 @@
     //   放置すると後続の通常試合で all-btn（結果を見る）が無効のまま残る。
     var _nb = document.getElementById('next-btn'); if (_nb) _nb.disabled = false;
     var _ab = document.getElementById('all-btn'); if (_ab) _ab.disabled = false;
+    // MTG1-#2: 采配適用の瞬間を記録（直後のビートのドラマスコアを盛る・表示のみ）
+    if (typeof dramaNoteIntervention === 'function') dramaNoteIntervention(currentChanceIdx);
     _toggleNormalControls(false);
     _mvShowControls(true);
     if (_mvSubCutQueue.length) _mvPlaySubCutscenes(function () { _mvResume(); });   // 自チーム交代のカット
@@ -932,11 +979,18 @@
     var bm = document.getElementById('btn-multi'); if (bm) bm.style.display = 'none';
     var bm100 = document.getElementById('btn-multi100'); if (bm100) bm100.style.display = 'none';
 
+    /* MD-04c（2026-08-05）: リーグの試合中は**試合前と同じ3ゾーンUI**で采配する
+     * （ユーザー要望「選手が選びづらい／試合前のUIをここにも」）。
+     * 装飾できたときは主ボタン「▶ 試合へ戻る」を**下部コマンドバーに一本化**し、
+     * ヘッダー（.league-prep では非表示）には同じボタンを挿さない＝重複ボタンを作らない。 */
+    var _lgDeco = (typeof window.leagueDecorateSetting === 'function' &&
+                   document.body && document.body.classList.contains('league-mode'));
+
     var header = document.querySelector('#screen-setting .screen-header');
     if (header) {
       var origBack = header.querySelector('.back-btn:not(#mv-setting-back)');
       if (origBack) origBack.style.display = 'none';
-      if (!document.getElementById('mv-setting-back')) {
+      if (!_lgDeco && !document.getElementById('mv-setting-back')) {
         var bb = document.createElement('button');
         bb.className = 'back-btn';
         bb.id = 'mv-setting-back';
@@ -945,11 +999,21 @@
         header.insertBefore(bb, header.firstChild);
       }
     }
-    // 交代枠ラベル（既存 _updateHtSubsLabel を流用）。
-    if (!document.getElementById('ht-subs-label')) {
-      var subLabel = document.createElement('div');
+
+    // 3ゾーン化（先に走らせて下部バーを用意する＝交代枠ラベルの引越し先になる）
+    if (_lgDeco) window.leagueDecorateSetting(true, { mode: 'match', status: _mvSettingStatus() });
+
+    // 交代枠ラベル（既存 _updateHtSubsLabel を流用）。装飾中は下部バーの枠内へ、
+    // 非装飾（シングル/W杯）は従来どおり控えリストの上へ。
+    var subLabel = document.getElementById('ht-subs-label');
+    if (!subLabel) {
+      subLabel = document.createElement('div');
       subLabel.id = 'ht-subs-label';
-      subLabel.style.cssText = 'font-size:12px;color:#888;text-align:center;padding:4px 0 8px';
+      subLabel.style.cssText = 'font-size:12px;color:#9fb0c9;text-align:center;padding:4px 0 8px';
+    }
+    var _subSlot = document.getElementById('lg-prep-subs');
+    if (_subSlot) _subSlot.appendChild(subLabel);
+    else if (!subLabel.parentNode) {
       var benchEl = document.getElementById('bench-list');
       if (benchEl && benchEl.parentNode) benchEl.parentNode.insertBefore(subLabel, benchEl);
     }
@@ -960,10 +1024,26 @@
     showScreen('setting');
   }
 
+  /* MD-04c: 采配画面の下部バー左端に出す「戦況」（時間＋スコア）。
+   * 采配中は試合が止まっているので開いた時点の静的スナップショットでよい。
+   * ★ 3ゾーンUIはヘッダーを畳む＝この画面で唯一の「今の状況」表示になるので必須。 */
+  function _mvSettingStatus() {
+    var s1 = (gameState && gameState.team1) ? gameState.team1.score : 0;
+    var s2 = (gameState && gameState.team2) ? gameState.team2.score : 0;
+    var tm = _mvTimeLabel();
+    return (tm ? '<span class="lgp-st-time">' + tm + '</span>' : '') +
+      '<span class="lgp-st-score">' + (team1Data.flag || '') +
+      '<b>' + s1 + '</b><i>-</i><b>' + s2 + '</b>' + (team2Data.flag || '') + '</span>';
+  }
+
   // 負傷交代バナー（Sprint 2b・lab）: 重症負傷で交代画面が開いた時、対象選手を明示する。
   //   ピッチ上の🚑赤リングと合わせて「誰を交代するか」を確実に伝える。要求が無ければ隠す。
   function _mvSyncInjuryBanner() {
-    var host = document.querySelector('#screen-setting .formation-wrap') ||
+    /* ★ 2026-08-05: 挿入先は **ピッチ枠（.field-container）の手前**。
+     *   以前は #formation-display（＝ピッチ枠の“中”）の前に入れていたため、バナーが
+     *   芝の上に重なり、絶対配置の選手カードに食われて読めなかった。 */
+    var host = document.querySelector('#screen-setting .field-container') ||
+               document.querySelector('#screen-setting .formation-wrap') ||
                document.getElementById('formation-display');
     var banner = document.getElementById('mv-injury-banner');
     var req = (typeof disciplinePendingUserSub === 'function' && gameState && gameState.team1)
@@ -1022,6 +1102,13 @@
     _mvRecordPlayerSubs(_mvTimeLabel());   // テキストログ用に交代を記録
     if (typeof _insertSubLog === 'function') _insertSubLog(_mvTimeLabel());
 
+    // 負傷バナーはこのパネル専用＝閉じたら必ず畳む（次に開く画面に古い文言を残さない）。
+    var _ib = document.getElementById('mv-injury-banner'); if (_ib) _ib.style.display = 'none';
+
+    // MD-04c: 3ゾーン装飾を必ず剥がす（共有DOM＝シングル/W杯/HTモーダルへ漏らさない）。
+    //   非装飾で開いていた場合も no-op で安全なので無条件に呼ぶ。
+    if (typeof window.leagueDecorateSetting === 'function') window.leagueDecorateSetting(false);
+
     // 設定画面のクロームを元に戻す。
     var header = document.querySelector('#screen-setting .screen-header');
     if (header) {
@@ -1036,6 +1123,9 @@
     var bm = document.getElementById('btn-multi'); if (bm) bm.style.display = '';
     var bm100 = document.getElementById('btn-multi100'); if (bm100) bm100.style.display = '';
     var sl = document.getElementById('ht-subs-label'); if (sl && sl.parentNode) sl.parentNode.removeChild(sl);
+
+    // MTG1-#2: 采配適用の瞬間を記録（直後のビートのドラマスコアを盛る・表示のみ）
+    if (typeof dramaNoteIntervention === 'function') dramaNoteIntervention(currentChanceIdx);
 
     // 試合画面へ戻り、そのまま自動再生を再開（采配ポイントの確認パネルは廃止＝余計な1クリック削減）。
     showScreen('game');
@@ -1196,6 +1286,8 @@
       '<button class="mv-btn mv-btn-ghost" onclick="_mvSkipToEnd()"><span class="mv-btn-ic">⏭</span>' + _mvT('結果', 'Result') + '</button>';
     host.appendChild(bar);
     _mvSyncDiscTestBtn();
+    // MTG1-#2 hold-to-skim 帯（バー内の全幅行として注入。dramascore.js 非同梱/キルOFFは何も出ない）
+    if (typeof dramaEnsureSkimUI === 'function') dramaEnsureSkimUI();
 
     // 采配パネル（采配する／続ける）。
     var dec = document.createElement('div');
@@ -1250,6 +1342,8 @@
   g.startManagerMatch = startManagerMatch;
   g._mvTogglePlay = _mvTogglePlay;
   g._mvNext = _mvNext;            // 手動送り（HTML onclick から呼ぶ）
+  g._mvSkimTick = _mvSkimTick;    // MTG1-#2 hold-to-skim（dramascore.js から）
+  g._mvSkimEnd = _mvSkimEnd;      // MTG1-#2 hold-to-skim 終了時の後始末
   g._mvCycleSpeed = _mvCycleSpeed;
   g._mvOpenSetting = _mvOpenSetting;
   g._mvCloseSetting = _mvCloseSetting;

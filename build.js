@@ -38,7 +38,9 @@ const JS_FILES = ['players.js', 'rng.js', 'simulate.js', 'events.js', 'match.js'
 // ★ names.js（FN-00 表示名インダイレクション層）も lab 限定。既定は実名表示＝OFF なので
 //   読み込むだけでは挙動不変。?names=fiction / NAMES.toggle() で架空表示に切り替わる。
 const LAB_ONLY_JS = ['names.js', 'sns.js', 'mental.js', 'discipline.js', 'portrait.js', 'manga_recolor.js',
-  'juice.js', 'lab-art.js', 'lg-ui.js', 'matchday.js', 'wideshot.js', 'league.js'];
+  'juice.js', 'lab-art.js', 'lg-ui.js', 'matchday.js', 'wideshot.js', 'league.js',
+  // MTG1（2026-08-03 第1回面白さMTG採用分・全てキルスイッチ付き）
+  'attribution.js', 'archetype.js', 'dramascore.js', 'rail.js', 'oshi.js'];
 
 // 試合エンジン系: 最小化＋軽難読化
 const LOGIC_OPTS = {
@@ -152,6 +154,14 @@ const labInject =
   // 層S 引き画（WIDE-01）。simulate.js から typeof ガードで呼ばれるだけ＝依存なし。
   `<script src="js/wideshot.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/league.js?v=${BUILD_VER}"></script>\n` +
+  // MTG1（第1回面白さMTG採用分）。league.js の後＝league.js が typeof ガードで拾い、
+  //   こちら側は window._leagueRailHost / _leagueOshiHost 経由で遅延バインドする。
+  //   各ファイル先頭にキルスイッチ（MTG1_ANSWER / _ARCH / _DRAMA / _RAIL / _OSHI）。
+  `<script src="js/attribution.js?v=${BUILD_VER}"></script>\n` +
+  `<script src="js/archetype.js?v=${BUILD_VER}"></script>\n` +
+  `<script src="js/dramascore.js?v=${BUILD_VER}"></script>\n` +
+  `<script src="js/rail.js?v=${BUILD_VER}"></script>\n` +
+  `<script src="js/oshi.js?v=${BUILD_VER}"></script>\n` +
   // BG-TONE-01: 背景1枚絵の声量を描画時に下げる（cutscene.js の _bgTone）。
   //   ★ 公開 docs/ はフラグ未定義＝完全OFF。ここで lab だけ有効化する。
   `<script>window.CS_BG_TONE_ENABLED=true;</script>\n` +

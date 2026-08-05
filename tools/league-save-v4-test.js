@@ -421,15 +421,24 @@ check('TALENT_OVERRIDES で特定選手を手で固定できる（メッシ型�
 /* ── ⑦ MG-03b 週プラン（1節=1週間・月〜金を3コマ） ───────────────── */
 section('⑦ MG-03b 今週の準備（3コマ配分）');
 reset(); L.newSeason(MY);
-const mgf = vm.runInContext('window.managerParamFactor', ctx);
 
 check('初期状態では週プラン未設定', L.pendingWeek() === null);
-check('対策 buff は未選択なら無効（係数 1.0）', (function () {
-  L.beginMatchCtx(MY);
-  return mgf({ name: TEAM_DATA[MY].name }, null, '対ドリブル突破') === 1.0;
-})());
 
-// ビデオ学習: 相手の得意な攻め筋を決定論で割り出す
+/* ★ 2026-08-04: 「攻め筋に対策する」機能（📹ビデオ学習 / HTコーチ助言）はユーザー判断で廃止。
+ *   ここでは「対策フックが完全に消えたこと」と「旧セーブが壊れないこと」を検証する。 */
+check('📹ビデオ学習は定義表から消えている',
+  !L.WEEK_ACTION_DEFS.some(d => d.kind === 'video_study'),
+  JSON.stringify(L.WEEK_ACTION_DEFS.map(d => d.kind)));
+check('試合内の対策フック window.managerParamFactor は定義されない',
+  vm.runInContext('typeof window.managerParamFactor', ctx) === 'undefined',
+  vm.runInContext('typeof window.managerParamFactor', ctx));
+check('対策 buff の定数 BUFF_MAX が撤去されている',
+  vm.runInContext('typeof window._leagueTestAPI', ctx) === 'object' &&
+  L.MANAGER_TUNING.BUFF_MAX === undefined, String(L.MANAGER_TUNING.BUFF_MAX));
+check('成長源 GROWTH.VIDEO が撤去されている',
+  L.MANAGER_TUNING.GROWTH.VIDEO === undefined, String(L.MANAGER_TUNING.GROWTH.VIDEO));
+
+// 攻め筋のランキング（偵察レポートの表示素材として残す。試合内の効果は持たない）
 const fx0 = L.getState().fixtures[0].find(m => m.home === MY || m.away === MY);
 const opp0 = (fx0.home === MY) ? fx0.away : fx0.home;
 const ranked = L.opponentThreats(opp0);
@@ -439,51 +448,32 @@ check('攻め筋のランキングが決定論で決まる（同じ入力で同�
 check('ランキングは全6本を重複なく並べる', new Set(ranked).size === 6 && ranked.length === 6);
 check('_opponentThreat は1位と一致', L.opponentThreat(opp0) === threat);
 
-L.setWeekSlot(0, 'video_study');
+L.setWeekSlot(0, 'sports_science');
 let pa = L.pendingWeek();
-check('コマ1にビデオ学習が入る（対象＝1位の武器）',
-  !!pa && pa.slots[0].kind === 'video_study' && pa.slots[0].target === threat);
+check('コマ1に置いたものが入る', !!pa && pa.slots[0].kind === 'sports_science');
 check('未設定のコマは null のまま', pa.slots[1] === null && pa.slots[2] === null);
 check('コマ数は常に3', pa.slots.length === L.WEEK_SLOTS && L.WEEK_SLOTS === 3);
-check('保存される', JSON.parse(api.ls.getItem(LS_KEY)).seasonMeta.pendingAction.slots[0].kind === 'video_study');
+check('保存される', JSON.parse(api.ls.getItem(LS_KEY)).seasonMeta.pendingAction.slots[0].kind === 'sports_science');
 
-// 重ねがけ＝封じる武器が1本ずつ増える
-L.setWeekSlot(1, 'video_study');
+// 同じものを重ねられる（重点配分）
+L.setWeekSlot(1, 'sports_science');
 pa = L.pendingWeek();
-check('ビデオ学習を重ねると2本目の武器を狙う', pa.slots[1].target === ranked[1], pa.slots[1].target);
-check('1本目の対象は変わらない', pa.slots[0].target === ranked[0]);
-L.beginMatchCtx(MY);
-check('2本とも試合中に効く', mgf({ name: TEAM_DATA[MY].name }, null, '対' + ranked[0]) > 1 &&
-  mgf({ name: TEAM_DATA[MY].name }, null, '対' + ranked[1]) > 1);
-check('3本目（未対策）には効かない', mgf({ name: TEAM_DATA[MY].name }, null, '対' + ranked[2]) === 1.0);
-check('重ねても1本あたりの上限は変わらない（+5%以内）',
-  mgf({ name: TEAM_DATA[MY].name }, null, '対' + ranked[0]) <= 1.05);
+check('同じコマを重ねられる（重点配分）', pa.slots[0].kind === 'sports_science' && pa.slots[1].kind === 'sports_science');
 // 同じコマをもう一度押すと空に戻る
 L.setWeekSlot(1, '');
 check('同じアイコンを押し直すとコマが空になる', L.pendingWeek().slots[1] === null);
-L.setWeekSlot(1, 'video_study');
 
-L.beginMatchCtx(MY);
-const myTeamStub = { name: TEAM_DATA[MY].name };
-const oppTeamStub = { name: TEAM_DATA[opp0].name };
-const fBuff = mgf(myTeamStub, null, '対' + threat);
-check('対策した攻め筋を守る時だけ係数が上がる', fBuff > 1.0, 'f=' + fBuff);
-check('係数は +5% 以内（[0.95,1.05] clamp）', fBuff <= 1.05);
-check('初期 tactical=20 なら +1% 程度', Math.abs(fBuff - 1.01) < 0.0001, 'f=' + fBuff);
-check('対策していない攻め筋には効かない', mgf(myTeamStub, null, '対' + ranked[2]) === 1.0);
-check('攻撃側（"対"なし）には効かない', mgf(myTeamStub, null, threat) === 1.0);
-check('相手チームには効かない', mgf(oppTeamStub, null, '対' + threat) === 1.0);
-vm.runInContext('window.MANAGER_ENABLED = false', ctx);
-check('キルスイッチ MANAGER_ENABLED=false で無効化', mgf(myTeamStub, null, '対' + threat) === 1.0);
-vm.runInContext('delete window.MANAGER_ENABLED', ctx);
-L.endMatchCtx();
-check('試合が終われば係数は 1.0 に戻る', mgf(myTeamStub, null, '対' + threat) === 1.0);
+L.getState().round = 0;
+// ★ 逓減の検証は「conditioning は MATCH_ALL だけで動く」前提なので、conditioning を伸ばさない
+//   コマ（🗣️話術勉強＝motivator）を置く。旧版は📹ビデオ学習（tactical）が同じ役目だった。
+L.setWeekSlot(0, 'speech_study');
+L.setWeekSlot(1, 'speech_study');
 
 // 成長: gain = base × (1 - param/CAP) の逓減
 const before7 = JSON.parse(JSON.stringify(L.getState().manager.params));
 let mg = L.consumeWeek('W');
 const after7 = L.getState().manager.params;
-check('勝利で戦術眼が伸びる（試合0.4＋勝利1.0＋ビデオ1.5×2 の逓減後）',
+check('勝利で戦術眼が伸びる（試合0.4＋勝利1.0 の逓減後）',
   after7.tactical > before7.tactical, before7.tactical + '→' + after7.tactical);
 check('指揮しただけの param も微増する', after7.conditioning > before7.conditioning);
 check('成長は逓減する（20 のとき base の 80%）',
@@ -499,6 +489,29 @@ L.getState().manager.params.tactical = 100;
 const capped = L.consumeWeek('W');
 check('CAP=100 では成長しない（上限）', L.getState().manager.params.tactical === 100);
 check('CAP 超えの値は返さない', !capped.grown.tactical);
+
+/* ── 旧セーブ互換: 廃止した 'video_study' が残っていても壊れない ─────────────
+ * セーブ版数は上げていないので、既存プレイヤーのセーブには残り得る。 */
+(function () {
+  const st = L.getState();
+  st.seasonMeta.pendingAction = { round: st.round, slots: [
+    { kind: 'video_study', target: 'ドリブル突破' },
+    { kind: 'sports_science', target: null },
+    { kind: 'video_study', target: 'クロス' }
+  ] };
+  let threw = null, pw = null;
+  try { pw = L.pendingWeek(); } catch (e) { threw = e; }
+  check('旧セーブの video_study スロットを読んでも例外を投げない', threw === null, String(threw));
+  check('廃止された kind は空きスロット扱いになる',
+    !!pw && pw.slots[0] === null && pw.slots[2] === null, JSON.stringify(pw && pw.slots));
+  check('同居する生きたコマは残る', !!pw && pw.slots[1] && pw.slots[1].kind === 'sports_science');
+  let threw2 = null, out = null;
+  try { out = L.consumeWeek('D'); } catch (e) { threw2 = e; }
+  check('旧セーブのまま週を消費しても例外を投げない', threw2 === null, String(threw2));
+  check('廃止された kind は actionsLog にも積まれない',
+    !L.getState().seasonMeta.actionsLog.some(a => a.action === 'video_study'));
+  check('消費後は週プランが空になる', !!out && L.pendingWeek() === null);
+})();
 
 /* 🏥 回復日＝週の練習なので「試合の前」に効く */
 section('⑧ 🏥 回復日（負傷者の復帰が1週早まる）');
@@ -558,7 +571,31 @@ const autoSlots = L.pendingWeek().slots;
 check('3コマとも埋まる', autoSlots.every(Boolean) && autoSlots.length === 3);
 check('負傷者がいれば回復日が入る', autoSlots.some(s => s.kind === 'recovery'));
 check('未習得の戦術があれば戦術勉強が入る', autoSlots.some(s => s.kind === 'tactic_study'));
-check('残りは相手対策で埋まる', autoSlots.some(s => s.kind === 'video_study'));
+/* ★ 2026-08-04: 埋め先だった 📹ビデオ学習 の廃止に伴い、残り枠は autoFill 昇順
+ *   （🎯個人練習 → 🗣️話術勉強 → 🧪スポーツ科学）で決定論に埋める。 */
+check('残りは autoFill の先頭（🎯個人練習）で埋まる', autoSlots.some(s => s.kind === 'individual_training'),
+  JSON.stringify(autoSlots.map(s => s && s.kind)));
+check('おまかせは決定論（2回押しても同じ答え）', (function () {
+  const a = JSON.stringify(L.pendingWeek().slots.map(s => s && s.kind));
+  L.autoWeek();
+  return JSON.stringify(L.pendingWeek().slots.map(s => s && s.kind)) === a;
+})(), JSON.stringify(L.pendingWeek().slots.map(s => s && s.kind)));
+check('おまかせが廃止済みの video_study を入れることはない',
+  !L.pendingWeek().slots.some(s => s && s.kind === 'video_study'));
+check('autoOnce が1つも立たなくても全枠が埋まる（埋め順を巡回）', (function () {
+  // 負傷者なし＋全戦術習得済み＝autoOnce がゼロの状況
+  const st = L.getState();
+  st.round = 3;
+  L.squadEntry(MY, injKey).injuryOut = 0;
+  const learned = st.manager.learnedTactics.slice();
+  st.manager.learnedTactics = L.TACTIC_IDS.slice();
+  L.autoWeek();
+  const s = L.pendingWeek().slots;
+  const okAll = s.every(Boolean) &&
+    s[0].kind === 'individual_training' && s[1].kind === 'speech_study' && s[2].kind === 'sports_science';
+  st.manager.learnedTactics = learned;
+  return okAll;
+})(), JSON.stringify(L.pendingWeek().slots.map(s => s && s.kind)));
 
 // 戦術勉強: ゲージ → 解放
 section('⑪ 📖 戦術勉強（ゲージ→解放）');
@@ -588,7 +625,7 @@ const before12 = DEFS.length;
 let customConsumed = 0;
 DEFS.push({
   kind: 'press_conference', icon: '🎤', ja: '記者会見', en: 'Press conference',
-  grow: { param: 'popularity', base: 'VIDEO' },
+  grow: { param: 'popularity', base: 'SPEECH' },
   target: function () { return 'home_fans'; },
   text: function () { return 'テスト用のコマ'; },
   summary: function () { return 'テスト'; },

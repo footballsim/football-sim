@@ -39,7 +39,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20260625d">
-</head>
+<link rel="stylesheet" href="css/league-ui.css"></head>
 <body>
 
 <!-- TITLE SCREEN -->
@@ -131,7 +131,7 @@
         <span id="x-follow-label">@footballsim_ai をフォロー</span>
       </a>
     </div>
-    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v2.8.2</div>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:1px">v2.7.1</div>
     <div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;letter-spacing:0.5px">© 2026 footballsim · All rights reserved</div>
   </div>
 </div>
@@ -866,5 +866,17 @@
 <script src="js/tournament.js?v=20260622e"></script>
 <script src="js/japanwc.js?v=20260622r"></script>
 <div id="oop-toast"></div>
+<script src="js/names.js"></script>
+<script src="js/sns.js"></script>
+<script src="js/mental.js"></script>
+<script src="js/discipline.js"></script>
+<script src="js/portrait.js"></script>
+<script src="js/manga_recolor.js"></script>
+<script src="js/juice.js"></script>
+<script src="js/lab-art.js"></script>
+<script src="js/lg-ui.js"></script>
+<script src="js/matchday.js"></script>
+<script src="js/league.js"></script>
+<script>window.LEAGUE_TEST_MODE=true;(function(){function boot(){var tm=document.querySelector(".top-menu");if(tm)tm.style.display="none";if(typeof showLeague==="function")showLeague();}if(document.readyState==="loading")window.addEventListener("DOMContentLoaded",boot);else boot();})();</script>
 </body>
 </html>
