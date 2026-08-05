@@ -2209,9 +2209,7 @@ body.league-mode #screen-home.season-end-mode > #league-body {
     body.league-mode #screen-setting.league-prep::after { opacity: .14; }
   }
 
-  /* ── ヘッダー：MD-04b（2026-07-27）で全撤去。戻るは下部コマンドバーに一本化。──
-     対戦カード・節/ホームは直前の「試合へ」画面で見せている＝ここでは繰り返さない。 */
-  body.league-mode #screen-setting.league-prep .screen-header { display: none; }
+  /* ヘッダー撤去（MD-04b）は縦持ちでも同じ＝MD-04c ブロックへ移設した。 */
 
   /* ── 本文（MD-04b）：左=控え棚／中央=ピッチ（主役）／右=総合力+設定5行／最下段=コマンドバー ──
      .bench-panel と .field-panel は #formation-view > .formation-layout の中に居るので、
@@ -2318,31 +2316,7 @@ body.league-mode #screen-home.season-end-mode > #league-body {
      （列を畳むのは幅条件だけ＝AGENTS.md 10）。 */
   body.league-mode #screen-setting.league-prep .setting-btn-grid { gap: clamp(4px, 0.9vh, 8px); }
 
-  /* ── 下部コマンドバー（戻る／自動編成／キックオフ）── */
-  body.league-mode #screen-setting.league-prep .setting-content > .lg-prep-cmd {
-    grid-column: 1 / -1; grid-row: 2;
-    display: grid; gap: 8px;
-    grid-template-columns: minmax(0, .8fr) minmax(0, 1fr) minmax(0, 2fr);
-  }
-  body.league-mode #screen-setting.league-prep .lg-prep-nb {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    min-height: clamp(36px, 6.4vh, 48px); padding: 6px 14px; cursor: pointer;
-    border-radius: 5px; border: 2px solid var(--lg-line);
-    background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
-    color: var(--lg-text-dim);
-    font-size: clamp(12px, 2.2vh, 15px); font-weight: 900; letter-spacing: .6px;
-    box-shadow: 0 3px 0 var(--pr-edge); transition: transform .08s ease, box-shadow .08s ease;
-  }
-  body.league-mode #screen-setting.league-prep .lg-prep-nb:active {
-    transform: translateY(2px); box-shadow: 0 1px 0 var(--pr-edge);
-  }
-  body.league-mode #screen-setting.league-prep .lg-prep-nb.auto { color: var(--lg-text); }
-  body.league-mode #screen-setting.league-prep .lg-prep-nb.auto:hover { border-color: var(--lg-gold-2); }
-  body.league-mode #screen-setting.league-prep .lg-prep-nb.kick {
-    color: var(--lg-ink); border-color: var(--lg-gold);
-    background: linear-gradient(165deg, var(--lg-gold), var(--lg-gold-2));
-    font-size: clamp(14px, 2.8vh, 20px); letter-spacing: 2px;
-  }
+  /* 下部コマンドバーの見た目と横一列の並べ方は MD-04c ブロック（後方）に集約した。 */
 }
 
 /* ==========================================================================
@@ -2458,6 +2432,132 @@ body.league-mode #screen-setting.league-prep .lgp-mode {
 body.league-mode #screen-setting.league-prep .lgp-mode .lgp-mode-ic { color: var(--lg-gold); }
 /* .field-container は position 指定が無い＝ボタンの絶対配置の基準にする */
 body.league-mode #screen-setting.league-prep .field-container { position: relative; }
+
+/* ==========================================================================
+ * MD-04c — 采配画面の共通化（2026-08-05・ユーザー要望「試合前のUIを試合中にも」）
+ * --------------------------------------------------------------------------
+ * 試合前(prep)／試合中(match)／ハーフタイム(ht)で **同じ3ゾーン**を使い、
+ * 下部コマンドバーの中身だけを文脈で入れ替える（league.js `_decorateSettingScreen`）。
+ * ここは向き非依存の基底＝縦持ちでもバー/枠が素のブラウザ既定にならないようにする
+ * （横持ちの並べ方だけが上の @media landscape 側）。
+ * ★ すべて `.league-prep` スコープ＝シングル/W杯には一切波及しない。
+ * ========================================================================== */
+body.league-mode #screen-setting.league-prep {
+  --pr-edge: rgba(0, 0, 0, .5);
+  --pr-panel: rgba(255, 255, 255, .05);
+}
+/* ヘッダーは全向きで畳む。戻る/主ボタンは下部コマンドバーに一本化する＝
+   同じ操作のボタンが画面に2つ並ばない（試合中は manager-match.js 側も挿さない）。 */
+body.league-mode #screen-setting.league-prep .screen-header { display: none; }
+
+/* ── 下部コマンドバー（基底）── */
+/* 縦持ち＝この画面は縦に長くスクロールする（3ゾーンは横持ち専用）。ヘッダーを畳んだぶん
+   主ボタンが画面外に落ちないよう、バーを最下部に貼り付ける＝どこまで送っても戻れる。 */
+body.league-mode #screen-setting.league-prep .lg-prep-cmd {
+  display: grid; gap: var(--lg-pad-s);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  margin-top: var(--lg-pad-m);
+  position: sticky; bottom: 0; z-index: 40;
+  padding: var(--lg-pad-s) 0 calc(var(--lg-pad-s) + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, rgba(10, 23, 48, 0) 0%, rgba(10, 23, 48, .92) 34%);
+}
+/* 縦持ち＝主ボタンは行いっぱいで最下段（親指の届く位置に大きく置く） */
+body.league-mode #screen-setting.league-prep .lg-prep-nb.kick { grid-column: 1 / -1; }
+
+body.league-mode #screen-setting.league-prep .lg-prep-nb {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--lg-pad-s);
+  min-height: clamp(44px, 6.4vh, 48px); padding: 6px 14px; cursor: pointer;
+  border-radius: 5px; border: 2px solid var(--lg-line);
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  color: var(--lg-text-dim);
+  font-size: clamp(12px, 2.2vh, 15px); font-weight: 900; letter-spacing: .6px;
+  font-family: inherit;
+  box-shadow: 0 3px 0 var(--pr-edge); transition: transform .08s ease, box-shadow .08s ease;
+}
+body.league-mode #screen-setting.league-prep .lg-prep-nb:active {
+  transform: translateY(2px); box-shadow: 0 1px 0 var(--pr-edge);
+}
+body.league-mode #screen-setting.league-prep .lg-prep-nb.auto { color: var(--lg-text); }
+body.league-mode #screen-setting.league-prep .lg-prep-nb.auto:hover { border-color: var(--lg-gold-2); }
+body.league-mode #screen-setting.league-prep .lg-prep-nb.kick {
+  color: var(--lg-ink); border-color: var(--lg-gold);
+  background: linear-gradient(165deg, var(--lg-gold), var(--lg-gold-2));
+  font-size: clamp(14px, 2.8vh, 20px); letter-spacing: 2px;
+}
+
+/* ── 試合中バーの左2枠＝［戦況］［交代枠］。ボタンと同じ高さ・同じ縁で1本のリズムに揃える。
+      （バーの左半分を空けるとデッドスペースになる＝ここは「今の状況」を置く場所） ── */
+body.league-mode #screen-setting.league-prep .lg-prep-status,
+body.league-mode #screen-setting.league-prep .lg-prep-subs {
+  display: flex; align-items: center; justify-content: center; gap: var(--lg-pad-s);
+  min-height: clamp(44px, 6.4vh, 48px); padding: 4px var(--lg-pad-m); overflow: hidden;
+  border-radius: 5px; border: 2px solid var(--lg-line);
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 3px 0 var(--pr-edge);
+}
+body.league-mode #screen-setting.league-prep .lgp-st-time {
+  color: var(--lg-gold); font-size: 10px; font-weight: 900; letter-spacing: 2px;
+  font-feature-settings: "tnum" 1; flex: 0 0 auto;
+}
+body.league-mode #screen-setting.league-prep .lgp-st-score {
+  display: inline-flex; align-items: center; gap: 4px; min-width: 0;
+  color: var(--lg-text); font-size: clamp(13px, 2.4vh, 17px); font-weight: 900;
+  font-feature-settings: "tnum" 1; white-space: nowrap;
+}
+body.league-mode #screen-setting.league-prep .lgp-st-score i {
+  font-style: normal; color: var(--lg-text-mute); font-weight: 700;
+}
+body.league-mode #screen-setting.league-prep .lg-prep-subs-ic {
+  color: var(--lg-gold); font-size: 12px; font-weight: 900; flex: 0 0 auto;
+}
+body.league-mode #screen-setting.league-prep .lg-prep-subs-slot { min-width: 0; }
+/* 交代枠ラベルは JS がインライン style を書く（色は残り0で赤に変わる＝意味がある）。
+   ここでは寸法だけを !important で上書きしてチップに収める。 */
+body.league-mode #screen-setting.league-prep #ht-subs-label {
+  font-size: clamp(10px, 1.9vh, 12px) !important;
+  padding: 0 !important; font-weight: 800; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ── 負傷交代バナー（manager-match.js のインライン style を締める）──
+      中央カラム＝主役のピッチの上に薄く1本。太らせるとピッチが痩せるので高さを詰める。 */
+body.league-mode #screen-setting.league-prep #mv-injury-banner {
+  margin: 0 0 clamp(4px, 1vh, 8px) !important;
+  padding: clamp(5px, 1.1vh, 9px) 10px !important;
+  border-radius: 5px !important; border-width: 2px !important;
+  font-size: clamp(10px, 1.9vh, 12.5px) !important; line-height: 1.45 !important;
+}
+
+/* ── 横持ち＝3ゾーンの最下段に**横一列**（バーで2行取ると主役のピッチが痩せる）──
+      試合前  ［← 戻る］［👥 自動編成］［⚽ キックオフ！］
+      試合中  ［戦況］  ［交代枠］     ［▶ 試合へ戻る］
+      どちらも主ボタンは右端・最大＝押す場所が文脈で動かない。 */
+@media (orientation: landscape) {
+  body.league-mode #screen-setting.league-prep .setting-content > .lg-prep-cmd {
+    grid-column: 1 / -1; grid-row: 2; margin-top: 0;
+    position: static; padding: 0; background: none;   /* 横持ちはグリッド最下段に収まる＝貼り付け不要 */
+    /* 3ゾーンと同じ列間隔でバーを刻む＝上の3枠と同じリズムで並んで見える */
+    gap: clamp(8px, 1.2vw, 14px);
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1fr) minmax(0, 2fr);
+  }
+  body.league-mode #screen-setting.lgp-inmatch .setting-content > .lg-prep-cmd {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.15fr) minmax(0, 1.8fr);
+  }
+  body.league-mode #screen-setting.league-prep .lg-prep-nb.kick { grid-column: auto; }
+
+  /* 右カラムの底に空きが残っていた（総合力＋5行を上詰め＝下に無意味な暗い余白）。
+     設定行を余りに合わせて伸ばし、列の高さをピッチ/控えと揃える＝デッドスペース解消。 */
+  body.league-mode #screen-setting.league-prep .lgp-power { flex: 0 0 auto; }
+  body.league-mode #screen-setting.league-prep .setting-btn-grid .setting-nav-btn {
+    flex: 1 1 auto; min-height: 0;
+  }
+  /* 横持ちは高さが足りない＝押さない枠（戦況/交代枠）だけ 40px まで詰める。
+     押すもの（ボタン）は 44px を死守（タップ最小サイズ）。 */
+  body.league-mode #screen-setting.league-prep .lg-prep-status,
+  body.league-mode #screen-setting.league-prep .lg-prep-subs {
+    min-height: clamp(40px, 6.4vh, 48px);
+  }
+}
 
 /* ==========================================================================
  * HT-01 — ハーフタイム画面（2026-07-26・Codexモック R_halftime_retro_v3 準拠）

@@ -3809,11 +3809,22 @@
    * 共有画面（#screen-setting）なので **DOM は増やさず**、下部コマンドバーだけを注入し
    * レイアウトと仕上げは league-ui.css の `.league-prep` スコープで行う。
    * リーグを抜けるときは必ず外す＝シングル/W杯/ハーフタイム采配には一切波及させない。 */
-  function _decorateSettingScreen(on) {
+  /* MD-04c（2026-08-05・ユーザー要望「試合前のUIを試合中の采配にも」）:
+   *   mode で下部コマンドバーだけを差し替え、レイアウト/カード装飾は完全に共通にする。
+   *     'prep'  … 試合前  ［← 戻る］［👥 自動編成］［⚽ キックオフ！］
+   *     'match' … 試合中の采配  ［戦況］［交代枠］［▶ 試合へ戻る］
+   *     'ht'    … ハーフタイムの采配  ［戦況］［交代枠］［↩ ハーフタイムへ］
+   *   ★ 試合中に「自動編成」を出さないのは意図的。leagueAutoLineup は XI を丸ごと差し替える
+   *     ＝ applyDrop の交代枠カウント（_htMode/htSubsCount/_subbedOff）を通らないため、
+   *     交代0で11人入れ替えができてしまう（ルール破り）。枠を消費する自動編成が要るなら
+   *     エンジン側の対応が必要なので、ここでは出さない。 */
+  function _decorateSettingScreen(on, opts) {
     var s = document.getElementById('screen-setting'); if (!s) return;
+    var mode = (opts && opts.mode) || 'prep';
     var bar = document.getElementById('lg-prep-cmd');
     if (!on) {
       s.classList.remove('league-prep');
+      s.classList.remove('lgp-inmatch');
       if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
       ['lgp-power', 'lgp-mode', 'lgp-bench-count'].forEach(function (id) {
         var el = document.getElementById(id);
@@ -3833,6 +3844,8 @@
       return;
     }
     s.classList.add('league-prep');
+    if (mode === 'match' || mode === 'ht') s.classList.add('lgp-inmatch');
+    else s.classList.remove('lgp-inmatch');
     if (!bar) {
       var host = s.querySelector('.setting-content'); if (!host) return;
       bar = document.createElement('div');
@@ -3840,13 +3853,28 @@
       bar.className = 'lg-prep-cmd';
       host.appendChild(bar);
     }
-    bar.innerHTML =
-      '<button type="button" class="lg-prep-nb back" onclick="settingBack()">' +
-        _t('← 戻る', '← Back') + '</button>' +
-      '<button type="button" class="lg-prep-nb auto" onclick="leagueAutoLineup()">' +
-        '👥 ' + _t('自動編成', 'Auto pick') + '</button>' +
-      '<button type="button" class="lg-prep-nb kick" onclick="startGame()">' +
-        '⚽ ' + _t('キックオフ！', 'KICK OFF!') + '</button>';
+    if (mode === 'match' || mode === 'ht') {
+      // 試合中＝［戦況］［交代枠スロット］［主ボタン］。主ボタンは常に右下・44px以上。
+      //   交代枠ラベル(#ht-subs-label)は manager-match.js / simulate.js が持つ既存ノードを
+      //   このスロットへ引っ越して使う（DOM を増やさない・_updateHtSubsLabel がそのまま効く）。
+      bar.innerHTML =
+        '<div class="lg-prep-status">' + ((opts && opts.status) || '') + '</div>' +
+        '<div class="lg-prep-subs"><span class="lg-prep-subs-ic">⇄</span>' +
+          '<span class="lg-prep-subs-slot" id="lg-prep-subs"></span></div>' +
+        (mode === 'ht'
+          ? '<button type="button" class="lg-prep-nb kick" onclick="htCloseLineup()">' +
+              '↩ ' + _t('ハーフタイムへ', 'Back to Half Time') + '</button>'
+          : '<button type="button" class="lg-prep-nb kick" onclick="_mvCloseSetting()">' +
+              '▶ ' + _t('試合へ戻る', 'Back to match') + '</button>');
+    } else {
+      bar.innerHTML =
+        '<button type="button" class="lg-prep-nb back" onclick="settingBack()">' +
+          _t('← 戻る', '← Back') + '</button>' +
+        '<button type="button" class="lg-prep-nb auto" onclick="leagueAutoLineup()">' +
+          '👥 ' + _t('自動編成', 'Auto pick') + '</button>' +
+        '<button type="button" class="lg-prep-nb kick" onclick="startGame()">' +
+          '⚽ ' + _t('キックオフ！', 'KICK OFF!') + '</button>';
+    }
 
     // ── MD-04b（2026-07-27・R_lineup_setting_retro_v2 準拠）────────────────
     // スタメン総合力パネル（右カラム先頭）
@@ -3954,6 +3982,12 @@
     var nm = _lgpMode === 'v' ? _t('数値', 'Rating') : _lgpMode === 'c' ? _t('調子', 'Form') : _t('士気', 'Morale');
     mb.innerHTML = nm + ' <span class="lgp-mode-ic">⟳</span>';
   }
+
+  /* MD-04c: 試合中の采配画面（manager-match.js の _mvOpenSetting／simulate.js の htOpenLineup）
+   * から同じ3ゾーンUIを使うための薄い公開口。呼ぶ側は typeof ガード＋body.league-mode 判定で。
+   *   leagueDecorateSetting(true,  {mode:'match'|'ht', status:'<戦況HTML>'})
+   *   leagueDecorateSetting(false)  ← 閉じるときは必ず（.league-prep を残さない） */
+  window.leagueDecorateSetting = function (on, opts) { _decorateSettingScreen(on, opts); };
 
   window.lgPrepAfterRender = function (what) {
     if (!_lgpOn()) return;

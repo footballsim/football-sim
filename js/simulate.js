@@ -3872,31 +3872,54 @@ function htOpenLineup() {
   document.getElementById('btn-kickoff-top').style.display = 'none';
   document.getElementById('btn-kickoff-bottom').closest('div').style.display = 'none';
   { var _bmgr = document.getElementById('btn-manager'); if (_bmgr) _bmgr.style.display = 'none'; } // 監督モードボタンを試合中設定で隠す
-  const _htBackBtn = document.createElement('button');
-  _htBackBtn.className = 'back-btn';
-  _htBackBtn.id = 'ht-lineup-back-btn';
-  _htBackBtn.textContent = window.LANG === 'en' ? '← Half Time' : '← ハーフタイムへ';
-  _htBackBtn.onclick = htCloseLineup;
+  // MD-04c（2026-08-05・lab）: リーグ中は試合前と同じ3ゾーンUIで采配する。
+  //   装飾時は「← ハーフタイムへ」を下部コマンドバーに一本化＝ヘッダーには挿さない。
+  const _lgDeco = (typeof leagueDecorateSetting === 'function' &&
+                   document.body && document.body.classList.contains('league-mode'));
   const header = document.querySelector('#screen-setting .screen-header');
   header.dataset.htMode = '1';
   // 元の「戻る」ボタンを非表示（ハーフタイム中は対戦相手変更を防ぐ）
   const _origBack = header.querySelector('.back-btn:not(#ht-lineup-back-btn)');
   if (_origBack) _origBack.style.display = 'none';
-  header.insertBefore(_htBackBtn, header.firstChild);
-  // 交代人数ラベルを追加
+  if (!_lgDeco) {
+    const _htBackBtn = document.createElement('button');
+    _htBackBtn.className = 'back-btn';
+    _htBackBtn.id = 'ht-lineup-back-btn';
+    _htBackBtn.textContent = window.LANG === 'en' ? '← Half Time' : '← ハーフタイムへ';
+    _htBackBtn.onclick = htCloseLineup;
+    header.insertBefore(_htBackBtn, header.firstChild);
+  } else {
+    leagueDecorateSetting(true, { mode: 'ht', status: _htLineupStatus() });
+  }
+  // 交代人数ラベル（装飾時は下部バーの枠内・それ以外は従来どおり控えの上）
   const subLabel = document.createElement('div');
   subLabel.id = 'ht-subs-label';
-  subLabel.style.cssText = 'font-size:12px;color:#888;text-align:center;padding:4px 0 8px';
-  const benchEl = document.getElementById('bench-list');
-  benchEl.parentNode.insertBefore(subLabel, benchEl);
+  subLabel.style.cssText = 'font-size:12px;color:#9fb0c9;text-align:center;padding:4px 0 8px';
+  const _subSlot = document.getElementById('lg-prep-subs');
+  if (_subSlot) _subSlot.appendChild(subLabel);
+  else {
+    const benchEl = document.getElementById('bench-list');
+    benchEl.parentNode.insertBefore(subLabel, benchEl);
+  }
   _updateHtSubsLabel();
   showScreen('setting');
+}
+
+// MD-04c: ハーフタイム采配の下部バー左端に出す戦況（HT なので時間は「HT」固定）。
+function _htLineupStatus() {
+  const s1 = (typeof gameState !== 'undefined' && gameState && gameState.team1) ? gameState.team1.score : 0;
+  const s2 = (typeof gameState !== 'undefined' && gameState && gameState.team2) ? gameState.team2.score : 0;
+  return '<span class="lgp-st-time">HT</span>' +
+    '<span class="lgp-st-score">' + (team1Data.flag || '') +
+    '<b>' + s1 + '</b><i>-</i><b>' + s2 + '</b>' + (team2Data.flag || '') + '</span>';
 }
 
 function htCloseLineup() {
   _htMode = false;
   subsCount += htSubsCount;
   htSubsCount = 0;
+  // MD-04c: 3ゾーン装飾を必ず剥がす（共有DOM＝他モードへ漏らさない。未装飾でも no-op）
+  if (typeof leagueDecorateSetting === 'function') leagueDecorateSetting(false);
   // 追加した要素を削除
   const header = document.querySelector('#screen-setting .screen-header');
   if (header.dataset.htMode) {
@@ -4019,7 +4042,8 @@ function _updateHtSubsLabel() {
   label.textContent = window.LANG === 'en'
     ? `Substitutions: ${total}/5 (${remaining} left)`
     : `交代枠: ${total}/5人（残り${remaining}人）`;
-  label.style.color = remaining === 0 ? '#cc0000' : '#888';
+  // 表示のみ: 全画面が暗背景なので #888/#cc0000 では沈む＝暗背景で読める2色に（2026-08-05）
+  label.style.color = remaining === 0 ? '#ff6a6a' : '#9fb0c9';
 }
 
 function closeHalfTimeModal() {

@@ -979,11 +979,18 @@
     var bm = document.getElementById('btn-multi'); if (bm) bm.style.display = 'none';
     var bm100 = document.getElementById('btn-multi100'); if (bm100) bm100.style.display = 'none';
 
+    /* MD-04c（2026-08-05）: リーグの試合中は**試合前と同じ3ゾーンUI**で采配する
+     * （ユーザー要望「選手が選びづらい／試合前のUIをここにも」）。
+     * 装飾できたときは主ボタン「▶ 試合へ戻る」を**下部コマンドバーに一本化**し、
+     * ヘッダー（.league-prep では非表示）には同じボタンを挿さない＝重複ボタンを作らない。 */
+    var _lgDeco = (typeof window.leagueDecorateSetting === 'function' &&
+                   document.body && document.body.classList.contains('league-mode'));
+
     var header = document.querySelector('#screen-setting .screen-header');
     if (header) {
       var origBack = header.querySelector('.back-btn:not(#mv-setting-back)');
       if (origBack) origBack.style.display = 'none';
-      if (!document.getElementById('mv-setting-back')) {
+      if (!_lgDeco && !document.getElementById('mv-setting-back')) {
         var bb = document.createElement('button');
         bb.className = 'back-btn';
         bb.id = 'mv-setting-back';
@@ -992,11 +999,21 @@
         header.insertBefore(bb, header.firstChild);
       }
     }
-    // 交代枠ラベル（既存 _updateHtSubsLabel を流用）。
-    if (!document.getElementById('ht-subs-label')) {
-      var subLabel = document.createElement('div');
+
+    // 3ゾーン化（先に走らせて下部バーを用意する＝交代枠ラベルの引越し先になる）
+    if (_lgDeco) window.leagueDecorateSetting(true, { mode: 'match', status: _mvSettingStatus() });
+
+    // 交代枠ラベル（既存 _updateHtSubsLabel を流用）。装飾中は下部バーの枠内へ、
+    // 非装飾（シングル/W杯）は従来どおり控えリストの上へ。
+    var subLabel = document.getElementById('ht-subs-label');
+    if (!subLabel) {
+      subLabel = document.createElement('div');
       subLabel.id = 'ht-subs-label';
-      subLabel.style.cssText = 'font-size:12px;color:#888;text-align:center;padding:4px 0 8px';
+      subLabel.style.cssText = 'font-size:12px;color:#9fb0c9;text-align:center;padding:4px 0 8px';
+    }
+    var _subSlot = document.getElementById('lg-prep-subs');
+    if (_subSlot) _subSlot.appendChild(subLabel);
+    else if (!subLabel.parentNode) {
       var benchEl = document.getElementById('bench-list');
       if (benchEl && benchEl.parentNode) benchEl.parentNode.insertBefore(subLabel, benchEl);
     }
@@ -1007,10 +1024,26 @@
     showScreen('setting');
   }
 
+  /* MD-04c: 采配画面の下部バー左端に出す「戦況」（時間＋スコア）。
+   * 采配中は試合が止まっているので開いた時点の静的スナップショットでよい。
+   * ★ 3ゾーンUIはヘッダーを畳む＝この画面で唯一の「今の状況」表示になるので必須。 */
+  function _mvSettingStatus() {
+    var s1 = (gameState && gameState.team1) ? gameState.team1.score : 0;
+    var s2 = (gameState && gameState.team2) ? gameState.team2.score : 0;
+    var tm = _mvTimeLabel();
+    return (tm ? '<span class="lgp-st-time">' + tm + '</span>' : '') +
+      '<span class="lgp-st-score">' + (team1Data.flag || '') +
+      '<b>' + s1 + '</b><i>-</i><b>' + s2 + '</b>' + (team2Data.flag || '') + '</span>';
+  }
+
   // 負傷交代バナー（Sprint 2b・lab）: 重症負傷で交代画面が開いた時、対象選手を明示する。
   //   ピッチ上の🚑赤リングと合わせて「誰を交代するか」を確実に伝える。要求が無ければ隠す。
   function _mvSyncInjuryBanner() {
-    var host = document.querySelector('#screen-setting .formation-wrap') ||
+    /* ★ 2026-08-05: 挿入先は **ピッチ枠（.field-container）の手前**。
+     *   以前は #formation-display（＝ピッチ枠の“中”）の前に入れていたため、バナーが
+     *   芝の上に重なり、絶対配置の選手カードに食われて読めなかった。 */
+    var host = document.querySelector('#screen-setting .field-container') ||
+               document.querySelector('#screen-setting .formation-wrap') ||
                document.getElementById('formation-display');
     var banner = document.getElementById('mv-injury-banner');
     var req = (typeof disciplinePendingUserSub === 'function' && gameState && gameState.team1)
@@ -1068,6 +1101,13 @@
     // 交代ログをテキストログへ挿入（_pendingSubLog → ログ・既存関数）。
     _mvRecordPlayerSubs(_mvTimeLabel());   // テキストログ用に交代を記録
     if (typeof _insertSubLog === 'function') _insertSubLog(_mvTimeLabel());
+
+    // 負傷バナーはこのパネル専用＝閉じたら必ず畳む（次に開く画面に古い文言を残さない）。
+    var _ib = document.getElementById('mv-injury-banner'); if (_ib) _ib.style.display = 'none';
+
+    // MD-04c: 3ゾーン装飾を必ず剥がす（共有DOM＝シングル/W杯/HTモーダルへ漏らさない）。
+    //   非装飾で開いていた場合も no-op で安全なので無条件に呼ぶ。
+    if (typeof window.leagueDecorateSetting === 'function') window.leagueDecorateSetting(false);
 
     // 設定画面のクロームを元に戻す。
     var header = document.querySelector('#screen-setting .screen-header');
