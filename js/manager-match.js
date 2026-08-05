@@ -347,8 +347,12 @@
       }
     } else { _mvProgKey = _pk; _mvStallCount = 0; }
     _mvSyncHud();
-    // MTG1-#1: 決定的に効いた瞬間の一行トースト（attribution.js 非同梱/キルOFFは no-op・1試合最大3回）
-    if (typeof attributionOnBeat === 'function') attributionOnBeat(_abC, _abS, _mvToast);
+    // MTG1-#1: 決定的に効いた瞬間の一行メッセージ（attribution.js 非同梱/キルOFFは no-op・1試合最大3回）
+    //   MTG1案1(2026-08-05): 表示先をトースト→実況ノート（⭐🗣＝自チームに良い出来事＝tone 'mine'）。
+    //   attributionOnBeat のシグネチャは不変＝sink 関数の差し替えのみ。
+    if (typeof attributionOnBeat === 'function') {
+      attributionOnBeat(_abC, _abS, function (m) { _mvLiveNote(m, 'mine'); });
+    }
     // MTG1-#2 ドラマスコア×ティア演出: いま表示したビートを採点し FX を帯内に重ねる（表示のみ・エンジン不変）。
     //   nextChance 後に _shootSubStep===0 ＝ このビートがシーンの結果打（分割シュートの最終ビート）。
     if (!_dsCoach && typeof dramaOnBeat === 'function') dramaOnBeat(_abC, _abS, _shootSubStep === 0);
@@ -529,7 +533,8 @@
     if (target == null || target === cur) return;
     if (Math.random() >= OPP_TACTIC_CHANCE) return;   // 発動確率（25%）
     if (_mvCtrl.applyDecision({ type: 'tactic', side: 'away', tactics: target })) {
-      _mvToast('🧠 ' + _mvT('相手監督', 'Rival manager') + '：' + label + '（' + _mvTacName(target) + '）');
+      // MTG1案1: 演出系はトースト→実況ノート（相手の動き＝tone 'rival'）。
+      _mvLiveNote('🧠 ' + _mvT('相手監督', 'Rival manager') + '：' + label + '（' + _mvTacName(target) + '）', 'rival');
     }
   }
   function _mvToast(msg) {
@@ -547,6 +552,49 @@
     el.style.opacity = '1';
     clearTimeout(el._t);
     el._t = setTimeout(function () { el.style.opacity = '0'; }, 3200);
+  }
+
+  /* ── 実況ノート（MTG1 案1・2026-08-05）──────────────────────────────
+   * 演出系メッセージ（⭐🗣⚡🧠🔁）はトースト（#mv-toast＝画像上部に被るピル）をやめ、
+   * 下部LIVE実況フィードの「現在の実況行の下」に色付き補助行として出す。
+   * アラート系（🚑負傷・⚠️エラー・🧪検証）は従来どおり _mvToast のまま。
+   * tone: 'mine'＝自チームに良い出来事（金系）／'rival'＝相手の動き（赤系）。
+   * ライフサイクル: 実況行と同じくフィードに「残す」（タイマー消去しない）。
+   *   理由: フィードは下端追従スクロール＝次ビートで自然に上へ流れて主役を譲る。
+   *   時限消去だと 2×/3× 再生で読み切れず、後からログを遡った時も行が虫食いになる。
+   * 同一実況行の下に積めるのは最大2行（同時多発時は古い方から落とす）。
+   * noLog=true は記録タブへの記帳を抑止（🔁相手交代＝既に _mvMatchSubs へ詳細文で記帳済み）。 */
+  function _mvLiveNote(msg, tone, noLog) {
+    var la = document.getElementById('log-area');
+    var hosts = la ? la.getElementsByClassName('log-text') : null;
+    var host = (hosts && hosts.length) ? hosts[hosts.length - 1] : null;
+    if (!host) { _mvToast(msg); return; }   // フィード未生成（試合開始前）はトーストへフォールバック
+    var notes = host.getElementsByClassName('mv-live-note');
+    while (notes.length >= 2) host.removeChild(notes[0]);   // 最大2行（古い方から落とす）
+    var rival = tone === 'rival';
+    var line = document.createElement('div');
+    line.className = 'mv-live-note';
+    // 視認性: LIVEフィードのイベントカードは「明背景」（.log-event は白系）なので、
+    // 濃色テキスト×淡色帯×左ボーダーで本文（暗色）と区別する（明背景に淡色文字は沈む＝実測済み）。
+    line.style.cssText = 'margin:2px 0 8px;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:800;line-height:1.5;' +
+      'border-left:3px solid ' + (rival ? '#d84338' : '#e0a800') + ';' +
+      'background:' + (rival ? 'rgba(224,90,80,0.13)' : 'rgba(255,193,7,0.16)') + ';' +
+      'color:' + (rival ? '#b02a22' : '#8a6400');
+    line.textContent = msg;
+    host.appendChild(line);
+    requestAnimationFrame(function () { la.scrollTop = la.scrollHeight; });   // 追加行まで見せる
+    // 記録タブ（league.js _buildMatchLog）にも実況行として残す（交代記帳と同じ経路）。
+    if (!noLog) {
+      if (!window._mvMatchSubs) window._mvMatchSubs = [];
+      // _buildMatchLog は chanceIdx===i+1 を「チャンスiの直後」に差し込む。チャンス途中の
+      // ビート（currentChanceIdx がまだ当該チャンス C を指す）は +1 して C の本文の後に置く。
+      var mid = (typeof currentSceneIdx !== 'undefined' && typeof _shootSubStep !== 'undefined' &&
+                 (currentSceneIdx > 0 || _shootSubStep > 0));
+      window._mvMatchSubs.push({
+        chanceIdx: ((typeof currentChanceIdx !== 'undefined') ? currentChanceIdx : 0) + (mid ? 1 : 0),
+        time: _mvTimeLabel(), text: msg, note: true, tone: rival ? 'rival' : 'mine'
+      });
+    }
   }
 
   /* ── 相手監督AI（選手交代）──────────────────────────────────────────
@@ -677,7 +725,8 @@
     _mvOppSubCount++;
     _mvOppOff[plan.out.idx] = true;
     _mvOppIn[plan.in.idx] = true;   // 投入した選手を記録＝以後の交代でOUT候補から除外
-    _mvToast('🔁 ' + _mvT('相手交代', 'Rival sub') + '：' + _mvName(plan.out.p) + ' → ' + _mvName(plan.in.p) + '（' + plan.label + '）');
+    // MTG1案1: 演出系はトースト→実況ノート。noLog=true（直下で _mvMatchSubs に詳細文を記帳済み）。
+    _mvLiveNote('🔁 ' + _mvT('相手交代', 'Rival sub') + '：' + _mvName(plan.out.p) + ' → ' + _mvName(plan.in.p) + '（' + plan.label + '）', 'rival', true);
     if (window._mvMatchSubs) window._mvMatchSubs.push({
       chanceIdx: currentChanceIdx, time: _mvTimeLabel(),
       text: '🔁 ' + _mvT('交代', 'Sub') + '（' + getTeamName(team2Data) + '・' + plan.label + '）：' + _mvName(plan.out.p) + ' → ' + _mvName(plan.in.p)
@@ -811,7 +860,9 @@
     el.appendChild(c);
     el.getBoundingClientRect();   // reflow → フェードイン
     el.style.opacity = '1';
-    _mvToast('⚡ ' + _mvSkillLabel(evt));   // 発動トースト（相手監督AIトースト機構を流用）
+    // MTG1案1: 発動はトースト→実況ノート。鼓舞は相手選手でも発動する（実測: ベルギーのティーレマンス）
+    // ので、evt.team で色を分ける（away＝相手の動き＝rival／それ以外＝mine）。
+    _mvLiveNote('⚡ ' + _mvSkillLabel(evt), evt.team === 'away' ? 'rival' : 'mine');
     return true;
   }
   function _mvHideSkillCutin() { var el = document.getElementById('mv-skillcut'); if (el) el.style.opacity = '0'; }
@@ -1351,6 +1402,7 @@
   g._mvContinue = _mvContinue;
   g._mvToggleDiscTest = _mvToggleDiscTest;
   g._mvManagerHTKickoff = _mvManagerHTKickoff;
+  g._mvLiveNote = _mvLiveNote;    // MTG1案1: 実況ノート（他表示層・ラボ検証から呼べるように公開）
   g._mvTeardownUI = _mvTeardownUI;
   g._mvOpponentReact = _mvOpponentReact;   // デバッグ/検証用ハンドル
   g._mvOpponentSub = _mvOpponentSub;       // デバッグ/検証用ハンドル
