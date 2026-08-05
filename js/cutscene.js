@@ -182,9 +182,36 @@ function showGoalCutscene(sc, res) {
   overlay.appendChild(canvas); overlay.appendChild(hint);
   document.body.appendChild(overlay);
 
-  var paint = function () { _renderCutsceneCard(canvas, img, sc, res); };
-  paint();
-  if (!img.complete) img.onload = paint;
+  // ── 共通FXレイヤー（_csFx 2026-07-28）: 完全静止カードへ rAF ループを重ねて「動く1枚絵」化 ──
+  //   punch(表示直後260ms) → ring(中央上寄り=ボール想定位置) → rays スイープイン → 観客フラッシュ高密度。
+  //   自チームゴール= grade('burst') / 失点= grade('drain')＋赤ビネット。FX_MS 終端でFXをフェードアウト
+  //   （静止残骸を残さない）。close 後はループ即停止（closed は var 巻き上げで参照可）。
+  var CW = 360, CH = 480;
+  var fxAccent = (sc.offence && sc.offence.team_color) || '#ffd23a';
+  var fxConcede = _csFxConcede(sc);
+  var fxT0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var FX_MS = 2800;
+  _csFx.grade(canvas, fxConcede ? 'drain' : 'burst');
+  var fxCtx = canvas.getContext('2d');
+  var paint = function () {
+    var t = ((typeof performance !== 'undefined') ? performance.now() : Date.now()) - fxT0;
+    fxCtx.clearRect(0, 0, CW, CH);
+    fxCtx.save();
+    _csFx.punch(fxCtx, CW, CH, t, { cy: CH * 0.42 });          // 表示瞬間のズームパンチ（260msのみ）
+    _renderCutsceneCard(canvas, img, sc, res);                 // 静止カード本体（punch transform 下で描画）
+    fxCtx.restore();
+    var endK = t < FX_MS - 300 ? 1 : Math.max(0, (FX_MS - t) / 300);
+    // ★ 光芒(rays)／衝撃波リング(ring)／観客フラッシュ(flashes)は不採用（2026-07-28 ユーザー判断）。
+    //   残すのは「絵そのものの見え方を変える」層だけ＝パンチ（寄り）とグレード（彩度）と失点の赤ビネット。
+    if (fxConcede) _csFx.vignette(fxCtx, CW, CH, Math.min(1, t / 380) * 0.5 * endK, '#d81830');
+  };
+  var fxLoop = function () {
+    if (closed) return;
+    paint();
+    if ((((typeof performance !== 'undefined') ? performance.now() : Date.now()) - fxT0) < FX_MS) requestAnimationFrame(fxLoop);
+  };
+  requestAnimationFrame(fxLoop);
+  if (!img.complete) img.onload = paint;                       // ループ終了後の遅延ロード保険
   requestAnimationFrame(function () { overlay.style.opacity = '1'; canvas.style.transform = 'scale(1)'; });
 
   var closed = false;
@@ -291,7 +318,7 @@ function renderShootStep(sc, stepType) {
   if (sc.action === 'フリーキック') return _renderFreekickScene(shotSc);   // FK=専用2フレーム（蹴る前→蹴った瞬間＋ボール弧）
   if (sc.action === 'ミドルシュート') return _renderMidShotScene(shotSc);
   if (sc.action === 'ボレーシュート') return _renderVolleyScene(shotSc);
-  if (sc.action === 'ヘディングシュート') return _renderHeaderRiseDuelScene(shotSc) || _renderHeaderScene(shotSc);   // 対決割りRise優先・旧重ね絵フォールバック
+  if (sc.action === 'ヘディングシュート') return _renderHeadingAnimScene(shotSc) || _renderHeaderRiseDuelScene(shotSc) || _renderHeaderScene(shotSc);   // 6コマアニメ優先→対決割りRise→旧重ね絵
   var entry = _pickCutscene('shot', sc.offence && sc.offence.team_color);   // ← PK もここ（シュート絵）
   if (entry && entry.file) return _renderShotScene(shotSc, entry);
   return null;
@@ -307,14 +334,14 @@ function renderSceneArt(sc, nextSc) {
   if (sc.scenario === 'コーナーキック') {
     var _ck = {}; for (var _ckk in sc) { if (Object.prototype.hasOwnProperty.call(sc, _ckk)) _ck[_ckk] = sc[_ckk]; }
     _ck.result = (sc.result === '失敗') ? '失敗' : '成功';
-    return _renderHeaderRiseDuelScene(_ck) || _renderHeaderScene(_ck);   // 対決割りRise優先・旧重ね絵フォールバック
+    return _renderHeadingAnimScene(_ck) || _renderHeaderRiseDuelScene(_ck) || _renderHeaderScene(_ck);   // 6コマアニメ優先→対決割りRise→旧重ね絵
   }
   if (sc.result === 'ファール') return _renderFoulScene(sc);   // ファール=主審カット（全アクション共通・recolorなし・笛＆FOUL!）
   if (sc.action === 'ミドルシュート') return _renderMidShotScene(sc);   // 専用ミドル: 成功(抜け)=直進 / ブロック=右上deflect。ゴールでも goal-net でなくミドル演出。
   if (sc.result === 'ゴール！！') return _renderGoalScene(sc);   // 全ゴール=新ゴール演出（旧バイシクル廃止）
   if (sc.action === 'フリーキック') return _renderFreekickScene(sc);   // FK=専用2フレーム（枠外/セーブ等の非分割時もここ。ゴールは上で処理）
   // ヘディング競り合い（クロス/セットプレー段, result=成功/失敗）= 専用ヘディング演出。シュート段(scenario=シュート)は下の通常処理へ。
-  if (sc.action === 'ヘディングシュート' && sc.scenario !== 'シュート') return _renderHeaderRiseDuelScene(sc) || _renderHeaderScene(sc);   // 対決割りRise優先・旧重ね絵フォールバック
+  if (sc.action === 'ヘディングシュート' && sc.scenario !== 'シュート') return _renderHeadingAnimScene(sc) || _renderHeaderRiseDuelScene(sc) || _renderHeaderScene(sc);   // 6コマアニメ優先→対決割りRise→旧重ね絵
   if (sc.action === 'ボレーシュート' && sc.scenario !== 'シュート') return _renderVolleyScene(sc);   // ボレー競り合い=ロングパス蹴りアニメ流用（ボール起点を膝高さへ）
   if (sc.action === 'クロス') return _renderCrossScene(sc);   // クロス=ミドル流用（成功=斜め上/失敗=反対方向）
   // ヘディング/ボレーの「シュート」段（クロス後の結果シーン。_ACTION_MOMENT 未登録なので個別に結果別描画）。
@@ -462,6 +489,20 @@ function _lpBall(ctx, x, y, r, spin) {     // 正しいサッカーボール（�
 // 無ければ（404）コード描画の _lpBg() にフォールバックする。チーム色非依存の共通背景。
 var _LP_BG_SRC = 'img/cutscenes/longpass_bg_01.png';
 function _lpDrawBg(ctx, img, fallbackCanvas, W, H) {
+  /* BG3D-01（2026-07-28・実験）: ローポリ3Dスタジアム背景へ差し替える。
+   * ★ three.js はラボページ側だけに置き（_scene_lab.html の module script が window.CS_BG3D を生やす）、
+   *   ここは typeof ガードで呼ぶだけ＝本番(docs/)には一切載らない。既存の lab-only 方針と同じ作法。
+   * ★ 呼び出し側（各シーン）は無改修。**いま ctx に掛かっているカメラ変換を読み取って** 3Dカメラへ渡す。
+   *   こうすると 2D側の寄り/パン/ミラーがそのまま3Dのドリー/横移動になり、擬似パララックスが本物に変わる。
+   *   ★ 3D側が動きを担うので、2Dの変換は一旦解除してから描く（二重に掛けない）。 */
+  if (typeof window !== 'undefined' && window.CS_BG3D_ENABLED && window.CS_BG3D && window.CS_BG3D.draw && ctx.getTransform) {
+    var m = ctx.getTransform();
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    window.CS_BG3D.draw(ctx, W, H, { zoom: Math.abs(m.a) || 1, panX: m.e, panY: m.f, mirror: m.a < 0 });
+    ctx.restore();
+    return;
+  }
   if (img && img.complete && img.naturalWidth) {
     var s = Math.max(W / img.naturalWidth, H / img.naturalHeight);   // cover
     var dw = img.naturalWidth * s, dh = img.naturalHeight * s;
@@ -469,6 +510,99 @@ function _lpDrawBg(ctx, img, fallbackCanvas, W, H) {
   } else {
     ctx.drawImage(fallbackCanvas, 0, 0);
   }
+  _bgTone(ctx, W, H);
+}
+
+/* ── BGトーン（BG-TONE-01・2026-07-29・lab限定 `window.CS_BG_TONE_ENABLED`）───────────
+ * 背景の1枚絵は観客席が明るく高コントラストで、**主役より大きな声で喋っている**。
+ * 同じ失敗を引き画(WIDE-01)と3D背景(BG3D-01)でもやって直したので、ここにも同じ処方を当てる。
+ *   ★ 原則: 背景に要るのは「情報量」であって「明度」ではない。
+ *     密度（賑わい）は一切減らさず、上部（観客帯）と左右端の**声量だけ**を下げる。
+ *     結果、画面の明るさの山が中央の主役に1つだけ残る。
+ * ★ **絵を作り直さない**のが要点。生成→受入検査(asset-qa)のループは実績として何日も掛かるので、
+ *   描画時の後処理で解けるならそちらが速いし、全背景に一律で効く。
+ * ★ 公開ビルドは既定OFF（フラグ未定義）＝本番凍結を守る。lab の index.html で true にする。 */
+var _bgToneC = null, _bgToneKey = '';
+function _bgTone(ctx, W, H) {
+  if (typeof window === 'undefined' || !window.CS_BG_TONE_ENABLED) return;
+  var top = Math.ceil(H * 0.74);          // 観客帯の下端の目安（芝には掛けない）
+  /* ★ ここは各シーンの「寄りのズーム変換が掛かった ctx」の中で呼ばれる（例: ロングパスは z=1.10）。
+   *   0..W,0..H ちょうどで塗ると寄った時に画面端が覆われず素の背景が細く残る。
+   *   背景画像自体も cover ではみ出しているので、上下左右に余白 M を持たせて塗る。 */
+  var M = Math.ceil(Math.max(W, H) * 0.25);
+
+  /* ①彩度を落とす。★ この関数は「背景を描いた直後・選手を描く前」に呼ばれるので、
+   *   composite を使っても前景には一切掛からない。観客の青の押しの強さが消え、
+   *   芝の緑は下側なのでほぼ無傷で残る＝**主役と芝が色を持ち、観客だけが色を手放す**。 */
+  ctx.save();
+  ctx.globalCompositeOperation = 'saturation';
+  var sg = ctx.createLinearGradient(0, -M, 0, top);
+  sg.addColorStop(0, 'hsla(0,28%,50%,1)');
+  sg.addColorStop(0.75, 'hsla(0,28%,50%,0.75)');
+  sg.addColorStop(1, 'hsla(0,28%,50%,0)');
+  ctx.fillStyle = sg; ctx.fillRect(-M, -M, W + M * 2, top + M);
+  ctx.restore();
+
+  // ②明度を落とす＋左右端を落とす（この2枚は静的なので焼いて使い回す）
+  var key = W + 'x' + H;
+  if (!_bgToneC || _bgToneKey !== key) {
+    var c = document.createElement('canvas'); c.width = W + M * 2; c.height = H + M * 2;
+    var x = c.getContext('2d');
+    x.translate(M, M);                                   // 論理原点を (0,0) に合わせる
+    var g = x.createLinearGradient(0, -M, 0, top);
+    g.addColorStop(0, 'rgba(8,14,26,0.60)');
+    g.addColorStop(0.55, 'rgba(8,14,26,0.40)');
+    g.addColorStop(0.86, 'rgba(8,14,26,0.15)');
+    g.addColorStop(1, 'rgba(8,14,26,0)');
+    x.fillStyle = g; x.fillRect(-M, -M, W + M * 2, top + M);
+    // 左右端は「背景画像の端」に合わせるので 0..W 基準のまま。外側は最も暗い値で埋める。
+    var e = x.createLinearGradient(0, 0, W, 0);
+    e.addColorStop(0, 'rgba(4,8,16,0.42)'); e.addColorStop(0.26, 'rgba(4,8,16,0)');
+    e.addColorStop(0.74, 'rgba(4,8,16,0)'); e.addColorStop(1, 'rgba(4,8,16,0.42)');
+    x.fillStyle = e; x.fillRect(0, -M, W, H + M * 2);
+    x.fillStyle = 'rgba(4,8,16,0.42)';
+    x.fillRect(-M, -M, M, H + M * 2); x.fillRect(W, -M, M, H + M * 2);
+    _bgToneC = c; _bgToneKey = key;
+  }
+  ctx.drawImage(_bgToneC, -M, -M);
+}
+
+/* ── 非主語トーン（SUBDUE-01・2026-07-29）─────────────────────────────────
+ * デイヴ・ザ・ダイバーのボス戦フレームを自分で並べて分かった規則の実装。
+ * 巨体のタコは**ディテールほぼゼロの赤いベタの塊**で、精密なのは**目だけ**。
+ * つまり1枚の絵の中で「主語に情報量を全振りし、それ以外はシルエットまで落とす」が起きている。
+ *   ★ うちは対決割りでシューターもGKも**同じ描き込み量**で描いていた＝主語が2つ＝主語なし。
+ *   ★ [[art-one-shot-one-subject]] ②「情報量とコントラストは別物」。ここで落とすのは
+ *     彩度と明度＝**声量**だけで、線の本数（密度）は1本も減らさない。
+ *   ★ _bgTone と同じく**絵を作り直さない**。生成→受入検査のループを回さずに済むのが利点。
+ * スプライト1枚につき1回だけ焼いてキャッシュする（毎フレームの合成は重い）。
+ */
+var _subdueCache = {};
+function _csSubdue(spr, key, opts) {
+  if (!spr || !spr.width || typeof document === 'undefined') return spr;
+  var o = opts || {};
+  var sat = (o.sat == null) ? 0.42 : o.sat;      // 残す彩度（0=完全なグレー / 1=無加工）
+  var dark = (o.dark == null) ? 0.34 : o.dark;   // かぶせる暗色の濃さ
+  var ck = key + '|sub|' + sat + '|' + dark;
+  if (_subdueCache[ck]) return _subdueCache[ck];
+  var c = document.createElement('canvas');
+  c.width = spr.width; c.height = spr.height;
+  var x = c.getContext('2d');
+  x.drawImage(spr, 0, 0);
+  // ①彩度を落とす（saturation ブレンドで無彩色を重ねる＝色相と明度は保つ）
+  x.globalCompositeOperation = 'saturation';
+  x.fillStyle = 'hsla(0,0%,50%,' + (1 - sat).toFixed(3) + ')';
+  x.fillRect(0, 0, c.width, c.height);
+  // ②明度を落とす
+  x.globalCompositeOperation = 'source-over';
+  x.globalAlpha = dark; x.fillStyle = '#0a0d16';
+  x.fillRect(0, 0, c.width, c.height);
+  x.globalAlpha = 1;
+  // ③①②は透明部分も塗ってしまうので、元のアルファで型抜きして輪郭を戻す
+  x.globalCompositeOperation = 'destination-in';
+  x.drawImage(spr, 0, 0);
+  _subdueCache[ck] = c;
+  return c;
 }
 
 // 失敗（カット）タブロー用: 赤×緑の2人絵を、実行時に赤→守備色・緑→攻撃色へ色替え。
@@ -1005,11 +1139,632 @@ function _csPixelate(spr, key, dw, dh) {
   return c;
 }
 
+// ============================================================
+// _csFx — 静止画マンガを「動いて見せる」共通FXレイヤー（2026-07-28）
+//   参考演出: レトロピクセルゲームの光芒/衝撃波リング/打字字幕＋カラーグレードの状態表現。
+//   原則:
+//     ・1画面1ビート＝FXはビートの強調のみ。情報は一切増やさない（fxTypeはビート間つなぎ専用API）。
+//     ・重い生成はオフスクリーンへ1回だけ → 毎フレームは transform+alpha のみ（モバイル性能）。
+//       毎フレームの getImageData / createPattern / 大canvas再生成は禁止。
+//     ・ドット絵美学: FXもセル(3-4px)スナップの粗い矩形で描く（_csPixelate のレトロ画素感と整合）。
+//     ・恒常的なカメラ移動は入れない（punch はインパクト後 200-300ms のみ＝静止カメラ設計を守る）。
+//   ロード安全: トップレベルでは DOM/Image/document に触れない（回帰ハーネスの vm ロードでも壊れない）。
+// ============================================================
+var _csFx = (function () {
+  var TAU = Math.PI * 2;
+  function _now() { return (typeof performance !== 'undefined') ? performance.now() : Date.now(); }
+  function _lcg(seed) { var s = (seed | 0) || 1; return function () { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; }; }
+
+  // ── fxRays: ナイター光芒 ──
+  //   画面上部から差す太い光の柱。ディザ（市松）付き縦グラデをオフスクリーンに一度だけ生成し、
+  //   毎フレームは上端アンカーの rotate（ゆっくり sway）＋ globalAlpha ＋ 'lighter' 合成のみ。
+  var _raysCache = {};
+  function _makeRays(W, H, count, seed) {
+    var key = W + 'x' + H + '|' + count + '|' + seed;
+    if (_raysCache[key]) return _raysCache[key];
+    var rnd = _lcg(seed), set = [], cell = 3;
+    for (var i = 0; i < count; i++) {
+      var bw = Math.round(30 + rnd() * 42);                    // 光柱の太さ（30-72px）
+      var len = Math.ceil(H * (1.15 + rnd() * 0.35));          // 回転しても下端が見えない長さ
+      var c = document.createElement('canvas'); c.width = bw; c.height = len;
+      var x = c.getContext('2d');
+      for (var gy = 0; gy < len; gy += cell) {
+        var fade = Math.max(0, 1 - gy / len);                  // 上=濃 → 下=透明
+        for (var gx = 0; gx < bw; gx += cell) {
+          var edge = (Math.min(gx, bw - cell - gx) < cell * 2) ? 0.45 : 1;   // 柱の縁は薄く
+          var lvl = fade * edge;
+          var odd = ((gx / cell + gy / cell) & 1);             // 市松ディザ: 薄い所は片相のみ点灯
+          if (odd ? lvl < 0.34 : lvl < 0.10) continue;
+          x.fillStyle = 'rgba(255,247,210,' + (0.16 + 0.30 * lvl).toFixed(3) + ')';
+          x.fillRect(gx, gy, cell, cell);
+        }
+      }
+      set.push({ c: c, ax: (i + 0.5 + (rnd() - 0.5) * 0.6) / count,
+        rot: 0.16 + (rnd() - 0.5) * 0.42, amp: 0.045 + rnd() * 0.05,
+        spd: 0.00030 + rnd() * 0.00022, ph: rnd() * TAU, al: 0.55 + rnd() * 0.35 });
+    }
+    _raysCache[key] = set; return set;
+  }
+  function rays(ctx, W, H, tMs, master, opts) {
+    if (!(master > 0)) return;
+    var set = _makeRays(W, H, (opts && opts.count) || 4, (opts && opts.seed) || 5);
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';                  // additive（光）
+    for (var i = 0; i < set.length; i++) {
+      var r = set[i];
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, r.al * master);
+      ctx.translate(W * r.ax, -6);
+      ctx.rotate(r.rot + Math.sin(tMs * r.spd + r.ph) * r.amp);
+      ctx.drawImage(r.c, -r.c.width / 2, 0);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  // ── fxRing: 衝撃波リング ──
+  //   指定座標から膨張する太いピクセルリング（白＋チーム色の2重・少しオフセット）＋飛散チャンク。
+  //   t:0→1 で半径/alpha補間。セルスナップの矩形描きで低解像度でもクッキリ。
+  function _ringPass(ctx, x, y, r, cell, thick, col, alpha) {
+    if (r <= 0) return;
+    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+    ctx.fillStyle = col;
+    // ★ 円周サンプルはセルスナップで同じマスに何度も落ちる。素朴に fillRect すると
+    //   重なった回数だけ alpha が合成され、リングが「半透明のムラ」になる（2026-07-28 実測）。
+    //   1マス1回だけ描いて濃度を揃える＝取りこぼし防止に2倍サンプル＋重複除去。
+    var steps = Math.max(16, Math.ceil(TAU * r / cell) * 2);
+    var seen = {};
+    for (var i = 0; i < steps; i++) {
+      var a = i / steps * TAU, ca = Math.cos(a), sa = Math.sin(a);
+      for (var q = 0; q < thick; q++) {
+        var rr = r - q * cell;
+        var px = Math.round((x + ca * rr) / cell) * cell;
+        var py = Math.round((y + sa * rr) / cell) * cell;
+        var k = px + ',' + py;
+        if (seen[k]) continue;
+        seen[k] = 1;
+        ctx.fillRect(px, py, cell, cell);
+      }
+    }
+  }
+  function ring(ctx, x, y, t, opts) {
+    if (!(t > 0) || t >= 1) return;
+    opts = opts || {};
+    var cell = opts.cell || 4, rMax = opts.radius || 72;
+    var col = opts.color || '#ffd23a';
+    var e = 1 - (1 - t) * (1 - t);                             // easeOut膨張
+    var r = cell * 2 + (rMax - cell * 2) * e;
+    var al = 1 - t * t;
+    // ★ 白リング単体はマンガの白背景で完全に消える（shotduel で実証）。外周に暗縁を1セル置き、
+    //   白背景でも夜空でも同じ強さで読ませる＝マンガのインク線と同じ考え方。
+    _ringPass(ctx, x, y, r + cell, cell, 1, opts.edge || '#14181f', al * 0.9);
+    // 白コアは立ち上がりを不透明に寄せる（薄い輪＝「ペン書きの丸」に見えるのを避ける）。
+    _ringPass(ctx, x, y, r, cell, 3, '#ffffff', Math.min(1, al * 1.35));
+    _ringPass(ctx, x, y, Math.max(cell * 2, r - cell * 3), cell, 1, col, al * 0.95);   // チーム色（内側オフセット）
+    var rnd = _lcg(opts.seed || 17);                           // 飛散する矩形チャンク（決定論）
+    var n = (opts.chunks != null) ? opts.chunks : 7;
+    ctx.globalAlpha = al;
+    for (var i = 0; i < n; i++) {
+      var a2 = rnd() * TAU, spd = 0.85 + rnd() * 0.55, sz = cell * (rnd() < 0.4 ? 2 : 1);
+      var cr = rMax * 1.2 * e * spd;
+      ctx.fillStyle = (i & 1) ? '#ffffff' : col;
+      ctx.fillRect(Math.round((x + Math.cos(a2) * cr) / cell) * cell,
+                   Math.round((y + Math.sin(a2) * cr) / cell) * cell, sz, sz);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // ── fxGrade: カラーグレード（canvas要素の CSS filter＝GPU任せ・getImageData不使用）──
+  //   'burst'=ゴール（彩度1.6→1.0へ減衰）/ 'drain'=失点（彩度0.25＋僅かに暗く→ゆっくり復帰）。
+  //   多重起動は最後勝ち（_csFxGradeT0 印で古いループが自然停止）。終了時に filter を必ず外す。
+  function grade(canvas, mode, opts) {
+    if (!canvas || !canvas.style || typeof requestAnimationFrame === 'undefined') return;
+    var T0 = _now();
+    var dur = (opts && opts.dur) || (mode === 'drain' ? 2300 : 1100);
+    canvas._csFxGradeT0 = T0;
+    function step() {
+      if (canvas._csFxGradeT0 !== T0) return;                  // 新しい grade に置き換わった
+      var t = (_now() - T0) / dur;
+      if (t >= 1) { canvas.style.filter = ''; return; }
+      var f;
+      if (mode === 'drain') {                                  // 落ち込み→維持→ゆっくり復帰
+        var k = t < 0.16 ? t / 0.16 : (t < 0.55 ? 1 : 1 - (t - 0.55) / 0.45);
+        f = 'saturate(' + (1 - 0.75 * k).toFixed(3) + ') brightness(' + (1 - 0.13 * k).toFixed(3) + ') contrast(' + (1 + 0.06 * k).toFixed(3) + ')';
+      } else {                                                 // burst: 高彩度スパイク→減衰
+        var k2 = 1 - t;
+        f = 'saturate(' + (1 + 0.6 * k2 * k2).toFixed(3) + ') brightness(' + (1 + 0.10 * k2 * k2).toFixed(3) + ')';
+      }
+      canvas.style.filter = f;
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // ── 赤ビネット（drain随伴・radial-gradientを一度だけ生成してctxへ重ね描き）──
+  var _vigCache = {};
+  function _vig(W, H, color) {
+    var key = W + 'x' + H + '|' + color;
+    if (_vigCache[key]) return _vigCache[key];
+    var c = document.createElement('canvas'); c.width = W; c.height = H;
+    var x = c.getContext('2d');
+    // 角まで色が届くよう外径は半対角以内に収める（0.72*maxだと角が55%止まり＝ほぼ見えなかった）。
+    // drain の saturate(0.25) フィルタ越しでも赤が残るよう、既定色は高彩度寄り。
+    var g = x.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.28, W / 2, H / 2, Math.max(W, H) * 0.52);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.6, color + 'aa'); g.addColorStop(1, color);
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+    _vigCache[key] = c; return c;
+  }
+  function vignette(ctx, W, H, alpha, color) {
+    if (!(alpha > 0)) return;
+    ctx.globalAlpha = Math.min(1, alpha);
+    ctx.drawImage(_vig(W, H, color || '#d81830'), 0, 0);
+    ctx.globalAlpha = 1;
+  }
+
+  // ── fxFlashes: 観客フラッシュ ──
+  //   指定帯（観客席）にランダムな白ドット明滅。110msスロットの決定論LCG＝低コスト・再現可能。
+  //   density=0 で無音（通常時）、ゴール時に高密度。
+  function flashes(ctx, tMs, opts) {
+    opts = opts || {};
+    var density = opts.density || 0;
+    if (density <= 0) return;
+    var x0 = opts.x0 || 0, y0 = opts.y0 || 0;
+    var x1 = (opts.x1 != null) ? opts.x1 : x0 + 100, y1 = (opts.y1 != null) ? opts.y1 : y0 + 40;
+    var slot = Math.floor(tMs / 110);
+    var ph = 1 - (tMs % 110) / 110;                            // スロット内で減衰＝チカッと明滅
+    // ★ 観客席の帯はもともとランダムな点の集合＝同系の白ドットを足しても「元から居た点」に紛れる。
+    //   通常合成では density を上げても写真では変化が読めなかった（2026-07-28 実測）。
+    //   加算合成（lighter）＋にじみ1段で「暗い群衆の中で光った」に見せる＝数より1粒の強さ。
+    var prevOp = ctx.globalCompositeOperation;
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = '#ffffff';
+    for (var i = 0; i < density; i++) {
+      var rnd = _lcg(slot * 8191 + i * 131 + ((opts.seed || 0) * 7));
+      var px = (x0 + rnd() * (x1 - x0)) | 0, py = (y0 + rnd() * (y1 - y0)) | 0;
+      var st = rnd();                                          // 個体の強度
+      var s = st > 0.6 ? 4 : 3;
+      ctx.globalAlpha = (0.20 + st * 0.30) * ph;               // にじみ（広く弱く）
+      ctx.fillRect(px - s, py - s, s * 3, s * 3);
+      ctx.globalAlpha = (0.55 + st * 0.45) * ph;               // 芯（狭く強く）
+      ctx.fillRect(px, py, s, s);
+      if (st > 0.75) {                                         // 強い発光は小さな十字
+        ctx.globalAlpha *= 0.55;
+        ctx.fillRect(px - s, py, s, s); ctx.fillRect(px + s, py, s, s);
+        ctx.fillRect(px, py - s, s, s); ctx.fillRect(px, py + s, s, s);
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = prevOp;
+  }
+
+  // ── fxType（描画コア）: ターミナル風モノスペース打字＋カーソル明滅。戻り値=打字完了か。──
+  //   スタンドアロン canvas 版は下の _csFxType（公開API）。
+  function typeText(ctx, W, H, text, tMs, opts) {
+    opts = opts || {};
+    var cps = opts.cps || 24;                                  // chars per second
+    var n = Math.max(0, Math.min(text.length, Math.floor(tMs / 1000 * cps)));
+    var fs = opts.size || 17;
+    ctx.save();
+    ctx.font = '700 ' + fs + 'px "Courier New",ui-monospace,monospace';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    var y = (opts.y != null) ? opts.y : Math.round(H * 0.64);  // 中央やや下
+    var fullW = ctx.measureText('> ' + text).width;
+    var x = Math.round((W - fullW) / 2);
+    ctx.fillStyle = 'rgba(8,10,16,.66)';                       // 読みやすさの薄墨背板
+    ctx.fillRect(x - 10, y - Math.round(fs * 0.9), Math.ceil(fullW) + 20 + Math.round(fs * 0.6), Math.round(fs * 1.8));
+    ctx.fillStyle = opts.color || '#cfeec6';                   // ターミナル淡緑
+    var shown = '> ' + text.slice(0, n);
+    ctx.fillText(shown, x, y);
+    var done = n >= text.length;
+    if (!done || (Math.floor(tMs / 300) & 1)) {                // 打字中=常時 / 完了後=明滅
+      var cw = ctx.measureText(shown).width;
+      ctx.fillRect(x + cw + 3, y - Math.round(fs * 0.5), Math.round(fs * 0.5), fs);
+    }
+    ctx.restore();
+    return done;
+  }
+
+  // ── fxPunch: ズームパンチ＋シェイク ──
+  //   合成済みフレーム全体へ ctx.translate/scale の減衰ズーム(1.06→1.0)＋2-3pxジッター。
+  //   インパクト後 dur(既定260ms) のみ有効＝恒常カメラ移動なし。ctx.save() の後に呼び、描画後 restore()。
+  function punch(ctx, W, H, tMs, opts) {
+    var dur = (opts && opts.dur) || 260;
+    if (!(tMs >= 0) || tMs >= dur) return false;
+    var k = 1 - tMs / dur;
+    var z = 1 + ((opts && opts.zoom) || 0.06) * k * k;
+    var rnd = _lcg(((tMs / 16) | 0) + 7);                      // 16ms毎に変わる決定論ジッター
+    var jx = (rnd() - 0.5) * 5 * k, jy = (rnd() - 0.5) * 4 * k;
+    var cx = (opts && opts.cx != null) ? opts.cx : W / 2;
+    var cy = (opts && opts.cy != null) ? opts.cy : H / 2;
+    ctx.translate(cx, cy); ctx.scale(z, z); ctx.translate(-cx + jx, -cy + jy);
+    return true;
+  }
+
+  return { rays: rays, ring: ring, grade: grade, vignette: vignette, flashes: flashes, typeText: typeText, punch: punch };
+})();
+
+/* ══ CAM-01 2.5Dカットアウト・カメラ（2026-07-28）══════════════════════════════
+ * 狙い: 静止画のまま「動いている」と読ませる。3D化は画風が割れるので不採用（3D試作の結論）。
+ *
+ * ★ 前提となる発見: 既存カットシーンは既に【背景／守備／攻撃／ボール】を**別々に draw** している。
+ *   つまり絵を切り分ける作業は不要で、各 draw を包む transform を足すだけでレイヤーが動く。
+ *   既存の withScene() は「静止カメラ・ミラーのみ」だった＝ここが継ぎ目。
+ *
+ * ★ 参考にした語法（FPS/潜水艦の動画分析）:
+ *   - 被写体でなく**カメラが動く**（プッシュイン／遅れて追うフォロー）
+ *   - 奥ほど動かない＝**パララックス**で奥行きが出る（潜水艦の多層背景）
+ *   - インパクトは**一瞬だけ**揺らす（恒常的なカメラ移動はしない＝酔う）
+ *
+ * ★ 1画面1ビートは崩さない: カメラは「今どこを見ればいいか」を示すだけで情報を足さない。
+ * ★ HUD は screen 空間＝カメラの外で描く（文字が動くと一気に安っぽくなる）。
+ */
+var _csCam = (function () {
+  function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function easeOut(t) { return 1 - (1 - t) * (1 - t); }
+  function smooth(t) { return t * t * (3 - 2 * t); }
+
+  /* カメラ状態を作る。
+   *   zoom  : 主役プレーンの倍率（1=素）
+   *   fx,fy : 注視点（この点を中心に寄る）
+   *   panX/Y: 主役プレーンの平行移動
+   *   shake : {x,y} 一時的な揺れ（インパクト用）
+   * ★ 背景は必ず zoom>=BG_MIN で描く。等倍のまま pan すると背景の端が見切れて黒帯が出る。 */
+  var BG_MIN = 1.06;
+  function mk(o) {
+    o = o || {};
+    return {
+      zoom: (o.zoom != null) ? o.zoom : 1,
+      fx: (o.fx != null) ? o.fx : 240, fy: (o.fy != null) ? o.fy : 108,
+      panX: o.panX || 0, panY: o.panY || 0,
+      shx: 0, shy: 0
+    };
+  }
+
+  /* レイヤーに適用。depth: 0=無限遠(動かない) / 1=主役プレーン / >1=手前。
+   *   奥のレイヤーほど zoom も pan も効きを弱める＝パララックス。 */
+  function begin(ctx, cam, depth) {
+    var d = (depth == null) ? 1 : depth;
+    ctx.save();
+    var ez = 1 + (cam.zoom - 1) * d;
+    if (d < 0.6) ez = Math.max(ez, BG_MIN);            // 背景のオーバースキャン（端の見切れ防止）
+    ctx.translate(cam.fx, cam.fy);
+    ctx.scale(ez, ez);
+    ctx.translate(-cam.fx, -cam.fy);
+    ctx.translate((cam.panX + cam.shx) * d, (cam.panY + cam.shy) * d);
+  }
+  function end(ctx) { ctx.restore(); }
+
+  /* 遅れて追うフォロー（FPSのカメラ語法）。被写体を100%追うと被写体が画面で静止して
+   * 「動いていない」ように見える＝lag<1 で追い、被写体は画面内でも動かす。 */
+  function follow(cam, subjX, centerX, lag) {
+    cam.panX = -(subjX - centerX) * ((lag == null) ? 0.62 : lag);
+  }
+
+  /* インパクトの揺れ。dur(既定220ms)だけ・減衰。恒常的には動かさない。 */
+  function shake(cam, elapsed, dur, amp) {
+    var D = dur || 220, A = (amp == null) ? 3.2 : amp;
+    if (!(elapsed >= 0) || elapsed > D) { cam.shx = cam.shy = 0; return; }
+    var k = 1 - elapsed / D;
+    cam.shx = Math.sin(elapsed * 0.85) * A * k;
+    cam.shy = Math.cos(elapsed * 1.07) * A * k * 0.7;
+  }
+
+  /* カットアウトの二次モーション（人形芝居）。足元を軸に「傾き」と「潰し/伸び」を掛ける。
+   * ★ 手足は描き直さない＝マンガ絵のまま。踏み込みの前傾と着地の潰しだけで生き物に見える。
+   *   lean: ラジアン（進行方向へ倒す）/ squash: 1=素・<1で潰れ横に広がる */
+  function puppet(ctx, pivotX, pivotY, lean, squash, draw) {
+    var s = (squash == null) ? 1 : squash;
+    ctx.save();
+    ctx.translate(pivotX, pivotY);
+    if (lean) ctx.rotate(lean);
+    if (s !== 1) ctx.scale(1 + (1 - s) * 0.7, s);       // 体積保存っぽく: 縦に潰れたら横に広がる
+    ctx.translate(-pivotX, -pivotY);
+    draw();
+    ctx.restore();
+  }
+
+  return { mk: mk, begin: begin, end: end, follow: follow, shake: shake, puppet: puppet,
+           easeOut: easeOut, smooth: smooth, clamp01: clamp01 };
+})();
+
+// カメラの一括ON/OFF（ラボでのA/B比較用。既定=ON）
+var CS_CAM_ENABLED = true;
+
+// 失点（自チーム被弾）判定: 監督モード/リーグは gameState.team1=自チーム（manager-match.js）。
+//   team2 の得点＝失点。gameState 不在（ラボ素振り等）は false＝中立扱い。表示層のみの判定。
+function _csFxConcede(sc) {
+  var gs = (typeof gameState !== 'undefined' && gameState) ? gameState : null;
+  return !!(gs && gs.team1 && gs.team2 && sc && sc.offence === gs.team2);
+}
+
+// 公開API: 打字字幕カード（ビート間のつなぎ用）。中央やや下に1文字ずつ打字＋カーソル明滅。
+//   例: _csFxType('COUNTER ATTACK') / _csFxType('GOAL CONFIRMED', { hold: 1500 })
+//   暗背景＋走査線のスタンドアロン canvas を返す（他シーン同様 live-field-wrap へ差し込む想定）。
+//   detach されたら rAF 停止（リーク防止・既存シーンと同パターン）。
+function _csFxType(text, opts) {
+  if (typeof document === 'undefined') return null;
+  opts = opts || {};
+  var W = opts.w || 480, H = opts.h || 216;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var hold = (opts.hold != null) ? opts.hold : 1200;
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var doneAt = 0, started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var t = ((typeof performance !== 'undefined') ? performance.now() : Date.now()) - T0;
+    ctx.fillStyle = '#0b1220'; ctx.fillRect(0, 0, W, H);       // 暗背景（文字色は typeText 側で明示）
+    ctx.fillStyle = 'rgba(120,150,190,.06)';
+    for (var y = 0; y < H; y += 4) ctx.fillRect(0, y, W, 1);   // 走査線
+    var done = _csFx.typeText(ctx, W, H, String(text || ''), t, opts);
+    if (done && !doneAt) doneAt = t;
+    if (!doneAt || t < doneAt + hold) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return canvas;
+}
+
+// FX単体デモ（_scene_lab 専用）: rays/ring/grade-burst/grade-drain/flashes/type/punch をループ再生。
+//   本番コードからは呼ばれない（ラボの確認台）。背景は _lpBg()（スタンド帯 y=84..118）。
+function _csFxDemo(kind) {
+  if (typeof document === 'undefined') return null;
+  if (kind === 'type') return _csFxType('COUNTER ATTACK', { hold: 1600 });
+  var W = 480, H = 216;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var bg = _lpBg();
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false, lastCyc = -1, CYCLE = 2400;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var t = ((typeof performance !== 'undefined') ? performance.now() : Date.now()) - T0;
+    var tc = t % CYCLE, cyc = Math.floor(t / CYCLE);
+    ctx.clearRect(0, 0, W, H);
+    ctx.save();
+    if (kind === 'punch') _csFx.punch(ctx, W, H, tc);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(bg, 0, 0);
+    ctx.restore();
+    if (kind === 'ring') _csFx.ring(ctx, W * 0.5, H * 0.52, tc / 620, { color: '#e03030', radius: 84, cell: 4, seed: 17 });
+    else if (kind === 'rays') _csFx.rays(ctx, W, H, t, 0.9);
+    else if (kind === 'flashes') _csFx.flashes(ctx, t, { x0: 0, y0: 82, x1: W, y1: 120, density: 12, seed: 4 });
+    else if (kind === 'grade-burst' || kind === 'grade-drain') {
+      if (cyc !== lastCyc) { lastCyc = cyc; _csFx.grade(canvas, kind === 'grade-drain' ? 'drain' : 'burst'); }
+      if (kind === 'grade-drain') {                            // drain随伴の赤ビネット（グレードと同プロファイル）
+        var td = tc / 2300, k = td >= 1 ? 0 : (td < 0.16 ? td / 0.16 : (td < 0.55 ? 1 : 1 - (td - 0.55) / 0.45));
+        _csFx.vignette(ctx, W, H, 0.5 * k, '#d81830');
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return canvas;
+}
+
 // 漫画コマ「演出」の一括スイッチ（2026-07-15 ユーザー指示で一旦停止）。
 //   false: 紙白＋集中線背景・墨リム・対決割り・顔カットイン・ヘディング縦2コマを止め、従来のスタジアム/芝背景スタイルで描く。
 //   ※スプライトの新旧はこのフラグと独立: シュート/GK/ロングパスは新素材（MangaRecolorリカラー）を従来演出の上に描く（2026-07-15 指示）。
 //   ヘディングのみ旧スプライト（旧重ね競り合いシーンごと）。漫画演出の再開は true に戻すだけ。
 var MANGA_COMIC_STYLE = false;
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * MONT-01 : 層C モンタージュ（試作 2026-07-29・lab限定）
+ *
+ * 4層設計の層C＝**主語は「感情」**。だからここは選手の全身ではなく **部位** を、
+ * 画面から見切れるサイズ（120〜200%）で見せる。参考のデイヴ・ザ・ダイバーの上段が
+ * まさにこれで、顔だけでなく**包丁・フライパン・手**という「部位」を並べている。
+ *
+ * ★ 既存の `_renderShotDuelScene`（対角2分割）が土台。違いは2点だけ:
+ *     ①分割を2→4コマにする ②**同時に出さず1コマずつ足していく**
+ *   ②が肝で、モンタージュは「1画面に4つの情報」ではなく **時間軸で1ビートずつ** 足している。
+ *   だから [[game-one-screen-one-beat]] と矛盾しない（デイヴの実フレームでもコマは増えていく）。
+ *
+ * ★ **新規アセットを1枚も作らずに成立するか**を確かめるのがこの試作の目的。答えは「半分だけ」:
+ *     ボール   ○ 手続き描画なので解像度の上限が無い（いくらでも寄れる）
+ *     グローブ ○ GKダイブ絵の reaching glove（_GK_DIVES の gx/gy を流用）
+ *     蹴り足   △ 座標は実行時に**アルファを走査して実測**する必要がある（下記）
+ *     顔       ✕ **原理的に部位アップにできない**（下記）
+ *
+ * ★★ 実測 2026-07-29 ── Portrait の合成頭は拡大できない。
+ *   パーツ実体（eyes_normal.png 等）は **360×420**＝合成画布 720×840 の半分で、
+ *   合成頭のベタ面は **水平12px幅（p90）のブロック**（目も頬も同値＝2026-07-05 の
+ *   「高精細を放棄し粗スタイルへ全面統一」の結果）。
+ *   最終 480px 画布でブロックを4px以下に保つには倍率0.33倍以下＝**クロップ幅504px必要＝
+ *   頭がほぼ丸ごと**。つまり「目だけ」に寄ると必ず破綻する。
+ *   → **層C（部位アップ）には専用の高精細素材が要る**。層M用に粗スタイルで統一した資産は
+ *     そのままでは使えない＝4層設計の「層ごとに別の作り方を持つ」がここでも裏取りされた。
+ *   → 当面は顔コマを「頭部まるごと」に留める（_MONT_FACE_MAXZ）。
+ * ══════════════════════════════════════════════════════════════════════════ */
+// 顔コマの最大倍率。合成頭のブロック12px@720 を最終画布で4px以下に保つ上限（実測由来）。
+var _MONT_FACE_MAXZ = 0.34;
+var _MONT_SHEAR = 0.13;        // 割り線の傾き（下へ行くほど左へ寄る）
+var _MONT_STEP = 200;          // コマが1枚増える間隔(ms)
+var _MONT_SLAM = 130;          // 1枚が叩きつけられる時間(ms)
+
+function _renderShotMontageScene(sc) {
+  if (typeof document === 'undefined') return null;
+  if (typeof MangaRecolor === 'undefined' || !MangaRecolor.render) return null;
+  var W = 480, H = 216, SS = 2;
+  var canvas = document.createElement('canvas');
+  canvas.width = W * SS; canvas.height = H * SS;
+  canvas.style.cssText = 'display:block;width:100%';
+  var ctx = canvas.getContext('2d');
+  ctx.scale(SS, SS);
+
+  // ── 素材 ───────────────────────────────────────────────────────
+  var shooterP = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  var longName = shooterP ? (shooterP.long_name || shooterP.name || '') : '';
+  var feat = _mangaFeat(longName);
+  var cols = _mangaColors(sc.offence, feat.skin);
+  var shDir = _shotSpriteDir();
+  var shKey = 'shot|' + shDir + '|' + feat.hstyle + '|' + cols.shirt + cols.shorts + cols.socks + cols.accent + cols.skin;
+  var shotImg = _loadCutsceneImg('img/cutscenes/' + shDir + '/' + feat.hstyle + '.png');
+
+  var accent = (sc.offence && sc.offence.team_color) || '#1f4fd6';
+  var gkColor = _pickGkColor(accent, sc.defence && sc.defence.team_color);
+  var gkP = sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[0]];
+  var gkCols = _gkDiveColors(gkColor, _mangaFeat(gkP ? (gkP.long_name || gkP.name || '') : '').skin);
+  var dive = _pickGkDive();
+  var gkKey = 'gkdive|' + dive.id + '|' + gkColor + '|' + gkCols.skin;
+  var gkImg = _loadCutsceneImg(dive.src);
+
+  /* 目元＝Portrait の合成頭。★ 720×840 の高解像度なので、目元だけ切り出して
+   *   120%まで拡大しても破綻しない＝**層Cに新規アセットが要らない最大の理由**。 */
+  var headC = null;
+  if (typeof Portrait !== 'undefined' && Portrait.renderHead) {
+    try {
+      headC = document.createElement('canvas'); headC.width = 720; headC.height = 840;
+      Portrait.renderHead(headC, longName, {});
+    } catch (e) { headC = null; }
+  }
+  var EYE = (typeof Portrait !== 'undefined' && Portrait.HEAD_ANCHOR) ? Portrait.HEAD_ANCHOR.EYE : { x: 446, y: 336 };
+
+  /* 層C専用アート（C-01）。まだ1点しか無いのでフラグで出し分ける＝画風の比較用。
+   *   ★ 顔まわりの部位アップは**フルブリード＝透過不要**（コマが必ずクリップするため）。
+   *     クロマキーが要るのは輪郭が立つ部位（グローブ等）だけ。 */
+  var faceC = (typeof window !== 'undefined' && window.CS_LAYERC_FACE)
+    ? _loadCutsceneImg('img/cutscenes/layerc/face_eyes_determined.png?v=2') : null;
+
+  /* ── 4ビートの連続（★ 2026-07-29 4分割コマ割りから転換・ユーザー確認済み）─────────────
+   * 旧実装は 480×216 を4つの多角形に割っていた。これは2つの理由で誤りだった:
+   *   ① **層Cを自ら否定していた**。4分割すると1コマ約135×108px。層Cの定義は選手の画面高
+   *      120〜200%（見切れる寄り）なので、その寸法には物理的に入らない。
+   *   ② **1画面1ビートに反していた**。「時間軸で1枚ずつ足すから矛盾しない」と弁護していたが、
+   *      シーケンス終了時には4コマが同時に画面上にある。
+   * ★ 参考漫画は1ページに3〜5コマ使うが、**漫画の1ページに対応するのは1画面ではなく1シーケンス**。
+   *   ページは読者が数秒視線を送る面で、480×216は1.3秒で流れる帯。ページを画面へ写したのが誤りだった。
+   *      漫画の1コマ → うちの1画面（フルフレーム）
+   *      漫画の1ページ → うちの数ビートの連なり
+   * ★ 決めた線: **3つ以上に割るのはナシ**。主コマ1つ＋食い込む小コマ1つ（=対決割り/カットイン帯）までは可。
+   * 副作用として、フルフレームなら層C素材が本来の120〜200%で使える＝寄りの上限が広がる。 */
+  var BEATS = [
+    // beat順。最後の1枚が「決着の緊張」＝GKのグローブ。
+    { key: 'eye' }, { key: 'boot' }, { key: 'ball' }, { key: 'glove' }
+  ];
+  BEATS.forEach(function (pn) {                      // 各ビートは画面まるごと（旧 pn.bx/bw 等をそのまま使えるようにする）
+    pn.bx = 0; pn.by = 0; pn.bw = W; pn.bh = H; pn.cx = W / 2; pn.cy = H / 2;
+  });
+
+  /* スプライト内の「足元」を実行時に実測する。
+   *   ★ ハードコードは不可。①髪型ごとに画布サイズが違う（wavy 291×388 / afro 268×379）
+   *     ②`_renderShotDuelScene` の (0.42,0.79) は**ボールの射出点**であってスプライト内の足ではない
+   *     （この取り違えで初回は空白をクロップした・2026-07-29）。最下段の不透明画素の重心を取る。 */
+  var _footCache = {};
+  function footFrac(spr, key) {
+    if (_footCache[key]) return _footCache[key];
+    var r = { x: 0.5, y: 0.95 };
+    try {
+      var c = document.createElement('canvas'); c.width = spr.width; c.height = spr.height;
+      var x2 = c.getContext('2d'); x2.drawImage(spr, 0, 0);
+      var d = x2.getImageData(0, 0, spr.width, spr.height).data, maxY = -1;
+      for (var i = 3; i < d.length; i += 4) { if (d[i] > 16) { var py = ((i - 3) / 4 / spr.width) | 0; if (py > maxY) maxY = py; } }
+      if (maxY > 0) {
+        var sx = 0, sn = 0;
+        for (var yy = Math.max(0, maxY - 20); yy <= maxY; yy++)
+          for (var xx = 0; xx < spr.width; xx++)
+            if (d[(yy * spr.width + xx) * 4 + 3] > 16) { sx += xx; sn++; }
+        if (sn) r = { x: sx / sn / spr.width, y: (maxY - 10) / spr.height };
+      }
+    } catch (e) { /* taint等は既定値で続行 */ }
+    _footCache[key] = r; return r;
+  }
+
+  /* 部位を切り出してコマに「はみ出させて」置く。
+   *   fx,fy = 元画像内の注目点（フラクション） / frac = 切り出す幅の割合 / over = はみ出し量 */
+  function drawPart(img, fx, fy, frac, pn, over) {
+    if (!img || !img.width) return false;
+    var iw = img.width, ih = img.height;
+    var sw = iw * frac, sh = sw * (pn.bh / pn.bw);
+    if (sh > ih) { sh = ih; sw = sh * (pn.bw / pn.bh); }
+    var sx = Math.max(0, Math.min(iw - sw, iw * fx - sw / 2));
+    var sy = Math.max(0, Math.min(ih - sh, ih * fy - sh / 2));
+    var o = over || 1.14;                                  // ★ 1.0超＝コマから見切れる（層Cの定義）
+    var dw = pn.bw * o, dh = pn.bh * o;
+    ctx.drawImage(img, sx, sy, sw, sh, pn.cx - dw / 2, pn.cy - dh / 2, dw, dh);
+    return true;
+  }
+
+  var flipH = _csAttackRight(sc);
+  /* ★ フルフレーム化に伴い1ビートを長くする。旧は4分割コマが「増えていく」ので1枚200msで足りたが、
+   *   画面まるごとの寄りは読ませる時間が要る（旧STEP下限120ms→260ms）。 */
+  var P = _MONT_STEP * BEATS.length + 520;
+  var beatMs = _csBeatMs();
+  if (beatMs) P = Math.max(700, Math.min(P, beatMs - 200));
+  var STEP = Math.max(260, (P - 260) / BEATS.length);
+
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var el = ((typeof performance !== 'undefined') ? performance.now() : Date.now()) - T0;
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#0c0a14'; ctx.fillRect(0, 0, W, H);      // 紙＝墨（未登場のコマはここが見える）
+    ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+    ctx.imageSmoothingEnabled = true;
+
+    var shotSpr = (shotImg.complete && shotImg.naturalWidth) ? MangaRecolor.render(shKey, shotImg, cols) : null;
+    var gkSpr = (gkImg.complete && gkImg.naturalWidth) ? MangaRecolor.render(gkKey, gkImg, gkCols) : null;
+
+    /* ★ 4分割から4ビート連続へ。**いま見せるビート1つだけを画面まるごとに描く**（累積しない）。 */
+    var idx = Math.min(BEATS.length - 1, Math.floor(el / STEP));
+    {
+      var pn = BEATS[idx], t = el - idx * STEP;
+      var k = Math.min(1, t / _MONT_SLAM);
+      var z = 1 + 0.22 * (1 - k) * (1 - k);                  // 叩きつけ（大きく入って収まる）
+
+      ctx.save();
+      ctx.translate(pn.cx, pn.cy); ctx.scale(z, z); ctx.translate(-pn.cx, -pn.cy);
+      // 背景＝集中線（焦点は画面中心）。部位だけだと空間が読めない。
+      ctx.drawImage(_mangaShotBg(W, H, pn.cx, pn.cy), 0, 0);
+
+      /* 顔コマ。
+       *   ① 層C専用アート（LAYER_C_ASSET_SPEC / C-01）があればそれを使う＝本来の「部位アップ」。
+       *      フルブリードの絵なので切り出さずコマへ被せる。
+       *   ② 無ければ Portrait の合成頭へフォールバック。ただし合成頭は12pxブロックなので
+       *      部位アップにはできず、崩れない上限（_MONT_FACE_MAXZ）＝頭部まるごとに留める。 */
+      if (pn.key === 'eye' && faceC && faceC.complete && faceC.naturalWidth) {
+        /* ★ 生成アートはそのままだと滑らかな線画で、隣の層Mスプライト（ドット絵）と画風が割れる。
+         *   層Mが通っているのと同じ _csPixelate（論理解像度へ高品質縮小→NN拡大）に通して
+         *   同じドットの目に落とす。CS_LAYERC_PIXELATE=false で素の絵と比較できる。 */
+        var doPix = (typeof window === 'undefined') || window.CS_LAYERC_PIXELATE !== false;
+        var fw = pn.bw * 1.04, fh = pn.bh * 1.04;
+        var fspr = doPix ? _csPixelate(faceC, 'lc_face_c01', fw, fh) : faceC;
+        var prevSm = ctx.imageSmoothingEnabled;
+        if (doPix) ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(fspr, pn.cx - fw / 2, pn.cy - fh / 2, fw, fh);
+        ctx.imageSmoothingEnabled = prevSm;
+      } else if (pn.key === 'eye' && headC) {
+        var need = pn.bw * 1.06 / _MONT_FACE_MAXZ;                    // 必要なクロップ幅(px)
+        drawPart(headC, EYE.x / 720, (EYE.y + 90) / 840, Math.min(1, need / 720), pn, 1.06);
+      } else if (pn.key === 'boot' && shotSpr) {
+        var ff = footFrac(shotSpr, shKey);
+        drawPart(shotSpr, ff.x, ff.y, 0.34, pn, 1.18);
+      }
+      else if (pn.key === 'glove' && gkSpr) drawPart(gkSpr, dive.gx, dive.gy, 0.36, pn, 1.22);
+      else if (pn.key === 'ball') {
+        var br = Math.min(pn.bw, pn.bh) * 0.62;
+        _lpBall(ctx, pn.cx, pn.cy, br, el * 0.006);
+      }
+      ctx.restore();
+
+      // ビートが切り替わった瞬間の白フラッシュ（「刺さった」ことを一瞬だけ示す）。割り線の代替。
+      if (k < 1) {
+        ctx.fillStyle = 'rgba(255,255,255,' + (0.42 * (1 - k)).toFixed(3) + ')';
+        ctx.fillRect(0, 0, W, H);
+      }
+    }
+    // ★ 墨の割り線は廃止（コマを割らないため）。
+    ctx.restore();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return canvas;
+}
 
 // Var A: 対角対決割り。canvas を対角の墨割り線で2分割し、右=シューター（蹴りの瞬間）/左=GKダイブ大ゴマ。
 //   両パネルとも背景はスピード線（_mangaShotBg 流用・焦点は各パネルの主）。墨縁の白抜きボール軌道＋
@@ -1042,13 +1797,39 @@ function _renderShotDuelScene(sc) {
   var _gkKey = 'gkdive|' + _dive.id + '|' + gkColor + '|' + _gkCols.skin;   // ポーズ別キー（共通キーだと先勝ちの絵が焼き付く）
   var gkImg = _loadCutsceneImg(_dive.src);
 
-  // ジオメトリ（native: 右=シューター/左=GK・ボール右→左）
-  var ph = 172, pcx = W * 0.80, sprW = 133;
+  /* ★ GK側のパターン2 ＝ 顔アップ（2026-07-29 ユーザー指定「GKは顔アップのパターンがあってもいい」）。
+   *   参考漫画 IMG_5885 / IMG_5887 の顔コマは**面積10〜15%の細い縦ゴマ**で、しかも**減彩しない**
+   *   ＝そのコマの中では顔が主語だから。ダイブ絵を縮めるパターン（既存）と2つ持つこと自体が
+   *   縮尺のダイナミックレンジになる（[[art-one-shot-one-subject]] ④）。
+   *   ★ 合成頭(Portrait)は12pxブロックで顔アップに使えない（2026-07-29 実測・予算4pxに対し10px）。
+   *     よって**層C素材があるときだけ**発動し、無ければダイブ縮小パターンへ落ちる。
+   *   ⚠️ 現状の層C素材は C-01（determined eyes）1点のみで、GK専用ではない＝仮置き。
+   *     仕様書の C-02(glare) がGK向けなので、そちらが出来たら差し替える。 */
+  var _lcFace = (typeof window !== 'undefined' && window.CS_LAYERC_FACE)
+    ? _loadCutsceneImg('img/cutscenes/layerc/face_eyes_determined.png?v=2') : null;
+  var _wantFace = (typeof window !== 'undefined' && window.CS_DUEL_GK_FACE !== undefined)
+    ? !!window.CS_DUEL_GK_FACE                     // ラボ: 明示切替（比較用）
+    : !!(_csShotVarHash(sc) & 2);                  // 既定: 決定論ローテ（ダイブ縮小と半々）
+  var gkFace = _wantFace && !!_lcFace;
+
+  /* ジオメトリ（native: 右=シューター/左=GK・ボール右→左）
+   * ★ 2026-07-29 コマ面積の重み付け（ユーザー指定「シュートのコマは大きく／GKの顔は小さく」＋
+   *   参考漫画6ページの実測）。
+   *   旧: 割り線 W*0.40→0.60 ＝ 左右きっかり 51,840px² : 51,840px²（**面積比1.0倍**）で、
+   *       しかも GK 幅264px > シューター幅133px ＝ **GKの方が2.0倍大きい**＝指定と正反対だった。
+   *   新: シューター 72% : GK 28%（面積比2.6倍）。GKは幅150pxへ縮めて左パネルに収める。
+   *   参考漫画の最大/最小コマ比は 4.2〜11倍なので、まだ控えめな側に置いている。 */
+  var ph = 190, pcx = W * 0.72, sprW = 147;                             // シューター＝主語（旧172→190・幅も比例）
   var foot = [pcx - sprW / 2 + sprW * 0.42, ground - ph + ph * 0.79];   // 蹴り点（既存拍1と同式）
-  var dTop = W * 0.40, dBot = W * 0.60;                                 // 対角割り線（上→下で右へ・急角度）
-  var gkW = 264 * _dive.ws, gkH = gkW * _dive.hw, gkX = -14, gkY = 52;            // GK大ゴマ（パネル高の7割級・はみ出しクロップ上等）
+  //   顔アップ時は参考漫画の顔コマに合わせてさらに細く（22%）。ダイブ縮小時は28%。
+  var dTop = W * (gkFace ? 0.13 : 0.18), dBot = W * (gkFace ? 0.31 : 0.38);
+  function divAt(y) { return dTop + (dBot - dTop) * (y / H); }          // 割り線のx（yの関数）
+  var gkW = 150 * _dive.ws, gkH = gkW * _dive.hw;                       // GK＝非主語の小ゴマ（旧264→150）
+  var gkX = 64 - gkW / 2, gkY = 112 - gkH / 2;                          // 左パネル（28%）の中央に収める
   var hX = gkX + gkW * _dive.gx, hY = gkY + gkH * _dive.gy;                     // GKの手元（reaching glove アンカー・絵別）
-  var target = [hX + 30, hY + 6];                                       // ボール静止点＝手元の少し手前（結果非開示）
+  /* ボール静止点。ダイブ絵＝手元の少し手前（旧+30,+6 を縮尺 150/264 で換算）。
+   *   顔アップ＝手が描かれないので、割り線の少し手前で止める＝「まだ分からない」を保つ。 */
+  var target = gkFace ? [divAt(H * 0.52) + 16, H * 0.52] : [hX + 17, hY + 3];
   var P = 1700;                                                         // 既存尺システムに従う（1×=1700ms）
   var _beatMs = _csBeatMs();
   if (_beatMs) P = Math.max(520, Math.min(1700, _beatMs - 250));
@@ -1070,6 +1851,10 @@ function _renderShotDuelScene(sc) {
     var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
     var p = Math.min(1, (now - T0) / P);
     ctx.clearRect(0, 0, W, H);
+    // ── 共通FXレイヤー: 蹴りインパクトのズームパンチ（launch後240msのみ・恒常カメラ移動なし）──
+    //   焦点は蹴り点側（flip込みの画面座標: 右攻めflipH時は左右反転するので中央寄りに置く）。
+    ctx.save();
+    _csFx.punch(ctx, W, H, (now - T0) - launchP * P, { dur: 240, cx: W / 2, cy: H * 0.6 });
     ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
     ctx.imageSmoothingEnabled = true;   // 高解像度マンガ絵＝スムージング縮小（falseだとNN間引きでジャギ・斑点 2026-07-15）
 
@@ -1078,10 +1863,35 @@ function _renderShotDuelScene(sc) {
     var zL = 1.0 + Math.min(1, p / 0.7) * 0.06;
     var gc = [gkX + gkW * 0.5, gkY + gkH * 0.55];
     ctx.translate(gc[0], gc[1]); ctx.scale(zL, zL); ctx.translate(-gc[0], -gc[1]);
-    ctx.drawImage(_mangaShotBg(W, H, hX - 40, hY + 30), 0, 0);
-    _csDrawNet(ctx, 4, 24, 116, 154, 0.16);
     var gkSpr = (gkImg.complete && gkImg.naturalWidth) ? MangaRecolor.render(_gkKey, gkImg, _gkCols) : null;
-    if (gkSpr) { rim4(_csInkSil(gkSpr, _gkKey), gkX, gkY, gkW, gkH); ctx.drawImage(gkSpr, gkX, gkY, gkW, gkH); }
+    if (gkFace) {
+      /* パターン2: 顔アップのコマ。
+       *   ★ このコマの主語は顔なので **_csSubdue は掛けない**（参考漫画の顔コマも減彩していない）。
+       *   ★ 背景はベタ（集中線もネットも描かない）＝情報量を顔だけに寄せる（層C仕様 §3）。
+       *   ★ フルブリードでコマが必ずクリップするので透過は不要。
+       *   ★ 生成アートは滑らかなので、層Mが通っているのと同じ _csPixelate に流して同じドットの目に落とす。 */
+      ctx.fillStyle = '#0c0a14'; ctx.fillRect(-4, -4, dBot + 12, H + 8);
+      if (_lcFace.complete && _lcFace.naturalWidth) {
+        var doPixD = (typeof window === 'undefined') || window.CS_LAYERC_PIXELATE !== false;
+        var fwD = dBot * 1.30, fhD = fwD * (_lcFace.naturalHeight / _lcFace.naturalWidth);
+        if (fhD < H * 1.06) { fhD = H * 1.06; fwD = fhD * (_lcFace.naturalWidth / _lcFace.naturalHeight); }
+        var fsprD = doPixD ? _csPixelate(_lcFace, 'lc_face_c01_duel', fwD, fhD) : _lcFace;
+        var prevSmD = ctx.imageSmoothingEnabled;
+        if (doPixD) ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(fsprD, dBot * 0.42 - fwD / 2, H * 0.5 - fhD / 2, fwD, fhD);
+        ctx.imageSmoothingEnabled = prevSmD;
+      }
+    } else {
+      /* パターン1: ダイブ絵の縮小。
+       *   ★ SUBDUE-01: GKは非主語なので彩度と明度を落とす。輪郭のリム(rim4)は墨のまま残すので
+       *     形は読めるが「声量」だけが下がる＝主語がシューター1つに定まる。 */
+      ctx.drawImage(_mangaShotBg(W, H, hX - 22, hY + 17), 0, 0);
+      _csDrawNet(ctx, 2, 30, 104, 132, 0.16);
+      if (gkSpr) {
+        rim4(_csInkSil(gkSpr, _gkKey), gkX, gkY, gkW, gkH);
+        ctx.drawImage(_csSubdue(gkSpr, _gkKey), gkX, gkY, gkW, gkH);
+      }
+    }
     ctx.restore();
 
     // ── 右パネル: 蹴り点焦点のスピード線＋シューター ──
@@ -1114,12 +1924,18 @@ function _renderShotDuelScene(sc) {
       _lpBall(ctx, bx, by, 12, u * 9);
     }
     _csImpactStar(ctx, foot[0], foot[1], 18 + (p < 0.1 ? (0.1 - p) * 60 : 0));
+    // ── 共通FXレイヤー: 蹴り点から膨張する衝撃波リング（白＋攻撃色・既存の星/ジグザグと併用）──
+    _csFx.ring(ctx, foot[0], foot[1], ((now - T0) - launchP * P) / 380, { color: accent, radius: 62, cell: 3, seed: 11, chunks: 6 });
     ctx.restore();
+    ctx.restore();   // FX punch
     // スプライト未ロード中は尺を超えても少し待つ（初回404様の固まり防止・上限 P+3000ms）
-    if (p < 1 || ((!shSpr || !gkSpr) && (now - T0) < P + 3000)) requestAnimationFrame(frame);
+    // 顔アップ時は層C素材のロードも待つ（未ロードのままだと墨ベタのコマが出る）
+    var _needWait = !shSpr || (gkFace ? !(_lcFace.complete && _lcFace.naturalWidth) : !gkSpr);
+    if (p < 1 || (_needWait && (now - T0) < P + 3000)) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return _csCenterSubject(canvas, 0.5, false);   // 両雄構図＝中央
+  // 旧は「両雄構図＝中央(0.5)」だったが、主語がシューター1つに定まったので主役へ寄せる。
+  return _csCenterSubject(canvas, pcx / W, flipH);
 }
 
 // ヘディング競り合い＝対決割り（垂直分割・2026-07-15 ユーザー指定で従来の重ね1コマ(_renderHeaderScene)から刷新）。
@@ -1380,10 +2196,41 @@ function _renderShotScene(sc, entry) {
     ctx.clearRect(0, 0, W, H);
     var z = 1.0 + Math.min(1, p / 0.6) * 0.08;                       // 寄り
     var strikeF = (p > strikeP - 0.02 && p < strikeP + 0.08) ? 1 - Math.abs(p - strikeP) / 0.08 : 0;
-    ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(foot[0], foot[1]); ctx.scale(z, z); ctx.translate(-foot[0], -foot[1]);
+    /* CAM-01: 既存の寄り(z)をカメラへ移し、背景だけ深度を下げてパララックスを作る（2026-07-28）。
+     * ★ 紙白背景(_mangaBg)は深度1のまま。放射スピード線が蹴り点から出ている“主役と一体の絵”なので、
+     *   ここを奥へ置くと線の中心が主役からズレて破綻する。パララックスするのは実写的なピッチ背景だけ。
+     * ★ 蹴りの瞬間だけ揺らす（strikeP＝インパクト）。 */
+    var cam = _csCam.mk({ fx: foot[0], fy: foot[1] });
+    var camOn = (typeof CS_CAM_ENABLED === 'undefined') || CS_CAM_ENABLED;
+    cam.zoom = z;
+    if (camOn) {
+      /* 拍に合わせた寄り。従来の z は p 依存のなだらかな寄りで、**一番効かせたい蹴りの瞬間に
+       * 何も起きなかった**。振りかぶりは浅く抑え、インパクトで一段踏み込む。
+       * ★ 踏み込んだ後は**引かない**（2026-07-28 ユーザー指示）。寄って戻すと勢いが打ち消され、
+       *   決まった画がふわっと緩む。寄りは片道＝到達した画角のまま拍を終える。
+       * ★ strikeP はこの下で毎フレーム再代入される（初回のみ1フレーム古い値＝自己補正されるので実害なし）。 */
+      var sp = strikeP || 0;
+      var wind = _csCam.smooth(_csCam.clamp01(sp > 0.02 ? p / sp : 1));
+      var kick = _csCam.easeOut(_csCam.clamp01((p - sp) / 0.10));
+      cam.zoom = 1 + 0.03 * wind + 0.09 * kick;
+      _csCam.shake(cam, (p - sp) * P, 210, 3.0);
+    }
+    var BGD = (camOn && !_mangaBg) ? 0.34 : 1;
+    function beginLayer(depth) {
+      ctx.save();
+      if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+      _csCam.begin(ctx, cam, camOn ? depth : 1);
+    }
+    function endLayer() { _csCam.end(ctx); ctx.restore(); }
+
+    beginLayer(BGD);
     ctx.imageSmoothingEnabled = SS > 1;   // マンガ絵=スムージング / ドット絵=NN維持（2026-07-15）
     if (_mangaBg) ctx.drawImage(_mangaShotBg(W, H, foot[0], foot[1] - 10), 0, 0);   // 拍1: 紙白＋放射スピード線＋網点
     else _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+    endLayer();
+
+    beginLayer(1);
+    ctx.imageSmoothingEnabled = SS > 1;
     // 2コマアニメ発動判定（両フレームのロード完了時のみ）。p<切替点=振りかぶり／以降=蹴り
     var _useAnim = _an2 && _anWind && _anWind.complete && _anWind.naturalWidth && _anStrike && _anStrike.naturalWidth;
     strikeP = _useAnim ? _AN_SW : 0;   // アニメ時はボールも蹴りの瞬間まで足元で待つ
@@ -1430,7 +2277,7 @@ function _renderShotScene(sc, entry) {
       }
     }
     if (strikeF > 0) speedLines(foot[0], foot[1], strikeF * 0.6, _mangaBg ? ('rgba(20,22,28,' + (strikeF * 0.55).toFixed(3) + ')') : null);   // 蹴り出しバースト（紙白では墨色）
-    ctx.restore();
+    endLayer();
     if (strikeF > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (strikeF * 0.45) + ')'; ctx.fillRect(0, 0, W, H); }
     // ── 拍2: 守備GK顔カットイン帯（アニメ終盤・下端から斜めスライドイン・台詞なし）──
     //   帯は常に「シューターと反対側」の下隅（flipH でシーンごと鏡像）。バスト未ロード中は描かず rAF を延長して待つ。
@@ -1592,6 +2439,7 @@ function _renderOnetwoScene(sc) {
 
   function speedLines(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 12, y + Math.sin(an) * 12); ctx.lineTo(x + Math.cos(an) * 50, y + Math.sin(an) * 50); ctx.stroke(); } }
   function drawSprF(img, cx, footY, h, flip) { if (!img) return; var nw = img.naturalWidth || img.width, nh = img.naturalHeight || img.height; if (!nw) return; var w = nw * (h / nh); ctx.save(); if (flip) { ctx.translate(cx, 0); ctx.scale(-1, 1); ctx.translate(-cx, 0); } ctx.drawImage(img, cx - w / 2, footY - h, w, h); ctx.restore(); }
+  // ★ CAM-01 は試したが不採用（2026-07-28 ユーザー判断「ワンツーは微妙」）＝静止カメラのまま。
   function withScene(draw) { ctx.save(); if (mirror) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.imageSmoothingEnabled = false; draw(); ctx.restore(); }   // 静止カメラ（選手は動かさない）。ミラーのみ。
   function hud() {
     if (!CUTSCENE_BURN_LABELS) return;   // 焼き込みラベル停止（時刻/アクション名/選手名はHUD・ネーム枠へ集約）
@@ -1837,6 +2685,20 @@ function _mangaFeat(longName) {
 // カット！（ドリブル失敗）の攻撃側スプライト置き場。
 //   専用「走り」ポーズ12髪型（ユーザー生成2×2グリッド×3・2026-07-08受入）。252×343・ネイティブ右向き。
 var MANGA_DRIBBLE_FAIL_DIR = 'img/cutscenes/manga_dribble_fail/';
+// ============================================================
+// タックル5コマ（sprite-studio tackle_f・2026-08-05 納品／ドリブルシーンの守備側）:
+//   f1=踏み込み f2=助走 f3〜f5=スライド（f5=決着ポーズ）。全コマ共通枠 251×230 で切り出し済み＝
+//   コマ間の位置関係が保たれるので、後からアニメ再生へ拡張できる。ネイティブ=伸ばした足が左
+//   （旧 manga_tackle_slide と同じ向き＝反転条件 !atkRight をそのまま流用できる）。
+//   ★旧素材との差: 髪型12種の差し替えが無い単一ヘッド（heading6 と同じ新パイプライン方式）。
+//   現状はドリブルシーンで **決着コマ(f5)を静止1枚として使用**（旧スライダーと同じ使い方）。
+// ============================================================
+var _TK6_DIR = 'img/cutscenes/manga_tackle6/';
+var _TK6_LAST = 5;                 // 決着（スライド伸び切り）のコマ番号
+var _TK6_BOXW = 251, _TK6_BOXH = 230;
+var _TK6_FOOT = 225;               // 決着コマの接地y（枠内実測）。枠下端との差5pxを描画時に足元へ効かせる
+var _TK6_DEFW = 175;               // 画面上の描画幅＝旧スライダーの実効幅(174.5px)と同等
+var _TK6_FOOTADJ = (_TK6_BOXH - _TK6_FOOT) * (_TK6_DEFW / _TK6_BOXW);   // ≒3.5px
 function _mangaColors(td, skin) {
   var kit = (typeof MangaRecolor !== 'undefined' && MangaRecolor.kitFor) ? MangaRecolor.kitFor(td) : { shirt: '#2060d0', shorts: '#1f9d3a', socks: '#cc2f9a', accent: '#24c2d0' };
   return { shirt: kit.shirt, shorts: kit.shorts, socks: kit.socks, accent: kit.accent, skin: skin };
@@ -1858,11 +2720,11 @@ function _renderMangaDribbleScene(sc) {
   //   失敗: manga_tackle_slide/（スライディングタックル 233×161・ネイティブ左向き。2026-07-08受入PASS）
   var defP = sc.defence && sc.defence.players && sc.defence.lineup && sc.defence.players[sc.defence.lineup[sc.dfsPos]];
   var defFeat = defP ? _mangaFeat(defP.long_name || defP.name || '') : null;
-  // 実験(2026-07-09): 成功時の守備も失敗時と同じスライダーポーズ(manga_tackle_slide)へ差し替えて試す。
-  //   キー接頭辞も 'ts_' に統一（'tk_'のままだとMangaRecolorのベースキャッシュが旧追走ポーズを使い回す）。
-  var defImg = defFeat ? _loadCutsceneImg('img/cutscenes/manga_tackle_slide/' + defFeat.hstyle + '.png') : null;
+  // 2026-08-05: 守備スライダーを新タックル素材(manga_tackle6 の決着コマ)へ差し替え（成功/失敗とも共通）。
+  //   旧 manga_tackle_slide（髪型12種）は不使用。キー接頭辞も 'tk6_' へ＝旧ベースキャッシュを引かない。
+  var defImg = defFeat ? _loadCutsceneImg(_TK6_DIR + 'f' + _TK6_LAST + '.png?v=1') : null;
   var defColors = defFeat ? _mangaColors(sc.defence, defFeat.skin) : null;
-  var defColorKey = defFeat ? ('ts_' + defFeat.hstyle + '|' + defColors.shirt + defColors.shorts + defColors.socks + defColors.accent + defColors.skin) : null;
+  var defColorKey = defFeat ? ('tk6_' + _TK6_LAST + '|' + defColors.shirt + defColors.shorts + defColors.socks + defColors.accent + defColors.skin) : null;
 
   var W = 480, H = 216, ground = 196;
   var canvas = document.createElement('canvas');
@@ -1892,7 +2754,8 @@ function _renderMangaDribbleScene(sc) {
 
   // 体スケール: canvas縦横比が違うため描画幅で体格を個別調整。
   //   成功守備(追走・縦長250×453)=104 / 失敗守備(スライディング・横長233×161)=176（横長なので幅は大きめ＝体格は同等に見える。2026-07-09 守備を少し大きく＝攻撃者とのバランス調整）。
-  var bodyWDrib = 120, bodyWDef = 176;   // 実験: 成功守備もスライダー(横長)＝176（旧・成功追走は104）
+  var bodyWDrib = 120, bodyWDef = _TK6_DEFW;   // 守備=新タックル決着コマ。旧スライダー(176)と同じ実効幅になるよう _TK6_DEFW で指定
+  var defFootY = ground + _TK6_FOOTADJ;        // 枠下端と接地線のズレ(5px)を補正＝足が地面から浮かない
   var heroX0 = success ? (W * 0.5 - dir * 46) : (W * 0.5 - dir * 47);   // 成功=両選手を中央寄せ(-6→-46・2026-07-09) / 失敗=静止構図のデュエル中心を画面中央に
   var P = success ? 460 : 820;   // 成功=460（ドリブラー移動速度）。失敗=820（スライドイン＋ボール離脱＋よろけ揺れが尺内に収まる長さ・成功側は不変）
 
@@ -1909,6 +2772,11 @@ function _renderMangaDribbleScene(sc) {
     ctx.restore();
   }
   function drawHero(cx, footY) { drawSprite(img, colorKey, colors, cx, footY, bodyWDrib); }
+  /* CAM-01: カットアウトの二次モーション付きヒーロー。lean=進行方向への前傾／squash=踏み込みの潰し。
+   *   ★ 足元(cx, footY)を軸にする＝地面から足が浮かない。 */
+  function drawHeroP(cx, footY, lean, squash) {
+    _csCam.puppet(ctx, cx, footY, lean, squash, function () { drawHero(cx, footY); });
+  }
   function speedLines(x, y, a, spread) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 12, y + Math.sin(an) * 12); ctx.lineTo(x + Math.cos(an) * (spread || 52), y + Math.sin(an) * (spread || 52)); ctx.stroke(); } }
   function hud() {
     if (!CUTSCENE_BURN_LABELS) return;
@@ -1931,7 +2799,12 @@ function _renderMangaDribbleScene(sc) {
     var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
     var p = Math.min(1, (now - T0) / P);
     ctx.clearRect(0, 0, W, H);
-    ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+
+    /* CAM-01: レイヤー深度つきカメラ。背景=0.34（ほぼ止まる）／守備=0.9／攻撃=1.0／ボール=1.06。
+     *   ★ カメラは主役を lag=0.62 で追う＝画面内でも主役は動き続ける（100%追うと止まって見える）。 */
+    var cam = _csCam.mk({ fx: W * 0.5, fy: ground - 52 });
+    var camOn = (typeof CS_CAM_ENABLED === 'undefined') || CS_CAM_ENABLED;
+    var DBG = camOn ? 0.34 : 1, DDEF = camOn ? 0.90 : 1, DBALL = camOn ? 1.06 : 1;
 
     if (success) {
       // 成功（突破）: 起点=添付ラフの密着デュエル（守備が左肩後ろに深く重なる）を一拍見せる→ドリブラーが前へ抜け出す。
@@ -1941,9 +2814,27 @@ function _renderMangaDribbleScene(sc) {
       var ballX = heroX + dir * 46;                     // ボールは前足の先
       var ballY = ground - 30;
 
-      if (defImg) drawSprite(defImg, defColorKey, defColors, defX, ground, bodyWDef);   // 守備＝静止・先描き（ドリブラーの後ろに深く重なる）
-      drawHero(heroX, ground);                          // 集中線（ピカッ）は不要のため削除（2026-07-09）
-      if (ballX > -20 && ballX < W + 20) _lpBall(ctx, ballX, ballY, 12, p * 15 * dir);
+      if (camOn) {
+        // 抜け出しに合わせて寄る＝「今ここを見ろ」。寄りは控えめ（1.00→1.12）＝低解像度で潰さない。
+        cam.zoom = 1 + 0.12 * _csCam.smooth(_csCam.clamp01((p - 0.05) / 0.55));
+        _csCam.follow(cam, heroX, heroX0 + dir * 34, 0.62);
+        _csCam.shake(cam, (p - 0.08) * P, 200, 2.4);    // バースト開始の一瞬だけ
+      }
+
+      _csCam.begin(ctx, cam, DBG);
+      ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+      _csCam.end(ctx);
+
+      if (defImg) { _csCam.begin(ctx, cam, DDEF); drawSprite(defImg, defColorKey, defColors, defX, defFootY, bodyWDef); _csCam.end(ctx); }  // 守備＝静止・先描き（ドリブラーの後ろに深く重なる）
+      _csCam.begin(ctx, cam, 1);
+      // 二次モーション: バーストで進行方向へ前傾し、抜け切って減速するにつれ起き上がる。
+      //   踏み込みの一瞬だけ潰す（squash）＝重心の乗りが出る。手足は描き直していない。
+      var burst = _csCam.clamp01((p - 0.06) / 0.30), settle = _csCam.clamp01((p - 0.45) / 0.55);
+      var lean = camOn ? dir * (0.085 * burst * (1 - settle * 0.75)) : 0;
+      var squash = camOn ? 1 - 0.05 * Math.sin(_csCam.clamp01((p - 0.06) / 0.22) * Math.PI) : 1;
+      drawHeroP(heroX, ground, lean, squash);           // 集中線（ピカッ）は不要のため削除（2026-07-09）
+      _csCam.end(ctx);
+      if (ballX > -20 && ballX < W + 20) { _csCam.begin(ctx, cam, DBALL); _lpBall(ctx, ballX, ballY, 12, p * 15 * dir); _csCam.end(ctx); }
     } else {
       // 失敗（カット！）: 従来の静止構図を「最終静止状態」とし、そこへ至る短いシーケンス（2026-07-09 ユーザー要望）。
       //   静止構図: 守備スライダー=heroX0+dir*64（奥z・先描き）/ 攻撃者=heroX0（手前z・後描き）。
@@ -1956,14 +2847,29 @@ function _renderMangaDribbleScene(sc) {
       // ② 攻撃者のよろけ: 着地(p>0.22)後から減衰sin（±2px・1周期＝左右1回）→ p=1で0＝静止構図へ収束。
       var wq = Math.max(0, Math.min(1, (p - 0.22) / 0.78));
       var heroXf = heroX0 + 2 * (1 - wq) * Math.sin(wq * Math.PI * 2);     // π*2 = 2π ＝ 1周期（左右1回だけ揺れる）
-      if (defImg) drawSprite(defImg, defColorKey, defColors, defX, ground, bodyWDef);   // スライダー＝奥z（先描き）
-      drawHero(heroXf, ground);                                            // 攻撃者＝手前z（後描き・守備の手を背後に隠す）
+
+      if (camOn) {
+        // 潰された側の絵＝寄って止める。スライド着地(p≒0.18)の一瞬だけ強く揺らす。
+        cam.zoom = 1 + 0.10 * _csCam.smooth(_csCam.clamp01(p / 0.35));
+        cam.panX = -dir * 10 * _csCam.smooth(_csCam.clamp01(p / 0.35));
+        _csCam.shake(cam, (p - 0.16) * P, 260, 4.0);
+      }
+      _csCam.begin(ctx, cam, DBG);
+      ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+      _csCam.end(ctx);
+
+      if (defImg) { _csCam.begin(ctx, cam, DDEF); drawSprite(defImg, defColorKey, defColors, defX, defFootY, bodyWDef); _csCam.end(ctx); }   // スライダー＝奥z（先描き）
+      _csCam.begin(ctx, cam, 1);
+      // 二次モーション: 止められた側は進行方向と逆へ仰け反る（つんのめり）→ 収束して静止構図へ。
+      var kick = _csCam.clamp01((p - 0.16) / 0.16) * (1 - _csCam.clamp01((p - 0.32) / 0.5));
+      drawHeroP(heroXf, ground, camOn ? -dir * 0.075 * kick : 0, camOn ? 1 - 0.035 * kick : 1);   // 攻撃者＝手前z（後描き・守備の手を背後に隠す）
+      _csCam.end(ctx);
       // 着地インパクトの集中線（控えめ・短く）＝守備の伸ばした足元(defX - dir*64)。
       var impF = (p > 0.10 && p < 0.24) ? 1 - Math.abs(p - 0.17) / 0.07 : 0;
-      if (impF > 0) speedLines(defX - dir * 64, ground - 10, impF * 0.4, 34);
+      if (impF > 0) { _csCam.begin(ctx, cam, 1); speedLines(defX - dir * 64, ground - 10, impF * 0.4, 34); _csCam.end(ctx); }
       // ボール: 前足(heroX0+dir*30)から着地とほぼ同時に -dir へ高速離脱→画面外(-dir側)で消える。
       var bStart = 0.14, ballX = (p < bStart) ? (heroX0 + dir * 30) : (heroX0 + dir * 30 - dir * 1600 * (p - bStart));
-      if (ballX > -16 && ballX < W + 16) _lpBall(ctx, ballX, ground - 14, 11, (p < bStart) ? 0 : (-dir * (p - bStart) * 80));
+      if (ballX > -16 && ballX < W + 16) { _csCam.begin(ctx, cam, DBALL); _lpBall(ctx, ballX, ground - 14, 11, (p < bStart) ? 0 : (-dir * (p - bStart) * 80)); _csCam.end(ctx); }
     }
     hud();
     if (p < 1 || !img.complete || (defImg && !defImg.complete)) requestAnimationFrame(frame);   // 画像ロードが遅れても完了後に必ず両者を描き切る
@@ -1973,12 +2879,208 @@ function _renderMangaDribbleScene(sc) {
   return _csCenterSubject(canvas, 0.5, false);
 }
 
+// ============================================================
+// ドリブル「新シーン」= 2コマ走り（テスト実装 2026-07-27・ユーザー提供アート）
+//   2拍構成: 拍1=溜め(_D2_HOLD・1コマ目が主役) → 拍2=決着(_D2_CUT・短く抜き去る) → 2コマ目で固定。
+//   ループはしない（2026-07-27 指示）。
+//   素材: img/cutscenes/manga_dribble2/f1..f2.png（191×179・接地線y=173・ネイティブ右向き）。
+//   従来の成功ドリブル（静止1枚の manga_dribble）を、走りループするドリブラーへ差し替える。
+//   構図・尺・守備（スライダー）・HUD は _renderMangaDribbleScene の成功側をそのまま踏襲＝
+//   「主役のアートとアニメだけ」を入れ替えた比較になるようにしてある。
+//   失敗（カット！）は当アートに該当ポーズが無いので null を返し、従来シーンへフォールバックする。
+//
+//   素材の正規化（sprite-studio tools/frames_norm.py --scale 0.20）:
+//     2コマは前傾角が違うため slice_anim の胴長(縦)正規化だと深い前傾のコマが15%拡大されて破綻する。
+//     面積(0.6%差)・頭→腰(5.6%差)・立位換算がいずれも一致＝素材は既に同スケールだったので、
+//     コマ毎の正規化はやめて共通倍率で縮小し、生成された通りの相対サイズを保っている。
+//     倍率0.20は run6（既存の走り）と体の面積・立位換算が揃う値。
+// ============================================================
+var DRIBBLE2_ENABLED = true;                            // window.DRIBBLE2_ENABLED===false で従来ドリブルへ
+var _D2_DIR = 'img/cutscenes/manga_dribble2/';
+var _D2_W = 191, _D2_H = 179, _D2_FOOT = 173;           // 素材の画布と接地線
+var _D2_BODY = 191;                                     // 立位換算の全身高（run6の_R6_BODY=195と同基準＝画面上で同じ体格になる）
+// 2拍の尺。1コマ目＝「溜め」を主役に置き、2コマ目＝「決着」は短く抜く（2026-07-27 指示）。
+//   溜めを主役にするとは配分だけでなく振り付けの話で、溜め拍では前進をほぼ止め（守備の滑り込みが動きを担う）、
+//   決着拍で移動量の大半を一息に使う。同じ700msでも「長く見せる」のは溜め側。
+var _D2_HOLD = 460;                                     // 拍1: 溜め（1コマ目）
+var _D2_CUT = 240;                                      // 拍2: 決着（2コマ目）＝短い
+// 走りの集中線（決着拍のみ）。主役の後方へ水平に流す。
+function _d2Speed(ctx, x, y, a, dir) {
+  if (a <= 0.02) return;
+  ctx.strokeStyle = 'rgba(255,255,255,' + a + ')';
+  ctx.lineWidth = 2;
+  for (var i = 0; i < 5; i++) {                        // 帯は胴の高さに収める（芝まで垂らすと走りでなく地面の線に見える）
+    var yy = y + i * 20;
+    ctx.beginPath(); ctx.moveTo(x - dir * 12, yy); ctx.lineTo(x - dir * (54 + (i % 2) * 16), yy); ctx.stroke();
+  }
+}
+var _D2_PH = 182;                                       // 画面上の全身高（run6のrunPhと同値）
+function _renderDribble2Scene(sc) {
+  if (typeof MangaRecolor === 'undefined' || !MangaRecolor.render) return null;
+  if (sc.result !== '成功') return null;                 // 失敗＝該当ポーズ無し→従来シーンへ
+  var dribP = sc && sc.offence && sc.offence.players && sc.offence.lineup && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  if (!dribP) return null;
+  var feat = _mangaFeat(dribP.long_name || dribP.name || '');
+  var colors = _mangaColors(sc.offence, feat.skin);
+  var imgs = [1, 2].map(function (i) { return _loadCutsceneImg(_D2_DIR + 'f' + i + '.png?v=1'); });   // 画像差し替え時は?vを上げる
+
+  // 守備（置き去りにされるスライダー）＝従来の成功ドリブルと同一。
+  var defP = sc.defence && sc.defence.players && sc.defence.lineup && sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+  var defFeat = defP ? _mangaFeat(defP.long_name || defP.name || '') : null;
+  var defImg = defFeat ? _loadCutsceneImg(_TK6_DIR + 'f' + _TK6_LAST + '.png?v=1') : null;   // 2026-08-05 新タックル決着コマへ差し替え
+  var defColors = defFeat ? _mangaColors(sc.defence, defFeat.skin) : null;
+  var defColorKey = defFeat ? ('tk6_' + _TK6_LAST + '|' + defColors.shirt + defColors.shorts + defColors.socks + defColors.accent + defColors.skin) : null;
+
+  var W = 480, H = 216, ground = 196;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var atkRight = _csAttackRight(sc);
+  var dir = atkRight ? 1 : -1;
+  var flipSpr = !atkRight;                               // 攻撃体=ネイティブ右向き / スライダーも反転条件は同じ（従来ドリブル準拠）
+
+  var atkColor = (sc.offence && sc.offence.team_color) || colors.shirt;
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  var label = en ? 'BREAK!' : 'ドリブル突破！';
+  function dom(id) { var el = (typeof document !== 'undefined') && document.getElementById(id); return el ? el.textContent : ''; }
+  var dribName = (typeof getPlayerName === 'function') ? getPlayerName(dribP) : (dribP.name || '');
+  var atkTeamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
+
+  // 守備は「奥で滑って置き去りにされた側」＝接地線を上げ＋小さく描いて奥行きで分ける。
+  //   従来（静止1枚のドリブラー）の 176/同一接地線のままだと、走り込む新アートの横に広いストライドと
+  //   守備のスライドが同じ面で重なり続け、主役もボールも埋まる（実測: 尺の中盤ほぼ全部が重なり）。
+  // 守備=新タックル決着コマ。旧スライダー(148)と同じ実効幅になる値＋枠下端と接地線のズレ補正。
+  var bodyWDef = 147, defGroundUp = 18 - (_TK6_BOXH - _TK6_FOOT) * (147 / _TK6_BOXW);
+  // 起点は従来の成功ドリブルと同一。尺は2拍の合計（溜め460 + 決着240 = 700ms）。
+  var heroX0 = W * 0.5 - dir * 46, P = _D2_HOLD + _D2_CUT;
+
+  function drawDef(cx, footY) {
+    if (!defImg || !defImg.complete || !defImg.naturalWidth) return;
+    var spr = MangaRecolor.render(defColorKey, defImg, defColors);
+    if (!spr) return;
+    var hgt = bodyWDef * (spr.height / spr.width);
+    ctx.save();
+    if (flipSpr) { ctx.translate(cx, 0); ctx.scale(-1, 1); ctx.translate(-cx, 0); }
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(spr, cx - bodyWDef / 2, footY - hgt, bodyWDef, hgt);
+    ctx.restore();
+  }
+  // 走りループ本体。run6 と同じ「MangaRecolor → _csPixelate（論理解像度へ高品質縮小）→ NN描画」。
+  function drawHero(cx, footY, fi) {
+    var im = imgs[fi];
+    if (!im || !im.complete || !im.naturalWidth) return false;
+    var key = 'drb2|' + fi + '|' + colors.shirt + colors.shorts + colors.socks + colors.accent + colors.skin;
+    var s = (_D2_PH * CS_FIGURE_SCALE) / _D2_BODY;
+    var dw = _D2_W * s, dh = _D2_H * s;
+    var spr = _csPixelate(MangaRecolor.render(key, im, colors), key, dw, dh);
+    if (!spr) return false;
+    ctx.save();
+    if (flipSpr) { ctx.translate(cx, 0); ctx.scale(-1, 1); ctx.translate(-cx, 0); }
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(spr, cx - dw / 2, footY - _D2_FOOT * s, dw, dh);
+    ctx.restore();
+    return true;
+  }
+  function hud() {
+    if (!CUTSCENE_BURN_LABELS) return;
+    var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
+    var timeTxt = dom('game-time-display'); if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
+    var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = atkColor; ctx.fillRect(0, H - 30, W, 3);
+    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = '#ffe14a'; ctx.fillText(label, 12, H - 9);
+    if (dribName) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(dribName + (atkTeamNm ? (' · ' + atkTeamNm) : ''), W - 12, H - 10); }
+  }
+
+  // 計時の起点は「画面に出た最初のフレーム」。render 呼び出し時点で開始すると、
+  //   canvas の挿入や初回リカラー（MangaRecolor+_csPixelate）にかかった時間が
+  //   溜め拍の持ち時間から差し引かれ、実際に見える時間が _D2_HOLD より短くなる。
+  var T0 = null;
+  var started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    if (T0 === null) {
+      if (!canvas.isConnected) { requestAnimationFrame(frame); return; }   // 未挿入＝まだ誰も見ていないので計時を始めない
+      T0 = now;
+    }
+    var el = now - T0, p = Math.min(1, el / P);
+    ctx.clearRect(0, 0, W, H);
+
+    // 溜めなしのイーズアウト＝抜き去りを尺の序盤で終わらせ、残りは「単独で走り抜ける」画にする。
+    //   従来の smoothstep だと交差が尺のちょうど中盤に来て、重なった状態の時間が最も長くなっていた。
+    // ── 2拍構成（2026-07-27 指示）: 1コマ目＝「溜め」の主役 / 2コマ目＝短い「決着」 ──
+    //   拍1(溜め): 前進をほぼ止め、守備が滑り込んでくる。緊張だけを積む拍。
+    //   拍2(決着): 溜めた分を一気に解放して抜き去る。短く速く、集中線で殴る。
+    var hold = el < _D2_HOLD;
+    var q = hold ? (el / _D2_HOLD) : Math.min(1, (el - _D2_HOLD) / _D2_CUT);
+    var fi = hold ? 0 : 1;
+    // 前進量: 溜めでは 12% までしか進まず（＝ほぼ密着のまま）、決着で残り 88% を一息に使う。
+    var u = hold ? (0.12 * q * q) : (0.12 + 0.88 * (1 - Math.pow(1 - q, 2.4)));
+    var heroX = heroX0 + dir * 124 * u;
+    // 守備: 溜めの前半で前方から滑り込んで来て、45%で止まる（＝足を出し切って committed）。
+    //   静止させたままだと溜めの拍が「ただ止まっている絵」になるので、ここで動きを担わせる。
+    var defXf = heroX0 + dir * 50;
+    var slide = hold ? Math.min(1, q / 0.45) : 1;
+    var defX = defXf + dir * 30 * (1 - slide) * (1 - slide);   // ease-out で 30px 前方から定位置へ
+    // ボール: 溜めでは足元に置いたまま（34px）、決着でぐっと前へ押し出す（→56px）。
+    var ballX = heroX + dir * (hold ? 34 : (34 + 22 * q));
+    var ballY = ground - 30;
+
+    /* CAM-01: 2拍構成にカメラを合わせる（2026-07-28）。
+     *   拍1「溜め」= ゆっくり寄るだけ（緊張を積む・揺らさない）
+     *   拍2「決着」= もう一段寄る＋遅れて追う＋抜き際の一瞬だけ揺らす
+     * ★ 拍の意味はカメラが担い、絵（2コマ）は触らない＝ユーザー確定の振り付けを崩さない。 */
+    var cam = _csCam.mk({ fx: W * 0.5, fy: ground - 58 });
+    var camOn = (typeof CS_CAM_ENABLED === 'undefined') || CS_CAM_ENABLED;
+    var DBG = camOn ? 0.34 : 1, DDEF = camOn ? 0.90 : 1, DBALL = camOn ? 1.06 : 1;
+    if (camOn) {
+      cam.zoom = hold ? (1 + 0.07 * _csCam.smooth(q))            // 溜め: 1.00→1.07 でじりじり寄る
+                      : (1.07 + 0.06 * _csCam.easeOut(q));       // 決着: 1.07→1.13 で踏み込む
+      _csCam.follow(cam, heroX, heroX0 + dir * 40, 0.58);
+      if (!hold) _csCam.shake(cam, el - _D2_HOLD, 190, 2.8);     // 抜き際だけ
+    }
+
+    _csCam.begin(ctx, cam, DBG);
+    ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+    _csCam.end(ctx);
+
+    _csCam.begin(ctx, cam, DDEF);
+    drawDef(defX, ground - defGroundUp);                 // 守備＝奥（接地線を上げる）＋先描き
+    _csCam.end(ctx);
+    _csCam.begin(ctx, cam, 1);
+    // 決着の集中線＝抜いた瞬間に一番強く、拍の終わりへ消える。溜め側には出さない（拍の差を音量差で作る）。
+    //   主役より先に描く＝体の背後を流れる。後描きにすると線が体の上を横切って傷のように見える。
+    if (!hold) _d2Speed(ctx, heroX - dir * 30, ground - 128, (1 - q) * 0.8, dir);
+    // 二次モーション: 決着で進行方向へ前傾＋踏み込みの潰し。溜め側は無変形＝拍の差を姿勢でも出す。
+    var d2lean = (camOn && !hold) ? dir * 0.075 * (1 - Math.pow(q, 1.6)) : 0;
+    var d2sq = (camOn && !hold) ? 1 - 0.045 * Math.sin(Math.min(1, q / 0.35) * Math.PI) : 1;
+    var drawn;
+    _csCam.puppet(ctx, heroX, ground, d2lean, d2sq, function () { drawn = drawHero(heroX, ground, fi); });
+    _csCam.end(ctx);
+    if (ballX > -20 && ballX < W + 20) { _csCam.begin(ctx, cam, DBALL); _lpBall(ctx, ballX, ballY, 12, p * 15 * dir); _csCam.end(ctx); }
+    hud();
+    // ループしない: 尺 P の終わりで停止し、2コマ目の絵を残したまま静止する。
+    //   画像ロードが遅れた場合だけは、完了後に最終フレームを描き切るために回し続ける（他シーンと同流儀）。
+    if (p < 1 || !imgs[0].complete || !imgs[1].complete) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return _csCenterSubject(canvas, 0.5, false);
+}
+
 var _DRIBBLE_SRC = 'img/cutscenes/dribble_01.png';
 var _DRIBBLE_DEF_SRC = 'img/cutscenes/dribbledef_01.png';
 function _renderDribbleScene(sc) {
   // lab限定：漫画スプライトが使えるなら漫画ドリブルへ（本番は MangaRecolor 未定義→従来描画）。
   if (_MANGA_DRIB_ENABLED && typeof MangaRecolor !== 'undefined' &&
       (typeof window === 'undefined' || window.MANGA_CUTSCENE_ENABLED !== false)) {
+    // 新2コマ走りドリブル（テスト実装）。成功時のみ担当し、失敗/未ロードは従来シーンへ落ちる。
+    if (DRIBBLE2_ENABLED && (typeof window === 'undefined' || window.DRIBBLE2_ENABLED !== false)) {
+      var _d2 = _renderDribble2Scene(sc);
+      if (_d2) return _d2;
+    }
     var _mg = _renderMangaDribbleScene(sc);
     if (_mg) return _mg;
   }
@@ -2283,8 +3385,11 @@ function _renderPostplayScene(sc) {
 
 // ============================================================
 // 飛び出し（Run In Behind）専用カットイン: 裏のスペースへ出たスルーパスへ走り込む演出。
-//   成功=dribble の走るスプライト（攻撃=緑→攻撃色）でランナー単独を描き、ボールを前方へ転がして
-//     「守備を振り切り単独で追いつく」振り付け（守備は描かない・dribble と差別化・新規アート不要）。
+//   成功=ランナー単独を描き、ボールを前方へ転がして「守備を振り切り単独で追いつく」振り付け
+//     （守備は描かない・dribble と差別化・新規アート不要）。
+//     ★ 2026-07-27 ユーザー指示で **2拍構成** へ（ドリブル演出と同じ作法）:
+//       拍1「溜め」= 選手は1コマで静止し、動くのはスルーパスのボールだけ。
+//       拍2「決着」= コマを差し替えて一息に追いつき、そのまま静止する。走りループは回さない。
 //   失敗（守備成功）=ロングパス失敗と同じカット・タブロー（longpass_fail: スライディングで止める守備＋
 //     止められる攻撃）を流用し攻撃/守備色へ色替え＋「読まれた！」HUD。1回再生で静止・detach で停止。
 // ============================================================
@@ -2380,8 +3485,30 @@ function _renderRunInScene(sc) {
       var u = hold ? (0.12 * q * q) : (0.12 + 0.88 * (1 - Math.pow(1 - q, 2.4)));
       var runX = 90 + 150 * u;                               // 前進して画面中央(240)で終わる・2026-07-23
       var ballX = -24 + 340 * eo(p);                         // 左から速く転がり込み、止まらず走者の先を転がる途中で尺終了・2026-07-23
-      ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(zc[0], zc[1]); ctx.scale(z, z); ctx.translate(-zc[0], -zc[1]);
+      /* CAM-01（2026-07-28）: 2拍にカメラを合わせる。拍1「溜め」は浅く寄るだけ、拍2「決着」で踏み込む。
+       *   ★ 追いかけ（follow）は入れない。この演出は**走者が画面中央へ入ってくる**ことで決着を見せる
+       *     振り付けなので、カメラが追うとその移動が打ち消される。寄りと揺れだけを足す。
+       *   ★ 寄りは片道（戻さない）。背景は深度0.34でほぼ止まる＝走者だけが前に出る。 */
+      var camOn = (typeof CS_CAM_ENABLED === 'undefined') || CS_CAM_ENABLED;
+      var cam = _csCam.mk({ fx: zc[0], fy: zc[1] });
+      cam.zoom = camOn ? (hold ? (1 + 0.05 * _csCam.smooth(q)) : (1.05 + 0.07 * _csCam.easeOut(q))) : z;
+      if (camOn && !hold) _csCam.shake(cam, el - _RI_HOLD, 190, 2.8);   // 抜け出しの一瞬だけ
+      var beginLayer = function (d) {
+        ctx.save();
+        if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+        _csCam.begin(ctx, cam, camOn ? d : 1);
+      };
+      var endLayer = function () { _csCam.end(ctx); ctx.restore(); };
+
+      beginLayer(camOn ? 0.34 : 1);
       ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+      endLayer();
+
+      beginLayer(1);
+      ctx.imageSmoothingEnabled = false;
+      // 二次モーション: 決着拍だけ進行方向へ前傾＋踏み込みの潰し（溜め拍は無変形＝拍の差を姿勢でも出す）。
+      var riLean = (camOn && !hold) ? 0.070 * (1 - Math.pow(q, 1.6)) : 0;
+      var riSq = (camOn && !hold) ? 1 - 0.040 * Math.sin(Math.min(1, q / 0.35) * Math.PI) : 1;
       var _r6Drawn = false;
       if (_r6Manga) {
         // ★ コマ送りではなく「拍ごとに1枚を静止」。同じ拍の間は同じ絵のまま動かさない。
@@ -2392,16 +3519,18 @@ function _renderRunInScene(sc) {
           var _s6 = (runPh * CS_FIGURE_SCALE) / _R6_BODY;    // 等身縮小＝共通定数（2026-07-23）
           var _dw = _R6_W * _s6, _dh = _R6_H * _s6;
           var _spr6 = _csPixelate(MangaRecolor.render(_k6, _im6, _r6Cols), _k6, _dw, _dh);
-          ctx.save(); ctx.translate(runX, 0); ctx.scale(-1, 1);   // ネイティブ左向き → 右向きへ反転
-          ctx.drawImage(_spr6, -_dw / 2, ground - _R6_FOOT * _s6, _dw, _dh);
-          ctx.restore();
+          _csCam.puppet(ctx, runX, ground, riLean, riSq, function () {
+            ctx.save(); ctx.translate(runX, 0); ctx.scale(-1, 1);   // ネイティブ左向き → 右向きへ反転
+            ctx.drawImage(_spr6, -_dw / 2, ground - _R6_FOOT * _s6, _dw, _dh);
+            ctx.restore();
+          });
           _r6Drawn = true;
         }
       }
-      if (!_r6Drawn) drawSpr(runSpr, runX, ground, runPh);                         // ランナーのみ（守備は消す）
+      if (!_r6Drawn) _csCam.puppet(ctx, runX, ground, riLean, riSq, function () { drawSpr(runSpr, runX, ground, runPh); });   // ランナーのみ（守備は消す）
       if (sprint > 0.05) trail(runX - 26, ground - 96, sprint * 0.5);               // ランナー後方の水平疾走線
       if (ballX > -20 && ballX < W + 20) { var _br = Math.round(12 * CS_FIGURE_SCALE); _lpBall(ctx, ballX, ground - _br, _br, p * 26); }   // ボールも共通定数で縮小
-      ctx.restore();
+      endLayer();
     } else {
       // ===== 失敗（守備成功）: longpass_fail のカット・タブロー流用（スライディング守備＋止められる攻撃）=====
       var failSpr = _lpFailSprite(failBase, atkColor, defColor);        // 赤→守備色 / 緑→攻撃色
@@ -2427,6 +3556,282 @@ function _renderRunInScene(sc) {
   }
   requestAnimationFrame(frame);
   // 飛び出し=ランナー/タブローとも概ね中央（0.5）。既定 50% と同等だが明示。
+  return _csCenterSubject(canvas, 0.5, false);
+}
+
+// ============================================================
+// ヘディング6コマ（sprite-studio 2026-07-31・キーポーズ式量産ルートの初号機）:
+//   ★2026-08-05 本編に配線＝ヘディング競り合いの既定演出。旧「対決割り(縦2分割)」
+//   _renderHeaderRiseDuelScene / _renderHeaderScene はフォールバックに降格
+//   （MangaRecolor が無い公開版 docs/ では従来どおり旧演出が出る）。
+//   素材 img/cutscenes/manga_heading6/f1..f6.png（198x256・全コマ腰=(109,136)・ネイティブ=左へ叩きつける）。
+//   踏切→上昇→反り→タメ→スナップ→余韻 を**一回再生**（ループしない）。コマ間隔は非等間隔＝
+//   タメ(f4)を長く・スナップ(f5)を一瞬に（CT4定石「タメ2拍→ドン」）。
+//   クロスのボールがスナップの瞬間に頭へ届き、叩きつけられて飛ぶ（成功=ゴール方向へ低く/失敗=枠の上へ）。
+//   素材は run6 より人物が約15%大きい(asset-qa 2026-07-31)ため立位換算 _HD6_BODY=224 で正規化して
+//   画面上の体格を run6/dribble と揃える。MangaRecolor 必須＝無ければ null（呼び出し側でフォールバック）。
+// ============================================================
+function _renderHeadingAnimScene(sc) {
+  if (typeof MangaRecolor === 'undefined' || !MangaRecolor.render) return null;
+  var W = 480, H = 216, ground = 190;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var atkColor = (sc.offence && sc.offence.team_color) || '#1f4fd6';
+  var success = (sc.result === '成功');
+  function dom(id) { var el = (typeof document !== 'undefined') && document.getElementById(id); return el ? el.textContent : ''; }
+  var timeTxt = dom('game-time-display');
+  var hdP = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  var hdName = hdP ? ((typeof getPlayerName === 'function') ? getPlayerName(hdP) : hdP.name) : '';
+  var atkTeamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
+  var defP = sc.defence && sc.defence.players && sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+  var defName = defP ? ((typeof getPlayerName === 'function') ? getPlayerName(defP) : defP.name) : '';
+  var defTeamNm = (typeof getTeamName === 'function' && sc.defence) ? getTeamName(sc.defence) : '';
+  var defColor = (sc.defence && sc.defence.team_color) || '#e36b1f';
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  // 競り合い化(2026-07-31): 失敗=守備のヘディングクリア成功。「枠の上」演出は廃止
+  var label = success ? (en ? 'HEADER!' : 'ヘディング！') : (en ? 'CLEARED!' : 'クリア！');
+  var labelCol = success ? '#ffe14a' : '#ff5a3c';
+
+  // 素材の実測定数（tools/slice_anim.py の出力と asset-qa 報告より）
+  var _HD6_W = 198, _HD6_H = 256, _HD6_HIPX = 109, _HD6_HIPY = 136, _HD6_BODY = 224;
+  var _HD6_HEAD = [[135, 31], [139, 32], [115, 26], [95, 20], [82, 53], [83, 53]];   // 各コマの頭(髪)重心
+  var _HD6_DUR = [160, 120, 160, 220, 110, 300];             // タメ(f4)長め・スナップ(f5)一瞬
+  var _HD6_SNAP = 660;                                       // f5開始=インパクト時刻(=160+120+160+220)
+  var imgs = [];
+  for (var _i = 1; _i <= 6; _i++) imgs.push(_loadCutsceneImg('img/cutscenes/manga_heading6/f' + _i + '.png?v=1'));
+  var cols = _mangaColors(sc.offence, _mangaFeat(hdP ? (hdP.long_name || hdP.name || '') : '').skin);
+  // 守備側（クリア・manga_headingdef4・2026-07-31）: 同じ競り合いに**垂直ジャンプ**で参加（横移動しない）。
+  //   素材189x252・全コマ腰=(71,128)・f1接地=腰+116px・f3(クリア)の頭=(130,46)実測。
+  //   タイムラインは攻撃と同期＝f3(クリア)がインパクト時刻660msちょうどに出る。
+  var _HDF_W = 189, _HDF_H = 252, _HDF_HIPX = 71, _HDF_HIPY = 128, _HDF_BODY = 224;
+  var _HDF_HEAD3 = [130, 46];
+  var _HDF_DUR = [440, 220, 110, 1];
+  var dimgs = [];
+  for (var _j = 1; _j <= 4; _j++) dimgs.push(_loadCutsceneImg('img/cutscenes/manga_headingdef4/f' + _j + '.png?v=1'));
+  var dcols = _mangaColors(sc.defence, _mangaFeat(defP ? (defP.long_name || defP.name || '') : '').skin);
+
+  var flipH = _csAttackRight(sc);                            // ネイティブ=左攻め → 右攻めなら鏡像
+  var s = (182 * CS_FIGURE_SCALE) / _HD6_BODY;               // runPh=182 と同基準＝run6/dribble と同体格
+  var hipY0 = ground - 100 * s;                              // f1で足が接地する腰高（f1足元=腰+100px実測）
+  var P = 1500;                                              // 尺: アニメ1070ms＋ボールの行方＋静止
+  function eo(x) { return 1 - (1 - x) * (1 - x); }
+  function burst(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 12, y + Math.sin(an) * 12); ctx.lineTo(x + Math.cos(an) * 48, y + Math.sin(an) * 48); ctx.stroke(); } }
+  function hud() {
+    if (!CUTSCENE_BURN_LABELS) return;
+    var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
+    if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
+    var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = success ? atkColor : defColor; ctx.fillRect(0, H - 30, W, 3);
+    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = labelCol; ctx.fillText(label, 12, H - 9);
+    var nm = success ? (hdName ? (hdName + (atkTeamNm ? (' · ' + atkTeamNm) : '')) : '')
+                     : (defName ? ('✕ ' + defName + (defTeamNm ? (' · ' + defTeamNm) : '')) : '');
+    if (nm) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(nm, W - 12, H - 10); }
+  }
+
+  var T0 = null, started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    if (T0 === null) { if (!canvas.isConnected) { requestAnimationFrame(frame); return; } T0 = now; }
+    var el = now - T0, p = Math.min(1, el / P);
+    ctx.clearRect(0, 0, W, H);
+
+    // コマ選択（非等間隔・最後は f6 のまま静止）
+    var fi = 0, acc = 0;
+    for (var k = 0; k < 6; k++) { acc += _HD6_DUR[k]; if (el < acc) { fi = k; break; } fi = 5; }
+    // 前方ドリフト: 助走の勢いでボールへ向かって少し進みながら跳ぶ（2026-07-31 ユーザー指示）。
+    //   ネイティブの前方=左。インパクトまでにほぼ使い切り、余韻ではわずかに流れるだけにする。
+    //   守備成功時は攻撃がわずかに届かない（ドリフトと跳びを浅くして「競り負け」を見せる）。
+    var px = 282 - (success ? 46 : 30) * Math.pow(Math.min(1, el / 900), 0.85);
+    // ジャンプ弧: スナップ時刻で頂点になる滑らかな上下（コマ差し替えのポップを消す連続量）
+    var rise = (success ? 34 : 26) * s * Math.sin(Math.PI * Math.min(el, 1000) / 1200);
+    var hipY = hipY0 - rise;
+    var hd = _HD6_HEAD[fi];
+    var hx = px + (hd[0] - _HD6_HIPX) * s, hy = hipY + (hd[1] - _HD6_HIPY) * s;   // 頭の画面座標
+
+    // 守備側: 垂直ジャンプ（xは固定）。攻撃成功時はわずかに届かない跳びに落とす。
+    var dfi = 0, dacc = 0;
+    for (var k2 = 0; k2 < 4; k2++) { dacc += _HDF_DUR[k2]; if (el < dacc) { dfi = k2; break; } dfi = 3; }
+    var ds = (182 * CS_FIGURE_SCALE) / _HDF_BODY;
+    var dpx = success ? 206 : 196;
+    var dHipY0 = ground - 116 * ds;
+    var drise = (success ? 26 : 36) * ds * Math.sin(Math.PI * Math.min(el, 1000) / 1200);
+    var dHipY = dHipY0 - drise;
+    var dhx = dpx + (_HDF_HEAD3[0] - _HDF_HIPX) * ds, dhy = dHipY + (_HDF_HEAD3[1] - _HDF_HIPY) * ds;
+
+    // ボール: 前方（左上）から浮いて届き、インパクト(660ms)で**勝った側の頭**に当たる。
+    //   攻撃成功=攻撃の頭→前方へ叩きつけ / 守備成功=守備の頭→高く蹴り返す(クリア)。
+    var cxT = success ? hx : dhx, cyT = success ? hy : dhy;
+    var br = Math.round(12 * CS_FIGURE_SCALE), bx, by, hit = el >= _HD6_SNAP;
+    if (!hit) { var q = Math.max(0, el) / _HD6_SNAP; bx = -26 + (cxT - (-26)) * q; by = 14 + (cyT - 14) * (0.35 * q + 0.65 * q * q) - 24 * Math.sin(q * Math.PI); }
+    else { var q2 = Math.min(1, (el - _HD6_SNAP) / 300); if (success) { bx = hx - 470 * eo(q2); by = hy + (ground - 26 - hy) * eo(q2); } else { bx = dhx + 360 * q2; by = dhy - 55 * q2; } }
+    // クリアの弾道: 攻撃の叩きつけ(左)と**反対の右**へ強く・やや上へ弾き返す(2026-07-31ユーザー指示)。
+    // 接点が画面上端に近い(y≈34)ため「高く」は数十msで見切れる→平たい弾道で220ms可視を確保
+
+    var camOn = (typeof CS_CAM_ENABLED === 'undefined') || CS_CAM_ENABLED;
+    var cam = _csCam.mk({ fx: 240, fy: 118 });
+    cam.zoom = 1;                                            // ズームなし（インパクトで大きくなる効果は不要=2026-07-31 ユーザー指示）
+    if (camOn && hit) _csCam.shake(cam, el - _HD6_SNAP, 180, 3.0);   // インパクトの一瞬の揺れだけ残す
+    var beginLayer = function (d) { ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } _csCam.begin(ctx, cam, camOn ? d : 1); };
+    var endLayer = function () { _csCam.end(ctx); ctx.restore(); };
+
+    // 背景: ヘディング競り合い(_renderHeaderScene)と同じ「cover拡大＋42px下げ」＝ピッチ線を画面最下端へ
+    //   落として空中の高さを出す（選手の描画位置は動かさない・2026-07-10の競り合いと同手法・カメラ非適用）。
+    //   ＋左→右へ少しパン（2026-07-31 ユーザー指示）＝選手の前方ドリフトと同じイージングで背景を逆方向へ
+    //   流し「カメラが選手を追っている」動きを出す。cover拡大の左右余白(約93px)の範囲内。
+    ctx.save();
+    if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+    ctx.imageSmoothingEnabled = false;
+    if (bgImg.complete && bgImg.naturalWidth) { var _bb = 42, _bs = Math.max(W / bgImg.naturalWidth, (H + 2 * _bb) / bgImg.naturalHeight), _bdw = bgImg.naturalWidth * _bs, _bdh = bgImg.naturalHeight * _bs; var _pan = 24 * Math.pow(Math.min(1, el / 900), 0.85); ctx.drawImage(bgImg, (W - _bdw) / 2 + _pan, (H - _bdh) / 2 + _bb, _bdw, _bdh); } else { ctx.drawImage(bgFallback, 0, 0); }
+    ctx.restore();
+
+    beginLayer(1);
+    ctx.imageSmoothingEnabled = false;
+    // 勝った側を後描き（前面）にする: 攻撃成功=攻撃が手前 / 守備成功=守備が手前（2026-07-31ユーザー指定）
+    var drawAtk = function () {
+      var im = imgs[fi];
+      if (!im || !im.complete || !im.naturalWidth) return;
+      var key = 'hd6|' + (fi + 1) + '|' + cols.shirt + cols.shorts + cols.socks + cols.accent + cols.skin;
+      var dw = _HD6_W * s, dh = _HD6_H * s;
+      var spr = _csPixelate(MangaRecolor.render(key, im, cols), key, dw, dh);
+      ctx.drawImage(spr, px - _HD6_HIPX * s, hipY - _HD6_HIPY * s, dw, dh);
+    };
+    var drawDef = function () {
+      var dim = dimgs[dfi];
+      if (!dim || !dim.complete || !dim.naturalWidth) return;
+      var dkey = 'hdf4|' + (dfi + 1) + '|' + dcols.shirt + dcols.shorts + dcols.socks + dcols.accent + dcols.skin;
+      var ddw = _HDF_W * ds, ddh = _HDF_H * ds;
+      var dspr = _csPixelate(MangaRecolor.render(dkey, dim, dcols), dkey, ddw, ddh);
+      ctx.drawImage(dspr, dpx - _HDF_HIPX * ds, dHipY - _HDF_HIPY * ds, ddw, ddh);
+    };
+    if (success) { drawDef(); drawAtk(); } else { drawAtk(); drawDef(); }
+    if (bx > -26 && bx < W + 30) _lpBall(ctx, bx, by, br, el * 0.03);
+    if (hit) { var fl = Math.max(0, 1 - (el - _HD6_SNAP) / 170); if (fl > 0) burst(cxT - 6 * s, cyT, fl * 0.8); }
+    endLayer();
+    if (hit) { var fw = Math.max(0, 1 - (el - _HD6_SNAP) / 140); if (fw > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (fw * 0.45) + ')'; ctx.fillRect(0, 0, W, H); } }
+    hud();
+    var loading = imgs.some(function (g) { return !g.complete; }) || dimgs.some(function (g) { return !g.complete; });
+    if (p < 1 || loading) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return _csCenterSubject(canvas, 0.5, false);
+}
+
+// ============================================================
+// オーバーヘッドキック5コマ（sprite-studio 2026-07-31・キーポーズ式量産の2本目）:
+//   素材 img/cutscenes/manga_overhead5/f1..f5.png（244x268・全コマ腰=(119,147)・ネイティブ=左へ蹴り込む）。
+//   踏切→上昇後傾→ハサミ→タメ→頭上へ振り抜き の一回再生（ループしない・6コマ目の余韻は不採用=2026-07-31ユーザー判断）。
+//   ボールは**最初から空中に浮いて待っている**（クロス入射でなく浮き球を捉える＝2026-07-31ユーザー指示）。
+//   背景はヘディングと同じ「cover拡大＋下げ」だが、開始は浅め(22px)→跳躍に合わせて42pxへ**下へスライド**
+//   （=カメラが選手と一緒に上がる感じ・2026-07-31ユーザー指示）。ズームはなし。MangaRecolor必須。
+// ============================================================
+function _renderOverheadScene(sc) {
+  if (typeof MangaRecolor === 'undefined' || !MangaRecolor.render) return null;
+  var W = 480, H = 216, ground = 214;   // 全体をさらに下へ(2026-07-31ユーザー指示)・接点の上端見切れ対策と両立
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var atkColor = (sc.offence && sc.offence.team_color) || '#1f4fd6';
+  var success = (sc.result === '成功');
+  function dom(id) { var el = (typeof document !== 'undefined') && document.getElementById(id); return el ? el.textContent : ''; }
+  var timeTxt = dom('game-time-display');
+  var ohP = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  var ohName = ohP ? ((typeof getPlayerName === 'function') ? getPlayerName(ohP) : ohP.name) : '';
+  var atkTeamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
+  var en = (typeof window !== 'undefined' && window.LANG === 'en');
+  var label = success ? (en ? 'BICYCLE!' : 'オーバーヘッド！') : (en ? 'OVER!' : '枠の上！');
+  var labelCol = success ? '#ffe14a' : '#ff5a3c';
+
+  // 素材の実測定数（slice_anim.py 出力: 画布244x268・腰(119,147)・f1接地=腰+114px・f5ブーツ接点(130,14)）
+  var _OH5_W = 244, _OH5_H = 268, _OH5_HIPX = 119, _OH5_HIPY = 147, _OH5_BODY = 224;
+  var _OH5_DUR = [160, 130, 150, 130, 1];                    // 最終コマはそのまま静止
+  var _OH5_STRIKE = 570;                                     // f5開始=インパクト(=160+130+150+130)
+  var _OH5_BOOT = [130, 14];                                 // f5の蹴り足ブーツ=ボール接点(素材座標)
+  var imgs = [];
+  for (var _i = 1; _i <= 5; _i++) imgs.push(_loadCutsceneImg('img/cutscenes/manga_overhead5/f' + _i + '.png?v=1'));
+  var cols = _mangaColors(sc.offence, _mangaFeat(ohP ? (ohP.long_name || ohP.name || '') : '').skin);
+
+  var flipH = _csAttackRight(sc);                            // ネイティブ=左攻め → 右攻めなら鏡像
+  var s = (182 * CS_FIGURE_SCALE) / _OH5_BODY;               // run6/heading と同体格
+  var px = 258;
+  var hipY0 = ground - 114 * s;                              // f1で足が接地する腰高
+  var P = 1500;
+  function eo(x) { return 1 - (1 - x) * (1 - x); }
+  function burst(x, y, a) { ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5; for (var i = 0; i < 14; i++) { var an = i / 14 * 6.28; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 12, y + Math.sin(an) * 12); ctx.lineTo(x + Math.cos(an) * 48, y + Math.sin(an) * 48); ctx.stroke(); } }
+  function hud() {
+    if (!CUTSCENE_BURN_LABELS) return;
+    var g = ctx.createLinearGradient(0, 0, 0, 46); g.addColorStop(0, 'rgba(6,6,14,.66)'); g.addColorStop(1, 'rgba(6,6,14,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, 46);
+    if (timeTxt) { ctx.fillStyle = '#fff'; ctx.font = '800 14px sans-serif'; ctx.textAlign = 'left'; ctx.fillText(timeTxt, 12, 24); }
+    var bgd = ctx.createLinearGradient(0, H - 40, 0, H); bgd.addColorStop(0, 'rgba(6,6,14,0)'); bgd.addColorStop(1, 'rgba(6,6,14,.9)'); ctx.fillStyle = bgd; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = atkColor; ctx.fillRect(0, H - 30, W, 3);
+    ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.font = '900 22px "Arial Black",sans-serif';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#0c0a14'; ctx.strokeText(label, 12, H - 9); ctx.fillStyle = labelCol; ctx.fillText(label, 12, H - 9);
+    var nm = ohName ? (ohName + (atkTeamNm ? (' · ' + atkTeamNm) : '')) : '';
+    if (nm) { ctx.textAlign = 'right'; ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(nm, W - 12, H - 10); }
+  }
+
+  var T0 = null, started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    if (T0 === null) { if (!canvas.isConnected) { requestAnimationFrame(frame); return; } T0 = now; }
+    var el = now - T0, p = Math.min(1, el / P);
+    ctx.clearRect(0, 0, W, H);
+
+    var fi = 0, acc = 0;
+    for (var k = 0; k < 5; k++) { acc += _OH5_DUR[k]; if (el < acc) { fi = k; break; } fi = 4; }
+    // 跳躍弧: ストライクで頂点。以降は保持（余韻カットなので落下は描かない）
+    var rise = 34 * s * Math.sin(Math.PI * Math.min(el, 900) / 1400);
+    var hipY = hipY0 - rise;
+
+    // ボール: 下からゆっくり浮き上がって接点へ（選手と一緒に上がる＝浮遊感・2026-07-31ユーザー指示）
+    //   → ストライクで**左から右へ画面と平行**に飛ぶ（成功=水平・失敗=枠の上へ抜ける）
+    var riseAtStrike = 34 * s * Math.sin(Math.PI * Math.min(_OH5_STRIKE, 900) / 1400);
+    var cxs = px + (_OH5_BOOT[0] - _OH5_HIPX) * s;                       // 接点(ストライク時)
+    var cys = (hipY0 - riseAtStrike) + (_OH5_BOOT[1] - _OH5_HIPY) * s;
+    var br = Math.round(12 * CS_FIGURE_SCALE), bx, by, hit = el >= _OH5_STRIKE;
+    if (!hit) { var qf = _csCam.smooth(Math.min(1, el / _OH5_STRIKE)); bx = cxs; by = cys + 34 * (1 - qf) + 2.5 * Math.sin(el / 170); }
+    else { var q2 = Math.min(1, (el - _OH5_STRIKE) / 300); bx = cxs + 470 * eo(q2); by = success ? cys : (cys - 120 * eo(q2)); }
+
+    var camOn = (typeof CS_CAM_ENABLED === 'undefined') || CS_CAM_ENABLED;
+    var cam = _csCam.mk({ fx: 240, fy: 112 });
+    cam.zoom = 1;                                            // ズームなし（ヘディングと同じ方針）
+    if (camOn && hit) _csCam.shake(cam, el - _OH5_STRIKE, 180, 3.0);
+    var beginLayer = function (d) { ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } _csCam.begin(ctx, cam, camOn ? d : 1); };
+    var endLayer = function () { _csCam.end(ctx); ctx.restore(); };
+
+    // 背景: cover拡大＋下げはヘディングと同じ流儀。開始22px→跳躍に合わせて42pxへ下へスライド
+    //   （終端はヘディングシーンと同じ高さ＝ピッチ線が画面最下端）。カメラ非適用。
+    ctx.save();
+    if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+    ctx.imageSmoothingEnabled = false;
+    if (bgImg.complete && bgImg.naturalWidth) { var _bb = 42, _bs = Math.max(W / bgImg.naturalWidth, (H + 2 * _bb) / bgImg.naturalHeight), _bdw = bgImg.naturalWidth * _bs, _bdh = bgImg.naturalHeight * _bs; var _sh = 22 + 20 * _csCam.smooth(Math.min(1, el / 600)); ctx.drawImage(bgImg, (W - _bdw) / 2, (H - _bdh) / 2 + _sh, _bdw, _bdh); } else { ctx.drawImage(bgFallback, 0, 0); }
+    ctx.restore();
+
+    beginLayer(1);
+    ctx.imageSmoothingEnabled = false;
+    var im = imgs[fi];
+    if (im && im.complete && im.naturalWidth) {
+      var key = 'oh5|' + (fi + 1) + '|' + cols.shirt + cols.shorts + cols.socks + cols.accent + cols.skin;
+      var dw = _OH5_W * s, dh = _OH5_H * s;
+      var spr = _csPixelate(MangaRecolor.render(key, im, cols), key, dw, dh);
+      ctx.drawImage(spr, px - _OH5_HIPX * s, hipY - _OH5_HIPY * s, dw, dh);
+    }
+    if (bx > -26 && bx < W + 30) _lpBall(ctx, bx, by, br, hit ? el * 0.05 : el * 0.008);
+    if (hit) { var fl = Math.max(0, 1 - (el - _OH5_STRIKE) / 170); if (fl > 0) burst(cxs, cys, fl * 0.8); }
+    endLayer();
+    if (hit) { var fw = Math.max(0, 1 - (el - _OH5_STRIKE) / 140); if (fw > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (fw * 0.45) + ')'; ctx.fillRect(0, 0, W, H); } }
+    hud();
+    var loading = imgs.some(function (g) { return !g.complete; });
+    if (p < 1 || loading) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
   return _csCenterSubject(canvas, 0.5, false);
 }
 
@@ -2488,11 +3893,37 @@ function _renderGkScene(sc, mode) {
 
   // ジオメトリ（2枚目の配置参考・TUNE）: GKは大きめ・中央やや左、左→右へスライドしながらダイブ
   var gkW = (_gkManga ? 205 * _dive.ws : 300) * CS_FIGURE_SCALE, gkH = gkW * (_gkManga ? _dive.hw : (127 / 220)), gkX0 = 8, gkX1 = 92;   // 2/3縮小(2026-07-23)   // 左→右へ移動。スプライト別にアスペクト＆幅を切替＝描画高≈171/173で従来と同じ距離感（近すぎ修正 2026-07-15）
+  /* ★ 2026-07-30 決着コマを最大にする（ユーザー指定4項目の4つめ）。
+   *   実測で判明した問題: この関数は拍2(dive=結果非開示の溜め)と拍3(save/抜かれ=決着)を
+   *   **mode だけ変えて同じ経路で描いていた**ので、決着の主語サイズ129px・尺1300ms・ボール16pxが
+   *   溜めと**1ドット/1msも違わなかった**。しかも拍1のシューター(148px=68.5%)より小さかった＝指定と逆。
+   *   参考漫画の決着はページの70〜80%を占める最大のコマなので、拍3だけを持ち上げる。
+   *   面積は全ビートがフルフレームで使えないため、レバーは「寄り・尺・ボール」の3つ（[[art-one-shot-one-subject]] ③）。
+   *   ★ 拍2は据え置き＝拍2→拍3に落差が生まれることが狙い。 */
+  var isResult = !dive;                                        // save / 抜かれた ＝ 決着ビート
+  var _resZoom = 1;
+  if (isResult) {
+    _resZoom = Math.min(1.55, (H * 0.87) / gkH);               // 目標=画面高87%。上限1.55は横長pose1の幅暴走を抑えるため
+    gkW *= _resZoom; gkH *= _resZoom;
+  }
   if (_dive.sc3Rev) { gkX0 = 92; gkX1 = 8; }   // pose1: スライド方向を反転（反転絵に追従＝画面上の移動をpose0と逆向きに・2026-07-24 ユーザー要望）
   var gkY0 = _dive.rise ? 64 : 39, gkY1 = _dive.rise ? 14 : 39;   // rise=true: 下→上の対角（pose0）。rise=false: 縦移動なしの水平（pose1）。中点≈39で従来相当
   if (_dive.sc3) { var _s3 = (typeof window !== 'undefined' && window._LAB_SC3) || _dive.sc3; gkX0 = _s3.x0; gkX1 = _s3.x1; gkY0 = gkY1 = _s3.y; }   // pose1: ゴールライン上・少し前の配置を明示（unflipped座標・2026-07-24 ユーザー要望。_LAB_SC3=ラボ限定の実行時上書き）
   var handsFx = _gkManga ? _dive.gx : 0.85, handsFy = _gkManga ? _dive.gy : 0.13;                          // GKの手元（reaching glove アンカー・絵別）
-  var ballSpd = 2400, ballStartP = 0.20, slope = 0.16, P = 1300;   // ボールは右→左・シュートシーンと同速（同じpx/ms）。総尺を短縮=ダイブを速く(1700→1300)＋ボール到達を早める(0.42→0.20・接触p≈0.31・2026-07-23 ユーザー要望)
+  /* 決着で絵を1.45〜1.55倍にすると手元(=主語・ボールの通過点)が画面外へ出る絵がある
+   *   （pose1は handsFy=0.82 で hY=221 > H=216 になり、ボールとの接触が画面外で起きてしまう）。
+   *   脚が見切れるのは層Cの定義どおり構わないが、**手元だけは画面内に残す**のでyをクランプする。 */
+  if (isResult) {
+    var _fixY = function (y) {
+      var h = y + gkH * handsFy;
+      if (h > H - 30) y -= (h - (H - 30));
+      if (y + gkH * handsFy < 30) y += (30 - (y + gkH * handsFy));
+      return Math.round(y);
+    };
+    gkY0 = _fixY(gkY0); gkY1 = _fixY(gkY1);
+  }
+  //   尺: 決着 1300→1900ms（ゴール2200・枠外1700と整合。旧1300は全ビート中で最短だった）
+  var ballSpd = 2400, ballStartP = 0.20, slope = 0.16, P = isResult ? 1900 : 1300;   // ボールは右→左・シュートシーンと同速（同じpx/ms）。拍2は従来どおり短く速いダイブ（2026-07-23 ユーザー要望）
   var zc = [240, 116];                                         // ズーム中心（固定でジッター防止）
   var flipH = _csAttackRight(sc);                              // ネイティブ=左攻め(右→左シュート) → team1(右)で反転
 
@@ -2529,7 +3960,10 @@ function _renderGkScene(sc, mode) {
     }
     var ballGone = !dive && (p > ballStartP + 0.03) && !onScreen;   // dive はボールを手元で凍結＝終了させない
     var drawGK = function () { if (!gkImg.complete || !gkImg.naturalWidth) return; var _s = _gkManga ? MangaRecolor.render(_gkKey, gkImg, _gkCols) : gkImg; if (_s && _gkManga) _s = _csPixelate(_s, _gkKey, gkW, gkH); if (_s) ctx.drawImage(_s, slide, gkY, gkW, gkH); };
-    var drawBall = function () { if (onScreen) _lpBall(ctx, bx, by, 8, (p - ballStartP) * 120); };   // ボールも2/3(r=8)
+    /* ボールも絵と同じ倍率で拡大する（決着はr≈12）。★ 固定の大きな値にしないのが要点＝
+     *   GKだけ1.45倍でボールが据え置きだと縮尺が壊れる。参考漫画の決着は「ボールがどこにあるか」で
+     *   結果を語っているので、主語と同じ縮尺で大きくなるのが正しい。 */
+    var drawBall = function () { if (onScreen) _lpBall(ctx, bx, by, Math.round(8 * _resZoom), (p - ballStartP) * 120); };
     ctx.save(); if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); } ctx.translate(zc[0], zc[1]); ctx.scale(z, z); ctx.translate(-zc[0], -zc[1]);
     ctx.imageSmoothingEnabled = SS > 1; _lpDrawBg(ctx, bgImg, bgFallback, W, H);   // マンガ絵=スムージング / ドット絵=NN維持（2026-07-15）
     if (save || dive) { drawGK(); drawBall(); } else { drawBall(); drawGK(); }   // 抜けはボールをGKの背後（先に描画）に
@@ -2553,6 +3987,87 @@ function _renderGkScene(sc, mode) {
 //   ※ シュートからの得点は renderSceneArt がこれをインライン表示し、showGoalCutscene 側の takeover は抑止する。
 // ============================================================
 var _GOAL_BG_SRC = 'img/cutscenes/goalnet_01.png';
+/* ════════════════════════════════════════════════════════════════════════════
+ * QUIET-01 : 「間（ま）」のビート（2026-07-29・lab限定）
+ *
+ * 3作品（GIANT KILLING / キャプテン翼 / 蒼く染めろ）に共通していた文法:
+ *   **決着の直後に、効果を全部剥がした大きなコマが来る。**
+ *   蒼く染めろ IMG_5889 が決定的だった＝ページの75%を占める大コマに、
+ *   集中線ゼロ・描き文字ゼロ・セリフゼロ。ネットのテクスチャと人物だけ。
+ *   → **静けさが最大のコマ。効果を足すのではなく、全部剥がして決着を見せている。**
+ *
+ * 現行の football-sim はクライマックスに FX を乗せて**そこで終わっている**。
+ * その後ろにこの1拍を足す。★新規アセットは要らない（既存の goalnet_01 と WIDE-01 で足りる）。
+ *
+ * ここで守ること（＝この演出の全て）:
+ *   ・集中線を描かない ・描き文字を描かない ・_csFx を一切呼ばない
+ *   ・焼き込みラベルを出さない ・カメラを動かさない（寄りも揺れも無し）
+ * 唯一入れるのは、直前の着弾フラッシュから**明るさが落ち着いてくる**フェードだけ。
+ * ★ 完全静止はゲームでは「固まった」に見えるので、1px以下のごく僅かな呼吸だけ残す。
+ * ══════════════════════════════════════════════════════════════════════════ */
+var QUIET_BEAT_MS = 1250;                 // 尺。ここは長めでよい（間が主役なので）
+function _renderQuietBeatScene(sc, kind) {
+  if (typeof document === 'undefined') return null;
+  var W = 480, H = 216;
+
+  /* 外した / 失点 → **空いたピッチの引き画**（ジャイキリ流の「間」）。
+   *   WIDE-01 をそのまま使う。★ area:false でエリア強調リングを消す＝完全に静かな画にする。 */
+  if ((kind === 'miss' || kind === 'concede') &&
+      typeof WideShot !== 'undefined' && WideShot.forScene &&
+      typeof gameState !== 'undefined' && gameState) {
+    var wide = null;
+    try {
+      wide = WideShot.forScene(sc, gameState,
+        (typeof AREA_COORDS_H !== 'undefined') ? AREA_COORDS_H : null,
+        { area: false });          // ★ エリア強調リングを消す＝効果ゼロにする
+    } catch (e) { wide = null; }
+    if (wide) return wide;
+  }
+
+  // ゴール → ネットに収まったボールの静止画。ラベルもFXも乗せない。
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var src = (kind === 'goal') ? _GOAL_BG_SRC
+          : (kind === 'miss') ? 'img/cutscenes/missgoal_01.png'
+          : _LP_BG_SRC;
+  var img = _loadCutsceneImg(src), fallback = _lpBg();
+  var flipH = _csAttackRight(sc);
+
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    requestAnimationFrame(frame);
+    var el = ((typeof performance !== 'undefined') ? performance.now() : Date.now()) - T0;
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.save();
+    if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+    ctx.imageSmoothingEnabled = false;
+    // ★ ごく僅かな呼吸だけ（±0.5px）。寄りではない＝カメラは動かさない。
+    ctx.translate(0, Math.sin(el / 900) * 0.5);
+    if (img && img.complete && img.naturalWidth) {
+      var s = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+      var dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+      ctx.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh);
+    } else {
+      ctx.drawImage(fallback, 0, 0);
+    }
+    ctx.restore();
+
+    // 直前の着弾フラッシュから明るさが落ち着いてくる（これだけが唯一の「効果」）
+    if (el < 260) {
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.45 * (1 - el / 260)).toFixed(3) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+    // ★ HUD・ラベル・集中線・描き文字・_csFx は一切描かない。ここが演出の本体。
+  }
+  frame();
+  return canvas;
+}
+
 function _renderGoalScene(sc) {
   var W = 480, H = 216;
   var canvas = document.createElement('canvas');
@@ -2574,6 +4089,11 @@ function _renderGoalScene(sc) {
   var teamNm = (typeof getTeamName === 'function' && sc.offence) ? getTeamName(sc.offence) : '';
   var P = 2200;
   var flipH = _csAttackRight(sc);                     // ネイティブ=左攻め(ゴール左) → team1(右)で反転（他シーンと統一）
+  // ── 共通FXレイヤー（_csFx 2026-07-28）──
+  //   自チームゴール= grade('burst')（彩度スパイク→減衰）/ 失点= grade('drain')＋赤ビネット。
+  //   着弾リング＋光芒スイープ＋観客フラッシュ（失点時は光芒/フラッシュを抑制＝喜ばない画面）。
+  var fxConcede = _csFxConcede(sc);
+  _csFx.grade(canvas, fxConcede ? 'drain' : 'burst');
 
   function easeOutBack(t) { var c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); }
   function bigGoal(p) {                                // 画面中央に大きく "GOAL!!"（ポップイン→静止）
@@ -2611,6 +4131,12 @@ function _renderGoalScene(sc) {
     ctx.imageSmoothingEnabled = false; _lpDrawBg(ctx, bgImg, bgFallback, W, H);
     ctx.restore();
     if (fl > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (fl * 0.4) + ')'; ctx.fillRect(0, 0, W, H); }
+    // ── 共通FXレイヤー ──
+    //   ★ 着弾リング／光芒／観客フラッシュは不採用（2026-07-28 ユーザー判断）。絵に物を足す方向のFXは載せない。
+    //     残すのは彩度グレード（burst/drain）と失点の赤ビネット＝**絵そのものの見え方**を変える層だけ。
+    //   punch相当のズーム/シェイクは既存の z/shake が担当（重複させない）。
+    var endK = p < 0.86 ? 1 : Math.max(0, (1 - p) / 0.14);
+    if (fxConcede) _csFx.vignette(ctx, W, H, Math.min(1, p / 0.15) * 0.5 * (p < 0.7 ? 1 : Math.max(0, (1 - p) / 0.3)), '#d81830');   // grade('drain')の復帰カーブに同期して晴れる
     hud();
     bigGoal(p);                                          // 画面中央の大「GOAL!!」（ポップ）
     if (p < 1) requestAnimationFrame(frame);
@@ -2645,7 +4171,10 @@ function _renderMissScene(sc) {
   var label = en ? 'OFF TARGET' : '枠外！';
 
   // ボールはゴールマウスの前を左→右に横切る（TUNE）
-  var bY = 120, bR = 13, startX = -30, endX = W + 30;
+  /* ★ 2026-07-30 決着コマを最大に（4項目の4つめ）。枠外は人物を描かず**ボールが唯一の主語**なのに
+   *   直径26px＝画面高の12%しかなかった。参考漫画の決着はボールが画面を大きく占めて結果を語るので、
+   *   直径56px＝**25.9%**へ。ここは主語そのものなので拡大の根拠が最も強い。 */
+  var bY = 120, bR = 28, startX = -30, endX = W + 30;
   var ballSpd = 2400, P = 1700;                       // シュートと同速（2400px / 1700ms）
   // 枠外だけネイティブのボールが左→右で、他のシュート系(GKダイブ/シュート=右→左)と逆だった。
   // flipHを反転して「ゴールの向き＋ボール軌道」をまとめて反転し、シュート方向と一致させる。

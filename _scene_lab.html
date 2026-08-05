@@ -4,7 +4,7 @@
 body{margin:0;background:linear-gradient(180deg,#0c1424,#070b14);color:#eef3ff;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif;min-height:100vh;padding:16px 12px 48px;display:flex;flex-direction:column;align-items:center}
 h1{font-size:16px;letter-spacing:.12em;color:#f2c14e;margin:0 0 12px}
 .layout{display:flex;gap:20px;align-items:flex-start;width:min(1440px,98vw);flex-wrap:wrap;justify-content:center}
-.left{flex:1 1 480px;max-width:960px;min-width:320px;display:flex;flex-direction:column;align-items:center}
+.left{flex:1 1 100%;max-width:1180px;min-width:320px;display:flex;flex-direction:column;align-items:center}
 .stage{width:100%;aspect-ratio:480/216;background:#000;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 60px -20px rgba(0,0,0,.8)}
 .stage canvas{width:100%;height:100%;display:block}
 .panel{flex:0 1 360px;min-width:280px;max-height:calc(100vh - 32px);overflow-y:auto;position:sticky;top:16px;padding-right:4px}
@@ -20,12 +20,48 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
 .replay{min-height:40px;padding:6px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#eef3ff;font-size:13px;cursor:pointer}
 .err{color:#ff8f88;font-size:12px;margin-top:10px;white-space:pre-wrap;max-width:640px}
 .hint{color:#68758f;font-size:11px;margin-top:10px;max-width:680px;text-align:center;line-height:1.7}
+/* ── 一覧（モンタージュ）── */
+#gallery{width:100%}
+.gal-head{display:flex;align-items:baseline;gap:12px;margin:0 0 12px}
+.gal-title{font-size:14px;letter-spacing:.1em;color:#f2c14e;margin:0;font-weight:800}
+.gal-sub{font-size:11.5px;color:#68758f}
+.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.gal-sec{grid-column:1/-1;font-size:11px;letter-spacing:.14em;color:#8b98b3;font-weight:700;
+  border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:5px;margin:6px 0 0}
+.tile{background:#101a2b;border:1px solid rgba(255,255,255,.12);border-radius:8px;overflow:hidden;
+  cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0;min-height:0}
+.tile:hover{border-color:#f2c14e;filter:none}
+.tile .ph{width:100%;aspect-ratio:480/216;background:#05080f;display:block;object-fit:cover}
+.tile .cap{padding:8px 10px 10px;display:flex;flex-direction:column;gap:3px}
+.tile .nm{font-size:12.5px;font-weight:800;color:#eef3ff;line-height:1.35}
+.tile .nt{font-size:10.5px;color:#8b98b3;line-height:1.5;font-weight:400}
+.lay{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.08em;padding:1px 5px;
+  border-radius:2px;margin-right:5px;vertical-align:1px}
+.lay.S{background:#1e5a8a;color:#cfe8ff}.lay.M{background:#7a5a1e;color:#ffe9bf}
+.lay.C{background:#7a1e3a;color:#ffd0dd}.lay.X{background:#2a3446;color:#aab6cd}
 </style></head>
 <body>
 <h1>⚽ 演出テストラボ</h1>
 <div class="layout">
   <div class="left">
-    <div class="stage" id="stage"><canvas></canvas></div>
+    <!-- ══ 一覧（モンタージュ）＝既定表示。ボタンが増えすぎて「どれを見ればいいか分からない」
+             状態になったので、まず全シーンを並べて見せる。タイルを押すと大きく再生する。 ══ -->
+    <div id="gallery">
+      <div class="gal-head">
+        <h2 class="gal-title">演出 一覧</h2>
+        <span class="gal-sub" id="galStatus">生成中…</span>
+        <button class="replay" style="margin-left:auto;min-height:32px;padding:4px 12px;font-size:12px"
+                onclick="togglePanel()">⚙ 詳細設定</button>
+      </div>
+      <div class="gal-grid" id="galGrid"></div>
+    </div>
+
+    <div id="player" style="display:none;width:100%">
+      <button class="replay" id="backBtn" onclick="showGallery()" style="margin-bottom:10px">← 一覧へ戻る</button>
+      <div id="playTitle" style="font-size:14px;font-weight:800;margin:0 0 8px;color:#eef3ff"></div>
+      <div class="stage" id="stage"><canvas></canvas></div>
+    </div>
+    <div id="snapHost" style="position:absolute;left:-9999px;top:0;width:480px"></div>
     <div class="row">
       攻撃 <select id="atk"></select>
       守備 <select id="def"></select>
@@ -35,11 +71,43 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
     <div class="err" id="err"></div>
     <p class="hint">実ゲームと同一の描画コード（root js）を直接呼ぶ確認用。試合進行・セーブに影響しません。「成功」チェックでヘディングは ヘディング！/競り負け！、シュートは成功/セーブ寄りが切替わります。</p>
   </div>
-  <div class="panel">
+  <div class="panel" style="display:none">
+    <div class="grp"><h2>層S 引き画（WIDE-01・試作 2026-07-29）</h2><div class="btns">
+      <button data-k="wide" onclick="run('wide')">スタジアム引き画（22人＝7〜15px シルエット）</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      選手サイズ
+      <input type="range" id="wfig" min="0.8" max="2.4" step="0.1" value="1.0" oninput="setWideFig(this.value)" style="flex:1;min-width:120px">
+      <span id="wfigv" style="min-width:64px">×1.0</span>
+    </div>
+    <div class="row" style="margin-top:4px">
+      ボール位置
+      <select id="warea" onchange="run('wide')">
+        <option value="62,42">敵陣右（アタッキングサード）</option>
+        <option value="88,50">ペナルティエリア前</option>
+        <option value="52,34">センターサークル</option>
+        <option value="24,18">自陣左（押し込まれ）</option>
+        <option value="72,8">奥タッチライン際（サイド）</option>
+      </select>
+      <label class="chk"><input type="checkbox" id="warearing" checked onchange="run('wide')"> エリア強調</label>
+    </div>
+    <p class="hint" style="margin:6px 0 0">主語＝<b>チームと戦況</b>。選手は素材ファイルを持たない手続き的シルエットで、情報量は全部「環境」（夜空／照明塔と光の傘／屋根／上段・下段の観客／旗／LED看板／刈り目／ネット／手前の看板）に置いてあります。<br>サイズ×1.0＝物理的な実寸（4〜9px）。<b>誇張（×1.6）より実寸の方が良い</b>と確認済み＝小さいほど主語がスタジアムに移り、重なりが減って布陣も読めます。</p></div>
+
     <div class="grp"><h2>シュート</h2><div class="btns">
+      <button data-k="montage" onclick="run('montage')">層C モンタージュ（MONT-01・部位アップ4コマ順次）</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      顔コマの素材
+      <select id="lcface" onchange="setLayerCFace(this.value)">
+        <option value="1">層C専用アート C-01（新規発注）</option>
+        <option value="0">Portrait合成頭（従来・拡大不可）</option>
+      </select>
+    </div>
+    <div class="btns">
       <button data-k="shotduel" onclick="run('shotduel')">対決割り（漫画演出・停止中の比較用）</button>
       <button data-k="shot2" onclick="run('shot2')">2拍・顔カットイン</button>
     </div>
+    <p class="hint" style="margin:6px 0 0">層C＝主語は<b>感情</b>。全身でなく<b>部位</b>を見切れるサイズ（120〜130%）で見せます。<b>1コマずつ足していく</b>＝1画面に4つ出すのではなく時間軸で1ビートずつ（1画面1ビートと矛盾しない）。<br><b>新規アセットは1枚も作っていません</b>：目元=Portraitの合成頭(720×840)をEYEアンカーで切出／スパイク=既存シュート絵の蹴り足(0.42,0.79)／グローブ=GKダイブ絵のreaching glove／ボール=手続き描画。</p>
     <div class="row" style="margin-top:8px">
       シューター絵
       <select id="shotdir" onchange="setShotDir(this.value)">
@@ -78,9 +146,56 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
       <button data-k="header" onclick="run('header')">競り合い（成功/競り負けは「成功」チェックで切替）</button>
     </div></div>
 
+    <div class="grp"><h2>ドリブル突破（新2コマ走り・テスト実装）</h2><div class="btns">
+      <button data-k="dribble" onclick="run('dribble')">ドリブル突破（成功=溜め→決着の2拍／失敗=従来カット！）</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      ドリブラー絵
+      <select id="drib2" onchange="setDrib2(this.value)">
+        <option value="1">新2コマ（溜め460→決着240で固定）</option>
+        <option value="0">従来（静止1枚 manga_dribble）</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top:8px">
+      カメラ(CAM-01)
+      <select id="camsel" onchange="setCam01(this.value)">
+        <option value="1">ON（2.5Dカットアウト＝寄り／パララックス／前傾）</option>
+        <option value="0">OFF（従来＝静止カメラ）</option>
+      </select>
+    </div>
+    <p class="hint" style="margin:6px 0 0">構図・尺・守備・HUDは従来と同一。主役のアートとアニメだけが入れ替わります（失敗側は従来のまま）。<br>CAM-01は絵を描き直さず、既存レイヤーにカメラと二次モーションを掛けるだけ＝マンガ絵のまま動きを足す実験。</p></div>
+
+    <div class="grp"><h2>背景（BG3D-01 実験）</h2>
+    <div class="row" style="margin-top:0">
+      背景の種類
+      <select id="bg3dsel" onchange="setBg3d(this.value)">
+        <option value="0">現行（1枚絵 longpass_bg_01）</option>
+        <option value="1">ローポリ3Dスタジアム（潜水艦ゲーム技法）</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top:8px">
+      BGトーン(BG-TONE-01)
+      <select id="bgtone" onchange="setBgTone(this.value)">
+        <option value="1">ON（観客帯と左右端の声量を下げる）</option>
+        <option value="0">OFF（従来のまま）</option>
+      </select>
+    </div>
+    <p class="hint" style="margin:6px 0 0">切替後に各シーンのボタンを押すと反映されます。<br><b>BGトーンは絵を作り直さず描画時に掛ける後処理</b>＝密度（賑わい）は減らさず、上部の観客帯と左右端の明度だけを落として、画面の明るさの山を中央の主役に1つだけ残します。</p></div>
+
+    <div class="grp"><h2>ワンツー（3カット連結・絵は差し替え予定）</h2><div class="btns">
+      <button data-k="onetwo" onclick="run('onetwo')">ワンツー（①与える→②返し→③受け止め）</button>
+    </div>
+    <p class="hint" style="margin:6px 0 0">選手は各カットで静止しボールだけが動く設計。CAM-01 はカットごとに「今動いた人」へ寄り直します（絵は未差し替え）。</p></div>
+
     <div class="grp"><h2>飛び出し（スルーパス・走りループ6コマ）</h2><div class="btns">
       <button data-k="runin" onclick="run('runin')">スルーパスへ走り込み（成功=6コマ走り／失敗=カット）</button>
     </div></div>
+
+    <div class="grp"><h2>ヘディング6コマ（キーポーズ式量産・初号機 2026-07-31）</h2><div class="btns">
+      <button data-k="heading6" onclick="run('heading6')">ジャンプヘッド 競り合い（成功=攻撃が手前でシュート／失敗=守備が手前でクリア）</button>
+      <button data-k="overhead5" onclick="run('overhead5')">オーバーヘッド（成功=叩き込み／失敗=枠の上）</button>
+    </div>
+    <p class="hint" style="margin:6px 0 0">踏切→上昇→反り→<b>タメ</b>→<b>スナップ</b>→余韻の一回再生（非等間隔・ループしない）。クロスのボールがスナップの瞬間に頭へ届く。素材=manga_heading6（asset-qa PASS・立位換算224で run6 と同体格に正規化）。</p></div>
 
     <div class="grp"><h2>フリーキック / クロス（新FKアート・MangaRecolor）</h2><div class="btns">
       <button data-k="freekick" onclick="run('freekick')">直接FK（蹴る前→蹴った瞬間）</button>
@@ -96,17 +211,41 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
     <div class="grp"><h2>スキル発動（PS-05・決めゴマ）</h2><div class="btns">
       <button data-k="skill_captaincy" onclick="run('skill_captaincy')">鼓舞（キャプテンシー・失点後）</button>
     </div></div>
+
+    <div class="grp"><h2>ゴール / 失点（共通FX配線・旗艦）</h2><div class="btns">
+      <button data-k="goal_burst" onclick="run('goal_burst')">ゴール！！（自チーム＝burstグレード＋光芒＋リング＋フラッシュ）</button>
+      <button data-k="goal_drain" onclick="run('goal_drain')">失点（drainグレード＋赤ビネット）</button>
+      <button data-k="goal_card" onclick="run('goal_card')">GOAL!!テイクオーバー（静止カード＋FXループ・全画面）</button>
+    </div>
+    <p class="hint" style="margin:10px 0 4px;text-align:left"><b>QUIET-01「間」</b>＝決着の<b>直後</b>に置く1拍。3作品（ジャイキリ／翼／蒼く染めろ）に共通していた文法で、<b>集中線・描き文字・ラベル・FXを全部剥がす</b>のが演出の本体。上のゴール/失点を押してから下を押すと繋がりが見えます。</p>
+    <div class="btns">
+      <button data-k="quiet_goal" onclick="run('quiet_goal')">間：ゴール後（ネットに収まったボール・効果ゼロ）</button>
+      <button data-k="quiet_miss" onclick="run('quiet_miss')">間：外した後（空いたピッチの引き画＝ジャイキリ流）</button>
+      <button data-k="quiet_concede" onclick="run('quiet_concede')">間：失点後（引き画・エリア強調なし）</button>
+    </div>
+    <p class="hint" style="margin:6px 0 0">攻撃セレクトのチームが得点側。「対決割り」ボタンには蹴りインパクトのパンチ＋リングが入っています。</p></div>
+
+    <div class="grp"><h2>FXデモ（_csFx 単体再生）</h2><div class="btns">
+      <button data-k="fx_rays" onclick="run('fx_rays')">fxRays：ナイター光芒（ディザ縦グラデ・sway）</button>
+      <button data-k="fx_ring" onclick="run('fx_ring')">fxRing：衝撃波リング（白＋色2重＋チャンク）</button>
+      <button data-k="fx_grade_burst" onclick="run('fx_grade_burst')">fxGrade burst：ゴール彩度スパイク</button>
+      <button data-k="fx_grade_drain" onclick="run('fx_grade_drain')">fxGrade drain：失点減彩＋赤ビネット</button>
+      <button data-k="fx_flashes" onclick="run('fx_flashes')">fxFlashes：観客フラッシュ明滅</button>
+      <button data-k="fx_type" onclick="run('fx_type')">fxType：打字字幕（COUNTER ATTACK）</button>
+      <button data-k="fx_punch" onclick="run('fx_punch')">fxPunch：ズームパンチ＋シェイク</button>
+    </div></div>
   </div>
 </div>
 
-<script src="js/players.js?v=lab40"></script>
-<script src="js/rng.js?v=lab40"></script>
-<script src="js/events.js?v=lab40"></script>
-<script src="js/simulate.js?v=lab40"></script>
-<script src="js/match.js?v=lab40"></script>
-<script src="js/portrait.js?v=lab40"></script>
-<script src="js/manga_recolor.js?v=lab40"></script>
-<script src="js/cutscene.js?v=lab40"></script>
+<script src="js/players.js?v=lab61"></script>
+<script src="js/rng.js?v=lab61"></script>
+<script src="js/events.js?v=lab61"></script>
+<script src="js/simulate.js?v=lab61"></script>
+<script src="js/match.js?v=lab61"></script>
+<script src="js/portrait.js?v=lab61"></script>
+<script src="js/manga_recolor.js?v=lab61"></script>
+<script src="js/cutscene.js?v=lab66"></script>
+<script src="js/wideshot.js?v=lab61"></script>
 <script>
 var KEYS=[['belgium2026','ベルギー'],['england2026','イングランド'],['brazil2026','ブラジル'],['spain2026','スペイン'],['france2026','フランス'],['argentina2026','アルゼンチン'],['germany2026','ドイツ'],['netherlands2026','オランダ']];
 var atk=document.getElementById('atk'),def=document.getElementById('def');
@@ -114,12 +253,113 @@ KEYS.forEach(function(k){atk.add(new Option(k[1],k[0]));def.add(new Option(k[1],
 atk.value='belgium2026';def.value='brazil2026';
 var cur='shotduel';
 function mk(key){var d=TEAM_DATA[key];var si=system_data.findIndex(function(s){return s.name===d.default_system;});return buildTeam(d,{systemIdx:si>=0?si:0,lineup:d.default_lineup.slice(),tactics:d.default_tactics,keyplayer:d.default_keyplayer,marked_player:d.default_marked_player});}
-function put(c){var st=document.getElementById('stage');st.innerHTML='';st.appendChild(c);}
+var _putTarget=null;   // 一覧のサムネ生成中はオフスクリーンへ描かせる
+function put(c){var st=_putTarget||document.getElementById('stage');st.innerHTML='';st.appendChild(c);}
+
+/* ══ 一覧（モンタージュ）════════════════════════════════════════════════
+   ボタンが22個まで増えて「どれを見ればいいか分からない」状態になったので、
+   まず全部を並べて見せる。各タイルは実際に描画してスナップショットしたもの
+   （＝説明でなく実物）。押すと大きく再生する。 */
+var SCENE_CATALOG=[
+ {sec:'決着とその後（いま作っているところ）'},
+ {k:'goal_burst', lay:'M', nm:'ゴール！！（クライマックス）', nt:'FXを乗せた決着。この直後に下の「間」が来る'},
+ {k:'quiet_goal', lay:'M', nm:'間：ゴール後', nt:'ラベルもFXも全部剥がした1拍。3作品共通の文法'},
+ {k:'quiet_miss', lay:'S', nm:'間：外した後', nt:'空いたピッチの引き画（ジャイキリ流の沈黙）'},
+ {k:'goal_drain', lay:'M', nm:'失点', nt:'減彩＋赤ビネット'},
+ {k:'quiet_concede',lay:'S',nm:'間：失点後', nt:'引き画・エリア強調なし'},
+
+ {sec:'層S 引き画（試作）'},
+ {k:'wide', lay:'S', nm:'スタジアム引き画', nt:'選手22人が実寸4〜9px。情報量は全部「環境」へ'},
+
+ {sec:'層C 部位アップ（試作）'},
+ {k:'montage', lay:'C', nm:'寄りの4連続 MONT-02', nt:'★4分割コマ割りを廃止。1画面1コマの寄りを4ビート連続で叩きつける'},
+ {k:'shotduel', lay:'C', nm:'対決割り①GKダイブ縮小', nt:'シューター72.6%：GK27.4%。GK側は減彩（非主語）'},
+ {k:'shotduelface', lay:'C', nm:'対決割り②GK顔アップ', nt:'GK側を層C素材の顔アップ小ゴマ(22%)へ。顔は減彩しない'},
+ {k:'shot2', lay:'M', nm:'2拍・顔カットイン', nt:'現行のシュート演出'},
+
+ {sec:'試合中の演出（現行・本番同等）'},
+ {k:'gksave', lay:'M', nm:'GKダイブ', nt:'★3作品と同じ構図＝ここは変えなくてよい'},
+ {k:'dribble', lay:'M', nm:'ドリブル突破', nt:'溜め→決着の2拍'},
+ {k:'runin', lay:'M', nm:'飛び出し', nt:'走り6コマ'},
+ {k:'heading6', lay:'M', nm:'ヘディング6コマ', nt:'タメ2拍→スナップ・一回再生'},
+ {k:'overhead5', lay:'M', nm:'オーバーヘッド5コマ', nt:'浮き球を頭上で叩く・一回再生'},
+ {k:'longpass', lay:'M', nm:'ロングパス（蹴り出し）', nt:'結果非開示の拍'},
+ {k:'lpresult', lay:'M', nm:'ロングパス（結果）', nt:'スルー / カット'},
+ {k:'onetwo', lay:'M', nm:'ワンツー', nt:'3カット連結'},
+ {k:'freekick', lay:'M', nm:'フリーキック', nt:'蹴る前→蹴った瞬間'},
+ {k:'header', lay:'M', nm:'ヘディング競り合い', nt:'縦2分割'},
+ {k:'foul1', lay:'M', nm:'ファール①削り', nt:''},
+ {k:'foul2', lay:'M', nm:'ファール②転倒', nt:''},
+ {k:'foul3', lay:'M', nm:'ファール③判定', nt:'主審'},
+ {k:'skill_captaincy',lay:'C',nm:'スキル発動（鼓舞）', nt:'決めゴマ'}
+];
+
+// 右のボタン群は既定で畳む。一覧が入口で、こちらは絵の差し替え等の細かい切替専用。
+function togglePanel(){
+  var p=document.querySelector('.panel');
+  p.style.display=(p.style.display==='none')?'':'none';
+}
+function showGallery(){
+  document.getElementById('gallery').style.display='';
+  document.getElementById('player').style.display='none';
+  document.getElementById('stage').innerHTML='';      // 再生中のループを止める
+}
+function playScene(k,nm){
+  document.getElementById('gallery').style.display='none';
+  document.getElementById('player').style.display='';
+  document.getElementById('playTitle').textContent=nm;
+  run(k);
+}
+function buildGallery(){
+  var grid=document.getElementById('galGrid'), host=document.getElementById('snapHost');
+  var status=document.getElementById('galStatus');
+  grid.innerHTML='';
+  var tiles=[];
+  SCENE_CATALOG.forEach(function(e){
+    if(e.sec){ var h=document.createElement('div'); h.className='gal-sec'; h.textContent=e.sec; grid.appendChild(h); return; }
+    var t=document.createElement('button'); t.className='tile'; t.type='button';
+    t.innerHTML='<canvas class="ph"></canvas><div class="cap"><div class="nm">'
+      +'<span class="lay '+e.lay+'">'+e.lay+'</span>'+e.nm+'</div>'
+      +(e.nt?'<div class="nt">'+e.nt+'</div>':'')+'</div>';
+    t.onclick=function(){ playScene(e.k,e.nm); };
+    grid.appendChild(t); tiles.push({e:e,el:t});
+  });
+  // 1枚ずつ実描画→スナップショット→ループ破棄（同時に何十もrAFを回さない）
+  var i=0;
+  function next(){
+    if(i>=tiles.length){ status.textContent=tiles.length+'件'; _putTarget=null; host.innerHTML=''; return; }
+    var t=tiles[i]; status.textContent='生成中… '+(i+1)+'/'+tiles.length;
+    _putTarget=host;
+    try{ run(t.e.k); }catch(err){}
+    setTimeout(function(){
+      var src=host.querySelector('canvas');
+      var ph=t.el.querySelector('canvas.ph');
+      if(src&&src.width){ ph.width=src.width; ph.height=src.height;
+        try{ ph.getContext('2d').drawImage(src,0,0); }catch(err){} }
+      host.innerHTML='';        // ← DOMから外す＝各シーンのrAFが止まる
+      i++; next();
+    }, t.e.k==='montage'?1500:850);
+  }
+  next();
+}
 // シューター絵の差し替え（ラボ限定・cutscene.js は typeof ガードで既定 manga_shot）
 function setShotDir(v){window._LAB_SHOT_DIR=v;if(typeof MangaRecolor!=='undefined'&&MangaRecolor.clearCache)MangaRecolor.clearCache();run(cur);}
 // ラボ限定の演出強制（本番は未定義＝ランダム）。''=ランダム / 決め打ちで確認。
 function setShotAnim(v){window._LAB_SHOT_ANIM=(v==='anim')?true:(v==='still')?false:undefined;run(cur);}
 function setGkDive(v){window._LAB_GK_DIVE=(v==='0')?0:(v==='1')?1:undefined;run(cur);}
+// 新2コマ走りドリブルのON/OFF（OFF=従来の静止1枚ドリブルへフォールバック）
+function setBg3d(v){window.CS_BG3D_ENABLED=(v==='1');}
+// BG-TONE-01: 1枚絵を作り直さずに描画時の後処理で声量を下げる（cutscene.js の _bgTone）
+function setBgTone(v){window.CS_BG_TONE_ENABLED=(v==='1');run(cur);}
+window.CS_LAYERC_FACE=true;      // 層C専用アート(C-01)を顔コマに使う。falseでPortrait合成頭へ
+function setLayerCFace(v){window.CS_LAYERC_FACE=(v==='1');run('montage');}
+window.CS_BG_TONE_ENABLED=true;   // ラボは既定ON（公開ビルドはフラグ未定義＝OFF）
+function setDrib2(v){window.DRIBBLE2_ENABLED=(v==='1');run('dribble');}
+// CAM-01 のA/B。cutscene.js の var 宣言なので window 経由・素の識別子の両方へ入れる
+function setCam01(v){var on=(v==='1');window.CS_CAM_ENABLED=on;try{CS_CAM_ENABLED=on;}catch(e){}run('dribble');}
+// 層S 引き画（WIDE-01）。選手サイズは実寸倍率＝1.0で物理的に正しい4〜9px。
+var _wideFig=1.0;
+function setWideFig(v){_wideFig=parseFloat(v);document.getElementById('wfigv').textContent='×'+_wideFig.toFixed(1);run('wide');}
 function err(m){document.getElementById('err').textContent=m||'';}
 function run(kind,retry){
   cur=kind; err('');
@@ -130,7 +370,26 @@ function run(kind,retry){
     window._LAB_FORCE_SHOT2=(kind==='shot2');   // shot2ボタンは構図ローテを止めて必ず2拍本体を描く（種別セレクタを効かせる）
     var ok=document.getElementById('ok').checked;
     var c=null;
-    if(kind==='shotduel'){
+    if(kind==='wide'){
+      // 層S: 主語＝チームと戦況。攻撃セレクト=左→右に攻めるホーム、守備セレクト=右→左。
+      var av=(document.getElementById('warea').value||'62,42').split(',');
+      c=WideShot.render({team1:a,team2:b,
+        ball:{X:parseFloat(av[0])/100*WideShot.DIM.PL, Z:parseFloat(av[1])/100*WideShot.DIM.PW},
+        fig:_wideFig, area:document.getElementById('warearing').checked});
+    }else if(kind.indexOf('quiet_')===0){
+      // 「間」のビート。goal=ネット静止 / miss・concede=WIDE-01の空いたピッチ
+      var qk=kind.slice(6);
+      var qsc={offence:a,defence:b,ofsPos:10,dfsPos:0,area:(qk==='goal'?'SHOOT_M':'FW_M'),
+               action:'シュート',scenario:'シュート',
+               result:(qk==='goal'?'ゴール！！':qk==='miss'?'枠を外した！':'ゴール！！')};
+      // gameState は let束縛＝素の識別子へ入れる。引き画(WIDE-01)経路はこれが無いと静止画へ落ちる。
+      gameState=(qk==='concede')?{team1:b,team2:a}:{team1:a,team2:b};
+      c=_renderQuietBeatScene(qsc,qk);
+    }else if(kind==='montage'){
+      var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'成功'};
+      c=_renderShotMontageScene(sc);
+    }else if(kind==='shotduel'||kind==='shotduelface'){
+      window.CS_DUEL_GK_FACE=(kind==='shotduelface');   // GK側のパターンをラボで明示切替（本番は決定論ローテで半々）
       var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'成功'};
       c=_renderShotDuelScene(sc);
     }else if(kind==='shot2'){
@@ -143,7 +402,7 @@ function run(kind,retry){
       c=_renderGkScene(sc,'save');
     }else if(kind==='header'){
       var sc={offence:a,defence:b,ofsPos:9,dfsPos:3,action:'ヘディングシュート',scenario:'クロス',result:ok?'成功':'失敗'};
-      c=_renderHeaderRiseDuelScene(sc)||_renderHeaderScene(sc);   // 実ゲームと同じフォールバック経路
+      c=_renderHeaderRiseDuelScene(sc)||_renderHeaderScene(sc);   // 旧演出の単体確認用（実ゲームは heading6 が優先・これはフォールバック）
     }else if(kind==='longpass'){
       var sc={offence:a,defence:b,ofsPos:7,dfsPos:5,action:'ロングパス',scenario:'ロングパス',result:'成功'};
       var entry=_pickCutscene('longpass',a.team_color);
@@ -152,9 +411,24 @@ function run(kind,retry){
     }else if(kind==='lpresult'){
       var sc={offence:a,defence:b,ofsPos:7,dfsPos:5,action:'ロングパス',scenario:'ロングパス',result:ok?'成功':'失敗'};
       c=_renderLongpassResultScene(sc);
+    }else if(kind==='dribble'){
+      var sc={offence:a,defence:b,ofsPos:9,dfsPos:4,action:'ドリブル突破',scenario:'ドリブル突破',result:ok?'成功':'失敗'};
+      c=_renderDribbleScene(sc);
+    }else if(kind==='onetwo'){
+      // ワンツー3カット（①与える→②壁役が返す→③受け止める）。絵は差し替え予定・カメラ検証用。
+      var sc={offence:a,defence:b,ofsPos:9,dfsPos:4,action:'ショートパス',scenario:'ショートパス',result:'成功'};
+      c=_renderOnetwoScene(sc);
     }else if(kind==='runin'){
       var sc={offence:a,defence:b,ofsPos:9,dfsPos:4,action:'飛び出し',scenario:'飛び出し',result:ok?'成功':'失敗'};
       c=_renderRunInScene(sc);
+    }else if(kind==='heading6'){
+      var sc={offence:a,defence:b,ofsPos:9,dfsPos:4,action:'ヘディングシュート',scenario:'クロス',result:ok?'成功':'失敗'};
+      c=_renderHeadingAnimScene(sc);
+      if(!c)return err('MangaRecolor未ロード（ラボ専用シーンです）');
+    }else if(kind==='overhead5'){
+      var sc={offence:a,defence:b,ofsPos:9,dfsPos:4,action:'オーバーヘッド',scenario:'シュート',result:ok?'成功':'失敗'};
+      c=_renderOverheadScene(sc);
+      if(!c)return err('MangaRecolor未ロード（ラボ専用シーンです）');
     }else if(kind==='freekick'){
       var sc={offence:a,defence:b,ofsPos:8,dfsPos:0,action:'フリーキック',scenario:'フリーキック',result:'成功'};
       c=_renderFreekickScene(sc);
@@ -175,6 +449,23 @@ function run(kind,retry){
       var cap=b.players[b.lineup[5]]||b.players[b.lineup[0]];
       var evt={team:'home',skill:'captaincy',player:cap?cap.name:'—',playerEn:cap?(cap.en_name||cap.name):'—'};
       c=_renderSkillActivateScene(evt);
+    }else if(kind==='goal_burst'||kind==='goal_drain'){
+      // burst=自チーム(team1)の得点 / drain=相手(team2)の得点＝失点。_csFxConcede が gameState.team1 で判定。
+      // ⚠️ simulate.js の gameState は let（lexical binding）＝ window.gameState では届かない → 素の識別子へ代入。
+      gameState=(kind==='goal_burst')?{team1:a,team2:b}:{team1:b,team2:a};
+      var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'ゴール！！'};
+      c=_renderGoalScene(sc);
+    }else if(kind==='goal_card'){
+      // 旧テイクオーバーカード（SCENE_ART無効時の経路）＋FXループ。全画面overlayなのでstageには入れない。
+      gameState={team1:a,team2:b};   // 自チーム得点＝burst（let束縛へ素の識別子で代入）
+      var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'ゴール！！'};
+      var prev=window.SCENE_ART_ENABLED; window.SCENE_ART_ENABLED=false;
+      showGoalCutscene(sc,{time:"78'",t1score:2,t2score:1});
+      window.SCENE_ART_ENABLED=prev;
+      return;
+    }else if(kind.indexOf('fx_')===0){
+      var fxMap={fx_rays:'rays',fx_ring:'ring',fx_grade_burst:'grade-burst',fx_grade_drain:'grade-drain',fx_flashes:'flashes',fx_type:'type',fx_punch:'punch'};
+      c=_csFxDemo(fxMap[kind]);
     }
     if(!c){if((retry||0)<12)return setTimeout(function(){run(kind,(retry||0)+1);},400);return err('描画がnull（素材読込前かも・リロード）');}
     put(c);
@@ -182,5 +473,20 @@ function run(kind,retry){
 }
 function replay(){run(cur);}
 if(typeof Portrait!=='undefined'&&Portrait.preload)Portrait.preload();
-setTimeout(function(){run('shot2');},500);
-</script></body></html>
+setTimeout(buildGallery,600);   // 起動時は一覧を出す（個別再生はタイルを押す）
+</script>
+
+<!-- ══ BG3D-01: ローポリ3Dスタジアム背景（ラボ限定・2026-07-28）══════════════════
+     潜水艦ゲーム(DEEP SIX)と同じ技法＝ローポリ＋16色パレット＋ディザ＋低解像度＋ライティング無し。
+     ★ three.js はこのページだけ。cutscene.js からは typeof ガードで window.CS_BG3D を呼ぶだけなので、
+       本番ビルド(docs/)には一切載らない。詳細な素振りは _bg3d_lab.html。
+     ★ 選手には使わない（変形・関節・表情＝picoCADにリギングが無い）。剛体で顔が無いものだけ。 -->
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+<script type="module">
+// 共有モジュール（js/bg3d.js）を読むだけ。素材の調整は1箇所で済む＝_bg3d_lab.html と二重管理しない。
+import { install } from './js/bg3d.js?v=4';
+install();
+</script>
+</body></html>

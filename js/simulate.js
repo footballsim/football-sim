@@ -4289,7 +4289,16 @@ function nextChance() {
     liveFieldWrap.innerHTML = '';
     // カットインがあればそれを大きく表示し、簡易フィールド図は下に小さく添える。
     // カットインが無いアクションは簡易フィールド図を上で大きく表示（mini は出さない）。
-    liveFieldWrap.appendChild(_sceneArt || renderSceneField(sc, prevSc));
+    //
+    // 層S 引き画（WIDE-01・lab限定）: カットインが無いシーンは、戦術図の代わりに
+    //   スタジアムの引き画を出す。★画面は増えない＝既にある「引きの枠」の中身を図から絵に
+    //   差し替えるだけ。公開ビルドは wideshot.js 非同梱なので typeof で完全 no-op。
+    //   ミニ枠（下段）は図のまま＝あの寸法で引き画は読めない。
+    let _wideArt = null;
+    if (!_sceneArt && typeof WideShot !== 'undefined' && WideShot.forScene) {
+      try { _wideArt = WideShot.forScene(sc, gameState, AREA_COORDS_H); } catch (e) { _wideArt = null; }
+    }
+    liveFieldWrap.appendChild(_sceneArt || _wideArt || renderSceneField(sc, prevSc));
   }
   if (miniFieldWrap) {
     if (_sceneArt) {

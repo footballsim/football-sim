@@ -1,0 +1,33 @@
+{
+  "name": "dribble2_v1",
+  "canvas": [
+    191,
+    179
+  ],
+  "hip": [
+    92,
+    100
+  ],
+  "frames": [
+    {
+      "src": "attach_1.png",
+      "scale": 0.2,
+      "raw_h": 818,
+      "body_h": 164,
+      "top": 6,
+      "bottom": 169,
+      "bounce": 0
+    },
+    {
+      "src": "attach_2.png",
+      "scale": 0.2,
+      "raw_h": 763,
+      "body_h": 153,
+      "top": 20,
+      "bottom": 172,
+      "bounce": 0
+    }
+  ],
+  "foot": 173,
+  "target_h": 190
+}

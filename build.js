@@ -38,7 +38,7 @@ const JS_FILES = ['players.js', 'rng.js', 'simulate.js', 'events.js', 'match.js'
 // ★ names.js（FN-00 表示名インダイレクション層）も lab 限定。既定は実名表示＝OFF なので
 //   読み込むだけでは挙動不変。?names=fiction / NAMES.toggle() で架空表示に切り替わる。
 const LAB_ONLY_JS = ['names.js', 'sns.js', 'mental.js', 'discipline.js', 'portrait.js', 'manga_recolor.js',
-  'juice.js', 'lab-art.js', 'lg-ui.js', 'matchday.js', 'league.js'];
+  'juice.js', 'lab-art.js', 'lg-ui.js', 'matchday.js', 'wideshot.js', 'league.js'];
 
 // 試合エンジン系: 最小化＋軽難読化
 const LOGIC_OPTS = {
@@ -149,7 +149,12 @@ const labInject =
   `<script src="js/lab-art.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/lg-ui.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/matchday.js?v=${BUILD_VER}"></script>\n` +
+  // 層S 引き画（WIDE-01）。simulate.js から typeof ガードで呼ばれるだけ＝依存なし。
+  `<script src="js/wideshot.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/league.js?v=${BUILD_VER}"></script>\n` +
+  // BG-TONE-01: 背景1枚絵の声量を描画時に下げる（cutscene.js の _bgTone）。
+  //   ★ 公開 docs/ はフラグ未定義＝完全OFF。ここで lab だけ有効化する。
+  `<script>window.CS_BG_TONE_ENABLED=true;</script>\n` +
   `<script>window.LEAGUE_TEST_MODE=true;(function(){function boot(){var tm=document.querySelector('.top-menu');if(tm)tm.style.display='none';` +
   `if(typeof showLeague==='function')showLeague();}` +
   `if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',boot);else boot();})();</script>\n`;
