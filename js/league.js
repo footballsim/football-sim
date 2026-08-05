@@ -1355,7 +1355,7 @@
       if (!acc[k]) acc[k] = { clubId: clubId, name: p.name, key: _playerKey(p), pos: pos, team: team, delta: 0, goals: 0, assists: 0 };
       return acc[k];
     }
-    function _idOf(team) { return team === t1 ? id1 : id2; }
+    function _idOf(team) { return _sameTeam(team, t1) ? id1 : id2; }
 
     // 先発11人は出場ベース点を必ず持つ（シーンに絡まなくても選出対象になる）
     [[t1, id1], [t2, id2]].forEach(function (ti) {
@@ -2641,6 +2641,20 @@
   /* ── 試合後レポート用: 自チームの得点者・アシスト・MOM を sim 結果から抽出 ───
    * 既存WCモードと同一方式（scene: result==='ゴール！！' / 得点=ofsPos / 助=crossPos）。
    * 自チーム＝ sc.offence === gameState.team1（league は team1 に自クラブをセット）。 */
+  /* ── 采配を挟んだ試合の「左右判定」（2026-08-05 修正）────────────────────────
+   * ⚠️ 同一性（===）で自チーム/相手を判定してはいけない。試合中に交代/戦術変更を行うと
+   *   manager-match.js の _mvFreezePastScenes が、過去シーンの参照するチームを
+   *   「その時点の lineup を凍結したクローン」へ差し替える（交代前のゴールが控えへ
+   *   誤帰属するのを防ぐための正しい仕組み）。クローンは **name を保つ契約**なので、
+   *   左右は name で判定する。=== のままだと采配より前の全シーンが「どちらでもない」に
+   *   落ち、自チームのチャンス/シュート/得点者/持ち越し成績が丸ごと消える。
+   *   （実害: シュート0本で5得点・得点者が全部相手側に並ぶ・シーズン成績の取りこぼし） */
+  function _sameTeam(a, b) {
+    if (!a || !b) return false;
+    if (a === b) return true;
+    return !!(a.name && b.name && a.name === b.name);
+  }
+
   function _collectMyStats() {
     var empty = { scorers: [], mom: null, stats: {} };   // stats = 選手名→{goals,assists,duelWins}（v4 持ち越し用）
     if (typeof chanceResults === 'undefined' || !chanceResults) return empty;
@@ -2649,7 +2663,7 @@
     chanceResults.forEach(function (res) {
       if (!res || !res.scenes) return;
       res.scenes.forEach(function (sc) {
-        if (sc.offence !== t1) return;
+        if (!_sameTeam(sc.offence, t1)) return;
         var isGoal = sc.result === 'ゴール！！';
         var credit = isGoal || sc.result === '成功' || sc.result === 'ファール';
         var lineup = sc.offence.lineup, players = sc.offence.players;
@@ -3301,36 +3315,36 @@
       inv1: {}, inv2: {},       // name -> count（関与シーン数）
       patterns: {}              // 'me'|'opp'+'|'+action -> count
     };
-    function _duelTgt(team) { return team === t1 ? s.duels1 : team === t2 ? s.duels2 : null; }
+    function _duelTgt(team) { return _sameTeam(team, t1) ? s.duels1 : _sameTeam(team, t2) ? s.duels2 : null; }
     chanceResults.forEach(function (res) {
       if (!res || !res.scenes) return;
       var c1 = false, c2 = false;
       res.scenes.forEach(function (sc) {
-        if (sc.offence === t1) s.t1.atk++; else if (sc.offence === t2) s.t2.atk++;
+        if (_sameTeam(sc.offence, t1)) s.t1.atk++; else if (_sameTeam(sc.offence, t2)) s.t2.atk++;
         var isShoot = (sc.result === 'ゴール！！' || sc.result === 'GK防いだ！' || sc.result === '枠を外した！');
         var isNormal = (sc.result === '成功' || sc.result === '失敗' || sc.result === 'ファール');
         // 関与シーン数（攻撃側の起点選手）
         var op = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
-        if (op) { var inv = (sc.offence === t1) ? s.inv1 : (sc.offence === t2) ? s.inv2 : null; if (inv) inv[op.name] = (inv[op.name] || 0) + 1; }
+        if (op) { var inv = _sameTeam(sc.offence, t1) ? s.inv1 : _sameTeam(sc.offence, t2) ? s.inv2 : null; if (inv) inv[op.name] = (inv[op.name] || 0) + 1; }
         if (!isShoot && !isNormal) return;
         if (isShoot || (sc.area && sc.area.substring(0, 2) === 'FW')) {
-          if (sc.offence === t1 && !c1) { s.t1.ch++; c1 = true; }
-          if (sc.offence === t2 && !c2) { s.t2.ch++; c2 = true; }
+          if (_sameTeam(sc.offence, t1) && !c1) { s.t1.ch++; c1 = true; }
+          if (_sameTeam(sc.offence, t2) && !c2) { s.t2.ch++; c2 = true; }
         }
         if (isShoot) {
-          if (sc.offence === t1) s.t1.sh++; else if (sc.offence === t2) s.t2.sh++;
+          if (_sameTeam(sc.offence, t1)) s.t1.sh++; else if (_sameTeam(sc.offence, t2)) s.t2.sh++;
           // 得点者
           if (sc.result === 'ゴール！！' && op) {
-            (sc.offence === t1 ? s.scorers1 : s.scorers2).push({ time: res.time, name: op.name });
+            (_sameTeam(sc.offence, t1) ? s.scorers1 : s.scorers2).push({ time: res.time, name: op.name });
             var pat = sc.action || sc.scenario || '?';
-            var pk = (sc.offence === t1 ? 'me' : 'opp') + '|' + pat;
+            var pk = (_sameTeam(sc.offence, t1) ? 'me' : 'opp') + '|' + pat;
             s.patterns[pk] = (s.patterns[pk] || 0) + 1;
           }
           // GKセーブ率（守備側GK）
-          var gkt = (sc.defence === t1) ? s.gk1 : (sc.defence === t2) ? s.gk2 : null;
+          var gkt = _sameTeam(sc.defence, t1) ? s.gk1 : _sameTeam(sc.defence, t2) ? s.gk2 : null;
           if (gkt) { if (sc.result === 'GK防いだ！') gkt.save++; else gkt.goal++; }
         }
-        if (sc.result === 'GK防いだ！') { if (sc.defence === t1) s.t1.gk++; else if (sc.defence === t2) s.t2.gk++; }
+        if (sc.result === 'GK防いだ！') { if (_sameTeam(sc.defence, t1)) s.t1.gk++; else if (_sameTeam(sc.defence, t2)) s.t2.gk++; }
         // デュエル（成功/ファール=攻撃勝ち / 失敗=守備勝ち）
         if (isNormal) {
           var win = (sc.result === '成功' || sc.result === 'ファール');
@@ -6480,6 +6494,10 @@
     TACTIC_IDS: TACTIC_IDS,
     // RW-02 バックナンバー
     historyIssueHTML: _historyIssueHTML,
+    // 采配を挟んだ試合の左右判定（2026-08-05 修正の回帰テスト用）
+    sameTeam: _sameTeam,
+    computeMatchStats: _computeMatchStats,
+    collectMyStats: _collectMyStats,
     // BX ベストイレブン
     rateMatch: _rateMatch,
     pickBestXI: _pickBestXI,
