@@ -604,6 +604,18 @@
   border-radius: 4px; padding-left: 8px;
 }
 .lg-logrow.sub .lg-logtxt { color: #8ef0b0; font-weight: 700; }
+/* MTG1案1(2026-08-05): 演出系メッセージの実況ノート行（記録タブ）。
+ * mine=⭐🗣⚡自チームに良い出来事(金) / rival=🧠🔁相手の動き(赤)。暗背景前提の高コントラスト色。 */
+.lg-logrow.note-mine {
+  background: rgba(255, 215, 94, .10); border-left: 3px solid #ffd75e;
+  border-radius: 4px; padding-left: 8px;
+}
+.lg-logrow.note-mine .lg-logtxt { color: #ffe9a8; font-weight: 700; }
+.lg-logrow.note-rival {
+  background: rgba(255, 107, 107, .10); border-left: 3px solid #ff6b6b;
+  border-radius: 4px; padding-left: 8px;
+}
+.lg-logrow.note-rival .lg-logtxt { color: #ffb3ad; font-weight: 700; }
 
 /* =============================================================================
  * 10. UX-03/04 マッチデー（試合前導入 / 試合後の号）

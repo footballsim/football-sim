@@ -2708,11 +2708,12 @@
       if (res && res.textScenes) res.textScenes.forEach(function (tx) {
         if (tx && String(tx).replace(/<[^>]*>/g, '').trim()) out.push({ t: res.time || '', x: tx });
       });
-      // このチャンス消化直後(=currentChanceIdx が i+1 の時点)に起きた交代を差し込む
-      subs.filter(function (s) { return s.chanceIdx === i + 1; }).forEach(function (s) { out.push({ t: s.time || (res && res.time) || '', x: s.text, sub: true }); });
+      // このチャンス消化直後(=currentChanceIdx が i+1 の時点)に起きた交代/実況ノートを差し込む
+      // （MTG1案1: note=演出系メッセージ⭐🗣⚡🧠。sub行と区別して tone で色分け表示する）
+      subs.filter(function (s) { return s.chanceIdx === i + 1; }).forEach(function (s) { out.push({ t: s.time || (res && res.time) || '', x: s.text, sub: !s.note, note: !!s.note, tone: s.tone }); });
     });
-    // 全チャンス後(終盤)の交代を末尾に
-    subs.filter(function (s) { return s.chanceIdx > chanceResults.length; }).forEach(function (s) { out.push({ t: s.time, x: s.text, sub: true }); });
+    // 全チャンス後(終盤)の交代/実況ノートを末尾に
+    subs.filter(function (s) { return s.chanceIdx > chanceResults.length; }).forEach(function (s) { out.push({ t: s.time, x: s.text, sub: !s.note, note: !!s.note, tone: s.tone }); });
     return out;
   }
   function _showMatchLog() {
@@ -2724,7 +2725,8 @@
     var rows = '', lastT = null;
     lr.log.forEach(function (l) {
       var tcell = (l.t !== lastT) ? l.t : ''; lastT = l.t;
-      rows += '<div class="lg-logrow' + (l.sub ? ' sub' : '') + '"><span class="lg-logtime">' + tcell + '</span><span class="lg-logtxt">' + l.x + '</span></div>';
+      var rowCls = (l.sub ? ' sub' : '') + (l.note ? ' note-' + (l.tone === 'rival' ? 'rival' : 'mine') : '');
+      rows += '<div class="lg-logrow' + rowCls + '"><span class="lg-logtime">' + tcell + '</span><span class="lg-logtxt">' + l.x + '</span></div>';
     });
     var ov = document.createElement('div');
     ov.id = 'lg-log-ov'; ov.className = 'lg-logov';
