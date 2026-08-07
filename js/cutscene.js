@@ -937,10 +937,13 @@ var _GK_DIVES = [
   { id: 'p0', src: _MANGA_GK_DIVE_SRC, hw: _GK_DIVE_HW, gx: 0.85, gy: 0.13, ws: 1.00, rise: true, sc3Rev: false },          // pose0: 斜め上へ横っ飛び（reaching glove=右上・scene3は下→上の対角モーション）
   { id: 'p1', src: 'img/cutscenes/manga_gk_dive2.png?v=2', hw: 185 / 440, gx: 0.08, gy: 0.82, ws: 1.42, rise: false, sc3Rev: true, sc3: { x0: 195, x1: 160, y: 92 }, bg: 'img/cutscenes/gkdive2_bg_01.png' }  // pose1: 水平ダイブ（反転済・reaching glove=左下）。横長ゆえ幅1.42倍。scene3は縦移動なし＋専用配置（ゴールライン上・少し前＝左下）＋専用背景（ゴール裏フィールド）
 ];
+/* ★ 2026-08-06 ユーザー判断: **pose1（水平ダイブ・ゴール裏背景）は不採用**。pose0 のみを使う。
+ *   pose1 の定義・素材・専用配置(sc3)・専用背景はそのまま残してある＝復活は下の1行を戻すだけ。
+ *   ラボの強制選択 window._LAB_GK_DIVE=1 では今も pose1 を確認できる（比較用）。 */
 function _pickGkDive() {
-  var o = (typeof window !== 'undefined') ? window._LAB_GK_DIVE : undefined;   // ラボ限定の強制選択（本番は未定義＝ランダム）
+  var o = (typeof window !== 'undefined') ? window._LAB_GK_DIVE : undefined;   // ラボ限定の強制選択
   if (o === 0 || o === 1) return _GK_DIVES[o];
-  return _GK_DIVES[(Math.random() < 0.5) ? 0 : 1];
+  return _GK_DIVES[0];                                                          // 本番は pose0 固定（旧: Math.random()<0.5 で2種抽選）
 }
 var _GK_HEX = { yellow: '#f2c200', dark: '#2a2a33', white: '#e8e8ee', skyblue: '#3aa0e0', orange: '#e8641b', blue: '#1b5fd0', red: '#c8102e', green: '#1e8c3a' };
 function _gkShade(hex, f) { var h = hex.replace('#', ''); if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]; var v = [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; return '#' + v.map(function (c) { var s = Math.round(c * f).toString(16); return s.length < 2 ? '0' + s : s; }).join(''); }
@@ -3927,6 +3930,31 @@ function _renderGkScene(sc, mode) {
   var zc = [240, 116];                                         // ズーム中心（固定でジッター防止）
   var flipH = _csAttackRight(sc);                              // ネイティブ=左攻め(右→左シュート) → team1(右)で反転
 
+  /* ── GK-MOTION-01（2026-08-06）: ポーズを変えずに「動き」を出す層 ─────────────
+   *   問題: GKは1枚絵を gkX0→gkX1 / gkY0→gkY1 へ**平行移動しているだけ**だった。
+   *     剛体のまま滑るので「絵が動いている」であって「跳んでいる」に見えない。
+   *   方針: 動きは**被写体の身体から出す**。光芒・リングのような「絵に物を足すFX」は使わない
+   *     （2026-07-29 にユーザーがゴール/失点から不採用にした方向＝ここでも踏襲）。
+   *   道具は2つとも既存:
+   *     ① _csCam.puppet = CAM-01の人形芝居。**手足は描き直さず**軸まわりの傾き(lean)と
+   *        伸縮(stretch)だけ掛ける。ダイブ軸に沿って伸びるので「伸び上がって跳ぶ」が出る。
+   *     ② 残像 = 同じスプライトを数十ms前の位置へ薄く重ねる。recolor済みキャッシュを
+   *        使い回すので追加コストはほぼゼロ。
+   *   ★ マンガGK（_gkManga=lab限定）のときだけ有効＝公開ビルド docs/ の挙動は不変。
+   *   キルスイッチ: window.GK_MOTION_ENABLED === false で完全OFF（ラボのA/B用）。 */
+  var _gkMotion = _gkManga && ((typeof window === 'undefined') || window.GK_MOTION_ENABLED !== false);
+  var _mvDirX = (gkX1 >= gkX0) ? 1 : -1;                       // 画面内の進行方向（flip前のローカル座標）
+  function _gkMpAt(pp) { var m = Math.min(1, Math.max(0, pp) / 0.55); return 1 - (1 - m) * (1 - m); }   // frame内の mp と同式
+  function _gkPosAt(pp) { var m = _gkMpAt(pp); return { x: gkX0 + (gkX1 - gkX0) * m, y: gkY0 + (gkY1 - gkY0) * m }; }
+  /* 効き具合。ラボから window.GK_LEAN / GK_STRETCH / GK_GHOST で実行時に上書きできる（本番は未定義＝既定値）。 */
+  function _gkTune(k, dflt) { var v = (typeof window !== 'undefined') ? window[k] : undefined; return (typeof v === 'number') ? v : dflt; }
+  var GK_LEAN = _gkTune('GK_LEAN', 0.085);        // 最大の傾き(rad)。0.085≈4.9°＝ポーズは変えず輪郭だけ動く量
+  var GK_STRETCH = _gkTune('GK_STRETCH', 0.055);  // ダイブ軸方向の伸び（縦の潰し率）
+  /* ★ 残像は拍2（dive=結果非開示の跳躍）だけ。拍3（ナイスセーブ／抜かれた＝決着）には出さない。
+   *   決着は「効果を全部剥がした大きなコマ」が正解（QUIET-01・3作品共通の文法）で、
+   *   そこに残像を足すと逆走する。決着では傾きの収束だけが残る。 */
+  var GK_GHOST = dive ? _gkTune('GK_GHOST', 0.20) : 0;
+
   var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
   var started = false;
   function frame() {
@@ -3938,7 +3966,21 @@ function _renderGkScene(sc, mode) {
     var mp = Math.min(1, p / 0.55); mp = 1 - (1 - mp) * (1 - mp);   // 移動progress: 前半で一気に跳ぶイーズアウト＝ダイブが素早く見える（接触p≈0.52時点でほぼ到達）
     var slide = gkX0 + (gkX1 - gkX0) * mp;                    // 左→右へ移動（ボールが画面外に出るまで）
     var gkY = gkY0 + (gkY1 - gkY0) * mp;                      // 下→上へ移動＝対角ダイブ（ボール手元hYも追従）
+    /* 人形芝居のパラメータ（GK-MOTION-01）。★ 手元アンカーより先に出す＝下で同じ変換を掛けるため。
+     *   接触時刻ちょうどが lean 最大なので、素の hX/hY のままだとボールが**回した手から最大9pxずれる**。 */
+    var _burst = _csCam.clamp01(p / 0.30), _settle = _csCam.clamp01((p - 0.55) / 0.45);
+    var _lean = _gkMotion ? (_mvDirX * GK_LEAN * _burst * (1 - _settle * 0.8)) : 0;
+    var _stretch = _gkMotion ? (1 - GK_STRETCH * Math.sin(_csCam.clamp01(p / 0.5) * Math.PI)) : 1;
     var hX = slide + gkW * handsFx, hY = gkY + gkH * handsFy;  // GKの手元（ボール通過点）
+    if (_gkMotion && (_lean || _stretch !== 1)) {
+      // puppet と同じ変換（軸=絵の中心 → scale → rotate）を手元アンカーにも掛ける＝ボールが必ず手に付く
+      var _pvx = slide + gkW * 0.5, _pvy = gkY + gkH * 0.5;
+      var _sx = 1 + (1 - _stretch) * 0.7, _sy = _stretch;
+      var _dx = (hX - _pvx) * _sx, _dy = (hY - _pvy) * _sy;
+      var _cs = Math.cos(_lean), _sn = Math.sin(_lean);
+      hX = _pvx + _dx * _cs - _dy * _sn;
+      hY = _pvy + _dx * _sn + _dy * _cs;
+    }
     var contactP = ballStartP + (W - hX) / ballSpd;           // bx==hX（手元到達）になる p
     // ボール位置と画面内判定
     var bx = null, by = null, onScreen = false;
@@ -3959,7 +4001,29 @@ function _renderGkScene(sc, mode) {
       }
     }
     var ballGone = !dive && (p > ballStartP + 0.03) && !onScreen;   // dive はボールを手元で凍結＝終了させない
-    var drawGK = function () { if (!gkImg.complete || !gkImg.naturalWidth) return; var _s = _gkManga ? MangaRecolor.render(_gkKey, gkImg, _gkCols) : gkImg; if (_s && _gkManga) _s = _csPixelate(_s, _gkKey, gkW, gkH); if (_s) ctx.drawImage(_s, slide, gkY, gkW, gkH); };
+    var drawGKAt = function (x, y, alpha) {
+      if (!gkImg.complete || !gkImg.naturalWidth) return;
+      var _s = _gkManga ? MangaRecolor.render(_gkKey, gkImg, _gkCols) : gkImg;
+      if (_s && _gkManga) _s = _csPixelate(_s, _gkKey, gkW, gkH);
+      if (!_s) return;
+      if (alpha != null) { ctx.save(); ctx.globalAlpha = alpha; ctx.drawImage(_s, x, y, gkW, gkH); ctx.restore(); }
+      else ctx.drawImage(_s, x, y, gkW, gkH);
+    };
+    var drawGK = function () {
+      if (!_gkMotion) { drawGKAt(slide, gkY); return; }
+      // ① 残像: 跳び出しの速い区間だけ、数十ms前の位置に薄く重ねる（接触以降は出さない＝決着を濁さない）
+      //    ★ 立ち上がりでフェードインさせる＝p<0.055 では2枚とも開始位置に重なるので、
+      //      いきなり最大濃度だと「二重写しのバグ」に見える。
+      var _gv = Math.min(p / 0.09, 1 - _csCam.clamp01((p - 0.08) / 0.34));
+      if (GK_GHOST > 0 && _gv > 0.02) {
+        var _g2 = _gkPosAt(p - 0.105), _g1 = _gkPosAt(p - 0.055);
+        drawGKAt(_g2.x, _g2.y, GK_GHOST * 0.5 * _gv);
+        drawGKAt(_g1.x, _g1.y, GK_GHOST * _gv);
+      }
+      // ② 人形芝居: 踏切で進行方向へ倒し、飛翔中はダイブ軸に沿って伸び、決着へ向けて収束する
+      //    （_lean / _stretch は手元アンカーと共有するため frame 冒頭で算出済み）
+      _csCam.puppet(ctx, slide + gkW * 0.5, gkY + gkH * 0.5, _lean, _stretch, function () { drawGKAt(slide, gkY); });
+    };
     /* ボールも絵と同じ倍率で拡大する（決着はr≈12）。★ 固定の大きな値にしないのが要点＝
      *   GKだけ1.45倍でボールが据え置きだと縮尺が壊れる。参考漫画の決着は「ボールがどこにあるか」で
      *   結果を語っているので、主語と同じ縮尺で大きくなるのが正しい。 */
