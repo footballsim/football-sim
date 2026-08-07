@@ -2404,12 +2404,25 @@ body.league-mode #screen-setting.league-prep .lgp-bench-val .lgp-val { font-size
 body.league-mode #screen-setting.league-prep .lgp-bench-count {
   color: var(--lg-text-mute); font-size: 10px; font-weight: 700; margin-left: 6px;
 }
-/* 棚の下端のスクロールヒント（承認モックにあり）。棚が縦スクロールになった目印。 */
+/* 棚の下端のスクロールヒント（承認モックにあり）。棚が縦スクロールになった目印。
+   ★ 2026-08-06: 押しても効かない飾りだった（擬似要素）。本物のボタン #lgp-bench-more を
+   league.js が差し込むので、ボタンがある時は擬似要素の▼を出さない（二重表示の防止）。 */
 body.league-mode #screen-setting.league-prep .bench-panel::after {
   content: "▼";
   flex: 0 0 auto; text-align: center;
   color: var(--lg-text-mute); font-size: 8px; line-height: 1.4; padding-top: 1px;
 }
+body.league-mode #screen-setting.league-prep .bench-panel:has(#lgp-bench-more)::after { content: none; }
+/* ⚠️ ここに scroll-behavior: smooth を付けてはいけない（2026-08-06 実測）。
+   付けると scrollTop への代入が**一切反映されない**環境があり（600ms 待っても 0 のまま）、
+   「▼ を押しても効かない」という元のバグに逆戻りする。JS 側は素の代入で確実に動かす。 */
+body.league-mode #screen-setting.league-prep .lgp-bench-more {
+  flex: 0 0 auto; width: 100%; margin-top: 3px; padding: 3px 0;
+  border: 1px solid var(--lg-line); border-radius: 3px;
+  background: var(--pr-panel, rgba(255,255,255,.06));
+  color: var(--lg-text-dim); font-size: 10px; line-height: 1.2; cursor: pointer;
+}
+body.league-mode #screen-setting.league-prep .lgp-bench-more:active { background: var(--lg-surface-3, rgba(255,255,255,.14)); }
 
 /* スタメン総合力パネル（右カラム先頭） */
 body.league-mode #screen-setting.league-prep .lgp-power {

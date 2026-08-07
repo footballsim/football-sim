@@ -3800,6 +3800,13 @@
     //   ★ team1State は上で「習得済み戦術」に制約して組んだので、initSettingScreen 側では
     //     上書きしない（window._leagueInMatch を見て team1State リセットを飛ばす）。
     _pendingMatch = { myId: myId, oppId: oppId, iAmHome: iAmHome, fx: fx };
+    /* ★ 前試合の交代状態を、布陣画面を描く前に必ず捨てる（2026-08-06 バグ修正）。
+     *   交代カウンタ/_subbedOff/_htMode のリセットは startManagerMatch の中にあるが、
+     *   リーグは「布陣画面 →（キックオフ）→ startManagerMatch」の順なので、この画面には
+     *   前試合の残骸が乗ったまま来ていた（前節に退いた選手がベンチでグレー＝掴めない／
+     *   _htMode が残ると試合前の入れ替えが交代扱いになり即グレー）。
+     *   simulate.js 非同梱の環境では no-op（typeof ガード）＝公開版に波及しない。 */
+    if (typeof resetSubStateForPrep === 'function') resetSubStateForPrep();
     window._leagueInMatch = true;
     _settingBackScreen = 'home';   // フォールバック（実際の戻るは settingBack→leagueCancelPrep）
     if (typeof initSettingScreen === 'function') initSettingScreen();
@@ -3828,7 +3835,7 @@
       s.classList.remove('league-prep');
       s.classList.remove('lgp-inmatch');
       if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
-      ['lgp-power', 'lgp-mode', 'lgp-bench-count'].forEach(function (id) {
+      ['lgp-power', 'lgp-mode', 'lgp-bench-count', 'lgp-bench-more'].forEach(function (id) {
         var el = document.getElementById(id);
         if (el && el.parentNode) el.parentNode.removeChild(el);
       });
@@ -4052,6 +4059,48 @@
     var cnt = document.getElementById('lgp-bench-count');
     if (cnt) cnt.textContent = count + _t('人', '');
     _paintPortraitCanvases(bench);
+    _lgpBenchMore(bench);
+  }
+
+  /* 控え棚の「▼」（2026-08-06 バグ修正）。
+   * これまで ▼ は .bench-panel::after の**擬似要素＝押せない飾り**で、しかも横スクロール用の
+   * ‹› ボタンは league-mode で display:none。ユーザーには「▼を押しても効かない」に見えていた。
+   * → 本物のボタンを1つだけ差し込み、simulate.js の scrollBench(1)（縦棚では縦送り・
+   *   最下端まで来たら先頭へ巻き戻す）に繋ぐ。棚がスクロール不要なときは出さない。 */
+  function _lgpBenchMore(bench) {
+    var panel = bench.parentNode; if (!panel) return;
+    var btn = document.getElementById('lgp-bench-more');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'lgp-bench-more';
+      btn.className = 'lgp-bench-more';
+      btn.innerHTML = '▼';
+      btn.onclick = function () { if (typeof scrollBench === 'function') scrollBench(1); };
+      panel.appendChild(btn);
+    }
+    btn.title = _t('控えを下へスクロール', 'Scroll bench');
+    /* 出す/隠すの判定は「棚がはみ出しているか」。
+     * ⚠️ 一度きりの測定では誤る（2026-08-06 実測）: 3ゾーンのレイアウトが確定する前に測ると
+     *   clientHeight が実際より大きく、スクロールが必要なのに **ボタンを隠したまま**になった。
+     *   ＝ユーザーから見れば「▼が無い／効かない」で元のバグと同じ。
+     *   ResizeObserver で棚の寸法が変わるたびに測り直し、取りこぼしを無くす。 */
+    var apply = function () {
+      var more = bench.scrollHeight > bench.clientHeight + 4;
+      btn.style.display = more ? 'block' : 'none';
+    };
+    apply();
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(apply);
+    /* ★ 遅れて伸びる分を拾うための再測定（これが無いと隠れたままになる）。
+     *   ・renderBench は画面がまだ非表示（display:none）のうちに走ることがある＝寸法が測れない
+     *   ・顔キャンバス等が後から確定して **中身(scrollHeight)だけ**が伸びる。棚自身の枠は
+     *     変わらないので ResizeObserver は鳴らない＝時間差で測り直すしかない。 */
+    [0, 150, 500].forEach(function (ms) { setTimeout(apply, ms); });
+    // 画面回転・ウィンドウ幅の変化で棚の高さが変わったときの追従（枠の変化はこちらで拾う）
+    if (typeof ResizeObserver === 'function' && !bench._lgpRO) {
+      bench._lgpRO = new ResizeObserver(apply);
+      bench._lgpRO.observe(bench);
+    }
   }
 
   // スタメン総合力 = 11人の実効総合値の平均（小数1桁）。入れ替えのたびに juice でカウントアップ＋差分表示。
@@ -4208,6 +4257,8 @@
     _leagueMatchActive = false;
     window._leagueOnMatchFinish = null;
     _pendingMatch = null;
+    // 布陣画面で触った交代状態を持ち出さない（次に開く画面＝シングル/W杯にも漏らさない）
+    if (typeof resetSubStateForPrep === 'function') resetSubStateForPrep();
     if (typeof showScreen === 'function') showScreen('home');
   };
 

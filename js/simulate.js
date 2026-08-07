@@ -1807,7 +1807,11 @@ function renderFormation() {
     dot.addEventListener('touchstart', e => {
       e.stopPropagation();
       const t = e.touches[0];
-      const cr = circle.getBoundingClientRect();
+      // リーグ試合前（.league-prep）は .player-circle が display:none（ミニカード表示）＝
+      // 矩形が 0×0 になり、この判定が常に外れてスタメン同士のドラッグが始まらなかった。
+      // 円が見えない時はドット全体（カード）を掴み判定にする（従来レイアウトは円のまま＝不変）。
+      const _cr0 = circle.getBoundingClientRect();
+      const cr = (_cr0.width > 0 && _cr0.height > 0) ? _cr0 : dot.getBoundingClientRect();
       if (t.clientX < cr.left || t.clientX > cr.right ||
           t.clientY < cr.top  || t.clientY > cr.bottom) return;
       dragState.dragging = false;
@@ -1897,6 +1901,27 @@ const dragState = { dragging: false, sourceType: null, sourcePos: null, sourcePl
 
 function scrollBench(dir) {
   var bench = document.getElementById('bench-list');
+  if (!bench) return;
+  // リーグ試合前（.league-prep）は控えが縦1列の棚＝縦に送る（league.js が ▼ ボタンから呼ぶ）。
+  // 縦スクロールが存在しない従来レイアウト（シングル/W杯＝横並び）は今まで通り横送り＝挙動不変。
+  if (bench.scrollHeight > bench.clientHeight + 4) {
+    var maxTop = bench.scrollHeight - bench.clientHeight;
+    var atBottom = bench.scrollTop >= maxTop - 4;
+    var next;
+    if (dir > 0 && atBottom) {
+      next = 0;   // 端で止まってボタンが死なない＝先頭へ巻き戻す
+    } else {
+      var item = bench.firstElementChild;
+      var itemH = item ? (item.getBoundingClientRect().height + 6) : 40;
+      next = Math.max(0, Math.min(maxTop, bench.scrollTop + dir * itemH * 3));
+    }
+    /* ★ scrollBy/scrollTo の behavior:'smooth' は環境によって黙って無視される
+     *   （実測: プレビュー用ブラウザでは 900ms 経っても scrollTop が 0 のまま＝
+     *   「押しても効かない」に見える）。scrollTop への直接代入は必ず効くので値で動かし、
+     *   アニメーションは CSS の scroll-behavior に任せる（対応環境ではこれでも滑らかに動く）。 */
+    bench.scrollTop = next;
+    return;
+  }
   var itemW = 68; // bench-item幅+gap
   bench.scrollBy({ left: dir * itemW * 3, behavior: 'smooth' });
 }
@@ -2125,6 +2150,25 @@ function applyDrop(x, y) {
   renderFormation();
   renderBench();
   updateSettingBtnValues();
+}
+
+/* 交代まわりのモジュール状態を「試合前」の素の姿へ戻す（2026-08-06 バグ修正）。
+ * 何を: subsCount/subsUsed/htSubsCount/_htMode/_subbedOff を初期化する。
+ * なぜ: これらのリセットは startGame() / startManagerMatch() の中にしか無く、リーグの導線は
+ *   playToday() → 試合前の布陣設定画面 → キックオフ → startManagerMatch() の順＝
+ *   **リセットより先に布陣画面が開く**。結果、前試合の _subbedOff が残って「前節に退いた選手が
+ *   ベンチでグレー＝掴めない」、_htMode が残ると applyDrop が交代扱いになり「試合前なのに
+ *   入れ替えた瞬間に交代済み（グレー）」になっていた。
+ * ★ 試合中の采配（_htMode=true の間）からは呼ばない＝5枠制限・再出場不可の仕様は不変。
+ * ★ let 宣言はモジュール（script）スコープなので window 経由では書けない。呼び出し側は
+ *   typeof ガードでこの関数の有無だけ見る。 */
+function resetSubStateForPrep() {
+  subsCount = 0;
+  subsUsed = 0;
+  htSubsCount = 0;
+  _htMode = false;
+  _subbedOff = new Set();
+  _pendingSubLog = [];
 }
 
 function showGhost(name, x, y) {
