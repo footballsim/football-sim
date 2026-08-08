@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Football Simulation Lab",
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "deploy:guard": "node tools/deploy-guard.js",
+    "deploy:lab": "node tools/deploy-guard.js && npx --yes wrangler@4 pages deploy dist-lab --project-name=kantoku-lab --branch=main --commit-dirty=true"
   },
   "repository": {
     "type": "git",
