@@ -4317,6 +4317,183 @@
     _queueScrollHints();
   };
 
+  /* ══ MD-04e キープレイヤー選択の3ゾーン化（2026-08-09・ユーザー指示）════════
+   * 「キープレイヤー選択もお願いします」＝要注意プレイヤー（MD-04d）と対になる画面。
+   * #screen-keyplayer は simulate.js の openKeyPlayerSelect が組む **共有画面**なので、
+   * リーグ（body.league-mode）のときだけ
+   *   ［左＝自チームXIのカードリスト／中央＝自チームのピッチ＝主役／右＝指名・効果・自分の布陣］
+   * ＋下部コマンドバーへ組み替える。骨格・トークン・カード作法は MD-04／MD-04d と共通。
+   *
+   * ★ MD-04d との違い（＝仕様の違いをそのまま表示に落とす）:
+   *   ① 対象は **自チームのスタメン11人**（相手ではない）＝ピッチはここで新規に組み立てる。
+   *   ② **GK も指名できる**（グレーアウト・除外なしの11人フラット）。
+   *   ③ 「指定なし」が存在しない（常に誰か1人）＝下部バーは［戻る］［決定］の2枠。
+   *   ④ 効果は数値ではない＝ -15% のような効果数字は置かず ⭐ と説明文で伝える。
+   * ★ ロジックは1行も持たない。ピッチのカードは対応する行ノードの onclick を**借りる**だけ
+   *   （＝「選ぶと何が起きるか」の正本は simulate.js の team1State.keyplayer = pos のまま）。
+   * ★ league-mode でなければクラスを外して即 return ＝シングル/W杯は従来UIのまま。
+   * ★ 試合中の采配（_mvOpenSetting）から開いた場合も、team1State は live チームと同期済み
+   *   ＝ctx はその値をそのまま受け取る（ライブ布陣の分岐はこちらで再実装しない）。 */
+  var _LGK_FIELD_SVG =
+    '<svg viewBox="0 0 100 145" preserveAspectRatio="none" aria-hidden="true">' +
+      '<rect x="5" y="5" width="90" height="135" fill="none" stroke="white" stroke-width="0.8"/>' +
+      '<line x1="5" y1="72.5" x2="95" y2="72.5" stroke="white" stroke-width="0.6"/>' +
+      '<circle cx="50" cy="72.5" r="12" fill="none" stroke="white" stroke-width="0.6"/>' +
+      '<circle cx="50" cy="72.5" r="0.8" fill="white"/>' +
+      '<rect x="25" y="5" width="50" height="18" fill="none" stroke="white" stroke-width="0.6"/>' +
+      '<rect x="35" y="5" width="30" height="9" fill="none" stroke="white" stroke-width="0.6"/>' +
+      '<rect x="25" y="122" width="50" height="18" fill="none" stroke="white" stroke-width="0.6"/>' +
+      '<rect x="35" y="127" width="30" height="13" fill="none" stroke="white" stroke-width="0.6"/>' +
+    '</svg>';
+
+  window.leagueDecorateKeyplayer = function (content, ctx) {
+    var scr = document.getElementById('screen-keyplayer');
+    if (!scr || !content) return;
+    var bail = function () {
+      scr.classList.remove('league-keyplayer');
+      content.className = 'setting-content';   // 旧UIの素の姿へ確実に戻す
+    };
+    if (!(document.body && document.body.classList.contains('league-mode'))) { bail(); return; }
+    var data = ctx && ctx.data;
+    if (!data || !data.players) { bail(); return; }
+    var sys = ctx.sys, lineup = ctx.lineup || [];
+    if (!sys || lineup.length < 11) { bail(); return; }
+    scr.classList.add('league-keyplayer');
+
+    var nameOf = function (p) { return (typeof getPlayerName === 'function') ? getPlayerName(p) : (p.name || ''); };
+    var descNode = content.querySelector('.keyp-desc');
+    var descText = descNode ? descNode.textContent.replace(/^[\s⭐]+/, '') : '';
+    var items = Array.prototype.slice.call(content.querySelectorAll('.keyp-item'));
+    var keyPos = (typeof ctx.keyPos === 'number') ? ctx.keyPos : -1;
+
+    // ── 中央ゾーン（主役）＝自チームのピッチ ─────────────────────────
+    var mid = document.createElement('div');
+    mid.className = 'lgk-zone lgk-mid';
+    mid.innerHTML =
+      '<div class="lgk-zhead">' +
+        '<span class="lgk-zttl">' + _escHtml((data.flag || '') + ' ' +
+          ((typeof getTeamName === 'function') ? getTeamName(data) : (data.name || ''))) + '</span>' +
+        '<span class="lgk-zhint">' +
+          _t('選手をタップして指名', 'Tap a player to appoint') + '</span>' +
+      '</div>' +
+      '<div class="lgk-field"><div class="lgk-turf">' + _LGK_FIELD_SVG + '<div class="lgk-dots"></div></div></div>';
+    var dotsEl = mid.querySelector('.lgk-dots');
+
+    // ── 左ゾーン＝自チームXIのカードリスト（控え棚と同じ行の作法）──────────
+    var left = document.createElement('div');
+    left.className = 'lgk-zone lgk-left';
+    left.innerHTML =
+      '<div class="lgk-zhead"><span class="lgk-zttl">' + _t('スタメン', 'STARTING XI') + '</span>' +
+      '<span class="lgk-zcount">' + items.length + _t('人', '') + '</span></div>';
+    var rows = document.createElement('div');
+    rows.className = 'lgk-rows';
+
+    items.forEach(function (item) {
+      var pos = parseInt(item.dataset.pos, 10);
+      var pi = parseInt(item.dataset.playerIdx, 10);
+      var p = data.players[pi]; if (!p) return;
+      var posName = sys.positions[pos] || '';
+      var isKey = (pos === keyPos);
+      var chip = '<span class="lgk-chip ' + _lgpLine(posName) + '">' +
+        _escHtml(_lgmPosLabel(posName)) + '</span>';
+      var val = '<span class="lgk-val">' + Math.round(_lgpRating(p, posName)) + '</span>';
+
+      // ピッチのカード（行の onclick を借りる＝選択ロジックは simulate.js が正本）
+      var dot = document.createElement('div');
+      dot.className = 'lgk-dot';
+      dot.style.left = sys.x[pos] + '%';
+      dot.style.top = sys.y[pos] + '%';
+      // 行の重なりは「下の行ほど手前」＝上の行の選手名が下のカードの裏に回る（布陣設定と同じ）
+      dot.style.zIndex = String(10 + Math.round(sys.y[pos] || 0));
+      dot.onclick = item.onclick;
+      dot.innerHTML =
+        '<div class="lgk-card' + (isKey ? ' is-key' : '') + '">' +
+          '<div class="lgk-ctop">' + chip + val + '</div>' +
+          '<canvas class="lgk-head" width="48" height="48" data-portrait="' +
+            _escHtml(p.long_name || p.name) + '"></canvas>' +
+          (isKey ? '<span class="lgk-star">⭐</span>' : '') +
+        '</div>' +
+        '<div class="lgk-cname">' + _escHtml(nameOf(p)) + '</div>';
+      dotsEl.appendChild(dot);
+
+      // 左の行（元ノードを再利用＝onclick はそのまま）
+      item.className = 'keyp-item lgk-row' + (isKey ? ' is-key' : '');
+      item.style.cssText = '';
+      item.innerHTML =
+        '<canvas class="lgk-rhead" width="40" height="40" data-portrait="' +
+          _escHtml(p.long_name || p.name) + '"></canvas>' +
+        chip +
+        '<span class="lgk-rname">' + _escHtml(nameOf(p)) + '</span>' +
+        val +
+        (isKey ? '<span class="lgk-rstar">⭐</span>' : '');
+      rows.appendChild(item);
+    });
+    left.appendChild(rows);
+
+    // ── 右ゾーン＝いまの指名／効果／自チームの布陣 ─────────────────────
+    var curP = (keyPos >= 0 && data.players[lineup[keyPos]]) ? data.players[lineup[keyPos]] : null;
+    var curPosName = (keyPos >= 0) ? (sys.positions[keyPos] || '') : '';
+    var tacIdx = (typeof ctx.tactics === 'number') ? ctx.tactics : -1;
+    var tacNames = (typeof t === 'function' && t('tacticsNames')) ? t('tacticsNames') : [];
+    var tacIcon = ['🎯', '⚡', '🔄', '🛡️', '🎲'];
+    var sysName = (typeof systemLabel === 'function') ? systemLabel(ctx.sysIdx) : '-';
+    var unsetTxt = (typeof t === 'function') ? t('unset') : '-';
+    var right = document.createElement('div');
+    right.className = 'lgk-zone lgk-right';
+    right.innerHTML =
+      '<div class="lgk-cur' + (curP ? '' : ' is-none') + '">' +
+        '<div class="lgk-lab">' + _t('キープレイヤー', 'KEY PLAYER') + '</div>' +
+        '<div class="lgk-cur-row">' +
+          (curP ? '<canvas class="lgk-cur-head" width="56" height="56" data-portrait="' +
+            _escHtml(curP.long_name || curP.name) + '"></canvas>' : '') +
+          '<span class="lgk-cur-name">' + _escHtml(curP ? nameOf(curP) : unsetTxt) + '</span>' +
+        '</div>' +
+        '<div class="lgk-cur-sub">' + (curP
+          ? '<span class="lgk-chip ' + _lgpLine(curPosName) + '">' + _escHtml(_lgmPosLabel(curPosName)) + '</span>' +
+            '<span class="lgk-val">' + Math.round(_lgpRating(curP, curPosName)) + '</span>'
+          : '<span class="lgk-dash">—</span>') +
+        '</div>' +
+      '</div>' +
+      '<div class="lgk-panel lgk-eff">' +
+        '<div class="lgk-lab">' + _t('効果', 'EFFECT') + '</div>' +
+        '<div class="lgk-eff-mark">⭐</div>' +
+        '<div class="lgk-eff-cap">' + _t('攻撃で優先される', 'PRIORITISED IN ATTACK') + '</div>' +
+        '<p class="lgk-eff-txt">' + _escHtml(descText) + '</p>' +
+      '</div>' +
+      '<div class="lgk-panel lgk-own">' +
+        '<div class="lgk-lab">' + _t('自チームの布陣', 'YOUR SETUP') + '</div>' +
+        '<div class="lgk-kv"><span class="k">' + _t('システム', 'System') + '</span>' +
+          '<span class="v">' + _escHtml(sysName) + '</span></div>' +
+        '<div class="lgk-kv"><span class="k">' + _t('戦術', 'Tactics') + '</span>' +
+          '<span class="v">' + _escHtml(((tacIcon[tacIdx] || '') + ' ' + (tacNames[tacIdx] || '-')).trim()) + '</span></div>' +
+      '</div>';
+
+    // ── 下部コマンドバー（MD-04c の共通部品＝［戻る］［決定］の2枠）───────
+    //    「指定なし」が無い仕様なので2枠。主ボタンは右端・最大＝MD-04/MD-04d と同じ位置。
+    var bar = document.createElement('div');
+    bar.className = 'lg-prep-cmd lgk-cmd';
+    var back = document.createElement('button');
+    back.type = 'button'; back.className = 'lg-prep-nb back';
+    back.textContent = _t('← 戻る', '← Back');
+    back.onclick = function () { if (typeof closeSubSelect === 'function') closeSubSelect('keyplayer'); };
+    bar.appendChild(back);
+    var ok = document.createElement('button');
+    ok.type = 'button'; ok.className = 'lg-prep-nb kick';
+    ok.textContent = '⭐ ' + _t('決定', 'DONE');
+    ok.onclick = function () { if (typeof closeSubSelect === 'function') closeSubSelect('keyplayer'); };
+    bar.appendChild(ok);
+
+    // ── 組み替え（DOM順＝縦持ちの読み順: ピッチ → 指名/効果 → リスト → バー）──
+    content.innerHTML = '';
+    content.className = 'setting-content lgk-wrap';
+    content.appendChild(mid);
+    content.appendChild(right);
+    content.appendChild(left);
+    content.appendChild(bar);
+    _paintPortraitCanvases(content);
+    _queueScrollHints();   // 11行が入り切らない横持ちで下端フェード＝「まだ下がある」
+  };
+
   /* MD-04 自動編成。いま選んでいるシステムの各枠に、出場可能な選手から
    * 「適性 → 能力平均」の順で最良を当てる。
    * ★ 評価式は欠場補充（_availableLineup）と同じ＝相手AIの布陣と判断基準が揃う。
@@ -6352,7 +6529,8 @@
    * CSS に持たせ、ここで実測して .is-scrollable を付け外しする。
    * ★ 収まっている面にフェードを出すと逆に「切れている」と誤読させるので必ず実測する。 */
   var _SCROLLHINT_SEL = '.lg-rd-scroll, .lg-sh-boardwrap, .lg-se-plogwrap, .lg-md-deck,' +
-                        ' .bench-list, .lg-sh-panel, .lg-age-list, .lgm-rows';   // lg-age-list = SN-08a オフの変化 / lgm-rows = MD-04d 相手XI
+                        ' .bench-list, .lg-sh-panel, .lg-age-list, .lgm-rows, .lgk-rows';
+                        // lg-age-list = SN-08a オフの変化 / lgm-rows = MD-04d 相手XI / lgk-rows = MD-04e 自チームXI
   var _hintQueued = false;
 
   function _markScrollHints() {

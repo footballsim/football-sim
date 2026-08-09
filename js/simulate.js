@@ -1313,6 +1313,7 @@ function openKeyPlayerSelect() {
   content.innerHTML = '';
   const sys = system_data[team1State.systemIdx];
   const desc = document.createElement('div');
+  desc.className = 'keyp-desc';
   desc.style.cssText = 'font-size:12px;color:var(--text-dim);margin-bottom:14px;padding:10px;background:rgba(0,48,135,0.05);border-radius:8px';
   desc.textContent = '⭐ ' + t('keypHint').replace('⭐ ','');
   content.appendChild(desc);
@@ -1320,7 +1321,11 @@ function openKeyPlayerSelect() {
     const playerIdx = team1State.lineup[pos];
     const p = team1Data.players[playerIdx];
     const item = document.createElement('div');
-    item.className = 'player-select-item' + (pos === team1State.keyplayer ? ' current' : '');
+    // ★ 表示層フック用のメタ（リーグの3ゾーン装飾が「どの枠の行か」を読む）。
+    //   クリック処理（＝ロジック）は下の item.onclick のまま＝装飾側は onclick を借りるだけ。
+    item.className = 'player-select-item keyp-item' + (pos === team1State.keyplayer ? ' current' : '');
+    item.dataset.pos = String(pos);
+    item.dataset.playerIdx = String(playerIdx);
     item.innerHTML = `
       <div style="background:${team1Data.team_color};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${sys.positions[pos].replace(/[左右]/g,'').substring(0,2)}</div>
       <div class="psi-name">${getPlayerName(p)}<span style="font-size:11px;color:var(--text-dim);margin-left:6px">${sys.positions[pos]}</span></div>
@@ -1331,6 +1336,17 @@ function openKeyPlayerSelect() {
       closeSubSelect('keyplayer');
     };
     content.appendChild(item);
+  }
+  /* MD-04e（2026-08-09）: リーグ（lab）だけ、ここまでで組んだノードを **3ゾーンへ組み替える**。
+   *   ★ 生成した行ノードは「移動＋中身の描き直し」しかしない＝上で張った onclick
+   *     （＝keyplayer の代入）は素通しで保存される。ピッチのカードも同じ onclick を借りる。
+   *   ★ 未搭載（公開版 / league.js 非同梱）は typeof ガードで no-op ＝旧UIのまま。 */
+  if (typeof leagueDecorateKeyplayer === 'function') {
+    leagueDecorateKeyplayer(content, {
+      data: team1Data, sys: sys, sysIdx: team1State.systemIdx,
+      lineup: team1State.lineup.slice(0, 11), tactics: team1State.tactics,
+      keyPos: team1State.keyplayer
+    });
   }
   showScreen('keyplayer');
 }

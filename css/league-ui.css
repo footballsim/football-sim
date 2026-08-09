@@ -2487,7 +2487,8 @@ body.league-mode {
 /* ヘッダーは全向きで畳む。戻る/主ボタンは下部コマンドバーに一本化する＝
    同じ操作のボタンが画面に2つ並ばない（試合中は manager-match.js 側も挿さない）。 */
 body.league-mode #screen-setting.league-prep .screen-header,
-body.league-mode #screen-marked.league-marked .screen-header { display: none; }
+body.league-mode #screen-marked.league-marked .screen-header,
+body.league-mode #screen-keyplayer.league-keyplayer .screen-header { display: none; }
 
 /* ── 下部コマンドバー（基底）──
    ★ セレクタは **部品クラス自身**（.lg-prep-cmd / .lg-prep-nb）で取る。この2クラスは
@@ -2899,6 +2900,322 @@ body.league-mode #screen-marked.league-marked .lg-prep-nb.is-on {
   }
   body.league-mode #screen-marked.league-marked .lgm-eff-note { font-size: 9px; margin-top: 3px; }
   body.league-mode #screen-marked.league-marked .lgm-kv { padding: 3px 0; }
+}
+
+/* ==========================================================================
+ * MD-04e — キープレイヤー選択（#screen-keyplayer）の3ゾーン化
+ * （2026-08-09 ユーザー指示「キープレイヤー選択もお願いします」＝MD-04d の続き）
+ * --------------------------------------------------------------------------
+ * 構図（横持ち）:  左＝自チームXIのカードリスト ／ 中央＝自チームのピッチ（主役）／
+ *                 右＝指名中・効果・自チームの布陣 ／ 最下段＝コマンドバー
+ * MD-04（布陣設定）/ MD-04d（要注意プレイヤー）と **同じ骨格・同じ枠・同じ余白ステップ**。
+ * ★ MD-04d との差＝仕様の差だけ:
+ *     ・GK も指名できる（グレーアウトのルールを持たない）
+ *     ・「指定なし」が無い＝下部バーは2枠（[戻る][決定]）
+ *     ・強調色は赤（要注意）ではなく **金＋⭐**（＝主役を立てる意味の色）
+ * ★ #screen-keyplayer はシングル/W杯と共有。必ず `.league-keyplayer`
+ *   （league.js の leagueDecorateKeyplayer がリーグ中だけ付ける）でスコープする。
+ * ========================================================================== */
+body.league-mode #screen-keyplayer.league-keyplayer {
+  position: relative;
+  background: linear-gradient(165deg, #0a1730, #0d2246 55%, #0a1930);
+  color: var(--lg-text);
+}
+/* 薄い CRT スキャンライン（布陣設定・要注意と同じ質感＝画面をまたいでも同じ世界） */
+body.league-mode #screen-keyplayer.league-keyplayer::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 30;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .10) 0 1px, transparent 1px 3px);
+  opacity: .28; mix-blend-mode: overlay;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.league-mode #screen-keyplayer.league-keyplayer::after { opacity: .14; }
+}
+
+/* ── 器（縦持ち＝1カラムの読み順: ピッチ → 指名/効果 → リスト、バーは最下部に固定）── */
+body.league-mode #screen-keyplayer.league-keyplayer .setting-content {
+  display: flex; flex-direction: column;
+  gap: var(--lg-pad-m);
+  padding: var(--lg-pad-m) var(--lg-pad-m) 0;
+}
+
+/* ── パネル（金の二重罫＋段差）＝布陣設定の .field-panel / .bench-panel と同じ質感 ── */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-left,
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-mid,
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-cur,
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-panel {
+  padding: clamp(7px, 1.4vh, 11px);
+  border: 2px solid var(--lg-gold-2); border-radius: 5px;
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 3px 0 var(--pr-edge);
+}
+/* 右ゾーンは「パネルの入れ物」＝それ自体は素通し（枠の二重掛けを作らない） */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-right {
+  display: flex; flex-direction: column; gap: clamp(7px, 1.4vh, 12px); min-height: 0;
+}
+
+/* ゾーン見出し（overline＋補助情報の1行）＝控え棚のラベルと同じ段 */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-zhead {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--lg-pad-s);
+  margin-bottom: var(--lg-pad-s);
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-zttl {
+  color: var(--lg-gold); font-size: 10px; font-weight: 900; letter-spacing: 2px;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-zhint,
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-zcount {
+  flex: 0 0 auto; color: var(--lg-text-mute); font-size: 10px; font-weight: 700; white-space: nowrap;
+}
+
+/* ── 共通の小部品（ポジションチップ／総合値）＝布陣設定の .lgp-chip / .lgp-val と同値 ── */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-chip {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  padding: 0 3px; border-radius: 2px;
+  font-size: 9px; font-weight: 900; color: var(--lg-ink); line-height: 1.5;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-chip.gk { background: var(--lg-pos-gk); }
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-chip.df { background: var(--lg-pos-df); }
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-chip.mf { background: var(--lg-pos-mf); }
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-chip.fw { background: var(--lg-pos-fw); }
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-val {
+  flex: 0 0 auto; color: var(--lg-text); font-size: 13px; font-weight: 900;
+  font-feature-settings: "tnum" 1; line-height: 1.2;
+}
+
+/* ── 中央ゾーン＝自チームのピッチ（主役）───────────────────────── */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-mid {
+  display: flex; flex-direction: column; min-height: 0;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-field {
+  flex: 0 0 auto; width: 100%; aspect-ratio: 100 / 118;
+  border-radius: 4px; overflow: hidden;
+  container-type: inline-size;   /* 選手カードの寸法の基準（布陣設定の field-container と同じ） */
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-turf {
+  position: relative; height: 100%;
+  border: 2px solid var(--lg-line); border-radius: 4px;
+  background: repeating-linear-gradient(0deg, var(--lg-turf-1) 0 14px, var(--lg-turf-2) 14px 28px);
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-turf > svg {
+  width: 100%; height: 100%; opacity: .2; pointer-events: none;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-dots { position: absolute; inset: 0; }
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-dot {
+  position: absolute; transform: translate(-50%, -50%); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center;
+}
+
+/* 選手カード（MD-04b / MD-04d と同じ作法） */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-card {
+  position: relative;
+  display: flex; flex-direction: column; align-items: stretch;
+  width: clamp(44px, 13.2cqw, 58px);
+  padding: 1px 3px;
+  border: 1.5px solid rgba(255, 255, 255, .45); border-radius: 3px;
+  background: var(--lg-bg-2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .55);
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-ctop {
+  display: flex; align-items: center; justify-content: space-between; gap: 2px; white-space: nowrap;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-card .lgk-chip { font-size: clamp(7px, 2.2cqw, 9px); }
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-card .lgk-val { font-size: clamp(10px, 3cqw, 13px); }
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-head {
+  display: block; margin: 0 auto;
+  width: clamp(14px, 4.8cqw, 21px); height: clamp(14px, 4.8cqw, 21px);
+  image-rendering: pixelated;
+}
+/* 行間が狭い布陣（CF と OMF が縦に重なる 4-2-3-1 等）でも名前が隠れない最小の高さ */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-cname {
+  margin-top: 0; max-width: clamp(40px, 15cqw, 66px);
+  color: var(--lg-text); font-size: clamp(6px, 2.8cqw, 9.5px); font-weight: 700; text-align: center;
+  line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .9);
+}
+/* 指名中＝金の輪郭＋⭐（要注意＝赤に対して、キープレイヤーは「格」の金で言い分ける） */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-card.is-key {
+  border-color: var(--lg-gold);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, .45), 0 2px 6px rgba(0, 0, 0, .55);
+}
+/* ★ badge は「浮いた絵文字」にしない＝金縁の丸メダルに収める。上の行の選手名と重なる布陣
+   （CF と OMF が縦に並ぶ 4-2-3-1 等）でも、重なりが事故でなく意匠に見える。 */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-star {
+  position: absolute; top: -8px; right: -8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 15px; height: 15px; border-radius: 50%;
+  border: 1.5px solid var(--lg-gold); background: var(--lg-bg-0);
+  font-size: 8px; line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .85);
+}
+
+/* ── 左ゾーン＝自チームXIのカードリスト（控え棚と同じ行の作法・GKも普通に選べる）── */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-left {
+  display: flex; flex-direction: column; min-height: 0;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-rows {
+  display: flex; flex-direction: column; gap: clamp(4px, 0.9vh, 7px);
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 3px;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-row {
+  display: flex; align-items: center; gap: 6px; flex: 0 0 auto;
+  min-height: 30px; padding: 3px 6px; cursor: pointer;
+  border: 1.5px solid var(--lg-line); border-radius: 4px;
+  background: var(--pr-panel); color: var(--lg-text);
+  transition: background var(--lg-t-fast) var(--lg-ease);
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-row:hover { background: var(--lg-surface-2); }
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-row:active { background: var(--lg-surface-3); }
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-rhead {
+  display: block; width: 20px; height: 20px; flex: 0 0 auto; image-rendering: pixelated;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-rname {
+  flex: 1 1 auto; min-width: 0; text-align: left;
+  color: var(--lg-text-dim); font-size: 11px; font-weight: 800;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-rstar { flex: 0 0 auto; font-size: 12px; line-height: 1; }
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-row.is-key {
+  border-color: var(--lg-gold);
+  background: rgba(212, 175, 55, .14);
+  box-shadow: inset 3px 0 0 var(--lg-gold);
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-row.is-key .lgk-rname { color: var(--lg-text); }
+
+/* ── 右ゾーン① 指名中（顔＋名前＝この画面の「答え」を一目で読ませる）───── */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-cur { text-align: center; }
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-lab {
+  color: var(--lg-gold); font-size: 9px; font-weight: 900; letter-spacing: 1.5px;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-cur-row {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 4px; min-width: 0;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-cur-head {
+  flex: 0 0 auto; width: clamp(22px, 4vh, 30px); height: clamp(22px, 4vh, 30px);
+  image-rendering: pixelated;
+  border-radius: 3px; background: rgba(212, 175, 55, .12);
+  box-shadow: inset 0 0 0 1px rgba(212, 175, 55, .35);
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-cur-name {
+  min-width: 0; color: var(--lg-text);
+  font-size: clamp(13px, 2.6vh, 18px); font-weight: 900; line-height: 1.25;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-cur.is-none .lgk-cur-name { color: var(--lg-text-mute); }
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-cur-sub {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 4px; min-height: 15px;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-dash { color: var(--lg-text-faint); font-weight: 800; }
+
+/* ── 右ゾーン② 効果（数値の効果ではないので ⭐ を主役に・説明は既存 i18n をそのまま）── */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-eff {
+  display: flex; flex-direction: column; justify-content: center; text-align: center;
+}
+/* ⭐ はピッチのバッジと同じ「金縁のメダル」で出す＝同じ意匠の反復でリズムを作る
+   （-15% のような数値が無い効果なので、ここが右カラムの視覚の錨になる）。 */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-eff-mark {
+  display: flex; align-items: center; justify-content: center;
+  width: clamp(30px, 5.6vh, 40px); height: clamp(30px, 5.6vh, 40px);
+  margin: 4px auto; border-radius: 50%;
+  border: 2px solid var(--lg-gold); background: rgba(212, 175, 55, .10);
+  font-size: clamp(14px, 2.8vh, 19px); line-height: 1;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .05), 0 2px 4px rgba(0, 0, 0, .45);
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-eff-cap {
+  color: var(--lg-gold); font-size: 10px; font-weight: 900; letter-spacing: 1px;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-eff-txt {
+  margin: var(--lg-pad-s) 0 0; padding-top: var(--lg-pad-s);
+  border-top: 1px solid var(--lg-line-soft);
+  color: var(--lg-text-dim); font-size: clamp(10px, 1.9vh, 12px); line-height: 1.6; text-align: left;
+}
+
+/* ── 右ゾーン③ 自チームの布陣（ラベル左・値右＝布陣設定の .setting-nav-btn と同じ組版）── */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-kv {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 6px; padding: 4px 0;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-kv + .lgk-kv { border-top: 1px solid var(--lg-line-soft); }
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-kv .k {
+  flex: 0 0 auto; color: var(--lg-gold); font-size: 9px; font-weight: 900; letter-spacing: 1.2px;
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-kv .v {
+  min-width: 0; color: var(--lg-text); font-size: clamp(11px, 2.1vh, 15px); font-weight: 900;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* 下部バーは2枠＝縦持ちでも1行に並べる（枠が2つしかないので、主ボタンを次行に送ると
+   1行目の右半分が意味のない空きになる＝デッドスペースを作らない）。 */
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-cmd {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
+}
+body.league-mode #screen-keyplayer.league-keyplayer .lgk-cmd .lg-prep-nb.kick { grid-column: auto; }
+
+/* ── 横持ち＝3ゾーン＋最下段バー（布陣設定・要注意と同じ列比・同じ間隔で刻む）──── */
+@media (orientation: landscape) {
+  /* 画面自体を枠の高さに閉じる（3ゾーンは「1画面に収まる」ことが前提） */
+  body.league-mode #screen-keyplayer.league-keyplayer.active {
+    height: 100%; min-height: 0; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  body.league-mode #screen-keyplayer.league-keyplayer .setting-content {
+    flex: 1 1 auto; min-height: 0; width: 100%; overflow: hidden;
+    display: grid; max-width: none;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.55fr) minmax(0, 0.8fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-content: stretch;
+    row-gap: clamp(6px, 1.2vh, 10px);
+    column-gap: clamp(8px, 1.2vw, 14px);
+    padding: clamp(8px, 1.8vh, 13px) clamp(10px, 1.6vw, 16px) clamp(9px, 1.8vh, 13px);
+  }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-left  { grid-column: 1; grid-row: 1; }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-mid   { grid-column: 2; grid-row: 1; }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-right { grid-column: 3; grid-row: 1; }
+  /* ピッチはパネルいっぱい（縦の余りを主役が吸う＝中央に暗い空きを作らない） */
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-field {
+    aspect-ratio: auto; flex: 1 1 auto; min-height: 0;
+  }
+  /* 右カラムの余りは「効果」カードが吸う＝下端に意味のない暗い空きを残さない。
+     ★ 伸びるのは効果カードだけ（min-height:0 + overflow:hidden）＝英語で説明が1行増えても
+       下の「自チームの布陣」を列の外へ押し出さない。 */
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-right { overflow: hidden; }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-cur,
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-own { flex: 0 0 auto; }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-eff {
+    flex: 1 1 auto; min-height: 0; overflow: hidden;
+  }
+  /* 下部バー＝［戻る］［決定］。★ 列比は上の3ゾーンと**同じ**にして、戻る＝左カラムの真下、
+     決定＝ピッチ＋右カラムの真下に落とす（見えないグリッドに整列＝2枠でも構図が崩れない）。 */
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-cmd {
+    grid-column: 1 / -1; grid-row: 2; margin-top: 0;
+    position: static; padding: 0; background: none;
+    gap: clamp(8px, 1.2vw, 14px);
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.55fr) minmax(0, 0.8fr);
+  }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-cmd .lg-prep-nb.kick { grid-column: 2 / -1; }
+}
+
+/* 縦が短い横持ち（実機スマホ 844×390 等）＝行と字送りを詰めて3枚のカードを1列に収める。
+   ★ 英語（説明文が1行増える）を基準に詰める＝両言語とも下端に余裕が残る。 */
+@media (orientation: landscape) and (max-height: 560px) {
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-row { min-height: 26px; padding: 2px 5px; gap: 4px; }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-rname { font-size: 10px; }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-rhead { width: 18px; height: 18px; }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-val { font-size: 11px; }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-right { gap: 8px; }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-cur,
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-panel { padding: 7px 9px; }
+  /* ★ 英語は説明文が3行になる＝メダルと字送りを1段詰めて、効果カードの中に必ず収める
+     （landscape では .lgk-eff が overflow:hidden ＝溢れると末行が切れる）。 */
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-eff-mark {
+    width: 28px; height: 28px; margin: 2px auto; font-size: 14px;
+  }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-eff-cap { font-size: 9px; }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-eff-txt {
+    margin-top: 6px; padding-top: 6px; font-size: 10px; line-height: 1.45;
+  }
+  body.league-mode #screen-keyplayer.league-keyplayer .lgk-kv { padding: 3px 0; }
 }
 
 /* ==========================================================================
@@ -3566,7 +3883,7 @@ button.lg-se-award:active { transform: translateY(2px); box-shadow: inset 0 0 0 
  *   「収まっているのに切れて見える」という新しい誤読を生まない安全側に倒れる。 */
 .lg-rd-scroll.is-scrollable, .lg-sh-boardwrap.is-scrollable, .lg-se-plogwrap.is-scrollable,
 .lg-md-deck.is-scrollable, .bench-list.is-scrollable, .lg-sh-panel.is-scrollable,
-.lg-age-list.is-scrollable, .lgm-rows.is-scrollable {
+.lg-age-list.is-scrollable, .lgm-rows.is-scrollable, .lgk-rows.is-scrollable {
   -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 24px), transparent 100%);
   mask-image: linear-gradient(180deg, #000 calc(100% - 24px), transparent 100%);
 }
