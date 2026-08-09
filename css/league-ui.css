@@ -838,13 +838,13 @@
 .lgp-stamp { letter-spacing: 2px; }
 
 /* =============================================================================
- * 10b. PC-01 記者会見 / BD-01 ボードとの面談（選択に結果が伴うコマ）
+ * 10b. PC-01 記者会見（選択に結果が伴うコマ）
  * ========================================================================== */
 /* ★ 原則: 画像は専用の帯（region）に閉じ込め、**文字は絶対に画像の上に載せない**。
  *   以前は press_wall を全面背景にして半透明スクリム越しに文字を置いていたため、
  *   プレースホルダのラベルがボタンの隙間から透けて読めた（＝破綻）。
  *   半透明の裏にある文字は必ず前面の文字と喧嘩する。文字は不透明な面の上に置く。 */
-.lg-press, .lg-board {
+.lg-press {
   position: relative;
   overflow: hidden;
   padding: 0;
@@ -855,7 +855,7 @@
 /* ★ 枠は実アセットと同じ形にする（1280×400 = 16:5）。
    max-height を付けると aspect-ratio が上書きされ、枠の形が宣言サイズと
    食い違う（＝入れた画像が切れる/歪む）。高さの制限はしない。 */
-.lg-press-art, .lg-board-art {
+.lg-press-art {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 5;
@@ -863,34 +863,33 @@
   background: #0a1224;
   border-bottom: 1px solid var(--lg-line);
 }
-.lg-press-art canvas, .lg-board-art canvas { object-fit: cover; }
-.lg-press-art canvas, .lg-board-art canvas { display: block; width: 100%; height: 100%; }
+.lg-press-art canvas { object-fit: cover; }
+.lg-press-art canvas { display: block; width: 100%; height: 100%; }
 /* 帯の下端だけ落として本文へ繋ぐ（この上にも文字は置かない） */
-.lg-press-art::after, .lg-board-art::after {
+.lg-press-art::after {
   content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 42%;
   background: linear-gradient(180deg, rgba(13, 23, 48, 0), rgba(13, 23, 48, .92));
   pointer-events: none;
 }
 /* 文字の領域（不透明なカード面の上） */
-.lg-press-fg, .lg-board-fg {
+.lg-press-fg {
   position: relative; z-index: 1;
   padding: 12px 14px 14px;
 }
 
 /* 質問 */
-.lg-press-q, .lg-board-q {
+.lg-press-q {
   display: flex; align-items: flex-start; gap: 8px;
   font-size: 14px; font-weight: 800; line-height: 1.55;
   margin: 4px 0 11px;
   text-shadow: 0 2px 8px rgba(0, 0, 0, .8);
 }
-.lg-board-q { display: block; }
 .lg-press-mic { font-size: 17px; flex: 0 0 auto; line-height: 1.3; }
 .lg-press-qt { flex: 1; }
 
 /* 選択肢 */
-.lg-press-opts, .lg-board-opts { display: flex; flex-direction: column; gap: 7px; }
-.lg-press-opt, .lg-board-opt {
+.lg-press-opts { display: flex; flex-direction: column; gap: 7px; }
+.lg-press-opt {
   display: block; width: 100%; box-sizing: border-box; text-align: left;
   background: var(--lg-surface-2);
   border: 1px solid var(--lg-line);
@@ -899,15 +898,11 @@
   padding: 10px 12px; cursor: pointer;
   transition: transform var(--lg-t-fast) var(--lg-ease), background var(--lg-t-fast), border-color var(--lg-t-fast);
 }
-.lg-press-opt:hover, .lg-board-opt:hover {
+.lg-press-opt:hover {
   background: var(--lg-surface-3); border-color: rgba(122, 208, 255, .55);
 }
-.lg-press-opt:active, .lg-board-opt:active { transform: scale(.985); }
-.lg-press-say, .lg-board-say { display: block; font-size: 13px; font-weight: 700; line-height: 1.5; }
-.lg-board-eff {
-  display: block; margin-top: 4px;
-  font-size: 10px; font-weight: 800; color: var(--lg-info);
-}
+.lg-press-opt:active { transform: scale(.985); }
+.lg-press-say { display: block; font-size: 13px; font-weight: 700; line-height: 1.5; }
 
 /* 回答後 */
 .lg-press-said {
@@ -924,6 +919,110 @@
 .lg-press-eff.up { color: var(--lg-good); background: rgba(46, 204, 113, .16); border-color: rgba(46, 204, 113, .4); }
 .lg-press-eff.down { color: var(--lg-bad); background: rgba(231, 76, 60, .16); border-color: rgba(231, 76, 60, .4); }
 .lg-press-next { margin-top: 10px; }
+
+/* =============================================================================
+ * 10c. BD-01 ボードとの面談 — シーズンハブの手前の専用ページ
+ * --------------------------------------------------------------------------
+ * 以前はハブ中央パネルに畳んでいた（＝絵と3択が 257px の縦スクロールに詰まり、
+ * 3つ目の選択肢がフォールド下に隠れていた）。約束はその季の全部を決める分岐なので
+ * 1画面まるごとを与える＝1画面1ビート。
+ * 枠は最終話／シーズン前と同じ .lg-se-paged を流用し、中身だけここで定義する。
+ * ★ ページ自体はスクロールさせない。3枚は必ず同時に見えている＝比較して選ぶ画面。
+ * ========================================================================== */
+.lg-bd {
+  /* 3つの塊（絵／セリフ／3択）を1つのまとまりとして上下中央に置く。
+   * ★ 3択側を伸ばして中で中央寄せにすると、セリフと3択の間だけが大きく空いて
+   *   「関係の無い2つの面」に見える。伸ばすのはやめて、塊ごと中央に落とす。 */
+  align-items: center; justify-content: center;
+  gap: clamp(8px, 2.2vh, 20px);
+}
+/* 絵の枠。実アセット（1280×400＝16:5）と同じ形のまま、高さで大きさを決める。
+ * ★ LabArt は箱いっぱいに drawImage する（cover ではない）＝箱の比を崩すと絵が歪む。 */
+.lg-bd-art {
+  flex: 0 0 auto;
+  aspect-ratio: 16 / 5; height: clamp(56px, 24vh, 190px); max-width: 100%;
+  overflow: hidden; border-radius: 4px;
+  border: 2px solid var(--lg-line); background: #0a1224;
+  box-shadow: 0 3px 0 var(--se-edge);
+}
+.lg-bd-art canvas { display: block; width: 100%; height: 100%; }
+
+/* 会長のセリフ。文字は絵の上に載せない（不透明な面の上に置く＝10b と同じ原則）。 */
+.lg-bd-say-wrap { flex: 0 0 auto; max-width: 62ch; text-align: center; }
+.lg-bd-who {
+  display: inline-block; margin-bottom: 4px;
+  font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--lg-gold-2);
+}
+.lg-bd-q {
+  margin: 0;
+  font-size: clamp(13px, 2.8vh, 21px); font-weight: 900; line-height: 1.5;
+  color: var(--lg-text); text-shadow: 0 2px 8px rgba(0, 0, 0, .8);
+}
+.lg-bd-q b { color: var(--lg-gold); }
+
+/* 3択は横並び固定＝左から野心が上がる勾配で読ませる。 */
+.lg-bd-opts {
+  flex: 0 1 auto; min-height: 0; width: 100%;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(6px, 1.4vh, 12px);
+  align-items: stretch;
+}
+.lg-bd-opt {
+  display: flex; flex-direction: column; gap: clamp(4px, .9vh, 8px);
+  min-width: 0; text-align: left;
+  padding: clamp(7px, 1.6vh, 14px);
+  border: 2px solid var(--lg-line); border-radius: 5px;
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  box-shadow: 0 3px 0 var(--se-edge);
+  color: var(--lg-text); font-family: inherit; cursor: pointer;
+  transition: transform .08s ease, box-shadow .08s ease, border-color var(--lg-t-fast);
+}
+.lg-bd-opt:hover { border-color: rgba(122, 208, 255, .55); }
+.lg-bd-opt:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--se-edge); }
+.lg-bd-tone {
+  flex: 0 0 auto;
+  font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--lg-text-mute);
+}
+.lg-bd-opt.lower .lg-bd-tone { color: var(--lg-bad); }
+.lg-bd-opt.raise .lg-bd-tone { color: var(--lg-gold); }
+/* セリフが伸び縮みを吸う＝下の効果チップの高さがカード間で揃う（横並びで比較できる）。 */
+.lg-bd-say { flex: 1 1 auto; font-size: clamp(11.5px, 2.1vh, 15px); font-weight: 800; line-height: 1.45; }
+.lg-bd-eff { flex: 0 0 auto; display: flex; flex-wrap: wrap; gap: 4px; }
+.lg-bd-chip {
+  display: inline-flex; align-items: baseline; gap: 4px;
+  padding: 2px 7px; border-radius: 16px;
+  border: 1px solid var(--lg-line); background: var(--se-panel-2);
+  font-size: clamp(9px, 1.5vh, 11px); white-space: nowrap;
+}
+.lg-bd-chip i { font-style: normal; font-weight: 800; color: var(--lg-text-mute); }
+.lg-bd-chip b { font-weight: 900; color: var(--lg-text-dim); }
+.lg-bd-chip.up { border-color: rgba(46, 204, 113, .4); background: rgba(46, 204, 113, .14); }
+.lg-bd-chip.up b { color: var(--lg-good); }
+.lg-bd-chip.dn { border-color: rgba(231, 76, 60, .4); background: rgba(231, 76, 60, .14); }
+.lg-bd-chip.dn b { color: var(--lg-bad); }
+.lg-bd-note {
+  flex: 0 0 auto;
+  /* ★ 2行ぶんを常に確保する。文の長さでカードごとに丈が変わると、上のチップ行の
+   *   高さが揃わず「横に並べて比べる」という画面の目的が崩れる。 */
+  min-height: calc(1.45em * 2);
+  font-size: clamp(9.5px, 1.6vh, 12px); font-weight: 600; line-height: 1.45;
+  color: var(--lg-text-dim);
+}
+
+/* 背の低い横持ち＝絵を削って選択肢を守る（消える情報は説明文でなく装飾から）。 */
+@media (orientation: landscape) and (max-height: 430px) {
+  .lg-bd-art { height: clamp(46px, 22vh, 120px); }
+}
+/* 縦持ち＝3枚を縦に積む（横3列だと1枚あたりが読めない幅になる）。 */
+@media (orientation: portrait), (max-width: 560px) {
+  .lg-bd-opts { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .lg-bd-opt { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+  .lg-bd-tone { flex: 0 0 100%; }
+  .lg-bd-say { flex: 1 1 100%; }
+  .lg-bd-note { display: none; }
+}
 
 /* =============================================================================
  * 11. アクセシビリティ — 動きを減らす設定を尊重
@@ -2099,7 +2198,6 @@ body.league-mode #screen-home.season-end-mode > #league-body {
 .lg-sh-tile.warn { border-color: #c0392b; }
 .lg-sh-tile.warn .k { color: #ff9a8c; }
 .lg-sh-tile.warn .v { font-size: clamp(11px, 2vh, 15px); }
-.lg-sh-boardwrap { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
 
 /* ── 右：監督ステータス ── */
 .lg-sh-mgrtop { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; }
@@ -3097,17 +3195,6 @@ button.lg-se-award:active { transform: translateY(2px); box-shadow: inset 0 0 0 
   body.league-mode .lg-md-deck { padding: 4px 12px; }
   body.league-mode .lg-md-nav { padding: 5px 12px 6px; }
 
-  /* ボード面談（開幕の目標交渉＝初回プレイ最初の分岐）。3択が全部フォールド下だった。
-   * ハブ中央パネルは 257px しか無く「絵＋3択」を全部入れるのは物理的に無理なので、
-   *   ①絵は幅だけ縮める（16:5 は保つ＝スロットの形は実アセットと同じまま）
-   *   ②選択肢の余白を詰めて【3つ目が必ず画面に顔を出す】ところまで押し上げる
-   * ＋下端フェード（.is-scrollable）で「まだ下がある」を明示する、の合わせ技にする。
-   * ★ 3つ目が完全に隠れていると存在に気づけない＝少しでも覗いていることが要件。 */
-  .lg-sh-boardwrap .lg-board-art { width: 58%; margin: 0 auto; border-radius: 4px; }
-  .lg-sh-boardwrap .lg-board-opts { gap: 5px; }
-  .lg-sh-boardwrap .lg-board-opt { padding: 6px 10px; }
-  .lg-sh-boardwrap .lg-board-q { margin-bottom: 2px; }
-
   /* A-7 仕上げ: 週3コマのカード。チップを 44→40px に落としてもまだ 30px 溢れるので、
    * 行の上下余白とカード内の余白を詰めて「おまかせ」まで1画面に入れる。 */
   .lg-slotrow { padding: .15em 0; }
@@ -3243,11 +3330,11 @@ button.lg-se-award:active { transform: translateY(2px); box-shadow: inset 0 0 0 
 .lg-se-step > i { font-size: 10.5px; }
 
 /* C-3: スクロール手がかり。横持ちでは内側スクロール領域が「切れているだけ」に見えて
- * 続きの存在に気づけない（分析スタッフ／出場記録／BEST XI／ボード面談の選択肢）。
+ * 続きの存在に気づけない（分析スタッフ／出場記録／BEST XI）。
  * 下端をフェードさせて「まだ下がある」を示す。
  * ★ opt-in（.is-scrollable が付いた時だけ）。JS が実測して付ける＝万一 JS 側が動かなくても
  *   「収まっているのに切れて見える」という新しい誤読を生まない安全側に倒れる。 */
-.lg-rd-scroll.is-scrollable, .lg-sh-boardwrap.is-scrollable, .lg-se-plogwrap.is-scrollable,
+.lg-rd-scroll.is-scrollable, .lg-se-plogwrap.is-scrollable,
 .lg-md-deck.is-scrollable, .bench-list.is-scrollable, .lg-sh-panel.is-scrollable,
 .lg-age-list.is-scrollable {
   -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 24px), transparent 100%);

@@ -3004,38 +3004,91 @@
     _renderHub(false);
   }
 
-  function _boardTalkHTML() {
-    if (!_boardTalkPending()) return '';
-    var g = _ensureSeasonGoal(); if (!g) return '';
+  /* ── BD-01 の面談は「専用の1ページ」（ハブの手前）─────────────────────────
+   * 以前はシーズンハブの中央パネルに畳んでいたが、順位表・監督ステータスと同じ面に
+   * 並ぶと **その季の全部を決める分岐が「画面の一部」に見えて流し読みされる**。
+   * しかも3択が縦スクロールに埋まって3つ目が見えない。約束を交わすのは独立した
+   * ビートなので、1画面まるごとを与える（1画面1ビート）。 */
+  function _boardGoalLabel(t) {
     var n = CLUB_DEFS.length;
-    function goalLabel(t) {
-      t = Math.max(1, Math.min(n - 1, t));
-      return t <= 1 ? _t('優勝', 'the title') : _t(t + '位以内', 'top ' + t);
+    t = Math.max(1, Math.min(n - 1, t));
+    return t <= 1 ? _t('優勝', 'the title') : _t(t + '位以内', 'top ' + t);
+  }
+
+  /* 3択カード。効果は「目標／信頼／人気」の3チップに固定＝カード間で縦位置が揃い、
+   * 何を差し出して何を得るのかが横並びで比較できる（±0 も省略せず必ず出す）。 */
+  function _boardOptHTML(kind, tone, say, note, target) {
+    var d = _boardDef(kind); if (!d) return '';
+    function chip(dir, k, v) {
+      return '<span class="lg-bd-chip ' + dir + '"><i>' + k + '</i><b>' + v + '</b></span>';
     }
-    function opt(kind, ja, en, note) {
-      var d = _boardDef(kind); if (!d) return '';
-      var eff = [];
-      if (d.goal) eff.push(_t('目標→' + goalLabel(g.target + d.goal), 'Target → ' + goalLabel(g.target + d.goal)));
-      if (d.trust) eff.push(_t('信頼', 'Trust') + ' ' + (d.trust > 0 ? '+' : '') + d.trust);
-      if (d.pop) eff.push(_t('人気', 'Pop') + ' ' + (d.pop > 0 ? '+' : '') + d.pop);
-      return '<button type="button" class="lg-board-opt" onclick="leagueBoardTalk(\'' + kind + '\')">' +
-        '<span class="lg-board-say">「' + _t(ja, en) + '」</span>' +
-        '<span class="lg-board-eff">' + (eff.join('　') || note || '') + '</span></button>';
-    }
-    return '<div class="lg-card lg-board">' +
-      '<div class="lg-board-art"><canvas data-labart="boardroom"></canvas></div>' +
-      '<div class="lg-board-fg">' +
-        '<div class="lgp-kicker">' + _t('ボードとの面談', 'MEETING THE BOARD') + '</div>' +
-        '<div class="lg-board-q">' +
-          _t('「今季、我々はあなたに<b>' + goalLabel(g.target) + '</b>を期待している。異論はあるかね？」',
-             '"This season we expect <b>' + goalLabel(g.target) + '</b> from you. Any objection?"') +
+    function sign(v) { return v > 0 ? '+' + v : (v < 0 ? '' + v : '±0'); }
+    function dir(v) { return v > 0 ? 'up' : (v < 0 ? 'dn' : 'flat'); }
+    var eff =
+      chip(d.goal > 0 ? 'dn' : (d.goal < 0 ? 'up' : 'flat'), _t('目標', 'Target'), _boardGoalLabel(target + d.goal)) +
+      chip(dir(d.trust), _t('信頼', 'Trust'), sign(d.trust)) +
+      chip(dir(d.pop), _t('人気', 'Pop'), sign(d.pop));
+    return '<button type="button" class="lg-bd-opt ' + kind + '" onclick="leagueBoardTalk(\'' + kind + '\')">' +
+      '<span class="lg-bd-tone">' + _t(tone[0], tone[1]) + '</span>' +
+      '<span class="lg-bd-say">「' + _t(say[0], say[1]) + '」</span>' +
+      '<span class="lg-bd-eff">' + eff + '</span>' +
+      '<span class="lg-bd-note">' + _t(note[0], note[1]) + '</span>' +
+    '</button>';
+  }
+
+  function _boardPageHTML() {
+    var g = _ensureSeasonGoal(); if (!g) return '';
+    // 並びは「下げる → 受ける → 宣言する」＝左から野心が上がる（横並びの3枚は勾配で読ませる）。
+    var opts =
+      _boardOptHTML('lower',
+        ['守りに入る', 'PLAY IT SAFE'],
+        ['正直、その目標は高すぎます', 'Honestly, that target is too high.'],
+        ['達成は楽になるが、走り出す前に信頼と人気を失う。', 'Easier to hit — but you lose trust and support before a ball is kicked.'],
+        g.target) +
+      _boardOptHTML('accept',
+        ['約束どおり', 'ACCEPT'],
+        ['承知しました。その目標でやります', 'Understood. I accept that target.'],
+        ['増減なし。提示された目標のまま1年を戦う。', 'Nothing moves. You take the season on their terms.'],
+        g.target) +
+      _boardOptHTML('raise',
+        ['打って出る', 'RAISE THE BAR'],
+        ['それでは物足りない。もっと上を狙います', "That's not enough. We'll aim higher."],
+        ['いま支持を得られるが、未達なら落差はそのまま跳ね返る。', 'Support now — but if you fall short, the drop is yours to wear.'],
+        g.target);
+
+    return '<section class="lg-se-zone lg-se-wide lg-bd">' +
+      '<div class="lg-bd-art"><canvas data-labart="boardroom"></canvas></div>' +
+      '<div class="lg-bd-say-wrap">' +
+        '<span class="lg-bd-who">' + _t('会長', 'Chairman') + '</span>' +
+        '<p class="lg-bd-q">' +
+          _t('「今季、我々はあなたに<b>' + _boardGoalLabel(g.target) + '</b>を期待している。異論はあるかね？」',
+             '"This season we expect <b>' + _boardGoalLabel(g.target) + '</b> from you. Any objection?"') +
+        '</p>' +
+      '</div>' +
+      '<div class="lg-bd-opts">' + opts + '</div>' +
+    '</section>';
+  }
+
+  /* 面談ページ。枠は最終話／シーズン前と同じ固定フレームを流用する（新しい枠を作らない）。
+   * ★ 出口は3択そのもの＝「戻る」「次へ」は置かない（決めるまでハブに入れない）。 */
+  function _renderBoardTalk() {
+    _ensureStyle();
+    var myId = _state.myClub, def = _clubDef(myId);
+    var head = '<header class="lg-se-top">' +
+      '<div class="lg-se-brand">' +
+        '<span class="lg-se-emblem">🏛</span>' +
+        '<div class="lg-se-brandtx">' +
+          '<h1 class="lg-se-h1">' + _t('ボードとの面談', 'Meeting the board') + '</h1>' +
+          '<span class="lg-se-hsub">' + def.crest + ' ' + _clubName(myId) +
+            ' · Season ' + (_state.season || 1) + ' · ' + _t('開幕前', 'Before kick-off') + '</span>' +
         '</div>' +
-        '<div class="lg-board-opts">' +
-          opt('accept', '承知しました。その目標でやります', 'Understood. I accept that target.') +
-          opt('lower', '正直、その目標は高すぎます', 'Honestly, that target is too high.') +
-          opt('raise', 'それでは物足りない。もっと上を狙います', "That's not enough. We'll aim higher.") +
-        '</div>' +
-      '</div></div>';
+      '</div>' +
+      '<nav class="lg-se-steps"><span class="lg-se-step on"><i>◆</i>' +
+        _t('就任の約束', 'The promise') + '</span></nav>' +
+    '</header>';
+    var hint = '<span class="lg-se-nb mid">' +
+      _t('※ この約束はシーズン末に評価される', 'This promise is judged at the end of the season') + '</span>';
+    _finPaint2('lg-bd-page', head, _boardPageHTML(), _finNavHTML(null, null, '', '', hint));
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
@@ -5208,8 +5261,14 @@
 
   /* ページ枠を組んで描く（全ページ共通の出口＝描画後処理を1か所に閉じる）。 */
   function _finPaint(kind, idx, won, sacked, bodyHTML, navHTML) {
-    _body().innerHTML = '<div class="lg-se lg-se-paged' + (won ? ' won' : '') + (sacked ? ' sacked' : '') + '">' +
-      _finHeadHTML(kind, idx, won) +
+    _finPaint2((won ? ' won' : '') + (sacked ? ' sacked' : ''),
+      _finHeadHTML(kind, idx, won), bodyHTML, navHTML);
+  }
+
+  /* 同じ固定フレームを、独自ヘッダーのページ（BD-01 面談など）からも使うための下地。 */
+  function _finPaint2(extraCls, headHTML, bodyHTML, navHTML) {
+    _body().innerHTML = '<div class="lg-se lg-se-paged ' + (extraCls || '') + '">' +
+      headHTML +
       '<div class="lg-se-page">' + bodyHTML + '</div>' +
       navHTML +
     '</div>';
@@ -5981,14 +6040,9 @@
     }).join('') + '</div>';
   }
 
-  /* 中央：次の試合（NEXT MATCH ＋ 対戦相手スカウティング）。開幕はボード面談を出す。 */
+  /* 中央：次の試合（NEXT MATCH ＋ 対戦相手スカウティング）。
+   * ★ 開幕のボード面談はここには出さない＝ハブの手前の専用ページ（_renderBoardTalk）。 */
   function _shMatchPanel(myId) {
-    if (_boardTalkPending()) {
-      return '<section class="lg-sh-panel lg-sh-match board">' +
-        '<div class="lg-sh-ph">' + _t('ボードとの面談', 'Board meeting') + '</div>' +
-        '<div class="lg-sh-boardwrap">' + _boardTalkHTML() + '</div>' +
-      '</section>';
-    }
     var fx = _myFixtureThisRound();
     if (!fx) {
       return '<section class="lg-sh-panel lg-sh-match">' +
@@ -6059,10 +6113,9 @@
       : '';
     // ★ 画像枠。監督の顔絵はまだ無いのでブランクのまま寸法だけ確保する。
     var face = '<div class="lg-sh-face lg-sh-slot" aria-hidden="true"></div>';
-    var cta = _boardTalkPending()
-      ? '<div class="lg-sh-cta disabled">' + _t('まず会長と話す', 'Talk to the board first') + '</div>'
-      : '<button type="button" class="lg-sh-cta" onclick="leagueRoundView(\'prep\')">' +
-          '⚽ ' + _t('次へ：練習メニュー', 'Next: Training') + '</button>';
+    // 面談は手前のページで必ず済んでいる（ハブはその後にしか描かれない）＝常に本線のCTA。
+    var cta = '<button type="button" class="lg-sh-cta" onclick="leagueRoundView(\'prep\')">' +
+      '⚽ ' + _t('次へ：練習メニュー', 'Next: Training') + '</button>';
     // MTG1-#5: 推しの1行（oshi.js 非同梱/キルOFFなら空文字＝従来の見た目のまま）
     var oshiRow = (typeof oshiHubRow === 'function') ? oshiHubRow() : '';
     return '<section class="lg-sh-panel lg-sh-mgr">' +
@@ -6132,6 +6185,8 @@
     _seasonEndMode(false);
     // MTG1-#3: デイリーレール。節の初回だけ「朝刊」を挟む（rail.js 未搭載/キルOFFなら false）
     if (typeof Rail !== 'undefined' && Rail.intercept && Rail.intercept()) return;
+    // BD-01: 開幕の面談はハブの手前の独立ページ。決めるまでハブへ入れない。
+    if (_boardTalkPending()) { _renderBoardTalk(); return; }
 
     var myId = _state.myClub;
     var myDef = _clubDef(myId);
@@ -6171,7 +6226,7 @@
    * 気づけない（分析スタッフ／出場記録／ボード面談の3択／BEST XI）。下端フェードを
    * CSS に持たせ、ここで実測して .is-scrollable を付け外しする。
    * ★ 収まっている面にフェードを出すと逆に「切れている」と誤読させるので必ず実測する。 */
-  var _SCROLLHINT_SEL = '.lg-rd-scroll, .lg-sh-boardwrap, .lg-se-plogwrap, .lg-md-deck,' +
+  var _SCROLLHINT_SEL = '.lg-rd-scroll, .lg-se-plogwrap, .lg-md-deck,' +
                         ' .bench-list, .lg-sh-panel, .lg-age-list';   // lg-age-list = SN-08a オフの変化
   var _hintQueued = false;
 

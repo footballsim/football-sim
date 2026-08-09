@@ -190,6 +190,7 @@
     _mvCtrl = createMatch(team1Data, team2Data, { home: team1State, away: team2State });
     _managerMode = true;
     _mvGoalShown = false;
+    _mvClearNote();   // 前の試合の保留行を持ち越さない
     _mvPlaying = false;
     _mvSpeedIdx = 0;
     _mvLastKind = 'manual';
@@ -298,6 +299,27 @@
   // 無言フリーズ（再現条件未特定）が再発しても、ユーザーは ▶ で再開でき、原因が
   // window._mvLastError / コンソールに残る。
   var _mvProgKey = '';
+  /* ゴール演出が終わるまで伏せておく実況ノート（MTG1-#1 の⭐🗣）。1ビートに1本しか出ない。
+   * ★ 出し直しはタイマーで持つ＝ゴールのビートは HT停止/交代カット など複数の分岐で
+   *   早期 return しうるので、「どの分岐を通ったか」に依存させない。 */
+  var _MV_GOAL_HOLD = 3300;   // ゴール演出＋余韻（自動再生の停止時間と同じ尺）
+  var _mvNotePending = null;
+  var _mvNoteTimer = null;
+  function _mvHoldNote(msg) {
+    _mvClearNote();
+    _mvNotePending = msg;
+    _mvNoteTimer = setTimeout(_mvFlushNote, _MV_GOAL_HOLD);
+  }
+  function _mvFlushNote() {
+    _mvNoteTimer = null;
+    var m = _mvNotePending; _mvNotePending = null;
+    if (!m || !_managerMode) return;
+    _mvLiveNote(m, 'mine');
+  }
+  function _mvClearNote() {
+    if (_mvNoteTimer) { clearTimeout(_mvNoteTimer); _mvNoteTimer = null; }
+    _mvNotePending = null;
+  }
   var _mvStallCount = 0;
   var _MV_STALL_LIMIT = 10;   // 10ティック連続無進行で異常とみなす（HT/ゴール停止はタイマー停止なので誤検知しない）
 
@@ -350,8 +372,16 @@
     // MTG1-#1: 決定的に効いた瞬間の一行メッセージ（attribution.js 非同梱/キルOFFは no-op・1試合最大3回）
     //   MTG1案1(2026-08-05): 表示先をトースト→実況ノート（⭐🗣＝自チームに良い出来事＝tone 'mine'）。
     //   attributionOnBeat のシグネチャは不変＝sink 関数の差し替えのみ。
-    if (typeof attributionOnBeat === 'function') {
-      attributionOnBeat(_abC, _abS, function (m) { _mvLiveNote(m, 'mine'); });
+    //   ★ 出すタイミング（2026-08-10 修正）: 文面が「— ゴール！」と結果を含むので、
+    //     ①分割シュートの途中ビート（まだ蹴っている最中）では判定させない＝_shootSubStep===0
+    //       ＝シーンの結果打だけを見る。②結果打であっても、ゴール演出の前に出すと
+    //       カットシーンが動く前にテキストで結果が割れる（実測・添付スクショ）。
+    //     ゴールのビートは行を積まずに保留し、演出が終わってから出す（_mvFlushNote）。
+    if (typeof attributionOnBeat === 'function' && _shootSubStep === 0) {
+      attributionOnBeat(_abC, _abS, function (m) {
+        if (_mvGoalShown) _mvHoldNote(m);          // ゴール演出の後まで伏せる
+        else _mvLiveNote(m, 'mine');
+      });
     }
     // MTG1-#2 ドラマスコア×ティア演出: いま表示したビートを採点し FX を帯内に重ねる（表示のみ・エンジン不変）。
     //   nextChance 後に _shootSubStep===0 ＝ このビートがシーンの結果打（分割シュートの最終ビート）。
@@ -385,12 +415,13 @@
       _mvPause();
       setTimeout(function () {
         if (!_managerMode) return;
+        // ※ MTG1-#1 の一行（⭐🗣）は _mvHoldNote のタイマーが同じ尺で出す（ここでは触らない）。
         // 失点シーンの“後”に発動カットイン＋トースト → 交代カット → 続行（時系列＝失点→発動）。
         _mvPlaySkillCutscenes(function () {
           if (!_managerMode) return;
           _mvPlaySubCutscenes(function () { _mvResume(); });
         });
-      }, 3300);
+      }, _MV_GOAL_HOLD);
       return;
     }
 
