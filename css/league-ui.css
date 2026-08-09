@@ -45,6 +45,17 @@
   --lg-paper: #f4efe2;
   --lg-ink: #14110b;
 
+  /* ライン色（GK/DF/MF/FW のポジションチップ）＝布陣設定と要注意プレイヤーで共有する。
+     色は「役割」なので個別画面に散らさずここ1か所で決める（MD-04d で切り出し）。 */
+  --lg-pos-gk: #e05555;
+  --lg-pos-df: #4a9df0;
+  --lg-pos-mf: #53c06a;
+  --lg-pos-fw: #f0b429;
+
+  /* 芝（限定色のフラットな縞・ツヤ無し）＝布陣設定と要注意プレイヤーで同じピッチに見せる */
+  --lg-turf-1: #1d5232;
+  --lg-turf-2: #1a4a2d;
+
   /* 形 */
   --lg-r-s: 8px;
   --lg-r-m: 12px;
@@ -2266,7 +2277,7 @@ body.league-mode #screen-home.season-end-mode > #league-body {
   /* ピッチ＝限定色のフラットな芝（ツヤ無し）。ラインは白の細罫のまま活かす。 */
   body.league-mode #screen-setting.league-prep .field-container {
     border: 2px solid var(--lg-line); border-radius: 4px; overflow: hidden;
-    background: repeating-linear-gradient(0deg, #1d5232 0 14px, #1a4a2d 14px 28px);
+    background: repeating-linear-gradient(0deg, var(--lg-turf-1) 0 14px, var(--lg-turf-2) 14px 28px);
   }
   /* MD-04b: 凡例とドラッグヒントはモック準拠で出さない（!バッジ＋数字の減衰で読める） */
   body.league-mode #screen-setting.league-prep .oop-legend,
@@ -2359,10 +2370,10 @@ body.league-mode #screen-setting.league-prep .lgp-chip {
   padding: 0 3px; border-radius: 2px;
   font-size: clamp(7px, 2.2cqw, 9px); font-weight: 900; color: #0b1020; line-height: 1.5;
 }
-body.league-mode #screen-setting.league-prep .lgp-chip.gk { background: #e05555; }
-body.league-mode #screen-setting.league-prep .lgp-chip.df { background: #4a9df0; }
-body.league-mode #screen-setting.league-prep .lgp-chip.mf { background: #53c06a; }
-body.league-mode #screen-setting.league-prep .lgp-chip.fw { background: #f0b429; }
+body.league-mode #screen-setting.league-prep .lgp-chip.gk { background: var(--lg-pos-gk); }
+body.league-mode #screen-setting.league-prep .lgp-chip.df { background: var(--lg-pos-df); }
+body.league-mode #screen-setting.league-prep .lgp-chip.mf { background: var(--lg-pos-mf); }
+body.league-mode #screen-setting.league-prep .lgp-chip.fw { background: var(--lg-pos-fw); }
 body.league-mode #screen-setting.league-prep .lgp-val {
   font-size: clamp(10px, 3cqw, 13px); font-weight: 900; color: #fff;
   font-feature-settings: "tnum" 1; line-height: 1.2;
@@ -2467,18 +2478,25 @@ body.league-mode #screen-setting.league-prep .field-container { position: relati
  * （横持ちの並べ方だけが上の @media landscape 側）。
  * ★ すべて `.league-prep` スコープ＝シングル/W杯には一切波及しない。
  * ========================================================================== */
-body.league-mode #screen-setting.league-prep {
+/* ★ 面の変数は body.league-mode に置く＝布陣設定（.league-prep）と
+   要注意プレイヤー（.league-marked）が同じ段差・同じ縁を共有する（MD-04d）。 */
+body.league-mode {
   --pr-edge: rgba(0, 0, 0, .5);
   --pr-panel: rgba(255, 255, 255, .05);
 }
 /* ヘッダーは全向きで畳む。戻る/主ボタンは下部コマンドバーに一本化する＝
    同じ操作のボタンが画面に2つ並ばない（試合中は manager-match.js 側も挿さない）。 */
-body.league-mode #screen-setting.league-prep .screen-header { display: none; }
+body.league-mode #screen-setting.league-prep .screen-header,
+body.league-mode #screen-marked.league-marked .screen-header { display: none; }
 
-/* ── 下部コマンドバー（基底）── */
+/* ── 下部コマンドバー（基底）──
+   ★ セレクタは **部品クラス自身**（.lg-prep-cmd / .lg-prep-nb）で取る。この2クラスは
+     league.js の装飾が付ける時だけ存在する＝シングル/W杯には最初から出現しないので、
+     画面IDでスコープを切る必要がない。こうしておくと同じバーを他の選択画面
+     （要注意プレイヤー＝MD-04d／将来のキャプテン・キープレイヤー）で再利用できる。 */
 /* 縦持ち＝この画面は縦に長くスクロールする（3ゾーンは横持ち専用）。ヘッダーを畳んだぶん
    主ボタンが画面外に落ちないよう、バーを最下部に貼り付ける＝どこまで送っても戻れる。 */
-body.league-mode #screen-setting.league-prep .lg-prep-cmd {
+body.league-mode .lg-prep-cmd {
   display: grid; gap: var(--lg-pad-s);
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   margin-top: var(--lg-pad-m);
@@ -2487,9 +2505,9 @@ body.league-mode #screen-setting.league-prep .lg-prep-cmd {
   background: linear-gradient(180deg, rgba(10, 23, 48, 0) 0%, rgba(10, 23, 48, .92) 34%);
 }
 /* 縦持ち＝主ボタンは行いっぱいで最下段（親指の届く位置に大きく置く） */
-body.league-mode #screen-setting.league-prep .lg-prep-nb.kick { grid-column: 1 / -1; }
+body.league-mode .lg-prep-nb.kick { grid-column: 1 / -1; }
 
-body.league-mode #screen-setting.league-prep .lg-prep-nb {
+body.league-mode .lg-prep-nb {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--lg-pad-s);
   min-height: clamp(44px, 6.4vh, 48px); padding: 6px 14px; cursor: pointer;
   border-radius: 5px; border: 2px solid var(--lg-line);
@@ -2499,12 +2517,12 @@ body.league-mode #screen-setting.league-prep .lg-prep-nb {
   font-family: inherit;
   box-shadow: 0 3px 0 var(--pr-edge); transition: transform .08s ease, box-shadow .08s ease;
 }
-body.league-mode #screen-setting.league-prep .lg-prep-nb:active {
+body.league-mode .lg-prep-nb:active {
   transform: translateY(2px); box-shadow: 0 1px 0 var(--pr-edge);
 }
-body.league-mode #screen-setting.league-prep .lg-prep-nb.auto { color: var(--lg-text); }
-body.league-mode #screen-setting.league-prep .lg-prep-nb.auto:hover { border-color: var(--lg-gold-2); }
-body.league-mode #screen-setting.league-prep .lg-prep-nb.kick {
+body.league-mode .lg-prep-nb.auto { color: var(--lg-text); }
+body.league-mode .lg-prep-nb.auto:hover { border-color: var(--lg-gold-2); }
+body.league-mode .lg-prep-nb.kick {
   color: var(--lg-ink); border-color: var(--lg-gold);
   background: linear-gradient(165deg, var(--lg-gold), var(--lg-gold-2));
   font-size: clamp(14px, 2.8vh, 20px); letter-spacing: 2px;
@@ -2582,6 +2600,305 @@ body.league-mode #screen-setting.league-prep #mv-injury-banner {
   body.league-mode #screen-setting.league-prep .lg-prep-subs {
     min-height: clamp(40px, 6.4vh, 48px);
   }
+}
+
+/* ==========================================================================
+ * MD-04d — 要注意プレイヤー選択（#screen-marked）の3ゾーン化
+ * （2026-08-08 ユーザー指示「ここもUIが古いので、スタメン変更画面と同様のUIに」）
+ * --------------------------------------------------------------------------
+ * 構図（横持ち）:  左＝相手XIのカードリスト ／ 中央＝相手ピッチ（主役）／
+ *                 右＝マーク中・効果・相手の布陣 ／ 最下段＝コマンドバー
+ * MD-04（試合前の布陣設定）と **同じ骨格・同じ枠・同じ余白ステップ**で組む
+ * （列比 .95/1.55/.8・row/column gap・パネルの金二重罫・下部バーの3枠）。
+ * ★ #screen-marked はシングル/W杯と共有の画面。必ず `.league-marked`
+ *   （league.js の leagueDecorateMarked がリーグ中だけ付ける）でスコープする。
+ * ========================================================================== */
+body.league-mode #screen-marked.league-marked {
+  position: relative;
+  background: linear-gradient(165deg, #0a1730, #0d2246 55%, #0a1930);
+  color: var(--lg-text);
+}
+/* 薄い CRT スキャンライン（布陣設定と同じ質感＝画面をまたいでも同じ世界に見える） */
+body.league-mode #screen-marked.league-marked::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 30;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .10) 0 1px, transparent 1px 3px);
+  opacity: .28; mix-blend-mode: overlay;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.league-mode #screen-marked.league-marked::after { opacity: .14; }
+}
+
+/* ── 器（縦持ち＝1カラムの読み順: ピッチ → 状況/効果 → リスト、バーは最下部に固定）── */
+body.league-mode #screen-marked.league-marked .setting-content {
+  display: flex; flex-direction: column;
+  gap: var(--lg-pad-m);
+  padding: var(--lg-pad-m) var(--lg-pad-m) 0;
+}
+
+/* ── パネル（金の二重罫＋段差）＝布陣設定の .field-panel / .bench-panel と同じ質感 ── */
+body.league-mode #screen-marked.league-marked .lgm-left,
+body.league-mode #screen-marked.league-marked .lgm-mid,
+body.league-mode #screen-marked.league-marked .lgm-cur,
+body.league-mode #screen-marked.league-marked .lgm-panel {
+  padding: clamp(7px, 1.4vh, 11px);
+  border: 2px solid var(--lg-gold-2); border-radius: 5px;
+  background: linear-gradient(165deg, var(--lg-bg-1), var(--lg-bg-2));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 3px 0 var(--pr-edge);
+}
+/* 右ゾーンは「パネルの入れ物」＝それ自体は素通し（枠の二重掛けを作らない） */
+body.league-mode #screen-marked.league-marked .lgm-right {
+  display: flex; flex-direction: column; gap: clamp(7px, 1.4vh, 12px); min-height: 0;
+}
+
+/* ゾーン見出し（overline＋補助情報の1行）＝控え棚のラベルと同じ段 */
+body.league-mode #screen-marked.league-marked .lgm-zhead {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--lg-pad-s);
+  margin-bottom: var(--lg-pad-s);
+}
+body.league-mode #screen-marked.league-marked .lgm-zttl {
+  color: var(--lg-gold); font-size: 10px; font-weight: 900; letter-spacing: 2px;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+body.league-mode #screen-marked.league-marked .lgm-zhint,
+body.league-mode #screen-marked.league-marked .lgm-zcount {
+  flex: 0 0 auto; color: var(--lg-text-mute); font-size: 10px; font-weight: 700; white-space: nowrap;
+}
+
+/* ── 共通の小部品（ポジションチップ／総合値）＝布陣設定の .lgp-chip / .lgp-val と同値 ── */
+body.league-mode #screen-marked.league-marked .lgm-chip {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  padding: 0 3px; border-radius: 2px;
+  font-size: 9px; font-weight: 900; color: var(--lg-ink); line-height: 1.5;
+}
+body.league-mode #screen-marked.league-marked .lgm-chip.gk { background: var(--lg-pos-gk); }
+body.league-mode #screen-marked.league-marked .lgm-chip.df { background: var(--lg-pos-df); }
+body.league-mode #screen-marked.league-marked .lgm-chip.mf { background: var(--lg-pos-mf); }
+body.league-mode #screen-marked.league-marked .lgm-chip.fw { background: var(--lg-pos-fw); }
+body.league-mode #screen-marked.league-marked .lgm-val {
+  flex: 0 0 auto; color: var(--lg-text); font-size: 13px; font-weight: 900;
+  font-feature-settings: "tnum" 1; line-height: 1.2;
+}
+
+/* ── 中央ゾーン＝相手ピッチ（主役）────────────────────────── */
+body.league-mode #screen-marked.league-marked .lgm-mid {
+  display: flex; flex-direction: column; min-height: 0;
+}
+body.league-mode #screen-marked.league-marked .marked-field {
+  flex: 0 0 auto; width: 100%; aspect-ratio: 100 / 118;
+  margin: 0 !important; border-radius: 4px; overflow: hidden;
+  container-type: inline-size;   /* 選手カードの寸法の基準（布陣設定の field-container と同じ） */
+}
+body.league-mode #screen-marked.league-marked .marked-field > div {
+  height: 100%;
+  border: 2px solid var(--lg-line) !important; border-radius: 4px !important;
+  background: repeating-linear-gradient(0deg, var(--lg-turf-1) 0 14px, var(--lg-turf-2) 14px 28px) !important;
+}
+body.league-mode #screen-marked.league-marked .marked-field svg { height: 100%; }
+
+/* 選手ドット → ミニカード（MD-04b と同じ作法） */
+body.league-mode #screen-marked.league-marked .lgm-card {
+  position: relative;
+  display: flex; flex-direction: column; align-items: stretch;
+  width: clamp(44px, 13.2cqw, 58px);
+  padding: 1px 3px;
+  border: 1.5px solid rgba(255, 255, 255, .45); border-radius: 3px;
+  background: var(--lg-bg-2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .55);
+}
+body.league-mode #screen-marked.league-marked .lgm-ctop {
+  display: flex; align-items: center; justify-content: space-between; gap: 2px; white-space: nowrap;
+}
+body.league-mode #screen-marked.league-marked .lgm-card .lgm-chip { font-size: clamp(7px, 2.2cqw, 9px); }
+body.league-mode #screen-marked.league-marked .lgm-card .lgm-val { font-size: clamp(10px, 3cqw, 13px); }
+body.league-mode #screen-marked.league-marked .lgm-head {
+  display: block; margin: 0 auto;
+  width: clamp(14px, 4.8cqw, 21px); height: clamp(14px, 4.8cqw, 21px);
+  image-rendering: pixelated;
+}
+/* ★ 行間が狭い布陣（CF と OMF が縦に重なる 4-2-3-1 等）でも名前が隠れないよう、
+   カードは「1行＋顔」の最小の高さに保つ（実測で1段小さくしないと重なった）。 */
+body.league-mode #screen-marked.league-marked .lgm-cname {
+  margin-top: 0; max-width: clamp(40px, 15cqw, 66px);
+  color: var(--lg-text); font-size: clamp(6px, 2.8cqw, 9.5px); font-weight: 700; text-align: center;
+  line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .9);
+}
+/* 選択中＝赤の輪郭＋🎯（旧UIの黄色縁の思想を、要注意＝赤で言い直す） */
+body.league-mode #screen-marked.league-marked .lgm-card.is-marked {
+  border-color: var(--lg-accent);
+  box-shadow: 0 0 0 2px rgba(232, 67, 59, .45), 0 2px 6px rgba(0, 0, 0, .55);
+}
+body.league-mode #screen-marked.league-marked .lgm-tgt {
+  position: absolute; top: -7px; right: -7px; font-size: 12px; line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .85));
+}
+/* GK は指定できない＝沈める（クリック無視は simulate.js 側の onclick ガードが正本） */
+body.league-mode #screen-marked.league-marked .lgm-card.is-gk { opacity: .42; filter: grayscale(.65); }
+
+/* ── 左ゾーン＝相手XIのカードリスト（控え棚と同じ行の作法）───────────── */
+body.league-mode #screen-marked.league-marked .lgm-left {
+  display: flex; flex-direction: column; min-height: 0;
+}
+body.league-mode #screen-marked.league-marked .lgm-rows {
+  display: flex; flex-direction: column; gap: clamp(4px, 0.9vh, 7px);
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 3px;
+}
+body.league-mode #screen-marked.league-marked .lgm-row {
+  display: flex; align-items: center; gap: 6px; flex: 0 0 auto;
+  min-height: 30px; padding: 3px 6px; cursor: pointer;
+  border: 1.5px solid var(--lg-line); border-radius: 4px;
+  background: var(--pr-panel); color: var(--lg-text);
+  transition: background var(--lg-t-fast) var(--lg-ease);
+}
+body.league-mode #screen-marked.league-marked .lgm-row:hover { background: var(--lg-surface-2); }
+body.league-mode #screen-marked.league-marked .lgm-row:active { background: var(--lg-surface-3); }
+body.league-mode #screen-marked.league-marked .lgm-rhead {
+  display: block; width: 20px; height: 20px; flex: 0 0 auto; image-rendering: pixelated;
+}
+body.league-mode #screen-marked.league-marked .lgm-rname {
+  flex: 1 1 auto; min-width: 0; text-align: left;
+  color: var(--lg-text-dim); font-size: 11px; font-weight: 800;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+body.league-mode #screen-marked.league-marked .lgm-rna {
+  flex: 0 0 auto; color: var(--lg-text-faint); font-size: 9px; font-weight: 700; white-space: nowrap;
+}
+body.league-mode #screen-marked.league-marked .lgm-rtgt { flex: 0 0 auto; font-size: 12px; line-height: 1; }
+body.league-mode #screen-marked.league-marked .lgm-row.is-marked {
+  border-color: var(--lg-accent);
+  background: rgba(232, 67, 59, .16);
+  box-shadow: inset 3px 0 0 var(--lg-accent);
+}
+body.league-mode #screen-marked.league-marked .lgm-row.is-marked .lgm-rname { color: var(--lg-text); }
+body.league-mode #screen-marked.league-marked .lgm-row.is-gk {
+  opacity: .42; filter: grayscale(.6); pointer-events: none; cursor: default;
+}
+
+/* ── 右ゾーン① マーク中（状態の読み。布陣設定の「スタメン総合力」と同じ位置・同じ格）── */
+body.league-mode #screen-marked.league-marked .lgm-cur { text-align: center; }
+body.league-mode #screen-marked.league-marked .lgm-lab {
+  color: var(--lg-gold); font-size: 9px; font-weight: 900; letter-spacing: 1.5px;
+}
+body.league-mode #screen-marked.league-marked .lgm-cur-name {
+  margin-top: 2px; color: var(--lg-text);
+  font-size: clamp(13px, 2.6vh, 18px); font-weight: 900; line-height: 1.25;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+body.league-mode #screen-marked.league-marked .lgm-cur.is-none .lgm-cur-name { color: var(--lg-text-mute); }
+body.league-mode #screen-marked.league-marked .lgm-cur-sub {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 4px; min-height: 15px;
+}
+body.league-mode #screen-marked.league-marked .lgm-dash { color: var(--lg-text-faint); font-weight: 800; }
+
+/* ── 右ゾーン② 効果（−15% を主役に・説明文は既存 i18n をそのまま置く）── */
+body.league-mode #screen-marked.league-marked .lgm-eff {
+  display: flex; flex-direction: column; justify-content: center; text-align: center;
+}
+body.league-mode #screen-marked.league-marked .lgm-eff-num {
+  margin-top: 2px; color: var(--lg-accent);
+  font-size: clamp(26px, 8vh, 38px); font-weight: 900; line-height: 1.1;
+  font-feature-settings: "tnum" 1;
+}
+body.league-mode #screen-marked.league-marked .lgm-eff-num i {
+  font-style: normal; font-size: .55em; margin-left: 1px;
+}
+body.league-mode #screen-marked.league-marked .lgm-eff-cap {
+  color: var(--lg-text-mute); font-size: 9px; font-weight: 800; letter-spacing: 1px;
+}
+body.league-mode #screen-marked.league-marked .lgm-eff-txt {
+  margin: var(--lg-pad-s) 0 0; padding-top: var(--lg-pad-s);
+  border-top: 1px solid var(--lg-line-soft);
+  color: var(--lg-text-dim); font-size: clamp(10px, 1.9vh, 12px); line-height: 1.6; text-align: left;
+}
+/* GK がグレーで並ぶ理由をその場で説明する（凡例を別に置かずに済ませる） */
+body.league-mode #screen-marked.league-marked .lgm-eff-note {
+  display: block; margin-top: 4px;
+  color: var(--lg-text-mute); font-size: 10px; font-weight: 700; line-height: 1.5;
+}
+
+/* ── 右ゾーン③ 相手の布陣（ラベル左・値右の1行＝布陣設定の .setting-nav-btn と同じ組版）── */
+body.league-mode #screen-marked.league-marked .lgm-kv {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 6px; padding: 4px 0;
+}
+body.league-mode #screen-marked.league-marked .lgm-kv + .lgm-kv { border-top: 1px solid var(--lg-line-soft); }
+body.league-mode #screen-marked.league-marked .lgm-kv .k {
+  flex: 0 0 auto; color: var(--lg-gold); font-size: 9px; font-weight: 900; letter-spacing: 1.2px;
+}
+body.league-mode #screen-marked.league-marked .lgm-kv .v {
+  min-width: 0; color: var(--lg-text); font-size: clamp(11px, 2.1vh, 15px); font-weight: 900;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* 「指定なし」は元ノード（div）を下部バーへ移設して使う＝ボタンと同じ触感に揃える。
+   いまが「指定なし」のときは押し込まれた状態に見せる（金＝主ボタンとは色で競合させない）。 */
+body.league-mode #screen-marked.league-marked .lg-prep-nb.is-on {
+  border-color: var(--lg-text-mute); background: var(--lg-surface-2); color: var(--lg-text);
+}
+
+/* ── 横持ち＝3ゾーン＋最下段バー（布陣設定と同じ列比・同じ間隔で刻む）───── */
+@media (orientation: landscape) {
+  /* 画面自体を枠の高さに閉じる（3ゾーンは「1画面に収まる」ことが前提）。
+     ★ #screen-setting は style.css の league ブロックで同じ処置がしてある。共有画面なので
+       ここでも `.league-marked` が付いている時だけに限定する。 */
+  body.league-mode #screen-marked.league-marked.active {
+    height: 100%; min-height: 0; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  body.league-mode #screen-marked.league-marked .setting-content {
+    flex: 1 1 auto; min-height: 0; width: 100%; overflow: hidden;
+    display: grid; max-width: none;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.55fr) minmax(0, 0.8fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-content: stretch;
+    row-gap: clamp(6px, 1.2vh, 10px);
+    column-gap: clamp(8px, 1.2vw, 14px);
+    padding: clamp(8px, 1.8vh, 13px) clamp(10px, 1.6vw, 16px) clamp(9px, 1.8vh, 13px);
+  }
+  body.league-mode #screen-marked.league-marked .lgm-left  { grid-column: 1; grid-row: 1; }
+  body.league-mode #screen-marked.league-marked .lgm-mid   { grid-column: 2; grid-row: 1; }
+  body.league-mode #screen-marked.league-marked .lgm-right { grid-column: 3; grid-row: 1; }
+  /* ピッチはパネルいっぱい（縦の余りを主役が吸う＝中央に暗い空きを作らない） */
+  body.league-mode #screen-marked.league-marked .marked-field {
+    aspect-ratio: auto; flex: 1 1 auto; min-height: 0;
+  }
+  /* 右カラムの余りは「効果」カードが吸う＝下端に意味のない暗い空きを残さない。
+     ★ 伸びるのは効果カードだけ（min-height:0 + overflow:hidden）。こうしておくと
+       英語で説明文が1行増えても、下の「相手の布陣」を列の外へ押し出さない。 */
+  body.league-mode #screen-marked.league-marked .lgm-right { overflow: hidden; }
+  body.league-mode #screen-marked.league-marked .lgm-cur,
+  body.league-mode #screen-marked.league-marked .lgm-opp { flex: 0 0 auto; }
+  body.league-mode #screen-marked.league-marked .lgm-eff {
+    flex: 1 1 auto; min-height: 0; overflow: hidden;
+  }
+  /* 下部バー＝［戻る］［指定なし］［決定］。主ボタンは右端・最大（布陣設定と同じ位置） */
+  body.league-mode #screen-marked.league-marked .lgm-cmd {
+    grid-column: 1 / -1; grid-row: 2; margin-top: 0;
+    position: static; padding: 0; background: none;
+    gap: clamp(8px, 1.2vw, 14px);
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1fr) minmax(0, 2fr);
+  }
+  body.league-mode #screen-marked.league-marked .lgm-cmd .lg-prep-nb.kick { grid-column: auto; }
+}
+
+/* 縦が短い横持ち（実機スマホ 844×390 等）＝行と字送りを詰めて 3枚のカードを1列に収める。
+   ★ 日本語で「ぎりぎり収まる」設計にすると英語（説明文が1行増える）で溢れる。
+     ここは英語基準で詰める＝両言語とも下端に余裕が残る。 */
+@media (orientation: landscape) and (max-height: 560px) {
+  body.league-mode #screen-marked.league-marked .lgm-row { min-height: 26px; padding: 2px 5px; gap: 4px; }
+  body.league-mode #screen-marked.league-marked .lgm-rname { font-size: 10px; }
+  body.league-mode #screen-marked.league-marked .lgm-rhead { width: 18px; height: 18px; }
+  body.league-mode #screen-marked.league-marked .lgm-val { font-size: 11px; }
+  body.league-mode #screen-marked.league-marked .lgm-right { gap: 8px; }
+  body.league-mode #screen-marked.league-marked .lgm-cur,
+  body.league-mode #screen-marked.league-marked .lgm-panel { padding: 7px 9px; }
+  body.league-mode #screen-marked.league-marked .lgm-eff-num { font-size: 26px; }
+  body.league-mode #screen-marked.league-marked .lgm-eff-txt {
+    margin-top: 6px; padding-top: 6px; font-size: 10px; line-height: 1.5;
+  }
+  body.league-mode #screen-marked.league-marked .lgm-eff-note { font-size: 9px; margin-top: 3px; }
+  body.league-mode #screen-marked.league-marked .lgm-kv { padding: 3px 0; }
 }
 
 /* ==========================================================================
@@ -3249,7 +3566,7 @@ button.lg-se-award:active { transform: translateY(2px); box-shadow: inset 0 0 0 
  *   「収まっているのに切れて見える」という新しい誤読を生まない安全側に倒れる。 */
 .lg-rd-scroll.is-scrollable, .lg-sh-boardwrap.is-scrollable, .lg-se-plogwrap.is-scrollable,
 .lg-md-deck.is-scrollable, .bench-list.is-scrollable, .lg-sh-panel.is-scrollable,
-.lg-age-list.is-scrollable {
+.lg-age-list.is-scrollable, .lgm-rows.is-scrollable {
   -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 24px), transparent 100%);
   mask-image: linear-gradient(180deg, #000 calc(100% - 24px), transparent 100%);
 }
