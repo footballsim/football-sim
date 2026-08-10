@@ -1313,6 +1313,7 @@ function openKeyPlayerSelect() {
   content.innerHTML = '';
   const sys = system_data[team1State.systemIdx];
   const desc = document.createElement('div');
+  desc.className = 'keyp-desc';
   desc.style.cssText = 'font-size:12px;color:var(--text-dim);margin-bottom:14px;padding:10px;background:rgba(0,48,135,0.05);border-radius:8px';
   desc.textContent = '⭐ ' + t('keypHint').replace('⭐ ','');
   content.appendChild(desc);
@@ -1320,7 +1321,11 @@ function openKeyPlayerSelect() {
     const playerIdx = team1State.lineup[pos];
     const p = team1Data.players[playerIdx];
     const item = document.createElement('div');
-    item.className = 'player-select-item' + (pos === team1State.keyplayer ? ' current' : '');
+    // ★ 表示層フック用のメタ（リーグの3ゾーン装飾が「どの枠の行か」を読む）。
+    //   クリック処理（＝ロジック）は下の item.onclick のまま＝装飾側は onclick を借りるだけ。
+    item.className = 'player-select-item keyp-item' + (pos === team1State.keyplayer ? ' current' : '');
+    item.dataset.pos = String(pos);
+    item.dataset.playerIdx = String(playerIdx);
     item.innerHTML = `
       <div style="background:${team1Data.team_color};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${sys.positions[pos].replace(/[左右]/g,'').substring(0,2)}</div>
       <div class="psi-name">${getPlayerName(p)}<span style="font-size:11px;color:var(--text-dim);margin-left:6px">${sys.positions[pos]}</span></div>
@@ -1331,6 +1336,17 @@ function openKeyPlayerSelect() {
       closeSubSelect('keyplayer');
     };
     content.appendChild(item);
+  }
+  /* MD-04e（2026-08-09）: リーグ（lab）だけ、ここまでで組んだノードを **3ゾーンへ組み替える**。
+   *   ★ 生成した行ノードは「移動＋中身の描き直し」しかしない＝上で張った onclick
+   *     （＝keyplayer の代入）は素通しで保存される。ピッチのカードも同じ onclick を借りる。
+   *   ★ 未搭載（公開版 / league.js 非同梱）は typeof ガードで no-op ＝旧UIのまま。 */
+  if (typeof leagueDecorateKeyplayer === 'function') {
+    leagueDecorateKeyplayer(content, {
+      data: team1Data, sys: sys, sysIdx: team1State.systemIdx,
+      lineup: team1State.lineup.slice(0, 11), tactics: team1State.tactics,
+      keyPos: team1State.keyplayer
+    });
   }
   showScreen('keyplayer');
 }
@@ -1404,12 +1420,14 @@ function openMarkedPlayerSelect() {
 
   // 説明文
   const desc = document.createElement('div');
+  desc.className = 'marked-desc';
   desc.style.cssText = 'font-size:12px;color:var(--text-dim);margin-bottom:12px;padding:10px;background:rgba(188,0,45,0.05);border-radius:8px';
   desc.textContent = `🎯 ${getTeamName(team2Data)}${t('markedHint')}`;
   content.appendChild(desc);
 
   // フォーメーション表示
   const fmLabel = document.createElement('div');
+  fmLabel.className = 'marked-fm';
   fmLabel.style.cssText = 'font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:4px;text-align:center';
   fmLabel.textContent = `${team2Data.flag} ${team2Data.name}  ${systemLabel(t2sys >= 0 ? t2sys : 0)}`;
   content.appendChild(fmLabel);
@@ -1423,11 +1441,13 @@ function openMarkedPlayerSelect() {
   tacticsLabel.style.cssText = 'font-size:11px;font-weight:700;color:var(--gold);margin-bottom:10px;text-align:center;padding:3px 10px;background:rgba(212,175,55,0.1);border-radius:8px;display:inline-block;width:fit-content;margin-left:auto;margin-right:auto';
   tacticsLabel.textContent = `${tacticsEmoji} ${window.LANG === 'en' ? 'Tactics' : '戦術'}: ${tacticsName}`;
   const tacticsWrap = document.createElement('div');
+  tacticsWrap.className = 'marked-tacwrap';
   tacticsWrap.style.cssText = 'text-align:center;margin-bottom:10px';
   tacticsWrap.appendChild(tacticsLabel);
   content.appendChild(tacticsWrap);
 
   const fieldWrap = document.createElement('div');
+  fieldWrap.className = 'marked-field';
   fieldWrap.style.cssText = 'position:relative;margin-bottom:16px;border-radius:10px;overflow:hidden;';
   fieldWrap.innerHTML = `
     <div style="position:relative;background:linear-gradient(180deg,var(--green-field) 0%,var(--green-light) 50%,var(--green-field) 100%);border-radius:10px;border:2px solid rgba(255,255,255,0.15)">
@@ -1451,6 +1471,12 @@ function openMarkedPlayerSelect() {
     const p = team2Data.players[playerIdx];
     const isGK = p.positions.includes('GK');
     const dot = document.createElement('div');
+    // ★ 表示層フック用のメタ（リーグの3ゾーン装飾が「どの選手のドットか」を読む）。
+    //   クリック処理（＝ロジック）は下の dot.onclick のまま＝ノードを再描画しても壊れない。
+    dot.className = 'marked-dot';
+    dot.dataset.pos = String(pos);
+    dot.dataset.playerIdx = String(playerIdx);
+    dot.dataset.gk = isGK ? '1' : '0';
     dot.style.cssText = `position:absolute;transform:translate(-50%,-50%);left:${sys2.x[pos]}%;top:${sys2.y[pos]}%;display:flex;flex-direction:column;align-items:center;cursor:${isGK ? 'not-allowed' : 'pointer'};opacity:${isGK ? '0.4' : '1'}`;
     const isMarked = team1State.marked_player === playerIdx;
     dot.innerHTML = `
@@ -1467,13 +1493,14 @@ function openMarkedPlayerSelect() {
 
   // 区切り
   const divider = document.createElement('div');
+  divider.className = 'marked-divider';
   divider.style.cssText = 'font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:8px';
   divider.textContent = t('markedTap');
   content.appendChild(divider);
 
   // 未設定オプション
   const none = document.createElement('div');
-  none.className = 'player-select-item' + (team1State.marked_player < 0 ? ' current' : '');
+  none.className = 'player-select-item marked-none' + (team1State.marked_player < 0 ? ' current' : '');
   none.innerHTML = `<div class="psi-name" style="color:var(--text-dim)">${t('unset')}</div>${team1State.marked_player < 0 ? '<span style="color:var(--japan-red);font-size:18px;margin-left:auto">🎯</span>' : ''}`;
   none.onclick = () => {
     team1State.marked_player = -1;
@@ -1485,7 +1512,10 @@ function openMarkedPlayerSelect() {
     const p = team2Data.players[playerIdx];
     const isGKitem = p.positions.includes('GK');
     const item = document.createElement('div');
-    item.className = 'player-select-item' + (team1State.marked_player === playerIdx ? ' current' : '');
+    item.className = 'marked-item player-select-item' + (team1State.marked_player === playerIdx ? ' current' : '');
+    item.dataset.pos = String(pos);
+    item.dataset.playerIdx = String(playerIdx);
+    item.dataset.gk = isGKitem ? '1' : '0';
     item.style.cssText = isGKitem ? 'opacity:0.4;pointer-events:none' : '';
     item.innerHTML = `
       <div style="background:${isGKitem ? '#555' : team2Data.team_color};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${sys2.positions[pos].replace(/[左右]/g,'').substring(0,2)}</div>
@@ -1499,6 +1529,16 @@ function openMarkedPlayerSelect() {
     };
     content.appendChild(item);
   });
+  /* MD-04d（2026-08-08）: リーグ（lab）だけ、ここまでで組んだノードを **3ゾーンへ組み替える**。
+   *   ★ 生成したノード（ドット/行/未設定）を league 側は「移動＋中身の描き直し」しかしない＝
+   *     上で張った onclick（＝marked_player の代入・GK除外）は素通しで保存される。
+   *   ★ 未搭載（公開版 / league.js 非同梱）は typeof ガードで no-op ＝旧UIのまま。 */
+  if (typeof leagueDecorateMarked === 'function') {
+    leagueDecorateMarked(content, {
+      data: team2Data, sys: sys2, sysIdx: (t2sys >= 0 ? t2sys : 0),
+      lineup: lineup2, tactics: _t2tac, live: !!_liveT2
+    });
+  }
   showScreen('marked');
 }
 
