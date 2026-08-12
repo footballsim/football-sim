@@ -4,8 +4,12 @@
   "description": "Football Simulation Lab",
   "scripts": {
     "build": "node build.js",
+    "check": "for f in js/*.js; do node --check \"$f\" || exit 1; done && echo '✅ 構文チェック全緑'",
+    "check:docs": "node tools/docs-guard.js",
+    "regression": "node tools/regression-harness.js check",
+    "regression:full": "node tools/regression-harness.js check 1500",
     "deploy:guard": "node tools/deploy-guard.js",
-    "deploy:lab": "node tools/deploy-guard.js && npx --yes wrangler@4 pages deploy dist-lab --project-name=kantoku-lab --branch=main --commit-dirty=true"
+    "deploy:lab": "node tools/docs-guard.js && node tools/deploy-guard.js && npx --yes wrangler@4 pages deploy dist-lab --project-name=kantoku-lab --branch=main --commit-dirty=true"
   },
   "repository": {
     "type": "git",

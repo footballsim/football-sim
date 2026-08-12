@@ -8,3 +8,17 @@ cutscene-demo.html
 
 # 非公開lab配信ビルド（Cloudflare Pagesへ直接デプロイ）
 dist-lab/
+
+# ── 2026-08-13 棚卸しで追加 ──
+.DS_Store
+_incoming/
+*.bak-*
+# Codexモックアップ画像(68MB・仕様書.mdだけ追跡する)
+design/codex-mockups/
+# tools/proto はスクリプト(.py/.html/.js/.md/.patch)だけ追跡・QA証跡/中間画像は除外
+tools/proto/*
+!tools/proto/*.py
+!tools/proto/*.html
+!tools/proto/*.js
+!tools/proto/*.md
+!tools/proto/*.patch

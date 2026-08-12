@@ -1,8 +1,21 @@
-# AGENTS.md — 自走改善チームの規約
+# AGENTS.md — 開発の規約
 
-football-sim をゲーム化（[GAME_PLAN.md](GAME_PLAN.md)）するための複数エージェント運用の契約書。
-**各エージェントは作業前に必ずこのファイルと [CLAUDE.md](CLAUDE.md) を読む。**
+football-sim をゲーム化（[GAME_PLAN.md](GAME_PLAN.md)）するための契約書。
+**作業前に必ずこのファイルと [CLAUDE.md](CLAUDE.md)（＝プロジェクトの技術仕様。名前は由来にすぎない）を読む。**
 本番 football-sim.com は稼働中。自律はPRまで。main へのマージと本番反映は人間が承認する。
+
+## 🧭 体制（2026-08-13〜）— **Codex が主・Claude Code が補助**
+
+- **Codex**: 実装・設計・レビュー・画像生成の主担当。
+- **Claude Code**: ブラウザ実機検証／回帰ハーネスの数値判定／Obsidian 外部脳への蒸留／デプロイ実行。
+- ⚠️ **Claude Code 側のフック（`docs/` 手編集ブロック・js 編集後の `node --check`）は Codex には効かない**。
+  ガードレール 2 番などは**規律で守る**こと。
+
+**読む順**: 本ファイル → **[CODEX_HANDOFF.md](CODEX_HANDOFF.md)（地雷と実務則・引き継ぎの本体）** →
+[SCOPE.md](SCOPE.md)（機能の正本）→ [ROADMAP.md](ROADMAP.md) → [BACKLOG.md](BACKLOG.md) → [DECISIONS.md](DECISIONS.md)。
+複数セッションを同時に走らせる時だけ [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md)（所有権・git 作法・**デプロイ調停**）。
+
+**反映先は kantoku-lab.pages.dev のみ**（football-sim.com は 2026-07-03 から凍結中）。
 
 ---
 
