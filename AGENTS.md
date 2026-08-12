@@ -2,7 +2,17 @@
 
 football-sim をゲーム化（[GAME_PLAN.md](GAME_PLAN.md)）するための契約書。
 **作業前に必ずこのファイルと [CLAUDE.md](CLAUDE.md)（＝プロジェクトの技術仕様。名前は由来にすぎない）を読む。**
-本番 football-sim.com は稼働中。自律はPRまで。main へのマージと本番反映は人間が承認する。
+
+## 🔀 プロジェクト分離（2026-08-13 ユーザー決定）— **シミュレーターとゲームは別プロジェクト**
+
+| | ブランチ | 公開先 | 状態 |
+|---|---|---|---|
+| **シミュレーター**（旧本番） | `main` | football-sim.com（GitHub Pages＝main の `docs/`） | **凍結アーカイブ・更新予定なし** |
+| **サッカーゲーム**（開発中・唯一のアクティブプロジェクト） | **`game-main`** | kantoku-lab.pages.dev（`dist-lab/` を wrangler で直接デプロイ） | **開発の本流＝ここで作業する** |
+
+- ⚠️ **`main` に触らない・push しない**（push すると GitHub Pages が走り football-sim.com が変わりうる）。
+- 開発は **`game-main`**（または `game-main` から切る枝）で行う。旧 `feat/lab-ui-gamefeel` は `game-main` に改名相当（同一コミット）。
+- `docs/` に関する規則（手編集禁止・差分は破棄）はアーカイブ保護として**引き続き有効**（`npm run check:docs` が機械検知）。
 
 ## 🧭 体制（2026-08-13〜）— **Codex が主・Claude Code が補助**
 

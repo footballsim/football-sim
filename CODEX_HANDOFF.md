@@ -99,7 +99,10 @@ npm run deploy:lab     # deploy-guard → wrangler pages deploy dist-lab --proje
 
 ## 4. リポジトリ状態（2026-08-13 棚卸し済み）
 
-- **現在のブランチ = `feat/lab-ui-gamefeel`**（`origin/main` から大きく先行）。**本番 football-sim.com＝main は凍結中**なので、当面はこのブランチ系で開発を続けてよい。
+- **開発の本流 = `game-main`**（2026-08-13 新設・旧 `feat/lab-ui-gamefeel` と同一コミット）。
+  **プロジェクト分離（同日ユーザー決定）**: シミュレーター（football-sim.com＝`main`＋`docs/`）は**凍結アーカイブ・更新予定なし**。
+  アクティブなのはサッカーゲーム（kantoku-lab）のみで、**作業は常に `game-main` 系で行う**。
+  ⚠️ **`main` に push しない**（GitHub Pages が走り football-sim.com が変わりうる。ローカル `main` には未 push のコミットが数個あるが、これも凍結のまま放置が正）。
 - 2026-08-13 に棚卸しを実施:
   - `docs/` の再ビルド差分は破棄（規約どおり）。
   - 計画・契約ドキュメント（`PARALLEL_SESSIONS.md` `DESIGN_SYSTEM.md` `MEETINGS/` `design/*.md` 等）を追跡化してコミット。
