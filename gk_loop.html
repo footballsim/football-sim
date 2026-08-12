@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>漫画GKダイビング — ループ再生</title>
+<style>
+  body{background:#0b0d16;color:#dce3ee;font:14px system-ui,sans-serif;margin:0;padding:16px}
+  h1{font-size:16px;margin:0 0 4px}
+  p.note{color:#9fb0c8;font-size:12px;margin:0 0 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;max-width:1000px}
+  .cell .frame{background:#000;border-radius:7px;overflow:hidden;aspect-ratio:480/216}
+  .cell .frame canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+  .cap{color:#8fd6ff;font-size:12px;margin:5px 2px 0}
+  #log{color:#c05a5a;font:12px ui-monospace,monospace;margin-top:8px}
+</style>
+</head>
+<body>
+<h1>漫画GKダイビング（単体＋MangaRecolor）— ループ再生</h1>
+<p class="note">実 cutscene.js の _renderGkScene(save/dive) を約2.0秒ごとに再描画。GK色は攻守と別色に自動選択→GKキット4色でリカラー（白グローブは不変）。セーブ=手元で止める／ダイブ=結果非開示。攻撃チーム色を変えてGK色の自動選択を確認。</p>
+<div class="grid" id="grid"></div>
+<div id="log"></div>
+
+<script src="js/portrait.js?v=g1"></script>
+<script src="js/manga_recolor.js?v=g1"></script>
+<script src="js/cutscene.js?v=g1"></script>
+<script>
+window.MANGA_CUTSCENE_ENABLED = true;
+window.LANG = 'ja';
+CUTSCENE_BURN_LABELS = true;
+window.gameState = {};
+window.getPlayerName = function (p) { return p.long_name || p.name; };
+window.getTeamName = function (t) { return t.__name || ''; };
+
+// [攻撃チーム名, 攻撃色(GK色の自動選択に影響), 守備(GK側)チーム名, 守備色, GK選手名, mode]
+var CASES = [
+  ['イングランド', '#F2F4F7', 'ブラジル',   '#F2C500', 'Alisson',  'save'],
+  ['アルゼンチン', '#74ACDF', 'フランス',   '#1A2C6B', 'Maignan',  'save'],
+  ['スペイン',     '#C8102E', 'ドイツ',     '#F2F4F7', 'Neuer',    'dive'],
+  ['オランダ',     '#E8641B', 'イタリア',   '#1B4BA0', 'Donnarumma','save'],
+  ['日本',         '#1B3E9C', 'ベルギー',   '#E23A2E', 'Courtois', 'save'],
+  ['ポルトガル',   '#B01C2E', 'メキシコ',   '#1E8C3A', 'Ochoa',    'dive']
+];
+
+function makeSc(c) {
+  var offence = { __name: c[0], team_color: c[1], kit: { shirt:c[1], shorts:'#222', socks:c[1], accent:'#fff' },
+    players: [{ long_name: 'Striker' }], lineup: [0] };
+  var defence = { __name: c[2], team_color: c[3], kit: { shirt:c[3], shorts:'#222', socks:c[3], accent:'#fff' },
+    players: [{ long_name: c[4] }], lineup: [0] };   // lineup[0]=GK
+  return { offence: offence, defence: defence, ofsPos: 0, dfsPos: 0, action: 'シュート',
+    result: c[5] === 'save' ? 'GK防いだ！' : 'ゴール！！' };
+}
+
+var grid = document.getElementById('grid');
+var cells = CASES.map(function (c) {
+  var cell = document.createElement('div'); cell.className = 'cell';
+  var frame = document.createElement('div'); frame.className = 'frame';
+  var cap = document.createElement('div'); cap.className = 'cap';
+  cap.textContent = c[4] + ' (' + c[2] + ') — ' + (c[5] === 'save' ? 'セーブ' : 'ダイブ') + ' / 攻:' + c[0];
+  cell.appendChild(frame); cell.appendChild(cap); grid.appendChild(cell);
+  return { c: c, frame: frame };
+});
+
+function play() {
+  cells.forEach(function (x) {
+    var cv = _renderGkScene(makeSc(x.c), x.c[5]);
+    if (!cv) { document.getElementById('log').textContent = 'NULL canvas (MangaRecolor未ロード?)'; return; }
+    x.frame.innerHTML = '';
+    x.frame.appendChild(cv);
+  });
+}
+play();
+setInterval(play, 2000);
+document.getElementById('log').textContent = 'looping ' + CASES.length + ' GK dives';
+</script>
+</body>
+</html>

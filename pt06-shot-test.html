@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PT-06 シュートカットシーン差し替えテスト</title>
+<style>
+  body{margin:0;background:linear-gradient(160deg,#003087,#0050cc,#1a7a3a);color:#fff;font:13px system-ui;padding:16px}
+  h1{font-size:16px;margin:0 0 4px}
+  p.note{opacity:.9;margin:4px 0 14px;max-width:980px}
+  .row{display:flex;gap:22px;flex-wrap:wrap}
+  .cell{background:rgba(0,0,0,.25);border-radius:10px;padding:10px 10px 12px;width:480px;max-width:96vw}
+  .cell h2{font-size:13px;margin:0 0 8px;color:#ffe27a}
+  .stage{width:480px;max-width:100%;aspect-ratio:480/216;background:#0a0f1c;border-radius:6px;overflow:hidden}
+  .stage canvas{width:100%;height:100%;object-fit:cover}
+  button{margin-top:12px;background:#ffd24a;color:#111;border:0;border-radius:8px;padding:9px 18px;font-weight:800;cursor:pointer}
+  .tune{margin-top:8px;font-size:11px;opacity:.8}
+</style>
+</head>
+<body>
+<h1>PT-06 — 既存シュート演出を流用して画像を差し替え</h1>
+<p class="note">既存 <code>_renderShotScene</code> と同じ枠組み（背景・寄り・ボール軌道・スピード線・ストライクフラッシュ）で、シューター画像だけを差し替えて比較します。
+左＝現行 <code>shot_red_01.png</code>／右＝PT-06 <code>shot_pt06red_01.png</code>（ピクセル頭・両足フル）。ボール起点だけスプライト個別に調整。</p>
+
+<div class="row">
+  <div class="cell"><h2>4パーツ独立リカラー：青/青/青・襟白</h2><div class="stage" id="stgOld"></div></div>
+  <div class="cell"><h2>4パーツ独立リカラー：赤シャツ/白パンツ/赤ソックス</h2><div class="stage" id="stgNew"></div></div>
+</div>
+<button id="replay">▶ 再生（両方）</button>
+<div class="tune" id="tune"></div>
+
+<script src="js/cutscene.js"></script>
+<script>
+window.SCENE_ART_ENABLED = true;
+var W=480,H=216,ground=190,ph=178,pcx=326;
+
+// スプライト定義: file と 蹴り足位置(描画スプライト box に対する割合)
+var SPRITES = {
+  old: { file:'img/cutscenes/shot_pt06parts_japan_01.png',    fx:0.06, fy:0.78 },  // 4パーツ独立: 青/青/青/白
+  new: { file:'img/cutscenes/shot_pt06parts_redwhite_01.png', fx:0.06, fy:0.78 }   // 4パーツ独立: 赤/白/赤/紺
+};
+
+var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+
+function speedLines(ctx,x,y,a){ctx.strokeStyle='rgba(255,255,255,'+a+')';ctx.lineWidth=2.5;for(var i=0;i<14;i++){var an=i/14*6.28;ctx.beginPath();ctx.moveTo(x+Math.cos(an)*14,y+Math.sin(an)*14);ctx.lineTo(x+Math.cos(an)*58,y+Math.sin(an)*58);ctx.stroke();}}
+
+// rAFはLaunchパネルで抑制されることがあるため setInterval で連続ループ描画する。
+var ANIM=1700, HOLD=1100, LOOP=ANIM+HOLD, strikeP=0.12, ballSpd=2400;
+function drawFrame(ctx, shooter, spec, p){
+  ctx.clearRect(0,0,W,H);
+  var pw = (shooter.naturalWidth&&shooter.naturalHeight)? shooter.naturalWidth*(ph/shooter.naturalHeight) : 133;
+  var sx0 = pcx - pw/2, sy0 = ground - ph;
+  var foot=[sx0+pw*spec.fx, sy0+ph*spec.fy];
+  var z=1.0+Math.min(1,p/0.6)*0.08;
+  ctx.save(); ctx.translate(foot[0],foot[1]); ctx.scale(z,z); ctx.translate(-foot[0],-foot[1]);
+  ctx.imageSmoothingEnabled=false; _lpDrawBg(ctx,bgImg,bgFallback,W,H);
+  if(shooter.complete&&shooter.naturalWidth){ ctx.drawImage(shooter, sx0, sy0, pw, ph); }
+  if(p<strikeP){ _lpBall(ctx,foot[0],foot[1],11,0); }
+  else { var bx=foot[0]-ballSpd*(p-strikeP); if(bx>-16)_lpBall(ctx,bx,foot[1],11,(p-strikeP)*80); }
+  var strikeF=(p>strikeP-0.02&&p<strikeP+0.08)?1-Math.abs(p-strikeP)/0.08:0;
+  if(strikeF>0)speedLines(ctx,foot[0],foot[1],strikeF*0.6);
+  ctx.restore();
+  if(strikeF>0){ctx.fillStyle='rgba(255,255,255,'+(strikeF*0.45)+')';ctx.fillRect(0,0,W,H);}
+}
+var _timers=[];
+function makeScene(stageEl, spec, phase){
+  stageEl.innerHTML='';
+  var canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+  var ctx=canvas.getContext('2d');stageEl.appendChild(canvas);
+  var shooter=_loadCutsceneImg(spec.file);
+  var start=performance.now()-(phase||0);
+  function tick(){ var t=(performance.now()-start)%LOOP; var p=Math.min(1,t/ANIM); drawFrame(ctx,shooter,spec,p); }
+  drawFrame(ctx,shooter,spec,1);            // 即座に静止フレーム（画像未ロードでも背景は出る）
+  shooter.onload=function(){ drawFrame(ctx,shooter,spec,1); };
+  _timers.push(setInterval(tick,33));
+}
+function playAll(){
+  _timers.forEach(clearInterval); _timers=[];
+  makeScene(document.getElementById('stgOld'),SPRITES.old,0);
+  makeScene(document.getElementById('stgNew'),SPRITES.new,0);
+}
+document.getElementById('replay').onclick=playAll;
+playAll();
+document.getElementById('tune').textContent='sprite new fx='+SPRITES.new.fx+' fy='+SPRITES.new.fy+' ／ 自動ループ再生中';
+</script>
+</body>
+</html>

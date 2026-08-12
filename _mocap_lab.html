@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>モーション実験室（CMUモーキャップ） — football-sim</title>
+<!--
+  MOCAP-01（2026-07-29）: 手書きのsinカーブでは「本物らしさ」に届かないと判断し、実データへ切替。
+  ★ 出典: CMU Graphics Lab Motion Capture Database（mocap.cs.cmu.edu・無償／ログイン不要）
+     被験者09=走り / 被験者10=サッカーのキック。ASF(骨格)+AMC(毎フレーム関節角)を
+     mocap/asf2json.py で順運動学に解き、関節のワールド座標だけを JSON に落としてある。
+  ★ ここは判定台。手書きモーションと同じ低解像度・同じ画づくりで並べないと比較にならないので、
+     描画は _3d_lab.html と同条件（480x216 / フラット塗り / 等幅インク輪郭）にしてある。
+  ★ 用途は3D描画だけではない。sprite-studio の人形にこの動きを流せば、生成するスプライトの
+     ポーズ品質が直接上がる（＝マンガ絵路線のままでも投資が回収できる）。
+-->
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+<style>
+  body{margin:0;background:#0d1117;color:#e6edf3;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif}
+  header{padding:10px 14px;border-bottom:1px solid #30363d}
+  h1{font-size:15px;margin:0 0 3px} .sub{font-size:11px;color:#8b949e}
+  .wrap{padding:14px;display:flex;flex-wrap:wrap;gap:16px}
+  .stage{position:relative;background:#000;border:1px solid #30363d;border-radius:6px;overflow:hidden;width:960px;max-width:100%;cursor:grab}
+  .stage.drag{cursor:grabbing}
+  canvas{display:block;width:100%;image-rendering:pixelated;touch-action:none}
+  .panel{min-width:250px;flex:1 1 250px;max-width:330px}
+  h2{font-size:12px;color:#8b949e;margin:14px 0 6px;font-weight:600} h2:first-child{margin-top:0}
+  .btns{display:flex;flex-wrap:wrap;gap:6px}
+  button{background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:5px;padding:6px 10px;font-size:12px;cursor:pointer}
+  button:hover{background:#30363d} button.on{background:#1f6feb;border-color:#1f6feb}
+  label{display:flex;align-items:center;gap:6px;font-size:12px;margin:5px 0}
+  input[type=range]{width:100%}
+  #info{font-size:11px;color:#8b949e;margin-top:10px;line-height:1.8;font-family:ui-monospace,monospace;
+        background:#161b22;border:1px solid #30363d;border-radius:5px;padding:8px}
+  .hint{font-size:11px;color:#68758f;line-height:1.7;margin:8px 0 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>モーション実験室 <span class="sub">MOCAP-01 / CMU Graphics Lab Motion Capture Database</span></h1>
+  <div class="sub">実データの再生。ドラッグで回す・ホイールで寄る。手書きsinとの差を見るための台</div>
+</header>
+<div class="wrap">
+  <div class="stage" id="stage"><canvas id="out"></canvas></div>
+  <div class="panel">
+    <h2>モーション</h2>
+    <div class="btns">
+      <button data-m="run" class="on">走り（被験者09）</button>
+      <button data-m="kick">キック（被験者10・サッカー）</button>
+    </div>
+    <h2>アングル</h2>
+    <div class="btns">
+      <button data-p="side" class="on">サイド</button>
+      <button data-p="front">正面</button>
+      <button data-p="low">ロー</button>
+      <button data-p="q">斜め</button>
+    </div>
+    <h2>再生</h2>
+    <label><input type="checkbox" id="opt-play" checked> 再生</label>
+    <label><input type="checkbox" id="opt-follow" checked> root を原点に固定（その場で走らせる）</label>
+    <label>コマ送り <input type="range" id="scrub" min="0" max="100" value="0"></label>
+    <label>速度 <input type="range" id="speed" min="10" max="150" value="100"></label>
+    <div id="info">—</div>
+    <p class="hint">出典 CMU Graphics Lab Motion Capture Database（無償・研究/商用可）。<br>
+      変換は mocap/asf2json.py（ASF/AMC → 関節ワールド座標のJSON）。</p>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+const W = 480, H = 216;
+const out = document.getElementById('out');
+out.width = W; out.height = H;
+const octx = out.getContext('2d');
+octx.imageSmoothingEnabled = false;
+
+const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
+renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x8fc7ef);
+const camera = new THREE.PerspectiveCamera(38, W / H, 0.05, 100);
+// 手書き版と同条件の絵づくり（判定を公平にするため）
+const key = new THREE.DirectionalLight(0xfff3d6, 2.6); key.position.set(2.2, 3.4, 2.6); scene.add(key);
+scene.add(new THREE.AmbientLight(0x93b6d8, 0.62));
+function ramp(n){ const d=new Uint8Array(n); for(let i=0;i<n;i++) d[i]=Math.round(70+185*i/(n-1));
+  const t=new THREE.DataTexture(d,n,1,THREE.RedFormat); t.minFilter=t.magFilter=THREE.NearestFilter; t.needsUpdate=true; return t; }
+const RAMP = ramp(3);
+const KIT = { shirt:0xd92d3c, shorts:0x1b2430, socks:0xd92d3c, skin:0xe8b088, hair:0x2b1d16, boot:0x14161c };
+const MAT = {}; for (const k in KIT) MAT[k] = new THREE.MeshToonMaterial({ color: KIT[k], gradientMap: RAMP });
+const INKMAT = new THREE.MeshBasicMaterial({ color: 0x101318, side: THREE.BackSide });
+const INK = 0.017;
+
+// ピッチ
+{ const c=document.createElement('canvas'); c.width=c.height=64; const x=c.getContext('2d');
+  for(let i=0;i<2;i++){ x.fillStyle=i%2?'#1e5a2a':'#2f8b3f'; x.fillRect(0,i*32,64,32); }
+  const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(6,8); t.magFilter=THREE.NearestFilter;
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(40,50), new THREE.MeshToonMaterial({map:t, gradientMap:RAMP}));
+  m.rotation.x=-Math.PI/2; scene.add(m); }
+
+/* CMUのボーン名 → 見た目（太さと色）。関節位置だけ貰って、間をカプセルで繋ぐ＝スキニング無しで足りる。 */
+const STYLE = {
+  lfemur:['shorts',0.075], rfemur:['shorts',0.075], ltibia:['socks',0.055], rtibia:['socks',0.055],
+  lfoot:['boot',0.045], rfoot:['boot',0.045], ltoes:['boot',0.038], rtoes:['boot',0.038],
+  lowerback:['shirt',0.088], upperback:['shirt',0.095], thorax:['shirt',0.092],
+  lowerneck:['skin',0.038], upperneck:['skin',0.036], head:['hair',0.082],
+  lhumerus:['skin',0.048], rhumerus:['skin',0.048], lradius:['skin',0.040], rradius:['skin',0.040],
+  lwrist:['skin',0.034], rwrist:['skin',0.034], lhand:['skin',0.034], rhand:['skin',0.034],
+  lclavicle:['shirt',0.055], rclavicle:['shirt',0.055], lhipjoint:['shorts',0.070], rhipjoint:['shorts',0.070]
+};
+const HIDE = new Set(['lfingers','rfingers','lthumb','rthumb']);
+
+const rig = new THREE.Group(); scene.add(rig);
+let DATA = null, segs = [];
+function buildSegs() {
+  segs.forEach(s => { rig.remove(s.mesh); rig.remove(s.ink); });
+  segs = [];
+  DATA.names.forEach((n, i) => {
+    const p = DATA.parents[i];
+    if (p < 0 || HIDE.has(n)) return;
+    const st = STYLE[n]; if (!st) return;
+    const [col, r] = st;
+    const geo = new THREE.CapsuleGeometry(r, 1, 3, 10);          // 長さは毎フレーム scale.y で合わせる
+    const mesh = new THREE.Mesh(geo, MAT[col]);
+    const ink = new THREE.Mesh(new THREE.CapsuleGeometry(r + INK, 1, 3, 10), INKMAT);
+    rig.add(mesh); rig.add(ink);
+    segs.push({ a: p, b: i, mesh, ink, r });
+  });
+}
+const vA = new THREE.Vector3(), vB = new THREE.Vector3(), vM = new THREE.Vector3(), vD = new THREE.Vector3();
+const UP = new THREE.Vector3(0, 1, 0), q = new THREE.Quaternion();
+function pose(f, originX, originZ) {
+  const F = DATA.frames[f];
+  for (const s of segs) {
+    vA.set(F[s.a][0] - originX, F[s.a][1], F[s.a][2] - originZ);
+    vB.set(F[s.b][0] - originX, F[s.b][1], F[s.b][2] - originZ);
+    vM.addVectors(vA, vB).multiplyScalar(0.5);
+    vD.subVectors(vB, vA);
+    const len = Math.max(0.02, vD.length());
+    q.setFromUnitVectors(UP, vD.normalize());
+    for (const m of [s.mesh, s.ink]) {
+      m.position.copy(vM); m.quaternion.copy(q);
+      m.scale.set(1, len, 1);                                     // CapsuleGeometry(r,1) を縦に伸ばす
+    }
+  }
+}
+
+const CAMS = {
+  side:{yaw:1.35,pitch:0.10,dist:3.6,ty:0.95}, front:{yaw:0.05,pitch:0.10,dist:3.4,ty:0.95},
+  low:{yaw:1.05,pitch:-0.10,dist:2.8,ty:1.05}, q:{yaw:0.75,pitch:0.22,dist:3.8,ty:0.95}
+};
+const cam = Object.assign({}, CAMS.side);
+function place(){
+  const cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
+  camera.position.set(Math.sin(cam.yaw)*cp*cam.dist, cam.ty+sp*cam.dist, Math.cos(cam.yaw)*cp*cam.dist);
+  if(camera.position.y<0.2) camera.position.y=0.2;
+  camera.lookAt(0, cam.ty, 0);
+}
+const stage=document.getElementById('stage');
+let drag=null;
+stage.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};stage.classList.add('drag');stage.setPointerCapture(e.pointerId);});
+stage.addEventListener('pointermove',e=>{ if(!drag)return;
+  cam.yaw-=(e.clientX-drag.x)*0.006; cam.pitch=Math.max(-0.25,Math.min(1.2,cam.pitch+(e.clientY-drag.y)*0.004));
+  drag={x:e.clientX,y:e.clientY}; });
+['pointerup','pointercancel'].forEach(ev=>stage.addEventListener(ev,()=>{drag=null;stage.classList.remove('drag');}));
+stage.addEventListener('wheel',e=>{e.preventDefault();cam.dist=Math.max(1.2,Math.min(12,cam.dist*(1+Math.sign(e.deltaY)*0.08)));},{passive:false});
+
+let t0 = performance.now(), fi = 0, name = 'run';
+async function load(which){
+  const r = await fetch(`mocap/mocap_${which}.json?v=1`);
+  DATA = await r.json(); buildSegs(); fi = 0; t0 = performance.now();
+  document.getElementById('scrub').max = DATA.frames.length - 1;
+  name = which;
+}
+function frame(){
+  place();
+  if (DATA) {
+    if (document.getElementById('opt-play').checked) {
+      const sp = document.getElementById('speed').value / 100;
+      fi = Math.floor((performance.now() - t0) / 1000 * DATA.fps * sp) % DATA.frames.length;
+      document.getElementById('scrub').value = fi;
+    } else fi = +document.getElementById('scrub').value;
+    const F = DATA.frames[fi];
+    const fol = document.getElementById('opt-follow').checked;
+    pose(fi, fol ? F[0][0] : 0, fol ? F[0][2] : 0);
+    renderer.render(scene, camera);
+    octx.clearRect(0,0,W,H); octx.drawImage(renderer.domElement,0,0,W,H);
+    document.getElementById('info').innerHTML =
+      `${name} · frame ${fi}/${DATA.frames.length-1} · ${DATA.fps}fps<br>` +
+      `joints ${DATA.names.length} · segs ${segs.length}<br>` +
+      `yaw ${cam.yaw.toFixed(2)} pitch ${cam.pitch.toFixed(2)} dist ${cam.dist.toFixed(1)}`;
+  }
+  requestAnimationFrame(frame);
+}
+for(const b of document.querySelectorAll('[data-m]')) b.onclick=()=>{ load(b.dataset.m);
+  document.querySelectorAll('[data-m]').forEach(x=>x.classList.toggle('on',x===b)); };
+for(const b of document.querySelectorAll('[data-p]')) b.onclick=()=>{ Object.assign(cam, CAMS[b.dataset.p]);
+  document.querySelectorAll('[data-p]').forEach(x=>x.classList.toggle('on',x===b)); };
+window._mocap = { load, cam, setFrame:(i)=>{document.getElementById('opt-play').checked=false;document.getElementById('scrub').value=i;},
+                  preset:(k)=>Object.assign(cam, CAMS[k]) };
+await load('run');
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

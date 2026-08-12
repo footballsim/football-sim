@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>縦長カットシーン — 方向性モック</title>
+<style>
+  body{background:#0b0d16;color:#dce3ee;font:14px system-ui,sans-serif;margin:0;padding:16px}
+  h1{font-size:17px;margin:0 0 2px}
+  p.note{color:#9fb0c8;font-size:12px;margin:0 0 16px;max-width:900px;line-height:1.5}
+  .row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+  .case{background:#11151f;border-radius:10px;padding:10px}
+  .case h2{font-size:13px;margin:0 0 8px;color:#8fd6ff;font-weight:700}
+  .case .sub{color:#7f8ca0;font-size:11px;margin:0 0 8px}
+  .frame{background:#000;border-radius:6px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+  .frame canvas{display:block;image-rendering:pixelated}
+  .cur{opacity:.9}
+  #log{color:#c05a5a;font:12px ui-monospace,monospace;margin-top:10px}
+</style>
+</head>
+<body>
+<h1>縦長カットシーン — 方向性モック（4案＋現状）</h1>
+<p class="note">既存の漫画スプライトを縦長キャンバスに再配置＋漫画背景（集中線・スピード線）＋SFX描き文字＋実況吹き出しで「迫力ある縦長」の完成イメージを提示。左端は現状（横長480×216）。各案はアスペクト比と構図が違います。どの方向で作り込むか選んでください。</p>
+<div class="row" id="row"></div>
+<div id="log"></div>
+
+<script src="js/portrait.js?v=p1"></script>
+<script src="js/manga_recolor.js?v=p1"></script>
+<script src="js/cutscene.js?v=p1"></script>
+<script>
+window.MANGA_CUTSCENE_ENABLED = true;
+window.LANG = 'ja';
+_MANGA_HAIR_UNIFORM = 'fade';
+
+function loadImg(src){ var im=new Image(); im.src=src; return im; }
+var IMGS = {
+  shot: loadImg('img/cutscenes/manga_shot/fade.png'),
+  hdrA: loadImg('img/cutscenes/header_rise_atk.png'),
+  hdrD: loadImg('img/cutscenes/header_rise_def.png'),
+  gk:   loadImg('img/cutscenes/manga_gk_dive.png')
+};
+function recolor(key,img,cols){ return (MangaRecolor&&MangaRecolor.render&&img.complete&&img.naturalWidth)?MangaRecolor.render(key,img,cols):(img.complete?img:null); }
+
+// ---- 漫画背景（放射集中線＋スピード線＋トーン）----
+function speedBurst(ctx,W,H,cx,cy,col){
+  ctx.save();
+  // 放射状の集中線
+  ctx.strokeStyle=col; ctx.lineWidth=2;
+  for(var i=0;i<48;i++){ var a=i/48*6.2832+ (i%2?0.03:0); var r0=Math.max(W,H)*0.12, r1=Math.max(W,H)*1.2;
+    ctx.globalAlpha=0.10+0.10*(i%3===0?1:0);
+    ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*r0,cy+Math.sin(a)*r0); ctx.lineTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1); ctx.stroke(); }
+  ctx.restore();
+}
+function halftone(ctx,W,H,y0,col){
+  ctx.save(); ctx.fillStyle=col; ctx.globalAlpha=0.22;
+  for(var y=y0;y<H;y+=7){ for(var x=(Math.floor(y/7)%2?3:0);x<W;x+=7){ var s=Math.min(1,(y-y0)/(H-y0))*2.2; if(s<0.15)continue; ctx.beginPath(); ctx.arc(x,y,Math.min(2.6,0.7+s),0,6.28); ctx.fill(); } }
+  ctx.restore();
+}
+function pitchBand(ctx,W,H,hy){
+  var g=ctx.createLinearGradient(0,hy,0,H); g.addColorStop(0,'#2f7d3a'); g.addColorStop(1,'#1c5a28');
+  ctx.fillStyle=g; ctx.fillRect(0,hy,W,H-hy);
+  ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(0,hy+4); ctx.lineTo(W,hy-2); ctx.stroke();
+}
+function skyBand(ctx,W,H,hy,c1,c2){ var g=ctx.createLinearGradient(0,0,0,hy); g.addColorStop(0,c1); g.addColorStop(1,c2); ctx.fillStyle=g; ctx.fillRect(0,0,W,hy); }
+
+// SFX描き文字（縁取り太字・斜め）
+function sfx(ctx,txt,x,y,size,rot,fill,edge){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(rot); ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font='900 '+size+'px "Arial Black",sans-serif'; ctx.lineJoin='round';
+  ctx.lineWidth=size*0.22; ctx.strokeStyle=edge; ctx.strokeText(txt,0,0);
+  ctx.lineWidth=size*0.09; ctx.strokeStyle='#111'; ctx.strokeText(txt,0,0);
+  ctx.fillStyle=fill; ctx.fillText(txt,0,0); ctx.restore();
+}
+// 実況吹き出し（下部帯）
+function subtitle(ctx,W,H,txt,accent){
+  var by=H-46; var g=ctx.createLinearGradient(0,by,0,H); g.addColorStop(0,'rgba(6,8,16,0)'); g.addColorStop(0.35,'rgba(6,8,16,.86)'); g.addColorStop(1,'rgba(6,8,16,.96)');
+  ctx.fillStyle=g; ctx.fillRect(0,by,W,H-by);
+  ctx.fillStyle=accent; ctx.fillRect(0,by+8,W,3);
+  ctx.textAlign='left'; ctx.textBaseline='alphabetic'; ctx.font='700 15px "Noto Sans JP",sans-serif';
+  ctx.fillStyle='#fff'; ctx.fillText(txt,14,H-16);
+}
+function drawSprite(ctx,spr,cx,footY,dispH,flip){
+  if(!spr) return;
+  var w=spr.width*(dispH/spr.height);
+  ctx.save(); ctx.imageSmoothingEnabled=false;
+  if(flip){ ctx.translate(cx,0); ctx.scale(-1,1); ctx.drawImage(spr,-w/2,footY-dispH,w,dispH); }
+  else ctx.drawImage(spr,cx-w/2,footY-dispH,w,dispH);
+  ctx.restore();
+}
+
+var RED={shirt:'#c8102e',shorts:'#f2f4f7',socks:'#c8102e',accent:'#ffd400',skin:'#e6ad7f'};
+var BLU={shirt:'#1050c0',shorts:'#17181c',socks:'#1050c0',accent:'#fff',skin:'#cf8f5d'};
+
+// ===== 各案の描画 =====
+function caseCurrent(cv){ // 現状=横長480x216（比較用）
+  cv.width=480; cv.height=216; var ctx=cv.getContext('2d');
+  skyBand(ctx,480,216,150,'#22406e','#3a6ea5'); pitchBand(ctx,480,216,150);
+  var spr=recolor('m_shot_cur',IMGS.shot,RED);
+  drawSprite(ctx,spr,300,205,150,false);
+  subtitle(ctx,480,216,'ロッシ、右足一閃！',RED.shirt);
+}
+function caseA(cv){ // 3:4・選手大クロップ（迫力寄り）
+  var W=450,H=600; cv.width=W; cv.height=H; var ctx=cv.getContext('2d');
+  skyBand(ctx,W,H,H*0.6,'#7a1220','#c0203a'); // 赤い緊迫の空
+  speedBurst(ctx,W,H,W*0.5,H*0.34,'rgba(255,255,255,1)');
+  pitchBand(ctx,W,H,H*0.6);
+  var spr=recolor('m_shot_A',IMGS.shot,RED);
+  drawSprite(ctx,spr,W*0.52,H*0.82,H*0.62,false); // 大きく
+  sfx(ctx,'ズドンッ!!',W*0.5,H*0.15,52,-0.08,'#ffe14a','#c8102e');
+  subtitle(ctx,W,H,'ロッシ、渾身のミドル！',RED.shirt);
+}
+function caseB(cv){ // 9:16・全身＋強集中線（フルスクリーン級）
+  var W=405,H=720; cv.width=W; cv.height=H; var ctx=cv.getContext('2d');
+  skyBand(ctx,W,H,H*0.68,'#101a34','#26407a');
+  halftone(ctx,W,H,0,'#0a1020');
+  speedBurst(ctx,W,H,W*0.45,H*0.4,'rgba(255,255,255,1)');
+  pitchBand(ctx,W,H,H*0.68);
+  var spr=recolor('m_shot_B',IMGS.shot,RED);
+  drawSprite(ctx,spr,W*0.5,H*0.86,H*0.5,false);
+  sfx(ctx,'GOAL!!',W*0.5,H*0.12,58,-0.05,'#ffe14a','#e0102e');
+  subtitle(ctx,W,H,'ゴォォール！！ ロッシだァ！',RED.shirt);
+}
+function caseC(cv){ // 3:4・ヘディング競り合い（縦2体＝縦長に最適）
+  var W=450,H=600; cv.width=W; cv.height=H; var ctx=cv.getContext('2d');
+  skyBand(ctx,W,H,H*0.72,'#1a2340','#33507f');
+  speedBurst(ctx,W,H,W*0.5,H*0.28,'rgba(255,255,255,1)');
+  pitchBand(ctx,W,H,H*0.72);
+  var a=recolor('m_hdrD_C',IMGS.hdrD,BLU), b=recolor('m_hdrA_C',IMGS.hdrA,RED);
+  drawSprite(ctx,a,W*0.56,H*0.9,H*0.72,false);
+  drawSprite(ctx,b,W*0.44,H*0.9,H*0.72,false);
+  sfx(ctx,'ドンッ!',W*0.5,H*0.13,46,-0.06,'#fff','#1050c0');
+  subtitle(ctx,W,H,'competing で競り勝った！',RED.shirt);
+}
+function caseD(cv){ // 9:16・GKダイビング（対角がフルで映える）
+  var W=405,H=720; cv.width=W; cv.height=H; var ctx=cv.getContext('2d');
+  skyBand(ctx,W,H,H*0.7,'#0d1a12','#1e5a30');
+  speedBurst(ctx,W,H,W*0.6,H*0.4,'rgba(255,255,255,1)');
+  pitchBand(ctx,W,H,H*0.7);
+  var spr=recolor('m_gk_D',IMGS.gk,{shirt:'#f2c200',shorts:'#3a2a10',socks:'#f2c200',accent:'#eef0f5',skin:'#cf8f5d'});
+  // GKは220x127横長→縦長では大きく対角配置
+  if(spr){ var dh=H*0.42, w=spr.width*(dh/spr.height); ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(spr,W*0.5-w/2,H*0.4,w,dh); ctx.restore(); }
+  sfx(ctx,'ナイスセーブ!',W*0.5,H*0.13,38,-0.05,'#ffe14a','#1e8c3a');
+  subtitle(ctx,W,H,'オチョア、超反応ではじいた！',BLU.shirt);
+}
+
+var CASES=[
+  ['現状（横長 480×216）','2.22:1・選手はやや小さめ・帯表示',caseCurrent],
+  ['案A　3:4 迫力クロップ','450×600・選手を大きく・赤い緊迫トーン・SFX大',caseA],
+  ['案B　9:16 フルスクリーン','405×720・モバイル全画面級・強い集中線＋ハーフトーン',caseB],
+  ['案C　3:4 競り合い','450×600・縦に2体重なるヘディング＝縦長に最適',caseC],
+  ['案D　9:16 GKダイブ','405×720・横っ飛びの対角がフルで映える',caseD]
+];
+var row=document.getElementById('row');
+function render(){
+  row.innerHTML='';
+  CASES.forEach(function(c){
+    var box=document.createElement('div'); box.className='case';
+    var h=document.createElement('h2'); h.textContent=c[0];
+    var s=document.createElement('div'); s.className='sub'; s.textContent=c[1];
+    var fr=document.createElement('div'); fr.className='frame'+(c[2]===caseCurrent?' cur':'');
+    var cv=document.createElement('canvas');
+    var scale = c[2]===caseCurrent? 0.62 : (0.42); // 表示縮尺
+    c[2](cv);
+    cv.style.width=(cv.width*scale)+'px'; cv.style.height=(cv.height*scale)+'px';
+    fr.appendChild(cv); box.appendChild(h); box.appendChild(s); box.appendChild(fr); row.appendChild(box);
+  });
+}
+var tries=0;
+(function waitImgs(){ var all=Object.keys(IMGS).every(function(k){return IMGS[k].complete;}); if(all||tries++>40){ render(); document.getElementById('log').textContent = all?'':'一部画像未ロード'; } else setTimeout(waitImgs,100); })();
+</script>
+</body>
+</html>

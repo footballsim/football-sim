@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>漫画シュート — 12髪型ループ再生</title>
+<style>
+  body{background:#0b0d16;color:#dce3ee;font:14px system-ui,sans-serif;margin:0;padding:16px}
+  h1{font-size:16px;margin:0 0 4px}
+  p.note{color:#9fb0c8;font-size:12px;margin:0 0 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;max-width:1000px}
+  .cell .frame{background:#000;border-radius:7px;overflow:hidden;aspect-ratio:480/216}
+  .cell .frame canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+  .cap{color:#8fd6ff;font-size:12px;margin:5px 2px 0}
+  #log{color:#c05a5a;font:12px ui-monospace,monospace;margin-top:8px}
+</style>
+</head>
+<body>
+<h1>漫画シュート（12髪型・単体＋MangaRecolor）— ループ再生</h1>
+<p class="note">実 cutscene.js の _renderShotScene を約2.0秒ごとに再描画。12髪型を1枚ずつ・6チーム色でリカラー（キット4色＋選手肌）。通常シュート10＝ボールが左へ高速／セーブ1・枠外1を混在。ボール起点・向き・軸足の位置を確認。</p>
+<div class="grid" id="grid"></div>
+<div id="log"></div>
+
+<script src="js/portrait.js?v=s2"></script>
+<script src="js/manga_recolor.js?v=s2"></script>
+<script src="js/cutscene.js?v=s2"></script>
+<script>
+window.MANGA_CUTSCENE_ENABLED = true;
+window.LANG = 'ja';
+CUTSCENE_BURN_LABELS = true;
+window.gameState = {};   // team1未設定→_csAttackRight=true（全キャンバス右攻めで一貫。ネイティブ左向きは反転される）
+window.getPlayerName = function (p) { return p.long_name || p.name; };
+window.getTeamName = function (t) { return t.__name || ''; };
+
+// プレビューでは過渡期の髪型固定を解除し、12髪型を明示表示（本番/実シーンは _MANGA_HAIR_UNIFORM='fade' のまま）
+_MANGA_HAIR_UNIFORM = null;
+_MANGA_HSTYLE_SPRITE_ALIAS = {};   // シュートは12髪型フル（bangs/bowlもエイリアスせず本物を使う）
+
+var HS = ['short','fade','skin','spike','curly','part','bangs','afro','slick','wavy','mohawk','bowl'];
+// [チーム名, キット(shirt/shorts/socks/accent), 選手名, 結果]
+var KITS = [
+  ['イングランド', { shirt:'#F2F4F7', shorts:'#1A2A66', socks:'#F2F4F7', accent:'#C8102E' }, 'Harry Kane', 'シュート'],
+  ['ブラジル',     { shirt:'#F2C500', shorts:'#1B3A8A', socks:'#F2F4F7', accent:'#1E8C3A' }, 'Richarlison', 'シュート'],
+  ['アルゼンチン', { shirt:'#74ACDF', shorts:'#17181C', socks:'#F2F4F7', accent:'#F2C200' }, 'Julian Alvarez', 'GK防いだ！'],
+  ['フランス',     { shirt:'#1A2C6B', shorts:'#F2F4F7', socks:'#C8102E', accent:'#C8102E' }, 'Kylian Mbappe', 'シュート'],
+  ['日本',         { shirt:'#1B3E9C', shorts:'#F2F4F7', socks:'#1B3E9C', accent:'#C8102E' }, 'Ayase Ueda', 'シュート'],
+  ['スペイン',     { shirt:'#C8102E', shorts:'#1A2A66', socks:'#C8102E', accent:'#F2C200' }, 'Alvaro Morata', '枠を外した！'],
+  ['ドイツ',       { shirt:'#F2F4F7', shorts:'#17181C', socks:'#F2F4F7', accent:'#111' }, 'Kai Havertz', 'シュート'],
+  ['オランダ',     { shirt:'#E8641B', shorts:'#17181C', socks:'#E8641B', accent:'#F2F4F7' }, 'Memphis Depay', 'シュート'],
+  ['ポルトガル',   { shirt:'#B01C2E', shorts:'#1E8C3A', socks:'#B01C2E', accent:'#F2C200' }, 'Goncalo Ramos', 'シュート'],
+  ['ベルギー',     { shirt:'#E23A2E', shorts:'#17181C', socks:'#F2C200', accent:'#F2C200' }, 'Romelu Lukaku', 'シュート'],
+  ['イタリア',     { shirt:'#1B4BA0', shorts:'#F2F4F7', socks:'#1B4BA0', accent:'#F2C200' }, 'Federico Chiesa', 'シュート'],
+  ['メキシコ',     { shirt:'#1E8C3A', shorts:'#F2F4F7', socks:'#C8102E', accent:'#F2F4F7' }, 'Santiago Gimenez', 'シュート']
+];
+
+function makeSc(kit, name, result) {
+  var offence = { __name: kit[0], team_color: kit[1].shirt, kit: kit[1],
+    players: [{ long_name: name }], lineup: [0] };
+  var defence = { __name: 'DEF', team_color: '#333', kit: { shirt:'#333', shorts:'#111', socks:'#333', accent:'#888' },
+    players: [{ long_name: 'Defender' }], lineup: [0] };
+  return { offence: offence, defence: defence, ofsPos: 0, dfsPos: 0, action: 'シュート', result: result };
+}
+
+var grid = document.getElementById('grid');
+var cells = HS.map(function (hs, i) {
+  var kit = KITS[i];
+  var cell = document.createElement('div'); cell.className = 'cell';
+  var frame = document.createElement('div'); frame.className = 'frame';
+  var cap = document.createElement('div'); cap.className = 'cap';
+  cap.textContent = hs + ' — ' + kit[0] + ' / ' + kit[3];
+  cell.appendChild(frame); cell.appendChild(cap); grid.appendChild(cell);
+  return { hs: hs, kit: kit, frame: frame };
+});
+
+function play() {
+  cells.forEach(function (c) {
+    _MANGA_HAIR_UNIFORM = c.hs;   // このセルの髪型を強制（呼び出し直前に設定＝_mangaFeat が即参照）
+    var entry = (typeof _pickCutscene === 'function') ? _pickCutscene('shot', c.kit[1].shirt) : { file: 'img/cutscenes/shot_pt06red_01.png' };
+    var cv = _renderShotScene(makeSc(c.kit, c.kit[2], c.kit[3]), entry || { file: '' });
+    if (!cv) { document.getElementById('log').textContent = 'NULL canvas (MangaRecolor未ロード?)'; return; }
+    c.frame.innerHTML = '';
+    c.frame.appendChild(cv);
+  });
+  _MANGA_HAIR_UNIFORM = null;
+}
+play();
+setInterval(play, 2000);
+document.getElementById('log').textContent = 'looping ' + HS.length + ' hairstyles';
+</script>
+</body>
+</html>

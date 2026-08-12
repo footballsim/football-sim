@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PT-06 pixel-head compose (CT/NES調)</title>
+<style>
+  body { margin:0; background:linear-gradient(160deg,#003087,#0050cc,#1a7a3a); color:#fff; font:13px system-ui; }
+  h2 { padding:8px 12px 0; margin:0; }
+  p.note { padding:0 12px; margin:4px 0; opacity:.85; }
+  #stage, #zoom { display:flex; flex-wrap:wrap; gap:10px; padding:12px; align-items:flex-end; }
+  .cell { text-align:center; background:rgba(0,0,0,.18); border-radius:8px; padding:6px; }
+  canvas { image-rendering:pixelated; image-rendering:crisp-edges; }
+  .cap { margin-top:4px; font-size:12px; }
+</style>
+</head>
+<body>
+<h2>PT-06 ピクセル頭（体と同一ドット画風）＋実ボディ合成</h2>
+<p class="note">仮説: 頭も体と同じ限定パレット/黒縁/階段エッジで描けば「貼り絵」にならない。</p>
+<div id="stage"></div>
+<h2>頭だけ 6倍ズーム（識別性チェック）</h2>
+<div id="zoom"></div>
+<script src="/js/portrait.js"></script>
+<script src="/js/portrait_pixel.js"></script>
+<script>
+(function(){
+  var stage = document.getElementById('stage');
+  var zoom = document.getElementById('zoom');
+  var NAMES = ['久保建英','三笘薫','冨安健洋','伊東純也','上田綺世','鎌田大地'];
+  // 実ボディ首ソケット実測: native 833x1180, 襟開口中心 x≈462, sy≈48
+  var SOCK_X = 462, SOCK_Y = 52, HEAD_H = 150, HEADROOM = 190;
+
+  var body = new Image();
+  body.onload = function(){
+    Portrait.preload().then(function(){
+      var DISP_H = 460;
+      var dScale = DISP_H / body.naturalHeight;
+
+      function makeCell(nm, flip){
+        var cell = document.createElement('div'); cell.className='cell';
+        var cw = Math.round(body.naturalWidth*dScale)+8;
+        var ch = Math.round(body.naturalHeight*dScale)+HEADROOM+8;
+        var cv = document.createElement('canvas'); cv.width=cw; cv.height=ch;
+        var ctx = cv.getContext('2d');
+        ctx.imageSmoothingEnabled=false;
+        ctx.translate(0, HEADROOM);
+        var a = { sx:SOCK_X, sy:SOCK_Y, headH:HEAD_H, dScale:dScale, flip:flip };
+        PixelHead.composePose(ctx, nm, body, a, { });
+        cell.appendChild(cv);
+        var cap = document.createElement('div'); cap.className='cap';
+        cap.textContent = nm + (flip?' [flip]':'');
+        cell.appendChild(cap);
+        stage.appendChild(cell);
+      }
+
+      NAMES.forEach(function(nm,i){ makeCell(nm, i===1); }); // 三笘だけflip
+
+      // 頭だけ大写し（識別性）: native 24x28 を 6倍
+      var Z = 6;
+      NAMES.forEach(function(nm){
+        var cell = document.createElement('div'); cell.className='cell';
+        var cv = document.createElement('canvas'); cv.width=24*Z; cv.height=28*Z;
+        var ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+        PixelHead.render(cv, nm, {});
+        cell.appendChild(cv);
+        var f = Portrait.featuresFor(nm);
+        var cap=document.createElement('div'); cap.className='cap';
+        cap.textContent = nm + ' hs'+f.hstyle+' hair'+f.hair+' skin'+f.skin+' bd'+f.beard;
+        cell.appendChild(cap);
+        zoom.appendChild(cell);
+      });
+
+      // 表情差分（演出余地）: 久保で normal / joy / grit
+      ['normal','joy','grit'].forEach(function(ex){
+        var cell = document.createElement('div'); cell.className='cell';
+        var cv = document.createElement('canvas'); cv.width=24*Z; cv.height=28*Z;
+        var ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+        PixelHead.render(cv, '久保建英', ex==='normal'?{}:{expr:ex});
+        cell.appendChild(cv);
+        var cap=document.createElement('div'); cap.className='cap'; cap.textContent='久保 '+ex;
+        cell.appendChild(cap);
+        zoom.appendChild(cell);
+      });
+
+      window.__DONE = true;
+    });
+  };
+  body.onerror=function(){ document.body.insertAdjacentHTML('beforeend','<p style="color:#f88">body load failed</p>'); };
+  body.src = '/tools/proto/pt06_body_shot.png';
+})();
+</script>
+</body>
+</html>

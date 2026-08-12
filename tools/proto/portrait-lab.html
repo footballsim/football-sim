@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>選手ポートレート・ラボ v2（共通変形スライダー）</title>
+<style>
+  :root{ --bg:#0b1220; --panel:#131c30; --line:#26324c; --ink:#eaf0ff; --sub:#93a4c8; --accent:#3d7dff; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:linear-gradient(160deg,#081020,#0d1830 60%,#0b1a12); color:var(--ink);
+        font-family:'Noto Sans JP',system-ui,sans-serif; padding:20px; }
+  h1{ font-size:18px; margin:0 0 4px; }
+  .note{ color:var(--sub); font-size:12px; margin:0 0 16px; max-width:860px; line-height:1.7; }
+  .wrap{ display:flex; gap:22px; flex-wrap:wrap; align-items:flex-start; }
+  .card{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; }
+  canvas{ image-rendering:pixelated; display:block; }
+  .stage{ background:#ffffff; border-radius:12px; padding:10px; }
+  .ctrls{ display:grid; grid-template-columns:auto 1fr; gap:8px 12px; align-items:center; font-size:12px; width:300px; }
+  .ctrls label{ color:var(--sub); }
+  select,input[type=text]{ width:100%; background:#0d1526; color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:12px; font-family:inherit; }
+  input[type=range]{ width:100%; }
+  .seg{ grid-column:1 / -1; border-top:1px solid var(--line); margin-top:8px; padding-top:8px; color:var(--sub); font-size:11px; letter-spacing:.04em; }
+  .val{ font-variant-numeric:tabular-nums; color:var(--ink); }
+  .row{ display:flex; gap:8px; margin-top:12px; }
+  button{ flex:1; background:var(--accent); color:#fff; border:0; border-radius:8px; padding:9px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; }
+  button.ghost{ background:#1b2740; }
+  code{ background:#0d1526; padding:2px 6px; border-radius:6px; font-size:11px; }
+</style>
+</head>
+<body>
+  <h1>選手ポートレート・ラボ v2 <span style="color:var(--sub);font-weight:400;font-size:12px">— 共通変形スライダーで位置・サイズを即調整</span></h1>
+  <p class="note">全パーツ（顔・髪・目・口）は同じ顔の上で描いて切り出したもの＝同一座標系。だから<b>1つの共通変形（拡大率・X・Y）を全パーツに掛ける</b>だけで、揃ったまま拡縮・移動できます。スライダーで合わせ込んでください。肌/髪は輝度保持リカラー、目/口はそのまま、襟はチーム色。</p>
+
+  <div class="wrap">
+    <div class="card"><div class="stage"><canvas id="hero" width="360" height="420"></canvas></div></div>
+
+    <div class="card ctrls" id="ctrls">
+      <label>肌トーン</label><select id="sel_skin"></select>
+      <label>髪色</label><select id="sel_hair"></select>
+      <label>髪型</label><select id="sel_hstyle"></select>
+      <label>輪郭</label><select id="sel_face"></select>
+      <label>目/眉</label><select id="sel_eyes"></select>
+      <label>瞳の色</label><select id="sel_iris"></select>
+      <label>口</label><select id="sel_mouth"></select>
+      <label>髭</label><select id="sel_beard"></select>
+      <label>チーム色</label><input type="text" id="team" value="#003087">
+
+      <div class="seg">共通変形（全パーツに同時適用）</div>
+      <label>拡大率 <span class="val" id="v_s"></span></label><input type="range" id="r_s" min="0.4" max="1.2" step="0.005">
+      <label>横位置 <span class="val" id="v_x"></span></label><input type="range" id="r_x" min="-220" max="220" step="1">
+      <label>縦位置 <span class="val" id="v_y"></span></label><input type="range" id="r_y" min="-220" max="220" step="1">
+
+      <div class="seg">パーツ個別調整（顔に対して動かす）</div>
+      <label>調整対象</label><select id="sel_adj"></select>
+      <label>横 <span class="val" id="v_ax"></span></label><input type="range" id="a_x" min="-180" max="180" step="1">
+      <label>縦 <span class="val" id="v_ay"></span></label><input type="range" id="a_y" min="-180" max="180" step="1">
+      <label>大きさ <span class="val" id="v_as"></span></label><input type="range" id="a_s" min="0.5" max="1.6" step="0.005">
+
+      <div class="row"><button id="fit">自動フィット</button><button class="ghost" id="copy">変形値をコピー</button></div>
+      <div class="seg" style="border:0"><span id="cfg"></span></div>
+    </div>
+  </div>
+
+<script>
+/* ---------- パーツ定義（id = PNGファイル名） ---------- */
+const SKIN=[['#ffdcbb','明1'],['#f4c79b','明2'],['#e6ad7f','中'],['#cf8f5d','中濃'],['#a06a3f','褐色'],['#6f492c','濃']];
+const HAIR=[['#20232a','黒'],['#3a2416','焦茶'],['#5a381f','茶'],['#7b4a26','明茶'],['#a86a2f','栗'],['#d7ac54','金茶'],['#e6cf86','金'],['#98352a','赤毛'],['#b9b9c0','銀'],['#e7e2da','白']];
+const FACE=[['oval','卵'],['round','丸'],['square','角'],['long','面長'],['diamond','逆三']];
+const HAIRSTYLE=[['short','ショート'],['fade','刈上げ'],['skin','スキンヘッド'],['spike','ツン'],['curly','クルクル'],['part','七三'],['bangs','ぱっつん'],['afro','アフロ'],['slick','オールバ'],['wavy','ウェーブ'],['mohawk','ソフモヒ'],['bowl','マッシュ']];  // 12種すべてhead_*.png実在(2026-07-06 buzz削除=head_buzz未制作・近縁short/fade/skinで代替)。skin=アート不要の正式スタイル
+const EYES=[['normal','標準'],['droopy','たれ目'],['round','丸目'],['narrow','細目']];  // 眉は固定・目の形だけ変える
+const IRIS=[['#6e4a2a','茶'],['#3a2414','こげ茶'],['#a86a1e','琥珀'],['#8a6238','ハシバミ'],['#3f6fa0','青'],['#4f7d4a','緑'],['#7f8a8d','灰']]; // 現実の瞳色・虹彩(橙画素)だけリカラー
+const MOUTH=[['flat','標準'],['thick','たらこ唇']];  // 2択（他は未生成のため外す）
+const BEARD=[['none','なし'],['stubble','無精髭'],['mustache','口髭'],['goatee','顎髭'],['full','フルビアード']];  // none=描かない・髪色でリカラー
+const FW=720, FH=840;
+
+/* ---------- 状態 ---------- */
+const f={ skin:2, hair:1, hstyle:0, face:0, eyes:0, iris:0, mouth:0, beard:0 };
+let team='#003087';
+let T={ s:1, ox:0, oy:0 };   // 共通変形（既定=等倍・描いたまま）
+// パーツ個別調整（顔に対して動かす・dx/dy=px, s=倍率）
+const PART_ADJ={ face:{dx:0,dy:0,s:1}, hairback:{dx:0,dy:0,s:1}, hairfront:{dx:0,dy:0,s:1}, eyes:{dx:0,dy:0,s:1}, mouth:{dx:0,dy:0,s:1}, beard:{dx:0,dy:0,s:1} };
+let adjSlot='eyes';
+
+/* ---------- PNGパーツ読込（キャッシュバスター） ---------- */
+const PARTS={};
+function load(fn){ const i=new Image(); i.onload=()=>{ PARTS[fn]=i; draw(); }; i.onerror=()=>{}; i.src='parts/'+fn+'?v='+Date.now(); }
+function loadAll(){ FACE.forEach(x=>load('face_'+x[0]+'.png')); HAIRSTYLE.forEach(x=>{load('head_'+x[0]+'.png'); load('hairfront_'+x[0]+'.png'); load('hairback_'+x[0]+'.png'); load('hairfade_'+x[0]+'.png');}); EYES.forEach(x=>load('eyes_'+x[0]+'.png')); MOUTH.forEach(x=>load('mouth_'+x[0]+'.png')); BEARD.forEach(x=>{ if(x[0]!=='none'&&x[0]!=='stubble') load('beard_'+x[0]+'.png'); }); } // stubbleは色(陰影)で表現＝PNG不要・型紙はbeard_full
+function part(fn){ const i=PARTS[fn]; return (i&&i.naturalWidth)?i:null; }
+
+/* ---------- 輝度保持リカラー（肌・髪） ---------- */
+function hexToRgb(h){const n=parseInt(h.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255];}
+function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h,s,l=(mx+mn)/2;if(mx===mn){h=s=0;}else{const d=mx-mn;s=l>0.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;default:h=(r-g)/d+4;}h/=6;}return[h,s,l];}
+function h2(p,q,t){if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;}
+function hslToRgb(h,s,l){let r,g,b;if(s===0){r=g=b=l;}else{const q=l<0.5?l*(1+s):l+s-l*s,p=2*l-q;r=h2(p,q,h+1/3);g=h2(p,q,h);b=h2(p,q,h-1/3);}return[r*255|0,g*255|0,b*255|0];}
+const tintCache={};
+/* 頭部一体パーツの二重リカラー: グレー画素(髪)→髪色 / 暖色画素(肌)→肌色。輪郭黒は低輝度のまま黒く残る */
+function dualTinted(img,fn,skinHex,hairHex){
+  const k=fn+'@'+skinHex+'@'+hairHex; if(tintCache[k])return tintCache[k];
+  const c=document.createElement('canvas'); c.width=FW; c.height=FH; const x=c.getContext('2d'); x.imageSmoothingEnabled=false; x.drawImage(img,0,0,FW,FH);
+  const [sh,ss,sl]=rgbToHsl(...hexToRgb(skinHex)); const [hh,hs,hl]=rgbToHsl(...hexToRgb(hairHex));
+  const id=x.getImageData(0,0,FW,FH), d=id.data;
+  const isHair=(r,g,b)=>{const mx=Math.max(r,g,b),mn=Math.min(r,g,b); return (mx-mn)<=32 && (r-b)<=28;};
+  let sSum=0,sN=0,hSum=0,hN=0;
+  for(let i=0;i<d.length;i+=4){ if(d[i+3]<8)continue; const l=rgbToHsl(d[i],d[i+1],d[i+2])[2];
+    if(isHair(d[i],d[i+1],d[i+2])){hSum+=l;hN++;}else{sSum+=l;sN++;} }
+  const sScale=sl/Math.max(0.06,sN?sSum/sN:0.5), hScale=hl/Math.max(0.06,hN?hSum/hN:0.5);
+  for(let i=0;i<d.length;i+=4){ if(d[i+3]<8)continue;
+    const hair=isHair(d[i],d[i+1],d[i+2]);
+    let l=rgbToHsl(d[i],d[i+1],d[i+2])[2]*(hair?hScale:sScale); l=Math.max(0,Math.min(1,l));
+    const rr=hslToRgb(hair?hh:sh, hair?hs:ss, l); d[i]=rr[0];d[i+1]=rr[1];d[i+2]=rr[2]; }
+  x.putImageData(id,0,0); tintCache[k]=c; return c;
+}
+function tinted(img,fn,hex){
+  const k=fn+'@'+hex; if(tintCache[k])return tintCache[k];
+  const c=document.createElement('canvas'); c.width=FW; c.height=FH; const x=c.getContext('2d'); x.imageSmoothingEnabled=false; x.drawImage(img,0,0,FW,FH);
+  const [th,ts,tl]=rgbToHsl(...hexToRgb(hex)); const id=x.getImageData(0,0,FW,FH),d=id.data;
+  // パーツ平均輝度を目標色の輝度へ寄せる（黒→暗く/金→明るく が効くように）
+  let sum=0,n=0;
+  for(let i=0;i<d.length;i+=4){ if(d[i+3]<8)continue; sum+=rgbToHsl(d[i],d[i+1],d[i+2])[2]; n++; }
+  const meanL=n?sum/n:0.5, scale=tl/Math.max(0.06,meanL);
+  for(let i=0;i<d.length;i+=4){ if(d[i+3]<8)continue; let l=rgbToHsl(d[i],d[i+1],d[i+2])[2]*scale; l=Math.max(0,Math.min(1,l)); const rr=hslToRgb(th,ts,l); d[i]=rr[0];d[i+1]=rr[1];d[i+2]=rr[2]; }
+  x.putImageData(id,0,0); tintCache[k]=c; return c;
+}
+
+/* ---------- 瞳の色＝虹彩(橙画素)だけリカラー 2026-07-05 ---------- */
+function irisTint(img,fn,hex){
+  const k='iris@'+fn+'@'+hex; if(tintCache[k])return tintCache[k];
+  const c=document.createElement('canvas'); c.width=FW;c.height=FH; const x=c.getContext('2d'); x.imageSmoothingEnabled=false; x.drawImage(img,0,0,FW,FH);
+  const [th,ts,tl]=rgbToHsl(...hexToRgb(hex));
+  const id=x.getImageData(0,0,FW,FH),d=id.data;
+  for(let i=0;i<d.length;i+=4){ if(d[i+3]<8)continue;
+    const r=d[i],g=d[i+1],b=d[i+2];
+    const white=r>190&&g>185&&b>165, dark=r+g+b<150;
+    if(!white&&!dark&&(r-b)>28&&r>=g-6){         // 虹彩(橙/琥珀の明暗すべて)＝白目/黒まぶた/眉は不変（目パーツに肌は無い）
+      let l=rgbToHsl(r,g,b)[2]*(0.55+tl); l=Math.max(0,Math.min(1,l));  // 明度は元の陰影を保ちつつ目標の明暗へ寄せる
+      const rr=hslToRgb(th,ts,l); d[i]=rr[0];d[i+1]=rr[1];d[i+2]=rr[2];
+    }
+  }
+  x.putImageData(id,0,0); tintCache[k]=c; return c;
+}
+function drawEyes(ctx,D){ const fn='eyes_'+EYES[f.eyes][0]+'.png'; const img=part(fn); if(!img)return;
+  const src=irisTint(img,fn,IRIS[f.iris][0]); const A=PART_ADJ.eyes; const s=T.s*A.s;
+  ctx.drawImage(src,(T.ox+A.dx)*D,(T.oy+A.dy)*D,FW*s*D,FH*s*D); }
+
+/* ---------- 無精髭＝色（顎ゾーンの陰影）2026-07-05 ----------
+   無精髭は「髭パーツ」ではなく「顎まわりの肌がうっすら青黒い」＝色で表現する。
+   フルビアードの形を型紙に、肌を暗く・低彩度にした陰影を敷き、髪の濃さで濃度を変える。 */
+function stubbleLayer(){
+  const k='stubble_black'; if(tintCache[k])return tintCache[k];
+  const img=part('beard_full.png'); if(!img)return null;
+  const c=document.createElement('canvas'); c.width=FW;c.height=FH; const x=c.getContext('2d'); x.imageSmoothingEnabled=false;
+  x.drawImage(img,0,0,FW,FH);
+  const id=x.getImageData(0,0,FW,FH),d=id.data;
+  // 型紙(フルビアード)の縦範囲を測り、下端側＝顎の下をカット（無精髭はフルより狭い）
+  let ymin=FH,ymax=0;
+  for(let i=0;i<d.length;i+=4){ if(d[i+3]>8){ const y=((i/4)/FW)|0; if(y<ymin)ymin=y; if(y>ymax)ymax=y; } }
+  const cutY=ymin+(ymax-ymin)*0.70;
+  // クリップ=素の顔シルエット(head_skin)の「肌ピクセルのみ」に限定＝あご輪郭からはみ出す髭を消す（輪郭線=暗/背景=透明は除外）
+  const clip=part('head_skin.png'); let ca=null;
+  if(clip){ const tc=document.createElement('canvas');tc.width=FW;tc.height=FH;const tx=tc.getContext('2d');tx.imageSmoothingEnabled=false;tx.drawImage(clip,0,0,FW,FH);ca=tx.getImageData(0,0,FW,FH).data; }
+  for(let i=0;i<d.length;i+=4){ if(d[i+3]<8)continue;
+    const y=((i/4)/FW)|0;
+    if(y>cutY){ d[i+3]=0; continue; }                                          // 顎の下カット
+    if(ca && (ca[i+3]<40 || ca[i]+ca[i+1]+ca[i+2]<200)){ d[i+3]=0; continue; } // 肌の外(輪郭/背景)＝消す
+    d[i]=34;d[i+1]=36;d[i+2]=42;d[i+3]=255; }                                  // 色は黒で統一
+  x.putImageData(id,0,0); tintCache[k]=c; return c;
+}
+
+/* ---------- 描画 ---------- */
+function shade(hex,fac){const n=parseInt(hex.slice(1),16);let r=(n>>16)&255,g=(n>>8)&255,b=n&255;r=Math.min(255,r*fac|0);g=Math.min(255,g*fac|0);b=Math.min(255,b*fac|0);return '#'+((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1);}
+function draw(){
+  const cv=document.getElementById('hero'), ctx=cv.getContext('2d'), D=cv.width/FW;
+  ctx.clearRect(0,0,cv.width,cv.height); ctx.imageSmoothingEnabled=false;
+  const P=(fn,slot,recolorHex)=>{ const img=part(fn); if(!img)return; const A=PART_ADJ[slot]; const s=T.s*A.s;
+    const src=recolorHex?tinted(img,fn,recolorHex):img;
+    ctx.drawImage(src, (T.ox+A.dx)*D, (T.oy+A.dy)*D, FW*s*D, FH*s*D); };
+
+  const headImg=part('head_'+HAIRSTYLE[f.hstyle][0]+'.png');
+  if(headImg){
+    // 【頭部一体方式 2026-07-05】輪郭+髪型=1パーツ（当てはめ工程を廃止）。二重リカラーで肌/髪を別色に
+    drawJersey(ctx,D);
+    const A=PART_ADJ.face; const s=T.s*A.s;
+    ctx.drawImage(dualTinted(headImg,'head_'+HAIRSTYLE[f.hstyle][0]+'.png',SKIN[f.skin][0],HAIR[f.hair][0]), (T.ox+A.dx)*D, (T.oy+A.dy)*D, FW*s*D, FH*s*D);
+    if(BEARD[f.beard][0]==='stubble'){ const sl=stubbleLayer(); if(sl){ ctx.save(); ctx.globalAlpha=0.68; ctx.drawImage(sl,(T.ox+A.dx)*D,(T.oy+A.dy)*D,FW*s*D,FH*s*D); ctx.restore(); } } // 無精髭=黒固定の陰影（目/口の下・顔シルエットでクリップ）
+    drawEyes(ctx,D);
+    P('mouth_'+MOUTH[f.mouth][0]+'.png','mouth', null);
+    if(BEARD[f.beard][0]!=='none'&&BEARD[f.beard][0]!=='stubble') P('beard_'+BEARD[f.beard][0]+'.png','beard', HAIR[f.hair][0]);
+  } else {
+  P('hairback_'+HAIRSTYLE[f.hstyle][0]+'.png','hairback', HAIR[f.hair][0]);
+  drawJersey(ctx,D);
+  P('face_'+FACE[f.face][0]+'.png','face', SKIN[f.skin][0]);
+  drawEyes(ctx,D);
+  P('mouth_'+MOUTH[f.mouth][0]+'.png','mouth', null);
+  if(BEARD[f.beard][0]!=='none') P('beard_'+BEARD[f.beard][0]+'.png','beard', HAIR[f.hair][0]); // 髭は口の上・前髪の下・髪色でリカラー
+  P('hairfade_'+HAIRSTYLE[f.hstyle][0]+'.png','hairfront', shade(SKIN[f.skin][0],0.72)); // 刈り上げ=地肌+無精髭（暗め肌色でリカラー・髪の下・前髪と同じ変形に連動）
+  P('hairfront_'+HAIRSTYLE[f.hstyle][0]+'.png','hairfront', HAIR[f.hair][0]);
+  }
+
+  document.getElementById('v_s').textContent=T.s.toFixed(3);
+  document.getElementById('v_x').textContent=T.ox;
+  document.getElementById('v_y').textContent=T.oy;
+  document.getElementById('cfg').innerHTML='<code>T = {s:'+T.s.toFixed(3)+', ox:'+T.ox+', oy:'+T.oy+'}</code>';
+}
+function drawJersey(ctx,D){
+  const cY=Math.round((T.oy + FH*T.s*0.79)); // 首の下あたりに肩を合わせる
+  const p=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x*D),Math.round(y*D),Math.round(w*D),Math.round(h*D));};
+  p(0,cY,FW,FH-cY,team);
+  p(0,cY,FW,18,shade(team,1.22));
+  p(0,FH-24,FW,24,shade(team,0.82));
+  const cx=T.ox+FW*T.s*0.5;
+  for(let i=0;i<3;i++){const o=i*26;p(70+o,cY+26+o,26,16,'#f4f4f4');p(FW-96-o,cY+26+o,26,16,'#f4f4f4');}
+  for(let k=0;k<90;k++){const vw=Math.round(70*(1-k/90));if(vw>0){p(cx-vw,cY+k,vw*2,1,shade(SKIN[f.skin][0],0.9));p(cx-vw,cY+k,3,1,'#f0f0f0');p(cx+vw-3,cY+k,3,1,'#f0f0f0');}}
+}
+
+/* ---------- 自動フィット（顔bboxを基準サイズへ） ---------- */
+function faceBBox(){
+  const img=part('face_'+FACE[f.face][0]+'.png'); if(!img)return null;
+  const c=document.createElement('canvas');c.width=FW;c.height=FH;const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(img,0,0,FW,FH);
+  const d=x.getImageData(0,0,FW,FH).data; let t=FH,b=0,l=FW,r=0;
+  for(let y=0;y<FH;y++)for(let X=0;X<FW;X++){ if(d[(y*FW+X)*4+3]>20){ if(y<t)t=y;if(y>b)b=y;if(X<l)l=X;if(X>r)r=X; } }
+  return b>t?{t,b,l,r}:null;
+}
+function autoFit(){
+  const bb=faceBBox(); if(!bb)return;
+  const targetH=500, targetTop=120;         // 頭+首を高さ500・上端120へ（頭は小さめ＋余白）
+  const s=targetH/(bb.b-bb.t);
+  T.s=Math.max(0.4,Math.min(1.2,s));
+  T.ox=Math.round(360 - ((bb.l+bb.r)/2)*T.s);
+  T.oy=Math.round(targetTop - bb.t*T.s);
+  syncSliders(); draw();
+}
+
+/* ---------- UI ---------- */
+function opt(sel,arr,val){ sel.innerHTML=''; arr.forEach((a,i)=>{const o=document.createElement('option');o.value=i;o.textContent=a[1];sel.appendChild(o);}); sel.value=val; }
+function syncSliders(){ r_s.value=T.s; r_x.value=T.ox; r_y.value=T.oy; }
+const r_s=document.getElementById('r_s'), r_x=document.getElementById('r_x'), r_y=document.getElementById('r_y');
+opt(document.getElementById('sel_skin'),SKIN,f.skin);
+opt(document.getElementById('sel_hair'),HAIR,f.hair);
+opt(document.getElementById('sel_hstyle'),HAIRSTYLE,f.hstyle);
+opt(document.getElementById('sel_face'),FACE,f.face);
+opt(document.getElementById('sel_eyes'),EYES,f.eyes);
+opt(document.getElementById('sel_iris'),IRIS,f.iris);
+opt(document.getElementById('sel_mouth'),MOUTH,f.mouth);
+opt(document.getElementById('sel_beard'),BEARD,f.beard);
+['skin','hair','hstyle','face','eyes','iris','mouth','beard'].forEach(k=>{ document.getElementById('sel_'+k).onchange=e=>{ f[k]=+e.target.value; draw(); }; });
+document.getElementById('team').oninput=e=>{ team=e.target.value; draw(); };
+r_s.oninput=e=>{T.s=+e.target.value;draw();};
+r_x.oninput=e=>{T.ox=+e.target.value;draw();};
+r_y.oninput=e=>{T.oy=+e.target.value;draw();};
+document.getElementById('fit').onclick=autoFit;
+document.getElementById('copy').onclick=()=>{ navigator.clipboard&&navigator.clipboard.writeText(JSON.stringify({T,PART_ADJ},null,1)); };
+
+// パーツ個別調整
+const ADJLABELS=[['face','輪郭'],['eyes','目/眉'],['mouth','口'],['beard','髭'],['hairfront','前髪'],['hairback','後髪']];
+const selAdj=document.getElementById('sel_adj');
+ADJLABELS.forEach(a=>{const o=document.createElement('option');o.value=a[0];o.textContent=a[1];selAdj.appendChild(o);}); selAdj.value=adjSlot;
+const a_x=document.getElementById('a_x'), a_y=document.getElementById('a_y'), a_s=document.getElementById('a_s');
+function loadAdj(){ const A=PART_ADJ[adjSlot]; a_x.value=A.dx; a_y.value=A.dy; a_s.value=A.s;
+  document.getElementById('v_ax').textContent=A.dx; document.getElementById('v_ay').textContent=A.dy; document.getElementById('v_as').textContent=A.s.toFixed(3); }
+selAdj.onchange=e=>{ adjSlot=e.target.value; loadAdj(); };
+a_x.oninput=e=>{ PART_ADJ[adjSlot].dx=+e.target.value; document.getElementById('v_ax').textContent=e.target.value; draw(); };
+a_y.oninput=e=>{ PART_ADJ[adjSlot].dy=+e.target.value; document.getElementById('v_ay').textContent=e.target.value; draw(); };
+a_s.oninput=e=>{ PART_ADJ[adjSlot].s=+e.target.value; document.getElementById('v_as').textContent=(+e.target.value).toFixed(3); draw(); };
+
+syncSliders(); loadAdj(); loadAll(); draw();
+</script>
+</body>
+</html>

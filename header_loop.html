@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>漫画ヘディング競り合い — ループ再生</title>
+<style>
+  body{background:#0b0d16;color:#dce3ee;font:14px system-ui,sans-serif;margin:0;padding:16px}
+  h1{font-size:16px;margin:0 0 4px}
+  p.note{color:#9fb0c8;font-size:12px;margin:0 0 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;max-width:1040px}
+  .cell .frame{background:#000;border-radius:7px;overflow:hidden;aspect-ratio:480/216}
+  .cell .frame canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+  .cap{color:#8fd6ff;font-size:12px;margin:5px 2px 0}
+  #log{color:#c05a5a;font:12px ui-monospace,monospace;margin-top:8px}
+</style>
+</head>
+<body>
+<h1>漫画ヘディング競り合い（2体分離＋MangaRecolor）— ループ再生</h1>
+<p class="note">実 cutscene.js の _renderHeaderScene を約2.0秒ごとに再描画。攻撃(前面)＝ヘディング！/守備(前面クリア)＝競り負け！を混在。6チーム色で攻撃と守備が別チーム色に染まる・肌が選手別・ボール飛来→接触バーストを確認。</p>
+<div class="grid" id="grid"></div>
+<div id="log"></div>
+
+<script src="js/portrait.js?v=t20260710d"></script>
+<script src="js/manga_recolor.js?v=t20260710d"></script>
+<script src="js/cutscene.js?v=t20260710d"></script>
+<script>
+window.MANGA_CUTSCENE_ENABLED = true;
+window.LANG = 'ja';
+CUTSCENE_BURN_LABELS = true;
+window.gameState = {};   // team1未設定→_csAttackRight=true（全キャンバス右攻めで一貫）
+window.getPlayerName = function (p) { return p.long_name || p.name; };
+window.getTeamName = function (t) { return t.__name || ''; };
+
+// [表示名, 攻撃チーム名, 攻撃キット, 攻撃選手名, 守備チーム名, 守備キット, 守備選手名, 成功?]
+var TEAMS = [
+  ['イングランド×伊', 'イングランド', { shirt:'#F2F4F7', shorts:'#1A2A66', socks:'#F2F4F7', accent:'#C8102E' }, 'Harry Kane',
+    'イタリア', { shirt:'#1B4BA0', shorts:'#F2F4F7', socks:'#1B4BA0', accent:'#F2C200' }, 'Alessandro Bastoni', true],
+  ['ブラジル×独',   'ブラジル',   { shirt:'#F2C500', shorts:'#1B3A8A', socks:'#F2F4F7', accent:'#1E8C3A' }, 'Richarlison',
+    'ドイツ', { shirt:'#F2F4F7', shorts:'#17181C', socks:'#F2F4F7', accent:'#C8102E' }, 'Antonio Ruediger', false],
+  ['アルゼンチン×蘭', 'アルゼンチン', { shirt:'#74ACDF', shorts:'#17181C', socks:'#F2F4F7', accent:'#F2C200' }, 'Julian Alvarez',
+    'オランダ', { shirt:'#E8641B', shorts:'#17181C', socks:'#E8641B', accent:'#F2F4F7' }, 'Virgil van Dijk', true],
+  ['フランス×西',   'フランス',   { shirt:'#1A2C6B', shorts:'#F2F4F7', socks:'#C8102E', accent:'#C8102E' }, 'Olivier Giroud',
+    'スペイン', { shirt:'#C8102E', shorts:'#1A2A66', socks:'#C8102E', accent:'#F2C200' }, 'Aymeric Laporte', false],
+  ['日本×墨',     '日本',     { shirt:'#1B3E9C', shorts:'#F2F4F7', socks:'#1B3E9C', accent:'#C8102E' }, 'Ayase Ueda',
+    'メキシコ', { shirt:'#1E8C3A', shorts:'#F2F4F7', socks:'#C8102E', accent:'#F2F4F7' }, 'Cesar Montes', true],
+  ['ポルトガル×白', 'ポルトガル', { shirt:'#B01C2E', shorts:'#1E8C3A', socks:'#B01C2E', accent:'#F2C200' }, 'Goncalo Ramos',
+    'ベルギー', { shirt:'#17181C', shorts:'#C8102E', socks:'#F2C200', accent:'#F2C200' }, 'Wout Faes', false]
+];
+function makeSc(team) {
+  var offence = { __name: team[1], team_color: team[2].shirt, kit: team[2],
+    players: [{ long_name: team[3] }], lineup: [0] };
+  var defence = { __name: team[4], team_color: team[5].shirt, kit: team[5],
+    players: [{ long_name: team[6] }], lineup: [0] };
+  return { offence: offence, defence: defence, ofsPos: 0, dfsPos: 0, scenario: 'コーナーキック',
+    action: 'ヘディングシュート', result: team[7] ? '成功' : '失敗' };
+}
+
+var grid = document.getElementById('grid');
+var cells = TEAMS.map(function (team) {
+  var cell = document.createElement('div'); cell.className = 'cell';
+  var frame = document.createElement('div'); frame.className = 'frame';
+  var cap = document.createElement('div'); cap.className = 'cap';
+  cap.textContent = team[0] + ' — ' + (team[7] ? 'ヘディング！ ' : '競り負け！ ') + team[3] + ' vs ' + team[6];
+  cell.appendChild(frame); cell.appendChild(cap); grid.appendChild(cell);
+  return { team: team, frame: frame };
+});
+
+function play() {
+  cells.forEach(function (c) {
+    var cv = _renderHeaderScene(makeSc(c.team));
+    if (!cv) { document.getElementById('log').textContent = 'NULL canvas (MangaRecolor未ロード?)'; return; }
+    c.frame.innerHTML = '';
+    c.frame.appendChild(cv);
+  });
+}
+play();
+setInterval(play, 2000);
+document.getElementById('log').textContent = 'looping ' + TEAMS.length + ' scenes';
+</script>
+</body>
+</html>

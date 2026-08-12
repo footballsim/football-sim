@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>PT-06 生成参照用シート（黒髪・肌統一）</title>
+<style>body{background:#555;margin:20px;font-family:sans-serif}canvas{background:#fff;image-rendering:pixelated;max-width:100%}</style>
+</head>
+<body>
+<h3 style="color:#fff">生成依頼専用: 10髪型リファレンス（髪=黒 #20232a / 肌=中 統一 / 髭なし）</h3>
+<canvas id="sheet"></canvas>
+<script src="/js/portrait.js"></script>
+<script>
+// ChatGPT生成依頼専用の髪型形状リファレンス。髪色・肌色を全頭で統一し
+// 「参照画像の髪色まで写される」事故(2026-07-09 fade茶髪FAIL)を根絶する。
+// 並びは旧カラー版シート(pt06_final)と同じ読み順。
+// 10髪型版（bangs/bowlはカット！シーンで未使用＝除外・2026-07-09）
+var ORDER = [
+  ['skin', 'スキンヘッド'], ['fade', '刈上げ'], ['slick', 'オールバック'],
+  ['spike', 'ツンツン'], ['curly', 'クルクル'],
+  ['short', 'ショート'], ['part', '七三'], ['wavy', 'ウェーブ'],
+  ['mohawk', 'ソフトモヒカン'], ['afro', 'アフロ']
+];
+// portrait.js の HAIRSTYLE index: 0short 1fade 2skin 3spike 4curly 5part 6bangs 7afro 8slick 9wavy 10mohawk 11bowl
+var HSTYLE_IDX = { short:0, fade:1, skin:2, spike:3, curly:4, part:5, bangs:6, afro:7, slick:8, wavy:9, mohawk:10, bowl:11 };
+
+var CELL_W = 240, CELL_H = 300, LABEL_H = 34, COLS = 5, ROWS = 2;
+var sheet = document.getElementById('sheet');
+sheet.width = CELL_W * COLS; sheet.height = (CELL_H + LABEL_H) * ROWS;
+var ctx = sheet.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+window._sheetReady = false;
+Portrait.preload().then(function () {
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, sheet.width, sheet.height);
+  ORDER.forEach(function (o, i) {
+    var col = i % COLS, row = (i / COLS) | 0;
+    var x0 = col * CELL_W, y0 = row * (CELL_H + LABEL_H);
+    var hc = document.createElement('canvas'); hc.width = 720; hc.height = 840;
+    // 全識別特徴を固定（髪=黒index0 / 肌=中index2 / 髭なし / 目・口・虹彩も統一）
+    Portrait.renderHead(hc, 'REFERENCE', {
+      hstyle: HSTYLE_IDX[o[0]], hair: 0, skin: 2, beard: 0, eyes: 0, mouth: 0, iris: 1, face: 0
+    });
+    // 頭BBOX(全style共通union)を切り出してセルへ
+    var B = { x: 16, y: 0, w: 658, h: 786 };
+    var k = Math.min((CELL_W - 16) / B.w, (CELL_H - 10) / B.h);
+    var dw = B.w * k, dh = B.h * k;
+    ctx.drawImage(hc, B.x, B.y, B.w, B.h, x0 + (CELL_W - dw) / 2, y0 + (CELL_H - dh) / 2, dw, dh);
+    // ラベル
+    ctx.fillStyle = '#1a1c24'; ctx.fillRect(x0, y0 + CELL_H, CELL_W, LABEL_H);
+    ctx.fillStyle = '#ffffff'; ctx.font = '16px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(o[0] + '（' + o[1] + '）', x0 + CELL_W / 2, y0 + CELL_H + 23);
+    // セル枠は描かない（枠線を学習させない）
+  });
+  window._sheetReady = true;
+});
+</script>
+</body>
+</html>

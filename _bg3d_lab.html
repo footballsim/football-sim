@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3D背景ビューア（潜水艦ゲーム技法） — football-sim</title>
+<!--
+  BG3D-01 ビューア（2026-07-28）。スタジアムの実体は js/bg3d.js（_scene_lab.html と共有＝二重管理しない）。
+  ★ 技法は潜水艦ゲーム(DEEP SIX)と同じ: ローポリ／16色パレット／ディザ／低解像度／ライティング無し。
+  ★ ここは「3Dでしか撮れない画」を探すための素振り台。ドラッグで回してホイールで寄れる。
+    いいアングルが見つかったら右下の座標をそのまま演出のカメラ設定に使える。
+-->
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+<style>
+  body{margin:0;background:#0d1117;color:#e6edf3;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif}
+  header{padding:10px 14px;border-bottom:1px solid #30363d}
+  h1{font-size:15px;margin:0 0 3px} .sub{font-size:11px;color:#8b949e}
+  .wrap{padding:14px;display:flex;flex-wrap:wrap;gap:16px}
+  .stage{position:relative;background:#000;border:1px solid #30363d;border-radius:6px;overflow:hidden;width:960px;max-width:100%;cursor:grab}
+  .stage.drag{cursor:grabbing}
+  canvas{display:block;width:100%;image-rendering:pixelated;touch-action:none}
+  .panel{min-width:260px;flex:1 1 260px;max-width:340px}
+  h2{font-size:12px;color:#8b949e;margin:14px 0 6px;font-weight:600}
+  h2:first-child{margin-top:0}
+  .btns{display:flex;flex-wrap:wrap;gap:6px}
+  button{background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:5px;padding:6px 10px;font-size:12px;cursor:pointer}
+  button:hover{background:#30363d} button.on{background:#1f6feb;border-color:#1f6feb}
+  label{display:flex;align-items:center;gap:6px;font-size:12px;margin:5px 0}
+  #info{font-size:11px;color:#8b949e;margin-top:10px;line-height:1.8;font-family:ui-monospace,monospace;
+        background:#161b22;border:1px solid #30363d;border-radius:5px;padding:8px}
+  .hint{font-size:11px;color:#68758f;line-height:1.7;margin:8px 0 0}
+  .pal{display:flex;gap:2px;margin:4px 0} .pal i{width:15px;height:15px;display:block;border:1px solid #0006}
+</style>
+</head>
+<body>
+<header>
+  <h1>3D背景ビューア <span class="sub">BG3D-01 / 潜水艦ゲームと同じ技法・背景のみ</span></h1>
+  <div class="sub">ドラッグで回す／ホイールで寄る・引く。素材は js/bg3d.js（演出ラボと共有）</div>
+</header>
+<div class="wrap">
+  <div class="stage" id="stage"><canvas id="out"></canvas></div>
+  <div class="panel">
+    <h2>アングル・プリセット</h2>
+    <div class="btns">
+      <button data-p="front" class="on">正面</button>
+      <button data-p="low">ゴール裏ロー</button>
+      <button data-p="side">サイド</button>
+      <button data-p="high">俯瞰</button>
+      <button data-p="post">ポスト際</button>
+    </div>
+    <h2>表示</h2>
+    <label><input type="checkbox" id="opt-spr" checked> 選手（既存マンガ絵）を手前に重ねる</label>
+    <label><input type="checkbox" id="opt-flat"> 現行の1枚絵背景と入れ替えて比較</label>
+    <label><input type="checkbox" id="opt-spin"> ゆっくり自動回転</label>
+    <h2>16色パレット</h2>
+    <div class="pal" id="pal"></div>
+    <div id="info">—</div>
+    <p class="hint">いいアングルが見つかったら、上の eye / target の数値をそのまま演出のカメラ設定に使えます。<br>
+      ★ 選手には3Dを使いません（変形・関節・表情＝picoCADにリギングが無い）。剛体で顔が無いものだけ。</p>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { buildStadium, PAL } from './js/bg3d.js?v=4';
+
+document.getElementById('pal').innerHTML = PAL.map(c => `<i style="background:${c}"></i>`).join('');
+
+const W = 480, H = 216;
+const out = document.getElementById('out');
+out.width = W; out.height = H;
+const octx = out.getContext('2d');
+octx.imageSmoothingEnabled = false;
+
+const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
+renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+const scene = buildStadium();
+const camera = new THREE.PerspectiveCamera(40, W / H, 0.1, 200);
+
+/* ── 自前のオービット操作（OrbitControls を足すと依存が増えるので20行で自作）──
+ *   target を中心に方位角(yaw)・仰角(pitch)・距離(dist)で回す。仰角は地面下へ潜らないよう制限。 */
+const cam = { yaw: 0, pitch: 0.14, dist: 18, target: new THREE.Vector3(0, 1.5, -7) };
+const PRESETS = {
+  front: { yaw: 0,     pitch: 0.14, dist: 18,  target: [0, 1.5, -7] },
+  low:   { yaw: 0.18,  pitch: -0.06, dist: 11, target: [0, 1.4, -7] },   // ゴール裏ロー＝見上げる
+  side:  { yaw: 1.02,  pitch: 0.12, dist: 16,  target: [0, 1.3, -7] },
+  high:  { yaw: 0.22,  pitch: 0.62, dist: 26,  target: [0, 0.6, -6] },
+  post:  { yaw: -0.62, pitch: 0.02, dist: 6.5, target: [-2.6, 1.5, -7] } // ポストのすぐ横＝1枚絵では作れない画
+};
+function applyPreset(k) {
+  const p = PRESETS[k]; if (!p) return;
+  cam.yaw = p.yaw; cam.pitch = p.pitch; cam.dist = p.dist;
+  cam.target.set(p.target[0], p.target[1], p.target[2]);
+}
+function place() {
+  const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+  camera.position.set(
+    cam.target.x + Math.sin(cam.yaw) * cp * cam.dist,
+    cam.target.y + sp * cam.dist,
+    cam.target.z + Math.cos(cam.yaw) * cp * cam.dist
+  );
+  if (camera.position.y < 0.25) camera.position.y = 0.25;   // 地面より下へ潜らせない
+  camera.lookAt(cam.target);
+}
+
+// ドラッグ＝回す / ホイール＝寄る・引く
+const stage = document.getElementById('stage');
+let drag = null;
+stage.addEventListener('pointerdown', e => {
+  drag = { x: e.clientX, y: e.clientY }; stage.classList.add('drag');
+  stage.setPointerCapture(e.pointerId);
+});
+stage.addEventListener('pointermove', e => {
+  if (!drag) return;
+  cam.yaw -= (e.clientX - drag.x) * 0.006;
+  cam.pitch = Math.max(-0.22, Math.min(1.25, cam.pitch + (e.clientY - drag.y) * 0.004));
+  drag = { x: e.clientX, y: e.clientY };
+});
+const endDrag = e => { drag = null; stage.classList.remove('drag'); };
+stage.addEventListener('pointerup', endDrag);
+stage.addEventListener('pointercancel', endDrag);
+stage.addEventListener('wheel', e => {
+  e.preventDefault();
+  cam.dist = Math.max(3, Math.min(48, cam.dist * (1 + Math.sign(e.deltaY) * 0.08)));
+}, { passive: false });
+
+// 比較用の現行背景＋手前に重ねる選手（どちらも既存アセット）
+const flatBg = new Image(); flatBg.src = 'img/cutscenes/longpass_bg_01.png';
+const sprite = new Image(); sprite.src = 'img/cutscenes/dribble_01.png';
+
+let frames = 0, fpsT = performance.now(), fps = 0;
+function frame() {
+  if (document.getElementById('opt-spin').checked && !drag) cam.yaw += 0.0035;
+  place();
+  octx.clearRect(0, 0, W, H);
+  if (document.getElementById('opt-flat').checked) {
+    if (flatBg.complete && flatBg.naturalWidth) octx.drawImage(flatBg, 0, 0, W, H);
+  } else {
+    renderer.render(scene, camera);
+    octx.drawImage(renderer.domElement, 0, 0, W, H);
+  }
+  if (document.getElementById('opt-spr').checked && sprite.complete && sprite.naturalWidth) {
+    const h = 118, w = sprite.naturalWidth * (h / sprite.naturalHeight);
+    octx.drawImage(sprite, W * 0.5 - w / 2, 196 - h, w, h);
+  }
+  frames++;
+  const now = performance.now();
+  if (now - fpsT > 500) {
+    fps = Math.round(frames / ((now - fpsT) / 1000)); frames = 0; fpsT = now;
+    const p = camera.position, t = cam.target;
+    document.getElementById('info').innerHTML =
+      `eye    [${p.x.toFixed(2)}, ${p.y.toFixed(2)}, ${p.z.toFixed(2)}]<br>` +
+      `target [${t.x.toFixed(2)}, ${t.y.toFixed(2)}, ${t.z.toFixed(2)}]<br>` +
+      `yaw ${cam.yaw.toFixed(2)} / pitch ${cam.pitch.toFixed(2)} / dist ${cam.dist.toFixed(1)}<br>` +
+      `FPS ${fps} · ${W}x${H} · 三角形 ${renderer.info.render.triangles} · ${PAL.length}色`;
+  }
+  requestAnimationFrame(frame);
+}
+for (const b of document.querySelectorAll('[data-p]')) b.onclick = () => {
+  applyPreset(b.dataset.p);
+  document.querySelectorAll('[data-p]').forEach(x => x.classList.toggle('on', x === b));
+};
+applyPreset('front');
+requestAnimationFrame(frame);
+window._bg3d = { preset: applyPreset, cam };
+</script>
+</body>
+</html>

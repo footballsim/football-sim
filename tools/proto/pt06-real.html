@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PT-06 real body compose</title>
+<style>
+  body { margin:0; background:linear-gradient(160deg,#003087,#0050cc,#1a7a3a); color:#fff; font:13px system-ui; }
+  h2 { padding:8px 12px 0; margin:0; }
+  #stage { display:flex; flex-wrap:wrap; gap:10px; padding:12px; align-items:flex-end; }
+  .cell { text-align:center; background:rgba(0,0,0,.18); border-radius:8px; padding:6px; }
+  canvas { image-rendering:auto; }
+  .cap { margin-top:4px; font-size:12px; }
+</style>
+</head>
+<body>
+<h2>PT-06 実ボディ（ドット絵シュート）＋合成頭</h2>
+<div id="stage"></div>
+<script src="/js/portrait.js"></script>
+<script>
+(function(){
+  var stage = document.getElementById('stage');
+  var NAMES = ['久保建英','三笘薫','冨安健洋','伊東純也','上田綺世','鎌田大地'];
+  // 実ボディの首ソケット実測: native 833x1180, 襟開口中心 x≈462, 首は襟に少し入れて sy≈45
+  var SOCK_X = 462, SOCK_Y = 48, HEAD_H = 140, HEADROOM = 180;
+
+  var body = new Image();
+  body.onload = function(){
+    Portrait.preload().then(function(){
+      var DISP_H = 460;
+      var dScale = DISP_H / body.naturalHeight;
+
+      function makeCell(nm, flip, headH){
+        var cell = document.createElement('div'); cell.className='cell';
+        var cw = Math.round(body.naturalWidth*dScale)+8;
+        var ch = Math.round(body.naturalHeight*dScale)+HEADROOM+8;
+        var cv = document.createElement('canvas'); cv.width=cw; cv.height=ch;
+        var ctx = cv.getContext('2d');
+        ctx.translate(0, HEADROOM);              // 頭のための上余白を確保
+        var a = { sx:SOCK_X, sy:SOCK_Y, headH:headH||HEAD_H, dScale:dScale, flip:flip };
+        var rect = Portrait.composePose(ctx, nm, body, a, { team:'#2050cc' });
+        cell.appendChild(cv);
+        var cap = document.createElement('div'); cap.className='cap';
+        cap.textContent = nm + (flip?' [flip]':'') + (headH?(' H'+headH):'');
+        cell.appendChild(cap);
+        stage.appendChild(cell);
+      }
+
+      NAMES.forEach(function(nm,i){ makeCell(nm, i===1); }); // 三笘だけflipで向き確認
+      // headHサイズ比較
+      [110,140,170].forEach(function(hh){ makeCell('久保建英', false, hh); });
+      window.__DONE = true;
+    });
+  };
+  body.onerror=function(){ document.body.insertAdjacentHTML('beforeend','<p style="color:#f88">body load failed</p>'); };
+  body.src = '/tools/proto/pt06_body_shot.png';
+})();
+</script>
+</body>
+</html>

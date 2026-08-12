@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PT-06 漫画コマ カットシーン試作 v2（カラー漫画構図）</title>
+<style>
+  body{margin:0;background:#0b1020;color:#fff;font:13px system-ui;padding:16px}
+  h1{font-size:16px;margin:0 0 4px}
+  p.note{opacity:.85;margin:4px 0 12px;max-width:900px}
+  .wrap{background:#fff;border-radius:6px;display:inline-block;box-shadow:0 8px 30px #0008}
+  canvas{display:block;image-rendering:pixelated;border-radius:6px;max-width:96vw;height:auto}
+  .ctl{margin-top:12px}
+  button{margin-right:8px;background:#ffd24a;color:#111;border:0;border-radius:8px;padding:9px 16px;font-weight:800;cursor:pointer}
+  select{padding:7px;border-radius:8px;border:0;font-weight:700;margin-right:10px}
+</style>
+</head>
+<body>
+<h1>PT-06 — カラー漫画構図カットシーン v2</h1>
+<p class="note">単一アクションコマ（他者リアクションは同一絵に入れない）。実況は吹き出しに表示。描き文字SFXは手続き挿入＋EN/JA切替。集中線は楔形の手続き描画。選手はネームプレート＋大きめ配置で認識可能に。</p>
+<div class="wrap"><canvas id="cv" width="760" height="430"></canvas></div>
+<div class="ctl">
+  <label>イベント: <select id="ev">
+    <option value="goal">ゴール</option>
+    <option value="shot">シュート</option>
+    <option value="save">セーブ</option>
+  </select></label>
+  <label>言語: <select id="lang"><option value="ja">日本語</option><option value="en">English</option></select></label>
+  <button id="redraw">再描画</button>
+</div>
+
+<script>
+var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+var shooter=new Image(); shooter.src='img/cutscenes/shot_pt06parts_redwhite_01.png';
+
+// ===== イベント×言語データ（量産の"データ表"） =====
+var DATA={
+  goal:{tone:'rgba(220,40,40,.5)',accent:'#ffd24a',
+        sfx:{ja:'ズドォン',en:'BLAST!!'}, com:{ja:'ゴォォル！！ 中央をぶち破ったァ！',en:'GOOOAL!! He tore through the middle!'}},
+  shot:{tone:'rgba(40,90,220,.4)',accent:'#fff',
+        sfx:{ja:'ドッ',en:'FWAP'}, com:{ja:'打った——っ！',en:'He lets it fly——!'}},
+  save:{tone:'rgba(40,160,90,.45)',accent:'#fff',
+        sfx:{ja:'ガシィッ',en:'GRAB!!'}, com:{ja:'止めたァ！！ 誰も予想できない！',en:'SAVED!! Nobody saw that coming!'}}
+};
+var PLAYER={num:'10', name:{ja:'ミナミノ', en:'MINAMINO'}};
+
+// ===== 漫画部品 =====
+function halftone(x,y,w,h,color,sp,maxr,fade){ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.fillStyle=color;
+  for(var gy=y;gy<y+h;gy+=sp)for(var gx=x;gx<x+w;gx+=sp){var t=fade?((gy-y)/h):0.5,r=maxr*(0.3+t*0.95);
+    ctx.beginPath();ctx.arc(gx,gy,Math.max(0.4,r),0,7);ctx.fill();}ctx.restore();}
+function focusWedges(cx,cy,r0,r1,n,color){ // 楔形の集中線（タメ・太さ変化で手描き風）
+  ctx.save();ctx.fillStyle=color;
+  for(var i=0;i<n;i++){var a=i/n*6.283+(i%2?0.008:-0.008);
+    var wob=0.5+((i*7)%5)/5;            // 太さのばらつき
+    var wd=(0.006+0.018*wob);           // 楔の開き角
+    var jitter=((i*13)%7)/7*0.03;
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.cos(a)*r0, cy+Math.sin(a)*r0);
+    ctx.lineTo(cx+Math.cos(a-wd)*r1, cy+Math.sin(a-wd)*r1);
+    ctx.lineTo(cx+Math.cos(a+wd+jitter)*r1, cy+Math.sin(a+wd+jitter)*r1);
+    ctx.closePath();ctx.fill();}
+  ctx.restore();}
+function speedStreaks(x,y,w,h,color){ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.strokeStyle=color;
+  for(var i=0;i<24;i++){var yy=y+Math.random()*h;ctx.lineWidth=1+Math.random()*2.2;ctx.globalAlpha=.4+Math.random()*.5;
+    ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x+w,yy+(Math.random()-0.5)*5);ctx.stroke();}ctx.restore();ctx.globalAlpha=1;}
+function sfx(text,x,y,size,rot,fill,stroke){ctx.save();ctx.translate(x,y);ctx.rotate(rot);
+  ctx.font='900 '+size+'px "Arial Black",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
+  ctx.lineWidth=size*0.24;ctx.strokeStyle=stroke||'#111';ctx.strokeText(text,0,0);
+  ctx.fillStyle=fill||'#fff';ctx.fillText(text,0,0);
+  ctx.lineWidth=size*0.05;ctx.strokeStyle=stroke||'#111';ctx.strokeText(text,0,0);ctx.restore();}
+function speechBubble(x,y,w,h,tailX,tailY,text){ // 実況吹き出し（トゲ付き）
+  ctx.save();ctx.fillStyle='#fff';ctx.strokeStyle='#111';ctx.lineWidth=3.5;
+  ctx.beginPath();
+  var cx=x+w/2, cy=y+h/2, steps=40;
+  for(var i=0;i<=steps;i++){var a=i/steps*6.283, spk=(i%2)?1.0:0.90; // ギザ縁
+    var px=cx+Math.cos(a)*(w/2)*spk, py=cy+Math.sin(a)*(h/2)*spk; i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+  ctx.closePath();ctx.fill();ctx.stroke();
+  // しっぽ
+  ctx.beginPath();ctx.moveTo(cx-14,cy+h/2*0.7);ctx.lineTo(tailX,tailY);ctx.lineTo(cx+14,cy+h/2*0.7);ctx.closePath();ctx.fillStyle='#fff';ctx.fill();ctx.stroke();
+  // 文字
+  ctx.fillStyle='#111';ctx.textAlign='center';ctx.textBaseline='middle';
+  var fs=text.length>22?15:18; ctx.font='800 '+fs+'px "Hiragino Sans","Noto Sans JP",sans-serif';
+  // 折返し
+  // 英語=単語単位・日本語=文字単位で折返し
+  var hasSpace=text.indexOf(' ')>=0, units=hasSpace?text.split(' '):text.split(''), sep=hasSpace?' ':'';
+  var line='', lines=[], maxw=w-30;
+  for(var c=0;c<units.length;c++){var tst=line?(line+sep+units[c]):units[c];
+    if(ctx.measureText(tst).width>maxw&&line){lines.push(line);line=units[c];}else line=tst;}
+  lines.push(line);
+  var ly=cy-(lines.length-1)*fs*0.62;
+  for(var L=0;L<lines.length;L++){ctx.fillText(lines[L],cx,ly+L*fs*1.24);}
+  ctx.restore();}
+function namePlate(x,y,num,name,accent){ctx.save();
+  ctx.font='900 20px "Arial Black",sans-serif';var nw=ctx.measureText(name).width;
+  var bw=nw+64, bh=30;
+  ctx.fillStyle='#111';ctx.fillRect(x,y,bw,bh);
+  ctx.fillStyle=accent;ctx.fillRect(x,y,42,bh);
+  ctx.fillStyle='#111';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(num,x+21,y+bh/2+1);
+  ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='800 18px "Arial Black",sans-serif';ctx.fillText(name,x+52,y+bh/2+1);
+  ctx.restore();}
+
+function draw(){
+  var ev=document.getElementById('ev').value, lang=document.getElementById('lang').value;
+  var E=DATA[ev];
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+  // 単一の大コマ
+  var pad=8;
+  ctx.save();ctx.beginPath();ctx.rect(pad,pad,W-pad*2,H-pad*2);ctx.clip();
+    // 背景トーン＋スピード線
+    ctx.fillStyle='#f5f5f5';ctx.fillRect(pad,pad,W-pad*2,H-pad*2);
+    halftone(pad,pad,W-pad*2,H-pad*2,E.tone,7,1.7,true);
+    speedStreaks(pad,pad,W-pad*2,120,'rgba(0,0,0,.45)');
+    // 集中線（アクション点＝ボール付近へ収束）
+    var ax=W*0.42, ay=H*0.60;
+    focusWedges(ax,ay,90,860,72,'rgba(0,0,0,.88)');
+    // 白い抜き（主役の周りをトーンから守る＝視線誘導）
+    var g=ctx.createRadialGradient(W*0.6,H*0.5,20,W*0.6,H*0.5,230);
+    g.addColorStop(0,'rgba(245,245,245,.95)');g.addColorStop(1,'rgba(245,245,245,0)');ctx.fillStyle=g;ctx.fillRect(pad,pad,W-pad*2,H-pad*2);
+    // 選手（大きめ・頭が見える＝認識可能）
+    if(shooter.complete&&shooter.naturalWidth){var ph=340,pw=shooter.naturalWidth*(ph/shooter.naturalHeight);
+      ctx.imageSmoothingEnabled=false;ctx.drawImage(shooter,W*0.50,H-24-ph,pw,ph);}
+    // ボール＋モーション
+    ctx.fillStyle='#fff';ctx.strokeStyle='#111';ctx.lineWidth=3.5;
+    ctx.beginPath();ctx.arc(ax,ay,16,0,7);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#111';ctx.beginPath();ctx.arc(ax-3,ay-3,6,0,7);ctx.fill();
+    for(var i=0;i<5;i++){ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=2.4;ctx.beginPath();ctx.moveTo(ax+20+i*12,ay-12+i*5);ctx.lineTo(ax+80+i*26,ay-12+i*5);ctx.stroke();}
+  ctx.restore();
+  // コマ枠
+  ctx.strokeStyle='#111';ctx.lineWidth=7;ctx.strokeRect(pad,pad,W-pad*2,H-pad*2);
+
+  // ネームプレート（認識性）
+  namePlate(pad+14, pad+14, PLAYER.num, PLAYER.name[lang], E.accent);
+  // 描き文字SFX（言語切替）
+  sfx(E.sfx[lang], W*0.28, H*0.42, 84, -0.13, E.accent, '#111');
+  // 実況吹き出し（下部・しっぽは選手の口元へ）
+  speechBubble(W-268, H-118, 250, 96, W-150, H-150, E.com[lang]);
+}
+shooter.onload=draw; shooter.onerror=draw; draw();
+document.getElementById('redraw').onclick=draw;
+document.getElementById('ev').onchange=draw;
+document.getElementById('lang').onchange=draw;
+</script>
+</body>
+</html>

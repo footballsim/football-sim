@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PT-06 harness</title>
+<style>
+  body { margin:0; background:#111; color:#eee; font:13px/1.4 system-ui; }
+  #stage { display:flex; flex-wrap:wrap; gap:12px; padding:12px; }
+  .cell { text-align:center; }
+  canvas { background:linear-gradient(160deg,#003087,#0050cc,#1a7a3a); image-rendering:pixelated; }
+  pre { padding:12px; white-space:pre-wrap; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<pre id="log">loading…</pre>
+<script src="/js/portrait.js"></script>
+<script>
+(function(){
+  var FW = Portrait._meta.FW, FH = Portrait._meta.FH;
+  var HAIRSTYLE = Portrait._meta.HAIRSTYLE;
+  var log = document.getElementById('log');
+
+  // ---- 各head styleの代表選手名を作る（そのhstyleに落ちる名前を探索） ----
+  function nameForStyle(styleIdx){
+    for (var i=0;i<20000;i++){
+      var nm = 'MEAS_'+i;
+      if (Portrait.featuresFor(nm).hstyle === styleIdx) return nm;
+    }
+    return null;
+  }
+
+  // ---- bbox 実測: headOnlyで描いてalpha>16の範囲を返す ----
+  function measure(styleIdx){
+    var nm = nameForStyle(styleIdx);
+    var c = document.createElement('canvas'); c.width = FW; c.height = FH;
+    // headOnly=true, flip=false, skin/hairは中間色に固定（bboxは形状依存で色非依存）
+    Portrait.render(c, nm, { headOnly:true, hstyle:styleIdx });
+    var ctx = c.getContext('2d');
+    var d = ctx.getImageData(0,0,FW,FH).data;
+    var xmin=FW,ymin=FH,xmax=-1,ymax=-1;
+    for (var y=0;y<FH;y++){
+      for (var x=0;x<FW;x++){
+        if (d[(y*FW+x)*4+3] > 16){
+          if (x<xmin)xmin=x; if (x>xmax)xmax=x;
+          if (y<ymin)ymin=y; if (y>ymax)ymax=y;
+        }
+      }
+    }
+    return { style:HAIRSTYLE[styleIdx][0], name:nm, xmin:xmin,ymin:ymin,xmax:xmax,ymax:ymax,
+             w:xmax-xmin+1, h:ymax-ymin+1, canvas:c };
+  }
+
+  // ---- 目の中心線Yを実測（eyes_normalの不透明重心Y） ----
+  function eyeCenterY(){
+    // 目パーツだけを別canvasに描く: normal eyesを直接
+    // Portraitに単独描画APIが無いので render 全体から目領域を推定する代わりに、
+    // eyes native は顔座標系に載る想定。ここでは head全体の上からの比率で近似せず
+    // 実測: eyes_normal.png の不透明重心を測る
+    return new Promise(function(res){
+      var img = new Image();
+      img.onload = function(){
+        var c=document.createElement('canvas'); c.width=FW;c.height=FH;
+        var x=c.getContext('2d'); x.drawImage(img,0,0,FW,FH);
+        var d=x.getImageData(0,0,FW,FH).data, sy=0,n=0,sx=0;
+        for(var yy=0;yy<FH;yy++)for(var xx=0;xx<FW;xx++){
+          if(d[(yy*FW+xx)*4+3]>16){sy+=yy;sx+=xx;n++;}
+        }
+        res({ eyeCY: n?Math.round(sy/n):0, eyeCX: n?Math.round(sx/n):0 });
+      };
+      img.onerror=function(){res({eyeCY:0,eyeCX:0});};
+      img.src='/img/portrait-parts/eyes_normal.png';
+    });
+  }
+
+  // ---- 首(ネック)ソケットYを実測: 顎下〜フレーム下で行ごとの不透明幅が最小になる行 ----
+  // headOnlyの頭を描いて、eyeCY より下の各行の不透明幅を測り、最小幅(=首のくびれ)を探す
+  function neckSocket(styleIdx, eyeCY){
+    var c=document.createElement('canvas'); c.width=FW;c.height=FH;
+    Portrait.render(c, nameForStyle(styleIdx), { headOnly:true, hstyle:styleIdx });
+    var d=c.getContext('2d').getImageData(0,0,FW,FH).data;
+    var best={w:1e9,y:0,cx:0};
+    // 顎はだいたい eyeCY+180 付近から下。フレーム下端手前まで探索
+    for (var y=eyeCY+140; y<FH-4; y++){
+      var xmin=FW,xmax=-1;
+      for (var x=0;x<FW;x++){ if(d[(y*FW+x)*4+3]>16){ if(x<xmin)xmin=x; if(x>xmax)xmax=x; } }
+      if (xmax<0) continue;
+      var w=xmax-xmin+1;
+      if (w<best.w){ best={w:w,y:y,cx:Math.round((xmin+xmax)/2)}; }
+    }
+    return best;
+  }
+
+  Portrait.preload().then(function(){
+    return eyeCenterY();
+  }).then(function(eye){
+    // 首ソケットは複数styleの中央値で安定化（skin/short/fade等 髪が少なめのstyle）
+    var neckSamples=[0,1,2,3].map(function(s){ return neckSocket(s, eye.eyeCY); });
+    neckSamples.sort(function(a,b){return a.y-b.y;});
+    var neckMed = neckSamples[Math.floor(neckSamples.length/2)];
+    var rows = [];
+    var union = {xmin:FW,ymin:FH,xmax:-1,ymax:-1};
+    var stage = document.getElementById('stage');
+    for (var s=0;s<HAIRSTYLE.length;s++){
+      var m = measure(s);
+      rows.push(m);
+      if (m.xmin<union.xmin)union.xmin=m.xmin;
+      if (m.ymin<union.ymin)union.ymin=m.ymin;
+      if (m.xmax>union.xmax)union.xmax=m.xmax;
+      if (m.ymax>union.ymax)union.ymax=m.ymax;
+      // サムネ
+      var cell=document.createElement('div'); cell.className='cell';
+      var tc=document.createElement('canvas'); tc.width=180; tc.height=210;
+      Portrait.render(tc, m.name, { headOnly:true, hstyle:s });
+      cell.appendChild(tc);
+      var cap=document.createElement('div'); cap.textContent=m.style;
+      cell.appendChild(cap); stage.appendChild(cell);
+    }
+    union.w=union.xmax-union.xmin+1; union.h=union.ymax-union.ymin+1;
+
+    // 首の付け根中心: 顔レイヤーの下端付近 x中心 = union の x中央、y = 最も下の顎/首端
+    // head native は 720幅で顔はほぼ中央。x中心を全styleのx重心平均で推定するより
+    // union.xmin/xmax の中点を採用（左右対称前提）。
+    var neckCX = neckMed.cx;         // 首くびれの中心x（実測）
+    var neckSocketY = neckMed.y;     // 首くびれのy（実測・くびれ最小幅の行）
+
+    var out = [];
+    out.push('native frame: '+FW+' x '+FH);
+    out.push('eyes_normal 不透明重心: eyeCX='+eye.eyeCX+'  eyeCY='+eye.eyeCY);
+    out.push('');
+    out.push('per-style bbox (headOnly, alpha>16):');
+    rows.forEach(function(r){
+      out.push('  '+String(r.style).padEnd(7)+
+        ' x['+r.xmin+'..'+r.xmax+'] y['+r.ymin+'..'+r.ymax+']  w='+r.w+' h='+r.h+
+        '  top='+r.ymin+' bottom='+r.ymax);
+    });
+    out.push('');
+    out.push('== UNION bbox (全12styleを安全に含む) ==');
+    out.push('  x='+union.xmin+'  y='+union.ymin+'  w='+union.w+'  h='+union.h+
+             '  (x2='+union.xmax+' y2='+union.ymax+')');
+    out.push('  基準点:');
+    out.push('    両目線中心 (eyeCX,eyeCY) = ('+eye.eyeCX+','+eye.eyeCY+')');
+    out.push('    首付根中心 (neckCX,neckSocketY) = ('+neckCX+','+neckSocketY+')  くびれ幅='+neckMed.w);
+    out.push('  相対(union内): eye = ('+ (eye.eyeCX-union.xmin) +','+ (eye.eyeCY-union.ymin) +')  '+
+             ((eye.eyeCX-union.xmin)/union.w).toFixed(3)+', '+((eye.eyeCY-union.ymin)/union.h).toFixed(3));
+    out.push('  相対(union内): neck= ('+ (neckCX-union.xmin) +','+ (neckSocketY-union.ymin) +')  '+
+             ((neckCX-union.xmin)/union.w).toFixed(3)+', '+((neckSocketY-union.ymin)/union.h).toFixed(3));
+    log.textContent = out.join('\n');
+    window.__PT06 = { rows:rows, union:union, eye:eye, neckCX:neckCX, neckSocketY:neckSocketY };
+  });
+})();
+</script>
+</body>
+</html>

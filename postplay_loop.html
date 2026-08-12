@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ポストプレー！（ホールドアップ成功）— 差し替え確認</title>
+<style>
+  body{background:#0b0d16;color:#dce3ee;font:14px system-ui,sans-serif;margin:0;padding:16px}
+  h1{font-size:16px;margin:0 0 4px}
+  p.note{color:#9fb0c8;font-size:12px;margin:0 0 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;max-width:1040px}
+  .cell .frame{background:#000;border-radius:7px;overflow:hidden;aspect-ratio:480/216}
+  .cell .frame canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+  .cap{color:#8fd6ff;font-size:12px;margin:5px 2px 0}
+  #log{color:#c05a5a;font:12px ui-monospace,monospace;margin-top:8px}
+</style>
+</head>
+<body>
+<h1>ポストプレー！（ホールドアップ成功）— 新タブロー差し替え確認</h1>
+<p class="note">実 cutscene.js の _renderPostplayScene（result='成功'）を約2.4秒ごとに再描画。前半=新ホールドアップ絵（赤→攻撃色/緑→守備色）→後半=抜け出し。6チーム巡回。</p>
+<div class="grid" id="grid"></div>
+<div id="log"></div>
+
+<script src="js/portrait.js?v=pp6"></script>
+<script src="js/manga_recolor.js?v=pp6"></script>
+<script src="js/cutscene.js?v=pp6"></script>
+<script>
+window.MANGA_CUTSCENE_ENABLED = true;
+window.LANG = 'ja';
+CUTSCENE_BURN_LABELS = true;
+window.gameState = {};
+window.getPlayerName = function (p) { return p.long_name || p.name; };
+window.getTeamName = function (t) { return t.__name || ''; };
+
+// [表示名, 攻撃チーム名, 攻撃色, 攻撃選手, 守備チーム名, 守備色, 守備選手]
+var TEAMS = [
+  ['日本×蘭', '日本', '#1B3E9C', 'Takefusa Kubo', 'オランダ', '#E8641B', 'Virgil van Dijk'],
+  ['ブラジル×独', 'ブラジル', '#F2C500', 'Vinicius Junior', 'ドイツ', '#17181C', 'Antonio Ruediger'],
+  ['アルゼンチン×西', 'アルゼンチン', '#74ACDF', 'Lionel Messi', 'スペイン', '#C8102E', 'Aymeric Laporte'],
+  ['フランス×伊', 'フランス', '#1A2C6B', 'Kylian Mbappe', 'イタリア', '#1B4BA0', 'Alessandro Bastoni'],
+  ['イングランド×白', 'イングランド', '#F2F4F7', 'Harry Kane', 'ポルトガル', '#B01C2E', 'Ruben Dias'],
+  ['メキシコ×白', 'メキシコ', '#1E8C3A', 'Santiago Gimenez', 'ベルギー', '#17181C', 'Wout Faes']
+];
+function makeSc(t) {
+  var offence = { __name: t[1], team_color: t[2], players: [{ long_name: t[3] }], lineup: [0] };
+  var defence = { __name: t[4], team_color: t[5], players: [{ long_name: t[6] }], lineup: [0] };
+  return { offence: offence, defence: defence, ofsPos: 0, dfsPos: 0, action: 'ポストプレー', result: '成功' };
+}
+
+var grid = document.getElementById('grid');
+var cells = TEAMS.map(function (t) {
+  var cell = document.createElement('div'); cell.className = 'cell';
+  var frame = document.createElement('div'); frame.className = 'frame';
+  var cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = t[0] + ' — ' + t[3];
+  cell.appendChild(frame); cell.appendChild(cap); grid.appendChild(cell);
+  return { t: t, frame: frame };
+});
+function play() {
+  cells.forEach(function (c) {
+    var cv = _renderPostplayScene(makeSc(c.t));
+    c.frame.innerHTML = ''; c.frame.appendChild(cv);
+  });
+}
+play();
+setInterval(play, 2400);
+document.getElementById('log').textContent = 'looping ' + TEAMS.length + ' postplay scenes';
+</script>
+</body>
+</html>

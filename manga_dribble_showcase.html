@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>漫画ドリブル ショーケース — 12髪型 × チームキット</title>
+<style>
+  body{background:#0b0d16;color:#dce3ee;font:14px system-ui,sans-serif;margin:0;padding:16px}
+  h1{font-size:16px;margin:0 0 4px}
+  p.note{color:#9fb0c8;font-size:12px;margin:0 0 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;max-width:1120px}
+  .frame{background:#000;border-radius:7px;overflow:hidden}
+  .frame canvas{display:block;width:100%;height:auto;image-rendering:pixelated}
+  .cap{color:#8fd6ff;font-size:12px;margin:5px 2px 0}
+  #log{color:#c05a5a;font:12px ui-monospace,monospace;margin-top:10px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<h1>漫画ドリブル カットイン — 12髪型 × チームキット</h1>
+<p class="note">選手ごとに髪型・肌・チームキットを実行時リカラー（js/manga_recolor.js）。静止ショーケース＝実ゲームではこの主役が前へ突破するアニメ＋ボール＋集中線が乗ります。</p>
+<div class="grid" id="grid"></div>
+<div id="log"></div>
+
+<script src="js/manga_recolor.js"></script>
+<script>
+var BG='img/cutscenes/longpass_bg_01.png';
+// [ラベル, 髪型, 肌hex, {shirt,shorts,socks,accent}, アクセントバー色]
+var COMBOS=[
+ ['イングランド / short','short','#e6ad7f',{shirt:'#F2F4F7',shorts:'#1A2A66',socks:'#F2F4F7',accent:'#C8102E'},'#C8102E'],
+ ['オランダ / fade','fade','#f4c79b',{shirt:'#EC652B',shorts:'#17181C',socks:'#EC652B',accent:'#17181C'},'#FF6600'],
+ ['スペイン / skin','skin','#cf8f5d',{shirt:'#B01823',shorts:'#1B2A6B',socks:'#1B2A6B',accent:'#F2C200'},'#AA151B'],
+ ['フランス / spike','spike','#f4c79b',{shirt:'#1A2C6B',shorts:'#F2F4F7',socks:'#C8102E',accent:'#C8102E'},'#002395'],
+ ['ブラジル / curly','curly','#6f492c',{shirt:'#F2C500',shorts:'#1B3A8A',socks:'#F2F4F7',accent:'#1E8C3A'},'#009C3B'],
+ ['アルゼンチン / part','part','#e6ad7f',{shirt:'#74ACDF',shorts:'#17181C',socks:'#F2F4F7',accent:'#F2C200'},'#74ACDF'],
+ ['イタリア / bangs','bangs','#e6ad7f',{shirt:'#1B4BA0',shorts:'#F2F4F7',socks:'#1B4BA0',accent:'#F2C200'},'#003DA5'],
+ ['ベルギー / afro','afro','#a06a3f',{shirt:'#C8102E',shorts:'#17181C',socks:'#C8102E',accent:'#F2C200'},'#CC0000'],
+ ['ドイツ / slick','slick','#f4c79b',{shirt:'#F2F4F7',shorts:'#17181C',socks:'#F2F4F7',accent:'#111111'},'#111111'],
+ ['ポルトガル / wavy','wavy','#cf8f5d',{shirt:'#B01823',shorts:'#0E5A2E',socks:'#B01823',accent:'#1E8C3A'},'#B01823'],
+ ['日本 / mohawk','mohawk','#e6ad7f',{shirt:'#14205C',shorts:'#14205C',socks:'#14205C',accent:'#F2F4F7'},'#14205C'],
+ ['モロッコ / bowl','bowl','#a06a3f',{shirt:'#C1272D',shorts:'#0E5A2E',socks:'#C1272D',accent:'#0E7A3A'},'#C1272D']
+];
+var log=function(m){document.getElementById('log').textContent+=m+'\n';};
+var load=function(src){return new Promise(function(res,rej){var i=new Image();i.onload=function(){res(i);};i.onerror=function(){rej(src);};i.src=src;});};
+
+(async function(){
+  try{
+    var bg=await load(BG);
+    var grid=document.getElementById('grid');
+    for(var k=0;k<COMBOS.length;k++){
+      var c=COMBOS[k];
+      var img=await load('img/cutscenes/manga_dribble/'+c[1]+'.png');
+      var cv=document.createElement('canvas');cv.width=480;cv.height=216;
+      var ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
+      var s=Math.max(480/bg.naturalWidth,216/bg.naturalHeight);
+      ctx.drawImage(bg,(480-bg.naturalWidth*s)/2,(216-bg.naturalHeight*s)/2,bg.naturalWidth*s,bg.naturalHeight*s);
+      var spr=MangaRecolor.render('sc_'+c[1],img,Object.assign({skin:c[2]},c[3]));
+      var ph=190,ground=200,cx=250,w=spr.width*(ph/spr.height);
+      ctx.drawImage(spr,cx-w/2,ground-ph,w,ph);
+      var g=ctx.createLinearGradient(0,176,0,216);g.addColorStop(0,'rgba(6,6,14,0)');g.addColorStop(1,'rgba(6,6,14,.9)');ctx.fillStyle=g;ctx.fillRect(0,176,480,40);
+      ctx.fillStyle=c[4];ctx.fillRect(0,186,480,3);
+      ctx.font='900 22px "Arial Black",sans-serif';ctx.textAlign='left';ctx.lineJoin='round';ctx.lineWidth=5;ctx.strokeStyle='#0c0a14';ctx.strokeText('ドリブル突破！',12,209);ctx.fillStyle='#ffe14a';ctx.fillText('ドリブル突破！',12,209);
+      var fr=document.createElement('div');fr.className='frame';fr.appendChild(cv);
+      var cell=document.createElement('div');cell.appendChild(fr);
+      var cap=document.createElement('div');cap.className='cap';cap.textContent=c[0];cell.appendChild(cap);
+      grid.appendChild(cell);
+    }
+    log('DONE — '+COMBOS.length+'体');
+  }catch(e){log('ERROR: '+e);}
+})();
+</script>
+</body>
+</html>

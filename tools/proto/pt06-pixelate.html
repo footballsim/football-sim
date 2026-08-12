@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PT-06 シュートポーズ ピクセル化 比較</title>
+<style>
+  body { margin:0; background:#141c2c; color:#eef; font:14px system-ui; padding:16px; }
+  h1 { font-size:16px; margin:0 0 4px; }
+  p.note { color:#9fb; margin:0 0 16px; font-size:12px; }
+  .row { display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start; }
+  .cell { background:#0d1422; border:1px solid #26324a; border-radius:8px; padding:10px; }
+  .cell h2 { font-size:13px; margin:0 0 8px; font-weight:700; }
+  /* ネイティブサイズを最近傍で拡大＝ドットのまま拡大 */
+  img { image-rendering:pixelated; display:block; }
+  .onlight { background:#fff; }
+  .ondark  { background:#0a0f1a; }
+  .scalerow { display:flex; gap:14px; align-items:flex-end; }
+  .lbl { font-size:11px; color:#9ab; text-align:center; margin-top:4px; }
+</style>
+</head>
+<body>
+<h1>PT-06 シュートポーズ ピクセル化 比較（ローカル変換・ポーズそのまま）</h1>
+<p class="note">shoot_src.png を tools/art/pixelate.js で粗いドット絵化。ポーズ・頭・髪は元絵のまま。右ほど粗い。背景はまだ白（採用時に透過キーイング）。</p>
+<div class="row">
+  <div class="cell">
+    <h2>中: w110 / 24色</h2>
+    <div class="scalerow">
+      <div><img src="shot_px_w110.png" style="width:220px"><div class="lbl">×2</div></div>
+      <div><img src="shot_px_w110.png" style="width:330px"><div class="lbl">×3</div></div>
+    </div>
+  </div>
+  <div class="cell">
+    <h2>強: w90 / 20色</h2>
+    <div class="scalerow">
+      <div><img src="shot_px_w90.png" style="width:180px"><div class="lbl">×2</div></div>
+      <div><img src="shot_px_w90.png" style="width:270px"><div class="lbl">×3</div></div>
+    </div>
+  </div>
+  <div class="cell">
+    <h2>弱: w140 / 28色</h2>
+    <div class="scalerow">
+      <div><img src="shot_px_w140.png" style="width:280px"><div class="lbl">×2</div></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

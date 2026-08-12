@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!-- ════════════════════════════════════════════════════════════════════════
+  _ct_lab.html — テクモ版キャプテン翼(FC)の「試合パート」構造の再現試作（2026-07-30）
+
+  ★ スタンドアロン。football-sim 本体(index.html)からは参照されず、build.js にも入れない。
+    読むのは js/ctmatch.js だけ＝ゲーム・kantoku-lab への影響ゼロ。
+  ★ 目的は絵の模倣ではなく「俯瞰↔カットインの交代の設計」を体で確かめること。
+    ドット絵・音楽・キャラ名は再現せず、絵は全て手続き描画・選手名は架空。
+═════════════════════════════════════════════════════════════════════════ -->
+<html lang="ja"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>キャプテン翼型 試合パート 再現試作</title>
+<style>
+  :root { --ink:#0b0b12; --panel:#161622; --line:#2c2c3c; --fg:#e6e9f2; --dim:#8b93a7; --acc:#f6d24a; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ink); color:var(--fg);
+         font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif; }
+  header { padding:14px 18px 10px; border-bottom:1px solid var(--line); }
+  h1 { margin:0; font-size:16px; letter-spacing:.02em; }
+  h1 span { color:var(--acc); }
+  .sub { margin:6px 0 0; font-size:11.5px; color:var(--dim); line-height:1.6; }
+  main { padding:16px 18px 40px; max-width:980px; }
+  .stage { background:#000; border:1px solid var(--line); border-radius:6px; padding:10px;
+           display:flex; justify-content:center; }
+  canvas { width:100%; max-width:768px; height:auto; display:block; image-rendering:pixelated; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:12px 0 0; }
+  button { background:var(--panel); color:var(--fg); border:1px solid var(--line);
+           border-radius:5px; padding:7px 13px; font-size:12.5px; cursor:pointer; }
+  button:hover { border-color:#4a4a64; }
+  button.on { background:var(--acc); color:#1a1a10; border-color:var(--acc); font-weight:700; }
+  .note { margin:16px 0 0; padding:12px 14px; background:var(--panel);
+          border:1px solid var(--line); border-radius:6px; font-size:12px; line-height:1.75; }
+  .note h2 { margin:0 0 8px; font-size:12.5px; color:var(--acc); }
+  .note b { color:#fff; }
+  .note ul { margin:6px 0 0; padding-left:18px; }
+  code { background:#0d0d16; padding:1px 5px; border-radius:3px; font-size:11px; color:#c9d4e8; }
+  #log { margin-top:12px; height:120px; overflow:auto; background:#08080f;
+         border:1px solid var(--line); border-radius:6px; padding:8px 10px;
+         font-family:"SF Mono",Menlo,monospace; font-size:10.5px; color:#8fa0bb; line-height:1.55; }
+</style>
+</head><body>
+
+<header>
+  <h1>キャプテン翼型 <span>試合パート</span> 再現試作 <span style="color:var(--dim);font-size:11px">CT-01</span></h1>
+  <p class="sub">
+    テクモ版キャプテン翼(FC/1988)の試合パートの<b>構造</b>を再現。監督視点なので<b>コマンド入力は無し・全自動で進行</b>。<br>
+    再現するのはシステムの型（俯瞰↔カットインの交代／ガッツ＝行動値／シュートの多段ブロック／実況テロップ）だけで、
+    ドット絵・音楽・キャラクター名は再現していません。<b>絵は全て手続き描画（外部素材ゼロ）・選手名は架空</b>です。
+  </p>
+</header>
+
+<main>
+  <div class="stage"><canvas id="cv"></canvas></div>
+
+  <div class="row">
+    <button id="btn-toggle" class="on">⏸ 一時停止</button>
+    <button id="btn-restart">↺ 最初から</button>
+    <span style="color:var(--dim);font-size:11.5px;margin-left:6px">速度</span>
+    <button class="spd" data-v="0.5">0.5×</button>
+    <button class="spd on" data-v="1">1×</button>
+    <button class="spd" data-v="2">2×</button>
+    <button class="spd" data-v="4">4×</button>
+  </div>
+
+  <div id="log"></div>
+
+  <div class="note">
+    <h2>この試作で確かめたいこと</h2>
+    <ul>
+      <li><b>俯瞰↔カットインの交代</b> — キャプテン翼は「俯瞰で状況、カットインで決着」を交代させて迫力を出している。
+          これは football-sim で保留にしている「引き画(層S)とマンガ(層M)の主従」と同じ問題。</li>
+      <li><b>ガッツ＝行動値</b> — 行動ごとに消費し、尽きると「くっ!! ガッツがたりない!!」。
+          <b>試合を通した資源管理が緊張を作る</b>構造。football-sim のスタミナ/メンタルとは別の効き方をする。</li>
+      <li><b>シュートの多段ブロック</b> — 割り込むDFごとにシュート力の数値が削られ、最後にGK。
+          <b>数値が画面に見える</b>のが要点で、これは football-sim の「決着ビート」に直接効く。</li>
+    </ul>
+    <h2 style="margin-top:12px">裏取りした仕様と、私の推定</h2>
+    <ul>
+      <li>裏取り済 — 俯瞰視点／アクションでなくSLG寄りのリアルタイム／選手ごとにコマンド＋ガッツ消費／
+          「くっ!! ガッツがたりない!!」／<b>ドライブシュートはガッツ200消費＝1試合4〜5回</b>／実況が画面に出る</li>
+      <li>私の推定（一次資料に数字が無い） — <code>GUTS_MAX=1000</code>（200×4〜5回から逆算）、各技の消費量、
+          ブロックの減衰率 <code>0.80</code>、割り込み上限 <code>2人</code>、GK判定式、遭遇距離・追走速度。
+          全部 <code>CTMatch.TUNE</code> に出してあるので、記憶と違えば数字だけ差し替えられます。</li>
+      <li>10試合×2セットの実測（未シードなので振れます） — 1試合あたり シュート <b>17〜18</b>／ゴール <b>4.5〜4.9</b>（決定率 <b>27%</b>）／
+          必殺シュート <b>約8</b>（両チーム計＝1チーム約4＝裏取りした「1試合4〜5回」と一致）／1対1 <b>31〜33</b>／
+          「ガッツがたりない」<b>4.5〜4.8</b>／<b>俯瞰66% : カットイン34%</b>／90分＝実時間 <b>2分44秒</b>。</li>
+    </ul>
+  </div>
+</main>
+
+<script src="js/ctmatch.js?v=6"></script>
+<script>
+var app = CTMatch.mount(document.getElementById('cv'), { speed: 1 });
+var logEl = document.getElementById('log'), seen = 0;
+setInterval(function () {
+  var L = app.state().log;
+  if (L.length !== seen) {
+    seen = L.length;
+    logEl.textContent = L.slice(-40).join('\n');
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+}, 250);
+
+document.getElementById('btn-toggle').onclick = function () {
+  var on = app.toggle();
+  this.textContent = on ? '⏸ 一時停止' : '▶ 再生';
+  this.classList.toggle('on', on);
+};
+document.getElementById('btn-restart').onclick = function () { app.restart(); seen = 0; };
+document.querySelectorAll('.spd').forEach(function (b) {
+  b.onclick = function () {
+    document.querySelectorAll('.spd').forEach(function (o) { o.classList.remove('on'); });
+    b.classList.add('on');
+    app.setSpeed(parseFloat(b.dataset.v));
+  };
+});
+</script>
+</body></html>

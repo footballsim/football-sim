@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>League Dev（最終話再設計・一時）</title>
+<!-- 【一時開発用・完了前に削除】ルートの素js/cssでリーグモードを検証する。dist-lab の読み込み順を踏襲。 -->
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/league-ui.css">
+</head>
+<body>
+<script src="js/players.js"></script>
+<script src="js/names.js"></script>
+<script src="js/rng.js"></script>
+<script src="js/simulate.js"></script>
+<script src="js/events.js"></script>
+<script src="js/match.js"></script>
+<script src="js/cutscene.js"></script>
+<script src="js/manager-match.js"></script>
+<script src="js/narration.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/tournament.js"></script>
+<script src="js/japanwc.js"></script>
+<script src="js/mental.js"></script>
+<script src="js/discipline.js"></script>
+<script src="js/portrait.js"></script>
+<script src="js/juice.js"></script>
+<script src="js/lab-art.js"></script>
+<script src="js/lg-ui.js"></script>
+<script src="js/matchday.js"></script>
+<script src="js/league.js"></script>
+<!-- MTG1: 第1回面白さMTG採用分（各ファイルにキルスイッチあり） -->
+<script src="js/attribution.js"></script>
+<script src="js/archetype.js"></script>
+<script src="js/dramascore.js"></script>
+<script src="js/rail.js"></script>
+<script src="js/oshi.js"></script>
+<script>window.LEAGUE_TEST_MODE=true;</script>
+<script>
+// 自動でリーグモードへ。?end=1 で先頭クラブを選び全節を無音消化して最終話まで一気に進める。
+window.addEventListener('load', function () {
+  try { showLeague(); } catch (e) { document.body.insertAdjacentHTML('beforeend', '<pre style="color:#f88">' + e.message + '</pre>'); return; }
+  var end = /[?&]end=1/.test(location.search);
+  if (end) {
+    setTimeout(function () {
+      var b = document.querySelector('[onclick*="leaguePickClub"]');
+      if (b) { var m = b.getAttribute('onclick').match(/leaguePickClub\('([^']+)'\)/); if (m) leaguePickClub(m[1]); }
+      setTimeout(function () { if (typeof leagueDebugSimSeason === 'function') leagueDebugSimSeason(); }, 60);
+    }, 120);
+  }
+});
+</script>
+</body></html>

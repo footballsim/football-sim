@@ -1,0 +1,393 @@
+diff --git a/js/manager-match.js b/js/manager-match.js
+index 05234da..84b1299 100644
+--- a/js/manager-match.js
++++ b/js/manager-match.js
+@@ -41,6 +41,9 @@
+   // ── 自動再生の状態（このモジュール内のみ）────────────────────────────
+   var _mvPlaying = false;     // 自動再生中か
+   var _mvTimer = null;        // setTimeout ハンドル
++  var _mvHeartbeat = null;    // タイマー連鎖切れを拾う独立ハートビート（setInterval）
++  var _mvHbKey = '';          // ハートビート用の進行キー
++  var _mvHbStall = 0;         // ハートビートの無進行連続回数
+   // 1ビートあたりの待ち(ms)。1× は最長アニメ（ワンツー 2200ms 等）を切らない尺にする。
+   var _MV_SPEEDS = [2400, 1300, 700];  // 1x / 2x / 3x
+   var _mvSpeedIdx = 0;        // 現在の速度段（0..2）
+@@ -117,6 +120,15 @@
+     if (typeof wcPhase !== 'undefined' && (wcPhase === 'et_first' || wcPhase === 'et_second')) return;
+     if (typeof createMatch !== 'function') { alert('createMatch 未ロード'); return; }
+ 
++    // ★ 選手詳細ページのデータ源キーを team1Data に整合させる（2026-07-04 バグ修正）。
++    //   リーグ(league.js)は team1Data を実チーム(例:オランダ)へ差し替えるが _team1DataKey を
++    //   更新しないため、既定の 'japan2026vsNetherlands' のまま残り、フォーメーションで選手を
++    //   タップすると日本人選手のプロフィールが出ていた（showPlayerDetail が TEAM_DATA[key] を引く）。
++    if (typeof TEAM_DATA !== 'undefined' && typeof team1Data !== 'undefined') {
++      var _k1 = Object.keys(TEAM_DATA).find(function (k) { return TEAM_DATA[k] === team1Data; });
++      if (_k1 && typeof _team1DataKey !== 'undefined') _team1DataKey = _k1;
++    }
++
+     // 相手（team2）状態を startGame と同様に構築（default_* から）。
+     var t2sys = system_data.findIndex(function (s) { return s.name === team2Data.default_system; });
+     team2State = {
+@@ -138,6 +150,7 @@
+     _mvOppSubCount = 0; _mvOppOff = {}; _mvOppIn = {}; _mvLateChecked = false;   // 相手監督AIの交代状態をリセット
+     window._mvMatchSubs = [];   // 全交代（自/相手）のログ記録をリセット
+     _mvSubCutQueue = [];   // 交代カットシーン待ち行列をリセット
++    _mvEventCutQueue = [];   // 退場/負傷カットシーン待ち行列をリセット
+     _subbedOff = new Set();
+     _pendingSubLog = [];
+     _shootSubStep = 0;
+@@ -181,6 +194,7 @@
+     _mvShowControls(true);
+     _mvUpdateControlBar();
+ 
++    _mvStartHeartbeat();   // 宙吊り自己回復の独立ハートビート（試合終了で停止）
+     _mvPlay();   // キックオフ後すぐ自動再生
+   }
+ 
+@@ -194,6 +208,51 @@
+     });
+   }
+ 
++  /* ── 独立ハートビート（P1 宙吊り自己回復・2026-07-04 dist-lab 実機修正）────────
++   * in-tick の stall watchdog は _mvTick が呼ばれ続けないと働かない。今回の P1 は
++   * 「重症負傷の pending が立った瞬間 _mvPause されたが交代画面にもカットにも到達せず、
++   *  タイマー連鎖も切れて宙吊り」＝ _mvTick が二度と呼ばれない状態だった。
++   * これを拾うため、試合中ずっと回る独立 setInterval を1本立てる。「進むべき状況（＝交代
++   * 画面・カット・HT/モーダルのいずれも出ていない）なのに ~5秒 chance/scene が無進行」を
++   * 検出したら、pending があれば交代画面、無ければ再生を強制再開して自己回復する。 */
++  var _MV_HB_MS = 1000;       // ハートビート間隔
++  var _MV_HB_STALL = 5;       // 5回連続（≒5秒）無進行で回復発火
++  function _mvStartHeartbeat() {
++    _mvStopHeartbeat();
++    _mvHbKey = ''; _mvHbStall = 0;
++    _mvHeartbeat = setInterval(_mvHeartbeatCheck, _MV_HB_MS);
++  }
++  function _mvStopHeartbeat() {
++    if (_mvHeartbeat) { clearInterval(_mvHeartbeat); _mvHeartbeat = null; }
++  }
++  function _mvHeartbeatCheck() {
++    if (!_managerMode) { _mvStopHeartbeat(); return; }
++    if (!_gameActive()) { _mvHbKey = ''; _mvHbStall = 0; return; }   // 別画面（交代/HT等）中は監視しない
++    // 「見せている最中」は正常な停止＝監視対象外（カット中/HTモーダル/采配パネル/交代画面）。
++    var _cut = document.getElementById('mv-eventcut');
++    var _sub = document.getElementById('mv-subcut');
++    var _ht = document.getElementById('halftime-modal');
++    var _dec = document.getElementById('mv-decision');
++    var showing =
++      (_cut && parseFloat(getComputedStyle(_cut).opacity) > 0.05) ||
++      (_sub && parseFloat(getComputedStyle(_sub).opacity) > 0.05) ||
++      (_ht && getComputedStyle(_ht).display !== 'none') ||
++      (_dec && getComputedStyle(_dec).display !== 'none');
++    if (showing) { _mvHbKey = ''; _mvHbStall = 0; return; }
++    // 進行キー（tick と同じ指標）。動いていればカウンタをリセット。
++    var key = currentChanceIdx + ':' + currentSceneIdx + ':' + _shootSubStep + ':' + chanceResults.length;
++    if (key !== _mvHbKey) { _mvHbKey = key; _mvHbStall = 0; return; }
++    if (++_mvHbStall < _MV_HB_STALL) return;
++    // ここまで来たら「見せてもいない・進んでもいない」＝宙吊り。自己回復する。
++    _mvHbStall = 0;
++    // 試合終了済みなら結果へ。
++    if (_mvCtrl && _mvCtrl.isOver() && currentChanceIdx >= chanceResults.length) { _mvFinish(); return; }
++    window._mvLastError = { msg: 'heartbeat recovered stall', at: key, pending: _mvHasPendingInjury() };
++    if (typeof console !== 'undefined') console.warn('[manager] heartbeat recovered stall at', key, 'pending=', _mvHasPendingInjury());
++    if (_mvHasPendingInjury()) { _mvPause(); _mvHandlePendingInjury(); }
++    else { _mvPlay(); }
++  }
++
+   /* ── 自動再生ドライバ ──────────────────────────────────────────── */
+   function _mvPlay() {
+     if (!_managerMode) return;
+@@ -224,6 +283,29 @@
+   var _mvStallCount = 0;
+   var _MV_STALL_LIMIT = 10;   // 10ティック連続無進行で異常とみなす（HT/ゴール停止はタイマー停止なので誤検知しない）
+ 
++  // 自チーム（team1）に重症負傷の采配待ちが立っているか。
++  function _mvHasPendingInjury() {
++    return typeof disciplinePendingUserSub === 'function' && gameState && gameState.team1 &&
++           !!disciplinePendingUserSub(gameState.team1);
++  }
++  // 采配待ち → 交代画面を開く。どの経路からも必ずここに到達させる（宙吊り防止）。
++  //   ★ 交代画面のオープンは同期で行う（setTimeout を挟まない）。バックグラウンドタブや
++  //     スロットリング下でも「pause したのに画面が開かない宙吊り」を作らないため。
++  //     トーストは出すが、画面遷移は待たせない。
++  function _mvHandlePendingInjury() {
++    if (!_managerMode) return;
++    // 既に交代画面が開いている／別経路で解決済みなら二重に開かない。
++    var _setEl = document.getElementById('screen-setting');
++    if (_setEl && _setEl.classList.contains('active')) return;
++    if (!_gameActive()) return;   // 別画面遷移中（HT等）はそちらが主導。宙吊りは heartbeat が拾う。
++    if (!_mvHasPendingInjury()) { _mvPlay(); return; }   // 直前に解決されていれば単に続行
++    var _injReq = disciplinePendingUserSub(gameState.team1);
++    var _injP = _injReq ? gameState.team1.players[_injReq.outIdx] : null;
++    _mvToast('🚑 ' + _mvT('負傷交代が必要', 'Injury — substitution needed') +
++             (_injP ? '：' + _mvName(_injP) : ''));
++    _mvOpenSetting();   // 同期でオープン（待たせない）
++  }
++
+   // 1ティック = 1ビート進める。HT/ゴール/終了で自動停止。
+   function _mvTick() {
+     _mvTimer = null;
+@@ -244,6 +326,24 @@
+       _mvToast('⚠️ ' + _mvT('再生エラー：一時停止しました', 'Playback error — paused'));
+       return;
+     }
++
++    // ★★ 自チーム重症負傷の采配待ち（最優先・stall watchdog より前）★★
++    //   エンジンは采配待ちの間チャンスを計算しない＝以降のティックは「無進行」になる。
++    //   これを stall watchdog（下）が「異常停止」と誤検知して pause→return し、交代画面にも
++    //   カットにも到達しないまま宙吊りになるのが P1 フリーズの原因（2026-07-04 dist-lab 実機）。
++    //   → pending が立っていたら、ここで確実に「カット（あれば）→ 交代画面」へ routing する。
++    //   currentSceneIdx に依存しない（pending は状態であってビート位置に紐づかない）。
++    if (_mvHasPendingInjury()) {
++      _mvPause();
++      var _hasCutForInj = (_mvEventCutQueue.length > 0 && _mvEventCutEnabled());
++      if (_hasCutForInj) {
++        _mvPlayEventCutscenes(function () { if (_managerMode) _mvHandlePendingInjury(); });
++      } else {
++        _mvHandlePendingInjury();
++      }
++      return;
++    }
++
+     // 無進行検出: チャンス/シーン/分割ステップのどれも動いていないティックが連続したら停止。
+     var _pk = currentChanceIdx + ':' + currentSceneIdx + ':' + _shootSubStep + ':' + chanceResults.length;
+     if (_pk === _mvProgKey) {
+@@ -275,7 +375,15 @@
+     if (typeof MATCH_CHANCES !== 'undefined' && currentChanceIdx >= Math.floor(MATCH_CHANCES * 0.75) && !_mvLateChecked) {
+       _mvLateChecked = true;
+       _mvOpponentDecide(false);
+-      if (_mvSubCutQueue.length) { _mvPause(); _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); }); return; }
++      if (_mvSubCutQueue.length) {
++        _mvPause();
++        // 交代カット → 退場/負傷カット → 続行（自チーム重症の交代画面は下の共通ゲートが拾う）。
++        _mvPlaySubCutscenes(function () {
++          if (!_managerMode) return;
++          _mvPlayEventCutscenes(function () { if (_managerMode) _mvPlay(); });
++        });
++        return;
++      }
+     }
+ 
+     // ゴール停止（カットシーンの余韻＋交代カットを見せてから自動再生を続行）。
+@@ -285,25 +393,36 @@
+       _mvPause();
+       setTimeout(function () {
+         if (!_managerMode) return;
+-        _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); });   // 交代あれば先にカット → 続行
++        // 順: 交代カット → 退場/負傷カット → （自チーム重症なら交代画面／なければ続行）。
++        //   ゴールと同一チャンスで退場/負傷が重なってもデッドロックしないよう 1 つずつ処理し、
++        //   最終的に必ず再生継続 or 交代画面へ遷移する（フリーズ防止）。
++        _mvPlaySubCutscenes(function () {
++          if (!_managerMode) return;
++          _mvPlayEventCutscenes(function () {
++            if (!_managerMode) return;
++            // 自チーム重症なら交代画面／なければ続行（共通ヘルパで宙吊り防止）。
++            if (_mvHasPendingInjury()) _mvHandlePendingInjury();
++            else _mvPlay();
++          });
++        });
+       }, 3300);
+       return;
+     }
+ 
+     if (_mvCtrl.isOver() && currentChanceIdx >= chanceResults.length) { _mvFinish(); return; }
+ 
+-    // 負傷交代（重症・自チーム・Sprint 2b）: チャンス境界（次チャンス未計算のタイミング）で
+-    // 停止し、交代画面を即時に開く。エンジンは采配待ちの間チャンスを計算しないので、
+-    // 負傷選手が次チャンスを踏むことはない。解決は _mvCloseSetting / _mvManagerHTKickoff。
++    // 退場/相手負傷/自チーム軽傷のカットを「チャンス境界」で見せる（done で必ず続行）。
++    //   ※ 自チーム重症負傷（采配待ち）はティック冒頭で最優先処理済み＝ここには来ない。
++    //     このゲートは pending の無いカット専用なので、done は常に _mvPlay で安全。
++    //     万一 done 時点で pending が立っていたら（同一チャンスに重症が混在）ヘルパへ委譲。
+     if (currentSceneIdx === 0 && _shootSubStep === 0 &&
+-        typeof disciplinePendingUserSub === 'function' && gameState && gameState.team1 &&
+-        disciplinePendingUserSub(gameState.team1)) {
++        _mvEventCutQueue.length > 0 && _mvEventCutEnabled()) {
+       _mvPause();
+-      var _injReq = disciplinePendingUserSub(gameState.team1);
+-      var _injP = gameState.team1.players[_injReq.outIdx];
+-      _mvToast('🚑 ' + _mvT('負傷交代が必要', 'Injury — substitution needed') +
+-               (_injP ? '：' + _mvName(_injP) : ''));
+-      setTimeout(function () { if (_managerMode) _mvOpenSetting(); }, 900);
++      _mvPlayEventCutscenes(function () {
++        if (!_managerMode) return;
++        if (_mvHasPendingInjury()) _mvHandlePendingInjury();
++        else _mvPlay();
++      });
+       return;
+     }
+ 
+@@ -335,6 +454,7 @@
+ 
+   function _mvFinish() {
+     _mvPause();
++    _mvStopHeartbeat();
+     _mvHideDecision();
+     _mvShowControls(false);
+     // 試合終了＝監督モード解除（リーグ経路だけでなく通常経路も）。true のまま残すと、
+@@ -406,6 +526,8 @@
+   var _mvOppIn = {};                // 相手が交代で投入した players index（＝再び交代でOUTしない）
+   var _mvLateChecked = false;       // 後半終盤の単発チェック済みフラグ
+   var _mvSubCutQueue = [];          // 交代カットシーン待ち行列 {out,in,teamColor,teamName,label}
++  var _mvEventCutQueue = [];        // 退場/負傷カットシーン待ち行列（交代とは別キュー）
++  //   {kind:'red'|'second_yellow'|'injurySevere'|'injuryMinor', name, teamName, teamColor, severe:bool}
+ 
+   function _mvRating(p) { if (!p || !p.params) return 0; var s = 0; for (var i = 0; i < p.params.length; i++) s += p.params[i]; return s / p.params.length; }
+   function _mvPosCat(role) {
+@@ -583,6 +705,94 @@
+     }, 2000);
+   }
+ 
++  /* ── 退場/負傷カットシーン（画像なし・手続き描画。画像が来たら差し替え）─────────
++   * 交代カットと同じ「全画面takeover→数秒ホールド→続行」パターンの並列機構。
++   * 対象は退場(red / second_yellow)と負傷(injury: severe / minor)のみ。単なる yellow は
++   * トースト/テキストのみでカットしない（enqueue 側で除外）。
++   * 素材PNGは未使用（SUB_CUTSCENE_PLAN.md と同思想）。届いたら各カードの背景を
++   * 背景PNGへ差し替え＋名前オーバーレイに拡張するだけ（構造はそのまま）。 */
++  function _mvRenderEventCutscene(batch) {
++    var host = document.getElementById('screen-game'); if (!host) return;
++    var el = document.getElementById('mv-eventcut');
++    if (!el) {
++      el = document.createElement('div'); el.id = 'mv-eventcut';
++      // z-index は交代カット(66)と同等以上。ダーク放射グラデ＋opacityフェード（手本流用）。
++      el.style.cssText = 'position:absolute;inset:0;z-index:67;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;' +
++        'background:radial-gradient(ellipse at center,rgba(20,8,12,0.95),rgba(4,2,6,0.985));opacity:0;transition:opacity .3s;pointer-events:none;padding:24px;box-sizing:border-box';
++      host.appendChild(el);
++    }
++    var cards = batch.map(function (ev) {
++      var col = ev.teamColor || '#8899aa';
++      var icon, head, sub, accent, nameCol;
++      if (ev.kind === 'red' || ev.kind === 'second_yellow') {
++        icon = '🟥';
++        head = _mvT('退場', 'RED CARD');
++        sub = (ev.kind === 'second_yellow') ? _mvT('2枚目の警告', 'SECOND YELLOW') : '';
++        accent = '#ff3b3b'; nameCol = '#ffd0d0';
++      } else if (ev.kind === 'injurySevere') {
++        icon = '🚑';
++        head = _mvT('負傷 — 交代', 'INJURY');
++        sub = '';
++        accent = '#ffb020'; nameCol = '#ffe6bd';
++      } else { // injuryMinor
++        icon = '🩹';
++        head = _mvT('軽傷（続行）', 'KNOCK (plays on)');
++        sub = '';
++        accent = '#6fd0ff'; nameCol = '#d6efff';
++      }
++      return '<div style="background:rgba(255,255,255,0.05);border:1px solid ' + accent + ';border-top:4px solid ' + accent + ';border-radius:14px;padding:22px 26px;min-width:min(300px,88vw);text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.55)">' +
++        '<div style="font-size:clamp(46px,15vw,72px);line-height:1;margin-bottom:10px">' + icon + '</div>' +
++        '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:clamp(26px,8vw,38px);letter-spacing:3px;font-weight:700;color:' + accent + '">' + head + '</div>' +
++        (sub ? '<div style="font-size:clamp(12px,3.6vw,14px);font-weight:700;letter-spacing:1px;color:' + accent + ';opacity:.85;margin-top:2px">' + sub + '</div>' : '') +
++        '<div style="font-size:clamp(17px,5vw,22px);font-weight:800;color:' + nameCol + ';margin:12px 0 6px">' + (ev.name || '') + '</div>' +
++        '<div style="font-size:12px;font-weight:700;color:' + col + ';letter-spacing:1px">' + (ev.teamName || '') + '</div>' +
++        '</div>';
++    }).join('');
++    el.innerHTML = cards;
++    el.getBoundingClientRect();   // reflow → フェードイン
++    el.style.opacity = '1';
++  }
++  function _mvHideEventCutscene() { var el = document.getElementById('mv-eventcut'); if (el) el.style.opacity = '0'; }
++
++  // ゲート: 退場/負傷カットは discipline.js 同梱時（＝lab）なら通常プレイでも出す。
++  //   公開ビルドは disciplineEvents 自体が存在しないので二重に安全。
++  function _mvEventCutEnabled() { return typeof disciplineIsOut === 'function'; }
++
++  // res.disciplineEvents を走査し、退場/負傷（＝カット対象）を _mvEventCutQueue に積む。
++  //   単なる yellow は除外（トースト/テキストのみ）。名前は i18n（player / playerEn）で選ぶ。
++  function _mvEnqueueDisciplineCut(res) {
++    if (!res || !res.disciplineEvents || !res.disciplineEvents.length) return;
++    var en = _isEn();
++    res.disciplineEvents.forEach(function (ev) {
++      var teamData = (ev.team === 1) ? team1Data : team2Data;
++      var nm = (en ? (ev.playerEn || ev.player) : (ev.player || ev.playerEn)) || '';
++      var base = { name: nm, teamName: getTeamName(teamData), teamColor: teamData.team_color };
++      if (ev.type === 'card') {
++        if (ev.card === 'red' || ev.card === 'second_yellow') {
++          base.kind = ev.card; base.severe = true;
++          _mvEventCutQueue.push(base);
++        }
++        // yellow はカットしない
++      } else if (ev.type === 'injury') {
++        base.kind = (ev.severity === 'severe') ? 'injurySevere' : 'injuryMinor';
++        base.severe = (ev.severity === 'severe');
++        _mvEventCutQueue.push(base);
++      }
++    });
++  }
++
++  // 待ち行列があれば ~2.4s 表示して done()。無ければ（or 非lab では）即 done()。
++  //   （手本 _mvPlaySubCutscenes と同じ作法・ホールドだけ少し長め＝視認性重視の要望。）
++  function _mvPlayEventCutscenes(done) {
++    if (!_mvEventCutQueue.length || !_mvEventCutEnabled()) { _mvEventCutQueue = []; if (done) done(); return; }
++    var batch = _mvEventCutQueue.slice(); _mvEventCutQueue = [];
++    _mvRenderEventCutscene(batch);
++    setTimeout(function () {
++      _mvHideEventCutscene();
++      setTimeout(function () { if (done) done(); }, 340);
++    }, 2400);
++  }
++
+   // 相手監督の1停止点ぶんの判断（戦術＋交代）。
+   function _mvOpponentDecide(atHT) { _mvOpponentReact(); _mvOpponentSub(!!atHT); }
+ 
+@@ -679,8 +889,13 @@
+     var _ab = document.getElementById('all-btn'); if (_ab) _ab.disabled = false;
+     _toggleNormalControls(false);
+     _mvShowControls(true);
+-    if (_mvSubCutQueue.length) _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); });   // 自チーム交代のカット
+-    else _mvPlay();
++    // 自チーム交代のカット → 前半終盤に溜まった退場/負傷カット（HTでは前半終了直後に出さず
++    //   後半キックオフでまとめて見せる。過去に HT重複負傷で再生フリーズを踏んだため、
++    //   ここでも「必ず done で _mvPlay」を保証する）。
++    _mvPlaySubCutscenes(function () {
++      if (!_managerMode) return;
++      _mvPlayEventCutscenes(function () { if (_managerMode) _mvPlay(); });
++    });
+   }
+ 
+   /* ── 采配（設定画面を再利用）─ T-11/T-12 ＋ システム/キープレイヤー/要注意/入替 ──
+@@ -828,8 +1043,12 @@
+     // 試合画面へ戻り、そのまま自動再生を再開（采配ポイントの確認パネルは廃止＝余計な1クリック削減）。
+     showScreen('game');
+     _mvShowControls(true);
+-    if (_mvSubCutQueue.length) _mvPlaySubCutscenes(function () { if (_managerMode) _mvPlay(); });   // 自チーム交代のカット → 続行
+-    else _mvPlay();
++    // 自チーム交代のカット → 残っている退場/負傷カット → 続行（必ず done で _mvPlay）。
++    //   自チーム重症のカットは開く前に見せ済みだが、他イベントが溜まっていれば拾う。
++    _mvPlaySubCutscenes(function () {
++      if (!_managerMode) return;
++      _mvPlayEventCutscenes(function () { if (_managerMode) _mvPlay(); });
++    });
+   }
+ 
+   /* ── トースト／ログ ────────────────────────────────────────────── */
+@@ -998,6 +1217,7 @@
+   // startGame からの復帰時の後始末（simulate.js が参照）。
+   function _mvTeardownUI() {
+     _mvPause();
++    _mvStopHeartbeat();
+     _mvHideDecision();
+     _mvShowControls(false);
+     _toggleNormalControls(true);
+@@ -1023,4 +1243,8 @@
+   g._mvOpponentSub = _mvOpponentSub;       // デバッグ/検証用ハンドル
+   g._mvRenderSubCutscene = _mvRenderSubCutscene;   // デバッグ/検証用ハンドル
+   g._mvPlaySubCutscenes = _mvPlaySubCutscenes;     // デバッグ/検証用ハンドル
++  // simulate.js（グローバルスコープ）のチャンス完了フックが typeof で参照するため公開必須。
++  g._mvEnqueueDisciplineCut = _mvEnqueueDisciplineCut;
++  g._mvRenderEventCutscene = _mvRenderEventCutscene;   // デバッグ/検証用ハンドル
++  g._mvPlayEventCutscenes = _mvPlayEventCutscenes;     // デバッグ/検証用ハンドル
+ })();
+diff --git a/js/simulate.js b/js/simulate.js
+index 1a284fe..966c48e 100644
+--- a/js/simulate.js
++++ b/js/simulate.js
+@@ -4007,6 +4007,10 @@ function nextChance() {
+   currentSceneIdx++;
+ 
+   if (currentSceneIdx >= res.textScenes.length) {
++    // 退場/負傷カットシーンの enqueue（表示層フック・監督モードのみ／公開ビルドは no-op）。
++    //   チャンス完了地点で res.disciplineEvents を待ち行列へ積む。再生は _mvTick が
++    //   チャンス境界で拾う。エンジンの判定/rng/デュエルには一切触れない。
++    if (_managerMode && typeof _mvEnqueueDisciplineCut === 'function') _mvEnqueueDisciplineCut(res);
+     currentChanceIdx++;
+     currentSceneIdx = 0;
+     currentEventDiv = null;

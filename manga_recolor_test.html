@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>manga_recolor test</title>
+<style>
+  body { background:#12161e; color:#dce3ee; font:13px/1.5 system-ui,sans-serif; margin:0; padding:16px; }
+  h1 { font-size:15px; margin:0 0 4px; }
+  #log { white-space:pre-wrap; background:#0b0e14; padding:8px 10px; border-radius:6px; margin:8px 0; font-family:ui-monospace,monospace; font-size:12px; }
+  canvas { image-rendering:pixelated; background:#fff; }
+  .grid { display:flex; flex-wrap:wrap; gap:2px; align-items:flex-start; }
+  .cell { display:flex; flex-direction:column; align-items:center; }
+  .cap { font-size:10px; color:#9fb0c8; margin-top:2px; }
+  .row { margin:14px 0; }
+  .rowlabel { font-size:12px; color:#7ad4ff; margin-bottom:4px; }
+</style>
+</head>
+<body>
+<h1>manga_recolor.js — 実行時リカラー検証</h1>
+<div id="log">読み込み中…</div>
+<div id="out"></div>
+
+<script src="js/manga_recolor.js"></script>
+<script>
+const SPRITE_DIR = 'tools/proto/manga_sprites';
+// 検査対象スプライト（四隅+要注意）
+const SPRITES = ['none_short','full_skin','goatee_afro','mustache_bowl'];
+// キット（shirt/shorts/socks/accent）
+const KITS = [
+  ['分離色base', null],
+  ['日本(青白)', {shirt:'#1b3fa0',shorts:'#e8e8ee',socks:'#1b3fa0',accent:'#e02b3a'}],
+  ['赤白',      {shirt:'#c0392b',shorts:'#e8e8ee',socks:'#c0392b',accent:'#1a1a2a'}],
+  ['緑黒',      {shirt:'#1f8f3a',shorts:'#12121a',socks:'#1f8f3a',accent:'#e0bd34'}],
+  ['黄黒',      {shirt:'#e0bd34',shorts:'#12121a',socks:'#e0bd34',accent:'#12121a'}],
+  ['白紺',      {shirt:'#e8e8ee',shorts:'#1a2450',socks:'#e8e8ee',accent:'#c0392b'}],
+];
+const SKINS = ['#ffdcbb','#f4c79b','#e6ad7f','#cf8f5d','#a06a3f','#6f492c'];
+
+const log = (m)=>{ document.getElementById('log').textContent += '\n'+m; };
+function loadImg(src){ return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>rej(new Error('load fail '+src)); im.src=src; }); }
+
+function makeCell(canvas, cap){
+  const d=document.createElement('div'); d.className='cell';
+  d.appendChild(canvas);
+  const c=document.createElement('div'); c.className='cap'; c.textContent=cap; d.appendChild(c);
+  return d;
+}
+// 着色canvasを縮小表示用にラップ
+function scaled(srcCanvas, h){
+  const s=h/srcCanvas.height; const c=document.createElement('canvas');
+  c.width=Math.round(srcCanvas.width*s); c.height=h;
+  const ctx=c.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(srcCanvas,0,0,c.width,c.height); return c;
+}
+
+// 数値検証: baseのパーツ別画素数 + recolor後にshirtの平均hueが目標へ寄ったか
+function partCounts(imgData){
+  const d=imgData.data, cnt={skin:0,shirt:0,shorts:0,socks:0,accent:0,fixed:0,none:0};
+  for(let i=0;i<d.length;i+=4){ const p=MangaRecolor.partOf(d[i],d[i+1],d[i+2],d[i+3]); cnt[p===null?'none':p]++; }
+  return cnt;
+}
+
+(async function(){
+  document.getElementById('log').textContent='';
+  const out=document.getElementById('out');
+  try {
+    for(const key of SPRITES){
+      const img = await loadImg(`${SPRITE_DIR}/${key}.png`);
+      // base ImageData でパーツ内訳を出す
+      const tmp=document.createElement('canvas'); tmp.width=img.naturalWidth; tmp.height=img.naturalHeight;
+      tmp.getContext('2d').drawImage(img,0,0);
+      const baseId=tmp.getContext('2d').getImageData(0,0,tmp.width,tmp.height);
+      const cnt=partCounts(baseId);
+      log(`${key}: ${img.naturalWidth}x${img.naturalHeight}  skin=${cnt.skin} shirt=${cnt.shirt} shorts=${cnt.shorts} socks=${cnt.socks} accent=${cnt.accent} fixed=${cnt.fixed}`);
+
+      // 行1: キット6種（肌=標準）
+      const row1=document.createElement('div'); row1.className='row';
+      const lab1=document.createElement('div'); lab1.className='rowlabel'; lab1.textContent=`${key} — キット6種（肌:標準 #e6ad7f）`; row1.appendChild(lab1);
+      const g1=document.createElement('div'); g1.className='grid';
+      for(const [nm,kit] of KITS){
+        let canvas;
+        if(!kit){ canvas=scaled(tmp,300); }
+        else { const colors=Object.assign({skin:'#e6ad7f'},kit); canvas=scaled(MangaRecolor.render(key+'_'+nm,img,colors),300); }
+        g1.appendChild(makeCell(canvas,nm));
+      }
+      row1.appendChild(g1); out.appendChild(row1);
+
+      // 行2: 肌6段（キット=赤白固定）
+      const row2=document.createElement('div'); row2.className='row';
+      const lab2=document.createElement('div'); lab2.className='rowlabel'; lab2.textContent=`${key} — 肌6段（キット:赤白固定）`; row2.appendChild(lab2);
+      const g2=document.createElement('div'); g2.className='grid';
+      SKINS.forEach((sk,idx)=>{
+        const colors={shirt:'#c0392b',shorts:'#e8e8ee',socks:'#c0392b',accent:'#1a1a2a',skin:sk};
+        const canvas=scaled(MangaRecolor.render(key+'_skin'+idx,img,colors),300);
+        g2.appendChild(makeCell(canvas,'skin'+idx));
+      });
+      row2.appendChild(g2); out.appendChild(row2);
+    }
+    log('\nDONE ok');
+    window.__RECOLOR_OK__ = true;
+  } catch(e){
+    log('ERROR: '+e.message);
+    window.__RECOLOR_OK__ = false;
+  }
+})();
+</script>
+</body>
+</html>

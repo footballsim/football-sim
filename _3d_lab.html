@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3Dプレイヤー実験室 — football-sim</title>
+<!--
+  3D-01 実験: 選手を three.js の3Dで動かせるか（2026-07-28・ユーザー選択「3を試し無理なら1」）。
+  ★ 狙いは「3Dだがマンガに見える」= 漫画風の柱を壊さずに動きを得ること。そのための3点:
+     ①低解像度レンダターゲット（480x216）→ CSS で pixelated 拡大 = 既存 _csPixelate と同じ粗さ
+     ②MeshToonMaterial + 3段グラデ = セル塗り（陰影が階調でなく段になる）
+     ③インバーテッドハル（背面を少し太らせて黒で描く）= マンガのインク線
+  ★ ここは実験専用。本体（js/）には手を入れない。評価してから配線を決める。
+-->
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+<style>
+  body{margin:0;background:#0d1117;color:#e6edf3;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif}
+  header{padding:10px 14px;border-bottom:1px solid #30363d}
+  h1{font-size:15px;margin:0 0 3px}
+  .sub{font-size:11px;color:#8b949e}
+  .wrap{padding:14px;display:flex;flex-wrap:wrap;gap:16px}
+  .stage{background:#000;border:1px solid #30363d;border-radius:6px;overflow:hidden;width:960px;max-width:100%}
+  canvas{display:block;width:100%;image-rendering:pixelated}
+  .panel{min-width:250px}
+  h2{font-size:12px;color:#8b949e;margin:0 0 6px;font-weight:600}
+  .btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  button{background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:5px;padding:6px 10px;font-size:12px;cursor:pointer}
+  button:hover{background:#30363d}
+  button.on{background:#1f6feb;border-color:#1f6feb}
+  label{display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:5px}
+  #fps{font-size:11px;color:#8b949e;margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>3Dプレイヤー実験室 <span class="sub">3D-01 / 選手を3Dで動かせるかの検証</span></h1>
+  <div class="sub">低解像度レンダ + トゥーン + インク輪郭で「3Dだがマンガに見える」かを見る</div>
+</header>
+<div class="wrap">
+  <div class="stage"><canvas id="cv"></canvas></div>
+  <div class="panel">
+    <h2>モーション</h2>
+    <div class="btns">
+      <button data-m="run" class="on">走り（ループ）</button>
+      <button data-m="shoot">シュート</button>
+      <button data-m="dribble">ドリブル</button>
+      <button data-m="idle">静止</button>
+    </div>
+    <h2>カメラ（FPS動画の語法）</h2>
+    <div class="btns">
+      <button data-c="side" class="on">サイド追走</button>
+      <button data-c="push">プッシュイン</button>
+      <button data-c="low">ローアングル</button>
+      <button data-c="orbit">オービット</button>
+    </div>
+    <h2>仕上げ</h2>
+    <label><input type="checkbox" id="opt-outline" checked> インク輪郭（インバーテッドハル）</label>
+    <label><input type="checkbox" id="opt-toon" checked> セル塗り（トゥーン3段）</label>
+    <label><input type="checkbox" id="opt-pixel" checked> 低解像度 480x216（pixelated拡大）</label>
+    <label><input type="checkbox" id="opt-rim"> リムライト</label>
+    <h2>FX（今回作った演出層の語法）</h2>
+    <div class="btns">
+      <button id="fx-impact">インパクト（パンチ＋リング）</button>
+      <button id="fx-rays">光芒</button>
+    </div>
+    <div id="fps">—</div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ── 描画解像度: カットシーンと同じ 480x216 の論理解像度で描いて pixelated 拡大 ──
+const LOW_W = 480, LOW_H = 216, HI_W = 960, HI_H = 432;
+const cv = document.getElementById('cv');
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: false, alpha: false });
+renderer.setPixelRatio(1);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x8fc7ef);
+const camera = new THREE.PerspectiveCamera(38, LOW_W / LOW_H, 0.1, 100);
+
+// ── ライト: セル塗りは「1灯＋環境」が一番きれいに段が出る ──
+// ★ 環境光を強くすると3段ランプが1段に潰れて「のっぺりした3D」になる。キー強め＋環境弱めで段を出す。
+const key = new THREE.DirectionalLight(0xfff3d6, 2.6); key.position.set(2.2, 3.4, 2.6); scene.add(key);
+scene.add(new THREE.AmbientLight(0x93b6d8, 0.62));
+const rimLight = new THREE.DirectionalLight(0xffffff, 0); rimLight.position.set(-3, 1.5, -2.5); scene.add(rimLight);
+
+// ── トゥーン用グラデーションマップ（3段＝セル塗り。連続階調にすると一気に「3D CG」の顔になる）──
+function toonRamp(steps) {
+  const d = new Uint8Array(steps);
+  for (let i = 0; i < steps; i++) d[i] = Math.round(70 + (185 * i) / (steps - 1));
+  const t = new THREE.DataTexture(d, steps, 1, THREE.RedFormat);
+  t.minFilter = t.magFilter = THREE.NearestFilter; t.needsUpdate = true;
+  return t;
+}
+const RAMP = toonRamp(3);
+
+const KIT = { shirt: 0xd92d3c, shorts: 0x1b2430, socks: 0xd92d3c, skin: 0xe8b088, hair: 0x2b1d16, boot: 0x14161c };
+function mat(color) { return new THREE.MeshToonMaterial({ color, gradientMap: RAMP }); }
+const MATS = {};
+for (const k in KIT) MATS[k] = mat(KIT[k]);
+const outlineMat = new THREE.MeshBasicMaterial({ color: 0x101318, side: THREE.BackSide });
+
+// ── 骨格（pose-figure の JOINT_DEFS を流用。実証済みの人体プロポーション）──
+const JOINT_DEFS = [
+  { name: 'root',      parent: null,        pos: [0, 0.92, 0] },
+  { name: 'spine',     parent: 'root',      pos: [0, 0.13, 0] },
+  { name: 'chest',     parent: 'spine',     pos: [0, 0.13, 0] },
+  { name: 'neck',      parent: 'chest',     pos: [0, 0.22, 0] },
+  { name: 'head',      parent: 'neck',      pos: [0, 0.09, 0] },
+  { name: 'clavicleL', parent: 'chest',     pos: [0.05, 0.17, 0] },
+  { name: 'shoulderL', parent: 'clavicleL', pos: [0.14, 0.02, 0] },
+  { name: 'elbowL',    parent: 'shoulderL', pos: [0, -0.285, 0] },
+  { name: 'wristL',    parent: 'elbowL',    pos: [0, -0.245, 0] },
+  { name: 'clavicleR', parent: 'chest',     pos: [-0.05, 0.17, 0] },
+  { name: 'shoulderR', parent: 'clavicleR', pos: [-0.14, 0.02, 0] },
+  { name: 'elbowR',    parent: 'shoulderR', pos: [0, -0.285, 0] },
+  { name: 'wristR',    parent: 'elbowR',    pos: [0, -0.245, 0] },
+  { name: 'hipL',      parent: 'root',      pos: [0.095, -0.03, 0] },
+  { name: 'kneeL',     parent: 'hipL',      pos: [0, -0.42, 0] },
+  { name: 'ankleL',    parent: 'kneeL',     pos: [0, -0.40, 0] },
+  { name: 'hipR',      parent: 'root',      pos: [-0.095, -0.03, 0] },
+  { name: 'kneeR',     parent: 'hipR',      pos: [0, -0.42, 0] },
+  { name: 'ankleR',    parent: 'kneeR',     pos: [0, -0.40, 0] },
+];
+const J = {};
+const figure = new THREE.Group();
+scene.add(figure);
+for (const d of JOINT_DEFS) {
+  const o = new THREE.Object3D(); o.name = d.name; o.position.set(...d.pos);
+  J[d.name] = o;
+  (d.parent ? J[d.parent] : figure).add(o);
+}
+
+// ── 体パーツ（カプセルの剛体セグメント）＋インク輪郭 ──
+const outlines = [];
+// ★ 輪郭は「メッシュを比率で拡大」だと細い腕は細い線・太い胴は太い線になり、マンガのペン入れに見えない。
+//   半径に一定量を足した別ジオメトリを背面描画する＝どのパーツでも線幅が揃う（等幅インク）。
+const INK = 0.017;
+function part(jointName, radius, len, material, y, sx = 1, sz = 1) {
+  const geo = new THREE.CapsuleGeometry(radius, len, 4, 12);
+  const m = new THREE.Mesh(geo, material);
+  m.scale.set(sx, 1, sz); m.position.y = y;
+  J[jointName].add(m);
+  const o = new THREE.Mesh(new THREE.CapsuleGeometry(radius + INK, len + INK * 0.6, 4, 12), outlineMat);
+  o.scale.set(sx, 1, sz); o.position.y = y;
+  J[jointName].add(o);
+  outlines.push(o);
+  return m;
+}
+part('root',  0.085, 0.06, MATS.shorts, 0.02, 1.35, 0.85);      // 骨盤
+part('spine', 0.075, 0.09, MATS.shirt,  0.065, 1.25, 0.8);      // 腹
+part('chest', 0.095, 0.13, MATS.shirt,  0.10, 1.45, 0.8);       // 胸
+part('neck',  0.035, 0.05, MATS.skin,   0.045);
+part('head',  0.086, 0.07, MATS.skin,   0.10, 0.92, 1.0);
+part('head',  0.090, 0.03, MATS.hair,   0.155, 0.94, 1.0, 1.05); // 髪（頭頂の帽子状）
+for (const s of ['L', 'R']) {
+  part('shoulder' + s, 0.045, 0.19, MATS.skin, -0.14);   // 上腕（半袖なので肌）
+  part('elbow' + s,    0.038, 0.17, MATS.skin, -0.12);   // 前腕
+  part('wrist' + s,    0.033, 0.02, MATS.skin, -0.03);   // 手
+  part('hip' + s,      0.070, 0.24, MATS.shorts, -0.19); // 腿（上はパンツ）
+  part('knee' + s,     0.052, 0.26, MATS.socks, -0.19);  // スネ（ソックス）
+  part('ankle' + s,    0.042, 0.07, MATS.boot, -0.02, 1.0, 1.8); // スパイク
+}
+// 肩の袖（シャツ色を肩に置いて「ユニフォームを着ている」と読ませる）
+for (const s of ['L', 'R']) part('shoulder' + s, 0.052, 0.03, MATS.shirt, -0.02);
+
+// ── 顔（マンガ側の最大の強みは表情。のっぺらぼうだと一気に「デッサン人形」に落ちる）──
+//   480x216 では頭が約15px＝目は1-2px。細部は作らず「濃い点＋眉の線」で顔の向きだけ立てる。
+{
+  const dark = new THREE.MeshBasicMaterial({ color: 0x14181f });
+  const face = new THREE.Group();
+  J.head.add(face);
+  // ★ 頭カプセルの半径は0.086。z=0.070だと目が頭の内側に埋まって見えない（2026-07-28 実測）。
+  //   表面より前に出す＝低解像度でも「顔がある」が成立する最低条件。
+  face.position.set(0, 0.105, 0.090);
+  for (const sgn of [1, -1]) {
+    const eye = new THREE.Mesh(new THREE.BoxGeometry(0.020, 0.026, 0.012), dark);
+    eye.position.set(sgn * 0.034, 0.004, 0);
+    face.add(eye);
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.030, 0.010, 0.010), dark);
+    brow.position.set(sgn * 0.035, 0.034, 0.002);
+    brow.rotation.z = sgn * -0.30;                    // ハの字＝マンガの「気迫」の顔
+    face.add(brow);
+  }
+  // 髪の毛先（マンガらしい尖り。低解像度では形のシルエットだけが効く）
+  for (let i = 0; i < 5; i++) {
+    const sp = new THREE.Mesh(new THREE.ConeGeometry(0.030, 0.075, 4), MATS.hair);
+    sp.position.set(-0.06 + i * 0.030, 0.175, -0.010 + (i % 2) * 0.028);
+    sp.rotation.z = (i - 2) * 0.24; sp.rotation.x = -0.30;
+    J.head.add(sp);
+    const so = new THREE.Mesh(new THREE.ConeGeometry(0.030 + INK, 0.075 + INK, 4), outlineMat);
+    so.position.copy(sp.position); so.rotation.copy(sp.rotation);
+    J.head.add(so); outlines.push(so);
+  }
+}
+
+// ── ピッチ（芝のストライプ＋白線。背景も低解像度前提で単純に）──
+{
+  const g = new THREE.PlaneGeometry(40, 60);
+  const cvs = document.createElement('canvas'); cvs.width = 256; cvs.height = 256;
+  const x = cvs.getContext('2d');
+  for (let i = 0; i < 8; i++) { x.fillStyle = i % 2 ? '#2e7d32' : '#276b2b'; x.fillRect(0, i * 32, 256, 32); }
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(6, 9);
+  tex.magFilter = THREE.NearestFilter;
+  const p = new THREE.Mesh(g, new THREE.MeshToonMaterial({ map: tex, gradientMap: RAMP }));
+  p.rotation.x = -Math.PI / 2;
+  scene.add(p);
+}
+// ボール
+const ball = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 9), new THREE.MeshToonMaterial({ color: 0xf5f5f5, gradientMap: RAMP }));
+scene.add(ball);
+{
+  const o = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 9), outlineMat);
+  o.scale.setScalar(1.13); ball.add(o);
+}
+
+// ══ モーション（手続き生成。スプライトを描き直さずに動きを作る）════════════
+const D = Math.PI / 180;
+function reset() {
+  for (const k in J) J[k].rotation.set(0, 0, 0);
+  J.root.position.set(...JOINT_DEFS[0].pos);
+}
+
+/* ── 関節可動域リミット（2026-07-28 ユーザー指摘「膝が逆に曲がっている」の再発防止）──
+ * ★ この骨格は 前方=+Z / 手足は-Yに伸びる。X軸まわりに正回転すると足先は-Z（後ろ）へ動く。
+ *   ひざの屈曲＝すねが後ろへ（かかとが尻へ）＝**正**。実装は全箇所が負で、過伸展していた。
+ * ★ 数式で姿勢を書く限り符号ミスは必ず起きるので、**最後に必ず可動域で殴る**。
+ *   pose-figure が同じ理由で可動域リミットを持っている（あちらはIKドラッグ用）。 */
+const LIMITS = {
+  hip:   { x: [-115, 35] },     // 前へ大きく上がる／後ろへは僅か
+  knee:  { x: [0, 150] },       // ★ 屈曲のみ。負＝過伸展は絶対に許さない
+  ankle: { x: [-35, 45] },
+  shoulder: { x: [-160, 70], z: [-95, 95] },
+  elbow: { x: [-150, 0] },      // ひじは前へのみ曲がる（この骨格では負が屈曲）
+  spine: { x: [-25, 35] }, chest: { x: [-25, 35] }, neck: { x: [-40, 40] }, head: { x: [-45, 45] }
+};
+function clampJoints() {
+  for (const name in J) {
+    const base = name.replace(/[LR]$/, '');
+    const lim = LIMITS[base]; if (!lim) continue;
+    for (const ax of ['x', 'y', 'z']) {
+      const r = lim[ax]; if (!r) continue;
+      const v = J[name].rotation[ax] / D;
+      J[name].rotation[ax] = Math.max(r[0], Math.min(r[1], v)) * D;
+    }
+  }
+}
+/* ── 歩容（gait）────────────────────────────────────────────────────────
+ * ★ 「ドリブルが歩きに見える」の主因は振り幅ではなく**時間配分**（2026-07-28 ユーザー指摘）。
+ *   sin で脚を振ると、接地している時間と空中の時間が 50:50・しかも等速になる。
+ *   実際の歩容は【立脚 ≒60%（足は地面に置いたまま、体がその上を乗り越える）】と
+ *   【遊脚 ≒40%（素早く前へ戻す・ひざを大きく畳む）】の非対称で、この差が「歩いている」感を作る。
+ *   sin は常に滑らかに往復するので、足が地面を蹴らずに宙を漂う＝浮いた歩きに見えていた。
+ * @param p 0..1 の位相 / 戻り値 fwd=腿の前方角(度・+が前) knee=ひざ屈曲(度・+のみ)
+ */
+function gaitLeg(p, o) {
+  const ST = o.stance == null ? 0.6 : o.stance;
+  if (p < ST) {                                  // 立脚: 前→後ろへ等速（＝足が地面に貼り付いて見える）
+    const u = p / ST;
+    return { fwd: o.fwd - (o.fwd + o.back) * u, knee: o.kneeStance * Math.sin(u * Math.PI) + 6 };
+  }
+  const u = (p - ST) / (1 - ST);                 // 遊脚: 一気に前へ戻す＋ひざを畳む
+  const e = u * u * (3 - 2 * u);
+  return { fwd: -o.back + (o.fwd + o.back) * e, knee: o.kneeSwing * Math.sin(u * Math.PI) + 8 };
+}
+/** 位相から接地の強さ（0..1）。踏み込みの沈み込みに使う。 */
+function stanceLoad(p, ST) { return p < (ST == null ? 0.6 : ST) ? Math.sin(p / (ST == null ? 0.6 : ST) * Math.PI) : 0; }
+
+const MOTION = {
+  // 走り: 腰の上下＋腿の前後＋ひざは後ろにだけ曲がる＋腕は脚と逆位相
+  /* 走り: 立脚を40%まで縮めると「滞空」が生まれ、歩きと明確に分かれる（歩行は立脚>50%）。 */
+  run(t) {
+    const cyc = 0.36;
+    const ph0 = (t / cyc) % 1, ph1 = (ph0 + 0.5) % 1;
+    const P = { fwd: 42, back: 26, kneeStance: 26, kneeSwing: 96, stance: 0.40 };
+    const gL = gaitLeg(ph0, P), gR = gaitLeg(ph1, P);
+    const load = Math.max(stanceLoad(ph0, P.stance), stanceLoad(ph1, P.stance));
+    const swing = Math.sin(t / cyc * Math.PI);
+
+    J.root.position.y = 0.95 - load * 0.055;            // 接地で沈み、滞空で伸びる
+    J.root.rotation.x = 12 * D;
+    J.root.rotation.y = swing * 7 * D;
+    J.spine.rotation.x = 6 * D;
+    J.chest.rotation.y = -swing * 13 * D;               // 骨盤と逆回旋
+    J.neck.rotation.x = -6 * D;
+
+    J.hipL.rotation.x = -gL.fwd * D; J.kneeL.rotation.x = gL.knee * D;
+    J.hipR.rotation.x = -gR.fwd * D; J.kneeR.rotation.x = gR.knee * D;
+    J.ankleL.rotation.x = 12 * D; J.ankleR.rotation.x = 12 * D;
+    for (const [s, sg] of [['L', 1], ['R', -1]]) {
+      J['shoulder' + s].rotation.x = sg * swing * 40 * D;   // 腕は脚と対角
+      J['shoulder' + s].rotation.z = sg * 14 * D;
+      J['elbow' + s].rotation.x = -78 * D;
+    }
+    ball.position.set(0.34, 0.11, 0.55 + Math.sin(t * 3) * 0.12);
+    ball.rotation.x -= 0.16;
+  },
+  // シュート: 溜め(踏み込み)→インパクト→フォロースルー の3拍。0.9秒で1周
+  shoot(t) {
+    const p = (t % 1.6) / 1.6;
+    // k: -1=引き, 0=インパクト, +1=振り抜き
+    const k = p < 0.45 ? -1 + p / 0.45 * 0.35 : (p < 0.55 ? (p - 0.45) / 0.10 * 1.4 - 0.65 : 0.75 + (p - 0.55) / 0.45 * 0.25);
+    J.root.position.y = 0.90;
+    J.root.rotation.y = -k * 16 * D;
+    J.chest.rotation.y = k * 26 * D;
+    J.chest.rotation.x = -k * 10 * D;
+    J.head.rotation.y = k * 10 * D;
+    // 蹴り足（右）
+    J.hipR.rotation.x = -k * 62 * D;
+    J.kneeR.rotation.x = Math.max(0, -k) * 95 * D + 10 * D;   // 正=屈曲。溜めで畳み、振り抜きで伸びる
+    J.ankleR.rotation.x = 22 * D;
+    // 軸足（左）
+    J.hipL.rotation.x = 16 * D; J.kneeL.rotation.x = 22 * D;
+    // 腕はバランス（蹴り足と逆へ大きく開く）
+    J.shoulderR.rotation.x = k * 30 * D; J.shoulderR.rotation.z = -46 * D; J.elbowR.rotation.x = -40 * D;
+    J.shoulderL.rotation.x = -k * 55 * D; J.shoulderL.rotation.z = 58 * D; J.elbowL.rotation.x = -30 * D;
+    // ボール: インパクトで前方へ射出
+    if (p < 0.5) ball.position.set(0.16, 0.11, 0.30);
+    else { const f = (p - 0.5) / 0.5; ball.position.set(0.16, 0.11 + f * 0.9, 0.30 - f * 9); ball.rotation.x -= 0.5; }
+    if (p >= 0.5 && p < 0.56) impact();
+  },
+  // ドリブル: 小刻みなステップ＋上体の揺れ＋足元のボール
+  /* ドリブル: 走りの縮小版にすると必ず「歩き」になる（＝今回の指摘）。別物として作る。
+   *   ①重心を落とす（ひざを曲げたまま構える）②歩幅は短く刻みは速い③上体は前傾＋頭はボールを見る
+   *   ④左右への体重移動（走りには無い）⑤腕は振らず、開いてバランスを取る */
+  dribble(t) {
+    const cyc = 0.44;                                  // 1歩の周期（走りより速い刻み）
+    const ph0 = (t / cyc) % 1, ph1 = (ph0 + 0.5) % 1;
+    const P = { fwd: 20, back: 12, kneeStance: 16, kneeSwing: 52, stance: 0.62 };
+    const gL = gaitLeg(ph0, P), gR = gaitLeg(ph1, P);
+    const load = Math.max(stanceLoad(ph0, P.stance), stanceLoad(ph1, P.stance));
+    const sway = Math.sin(t / cyc * Math.PI);           // 左右への体重移動（1歩ごとに入れ替わる）
+
+    J.root.position.y = 0.865 - load * 0.022;           // ★ 重心を落として構える（走り0.92→0.865）
+    J.root.position.x = sway * 0.045;
+    J.root.rotation.x = 14 * D;                         // 前傾は走りより深い
+    J.root.rotation.z = -sway * 7 * D;
+    J.root.rotation.y = sway * 12 * D;
+    J.spine.rotation.x = 6 * D;
+    J.chest.rotation.y = -sway * 16 * D;                // 骨盤と胸で逆回旋＝体幹が働いて見える
+    J.neck.rotation.x = 16 * D; J.head.rotation.x = 14 * D;   // 頭は下＝足元のボールを見る
+
+    J.hipL.rotation.x = -gL.fwd * D; J.kneeL.rotation.x = gL.knee * D;
+    J.hipR.rotation.x = -gR.fwd * D; J.kneeR.rotation.x = gR.knee * D;
+    J.ankleL.rotation.x = 10 * D; J.ankleR.rotation.x = 10 * D;
+    // 腕は「振る」のではなく「開いて構える」＝走りとの最大の見た目の差
+    for (const [s, sg] of [['L', 1], ['R', -1]]) {
+      J['shoulder' + s].rotation.x = -14 * D + sway * sg * 10 * D;
+      J['shoulder' + s].rotation.z = sg * 34 * D;
+      J['elbow' + s].rotation.x = -68 * D;
+    }
+    // ボール: 左右の足で交互に触る（体重移動と同位相）＝足元に置いて運んでいる感
+    ball.position.set(sway * 0.22, 0.11, 0.40 + Math.abs(sway) * 0.10);
+    ball.rotation.x -= 0.14;
+  },
+  /* MOCAP-01: sprite-studio 形式のポーズJSON（19関節・XYZオイラー度）をそのまま当てる。
+   *   ★ 関節名が pose-figure と完全一致しているので、変換なしで流し込める。 */
+  pose(t) {
+    if (!POSE) return;
+    for (const k in POSE) if (J[k]) J[k].rotation.set(POSE[k][0] * D, POSE[k][1] * D, POSE[k][2] * D);
+    ball.position.set(0.30, 0.11, 0.36);
+  },
+  idle(t) {
+    const w = t * 2;
+    J.root.position.y = 0.92 + Math.sin(w) * 0.008;
+    J.chest.rotation.x = Math.sin(w) * 2 * D;
+    J.shoulderL.rotation.z = 8 * D; J.shoulderR.rotation.z = -8 * D;
+    J.elbowL.rotation.x = -18 * D; J.elbowR.rotation.x = -18 * D;
+    ball.position.set(0.4, 0.11, 0.3);
+  },
+};
+
+// ══ カメラ（FPS動画の語法: 被写体でなくカメラが動く / インパクトで揺れる）════
+// ★ カットシーンの寄り＝選手が画面の高さを占める。引きだと低解像度では顔も体も潰れて読めない。
+const CAMS = {
+  side(t) { camera.position.set(2.05, 1.15, 1.95); camera.lookAt(0, 0.88, 0); },
+  push(t) { const p = (t % 4) / 4, z = 3.2 - p * 0.9; camera.position.set(0.7, 1.25 - p * 0.18, z); camera.lookAt(0, 0.92, 0); },
+  low(t)  { camera.position.set(1.25, 0.34, 1.8); camera.lookAt(0, 1.00, 0); },
+  orbit(t){ const a = t * 0.42; camera.position.set(Math.sin(a) * 1.9, 1.25, Math.cos(a) * 1.9); camera.lookAt(0, 0.92, 0); },
+};
+
+// ══ FX: 今回作った演出層と同じ語法（パンチ＝減衰ズーム＋シェイク / リング / 光芒）══
+let impactT0 = -1, raysT0 = -1;
+function impact() { if (impactT0 < 0 || perfNow() - impactT0 > 400) impactT0 = perfNow(); }
+function perfNow() { return performance.now(); }
+document.getElementById('fx-impact').onclick = () => { impactT0 = perfNow(); };
+document.getElementById('fx-rays').onclick = () => { raysT0 = perfNow(); };
+
+// FXは2Dオーバーレイで重ねる（3D側を汚さない＝既存 _csFx と同じ役割分担）
+const fxCv = document.createElement('canvas');
+const fxCtx = fxCv.getContext('2d');
+
+// ══ ループ ═══════════════════════════════════════════════════════════════
+let motion = 'run', cam = 'side', t0 = perfNow();
+let frames = 0, fpsT = perfNow();
+function applyOpts() {
+  const pixel = document.getElementById('opt-pixel').checked;
+  const W = pixel ? LOW_W : HI_W, H = pixel ? LOW_H : HI_H;
+  if (renderer.domElement.width !== W) { renderer.setSize(W, H, false); camera.aspect = W / H; camera.updateProjectionMatrix(); }
+  fxCv.width = W; fxCv.height = H;
+  const on = document.getElementById('opt-outline').checked;
+  for (const o of outlines) o.visible = on;
+  rimLight.intensity = document.getElementById('opt-rim').checked ? 2.2 : 0;
+  const toon = document.getElementById('opt-toon').checked;
+  for (const k in MATS) { MATS[k].gradientMap = toon ? RAMP : null; MATS[k].needsUpdate = true; }
+}
+function frame() {
+  applyOpts();
+  const now = perfNow(), t = (now - t0) / 1000;
+  reset();
+  MOTION[motion](t);
+  clampJoints();          // ★ 最後に必ず可動域で殴る（符号ミスを絵に出さない最後の砦）
+  CAMS[cam](t);
+
+  // パンチ: インパクト260msだけカメラを寄せて揺らす（恒常的なカメラ移動はしない）
+  if (impactT0 > 0) {
+    const e = now - impactT0;
+    if (e < 260) {
+      const k = 1 - e / 260;
+      camera.position.multiplyScalar(1 - 0.055 * k * k);
+      camera.position.x += (Math.sin(e * 0.9) * 0.035) * k;
+      camera.position.y += (Math.cos(e * 1.1) * 0.030) * k;
+      camera.lookAt(0, 0.98, 0);
+    } else if (e > 900) impactT0 = -1;
+  }
+  renderer.render(scene, camera);
+
+  // ── 2D FXオーバーレイ（リング＋光芒）──
+  const W = fxCv.width, H = fxCv.height;
+  fxCtx.clearRect(0, 0, W, H);
+  if (impactT0 > 0) {
+    const p = (now - impactT0) / 420;
+    if (p < 1) ring(fxCtx, W * 0.5, H * 0.62, p, 0x000000);
+  }
+  if (raysT0 > 0) {
+    const p = (now - raysT0) / 2200;
+    if (p < 1) rays(fxCtx, W, H, now, Math.sin(p * Math.PI) * 0.75);
+    else raysT0 = -1;
+  }
+  const c2 = cv.getContext ? null : null;   // WebGLコンテキストなので直接は描けない
+  // → FXは CSS 重ねでなく、three 側の後段に置くのが本筋。プロトタイプでは別canvasを重ねる
+  fxLayer.style.opacity = '1';
+
+  frames++;
+  if (now - fpsT > 1000) { document.getElementById('fps').textContent = 'FPS ' + frames + ' / 解像度 ' + W + 'x' + H; frames = 0; fpsT = now; }
+  requestAnimationFrame(frame);
+}
+// FX用の重ねcanvasをDOMに置く（WebGL canvasには2Dで描けないため）
+const fxLayer = fxCv;
+fxLayer.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;pointer-events:none';
+cv.parentElement.style.position = 'relative';
+cv.parentElement.appendChild(fxLayer);
+
+function ring(ctx, x, y, t, _c) {
+  const cell = 4, rMax = 78;
+  const e = 1 - (1 - t) * (1 - t), r = cell * 2 + (rMax - cell * 2) * e, al = 1 - t * t;
+  pass(ctx, x, y, r + cell, cell, 1, '#14181f', al * 0.9);
+  pass(ctx, x, y, r, cell, 3, '#ffffff', Math.min(1, al * 1.35));
+  pass(ctx, x, y, Math.max(cell * 2, r - cell * 3), cell, 1, '#ffd23a', al * 0.95);
+}
+function pass(ctx, x, y, r, cell, thick, col, alpha) {
+  if (r <= 0) return;
+  ctx.globalAlpha = Math.max(0, Math.min(1, alpha)); ctx.fillStyle = col;
+  const steps = Math.max(16, Math.ceil(2 * Math.PI * r / cell) * 2), seen = {};
+  for (let i = 0; i < steps; i++) {
+    const a = i / steps * 2 * Math.PI, ca = Math.cos(a), sa = Math.sin(a);
+    for (let q = 0; q < thick; q++) {
+      const rr = r - q * cell;
+      const px = Math.round((x + ca * rr) / cell) * cell, py = Math.round((y + sa * rr) / cell) * cell;
+      const k = px + ',' + py; if (seen[k]) continue; seen[k] = 1;
+      ctx.fillRect(px, py, cell, cell);
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+function rays(ctx, W, H, now, master) {
+  if (master <= 0) return;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 4; i++) {
+    const bw = 34 + i * 9, x = W * (0.16 + i * 0.23) + Math.sin(now / 2400 + i) * 12;
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, 'rgba(255,247,210,' + (0.30 * master).toFixed(3) + ')');
+    g.addColorStop(1, 'rgba(255,247,210,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(x - bw / 2, 0); ctx.lineTo(x + bw / 2, 0); ctx.lineTo(x + bw, H); ctx.lineTo(x - bw, H); ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+}
+
+for (const b of document.querySelectorAll('[data-m]')) b.onclick = () => {
+  motion = b.dataset.m; t0 = perfNow();
+  document.querySelectorAll('[data-m]').forEach(x => x.classList.toggle('on', x === b));
+};
+for (const b of document.querySelectorAll('[data-c]')) b.onclick = () => {
+  cam = b.dataset.c;
+  document.querySelectorAll('[data-c]').forEach(x => x.classList.toggle('on', x === b));
+};
+let POSE = null;
+window._3dLab = {
+  setMotion: m => { motion = m; t0 = perfNow(); }, setCam: c => { cam = c; }, impact,
+  // MOCAP-01: リターゲット済みポーズを読んで当てる（sprite-studio の poses/*.json と同形式）
+  loadPose: async (url) => { const d = await (await fetch(url)).json(); POSE = d.pose.rot; motion = 'pose'; return d.name; }
+};
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

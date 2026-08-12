@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!-- THROWAWAY 検証ハーネス: 頭なし体(AI) × 実行時ピクセル頭(PixelHead.composePose)
+     本番 cutscene.js は一切触らない。首ソケット/headH を振って画風の馴染みを目視する。 -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PixelHead compose test</title>
+<style>
+  html,body{margin:0;background:linear-gradient(160deg,#003087,#0050cc,#1a7a3a);color:#eef3ff;font-family:"Noto Sans JP",system-ui,sans-serif;}
+  h1{font-size:16px;padding:10px 14px;margin:0;font-weight:700;}
+  #ctl{position:sticky;top:0;z-index:5;background:rgba(0,10,30,.72);backdrop-filter:blur(4px);padding:8px 14px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:12px;}
+  #ctl label{display:flex;flex-direction:column;gap:2px;}
+  #ctl output{font-variant-numeric:tabular-nums;color:#ffe27a;}
+  input[type=range]{width:150px;}
+  #grid{display:flex;flex-wrap:wrap;gap:14px;padding:16px;}
+  .cell{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px;width:200px;}
+  .cell canvas{width:100%;height:auto;display:block;image-rendering:pixelated;background:transparent;}
+  .cap{font-size:11px;line-height:1.35;margin-top:6px;color:#dfe8ff;}
+  .cap b{color:#ffe27a;}
+  .kit{font-weight:700;font-size:12px;color:#8ff;margin:2px 0;}
+  .socketdot{}
+</style>
+</head>
+<body>
+<h1>頭なし体(AI・合格poseA) × 実行時ピクセル頭 合成テスト</h1>
+<div id="ctl">
+  <label>headH <output id="oH"></output><input id="rH" type="range" min="120" max="360" step="2" value="300"></label>
+  <label>sx(socket) <output id="oX"></output><input id="rX" type="range" min="640" max="880" step="1" value="760"></label>
+  <label>sy(socket) <output id="oY"></output><input id="rY" type="range" min="240" max="400" step="1" value="330"></label>
+  <label><input id="cSock" type="checkbox"> ソケット点表示</label>
+  <label><input id="cFlip" type="checkbox"> flip</label>
+</div>
+<div id="grid"></div>
+
+<script src="js/portrait.js"></script>
+<script src="js/portrait_pixel.js"></script>
+<script src="js/manga_recolor.js"></script>
+<script>
+// --- 別選手 8名（別 long_name = 別髪型/肌/髭 を決定論で引く） ---
+var PLAYERS = [
+  'Takumi Minamino','Kylian Mbappe','Virgil van Dijk','Achraf Hakimi',
+  'Luka Modric','Son Heung-min','Erling Haaland','Kaoru Mitoma'
+];
+// --- チームキット（数チーム分） ---
+var KITS = [
+  { name:'JPN', c:{ shirt:'#1b3a8f', shorts:'#12235a', socks:'#1b3a8f', accent:'#e8e8ee', skin:null } },
+  { name:'BRA', c:{ shirt:'#f7d417', shorts:'#1f5fbf', socks:'#f7d417', accent:'#1a7a3a', skin:null } },
+  { name:'RED', c:{ shirt:'#c8102e', shorts:'#ffffff', socks:'#c8102e', accent:'#111827', skin:null } }
+];
+
+var BODY = new Image();
+var bodyReady = false;
+BODY.onload = function(){ bodyReady = true; render(); };
+BODY.src = 'tools/proto/poseA_body_headless.png?t=' + Date.now();
+
+var grid = document.getElementById('grid');
+var META = window.Portrait && Portrait._meta;
+function featCap(name){
+  var f = Portrait.featuresFor(name);
+  var hs = META ? META.HAIRSTYLE[f.hstyle][1] : f.hstyle;
+  var sk = META ? META.SKIN[f.skin][1] : f.skin;
+  var bd = META ? META.BEARD[f.beard][1] : f.beard;
+  return { hs:hs, sk:sk, bd:bd, f:f };
+}
+
+function buildCells(){
+  grid.innerHTML='';
+  var idx=0;
+  KITS.forEach(function(kit){
+    PLAYERS.forEach(function(name, pi){
+      // 8名 × 3キット = 24 は多いので、各キットに違う3名だけ割当てて計9セル（見やすさ優先で別選手をばらす）
+      // → キットごとに PLAYERS を3つ窓でスライス
+    });
+  });
+  // キットごとに別3名（合計9セル・各セル別選手＝髪/肌/髭の出し分けが一望できる）
+  var windows = [[0,1,2],[3,4,5],[6,7,0]];
+  KITS.forEach(function(kit, ki){
+    windows[ki].forEach(function(pi){
+      var name = PLAYERS[pi];
+      var cap = featCap(name);
+      var cell = document.createElement('div'); cell.className='cell';
+      var cv = document.createElement('canvas');
+      cv.width = BODY.naturalWidth || 1122; cv.height = BODY.naturalHeight || 1402;
+      cell.appendChild(cv);
+      var d = document.createElement('div'); d.className='cap';
+      d.innerHTML = '<div class="kit">'+kit.name+'</div><b>'+name+'</b><br>髪:'+cap.hs+' / 肌:'+cap.sk+' / 髭:'+cap.bd;
+      cell.appendChild(d);
+      grid.appendChild(cell);
+      cell._cv = cv; cell._name = name; cell._kit = kit;
+    });
+  });
+}
+
+function drawCell(cell){
+  var cv = cell._cv, name = cell._name, kit = cell._kit;
+  var ctx = cv.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  // 1) 頭なし体を着色（naturalWidth||width 判定は composePose 内で担保）
+  var colored = MangaRecolor.render('poseA_headless', BODY, kit.c);
+  // 2) 頭を載せる
+  var headH = +document.getElementById('rH').value;
+  var sx = +document.getElementById('rX').value;
+  var sy = +document.getElementById('rY').value;
+  var flip = document.getElementById('cFlip').checked;
+  PixelHead.composePose(ctx, name, colored, { bw:cv.width, bh:cv.height, dScale:1, flip:flip, headH:headH, sx:sx, sy:sy });
+  // 3) ソケット可視化
+  if (document.getElementById('cSock').checked){
+    ctx.fillStyle='#ff3b3b'; ctx.beginPath(); ctx.arc(sx,sy,6,0,7); ctx.fill();
+  }
+}
+
+function render(){
+  document.getElementById('oH').textContent = document.getElementById('rH').value;
+  document.getElementById('oX').textContent = document.getElementById('rX').value;
+  document.getElementById('oY').textContent = document.getElementById('rY').value;
+  if (!bodyReady) return;
+  if (!grid.firstChild) buildCells();
+  Array.prototype.forEach.call(grid.children, drawCell);
+}
+['rH','rX','rY','cSock','cFlip'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', render);
+});
+render();
+</script>
+</body>
+</html>

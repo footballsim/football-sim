@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>漫画ドリブル デュエル — ループ再生</title>
+<style>
+  body{background:#0b0d16;color:#dce3ee;font:14px system-ui,sans-serif;margin:0;padding:16px}
+  h1{font-size:16px;margin:0 0 4px}
+  p.note{color:#9fb0c8;font-size:12px;margin:0 0 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;max-width:1040px}
+  .cell .frame{background:#000;border-radius:7px;overflow:hidden;aspect-ratio:480/216}
+  .cell .frame canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+  .cap{color:#8fd6ff;font-size:12px;margin:5px 2px 0}
+  #log{color:#c05a5a;font:12px ui-monospace,monospace;margin-top:8px}
+</style>
+</head>
+<body>
+<h1>漫画ドリブル デュエル — ループ再生（成功シーン）</h1>
+<p class="note">実 cutscene.js の _renderDribbleScene（→漫画分岐）を約2.4秒ごとに再生。密着デュエル→ドリブラーが右へ抜け出す動きを繰り返します。守備は静止。</p>
+<div class="grid" id="grid"></div>
+<div id="log"></div>
+
+<script src="js/portrait.js?v=t"></script>
+<script src="js/manga_recolor.js?v=t"></script>
+<script src="js/cutscene.js?v=t"></script>
+<script>
+window.MANGA_CUTSCENE_ENABLED = true;
+window.LANG = 'ja';
+CUTSCENE_BURN_LABELS = true;
+window.gameState = {};   // team1未設定→_csAttackRight=true（全キャンバス右攻めで一貫）
+window.getPlayerName = function (p) { return p.long_name || p.name; };
+window.getTeamName = function (t) { return t.__name || ''; };
+
+// [表示名, 攻撃チーム名, 攻撃キット, ドリブラー選手名]
+var TEAMS = [
+  ['イングランド', 'イングランド', { shirt:'#F2F4F7', shorts:'#1A2A66', socks:'#F2F4F7', accent:'#C8102E' }, 'Jude Bellingham'],
+  ['ブラジル',   'ブラジル',   { shirt:'#F2C500', shorts:'#1B3A8A', socks:'#F2F4F7', accent:'#1E8C3A' }, 'Vinicius Junior'],
+  ['アルゼンチン', 'アルゼンチン', { shirt:'#74ACDF', shorts:'#17181C', socks:'#F2F4F7', accent:'#F2C200' }, 'Lionel Messi'],
+  ['フランス',   'フランス',   { shirt:'#1A2C6B', shorts:'#F2F4F7', socks:'#C8102E', accent:'#C8102E' }, 'Kylian Mbappe' ]
+];
+// 守備（イタリア・固定キット。選手名を変えると守備の髪型も変わる）
+var DEF_KIT = { shirt:'#1B4BA0', shorts:'#F2F4F7', socks:'#1B4BA0', accent:'#F2C200' };
+
+function makeSc(team) {
+  var offence = { __name: team[1], team_color: team[2].shirt, kit: team[2],
+    players: [{ long_name: team[3] }], lineup: [0] };
+  var defence = { __name: 'イタリア', team_color: '#003DA5', kit: DEF_KIT,
+    players: [{ long_name: 'Marker ' + team[3] }], lineup: [0] };
+  return { offence: offence, defence: defence, ofsPos: 0, dfsPos: 0, action: 'ドリブル', result: '成功' };
+}
+
+var grid = document.getElementById('grid');
+var cells = TEAMS.map(function (team) {
+  var cell = document.createElement('div'); cell.className = 'cell';
+  var frame = document.createElement('div'); frame.className = 'frame';
+  var cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = team[0] + ' — ' + team[3];
+  cell.appendChild(frame); cell.appendChild(cap); grid.appendChild(cell);
+  return { team: team, frame: frame };
+});
+
+function play() {
+  cells.forEach(function (c) {
+    var cv = _renderDribbleScene(makeSc(c.team));   // 実シーン（新しいcanvasを返す）
+    c.frame.innerHTML = '';
+    c.frame.appendChild(cv);
+  });
+}
+play();
+setInterval(play, 1350);
+document.getElementById('log').textContent = 'looping ' + TEAMS.length + ' scenes';
+</script>
+</body>
+</html>

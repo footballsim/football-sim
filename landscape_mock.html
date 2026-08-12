@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>横長・試合画面 大画面化 — レイアウト3案</title>
+<style>
+  :root{ --acc:#e8641b; --blu:#1f4fd6; }
+  body{background:#0a0d14;color:#dce3ee;font:14px system-ui,sans-serif;margin:0;padding:18px}
+  h1{font-size:17px;margin:0 0 2px}
+  p.note{color:#9fb0c8;font-size:12px;margin:0 0 18px;max-width:1000px;line-height:1.5}
+  .casetitle{font-size:14px;color:#8fd6ff;font-weight:700;margin:20px 0 6px}
+  .casesub{color:#7f8ca0;font-size:11px;margin:0 0 8px}
+  /* 16:9 ステージ */
+  .stage{position:relative;width:900px;max-width:96vw;aspect-ratio:16/9;background:#05070c;border-radius:12px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+  .stage canvas{display:block;image-rendering:pixelated;position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  /* 半透明ガラス共通 */
+  .glass{background:rgba(16,22,34,.5);border:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(8px) saturate(1.1);backdrop-filter:blur(8px) saturate(1.1)}
+  .score{display:flex;align-items:center;gap:8px;font-weight:800;padding:6px 12px;border-radius:9px}
+  .chip{width:14px;height:14px;border-radius:3px;box-shadow:0 0 0 1px rgba(255,255,255,.3)}
+  .snum{font:900 20px "Arial Black";letter-spacing:1px}
+  .clock{font:800 15px ui-monospace,monospace;color:#ffe14a;padding:2px 8px}
+  .subtitle{font:700 clamp(13px,1.7vw,17px) "Noto Sans JP";color:#fff;text-shadow:0 2px 6px #000}
+  .btn{width:clamp(38px,4.6vw,52px);height:clamp(38px,4.6vw,52px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid rgba(255,255,255,.2);background:rgba(20,26,38,.72);cursor:pointer}
+  .btn.prime{background:var(--acc);border-color:#fff3}
+  .tempo{display:flex;gap:3px}
+  .tempo span{font:800 11px system-ui;padding:3px 7px;border-radius:6px;background:rgba(20,26,38,.7);border:1px solid rgba(255,255,255,.14)}
+  .tempo span.on{background:var(--blu);color:#fff}
+  .mini{width:78px;height:52px;border-radius:6px;background:rgba(10,30,16,.82);border:1px solid rgba(255,255,255,.18);position:relative}
+  .mini::before{content:"";position:absolute;left:50%;top:4px;bottom:4px;width:1px;background:rgba(255,255,255,.25)}
+  .mini .dot{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--acc);left:64%;top:40%;box-shadow:0 0 6px var(--acc)}
+
+  /* ===== 案1 シネマ（全画面＋オーバーレイ） ===== */
+  .c1 .hud-top{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:flex;gap:0;border-radius:10px;overflow:hidden}
+  .c1 .hud-top .score{border-radius:0}
+  .c1 .sub{position:absolute;left:0;right:0;bottom:0;padding:26px 20px 14px;background:linear-gradient(0deg,rgba(4,6,12,.92),rgba(4,6,12,0))}
+  .c1 .ctrl{position:absolute;right:14px;bottom:64px;display:flex;flex-direction:column;gap:8px;align-items:center}
+  .c1 .mini{position:absolute;left:14px;bottom:66px}
+  .c1 .tempo{position:absolute;right:14px;top:14px}
+
+  /* ===== 案2 放送席（左映像＋右パネル） ===== */
+  .c2{display:grid;grid-template-columns:1fr 300px}
+  .c2 .film{position:relative;overflow:hidden}
+  .c2 .film canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .c2 .film .score{position:absolute;top:10px;left:10px;border-radius:8px}
+  .c2 .film .clock{position:absolute;top:12px;right:12px;border-radius:6px}
+  .c2 .panel{background:#0d1119;border-left:1px solid rgba(255,255,255,.1);padding:12px;display:flex;flex-direction:column;gap:10px}
+  .c2 .log{flex:1;font-size:12px;color:#c3ccd9;line-height:1.6;overflow:hidden}
+  .c2 .log b{color:#ffe14a}
+  .c2 .prow{display:flex;gap:8px;align-items:center;justify-content:space-between}
+
+  /* ===== 案3 スタジアム（上帯＋中映像大＋下操作） ===== */
+  .c3{display:flex;flex-direction:column}
+  .c3 .top{display:flex;align-items:center;justify-content:center;gap:14px;padding:6px;background:#0d1119;border-bottom:1px solid rgba(255,255,255,.08)}
+  .c3 .film{position:relative;flex:1;overflow:hidden}
+  .c3 .film canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .c3 .film .sub{position:absolute;left:0;right:0;bottom:0;padding:22px 16px 10px;background:linear-gradient(0deg,rgba(4,6,12,.9),transparent)}
+  .c3 .film .mini{position:absolute;right:12px;bottom:52px}
+  .c3 .bottom{display:flex;align-items:center;justify-content:center;gap:10px;padding:8px;background:#0d1119;border-top:1px solid rgba(255,255,255,.08)}
+</style>
+</head>
+<body>
+<h1>横長・試合画面を大きく — レイアウト3案</h1>
+<p class="note">Steam＝横画面前提。カットシーン（試合映像）を主役に大きく。実カットシーン描画を 16:9 ステージに cover で充填し、スコア/実況/ミニフィールド/采配ボタン/テンポの置き方を3通り比較。既存の半透明ガラスHUDを踏襲。</p>
+<div id="root"></div>
+
+<script src="js/portrait.js?v=L1"></script>
+<script src="js/manga_recolor.js?v=L1"></script>
+<script src="js/cutscene.js?v=L1"></script>
+<script>
+window.MANGA_CUTSCENE_ENABLED = true; window.LANG='ja'; CUTSCENE_BURN_LABELS=false;
+window.gameState={}; window.getPlayerName=function(p){return p.long_name||p.name;}; window.getTeamName=function(t){return t.__name||'';};
+_MANGA_HAIR_UNIFORM='fade';
+
+function shotCanvas(){
+  var kit={shirt:'#c8102e',shorts:'#f2f4f7',socks:'#c8102e',accent:'#ffd400'};
+  var sc={offence:{__name:'RED',team_color:'#c8102e',kit:kit,players:[{long_name:'Marco Rossi'}],lineup:[0]},
+    defence:{__name:'BLU',team_color:'#1050c0',kit:{shirt:'#1050c0',shorts:'#17181c',socks:'#1050c0',accent:'#fff'},players:[{long_name:'Blanc'}],lineup:[0]},
+    ofsPos:0,dfsPos:0,action:'シュート',result:'シュート'};
+  var entry=(typeof _pickCutscene==='function')?_pickCutscene('shot','#c8102e'):{file:''};
+  return _renderShotScene(sc, entry||{file:''});
+}
+function el(tag,cls,html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
+function scoreBar(){ return '<div class="score glass"><span class="chip" style="background:#c8102e"></span><span>ITA</span><span class="snum">1</span></div>'
+  +'<div class="clock glass">67&#39;</div>'
+  +'<div class="score glass"><span class="snum">0</span><span>GER</span><span class="chip" style="background:#111"></span></div>'; }
+
+var root=document.getElementById('root');
+
+// 案1 シネマ
+(function(){
+  root.appendChild(el('div','casetitle',null)).textContent='案1　シネマ（全画面＋オーバーレイHUD）';
+  root.appendChild(el('div','casesub',null)).textContent='映像が画面いっぱい・最大没入。スコアは上中央、実況は下字幕、采配は右フロート、ミニフィールドとテンポは隅。';
+  var st=el('div','stage c1'); st.appendChild(shotCanvas());
+  st.appendChild(el('div','hud-top',scoreBar()));
+  st.appendChild(el('div','tempo','<span>1x</span><span class="on">2x</span><span>3x</span>'));
+  st.appendChild(el('div','mini','<div class="dot"></div>'));
+  var ctrl=el('div','ctrl'); ctrl.innerHTML='<div class="btn prime">👔</div><div class="btn">🔄</div>'; st.appendChild(ctrl);
+  st.appendChild(el('div','sub','<div class="subtitle">ロッシ、右足一閃！ ゴール左隅を撃ち抜く狙い——</div>'));
+  root.appendChild(st);
+})();
+
+// 案2 放送席
+(function(){
+  root.appendChild(el('div','casetitle',null)).textContent='案2　放送席（左＝映像大／右＝情報パネル）';
+  root.appendChild(el('div','casesub',null)).textContent='映像は左2/3で大きく、右に実況ログ・順位・采配ボタン・ミニフィールドを常設。情報量と没入の両立。縦モックの3ゾーン設計の横版。';
+  var st=el('div','stage c2');
+  var film=el('div','film'); film.appendChild(shotCanvas());
+  film.appendChild(el('div','score glass','<span class="chip" style="background:#c8102e"></span><span>ITA</span><span class="snum">1</span> : <span class="snum">0</span><span>GER</span>'));
+  film.appendChild(el('div','clock glass','67&#39;'));
+  film.appendChild(el('div','subtitle','<div style="position:absolute;left:12px;right:12px;bottom:12px" class="subtitle">ロッシ、右足一閃！</div>'));
+  st.appendChild(film);
+  var panel=el('div','panel');
+  panel.appendChild(el('div',null,'<div style="font-weight:800;font-size:12px;color:#8fd6ff">📜 実況ログ</div>'));
+  panel.appendChild(el('div','log','63′ <b>ロッシ</b> がミドル！<br>58′ GER 決定機、GK好セーブ<br>51′ ITA コーナー獲得<br>45′ ハーフタイム'));
+  var prow=el('div','prow'); prow.innerHTML='<div class="mini"><div class="dot"></div></div><div class="tempo"><span>1x</span><span class="on">2x</span><span>3x</span></div>'; panel.appendChild(prow);
+  var brow=el('div','prow'); brow.innerHTML='<div class="btn prime">👔 采配</div>'.replace('width:clamp','x');
+  var b=el('div'); b.style.cssText='display:flex;gap:8px'; b.innerHTML='<div class="btn prime">👔</div><div class="btn">🔄</div><div class="btn">📊</div>'; panel.appendChild(b);
+  st.appendChild(panel);
+  root.appendChild(st);
+})();
+
+// 案3 スタジアム
+(function(){
+  root.appendChild(el('div','casetitle',null)).textContent='案3　スタジアム（上帯スコア／中映像大／下操作バー）';
+  root.appendChild(el('div','casesub',null)).textContent='現状の縦スタックを横長に凝縮。上に細いスコア帯、中央に映像を最大化、下に采配ボタンとテンポを横並び。操作が指に届きやすい（スマホ横持ち向き）。';
+  var st=el('div','stage c3');
+  st.appendChild(el('div','top',scoreBar()));
+  var film=el('div','film'); film.appendChild(shotCanvas());
+  film.appendChild(el('div','mini','<div class="dot"></div>'));
+  film.appendChild(el('div','sub','<div class="subtitle">ロッシ、右足一閃！ ゴール左隅へ——</div>'));
+  st.appendChild(film);
+  var bottom=el('div','bottom'); bottom.innerHTML='<div class="btn prime">👔</div><div class="btn">🔄</div><div class="btn">📊</div><div class="tempo"><span>1x</span><span class="on">2x</span><span>3x</span></div>';
+  st.appendChild(bottom);
+  root.appendChild(st);
+})();
+</script>
+</body>
+</html>

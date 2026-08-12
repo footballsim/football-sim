@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PT-06 髪アート最終品質オーサリング（代表3種）</title>
+<style>
+  body { margin:0; background:linear-gradient(160deg,#003087,#0050cc,#1a7a3a); color:#fff; font:13px system-ui; }
+  h2 { padding:12px 14px 2px; margin:0; }
+  h3 { padding:10px 14px 0; margin:0; font-size:14px; color:#ffe27a; }
+  p.note { padding:0 14px; margin:5px 0; opacity:.9; max-width:1150px; }
+  .row { display:flex; flex-wrap:wrap; gap:14px; padding:12px 14px; align-items:flex-end; }
+  .cell { text-align:center; background:rgba(0,0,0,.22); border-radius:8px; padding:8px; }
+  canvas { image-rendering:pixelated; image-rendering:crisp-edges; display:block; }
+  .cap { margin-top:6px; font-size:11px; line-height:1.4; color:#e7eefc; }
+  .tag { display:inline-block; font-size:10px; padding:1px 5px; border-radius:4px; background:#0006; margin:1px; }
+</style>
+</head>
+<body>
+<h2>PT-06 髪アート — 最終品質オーサリング（spike / short / afro）</h2>
+<p class="note">固定土台 <b>pt06_body_bald</b> の頭シルエットを<b>実測LUT</b>で完全一致させ、CTファミコン翼調の<b>太黒縁＋毛流れ線＋3段陰影</b>で手描き品質のドット髪を載せる。
+髪は単一色相ベースで描き、輝度保持リカラーで栗/黒/銀へ。6xズームで「土台と1枚の絵に見えるか」を検証。</p>
+
+<h3>0) 土台＋実測シルエットLUT（整列の物差し）</h3>
+<div class="row" id="row-anchor"></div>
+
+<h3>1) 代表3髪型 × 髪色3 — 通常表示（合成）</h3>
+<div class="row" id="row-main"></div>
+
+<h3>2) 6xズーム精査（貼り絵感チェック）</h3>
+<p class="note">頭部のみ6x。土台の黒縁太さ・階調と髪が同じ密度・同じ画風か。房の毛流れ・毛先・分け目が描けているか。</p>
+<div class="row" id="row-zoom"></div>
+
+<h3>3) 髪レイヤー単体（透過・毛流れ確認）</h3>
+<div class="row" id="row-layer"></div>
+
+<script src="/js/portrait.js"></script>
+<script>
+(function(){
+'use strict';
+var BODY_SRC='/tools/proto/pt06_body_bald.png';
+var NW=1086, NH=1448;            // ネイティブ解像度
+var PXQ=6;                        // 髪ドットの粗さ（ネイティブpx/セル）＝CT階段エッジ
+
+// ---- 実測: 頭蓋シルエット外周LUT（y→[L,R]）。iswhite以外の最外周。2026-07-06 Python実測 ----
+// крон y72(501-558)→ y152で全幅(427-628)→ y184まで直下。y188から首肩が張り出す。
+var SIL = [
+ [72,501,558],[76,501,559],[80,485,581],[84,483,581],[88,474,592],[92,474,592],
+ [96,467,599],[100,459,605],[104,458,606],[108,452,612],[112,452,612],[116,444,612],
+ [120,443,612],[124,443,620],[128,437,620],[132,436,620],[136,436,620],[140,436,620],
+ [144,428,620],[148,427,620],[152,427,628],[156,427,628],[160,427,628],[164,427,628],
+ [168,427,628],[172,427,628],[176,427,628],[180,427,628],[184,427,628]
+];
+// LUT補間で任意yのシルエット端を返す（範囲外は最寄り）
+function silAt(y){
+  if(y<=SIL[0][0]) return [SIL[0][1],SIL[0][2]];
+  if(y>=SIL[SIL.length-1][0]) return [SIL[SIL.length-1][1],SIL[SIL.length-1][2]];
+  for(var i=0;i<SIL.length-1;i++){
+    if(y>=SIL[i][0]&&y<=SIL[i+1][0]){
+      var t=(y-SIL[i][0])/(SIL[i+1][0]-SIL[i][0]);
+      return [SIL[i][1]+(SIL[i+1][1]-SIL[i][1])*t, SIL[i][2]+(SIL[i+1][2]-SIL[i][2])*t];
+    }
+  }
+  return [SIL[SIL.length-1][1],SIL[SIL.length-1][2]];
+}
+// 頭アンカー
+var HEAD={ crownX:529, crownY:72, cx:527, topFullY:152, sideY:184,
+           browY:300, hairFrontCenterY:255, faceTurnX:505 };
+
+// ============ 色ユーティリティ（portrait.js 同方針・輝度保持リカラー）============
+function hexToRgb(h){var n=parseInt(h.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255];}
+function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;var mx=Math.max(r,g,b),mn=Math.min(r,g,b),h,s,l=(mx+mn)/2;if(mx===mn){h=s=0;}else{var d=mx-mn;s=l>0.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;default:h=(r-g)/d+4;}h/=6;}return[h,s,l];}
+function h2(p,q,t){if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;}
+function hslToRgb(h,s,l){var r,g,b;if(s===0){r=g=b=l;}else{var q=l<0.5?l*(1+s):l+s-l*s,p=2*l-q;r=h2(p,q,h+1/3);g=h2(p,q,h);b=h2(p,q,h-1/3);}return[r*255|0,g*255|0,b*255|0];}
+function newCanvas(w,h){var c=document.createElement('canvas');c.width=w;c.height=h;var x=c.getContext('2d');x.imageSmoothingEnabled=false;return c;}
+
+// 白背景キーイング → 透過土台
+function keyBody(img){
+  var W=img.naturalWidth||img.width,H=img.naturalHeight||img.height;
+  var c=newCanvas(W,H),x=c.getContext('2d');x.drawImage(img,0,0);
+  var id=x.getImageData(0,0,W,H),d=id.data;
+  for(var i=0;i<d.length;i+=4){ if(d[i]>235&&d[i+1]>235&&d[i+2]>235) d[i+3]=0; }
+  x.putImageData(id,0,0);return c;
+}
+
+// ============ 髪パレット（単一色相・基調茶。5段: 黒縁/影/基調/中光/ハイライト）============
+// リカラーは輝度を保ってHAIRのhueへ寄せるので、ここは階調の設計が主目的。
+var HAIR_PAL = {
+  outline:[14,7,3],     // 太黒縁（土台の縁と同density）
+  shadow: [54,30,13],   // 房の影・分け目・毛先の暗部
+  base:   [100,58,25],  // 基調
+  mid:    [150,92,40],  // 中間光
+  hi:     [208,142,72]  // ハイライト（頭頂・毛の稜線）
+};
+
+// トーン定数（占有バッファに格納する値）
+var T_NONE=0, T_BASE=1, T_SHADOW=2, T_HI=3, T_MID=4;
+
+// -- セル格子ラスタライザ：各セルにトーン(0..4)を格納。占有マップから黒縁を自動生成 --
+// 房は「毛流れ線」を明示的に打つ（明稜線=hi / 分け目=shadow）ことで貼り絵感を消す。
+function makeHairGrid(style){
+  var GW=Math.ceil(NW/PXQ), GH=Math.ceil(NH/PXQ);
+  var occ=new Uint8Array(GW*GH);
+  function idx(gx,gy){ return gy*GW+gx; }
+  function put(gx,gy,v){ if(gx<0||gy<0||gx>=GW||gy>=GH)return; occ[idx(gx,gy)]=v; }
+  function get(gx,gy){ if(gx<0||gy<0||gx>=GW||gy>=GH)return 0; return occ[idx(gx,gy)]; }
+  function cellOf(nx,ny){ return [Math.round(nx/PXQ), Math.round(ny/PXQ)]; }
+  // 既存の毛がある所だけトーン上書き（毛流れ線用）: overlayでベース塗り後に稜線/分け目を描く
+  function paintIfHair(nx,ny,v){ var g=cellOf(nx,ny); if(get(g[0],g[1])) put(g[0],g[1],v); }
+
+  var CX=HEAD.cx, faceX=HEAD.faceTurnX;
+
+  // ===== 共通: 頭皮ベースを毛で覆う（生え際は列ごとに算出。前=顔側短/後=長）=====
+  function frontHairlineY(x){
+    // M字ぎみ生え際。中心(faceX)で最も下（額を出す）、こめかみで上がる。左下向きに合わせ非対称。
+    var d=(x-faceX);
+    var base=HEAD.hairFrontCenterY - 46*Math.max(0,1-Math.abs(d)/104);
+    base += 12*Math.exp(-Math.pow((x-faceX)/26,2));      // M字中央の戻し
+    if(x>CX) base -= 6;                                   // 後頭側は生え際やや上→毛はその下も覆う
+    return base;
+  }
+  function scalpBottom(x, downShift){
+    var frontY=frontHairlineY(x)+ (downShift||0);
+    var backY =HEAD.sideY+34;
+    // 顔前(左)側は生え際で切る、後頭(右)は耳下まで
+    var w = Math.max(0, Math.min(1,(x-(faceX-70))/150));  // 0=前 1=後
+    return frontY*(1-w)+backY*w;
+  }
+  function fillScalp(downShift){
+    for(var y=HEAD.crownY-4; y<HEAD.sideY+40; y+=PXQ*0.5){
+      var lr=silAt(Math.min(y,184)); var L=lr[0]+3, R=lr[1]-3;
+      for(var x=L; x<=R; x+=PXQ*0.5){
+        if(y<=scalpBottom(x,downShift)) put.apply(null,cellOf(x,y).concat([T_BASE]));
+      }
+    }
+  }
+
+  // ===== 毛流れ線ヘルパ: (x0,y0)->(x1,y1) に沿って太さwのトーン線を毛の上に打つ =====
+  function strokeFlow(x0,y0,x1,y1,w,tone,curl,seed){
+    var steps=Math.max(6,Math.round(Math.hypot(x1-x0,y1-y0)/(PXQ*0.55)));
+    for(var s=0;s<=steps;s++){
+      var t=s/steps, cx=x0+(x1-x0)*t, cy=y0+(y1-y0)*t;
+      if(curl){ var nx=-(y1-y0),ny=(x1-x0),L=Math.hypot(nx,ny)||1; nx/=L;ny/=L;
+        var off=Math.sin(t*Math.PI*2.4+seed)*curl; cx+=nx*off; cy+=ny*off; }
+      var half=w/2;
+      for(var o=-half;o<=half;o+=PXQ*0.5) paintIfHair(cx+o,cy,tone);
+    }
+  }
+  // スパイク1本: 根(bx,by)から先端(tx,ty)へ。左稜線=hi, 右縁=shadow, 芯=base。
+  function drawSpike(bx,by,tx,ty,wRoot,seed){
+    var steps=Math.max(8,Math.round(Math.hypot(tx-bx,ty-by)/(PXQ*0.5)));
+    var dx=tx-bx,dy=ty-by,L=Math.hypot(dx,dy)||1; var nx=-dy/L,ny=dx/L; // 法線
+    for(var s=0;s<=steps;s++){
+      var t=s/steps, cx=bx+dx*t, cy=by+dy*t;
+      var w=wRoot*(1-t*0.86);      // 先細り
+      var half=w/2;
+      for(var o=-half;o<=half;o+=PXQ*0.5){
+        var frac=o/Math.max(1,half); // -1..1（左稜線=負）
+        var px=cx+nx*o, py=cy+ny*o;
+        var tone=T_BASE;
+        if(frac<-0.35) tone=T_HI;          // 左＝光の稜線
+        else if(frac>0.45) tone=T_SHADOW;  // 右＝影
+        else if(frac>-0.1&&frac<0.25) tone=T_MID;
+        if(t>0.82) tone=T_SHADOW;          // 毛先の締め
+        put.apply(null,cellOf(px,py).concat([tone]));
+      }
+    }
+  }
+
+  if(style==='spike'){
+    fillScalp(0);
+    // スパイク定義: 根x,根y(シルエット上), 先x,先y, 根太さ, seed
+    var spikes=[
+      [452,176, 402,96,  40, 1],  // 左こめかみ（短め・外向き）
+      [472,150, 440,44,  50, 2],
+      [498,132, 476,20,  56, 3],
+      [524,120, 516,8,   60, 4],  // 頂点付近・最長
+      [552,120, 560,14,  58, 5],
+      [580,130, 600,30,  54, 6],
+      [606,146, 640,58,  48, 7],
+      [626,168, 664,110, 42, 8]   // 右後頭（外・長め）
+    ];
+    spikes.forEach(function(sp,i){ drawSpike(sp[0],sp[1],sp[2],sp[3],sp[4],sp[5]); });
+    // スパイク間の谷（影）を根元に打って分離感を出す
+    for(var i=0;i<spikes.length-1;i++){
+      var a=spikes[i],b=spikes[i+1];
+      strokeFlow((a[0]+b[0])/2,(a[1]+b[1])/2+6,(a[0]+b[0])/2,(a[1]+b[1])/2-40,PXQ*1.6,T_SHADOW,0,0);
+    }
+    // 頭頂の頭皮に薄く縦の毛流れ（明暗交互）
+    for(var sx=470;sx<600;sx+=22){ strokeFlow(sx,150,sx-6,120,PXQ,(sx/22|0)%2?T_HI:T_SHADOW,0,0); }
+  }
+  else if(style==='short'){
+    // 短髪は頭蓋に薄く張り付く。生え際を高め(額を広く見せる)にし、分け目から左右へ流す。
+    fillScalpShort();
+    // 分け目: 頭頂やや右(x=560付近)。そこから左前へ長い流し、右へ短い流し。
+    var partX=560, partTopY=112;
+    // 左側(顔前)へ流す長い房: 明稜線＋その下に暗い房境を平行に並べる（wobble無し＝クリーン）
+    var leftFlows=[
+      // 根x,根y            先x,先y
+      [partX,partTopY,     444,146],
+      [partX-6,partTopY+14, 450,170],
+      [partX-8,partTopY+30, 462,192]
+    ];
+    leftFlows.forEach(function(f,i){
+      strokeFlow(f[0],f[1]-3, f[2],f[3]-3, PXQ*1.0, T_HI, 0, 0);       // 明稜線（細め・クリーン）
+      strokeFlow(f[0],f[1]+8, f[2],f[3]+8, PXQ*1.4, T_SHADOW, 0, 0);   // 房境（太い影＝房が立体に）
+    });
+    // 右側(後頭)へ流す短い房
+    var rightFlows=[
+      [partX+4,partTopY,   614,152],
+      [partX+8,partTopY+16,610,178]
+    ];
+    rightFlows.forEach(function(f,i){
+      strokeFlow(f[0],f[1]-2, f[2],f[3]-2, PXQ*1.0, T_HI, 0, 0);
+      strokeFlow(f[0],f[1]+9, f[2],f[3]+9, PXQ*1.3, T_SHADOW, 0, 0);
+    });
+    // 分け目の谷を1本濃く
+    strokeFlow(partX,partTopY-4, partX+2,partTopY+40, PXQ*0.9, T_SHADOW,0,0);
+    // 前髪: 生え際からおでこへ落ちる短い房（左寄り・先=影）
+    var bangs=[[492,182,478,214],[512,180,502,210],[532,180,526,204]];
+    bangs.forEach(function(b,i){ drawSpike(b[0],b[1],b[2],b[3],28,i); });
+    // サイドバーン（こめかみ下・薄く）
+    strokeFlow(452,178,456,206,PXQ*1.0,T_SHADOW,0,0);
+
+    function fillScalpShort(){
+      for(var y=HEAD.crownY-2; y<HEAD.sideY+34; y+=PXQ*0.5){
+        var lr=silAt(Math.min(y,184)); var L=lr[0]+3, R=lr[1]-3;
+        for(var x=L; x<=R; x+=PXQ*0.5){
+          // 短髪の生え際: 前=高め(額広い)、後=耳下
+          var frontY=HEAD.hairFrontCenterY-30 + 12*Math.exp(-Math.pow((x-faceX)/30,2));
+          var backY=HEAD.sideY+26;
+          var w=Math.max(0,Math.min(1,(x-(faceX-60))/140));
+          var bottom=frontY*(1-w)+backY*w;
+          if(y<=bottom) put.apply(null,cellOf(x,y).concat([T_BASE]));
+        }
+      }
+    }
+  }
+  else if(style==='afro'){
+    // アフロ: 頭蓋外へ丸く大きく膨らむ縮れ毛塊。輪郭は縮れ揺らぎ。内部は不規則クラスタ。
+    var acx=CX-4, acyMid=168, rx=176, ry=158, cyTop=HEAD.crownY-92;
+    // 疑似ノイズ（決定論）
+    function n2(x,y){ var v=Math.sin(x*12.9898+y*78.233)*43758.5453; return v-Math.floor(v); }
+    function fbm(x,y){ return 0.55*n2(x,y)+0.30*n2(x*2.1+7,y*2.1-3)+0.15*n2(x*4.3-1,y*4.3+5); }
+    for(var gy=0;gy<GH;gy++)for(var gx=0;gx<GW;gx++){
+      var nx=gx*PXQ, ny=gy*PXQ;
+      var ex=(nx-acx)/rx, ey=(ny-acyMid)/ry, rr=ex*ex+ey*ey;
+      // 縮れの縁揺らぎ
+      var wob=0.13*Math.sin(nx*0.10)+0.12*Math.cos(ny*0.095)+0.07*fbm(nx*0.02,ny*0.02);
+      var faceZone=(ny>HEAD.hairFrontCenterY-6)&&(nx>462&&nx<636)&&(ny<432);
+      if(rr<=1.0+wob && !faceZone && ny>cyTop){
+        // 不規則クラスタ: fbmで塊の明暗。粒サイズは中程度。
+        var cl=fbm(nx*0.05, ny*0.05);       // 0..1 大きめの塊
+        var fine=n2((nx*0.11|0),(ny*0.11|0)); // 粒
+        var lit=(nx-acx)/rx - (ny-acyMid)/ry;  // 左上で大
+        var v=T_BASE;
+        if(cl>0.62) v=T_MID;
+        if(cl>0.78) v=T_HI;
+        if(cl<0.36) v=T_SHADOW;
+        // 粒のハイライト点（縮れの照り）
+        if(fine>0.82 && v!==T_SHADOW) v=T_HI;
+        if(fine<0.15) v=T_SHADOW;
+        // 全体ライティングで左上を持ち上げ右下を沈める。ただし縮れ感を保つため粒で間引く。
+        if(lit>0.42){ v=(fine>0.45)?T_HI:(fine>0.2?T_MID:T_BASE); } // 明部も粒で割る＝ベタ化防止
+        if(lit<-0.55) v=(fine<0.5)?T_SHADOW:T_BASE;
+        if(rr>0.86+wob) v=T_SHADOW;           // 外縁は影
+        put(gx,gy,v);
+      }
+    }
+  }
+  return {occ:occ, GW:GW, GH:GH};
+}
+
+// -- トーンバッファから最終ピクセル画像へ：黒縁生成＋トーン→パレット色 --
+function renderHair(style, hairHex){
+  var grid=makeHairGrid(style);
+  var occ=grid.occ, GW=grid.GW, GH=grid.GH;
+  var c=newCanvas(NW,NH), x=c.getContext('2d');
+  var id=x.createImageData(NW,NH), d=id.data;
+  function O(gx,gy){ if(gx<0||gy<0||gx>=GW||gy>=GH)return 0; return occ[gy*GW+gx]; }
+  function setCell(gx,gy,col){
+    var x0=gx*PXQ,y0=gy*PXQ;
+    for(var yy=0;yy<PXQ;yy++)for(var xx=0;xx<PXQ;xx++){
+      var px=x0+xx,py=y0+yy; if(px>=NW||py>=NH)continue;
+      var i=(py*NW+px)*4; d[i]=col[0];d[i+1]=col[1];d[i+2]=col[2];d[i+3]=255;
+    }
+  }
+  var P=HAIR_PAL;
+  // pass1: 黒縁 — 毛セルの外側1リング
+  for(var gy=0;gy<GH;gy++)for(var gx=0;gx<GW;gx++){
+    if(O(gx,gy)) continue;
+    if(O(gx-1,gy)||O(gx+1,gy)||O(gx,gy-1)||O(gx,gy+1)||O(gx-1,gy-1)||O(gx+1,gy-1)||O(gx-1,gy+1)||O(gx+1,gy+1)){
+      setCell(gx,gy,P.outline);
+    }
+  }
+  // pass2: 毛本体トーン。下/右の外周は影で締める（黒縁の内側の陰）。
+  for(gy=0;gy<GH;gy++)for(gx=0;gx<GW;gx++){
+    var v=O(gx,gy); if(!v) continue;
+    var edgeDR=(!O(gx+1,gy)||!O(gx,gy+1));
+    var col;
+    if(edgeDR) col=P.shadow;                 // 右下外周＝影で立体化
+    else if(v===T_HI) col=P.hi;
+    else if(v===T_MID) col=P.mid;
+    else if(v===T_SHADOW) col=P.shadow;
+    else col=P.base;
+    setCell(gx,gy,col);
+  }
+  x.putImageData(id,0,0);
+  return recolorHair(c, hairHex);
+}
+
+// 髪canvasを HAIR 色へ輝度保持リカラー（黒縁は黒のまま保つ）
+function recolorHair(hairCanvas, hairHex){
+  var W=hairCanvas.width,H=hairCanvas.height,c=newCanvas(W,H),x=c.getContext('2d');
+  x.drawImage(hairCanvas,0,0);var id=x.getImageData(0,0,W,H),d=id.data;
+  var th=rgbToHsl.apply(null,hexToRgb(hairHex));
+  for(var i=0;i<d.length;i+=4){ if(d[i+3]<20)continue;
+    var hsl=rgbToHsl(d[i],d[i+1],d[i+2]);
+    // 黒縁(輝度<0.10)はそのまま黒
+    if(hsl[2]<0.12){ continue; }
+    var l=Math.min(1,hsl[2]);
+    // 彩度は髪色ベースを尊重しつつ、明部はやや落として艶
+    var s=th[1]*(0.72+0.28*(1-l));
+    var rr=hslToRgb(th[0], s, l);
+    d[i]=rr[0];d[i+1]=rr[1];d[i+2]=rr[2];
+  }
+  x.putImageData(id,0,0);return c;
+}
+
+// ============ 合成・表示 ============
+function compose(bodyCanvas, hairCanvas, dispW){
+  var s=dispW/NW, dispH=Math.round(NH*s);
+  var out=newCanvas(dispW,dispH),x=out.getContext('2d');x.imageSmoothingEnabled=false;
+  x.drawImage(bodyCanvas,0,0,dispW,dispH);
+  if(hairCanvas) x.drawImage(hairCanvas,0,0,dispW,dispH);
+  return out;
+}
+function cellEl(canvas,cap){var d=document.createElement('div');d.className='cell';d.appendChild(canvas);var p=document.createElement('div');p.className='cap';p.innerHTML=cap;d.appendChild(p);return d;}
+function load(src){return new Promise(function(res){var im=new Image();im.onload=function(){res(im);};im.onerror=function(){res(null);};im.src=src;});}
+
+var HAIRCOLORS=[['栗','#a86a2f'],['黒','#241a14'],['銀','#b9b9c0']];
+var STYLES=[['spike','ツン（逆立て）'],['short','ショート'],['afro','アフロ']];
+var DISP=232;
+
+load(BODY_SRC).then(function(bodyImg){
+  if(!bodyImg){document.body.insertAdjacentHTML('beforeend','<p style="color:#f88">土台読込失敗</p>');return;}
+  var body=keyBody(bodyImg);
+
+  // 0) アンカー可視化
+  (function(){
+    var s=DISP/NW, dh=Math.round(NH*s);
+    var vis=newCanvas(DISP,dh),x=vis.getContext('2d');x.imageSmoothingEnabled=false;
+    x.drawImage(body,0,0,DISP,dh);
+    x.strokeStyle='#0ff';x.lineWidth=1;x.beginPath();
+    for(var i=0;i<SIL.length;i++){var p=SIL[i];x.moveTo(p[1]*s,p[0]*s);x.lineTo(p[2]*s,p[0]*s);}
+    x.stroke();
+    x.fillStyle='#ff0';x.fillRect(HEAD.crownX*s-2,HEAD.crownY*s-2,4,4);
+    x.strokeStyle='#f0f';x.beginPath();x.moveTo(0,HEAD.browY*s);x.lineTo(DISP,HEAD.browY*s);x.stroke();
+    document.getElementById('row-anchor').appendChild(cellEl(vis,'土台＋実測シルエットLUT（水色線）<br>黄=頭頂 桃=眉ライン'));
+    var raw=newCanvas(DISP,dh),rx=raw.getContext('2d');rx.imageSmoothingEnabled=false;rx.drawImage(body,0,0,DISP,dh);
+    document.getElementById('row-anchor').appendChild(cellEl(raw,'固定土台（禿げ・全出力共通）'));
+  })();
+
+  // 1) 3髪型 × 3色 合成
+  (function(){
+    var host=document.getElementById('row-main');
+    STYLES.forEach(function(st){
+      HAIRCOLORS.forEach(function(hc){
+        var hair=renderHair(st[0],hc[1]);
+        var out=compose(body,hair,DISP);
+        host.appendChild(cellEl(out,st[1]+'<br><span class="tag">髪'+hc[0]+'</span>'));
+      });
+    });
+  })();
+
+  // 2) 6xズーム（頭部クロップ）
+  (function(){
+    var host=document.getElementById('row-zoom');
+    // ネイティブ頭部 x[360,700] y[0,470] を6x
+    var cropX=360,cropY=0,cropW=380,cropH=470,Z=1.9;
+    STYLES.forEach(function(st){
+      var hc=HAIRCOLORS[0]; // 栗で精査
+      var hair=renderHair(st[0],hc[1]);
+      var full=newCanvas(NW,NH),fx=full.getContext('2d');fx.imageSmoothingEnabled=false;
+      fx.drawImage(body,0,0);fx.drawImage(hair,0,0);
+      var zc=newCanvas(Math.round(cropW*Z),Math.round(cropH*Z)),zx=zc.getContext('2d');zx.imageSmoothingEnabled=false;
+      zx.drawImage(full,cropX,cropY,cropW,cropH,0,0,cropW*Z,cropH*Z);
+      host.appendChild(cellEl(zc,st[1]+' 頭部6x相当（栗）<br>黒縁太さ・毛流れ・階調を精査'));
+    });
+    // spike黒 と afro銀 も一枚ずつズーム
+    [['spike','#241a14','ツン黒'],['afro','#b9b9c0','アフロ銀']].forEach(function(z){
+      var hair=renderHair(z[0],z[1]);
+      var full=newCanvas(NW,NH),fx=full.getContext('2d');fx.imageSmoothingEnabled=false;
+      fx.drawImage(body,0,0);fx.drawImage(hair,0,0);
+      var zc=newCanvas(Math.round(cropW*Z),Math.round(cropH*Z)),zx=zc.getContext('2d');zx.imageSmoothingEnabled=false;
+      zx.drawImage(full,cropX,cropY,cropW,cropH,0,0,cropW*Z,cropH*Z);
+      host.appendChild(cellEl(zc,z[2]+' 6x相当'));
+    });
+  })();
+
+  // 3) 髪レイヤー単体（透過・格子背景で毛流れ確認）
+  (function(){
+    var host=document.getElementById('row-layer');
+    STYLES.forEach(function(st){
+      var hair=renderHair(st[0],'#a86a2f');
+      var s=DISP/NW,dh=Math.round(NH*s);
+      var bg=newCanvas(DISP,dh),bx=bg.getContext('2d');bx.imageSmoothingEnabled=false;
+      // 市松背景
+      for(var yy=0;yy<dh;yy+=8)for(var xx=0;xx<DISP;xx+=8){bx.fillStyle=((xx/8+yy/8)%2)?'#444':'#666';bx.fillRect(xx,yy,8,8);}
+      bx.drawImage(hair,0,0,DISP,dh);
+      host.appendChild(cellEl(bg,st[1]+' 髪レイヤー単体（透過）'));
+    });
+  })();
+});
+})();
+</script>
+</body>
+</html>

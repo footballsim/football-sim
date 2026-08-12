@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>漫画ドリブル突破！（成功）— 12髪型プレビュー</title>
+<style>
+  body{background:#0b0d16;color:#dce3ee;font:14px system-ui,sans-serif;margin:0;padding:16px}
+  h1{font-size:16px;margin:0 0 4px}
+  p.note{color:#9fb0c8;font-size:12px;margin:0 0 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;max-width:1280px}
+  .cell .frame{background:#000;border-radius:7px;overflow:hidden;aspect-ratio:480/216}
+  .cell .frame canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+  .cap{color:#8fd6ff;font-size:12px;margin:5px 2px 0}
+  #log{color:#c05a5a;font:12px ui-monospace,monospace;margin-top:8px}
+</style>
+</head>
+<body>
+<h1>漫画ドリブル突破！（成功）— 12髪型プレビュー</h1>
+<p class="note">実 cutscene.js の _renderDribbleScene（result='成功'＝ドリブル突破！）を約1.5秒ごとに再描画。過渡期フラグを一時 null 化し、セルごとに髪型を固定して全12種を並べて表示（攻撃・守備とも同一髪型のセル）。チームキットは巡回。</p>
+<div class="grid" id="grid"></div>
+<div id="log"></div>
+
+<script src="js/portrait.js?v=exp3"></script>
+<script src="js/manga_recolor.js?v=exp3"></script>
+<script src="js/cutscene.js?v=exp3"></script>
+<script>
+window.MANGA_CUTSCENE_ENABLED = true;
+window.LANG = 'ja';
+CUTSCENE_BURN_LABELS = true;
+window.gameState = {};
+window.getPlayerName = function (p) { return p.long_name || p.name; };
+window.getTeamName = function (t) { return t.__name || ''; };
+// このプレビューだけ髪型バリエーションを見せる＝過渡期の単一髪型固定を解除
+_MANGA_HAIR_UNIFORM = null;
+
+// 全12髪型（manga_dribble/ の12スプライトと一致）
+var STYLES = [
+  ['short','ショート'], ['fade','刈上げ'], ['skin','スキンヘッド'], ['spike','ツンツン'],
+  ['curly','クルクル'], ['part','七三'], ['bangs','ぱっつん'], ['afro','アフロ'],
+  ['slick','オールバック'], ['wavy','ウェーブ'], ['mohawk','ソフトモヒカン'], ['bowl','マッシュ']
+];
+// チームキット（攻撃・守備）を巡回して色にも変化を付ける
+var KITS = [
+  ['日本', { shirt:'#1B3E9C', shorts:'#F2F4F7', socks:'#1B3E9C', accent:'#C8102E' }, 'メキシコ', { shirt:'#1E8C3A', shorts:'#F2F4F7', socks:'#C8102E', accent:'#F2F4F7' }],
+  ['ブラジル', { shirt:'#F2C500', shorts:'#1B3A8A', socks:'#F2F4F7', accent:'#1E8C3A' }, 'ドイツ', { shirt:'#F2F4F7', shorts:'#17181C', socks:'#F2F4F7', accent:'#C8102E' }],
+  ['アルゼンチン', { shirt:'#74ACDF', shorts:'#17181C', socks:'#F2F4F7', accent:'#F2C200' }, 'オランダ', { shirt:'#E8641B', shorts:'#17181C', socks:'#E8641B', accent:'#F2F4F7' }],
+  ['フランス', { shirt:'#1A2C6B', shorts:'#F2F4F7', socks:'#C8102E', accent:'#C8102E' }, 'スペイン', { shirt:'#C8102E', shorts:'#1A2A66', socks:'#C8102E', accent:'#F2C200' }],
+  ['イングランド', { shirt:'#F2F4F7', shorts:'#1A2A66', socks:'#F2F4F7', accent:'#C8102E' }, 'イタリア', { shirt:'#1B4BA0', shorts:'#F2F4F7', socks:'#1B4BA0', accent:'#F2C200' }],
+  ['ポルトガル', { shirt:'#B01C2E', shorts:'#1E8C3A', socks:'#B01C2E', accent:'#F2C200' }, 'ベルギー', { shirt:'#17181C', shorts:'#C8102E', socks:'#F2C200', accent:'#F2C200' }]
+];
+var HERO = ['Kaito Mori','Leo Andersson','Diego Costa','Yuto Sato','Marco Bianchi','Andre Silva',
+  'Ren Takeda','Ivan Novak','Pablo Ortiz','Sho Nakamura','Tom Becker','Rui Alves'];
+
+function makeSc(styleIdx, kit) {
+  var offence = { __name: kit[0], team_color: kit[1].shirt, kit: kit[1], players: [{ long_name: HERO[styleIdx] }], lineup: [0] };
+  var defence = { __name: kit[2], team_color: kit[3].shirt, kit: kit[3], players: [{ long_name: HERO[(styleIdx + 6) % 12] }], lineup: [0] };
+  return { offence: offence, defence: defence, ofsPos: 0, dfsPos: 0, action: 'ドリブル', result: '成功' };
+}
+
+var grid = document.getElementById('grid');
+var cells = STYLES.map(function (st, i) {
+  var cell = document.createElement('div'); cell.className = 'cell';
+  var frame = document.createElement('div'); frame.className = 'frame';
+  var cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = st[0] + '（' + st[1] + '）';
+  cell.appendChild(frame); cell.appendChild(cap); grid.appendChild(cell);
+  return { style: st[0], frame: frame, idx: i };
+});
+
+function play() {
+  cells.forEach(function (c, i) {
+    _MANGA_HAIR_UNIFORM = c.style;                       // このセルの髪型を固定（攻守とも）
+    var cv = _renderDribbleScene(makeSc(i, KITS[i % KITS.length]));
+    c.frame.innerHTML = '';
+    c.frame.appendChild(cv);
+  });
+  _MANGA_HAIR_UNIFORM = null;                            // 後始末（次サイクルの各セル頭で再設定）
+}
+play();
+setInterval(play, 1500);
+document.getElementById('log').textContent = 'looping ' + STYLES.length + ' hairstyles (success)';
+</script>
+</body>
+</html>

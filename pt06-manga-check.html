@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PT-06 漫画body 検証（構図◎ / 塗り×）</title>
+<style>
+  body{margin:0;background:#0b1020;color:#fff;font:13px/1.6 system-ui;padding:18px;max-width:1100px}
+  h1{font-size:17px;margin:0 0 6px}
+  h2{font-size:14px;margin:22px 0 6px;color:#ffe27a}
+  .card{background:rgba(255,255,255,.04);border:1px solid #ffffff18;border-radius:10px;padding:12px;margin:8px 0}
+  img{max-width:100%;height:auto;border-radius:8px;display:block;background:#fff}
+  .verdict{display:inline-block;font-weight:800;border-radius:6px;padding:2px 8px;margin-right:6px}
+  .ok{background:#1f7a3a}.ng{background:#a02828}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  p{margin:6px 0}
+  .cap{opacity:.85;font-size:12px}
+</style>
+</head>
+<body>
+<h1>PT-06 漫画body 検証 — 「構図◎ / 塗り×」</h1>
+<p>ChatGPTの頭なし漫画body（ドリブル）を検証。<b>難所の構図・集中線・首ソケットは成功。だが"塗り"が滑らか＋テクスチャで、色替えがまだらになる</b>のが問題。</p>
+
+<h2><span class="verdict ok">◎</span>① 原本（ChatGPT出力）</h2>
+<div class="card">
+  <img src="tools/proto/manga_dribble_test.png" alt="manga body original">
+  <p class="cap">頭なし＋襟＋首ソケット◎／集中線・スクリーントーン◎／左下=ボール, 左上=SFX の余白◎。ここは狙いどおり。</p>
+</div>
+
+<h2><span class="verdict ng">×</span> ② 色替えテスト（青シャツ→赤）</h2>
+<div class="card">
+  <img src="tools/proto/manga_recolor_test.png" alt="manga recolor speckle">
+  <p class="cap">シャツが<b>赤×黒のまだら</b>に。原因＝滑らかな陰影で暗部が黒化しマスクから漏れる＋布テクスチャ。フラット塗りでないと色替えが破綻する。</p>
+</div>
+
+<h2><span class="verdict ok">◎</span> ③ 参考：フラットセル塗りなら色替えは常にクリーン</h2>
+<div class="card">
+  <img src="tools/proto/pt06_parts_recolor.png" alt="flat cel clean recolor">
+  <p class="cap">同じ手法でも<b>フラット塗りの分離ベース</b>なら、キット5色・肌6段すべて斑点なし。→ 結論：ChatGPTに<b>「完全フラットな2〜3階調・グラデ/テクスチャ禁止」を強制</b>すれば全部解決。</p>
+</div>
+
+<h2>次のアクション</h2>
+<p>同じドリブル＋<b>塗りをフラット強制</b>＋参考画像（<code>img/cutscenes/shot_pt06parts_01.png</code>）を添付して再生成 → 塗りがフラットになれば、色替え・頭合成・ボール/SFX/吹き出しが全部乗る。</p>
+</body>
+</html>

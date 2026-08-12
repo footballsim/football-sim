@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>manga shot-scene preview — リーグ8チーム</title>
+<style>
+  body { background:#0e1220; color:#dce3ee; font:13px system-ui,sans-serif; margin:0; padding:16px; }
+  h1 { font-size:15px; margin:0 0 10px; }
+  .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; max-width:1040px; }
+  .frame { background:#000; border-radius:6px; overflow:hidden; }
+  .frame canvas { display:block; width:100%; image-rendering:pixelated; }
+  .cap { font-size:12px; color:#8fd6ff; margin:4px 2px 0; }
+  #log { font:12px ui-monospace,monospace; color:#9fb0c8; white-space:pre-wrap; margin-top:10px; }
+</style>
+</head>
+<body>
+<h1>シュート演出プレビュー — リーグ8チームの実キット（_renderShotScene 構図の再現）</h1>
+<div class="grid" id="grid"></div>
+<div id="log"></div>
+
+<script src="js/manga_recolor.js"></script>
+<script>
+// ---- cutscene.js から忠実移植したボール描画 ----
+function _lpPent(ctx,cx,cy,rad,rot){ctx.beginPath();for(var i=0;i<5;i++){var a=rot+i*1.2566-1.5708,px=cx+Math.cos(a)*rad,py=cy+Math.sin(a)*rad;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.closePath();ctx.fill();}
+function _lpBall(ctx,x,y,r,spin){
+  ctx.globalAlpha=0.18;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+r*1.4,y,r*0.85,0,7);ctx.fill();ctx.globalAlpha=1;
+  ctx.fillStyle='#14101a';ctx.beginPath();ctx.arc(x,y,r*1.14,0,7);ctx.fill();
+  ctx.fillStyle='#f6f6f6';ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,.12)';ctx.beginPath();ctx.arc(x+r*0.3,y+r*0.3,r*0.85,0,7);ctx.fill();
+  ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.clip();
+  ctx.fillStyle='#15151d';ctx.strokeStyle='#15151d';ctx.lineWidth=Math.max(1.2,r*0.11);ctx.lineJoin='round';
+  _lpPent(ctx,x,y,r*0.46,spin);
+  for(var i=0;i<5;i++){var a=spin+i*1.2566-1.5708,ox=x+Math.cos(a)*r*1.02,oy=y+Math.sin(a)*r*1.02;
+    ctx.beginPath();ctx.moveTo(x+Math.cos(a)*r*0.46,y+Math.sin(a)*r*0.46);ctx.lineTo(ox,oy);ctx.stroke();
+    _lpPent(ctx,ox,oy,r*0.42,a+0.628);}
+  ctx.restore();
+}
+function _lpDrawBg(ctx,img,W,H){ if(img&&img.complete&&img.naturalWidth){var s=Math.max(W/img.naturalWidth,H/img.naturalHeight),dw=img.naturalWidth*s,dh=img.naturalHeight*s;ctx.drawImage(img,(W-dw)/2,(H-dh)/2,dw,dh);} }
+
+// ---- identity（portrait.js のハッシュ＆パレット再現） ----
+function fnv1a(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=(h+((h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24)))>>>0;}return h>>>0;}
+const idx=(f,n,len)=>fnv1a(f+' '+n)%len;
+const SKIN=['#ffdcbb','#f4c79b','#e6ad7f','#cf8f5d','#a06a3f','#6f492c'];
+const HAIRSTYLE=['short','fade','skin','spike','curly','part','bangs','afro','slick','wavy','mohawk','bowl'];
+const BEARD=['none','stubble','mustache','goatee','full'];
+
+// ---- リーグ8チーム（実キット＋代表色＋サンプル選手） ----
+const TEAMS=[
+  ['イングランド','#C8102E',{shirt:'#F2F4F7',shorts:'#1A2A66',socks:'#F2F4F7',accent:'#C8102E'},'Bellingham'],
+  ['オランダ','#FF6600',{shirt:'#EC652B',shorts:'#17181C',socks:'#EC652B',accent:'#17181C'},'Gakpo'],
+  ['スペイン','#AA151B',{shirt:'#B01823',shorts:'#1B2A6B',socks:'#1B2A6B',accent:'#F2C200'},'Yamal'],
+  ['フランス','#002395',{shirt:'#1A2C6B',shorts:'#F2F4F7',socks:'#C8102E',accent:'#C8102E'},'Mbappe'],
+  ['アルゼンチン','#74ACDF',{shirt:'#74ACDF',shorts:'#17181C',socks:'#F2F4F7',accent:'#F2C200'},'Messi'],
+  ['イタリア','#003DA5',{shirt:'#1B4BA0',shorts:'#F2F4F7',socks:'#1B4BA0',accent:'#F2C200'},'Chiesa'],
+  ['ブラジル','#009C3B',{shirt:'#F2C500',shorts:'#1B3A8A',socks:'#F2F4F7',accent:'#1E8C3A'},'Vinicius'],
+  ['ベルギー','#CC0000',{shirt:'#C8102E',shorts:'#17181C',socks:'#C8102E',accent:'#F2C200'},'DeBruyne'],
+];
+
+const load=src=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(src);i.src=src;});
+const log=m=>document.getElementById('log').textContent+=m+'\n';
+
+// _renderShotScene の構図を静止1コマで再現
+function drawShotFrame(canvas, bg, shooterCanvas, team){
+  const W=480,H=216,ground=192,ph=152,pcx=326,sprW=ph*0.75;
+  const ctx=canvas.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  const accent=team[1], shooterName=team[3], teamNm=team[0];
+  const sx0=pcx-sprW/2, sy0=ground-ph;
+  const foot=[sx0+sprW*0.42, sy0+ph*0.79];
+  const p=0.17, strikeP=0.12, ballSpd=2400;
+  const z=1.0+Math.min(1,p/0.6)*0.05;
+  ctx.clearRect(0,0,W,H);
+  ctx.save();
+  ctx.translate(foot[0],foot[1]); ctx.scale(z,z); ctx.translate(-foot[0],-foot[1]);
+  _lpDrawBg(ctx,bg,W,H);
+  // シューター（漫画・着色済み・元から左向き＝反転不要）
+  const pw=shooterCanvas.width*(ph/shooterCanvas.height);
+  ctx.drawImage(shooterCanvas, pcx-pw/2, ground-ph, pw, ph);
+  // ボール（蹴り出し後・左へ飛行）
+  const bx=foot[0]-ballSpd*(p-strikeP);
+  if(bx>-16) _lpBall(ctx,bx,foot[1],11,(p-strikeP)*80);
+  // 蹴り出しの集中線バースト
+  const strikeF=1-Math.abs(p-strikeP)/0.08;
+  if(strikeF>0){ctx.strokeStyle='rgba(255,255,255,'+(strikeF*0.6)+')';ctx.lineWidth=2.5;for(let i=0;i<14;i++){const an=i/14*6.28;ctx.beginPath();ctx.moveTo(foot[0]+Math.cos(an)*14,foot[1]+Math.sin(an)*14);ctx.lineTo(foot[0]+Math.cos(an)*58,foot[1]+Math.sin(an)*58);ctx.stroke();}}
+  ctx.restore();
+  // HUD（時刻・アクション名・選手名・アクセントバー）
+  let g=ctx.createLinearGradient(0,0,0,46);g.addColorStop(0,'rgba(6,6,14,.66)');g.addColorStop(1,'rgba(6,6,14,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,46);
+  ctx.fillStyle='#fff';ctx.font='800 14px sans-serif';ctx.textAlign='left';ctx.fillText("67'",12,24);
+  let bgd=ctx.createLinearGradient(0,H-40,0,H);bgd.addColorStop(0,'rgba(6,6,14,0)');bgd.addColorStop(1,'rgba(6,6,14,.9)');ctx.fillStyle=bgd;ctx.fillRect(0,H-40,W,40);
+  ctx.fillStyle=accent;ctx.fillRect(0,H-30,W,3);
+  ctx.textAlign='left';ctx.lineJoin='round';ctx.font='900 22px "Arial Black",sans-serif';
+  ctx.lineWidth=5;ctx.strokeStyle='#0c0a14';ctx.strokeText('シュート',12,H-9);ctx.fillStyle='#ff5a3c';ctx.fillText('シュート',12,H-9);
+  ctx.textAlign='right';ctx.font='700 12px sans-serif';ctx.fillStyle='#fff';ctx.fillText(shooterName+' · '+teamNm,W-12,H-10);
+}
+
+(async function(){
+  try{
+    const bg=await load('img/cutscenes/longpass_bg_01.png');
+    const grid=document.getElementById('grid');
+    for(const team of TEAMS){
+      const [name,tc,kit,player]=team;
+      // identity: サンプル選手名 → 髪型/髭/肌
+      const hstyle=HAIRSTYLE[idx('hstyle',player,12)];
+      const beardName=BEARD[idx('beard',player,5)];
+      const beardSprite=(beardName==='stubble')?'none':beardName;
+      const skinHex=SKIN[idx('skin',player,6)];
+      const base=await load('img/cutscenes/manga/'+beardSprite+'_'+hstyle+'.png');
+      const shooter=MangaRecolor.render('shot_'+name, base, Object.assign({skin:skinHex},kit));
+      const cell=document.createElement('div');
+      const fr=document.createElement('div');fr.className='frame';
+      const cv=document.createElement('canvas');cv.width=480;cv.height=216;
+      fr.appendChild(cv); cell.appendChild(fr);
+      const cap=document.createElement('div');cap.className='cap';cap.textContent=name+' — '+player+'（'+hstyle+'/'+beardName+'）';cell.appendChild(cap);
+      grid.appendChild(cell);
+      drawShotFrame(cv,bg,shooter,team);
+      log(name+': '+beardSprite+'_'+hstyle+' skin='+skinHex);
+    }
+    log('DONE');
+    window.__SHOT_OK__=true;
+  }catch(e){ log('ERROR: '+e); window.__SHOT_OK__=false; }
+})();
+</script>
+</body>
+</html>
