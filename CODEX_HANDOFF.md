@@ -33,7 +33,14 @@ cd ~/football-sim && git log --oneline -5 && git status --short | head -30 && gi
 
 - **正本はリポジトリの `.md` 群**。会話やメモリに依存した引き継ぎはしない（今回の反省）。
 - **Claude 側の独自資産**（残るもの）: `~/.claude/agents/` のサブエージェント9体（qa-regression / reviewer / asset-qa 等）、`/deploy` スキル、js 編集後 `node --check` の自動フック、`docs/`・`dist-lab` 手編集のブロックフック。
-  ★ **フックは Claude Code のセッションにしか効かない**＝**Codex が `docs/` を手編集しても機械的には止まらない**。ガードレール2番は Codex では「人間の規律」で守る必要がある。
+  ★ **フックは Claude Code のセッションにしか効かない**。その代替として**ツール非依存の npm ゲート**を用意した（2026-08-13）:
+  ```bash
+  npm run check        # js/*.js 全構文チェック（js 編集のたびに実行）
+  npm run check:docs   # docs/ の追跡ファイルに差分が積もっていないか（手編集/ビルド副産物の検知）
+  npm run regression   # 回帰ハーネス（エンジン/バランス変更は regression:full=1500）
+  ```
+  `npm run deploy:lab` は docs-guard → deploy-guard（プリフライト）を通ってから wrangler が走る。**wrangler の直叩き禁止**。
+- **Codex 側の自動発火**: `~/.codex/skills/football-sim/SKILL.md` — football-sim の話題で自動ロードされ、読む順・ガードレール要約・上記ゲートを Codex に強制する。恒久ルールを追加したら repo（本書/AGENTS.md）と**このスキルの両方**を更新する。
 
 ---
 
