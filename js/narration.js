@@ -253,7 +253,7 @@ function runMultiGame(GAMES) {
     if (!p) return;
     var tname = s.offence.name;
     var k = tname + '_' + p.name;
-    if (!_mvpCounter[k]) _mvpCounter[k] = { name: p.long_name||p.name, en_name: p.en_name, team: tname, color: s.offence.team_color, count: 0, dispName: window.LANG==='en'&&p.en_name?p.en_name:(p.long_name||p.name) };
+    if (!_mvpCounter[k]) _mvpCounter[k] = { name: getPlayerDisplayName(p), en_name: p.en_name, team: tname, color: s.offence.team_color, count: 0, dispName: getPlayerDisplayName(p) };
     _mvpCounter[k].count++;
   });
   var _t1mvps = Object.values(_mvpCounter).filter(function(v){return v.team===team1Data.name;}).sort(function(a,b){return b.count-a.count;}).slice(0,5);
@@ -2764,7 +2764,7 @@ function generateSummary() {
     res.scenes.forEach(function(s){
       if(s.result==='ゴール！！'){
         var p = s.offence.players[s.offence.lineup[s.ofsPos]];
-        var pname = p ? (window.LANG==='en' && p.en_name ? p.en_name : p.long_name||p.name) : '?';
+        var pname = p ? getPlayerDisplayName(p) : '?';
         var tname = window.LANG==='en' ? (s.offence===t1?getTeamName(team1Data):getTeamName(team2Data)) : (s.offence===t1?team1Data.name:team2Data.name);
         goals.push(res.time + ': ' + tname + ' - ' + pname);
       }
@@ -2775,7 +2775,7 @@ function generateSummary() {
   chanceResults.forEach(function(res){ res.scenes.forEach(function(s){
     var p = s.offence.players[s.offence.lineup[s.ofsPos]]; if(!p) return;
     var k = (s.offence===t1?'t1':'t2')+'_'+p.name;
-    if(!counter[k]) counter[k]={name: window.LANG==='en'&&p.en_name?p.en_name:(p.long_name||p.name), team:s.offence===t1?'t1':'t2', count:0};
+    if(!counter[k]) counter[k]={name: getPlayerDisplayName(p), team:s.offence===t1?'t1':'t2', count:0};
     counter[k].count++;
   });});
   var allMvp = Object.values(counter).sort(function(a,b){return b.count-a.count;});
@@ -2792,8 +2792,8 @@ function generateSummary() {
   // GK名取得
   var t1gkP = t1.players[t1.lineup[0]];
   var t2gkP = t2.players[t2.lineup[0]];
-  var t1gkName = t1gkP ? (window.LANG==='en' && t1gkP.en_name ? t1gkP.en_name : (t1gkP.long_name || t1gkP.name)) : '-';
-  var t2gkName = t2gkP ? (window.LANG==='en' && t2gkP.en_name ? t2gkP.en_name : (t2gkP.long_name || t2gkP.name)) : '-';
+  var t1gkName = t1gkP ? getPlayerDisplayName(t1gkP) : '-';
+  var t2gkName = t2gkP ? getPlayerDisplayName(t2gkP) : '-';
 
   var matchData = {
     team1:   getTeamName(team1Data),
@@ -2922,8 +2922,8 @@ function generateMultiSummary(t1wins, t2wins, draws, t1poss, t1shoot, t2shoot, G
   // GK名取得（team1Data/team2Data から取得 ─ gameState は simulateSilent では更新されないため使用不可）
   var t1gkP = team1Data && team1Data.players ? team1Data.players[team1Data.default_lineup[0]] : null;
   var t2gkP = team2Data && team2Data.players ? team2Data.players[team2Data.default_lineup[0]] : null;
-  var t1gkName = t1gkP ? (isEn && t1gkP.en_name ? t1gkP.en_name : (t1gkP.long_name || t1gkP.name)) : '-';
-  var t2gkName = t2gkP ? (isEn && t2gkP.en_name ? t2gkP.en_name : (t2gkP.long_name || t2gkP.name)) : '-';
+  var t1gkName = t1gkP ? getPlayerDisplayName(t1gkP) : '-';
+  var t2gkName = t2gkP ? getPlayerDisplayName(t2gkP) : '-';
 
   var matchData = {
     team1:      t1n,
@@ -3365,4 +3365,3 @@ function getPatreonBannerHtml(isEn) {
     + '</div>';
   return isEn ? en : ja;
 }
-
