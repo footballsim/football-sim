@@ -12,9 +12,10 @@
  *   怪我・停止の残り週 / 出場・得点）は選手キーで引くため、ここが動くと保存データが
  *   エラーも出さずに全損する（＝静かなデータ消失）。
  *
- * 差し替えは `TEAM_DATA` の name / en_name / long_name を **その場で書き換える**。
- *   → 表示側（league.js / lg-ui.js / cutscene.js / narration.js …）は一切変更不要で、
- *     どの画面から名前を読んでも自動的に架空名になる＝「実名残留」が原理的に起きにくい。
+ * 差し替えは `TEAM_DATA` の表示用フィールド name / en_name だけを切り替える。
+ *   → `long_name` は起動中も常に内部IDのまま。フルネーム表示だけは
+ *     NAMES.displayName(..., {full:true})（players.js の getPlayerDisplayName）で解決する。
+ *   → 短縮名を直接読む既存画面との互換性を保ちつつ、セーブキーそのものは物理的に不変になる。
  *   → 逆に「名前から実データを引いている箇所」だけが要注意なので、そこは
  *     NAMES.playerId() / NAMES.extraKey() を通す（呼び出し側は typeof ガード付き）。
  *
@@ -204,7 +205,7 @@
     }
   }
 
-  /* ── 適用 / 復帰（TEAM_DATA をその場で書き換える） ───────────────────── */
+  /* ── 適用 / 復帰（表示用フィールドだけを書き換える） ─────────────────── */
   function _write(fiction) {
     var TD = _teamData();
     if (!TD) return;
@@ -224,7 +225,8 @@
         if (!src) continue;
         p.name = src.name;
         p.en_name = fiction ? (src.en_name || src.name) : src.en_name;
-        if (src.long_name !== undefined) p.long_name = src.long_name;
+        /* ★ long_name はセーブキーそのもの。表示モードに関係なく絶対に変更しない。
+         * 架空フルネームは NAMES.displayName(p, {full:true}) で読む。 */
       }
     }
   }

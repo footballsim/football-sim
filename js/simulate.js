@@ -4851,9 +4851,8 @@ function showPlayerDetail(teamKey, playerIdx) {
     + '<span style="font-size:40px">👤</span>'
     + '</div>'
     + '<div style="padding:12px;font-size:13px;line-height:2">'
-    // FN-00: ex.longName は実データ側のフルネーム＝架空化ONでは使わない（実名が漏れる）
-    + '<div><b>' + (_isEn && player.en_name ? player.en_name
-        : ((typeof NAMES !== 'undefined' && NAMES && NAMES.isFiction()) ? player.long_name : (ex.longName || player.long_name))) + '</b></div>'
+    // FN-00: long_name は内部IDのまま。フル表示は日英とも表示名層で解決する。
+    + '<div><b>' + getPlayerDisplayName(player) + '</b></div>'
     + '<div>' + (_isEn ? 'Height: ' : '身長：') + heightStr + (_isEn ? '  Weight: ' : '　体重：') + weightStr + '</div>'
     + _playerPersonalityHTML(player, _isEn)
     + '</div>'
@@ -4997,4 +4996,3 @@ function showDuelDetail(el) {
   document.getElementById('modal-duel-detail').classList.add('open');
   }
 }
-

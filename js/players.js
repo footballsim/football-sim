@@ -491,6 +491,9 @@ function getWCTeamName(jpName) { return window.LANG === 'en' ? (WC_TEAM_EN[jpNam
 
 function getPlayerName(player) {
   if (!player) return '';
+  if (typeof NAMES !== 'undefined' && NAMES && NAMES.displayName) {
+    return NAMES.displayName(player) || '';
+  }
   if (window.LANG === 'en' && player.en_name) return player.en_name;
   return player.name;
 }
@@ -507,6 +510,9 @@ function getPlayerExtra(player) {
 
 function getTeamName(teamData) {
   if (!teamData) return '';
+  if (typeof NAMES !== 'undefined' && NAMES && NAMES.clubName) {
+    return NAMES.clubName(teamData) || '';
+  }
   if (window.LANG === 'en' && teamData.en_name) return teamData.en_name;
   return teamData.name;
 }
@@ -527,8 +533,11 @@ function getActionLabel(action) {
 
 function getPlayerDisplayName(player) {
   if (!player) return '?';
+  if (typeof NAMES !== 'undefined' && NAMES && NAMES.displayName) {
+    return NAMES.displayName(player, { full: true }) || '?';
+  }
   if (window.LANG === 'en' && player.en_name) return player.en_name;
-  return (window.LANG === 'en' && player.en_name) ? player.en_name : (player.long_name || player.name);
+  return player.long_name || player.name;
 }
 
 function setLang(lang) {
@@ -6273,4 +6282,3 @@ const IMG_CHAMPION = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABagAAAQ+CAIA
     ]
   },
 };
-
