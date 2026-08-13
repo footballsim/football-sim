@@ -362,6 +362,13 @@
 .lg-slotsub { padding: 0 0 .4em 1.8em; }
 .lg-slotfoot { display: flex; align-items: center; gap: .7em; margin-top: .5em; }
 .lg-absrow { display: flex; align-items: center; gap: .4em; font-size: .75em; padding: .2em 0; color: rgba(255, 255, 255, .85); }
+.lg-coachbrief { padding: 8px 11px; border-left: 3px solid #5aa6ef; }
+.lg-coachbrief.concern { border-left-color: #f3ad55; }
+.lg-coachbrief-main { display: flex; align-items: flex-start; gap: 8px; }
+.lg-coachbrief-main > span { flex: 0 0 auto; font-size: 18px; line-height: 1.2; }
+.lg-coachbrief-main > p { margin: 0; color: var(--lg-text-dim); font-size: .75em; line-height: 1.5; }
+.lg-coachbrief-main b { color: #ffe08a; }
+.lg-coachbrief-list { margin-top: 6px; padding-top: 5px; border-top: 1px solid var(--lg-line-soft); }
 
 /* 旧 <select>（LgUI 未搭載時のフォールバック用に残す） */
 .lg-select {

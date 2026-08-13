@@ -3714,11 +3714,20 @@ function _insertSubLog(timeLabel) {
 // ============================================================
 // コーチ情報カード
 // ============================================================
-function _buildCoachCard(label, body) {
+function _buildCoachCard(label, body, icon) {
   const div = document.createElement('div');
   div.className = 'coach-card';
-  div.innerHTML = '<div class="coach-card-icon">💬</div><div><div class="coach-card-label">' + label + '</div><div class="coach-card-body">' + body + '</div></div>';
+  div.innerHTML = '<div class="coach-card-icon">' + (icon || '💬') + '</div><div><div class="coach-card-label">' + label + '</div><div class="coach-card-body">' + body + '</div></div>';
   return div;
+}
+
+function _coachCardFor(kind, subject, fallbackLabel, fallbackBody) {
+  let note = null;
+  if (typeof leagueAnalysisCoachCard === 'function') {
+    try { note = leagueAnalysisCoachCard(kind, subject, chanceResults[currentChanceIdx - 1], gameState && gameState.team1); }
+    catch (e) { note = null; }
+  }
+  return _buildCoachCard(note ? note.label : fallbackLabel, note ? note.body : fallbackBody, note && note.icon);
 }
 
 function _maybeInsertCoachCard() {
@@ -3729,12 +3738,12 @@ function _maybeInsertCoachCard() {
   if (currentChanceIdx === 2 && gameState && gameState.team2) {
     const kp = gameState.team2.players[gameState.team2.lineup[gameState.team2.keyplayer]];
     if (kp) {
-      const name = isEn ? (kp.en_name || kp.name) : kp.name;
+      const name = getPlayerName(kp);
       const msg = isEn
         ? 'The opponent is building their attack around <b>' + name + '</b>.'
         : '相手は <b>' + name + '</b> 選手にボールを集めているようです。';
       // 直接挿入せず保留変数に退避 → 次の「次へ」で表示
-      _pendingCoachCardEl = _buildCoachCard(isEn ? "Coach's Note" : 'コーチからの指摘', msg);
+      _pendingCoachCardEl = _coachCardFor('opponent_focus', kp, isEn ? "Coach's Note" : 'コーチからの指摘', msg);
     }
   }
 
@@ -3742,12 +3751,12 @@ function _maybeInsertCoachCard() {
   if (currentChanceIdx === 4 && coachMarkTarget >= 0 && gameState && gameState.team1) {
     const jp = gameState.team1.players[gameState.team1.lineup[coachMarkTarget]];
     if (jp) {
-      const name = isEn ? (jp.en_name || jp.name) : jp.name;
+      const name = getPlayerName(jp);
       const msg = isEn
         ? 'The opponent is closely marking <b>' + name + '</b>. Watch out for tight coverage.'
-        : gameState.team1.name + 'の <b>' + name + '</b> 選手へのマークがキツイですね。';
+        : getTeamName(gameState.team1) + 'の <b>' + name + '</b> 選手へのマークがキツイですね。';
       // 直接挿入せず保留変数に退避 → 次の「次へ」で表示
-      _pendingCoachCardEl = _buildCoachCard(isEn ? "Coach's Note" : 'コーチからの指摘', msg);
+      _pendingCoachCardEl = _coachCardFor('tight_mark', jp, isEn ? "Coach's Note" : 'コーチからの指摘', msg);
     }
   }
 }
