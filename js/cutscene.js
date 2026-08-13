@@ -319,9 +319,7 @@ function renderShootStep(sc, stepType) {
   if (sc.action === 'ミドルシュート') return _renderMidShotScene(shotSc);
   if (sc.action === 'ボレーシュート') return _renderVolleyScene(shotSc);
   if (sc.action === 'ヘディングシュート') return _renderHeadingAnimScene(shotSc) || _renderHeaderRiseDuelScene(shotSc) || _renderHeaderScene(shotSc);   // 6コマアニメ優先→対決割りRise→旧重ね絵
-  var entry = _pickCutscene('shot', sc.offence && sc.offence.team_color);   // ← PK もここ（シュート絵）
-  if (entry && entry.file) return _renderShotScene(shotSc, entry);
-  return null;
+  return _renderShotScene(shotSc, null);   // 通常シュート/PKは採用4コマへ直結（旧shot素材に依存しない）
 }
 
 function renderSceneArt(sc, nextSc) {
@@ -356,6 +354,12 @@ function renderSceneArt(sc, nextSc) {
   if (moment === 'dribble') return _renderDribbleScene(sc);     // ドリブルは専用2スプライト（緑/赤を実行時recolor・manifest非依存）
   if (moment === 'runin') return _renderRunInScene(sc);         // 飛び出し: dribbleスプライト流用・manifest非依存
   if (moment === 'postplay') return _renderPostplayScene(sc);   // ポストプレー: 成功=ホールドアップ→反転(ドリブル流用) / 失敗=守備が弾く
+  // 通常シュートは採用4コマへ直結。結果専用演出（枠外/GKセーブ）は従来どおり維持する。
+  if (moment === 'shot') {
+    if (sc.result === '枠を外した！') return _renderMissScene(sc);
+    if (sc.result === 'GK防いだ！') return _renderGkScene(sc, 'save');
+    return _renderShotScene(sc, null);
+  }
   var entry = _pickCutscene(moment, sc.offence && sc.offence.team_color);
   if (!entry) return null;
 
@@ -378,13 +382,6 @@ function renderSceneArt(sc, nextSc) {
     if (!isPlainPass) return _renderOnetwoScene(sc);   // ワンツー3カット連結（同 or パス交換）
     return _renderShortpassScene(sc, entry);            // 別選手への通常ショートパス／次シーン無し
   }
-  // シュート: 枠外=ニアポスト脇を外す演出、GK防いだ！=GKカット、ブロック=シューター演出。（ゴールは上で処理）
-  if (moment === 'shot' && entry.file) {
-    if (sc.result === '枠を外した！') return _renderMissScene(sc);
-    if (sc.result === 'GK防いだ！') return _renderGkScene(sc, 'save');
-    return _renderShotScene(sc, entry);
-  }
-
   var img = _loadCutsceneImg(entry.file);
   var W = 390, H = 195;
   var canvas = document.createElement('canvas');
@@ -2078,7 +2075,124 @@ function _renderHeaderRiseDuelScene(sc) {
 //   枠外/ブロック=現状の左へ抜ける簡易演出（後で専用画像に差し替え）。ゴール！！は takeover 側。
 //   1回再生で静止（ループしない）。detach で停止。
 // ============================================================
+// 採用シュート4コマ（2026-08-13・演出ラボ先行）
+//   ユーザー指定のファイル名時刻順で1ビートとして再生する。
+//   白地を除去した透明PNGを共通フィールド背景へ重ねる。
+//   ★ 表示層のみ。実試合のシュート選択・結果・rng消費には接続しない。
+// ============================================================
+var _ADOPTED_SHOT_FRAMES = [
+  { src: 'img/cutscenes/manga_shot_adopted/frame_01_20260812_194453_alpha.png?v=3', crop: [105, 179, 885, 1143], cx: 348 },
+  { src: 'img/cutscenes/manga_shot_adopted/frame_02_20260812_195322_alpha.png?v=3', crop: [203, 86, 829, 1190], cx: 320 },
+  { src: 'img/cutscenes/manga_shot_adopted/frame_03_20260812_195726_alpha.png?v=3', crop: [93, 113, 1009, 1156], cx: 330 },
+  { src: 'img/cutscenes/manga_shot_adopted/frame_04_20260813_054443_alpha.png?v=3', crop: [44, 196, 844, 1301], cx: 342 }
+];
+
+function _renderAdoptedShotScene(sc) {
+  if (typeof document === 'undefined') return null;
+  var W = 480, H = 216, ground = 190, P = 560;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var imgs = _ADOPTED_SHOT_FRAMES.map(function (f) { return _loadCutsceneImg(f.src); });
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var flipH = _csAttackRight(sc);
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+
+  // 「2拍・顔カットイン」と同じ、蹴り点から放射する短い衝撃線。
+  function drawKickBurst(x, y, a) {
+    ctx.strokeStyle = 'rgba(255,255,255,' + (a * 0.72).toFixed(3) + ')';
+    ctx.lineWidth = 2.5;
+    for (var i = 0; i < 14; i++) {
+      var an = i / 14 * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(an) * 14, y + Math.sin(an) * 14);
+      ctx.lineTo(x + Math.cos(an) * 58, y + Math.sin(an) * 58);
+      ctx.stroke();
+    }
+  }
+
+  function drawFigure(idx, kick) {
+    var f = _ADOPTED_SHOT_FRAMES[idx], img = imgs[idx];
+    if (!img || !img.complete || !img.naturalWidth) return;
+    // ヘディング6コマの透明余白を除いた人物高（約125〜150px）に近づける。
+    // キック時は1.045倍になるため、基準160pxで最大約167px。
+    var dh = 160, dw = dh * f.crop[2] / f.crop[3];
+    var dx = f.cx - dw / 2, dy = ground - dh;
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    var punch = kick ? 1.045 : 1;
+    ctx.translate(f.cx, H * 0.56); ctx.scale(punch, punch); ctx.translate(-f.cx, -H * 0.56);
+    ctx.drawImage(img, f.crop[0], f.crop[1], f.crop[2], f.crop[3], dx, dy, dw, dh);
+    ctx.restore();
+    return { x: dx, y: dy, w: dw, h: dh };
+  }
+
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var p = Math.min(1, (now - T0) / P);
+    ctx.clearRect(0, 0, W, H);
+
+    // 「2拍・顔カットイン」と同じ210msのインパクト揺れ。
+    // 背景はdepth=0.34なので約1px、選手・ボールは主役面として最大3pxだけ動く。
+    var cam = _csCam.mk({ fx: 284, fy: 168 });
+    var camOn = (typeof CS_CAM_ENABLED === 'undefined') || CS_CAM_ENABLED;
+    if (camOn) _csCam.shake(cam, (p - 0.20) * P, 210, 3.0);
+
+    _csCam.begin(ctx, cam, camOn ? 0.34 : 1);
+    ctx.imageSmoothingEnabled = false;
+    _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+    _csCam.end(ctx);
+
+    var idx = p < 0.20 ? 0 : p < 0.40 ? 1 : p < 0.68 ? 2 : 3;
+    ctx.save();
+    if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+    _csCam.begin(ctx, cam, camOn ? 1 : 1);
+    var box = drawFigure(idx, idx === 2);
+
+    // 2コマ目の蹴り足の足首を起点に、低い軌道で3コマ目へつなぐ。
+    // 速度は「2拍・顔カットイン」の実速度（約1,400px/秒）へ合わせる。
+    if ((idx === 1 || idx === 2) && box) {
+      var u = Math.max(0, Math.min(1, (p - 0.20) / 0.39));
+      var contactX = 284, contactY = 168;
+      var bx = contactX - 310 * u, by = contactY - 18 * u;
+      if (u < 0.94) {
+        _lpBall(ctx, bx, by, 10, u * 34);
+      }
+      var impact = 1 - Math.min(1, Math.abs(u - 0.035) / 0.12);
+      if (impact > 0) {
+        drawKickBurst(contactX, contactY, impact);
+      }
+    }
+    _csCam.end(ctx);
+    ctx.restore();
+
+    // 参照演出と同じく、蹴った瞬間だけ全画面を短く白く飛ばす。
+    var flash = 1 - Math.min(1, Math.abs(p - 0.214) / 0.042);
+    if (flash > 0) {
+      ctx.fillStyle = 'rgba(255,255,255,' + (flash * 0.42).toFixed(3) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return canvas;
+}
+
+// ============================================================
+// 通常シュートの本編入口。
+//   旧「対決割り / 2拍・顔カットイン」のローテーションは廃止し、
+//   合格済みの採用4コマへ一本化する。entry は既存呼び出し互換のため受け取る。
+// ============================================================
 function _renderShotScene(sc, entry) {
+  return _renderAdoptedShotScene(sc);
+}
+
+// 旧シュート演出（演出ラボでの比較確認専用・本編からは呼ばない）。
+function _renderLegacyShotScene(sc, entry) {
   // 構図ローテーション（lab）: 決定論ハッシュが奇数 → Var A=対角対決割り（_renderShotDuelScene）。偶数 → Var B=2拍（本体）。
   //   対象は result='成功'（分割'shot'ビート/PK蹴り＝結果非開示）のみ。ブロック等の結果付き描画は Var B 固定。
   //   MangaRecolor 未ロードの公開ビルドはこの分岐に入らず常に従来経路＝公開版不変。

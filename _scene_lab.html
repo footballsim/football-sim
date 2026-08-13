@@ -244,7 +244,7 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
 <script src="js/match.js?v=lab61"></script>
 <script src="js/portrait.js?v=lab61"></script>
 <script src="js/manga_recolor.js?v=lab61"></script>
-<script src="js/cutscene.js?v=lab69"></script>
+<script src="js/cutscene.js?v=lab85"></script>
 <script src="js/wideshot.js?v=lab61"></script>
 <script>
 var KEYS=[['belgium2026','ベルギー'],['england2026','イングランド'],['brazil2026','ブラジル'],['spain2026','スペイン'],['france2026','フランス'],['argentina2026','アルゼンチン'],['germany2026','ドイツ'],['netherlands2026','オランダ']];
@@ -272,10 +272,11 @@ var SCENE_CATALOG=[
  {k:'wide', lay:'S', nm:'スタジアム引き画', nt:'選手22人が実寸4〜9px。情報量は全部「環境」へ'},
 
  {sec:'層C 部位アップ（試作）'},
+ {k:'shot4new', lay:'M', nm:'シュート（採用4コマ・本編）', nt:'旧2系統を差し替えた本編シュート。指定順4コマ・約0.56秒'},
  {k:'montage', lay:'C', nm:'寄りの4連続 MONT-02', nt:'★4分割コマ割りを廃止。1画面1コマの寄りを4ビート連続で叩きつける'},
- {k:'shotduel', lay:'C', nm:'対決割り①GKダイブ縮小', nt:'シューター72.6%：GK27.4%。GK側は減彩（非主語）'},
- {k:'shotduelface', lay:'C', nm:'対決割り②GK顔アップ', nt:'GK側を層C素材の顔アップ小ゴマ(22%)へ。顔は減彩しない'},
- {k:'shot2', lay:'M', nm:'2拍・顔カットイン', nt:'現行のシュート演出'},
+ {k:'shotduel', lay:'C', nm:'旧・対決割り①（比較用）', nt:'本編から撤去済み。旧GKダイブ構図の比較確認専用'},
+ {k:'shotduelface', lay:'C', nm:'旧・対決割り②（比較用）', nt:'本編から撤去済み。旧GK顔アップ構図の比較確認専用'},
+ {k:'shot2', lay:'M', nm:'旧・2拍／顔カットイン（比較用）', nt:'本編から撤去済み。旧シュート演出の比較確認専用'},
 
  {sec:'試合中の演出（現行・本番同等）'},
  {k:'gksave', lay:'M', nm:'GKダイブ', nt:'★3作品と同じ構図＝ここは変えなくてよい'},
@@ -307,6 +308,7 @@ function showGallery(){
 function playScene(k,nm){
   document.getElementById('gallery').style.display='none';
   document.getElementById('player').style.display='';
+  window.scrollTo(0,0);
   document.getElementById('playTitle').textContent=nm;
   run(k);
 }
@@ -385,6 +387,9 @@ function run(kind,retry){
       // gameState は let束縛＝素の識別子へ入れる。引き画(WIDE-01)経路はこれが無いと静止画へ落ちる。
       gameState=(qk==='concede')?{team1:b,team2:a}:{team1:a,team2:b};
       c=_renderQuietBeatScene(qsc,qk);
+    }else if(kind==='shot4new'){
+      var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'成功'};
+      c=_renderShotScene(sc,null);   // 本編と同じ入口を通し、採用4コマへの固定配線も検証する
     }else if(kind==='montage'){
       var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'成功'};
       c=_renderShotMontageScene(sc);
@@ -396,7 +401,7 @@ function run(kind,retry){
       var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'成功'};
       var entry=_pickCutscene('shot',a.team_color);
       if(!entry||!entry.file){if((retry||0)<12)return setTimeout(function(){run(kind,(retry||0)+1);},400);return err('素材読込待ち…リロードしてください');}
-      c=_renderShotScene(sc,entry);
+      c=_renderLegacyShotScene(sc,entry);   // 旧2拍は詳細設定からの比較確認だけに残す
     }else if(kind==='gksave'){
       var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'GK防いだ！'};
       c=_renderGkScene(sc,'save');
