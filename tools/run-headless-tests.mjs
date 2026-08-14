@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const toolsDir = dirname(fileURLToPath(import.meta.url));
-const repoRoot = resolve(toolsDir, '..');
+const toolsDir = dirname(realpathSync(fileURLToPath(import.meta.url)));
+const repoRoot = realpathSync(resolve(toolsDir, '..'));
 const manifestPath = join(toolsDir, 'headless-test-manifest.json');
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 
@@ -15,12 +15,23 @@ function fail(message) {
   process.exit(2);
 }
 
-function repoPath(input) {
+function repoPath(input, label = 'path') {
+  if (typeof input !== 'string') fail(`${label}は文字列で指定してください`);
   const absolute = resolve(repoRoot, input);
   if (absolute !== repoRoot && !absolute.startsWith(repoRoot + sep)) {
     fail(`repository外のpathは実行できません: ${input}`);
   }
-  return absolute;
+  if (!existsSync(absolute)) fail(`${label}が見つかりません: ${input}`);
+  let canonical;
+  try {
+    canonical = realpathSync(absolute);
+  } catch (error) {
+    fail(`${label}の実体pathを解決できません: ${input} (${error.message})`);
+  }
+  if (canonical !== repoRoot && !canonical.startsWith(repoRoot + sep)) {
+    fail(`${label}の実体がrepository外です: ${input}`);
+  }
+  return canonical;
 }
 
 function walkFiles(directory) {
@@ -43,8 +54,7 @@ if (!Array.isArray(manifest.includes)) fail('includes が必要です');
 
 const tests = new Map();
 for (const root of manifest.discovery.roots) {
-  const absoluteRoot = repoPath(root);
-  if (!existsSync(absoluteRoot)) fail(`discovery rootが見つかりません: ${root}`);
+  const absoluteRoot = repoPath(root, 'discovery root');
   if (!statSync(absoluteRoot).isDirectory()) fail(`discovery rootがdirectoryではありません: ${root}`);
   for (const file of walkFiles(absoluteRoot)) {
     const key = relative(repoRoot, file).split(sep).join('/');
@@ -58,8 +68,7 @@ for (const item of manifest.includes) {
   if (!item || typeof item.file !== 'string' || !Array.isArray(item.args)) {
     fail('includesの各項目にはfileとargs配列が必要です');
   }
-  const absolute = repoPath(item.file);
-  if (!existsSync(absolute)) fail(`明示includeが見つかりません: ${item.file}`);
+  const absolute = repoPath(item.file, '明示include');
   if (!statSync(absolute).isFile()) fail(`明示includeが見つかりません: ${item.file}`);
   tests.set(item.file, { file: item.file, args: item.args.map(String), source: 'manifest' });
 }
@@ -76,7 +85,7 @@ console.log('  note: エンジン・バランス変更時の統計判定は npm 
 const startedAt = Date.now();
 for (const [index, test] of ordered.entries()) {
   console.log(`\n[${index + 1}/${ordered.length}] ${test.file}${test.args.length ? ` ${test.args.join(' ')}` : ''}`);
-  const result = spawnSync(process.execPath, [repoPath(test.file), ...test.args], {
+  const result = spawnSync(process.execPath, [repoPath(test.file, '実行対象'), ...test.args], {
     cwd: repoRoot,
     env: process.env,
     stdio: 'inherit',
