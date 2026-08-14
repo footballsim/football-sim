@@ -260,11 +260,27 @@
       //   つまり新米監督は無策のベースラインだけを持って始まり、4戦術は全て勉強で解放する。
       learnedTactics: [],
       tacticProgress: {},                              // 習得ゲージ 0-100（勉強した戦術から生える）
-      coaches: { analysis: 1, physical: 0, mental: 0, scout: 0 },  // 0=未雇用
+      // MG-06: MVP の分析／フィジカルコーチは標準スタッフ。mental/scout は将来の雇用枠。
+      coaches: { analysis: 1, physical: 1, mental: 0, scout: 0 },  // 0=未雇用
       clubTrust: MANAGER_TUNING.TRUST_START,
       seasonGoal: null,          // SN-02 が開幕時に設定（{type:'table_pos',target:n}）
       tenure: { clubId: clubId || null, sinceSeason: season || 1 }
     };
+  }
+
+  /* MG-06 導入前の v4 セーブでは physical=0 が固定値だった（雇用UIも効果も未実装）。
+   * プレイヤーの選択を上書きする値ではないため、標準スタッフ2名だけを欠落補完と同じ扱いで生やす。 */
+  function _ensureCoreCoaches(manager) {
+    if (!manager) return false;
+    var changed = false;
+    if (!manager.coaches) { manager.coaches = {}; changed = true; }
+    ['analysis', 'physical'].forEach(function (kind) {
+      if (!(manager.coaches[kind] > 0)) { manager.coaches[kind] = 1; changed = true; }
+    });
+    ['mental', 'scout'].forEach(function (kind) {
+      if (typeof manager.coaches[kind] !== 'number') { manager.coaches[kind] = 0; changed = true; }
+    });
+    return changed;
   }
 
   function _defaultSeasonMeta() { return { actionsLog: [], pendingAction: null }; }
@@ -891,6 +907,57 @@
     };
   };
 
+  /* MG-06 分析コーチ。試合エンジンの結果を読み取って表示文へ変換するだけで、
+   * デュエル判定・カウント・能力値・rng には一切触れない。
+   * analysis パラメータによる精度差は MG-15 の収益化判断待ちなので、MVP は固定品質。 */
+  function _matchupConcern(completed, myTeam) {
+    var scenes = completed && completed.scenes;
+    if (!scenes || !myTeam) return null;
+    var worst = null;
+    for (var i = 0; i < scenes.length; i++) {
+      var sc = scenes[i]; if (!sc) continue;
+      var player = null, gap = 0, lost = false;
+      if (sc.offence === myTeam) {
+        lost = (sc.result === '失敗' || sc.result === 'カウンター');
+        gap = Number(sc.dfsPoint) - Number(sc.ofsPoint);
+        if (lost && sc.offence.players && sc.offence.lineup) player = sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+      } else if (sc.defence === myTeam) {
+        lost = (sc.result === '成功');
+        gap = Number(sc.ofsPoint) - Number(sc.dfsPoint);
+        if (lost && sc.defence.players && sc.defence.lineup) player = sc.defence.players[sc.defence.lineup[sc.dfsPos]];
+      }
+      if (player && gap >= 5 && (!worst || gap > worst.gap)) worst = { player: player, gap: gap };
+    }
+    return worst;
+  }
+
+  function _analysisCoachCard(kind, subject, completed, myTeam) {
+    var concern = _matchupConcern(completed, myTeam);
+    var label = _t('分析コーチ｜LIVE', 'Analysis Coach | LIVE');
+    if (concern) {
+      var concernName = (typeof getPlayerName === 'function') ? getPlayerName(concern.player) : concern.player.name;
+      return { icon: '🧑‍💻', label: label,
+        body: _t('<b>' + _escHtml(concernName) + '</b> 選手がマッチアップで後手に回っています。次の采配停止点で役割を見直しましょう。',
+          '<b>' + _escHtml(concernName) + '</b> is losing an unfavourable matchup. Reassess the role at the next coaching stop.') };
+    }
+    if (!subject) return null;
+    var name = (typeof getPlayerName === 'function') ? getPlayerName(subject) : subject.name;
+    if (kind === 'opponent_focus') {
+      return { icon: '🧑‍💻', label: label,
+        body: _t('相手は <b>' + _escHtml(name) + '</b> 選手を攻撃の起点にしています。',
+          'The opponent is building through <b>' + _escHtml(name) + '</b>.') };
+    }
+    return { icon: '🧑‍💻', label: label,
+      body: _t('<b>' + _escHtml(name) + '</b> 選手へのマークが厳しくなっています。',
+        '<b>' + _escHtml(name) + '</b> is being marked tightly.') };
+  }
+
+  window.leagueAnalysisCoachCard = function (kind, subject, completed, myTeam) {
+    if (!_leagueMatchActive || !_state || !_state.manager ||
+        !_state.manager.coaches || !(_state.manager.coaches.analysis > 0)) return null;
+    return _analysisCoachCard(kind, subject, completed, myTeam);
+  };
+
   // 未習得の戦術（習得順＝TACTIC_IDS の並び。FREE は習得対象外）
   function _nextUnlearnedTactic() {
     var m = _state && _state.manager; if (!m) return null;
@@ -1084,8 +1151,8 @@
     for (var i = 0; i < td.players.length; i++) {
       var e = _peekSquadEntry(clubId, _playerKey(td.players[i]));
       if (!e) continue;
-      if (e.injuryOut > 0) out.push({ name: td.players[i].name, weeks: e.injuryOut, kind: 'injury' });
-      else if (e.suspendOut > 0) out.push({ name: td.players[i].name, weeks: e.suspendOut, kind: 'suspend' });
+      if (e.injuryOut > 0) out.push({ name: td.players[i].name, key: _playerKey(td.players[i]), weeks: e.injuryOut, kind: 'injury' });
+      else if (e.suspendOut > 0) out.push({ name: td.players[i].name, key: _playerKey(td.players[i]), weeks: e.suspendOut, kind: 'suspend' });
     }
     return out;
   }
@@ -2207,11 +2274,12 @@
       if (!Array.isArray(_state.history)) _state.history = [];
       // ↓ v4 フィールドは版数に関係なく毎回「欠落なら補完」（部分的に壊れたセーブにも耐える）
       if (!_state.manager) _state.manager = _defaultManager(_state.myClub, _state.season);
+      var _coachesFilled = _ensureCoreCoaches(_state.manager);
       if (!_state.seasonMeta) _state.seasonMeta = _defaultSeasonMeta();
       if (!_state.squads) _state.squads = {};   // 空 = 全選手 base のまま（delta なし）
       _ensureSeasonGoal();   // SN-02: 目標未設定の既存セーブにも開幕目標を生やす
       _refreshDisplayNames();   // FN-00: セーブに焼き付いた表示名を「いまのモード」の名前へ貼り直す
-      if (_prevVersion !== _state.version || !_hadV4) _save();   // 移行が起きた時だけ一度保存
+      if (_prevVersion !== _state.version || !_hadV4 || _coachesFilled) _save();   // 移行が起きた時だけ一度保存
     } catch (e) { _state = null; }
   }
 
@@ -5135,21 +5203,39 @@
     return '<div class="lg-slotsub"><select class="lg-select" onchange="leagueSetTrainee(' + idx + ', this.value)">' + opts + '</select></div>';
   }
 
-  /* 離脱者（怪我＝残り週数／出場停止＝残り週数）。回復日の意味を読ませるために必ず出す。
-   * 置き場所は右カラム（＝3ゾーン設計の「選手情報」側）。 */
-  function _absenteeHTML(clubId) {
+  /* MG-06 フィジカルコーチ。永続化されているコンディション情報（負傷残り週）だけを読み、
+   * 回復日へつながる一言にする。試合内 fatigue は週を跨がないため、ここで捏造しない。 */
+  function _physicalCoachAdvice(clubId) {
     var list = _absentees(clubId);
-    if (!list.length) return '';
+    var injured = list.filter(function (a) { return a.kind === 'injury'; })
+      .sort(function (a, b) { return b.weeks - a.weeks; });
+    if (injured.length) {
+      var a = injured[0];
+      return { status: 'concern', name: _keyDisplayName(a.key || a.name), weeks: a.weeks,
+        text: _t('<b>' + _escHtml(_keyDisplayName(a.key || a.name)) + '</b> 選手はコンディション不良です。回復日を入れると復帰が1週早まります。',
+          '<b>' + _escHtml(_keyDisplayName(a.key || a.name)) + '</b> is not fully fit. A recovery day brings the return forward by one week.') };
+    }
+    return { status: 'ready', name: null, weeks: 0,
+      text: _t('フィジカル面の懸念はありません。今週は強化メニューを優先できます。',
+        'No fitness concerns this week. You can prioritise development work.') };
+  }
+
+  function _physicalCoachHTML(clubId) {
+    var advice = _physicalCoachAdvice(clubId);
+    var list = _absentees(clubId);
     var rows = list.map(function (a) {
       var ic = (a.kind === 'injury') ? '🩹' : '🟥';
       var lbl = (a.kind === 'injury')
         ? _t('あと' + a.weeks + '週', a.weeks + 'w left')
         : _t('出場停止 あと' + a.weeks + '週', 'Suspended ' + a.weeks + 'w');
-      return '<div class="lg-absrow">' + ic + ' <b>' + a.name + '</b>' +
+      return '<div class="lg-absrow">' + ic + ' <b>' + _escHtml(_keyDisplayName(a.key || a.name)) + '</b>' +
         '<span style="margin-left:auto;color:' + (a.kind === 'injury' ? '#ffb37a' : '#ff8f8f') + '">' + lbl + '</span></div>';
     }).join('');
-    return '<div class="lg-h">' + _t('離脱者', 'Unavailable') + '</div>' +
-      '<div class="lg-card" style="padding:8px 11px">' + rows + '</div>';
+    return '<div class="lg-h">' + _t('フィジカルコーチ', 'Physical Coach') +
+        '<span class="lg-badge">' + _t('コンディション', 'Fitness') + '</span></div>' +
+      '<div class="lg-card lg-coachbrief ' + advice.status + '">' +
+        '<div class="lg-coachbrief-main"><span>🧑‍⚕️</span><p>' + advice.text + '</p></div>' +
+        (rows ? '<div class="lg-coachbrief-list">' + rows + '</div>' : '') + '</div>';
   }
 
   /* 試合後の成長表示（MG-03。派手な演出は MG-08 で・ここは「動いた事実」を見せる最小形） */
@@ -6162,7 +6248,7 @@
         '<div class="lg-se-ztitle">' + _t('今週の練習メニュー', "This week's training") + '</div>' +
         '<div class="lg-rd-prepgrid">' +
           '<div class="lg-rd-prepcol">' + (oppId ? _scoutHTML(oppId) : '') + '</div>' +
-          '<div class="lg-rd-prepcol">' + _actionPhaseHTML() + _absenteeHTML(myId) + '</div>' +
+          '<div class="lg-rd-prepcol">' + _actionPhaseHTML() + _physicalCoachHTML(myId) + '</div>' +
         '</div>' +
       '</section>';
       nav = _finNavHTML(home, 'leagueRoundView(\'match\')', '次へ：試合へ', 'Next: Matchday');
@@ -6982,6 +7068,9 @@
     pendingWeek: _pendingWeek,
     applyWeekRecovery: _applyWeekRecovery,
     absentees: _absentees,
+    ensureCoreCoaches: _ensureCoreCoaches,
+    physicalCoachAdvice: _physicalCoachAdvice,
+    analysisCoachCard: _analysisCoachCard,
     opponentThreat: _opponentThreat,
     opponentThreats: _opponentThreats,
     opponentThreatsRanked: _opponentThreatsRanked,

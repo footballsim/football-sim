@@ -6,6 +6,7 @@
     "build": "node build.js",
     "check": "for f in js/*.js; do node --check \"$f\" || exit 1; done && echo '✅ 構文チェック全緑'",
     "test:fn00": "node tools/fn00-names-test.js",
+    "test:mg06": "node tools/mg06-coaches-test.js",
     "check:docs": "node tools/docs-guard.js",
     "regression": "node tools/regression-harness.js check",
     "regression:full": "node tools/regression-harness.js check 1500",
