@@ -5,6 +5,13 @@
 
 ---
 
+## 2026-08-14 — 通常開発をCodexへ包括委任
+
+- **ユーザー決定**: タスクごとの承認負担をなくす。ROADMAP/SCOPE/BACKLOGに含まれる通常開発は、タスク分解、専用worktree、実装、独立QA/Review、`game-main`統合、build、`game-main` push、Basic認証中のkantoku-lab反映までCodexが自律実行し、証拠を事後報告する。
+- **例外ゲート**: Steam提出・公開・発売、価格/支払い/契約/秘密情報、権利・AI申告の最終確定、baseline、save schema/内部ID、duel logic、スコープ/日程変更だけは停止してユーザー判断を求める。3回失敗、競合、担当外差分、deploy-guard DANGER、権利不明も自動停止する。
+- **機械的な境界**: project-local `.codex/rules/football-sim.rules`で明示ファイルのstage、commit、検証済み統合、`game-main` push等を許可する一方、`git add ./-A`、hard reset、force push、`main` push、wrangler直叩きを禁止する。Full Accessにはしない。
+- **変更前決定の上書き**: 下記「4枠の半自律体制」にある`game-main`統合/build/push/kantoku-lab deployの都度人間ゲートを、本決定の包括委任へ置き換える。Steam・権利・基幹データ等の例外ゲートは継続する。
+
 ## 2026-08-14 — PUB-01: Store Candidate完成までkantoku-labを再ロック
 
 - **ユーザー決定**: Steamストア撮影候補が架空表示で完成するまで、`kantoku-lab.pages.dev`をBasic認証で再ロックする。実名を使うバランス検証はローカルへ寄せる。

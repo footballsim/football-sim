@@ -1,0 +1,98 @@
+# football-sim standing delegation (2026-08-14 user decision).
+# Project-local rules load when this repository's .codex layer is trusted.
+
+prefix_rule(
+    pattern = ["git", "worktree", "add"],
+    decision = "allow",
+    justification = "One task per worktree is mandatory in football-sim",
+)
+
+prefix_rule(
+    pattern = ["git", "add"],
+    decision = "allow",
+    justification = "Standing delegation allows staging explicitly listed task files",
+)
+
+prefix_rule(
+    pattern = ["git", "add", "."],
+    decision = "forbidden",
+    justification = "Use explicit file paths; docs and unrelated drafts must never be swept in",
+)
+
+prefix_rule(
+    pattern = ["git", "add", "-A"],
+    decision = "forbidden",
+    justification = "Use explicit file paths; docs and unrelated drafts must never be swept in",
+)
+
+prefix_rule(
+    pattern = ["git", "add", "--all"],
+    decision = "forbidden",
+    justification = "Use explicit file paths; docs and unrelated drafts must never be swept in",
+)
+
+prefix_rule(
+    pattern = ["git", "commit"],
+    decision = "allow",
+    justification = "Task commits are delegated after validation and explicit staging",
+)
+
+prefix_rule(
+    pattern = ["git", "merge", ["--ff-only", "--no-edit"]],
+    decision = "allow",
+    justification = "Orchestrator may integrate independently reviewed task branches",
+)
+
+prefix_rule(
+    pattern = ["git", "push", "origin", "game-main"],
+    decision = "allow",
+    justification = "Standing delegation covers the active game branch only",
+)
+
+prefix_rule(
+    pattern = ["git", "restore", "docs/"],
+    decision = "allow",
+    justification = "Tracked docs build byproducts must be discarded because main is frozen",
+)
+
+prefix_rule(
+    pattern = ["npm", "run", ["build", "deploy:guard", "deploy:lab"]],
+    decision = "allow",
+    justification = "Only guarded project scripts may build or deploy the private lab",
+)
+
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "forbidden",
+    justification = "Never discard user work; use a new worktree or ask when recovery is required",
+)
+
+prefix_rule(
+    pattern = ["git", "push", ["--force", "-f"]],
+    decision = "forbidden",
+    justification = "Force push is outside standing delegation",
+)
+
+prefix_rule(
+    pattern = ["git", "push", "origin", "game-main", ["--force", "-f"]],
+    decision = "forbidden",
+    justification = "Force push is outside standing delegation",
+)
+
+prefix_rule(
+    pattern = ["git", "push", "origin", "main"],
+    decision = "forbidden",
+    justification = "main and football-sim.com are frozen archives; use game-main",
+)
+
+prefix_rule(
+    pattern = ["npx", "--yes", "wrangler@4", "pages", "deploy"],
+    decision = "forbidden",
+    justification = "Use npm run deploy:lab so docs-guard and deploy-guard cannot be skipped",
+)
+
+prefix_rule(
+    pattern = ["npx", ["wrangler", "wrangler@4"], "pages", "deploy"],
+    decision = "forbidden",
+    justification = "Use npm run deploy:lab so docs-guard and deploy-guard cannot be skipped",
+)

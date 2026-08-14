@@ -95,9 +95,9 @@
 
 - 同時稼働は **Orchestrator 1＋実装2＋QA/Reviewer 1** の最大4枠。
 - 機能ごとに `game-main` からworktree＋`codex/`ブランチを作り、担当ファイルを分離する。
-- QAが緑でも自動で `game-main` へマージしない。PR要約・回帰・実機証拠を人間ゲートへ出す。
+- 正式スコープ内は、独立QA/Reviewが緑で停止条件がなければ、Oが`game-main`統合・build・push・Basic認証中のkantoku-lab反映まで自動で進め、証拠を事後報告する。
 - 同じ停止理由で3回失敗したら自走を止め、原因・試行・選択肢をユーザーへ提示する。
-- デプロイ、Steamworks設定、Steam Direct支払い、税務・銀行情報、baseline更新、権利判断、スコープ変更は人間承認必須。
+- Steam提出/公開/発売、Steam Direct支払い、税務・銀行情報、価格/契約/秘密、baseline/save schema/内部ID/duel logic、権利・AI申告の最終確定、スコープ/日程変更は人間承認必須。
 - 詳細な所有権と停止条件は [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md) に従う。
 
 ## 毎週の判断

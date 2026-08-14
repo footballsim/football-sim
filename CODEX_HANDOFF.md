@@ -31,7 +31,7 @@ cd ~/football-sim && git log --oneline -5 && git status --short | head -30 && gi
 | **Codex（主）** | 実装全般・設計・リファクタ・レビュー。画像生成（`codex exec` で ChatGPT サブスク内・API 課金ゼロ）も担当 |
 | **Claude Code（補助）** | ブラウザ実機検証（preview/ヘッドレス操作・スクショ）、回帰ハーネスの実行と数値判定、Obsidian 外部脳への蒸留、横断的な調査、デプロイ実行 |
 
-Codex内の並行実行は **O / D / X-P / Q の最大4枠**。実装・検証・独立レビュー・人間ゲート待ちまでを自走し、game-main統合、build/push/deploy、Steam提出・公開は人間承認後に限る。1タスク1worktreeで、同じworking treeを共有しない。詳細は [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md)。
+Codex内の並行実行は **O / D / X-P / Q の最大4枠**。2026-08-14の包括委任により、正式スコープ内は実装・検証・独立レビュー・`game-main`統合・build/push・Basic認証中のkantoku-lab反映まで自走する。Steam提出/公開/発売、価格/契約/秘密、権利・AI申告の最終確定、baseline/save schema/内部ID/duel logic、スコープ/日程変更だけは人間承認後に限る。1タスク1worktreeで、同じworking treeを共有しない。詳細は [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md)。
 
 - **正本はリポジトリの `.md` 群**。会話やメモリに依存した引き継ぎはしない（今回の反省）。
 - **Claude 側の独自資産**（残るもの）: `~/.claude/agents/` のサブエージェント9体（qa-regression / reviewer / asset-qa 等）、`/deploy` スキル、js 編集後 `node --check` の自動フック、`docs/`・`dist-lab` 手編集のブロックフック。
@@ -43,6 +43,7 @@ Codex内の並行実行は **O / D / X-P / Q の最大4枠**。実装・検証�
   ```
   `npm run deploy:lab` は docs-guard → deploy-guard（プリフライト）を通ってから wrangler が走る。**wrangler の直叩き禁止**。
 - **Codex 側の自動発火**: `~/.codex/skills/football-sim/SKILL.md` — football-sim の話題で自動ロードされ、読む順・ガードレール要約・上記ゲートを Codex に強制する。恒久ルールを追加したら repo（本書/AGENTS.md）と**このスキルの両方**を更新する。
+- **Codex 側の実行許可**: `.codex/rules/football-sim.rules` — プロジェクトがtrustedな場合、明示ファイルのstage、commit、検証済みブランチ統合、`game-main` push等を都度確認なしで許可する。`git add ./-A`、force push、`main` push、wrangler直叩きは機械的に禁止する。OpenAI Docsの仕様上、新規rulesはCodex再起動後に確実に読み込まれる。
 
 ---
 

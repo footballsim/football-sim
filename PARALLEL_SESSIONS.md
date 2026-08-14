@@ -2,13 +2,13 @@
 
 作成: 2026-07-30 ／ 最終更新: **2026-08-14**。着手前に必ず本書を読む。
 
-> ## 2026-08-14 改定 — 4枠の半自律開発を再開（ユーザー正式決定）
+> ## 2026-08-14 改定 — 4枠の包括委任開発（ユーザー正式決定）
 >
-> **実装→検証→独立レビュー→人間ゲート待ちまでを自走**する。`game-main`統合、baseline更新、build/push/deploy、Steam提出・公開は自動化しない。
+> **正式スコープ内は実装→検証→独立レビュー→`game-main`統合→build/push→Basic認証中のkantoku-lab反映まで自走**する。都度の承認は求めず、例外ゲートだけ停止する。
 >
 > - 同時稼働は **Orchestrator 1＋Writer 2＋Independent QA/Reviewer 1** の最大4枠。
 > - **同じworking treeを共有しない**。旧S/G/D共有運用は履歴扱い。各タスクは最新`game-main`の固定SHAから専用worktree＋`codex/`ブランチを作る。
-> - `/Users/iwasakimitsuru/football-sim` は閲覧・人間承認後の統合専用。エージェントの機能編集は禁止。
+> - `/Users/iwasakimitsuru/football-sim` は閲覧・Oによる統合専用。Writerの機能編集は禁止。Oは包括委任条件を満たしたタスクをここへ統合できる。
 > - Writerは最大2体。共有ファイルのリースが重なるタスクは並行せず、Orchestratorが順序を付ける。
 > - デプロイ調停 D-2〜D-9は継続。デプロイは `npm run deploy:lab` のみ、wrangler直叩き禁止。
 
@@ -30,8 +30,8 @@ Reviewerは常駐5枠目にせず、Writerが終了して空いた枠へ**別コ
 3. Writerは実装後に対象テスト、`npm run check`、`npm run check:docs`を実行。エンジン/バランスは`npm run regression:full`。
 4. Qが同じ固定コミットを独立検証し、Writerへ差し戻す。修正ループは最大3回。
 5. Reviewerがdiff、ガードレール、日英、保存、画面、権利を独立確認する。
-6. Oが証拠を人間ゲートへ提示。**承認前はgame-mainへ統合しない**。
-7. 承認後だけOが統合し、cleanな統合worktreeでfull gate。push/deployはさらにユーザー承認後。
+6. Oが証拠を監査し、下記の包括委任条件と例外ゲートを判定する。条件を満たせば**人間確認なしでgame-mainへ統合**する。
+7. cleanな統合worktreeでfull gateを通し、必要時build、`game-main` push、Basic認証中のkantoku-lab deployまで続行する。完了後に証拠を報告する。
 
 ### 共有ファイルのリース
 
@@ -47,14 +47,21 @@ Reviewerは常駐5枠目にせず、Writerが終了して空いた枠へ**別コ
 - 9/6 Store Candidate freeze後の非blocker変更、9/14審査提出後の審査無関係変更、11/13以後の新機能。
 - deploy-guard DANGER、別Writer稼働中、直前Productionが祖先でない、公開先/Steam App IDが不明。
 
-## 人間専用ゲート
+## 包括委任で自動実行する操作
+
+- ROADMAP/SCOPE/BACKLOGに既に含まれるタスクの分解、worktree/branch、実装、テスト、独立QA/Review、最大3回の修正。
+- QA/Reviewが緑で、担当外差分・競合・停止条件がない変更の`game-main`統合、明示ファイルstage、commit、`game-main` push。
+- cleanな`integ/lab`、直前ProductionがHEAD祖先、他Writer停止、full gate緑、deploy-guard SAFEを全て満たす場合のbuildと`npm run deploy:lab`。デプロイ後はBasic認証401と代表機能をno-cacheで確認する。
+- BACKLOG/DECISIONSへのコミット・QA・反映証拠の記録。ユーザーへの報告は事後でよい。
+- `main`/football-sim.com、force push、baseline更新、秘密値の読出し/出力、wrangler直叩きは包括委任に含めない。
+
+## 人間専用の例外ゲート
 
 - スコープ・期限・対象OS・価格・ストア記載・機能カット。
 - baseline、セーブschema/内部ID、duel logic例外、権利判断、AI申告の確定。
-- `game-main`統合、build、push、kantoku-lab deploy。
 - Steam Direct支払い・本人/税務/銀行情報、Steamworks権限、審査提出、Coming Soon公開、SteamPipe set-live、発売。
 
-通常の承認は **火曜=機能統合、金曜=候補版/公開判断** にまとめる。緊急のP0と締切ゲートだけ随時確認する。
+通常開発の都度承認は廃止する。例外ゲートは可能な限り **金曜=候補版/公開判断** にまとめ、緊急のP0と締切ゲートだけ随時確認する。
 
 ## Oが発行するタスクカード
 
@@ -70,10 +77,10 @@ Acceptance criteria:
 Required tests / browser sizes / languages:
 Forbidden or untouched areas:
 Deadline / freeze relevance:
-Human gate needed after QA:
+Exception gate after QA (該当しなければnone):
 ```
 
-最初の自走順は `AUTO-02（統合テスト入口）→ MG-06独立レビュー → FN-01/02 → STORE-01`。PUB-01は外部公開状態を変えるため、並行して人間決定を待つ。
+最初の自走順は `AUTO-02（統合テスト入口）→ FN-01/02 → STORE-01`。MG-06とPUB-01は統合・反映済み。
 
 ---
 

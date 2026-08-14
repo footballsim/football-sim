@@ -10,6 +10,9 @@
 > **9/30 Coming Soon公開、12/10 Windows版発売（12/17予備日）**。日程は [ROADMAP.md](ROADMAP.md)。
 > 複数エージェントは同じworking treeを共有せず、1タスク1worktreeで最大Writer 2体＋独立QA。詳細は [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md)。
 
+> ## 2026-08-14 包括委任（ユーザー正式決定）
+> 正式スコープ内の通常開発は、独立QA/Review合格後の`game-main`統合・build・push・Basic認証中のkantoku-lab反映までCodexが自律実行する。Steamの提出/公開/発売、価格/契約/秘密、権利・AI申告の最終確定、baseline/save schema/内部ID/duel logic、スコープ/日程変更は引き続き人間ゲート。
+
 ## 概要
 サッカーシミュレーター（W杯モード・シングルマッチ対応）。
 目標: 2026W杯48チーム全実装 + W杯モードの汎用化。
@@ -56,7 +59,7 @@ football-sim/
 ## 絶対ルール
 - **デュエルカウントロジックには触れない**（既知の未解決バグあり）
 - 変更は該当箇所のdiffのみ提示。全文出力は求められた時だけ
-- ⚠️ **4枠の半自律運用（2026-08-14〜）**: O=Orchestrator／D=Gameplay／X/P=Experience→Platform／Q=独立QA。**同じworking treeは共有しない**。計画（ROADMAP/SCOPE/DECISIONS）を書き換えるのはOのみ。スコープ変更が必要なら実装せず報告する。
+- ⚠️ **4枠の包括委任運用（2026-08-14〜）**: O=Orchestrator／D=Gameplay／X/P=Experience→Platform／Q=独立QA。**同じworking treeは共有しない**。計画（ROADMAP/SCOPE/DECISIONS）を書き換えるのはOのみ。例外ゲートやスコープ変更が必要なら実装・公開を止めて報告する。
 
 ## 技術スタック
 - 純粋なHTML/CSS/JavaScript（フレームワークなし）

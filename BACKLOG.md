@@ -3,7 +3,7 @@
 唯一の信頼できる作業リスト。Orchestrator がここから次タスクを取る。
 規約は [AGENTS.md](AGENTS.md)、方針は [GAME_PLAN.md](GAME_PLAN.md)。
 
-状態: `[ ]` 未着手 / `[~]` 進行中 / `[x]` 完了（人間承認・merge 済み）
+状態: `[ ]` 未着手 / `[~]` 進行中 / `[x]` 完了（QA合格・merge済み。包括委任または例外ゲートの証拠あり）
 
 ---
 
@@ -59,6 +59,7 @@ Windows発売側は `WIN-01 → WIN-02/03 → WIN-04/05 → PLAY-01 → REL-02 �
 
 ## 自走開発基盤（AUTO）
 
+- [x] **GOV-01 包括委任契約**: 通常開発の都度承認を廃止し、独立QA後の`game-main`統合・build・push・Basic認証中のlab反映までをOへ委任。例外ゲートとproject-local Codex Rulesを正本化。✅ `codex/gov-01-standing-delegation`。
 - [ ] **AUTO-01 全チェック欄のGit再照合**: タスクID→受入れ証拠→統合コミットを記録し、古い未着手表示を修正。
 - [ ] **AUTO-02 統合テストコマンド**: `npm run test:all` と `npm run release:source` を作り、既存headlessテストの手動列挙漏れをなくす。
 - [ ] **AUTO-03 Golden Path smoke**: 最新候補のconsole error/404/主要出口を自動検査し、PC/横持ち解像度を回す。
