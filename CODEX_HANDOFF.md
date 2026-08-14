@@ -43,7 +43,7 @@ Codex内の並行実行は **O / D / X-P / Q の最大4枠**。2026-08-14の包�
   ```
   `npm run deploy:lab` は docs-guard → deploy-guard（プリフライト）を通ってから wrangler が走る。**wrangler の直叩き禁止**。
 - **Codex 側の自動発火**: `~/.codex/skills/football-sim/SKILL.md` — football-sim の話題で自動ロードされ、読む順・ガードレール要約・上記ゲートを Codex に強制する。恒久ルールを追加したら repo（本書/AGENTS.md）と**このスキルの両方**を更新する。
-- **Codex 側の実行許可**: `.codex/rules/football-sim.rules` — プロジェクトがtrustedな場合、明示ファイルのstage、commit、検証済みブランチ統合、`game-main` push等を都度確認なしで許可する。`git add ./-A`、force push、`main` push、wrangler直叩きは機械的に禁止する。OpenAI Docsの仕様上、新規rulesはCodex再起動後に確実に読み込まれる。
+- **Codex 側の実行許可**: `.codex/rules/football-sim.rules` — プロジェクトがtrustedな場合、引数を固定検証する`npm run delegated:*`だけを都度確認なしで許可する。直接git書込はprompt、`git add ./-A`、reset/clean、force push、`main` push、`npx`/`npm exec`/wrangler直叩きは機械的に禁止する。gateway本体は`tools/delegated-git.mjs`で、その変更自体は例外ゲート。OpenAI Docsの仕様上、新規rulesはCodex再起動後に確実に読み込まれる。
 
 ---
 

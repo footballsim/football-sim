@@ -166,14 +166,13 @@ Exception gate after QA (該当しなければnone):
 - **D-1 本番に出せるのは統合ブランチ `integ/lab` からのみ。** G/D は**自分のブランチから本番へ出さない**。`integ/lab` は**恒久ブランチ**（毎回 `integ/xxx` を作らない）。
 - **D-2 本番へ出すなら `--branch=main` を必ず明示。**
   ```bash
-  npx wrangler pages deploy dist-lab --project-name=kantoku-lab --branch=main   # integ/lab をチェックアウトした状態で
+  npm run deploy:lab   # integ/labをチェックアウト。内部で--branch=mainを固定
   ```
-  ⚠️ **省略すると現在のブランチ名で Preview に入り「出したつもりで本番に反映されない」**。しかも **Preview URL は Cloudflare Access のサインインが要るので検証にも使えない**（＝逃げ場ではなく行き止まり）。
+  `npx`/`npm exec`/wranglerバイナリの直叩きは禁止。正規scriptが`--branch=main`、docs-guard、deploy-guardを固定する。
 - **D-3 日常の確認は Cloudflare でなく**ローカル**で行う**（常設プレビュー `http://localhost:5175`／lab は `dist-lab` をローカル配信）。**Cloudflare へ出すのは節目だけ**＝衝突の"機会"そのものを減らす。
 - **D-4 本番デプロイ前にプリフライト（機械判定・省略禁止）**＝「直前の本番が自分のHEADの祖先か」を確認する。祖先でなければ**相手の成果が乗っていない**＝出した瞬間に消える。
   ```bash
-  npx wrangler pages deployment list --project-name=kantoku-lab | head -5   # 直前Productionのcommit shaを見る
-  git merge-base --is-ancestor <直前Productionのsha> HEAD && echo "SAFE" || echo "DANGER=統合してから出す"
+  npm run deploy:guard   # 直前Production SHA取得とancestor判定を一括実行
   ```
   **DANGER なら即中止**し、D-5 へ。
 - **D-5 統合の作法**: `integ/lab` に **G/D 双方の最新をマージ** → **必ず `npm run build`**（再ビルドしないと相手のコードが `dist-lab/` に入らない）→ 回帰 → デプロイ。**`build.js` の `LAB_ONLY_JS` が競合したら両側採用が正**（実績あり）。

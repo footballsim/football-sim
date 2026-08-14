@@ -1,16 +1,17 @@
 # football-sim standing delegation (2026-08-14 user decision).
 # Project-local rules load when this repository's .codex layer is trusted.
 
-prefix_rule(
-    pattern = ["git", "worktree", "add"],
-    decision = "allow",
-    justification = "One task per worktree is mandatory in football-sim",
-)
+prefix_rule(pattern = ["git", "worktree", "add"], decision = "prompt", justification = "Use npm run delegated:worktree")
+prefix_rule(pattern = ["git", "add"], decision = "prompt", justification = "Use npm run delegated:stage")
+prefix_rule(pattern = ["git", "commit"], decision = "prompt", justification = "Use npm run delegated:commit")
+prefix_rule(pattern = ["git", "merge"], decision = "prompt", justification = "Use npm run delegated:merge")
+prefix_rule(pattern = ["git", "push"], decision = "prompt", justification = "Use npm run delegated:push")
+prefix_rule(pattern = ["git", "restore"], decision = "prompt", justification = "Use npm run delegated:restore-docs for build byproducts")
 
 prefix_rule(
-    pattern = ["git", "add"],
+    pattern = ["npm", "run", ["delegated:worktree", "delegated:stage", "delegated:commit", "delegated:merge", "delegated:push", "delegated:restore-docs"]],
     decision = "allow",
-    justification = "Standing delegation allows staging explicitly listed task files",
+    justification = "Validated fixed-argument git gateways for standing delegation",
 )
 
 prefix_rule(
@@ -32,40 +33,14 @@ prefix_rule(
 )
 
 prefix_rule(
-    pattern = ["git", "commit"],
-    decision = "allow",
-    justification = "Task commits are delegated after validation and explicit staging",
-)
-
-prefix_rule(
-    pattern = ["git", "merge", ["--ff-only", "--no-edit"]],
-    decision = "allow",
-    justification = "Orchestrator may integrate independently reviewed task branches",
-)
-
-prefix_rule(
-    pattern = ["git", "push", "origin", "game-main"],
-    decision = "allow",
-    justification = "Standing delegation covers the active game branch only",
-)
-
-prefix_rule(
-    pattern = ["git", "restore", "docs/"],
-    decision = "allow",
-    justification = "Tracked docs build byproducts must be discarded because main is frozen",
-)
-
-prefix_rule(
     pattern = ["npm", "run", ["build", "deploy:guard", "deploy:lab"]],
     decision = "allow",
     justification = "Only guarded project scripts may build or deploy the private lab",
 )
 
-prefix_rule(
-    pattern = ["git", "reset", "--hard"],
-    decision = "forbidden",
-    justification = "Never discard user work; use a new worktree or ask when recovery is required",
-)
+prefix_rule(pattern = ["git", "reset"], decision = "forbidden", justification = "Never discard user work; use a new worktree or ask")
+prefix_rule(pattern = ["git", "clean"], decision = "forbidden", justification = "Never delete untracked user work")
+prefix_rule(pattern = ["git", "checkout", "--"], decision = "forbidden", justification = "Never discard user work with checkout --")
 
 prefix_rule(
     pattern = ["git", "push", ["--force", "-f"]],
@@ -85,14 +60,14 @@ prefix_rule(
     justification = "main and football-sim.com are frozen archives; use game-main",
 )
 
-prefix_rule(
-    pattern = ["npx", "--yes", "wrangler@4", "pages", "deploy"],
-    decision = "forbidden",
-    justification = "Use npm run deploy:lab so docs-guard and deploy-guard cannot be skipped",
-)
+prefix_rule(pattern = ["git", "push", "origin", "HEAD:main"], decision = "forbidden", justification = "main is frozen")
+prefix_rule(pattern = ["git", "push", "origin", "game-main:main"], decision = "forbidden", justification = "main is frozen")
+prefix_rule(pattern = ["git", "push", "origin", "refs/heads/main"], decision = "forbidden", justification = "main is frozen")
+prefix_rule(pattern = ["git", "push", "origin", "HEAD:refs/heads/main"], decision = "forbidden", justification = "main is frozen")
+prefix_rule(pattern = ["git", "push", "origin", "game-main:refs/heads/main"], decision = "forbidden", justification = "main is frozen")
 
-prefix_rule(
-    pattern = ["npx", ["wrangler", "wrangler@4"], "pages", "deploy"],
-    decision = "forbidden",
-    justification = "Use npm run deploy:lab so docs-guard and deploy-guard cannot be skipped",
-)
+prefix_rule(pattern = ["npx"], decision = "forbidden", justification = "Use a reviewed package.json script; direct external CLI execution is forbidden")
+prefix_rule(pattern = ["npm", "exec"], decision = "forbidden", justification = "Use a reviewed package.json script; direct external CLI execution is forbidden")
+prefix_rule(pattern = ["wrangler"], decision = "forbidden", justification = "Use npm run deploy:lab")
+prefix_rule(pattern = ["./node_modules/.bin/wrangler"], decision = "forbidden", justification = "Use npm run deploy:lab")
+prefix_rule(pattern = ["node_modules/.bin/wrangler"], decision = "forbidden", justification = "Use npm run deploy:lab")
