@@ -12,6 +12,12 @@
 - **機械的な境界**: project-local `.codex/rules/football-sim.rules`は直接git書込をpromptへ戻し、workspace外の固定gateway `~/.codex/bin/football-sim-delegated-git.mjs`だけを許可する。`git add ./-A`、reset/clean、`main` push、`npx`/`npm exec`/wrangler直叩きを禁止する。Rules/gateway自体の変更は例外ゲートとし、Full Accessにはしない。
 - **変更前決定の上書き**: 下記「4枠の半自律体制」にある`game-main`統合/build/push/kantoku-lab deployの都度人間ゲートを、本決定の包括委任へ置き換える。Steam・権利・基幹データ等の例外ゲートは継続する。
 
+## 2026-08-14 — AUTO-02: headless統合ゲートを採用
+
+- **実装**: `npm run test:all`で自動検出12本＋manifest明示3本のheadlessテストを安定順・fail-fastで実行し、`npm run release:source`で構文、docs guard、全headlessを一括実行する。回帰1500、soak、browser、build、asset検査は変更種別に応じる別ゲートのまま。
+- **独立QA**: 初版でmanifest内symlinkからrepository外JSを実行できるP2を発見。discovery root、明示include、実行直前を`realpathSync`で再検証する修正`edb92ec`後、同じ攻撃条件をexit 2で拒否し、外部JS未実行、15本PASSを確認した。
+- **反映**: 包括委任の初回通常タスクとして`game-main`へ統合（`083b153`）。`npm run release:source`がPASSしたため、以後のsource品質ゲートとして使用する。
+
 ## 2026-08-14 — PUB-01: Store Candidate完成までkantoku-labを再ロック
 
 - **ユーザー決定**: Steamストア撮影候補が架空表示で完成するまで、`kantoku-lab.pages.dev`をBasic認証で再ロックする。実名を使うバランス検証はローカルへ寄せる。

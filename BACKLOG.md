@@ -61,7 +61,7 @@ Windows発売側は `WIN-01 → WIN-02/03 → WIN-04/05 → PLAY-01 → REL-02 �
 
 - [x] **GOV-01 包括委任契約**: 通常開発の都度承認を廃止し、独立QA後の`game-main`統合・build・push・Basic認証中のlab反映までをOへ委任。例外ゲートとproject-local Codex Rulesを正本化。✅ `codex/gov-01-standing-delegation`。
 - [ ] **AUTO-01 全チェック欄のGit再照合**: タスクID→受入れ証拠→統合コミットを記録し、古い未着手表示を修正。
-- [ ] **AUTO-02 統合テストコマンド**: `npm run test:all` と `npm run release:source` を作り、既存headlessテストの手動列挙漏れをなくす。
+- [x] **AUTO-02 統合テストコマンド**: `npm run test:all` と `npm run release:source` を追加。自動検出12＋明示3のheadless 15本を固定し、repo外symlink実行をrealpath境界で拒否。✅ 実装`3a7cdb6`／修正`edb92ec`／統合`083b153`、独立QA・release:source PASS。
 - [ ] **AUTO-03 Golden Path smoke**: 最新候補のconsole error/404/主要出口を自動検査し、PC/横持ち解像度を回す。
 - [ ] **AUTO-04 成果物照合**: dist-lab/Steam成果物に元commitを記録し、HEADより古い成果物で撮影・提出しない。
 - [ ] **AUTO-05 Asset allowlist＋provenance gate**: buildへdraft/.DS_Store/台帳外画像が混入しないよう停止する。
