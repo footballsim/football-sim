@@ -6,7 +6,7 @@ football-sim をゲーム化（[GAME_PLAN.md](GAME_PLAN.md)）するための契
 > **2026-08-14 正式日程**: 9/30 Steam Coming Soon公開・ウィッシュリスト受付、11/13機能凍結、12/10 Windows版発売（12/17予備日）。日付は [ROADMAP.md](ROADMAP.md) が正本。
 
 > **2026-08-14 包括委任（ユーザー正式決定）**: 凍結済みスコープ内の通常開発は、タスク分解から独立QA、`game-main`統合、build、`game-main` push、Basic認証中の`kantoku-lab`反映までCodexへ包括委任する。都度の人間承認は不要。Steam提出・公開・発売、価格/支払い/契約/秘密情報、権利・AI申告の最終確定、baseline・save schema・内部ID・duel logic、スコープ/日程変更だけを例外ゲートとして停止する。詳細は [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md)。
-> gitの書込操作は原則`npm run delegated:*`経由とし、`.codex/rules/football-sim.rules`と`tools/delegated-git.mjs`の変更自体は例外ゲートとする。
+> gitの書込操作はworkspace外の固定gateway `~/.codex/bin/football-sim-delegated-git.mjs`経由とし、gatewayと`.codex/rules/football-sim.rules`の変更自体は例外ゲートとする。
 
 ## 🔀 プロジェクト分離（2026-08-13 ユーザー決定）— **シミュレーターとゲームは別プロジェクト**
 

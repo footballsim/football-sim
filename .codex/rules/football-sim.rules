@@ -1,17 +1,17 @@
 # football-sim standing delegation (2026-08-14 user decision).
 # Project-local rules load when this repository's .codex layer is trusted.
 
-prefix_rule(pattern = ["git", "worktree", "add"], decision = "prompt", justification = "Use npm run delegated:worktree")
-prefix_rule(pattern = ["git", "add"], decision = "prompt", justification = "Use npm run delegated:stage")
-prefix_rule(pattern = ["git", "commit"], decision = "prompt", justification = "Use npm run delegated:commit")
-prefix_rule(pattern = ["git", "merge"], decision = "prompt", justification = "Use npm run delegated:merge")
-prefix_rule(pattern = ["git", "push"], decision = "prompt", justification = "Use npm run delegated:push")
-prefix_rule(pattern = ["git", "restore"], decision = "prompt", justification = "Use npm run delegated:restore-docs for build byproducts")
+prefix_rule(pattern = ["git", "worktree", "add"], decision = "prompt", justification = "Use the external delegated-git gateway")
+prefix_rule(pattern = ["git", "add"], decision = "prompt", justification = "Use the external delegated-git gateway")
+prefix_rule(pattern = ["git", "commit"], decision = "prompt", justification = "Use the external delegated-git gateway")
+prefix_rule(pattern = ["git", "merge"], decision = "prompt", justification = "Use the external delegated-git gateway")
+prefix_rule(pattern = ["git", "push"], decision = "prompt", justification = "Use the external delegated-git gateway")
+prefix_rule(pattern = ["git", "restore"], decision = "prompt", justification = "Use the external delegated-git gateway")
 
 prefix_rule(
-    pattern = ["npm", "run", ["delegated:worktree", "delegated:stage", "delegated:commit", "delegated:merge", "delegated:push", "delegated:restore-docs"]],
+    pattern = ["node", "/Users/iwasakimitsuru/.codex/bin/football-sim-delegated-git.mjs"],
     decision = "allow",
-    justification = "Validated fixed-argument git gateways for standing delegation",
+    justification = "Workspace-external fixed-argument git gateway for football-sim standing delegation",
 )
 
 prefix_rule(

@@ -10,12 +10,6 @@
     "check:docs": "node tools/docs-guard.js",
     "regression": "node tools/regression-harness.js check",
     "regression:full": "node tools/regression-harness.js check 1500",
-    "delegated:worktree": "node tools/delegated-git.mjs worktree",
-    "delegated:stage": "node tools/delegated-git.mjs stage",
-    "delegated:commit": "node tools/delegated-git.mjs commit",
-    "delegated:merge": "node tools/delegated-git.mjs merge",
-    "delegated:push": "node tools/delegated-git.mjs push",
-    "delegated:restore-docs": "node tools/delegated-git.mjs restore-docs",
     "deploy:guard": "node tools/deploy-guard.js",
     "deploy:lab": "node tools/docs-guard.js && node tools/deploy-guard.js && npx --yes wrangler@4 pages deploy dist-lab --project-name=kantoku-lab --branch=main --commit-dirty=true"
   },

@@ -9,7 +9,7 @@
 
 - **ユーザー決定**: タスクごとの承認負担をなくす。ROADMAP/SCOPE/BACKLOGに含まれる通常開発は、タスク分解、専用worktree、実装、独立QA/Review、`game-main`統合、build、`game-main` push、Basic認証中のkantoku-lab反映までCodexが自律実行し、証拠を事後報告する。
 - **例外ゲート**: Steam提出・公開・発売、価格/支払い/契約/秘密情報、権利・AI申告の最終確定、baseline、save schema/内部ID、duel logic、スコープ/日程変更だけは停止してユーザー判断を求める。3回失敗、競合、担当外差分、deploy-guard DANGER、権利不明も自動停止する。
-- **機械的な境界**: project-local `.codex/rules/football-sim.rules`は直接git書込をpromptへ戻し、引数を固定検証する`npm run delegated:*`だけを許可する。`git add ./-A`、reset/clean、force push、`main` push、`npx`/`npm exec`/wrangler直叩きを禁止する。Rules/gateway自体の変更は例外ゲートとし、Full Accessにはしない。
+- **機械的な境界**: project-local `.codex/rules/football-sim.rules`は直接git書込をpromptへ戻し、workspace外の固定gateway `~/.codex/bin/football-sim-delegated-git.mjs`だけを許可する。`git add ./-A`、reset/clean、`main` push、`npx`/`npm exec`/wrangler直叩きを禁止する。Rules/gateway自体の変更は例外ゲートとし、Full Accessにはしない。
 - **変更前決定の上書き**: 下記「4枠の半自律体制」にある`game-main`統合/build/push/kantoku-lab deployの都度人間ゲートを、本決定の包括委任へ置き換える。Steam・権利・基幹データ等の例外ゲートは継続する。
 
 ## 2026-08-14 — PUB-01: Store Candidate完成までkantoku-labを再ロック
