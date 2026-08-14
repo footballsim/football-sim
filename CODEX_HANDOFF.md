@@ -24,12 +24,14 @@ cd ~/football-sim && git log --oneline -5 && git status --short | head -30 && gi
 
 ---
 
-## 1. 役割分担（2026-08-13 決定）
+## 1. 役割分担（2026-08-14 Steam日程に更新）
 
 | | 担当 |
 |---|---|
 | **Codex（主）** | 実装全般・設計・リファクタ・レビュー。画像生成（`codex exec` で ChatGPT サブスク内・API 課金ゼロ）も担当 |
 | **Claude Code（補助）** | ブラウザ実機検証（preview/ヘッドレス操作・スクショ）、回帰ハーネスの実行と数値判定、Obsidian 外部脳への蒸留、横断的な調査、デプロイ実行 |
+
+Codex内の並行実行は **O / D / X-P / Q の最大4枠**。実装・検証・独立レビュー・人間ゲート待ちまでを自走し、game-main統合、build/push/deploy、Steam提出・公開は人間承認後に限る。1タスク1worktreeで、同じworking treeを共有しない。詳細は [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md)。
 
 - **正本はリポジトリの `.md` 群**。会話やメモリに依存した引き継ぎはしない（今回の反省）。
 - **Claude 側の独自資産**（残るもの）: `~/.claude/agents/` のサブエージェント9体（qa-regression / reviewer / asset-qa 等）、`/deploy` スキル、js 編集後 `node --check` の自動フック、`docs/`・`dist-lab` 手編集のブロックフック。
@@ -120,7 +122,7 @@ npm run deploy:lab     # deploy-guard → wrangler pages deploy dist-lab --proje
 - **D トラックの配管**: `FN-00`（最優先）・`MG-06` コーチ陣・`SN-08a` soft加齢・怪我/停止の持ち越し本体・`SD-01` 効果音・`RW-01` SNSフィード。
 - **層C（顔アップ）用の高精細素材の発注仕様**＝既存のマンガ素材は粗スタイルで統一済みのため**流用不可**（実測で確定）。
 - **sprite-studio のキーポーズ式アニメ量産**（`~/sprite-studio/`）— クロス6コマは手の変形・顔ブレで**未達のまま**。
-- マイルストーン: **α 8月中旬 / β 8月下旬（合い言葉ゲートのクローズド）/ v1.0 9月末（一般公開・架空化済）**。
+- マイルストーン（2026-08-14正式改定）: **9/30 Steam Coming Soon公開／11/13機能凍結／11/30製品ビルド審査提出／12/10 Windows発売（12/17予備日）**。
 
 ---
 

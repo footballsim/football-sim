@@ -1,15 +1,83 @@
-# PARALLEL_SESSIONS — 3セッション並行運用の契約
+# PARALLEL_SESSIONS — Steam発売までの複数エージェント契約
 
-作成: 2026-07-30 ／ **同じワーキングツリーを複数セッションで共有するため、担当範囲を破ると commit 混入・上書き事故が起きる**。着手前に必ず本書を読む。
+作成: 2026-07-30 ／ 最終更新: **2026-08-14**。着手前に必ず本書を読む。
 
-> ## ⚠️ 2026-08-13 改定 — 現在は単独運用（Codex 主・Claude Code 補助）
+> ## 2026-08-14 改定 — 4枠の半自律開発を再開（ユーザー正式決定）
 >
-> 3セッション並行（S/G/D）は **2026-08-13 の体制転換で休止**。現在は1セッションずつの逐次運用。
-> - **本書の S/G/D 役割分担・ファイル所有権・ハンク単位ステージは「並行運用を再開した時」のみ適用**。
-> - **デプロイ調停ルールは D-2〜D-8 が引き続き有効**（`--branch` 明示・プリフライト・事後確認・ローカル優先）。
->   プリフライト D-4 は `npm run deploy:lab` が **`tools/deploy-guard.js` で機械実行**する（fail-safe＝判定不能なら止まる）。
-> - **D-1（統合ブランチ `integ/lab` 経由）は単独運用では適用しない**＝作業ブランチから deploy-guard を通して出してよい。
->   `integ/lab` はこの改定時点で**未作成**。並行運用を再開する場合は、再開時に作成してから D-1 を復活させること。
+> **実装→検証→独立レビュー→人間ゲート待ちまでを自走**する。`game-main`統合、baseline更新、build/push/deploy、Steam提出・公開は自動化しない。
+>
+> - 同時稼働は **Orchestrator 1＋Writer 2＋Independent QA/Reviewer 1** の最大4枠。
+> - **同じworking treeを共有しない**。旧S/G/D共有運用は履歴扱い。各タスクは最新`game-main`の固定SHAから専用worktree＋`codex/`ブランチを作る。
+> - `/Users/iwasakimitsuru/football-sim` は閲覧・人間承認後の統合専用。エージェントの機能編集は禁止。
+> - Writerは最大2体。共有ファイルのリースが重なるタスクは並行せず、Orchestratorが順序を付ける。
+> - デプロイ調停 D-2〜D-9は継続。デプロイは `npm run deploy:lab` のみ、wrangler直叩き禁止。
+
+## 現行ロール（最大4枠）
+
+| 枠 | 役割 | 書込範囲 | 禁止 |
+|---|---|---|---|
+| **O** | Orchestrator / Release Integrator | ROADMAP/SCOPE/BACKLOG/DECISIONS/PARALLEL、統合時の競合解消 | 通常の機能コードを自分で実装しない |
+| **D** | Gameplay Systems | league/save/engine/data/manager UI。従来D所有ファイル | art/img/cutscene/計画文書 |
+| **X/P** | Experience & Art（〜9/30）→ Desktop Platform（10月〜） | 9月まで=黄金5画面、演出、img、Steam素材。10月から=desktop/steam/package周辺 | D所有のエンジン・セーブ。担当切替前の混在 |
+| **Q** | Independent QA / Reviewer | 原則read-only。検査ツールは専用タスク時のみ | 実装をその場で直す、閾値を緩める、失敗テストを削る |
+
+Reviewerは常駐5枠目にせず、Writerが終了して空いた枠へ**別コンテキスト**で起動する。Qのテスト判定とReviewerの設計レビューは別に記録する。
+
+## 1タスク=1 worktree 契約
+
+1. OがタスクID、起点`game-main` SHA、所有ファイル、受入条件、期限を固定する。
+2. `/private/tmp/football-sim-<task-id>` と `codex/<task-id>-<slug>` を作り、1 ownerだけが書く。
+3. Writerは実装後に対象テスト、`npm run check`、`npm run check:docs`を実行。エンジン/バランスは`npm run regression:full`。
+4. Qが同じ固定コミットを独立検証し、Writerへ差し戻す。修正ループは最大3回。
+5. Reviewerがdiff、ガードレール、日英、保存、画面、権利を独立確認する。
+6. Oが証拠を人間ゲートへ提示。**承認前はgame-mainへ統合しない**。
+7. 承認後だけOが統合し、cleanな統合worktreeでfull gate。push/deployはさらにユーザー承認後。
+
+### 共有ファイルのリース
+
+`index.html`、`build.js`、`package.json`、`js/players.js`、`css/style.css`はOが1タスクにだけ期限付きで貸す。同時に2タスクが必要なら実装順を直列化する。担当外差分が見えたら即停止する。
+
+## 自動停止条件
+
+- `docs/`追跡差分、担当外差分、共有ファイルのリース衝突、起点SHAずれ、競合。
+- duel count、`system_data`順/name、`long_name`/内部ID、save schemaを仕様外に変更。
+- i18n片側、1画面1ビート違反、実名/実在ロゴ/透かし残留、AI・ライセンス台帳不明。
+- `npm run check`または`check:docs`失敗。回帰は短いcheck再実行→1500でも赤なら停止。baselineは自動更新禁止。
+- QA差し戻し3回、同じ阻害が2営業日超、見積り倍化、スコープ追加が必要。
+- 9/6 Store Candidate freeze後の非blocker変更、9/14審査提出後の審査無関係変更、11/13以後の新機能。
+- deploy-guard DANGER、別Writer稼働中、直前Productionが祖先でない、公開先/Steam App IDが不明。
+
+## 人間専用ゲート
+
+- スコープ・期限・対象OS・価格・ストア記載・機能カット。
+- baseline、セーブschema/内部ID、duel logic例外、権利判断、AI申告の確定。
+- `game-main`統合、build、push、kantoku-lab deploy。
+- Steam Direct支払い・本人/税務/銀行情報、Steamworks権限、審査提出、Coming Soon公開、SteamPipe set-live、発売。
+
+通常の承認は **火曜=機能統合、金曜=候補版/公開判断** にまとめる。緊急のP0と締切ゲートだけ随時確認する。
+
+## Oが発行するタスクカード
+
+Writerを起動する前に、Oは次を埋める。空欄のカードでは作業を始めない。
+
+```text
+Task ID / objective:
+Base game-main SHA:
+Owner role / worktree / branch:
+Owned files:
+Leased shared files (期限):
+Acceptance criteria:
+Required tests / browser sizes / languages:
+Forbidden or untouched areas:
+Deadline / freeze relevance:
+Human gate needed after QA:
+```
+
+最初の自走順は `AUTO-02（統合テスト入口）→ MG-06独立レビュー → FN-01/02 → STORE-01`。PUB-01は外部公開状態を変えるため、並行して人間決定を待つ。
+
+---
+
+## 旧S/G/D共有運用（2026-07-30〜2026-08-13・履歴）
 
 ## セッションの役割（3本）
 

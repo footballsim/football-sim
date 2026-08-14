@@ -3,6 +3,8 @@
 football-sim をゲーム化（[GAME_PLAN.md](GAME_PLAN.md)）するための契約書。
 **作業前に必ずこのファイルと [CLAUDE.md](CLAUDE.md)（＝プロジェクトの技術仕様。名前は由来にすぎない）を読む。**
 
+> **2026-08-14 正式日程**: 9/30 Steam Coming Soon公開・ウィッシュリスト受付、11/13機能凍結、12/10 Windows版発売（12/17予備日）。日付は [ROADMAP.md](ROADMAP.md) が正本。
+
 ## 🔀 プロジェクト分離（2026-08-13 ユーザー決定）— **シミュレーターとゲームは別プロジェクト**
 
 | | ブランチ | 公開先 | 状態 |
@@ -58,26 +60,27 @@ football-sim をゲーム化（[GAME_PLAN.md](GAME_PLAN.md)）するための契
 
 ---
 
-## ロール（チーム編成）
+## ロール（4枠の半自律チーム）
 
-| ロール | 責務 | Claude Code 上の実体 |
-|---|---|---|
-| 監督 / Orchestrator | バックログ管理・タスク分解・順序付け・ゲート執行。**コードは書かない** | `/loop`（自己ペース）or `/schedule` の定期ティック |
-| Engine | エンジン側ロジック（怪我/退場・相手AI・イベントログ） | `Agent` + `feature-dev:code-architect`、`isolation: worktree` |
-| Renderer | 漫画マッチアップ・レンダラ＋アセット | `Agent`、別 worktree、`run_in_background` で並行 |
-| QA | 回帰ハーネス＋ preview(5174) で客観合否 | `Agent`（下記コマンド） |
-| Reviewer | 本ファイル＋CLAUDE.md 準拠チェック | `Agent` + `feature-dev:code-reviewer` |
+| 枠 | 責務 |
+|---|---|
+| **O / Orchestrator** | バックログ、依存順、ファイルリース、期限、統合、人間ゲート。**通常の機能コードは書かない** |
+| **D / Gameplay Systems** | エンジン、リーグ、セーブ、データ、監督機能。専用worktreeで実装 |
+| **X/P / Experience→Platform** | 9月までは黄金5画面・演出・画像・Steam素材、10月以降はWindows/Electron製品化 |
+| **Q / Independent QA** | 原則read-onlyで回帰、保存、ブラウザ、権利、成果物を独立判定。修正は担当Writerへ差し戻す |
+
+同時に書くエージェントは最大2体。ReviewerはWriter終了後に空いた枠へ別コンテキストで起動する。所有権、停止条件、人間専用操作は [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md) が正本。
 
 ---
 
 ## スプリント・ループ（1機能=1周）
 
 1. **Plan** — Orchestrator が [BACKLOG.md](BACKLOG.md) から次タスクを取る。
-2. **Branch** — `git worktree` で機能ごとに隔離（Engine ∥ Renderer は別 worktree で並行）。
+2. **Branch** — 最新`game-main`の固定SHAから、1タスク1ownerの `git worktree`＋`codex/`ブランチを作る。メインworktreeを共有編集しない。
 3. **Implement** — 担当エージェントが root の `js/` のみ編集。
 4. **Validate** — QA が下記ゲートを実行。失敗なら Implement に差し戻し（自動反復、上限3回で人間へエスカレーション）。
 5. **Review** — Reviewer が本ファイル＋CLAUDE.md 準拠を確認。
-6. **人間ゲート** — PR要約＋証拠（回帰差分・preview スクショ）を提示。**承認されるまで build/push しない**。
+6. **人間ゲート** — PR要約＋証拠（回帰差分・preview スクショ）を提示。**承認されるまでgame-main統合/build/push/deployしない**。
 7. **Ship** — 承認後に `npm run build` → preview(5174) で実起動確認 → commit & push。
 8. **Log** — [DECISIONS.md](DECISIONS.md) に判断と理由を追記し、BACKLOG を更新。次スプリントへ。
 

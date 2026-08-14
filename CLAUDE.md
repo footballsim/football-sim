@@ -6,6 +6,10 @@
 > 本ファイルのシミュレーター関連記述（W杯モード・本番反映手順・VPS 等）はアーカイブ情報として残す。
 > 現行の規約と読む順は [AGENTS.md](AGENTS.md) → [CODEX_HANDOFF.md](CODEX_HANDOFF.md)。
 
+> ## 2026-08-14 Steam日程と並行体制（ユーザー正式決定）
+> **9/30 Coming Soon公開、12/10 Windows版発売（12/17予備日）**。日程は [ROADMAP.md](ROADMAP.md)。
+> 複数エージェントは同じworking treeを共有せず、1タスク1worktreeで最大Writer 2体＋独立QA。詳細は [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md)。
+
 ## 概要
 サッカーシミュレーター（W杯モード・シングルマッチ対応）。
 目標: 2026W杯48チーム全実装 + W杯モードの汎用化。
@@ -52,10 +56,11 @@ football-sim/
 ## 絶対ルール
 - **デュエルカウントロジックには触れない**（既知の未解決バグあり）
 - 変更は該当箇所のdiffのみ提示。全文出力は求められた時だけ
-- ⚠️ **3セッション並行運用中（2026-07-30〜）**: **S=スケジュール専任／G=グラフィック開発／D=ゲーム化開発**。同じワーキングツリーを共有するため、**着手前に [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md) を読み、担当ファイル・タスクID・git作法（ハンク単位ステージ／他人の変更を絶対にコミットしない）を守る**。計画（ROADMAP/SCOPE/DECISIONS）を書き換えるのは S のみ。スコープ変更が必要なら実装せず報告する。
+- ⚠️ **4枠の半自律運用（2026-08-14〜）**: O=Orchestrator／D=Gameplay／X/P=Experience→Platform／Q=独立QA。**同じworking treeは共有しない**。計画（ROADMAP/SCOPE/DECISIONS）を書き換えるのはOのみ。スコープ変更が必要なら実装せず報告する。
 
 ## 技術スタック
 - 純粋なHTML/CSS/JavaScript（フレームワークなし）
+- Steam製品版は既存Webコードを薄いWindows/Electronラッパーで梱包する（全面移植禁止）
 - Google Fonts（Noto Sans JP, Bebas Neue）
 - Google Analytics（G-JEPGS2HPDE）
 - Firebase Firestore（WC統計機能用）
