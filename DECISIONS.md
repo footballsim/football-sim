@@ -5,6 +5,13 @@
 
 ---
 
+## 2026-08-14 — PUB-01: Store Candidate完成までkantoku-labを再ロック
+
+- **ユーザー決定**: Steamストア撮影候補が架空表示で完成するまで、`kantoku-lab.pages.dev`をBasic認証で再ロックする。実名を使うバランス検証はローカルへ寄せる。
+- **実装**: `lab/_worker.js`をfail-closedへ戻した（`7739dad`）。Cloudflare Pages暗号化secretの`LAB_PASS`が無ければ503、無認証・誤認証は401＋`WWW-Authenticate`＋`Cache-Control: no-store`、一致時だけ`env.ASSETS.fetch()`へ通す。秘密値はrepo・CLI引数・ログへ出さない。
+- **品質証拠**: 専用6件＋独立異常系14件、既存11スイート581件、構文、docs guardがPASS。cleanな`integ/lab`からbuildし、`dist-lab/_worker.js`のバイト一致と未追跡draft非混入を確認後、正規`npm run deploy:lab`で本番反映。production aliasのroot／JS／開発ビューアが401であることを確認した。
+- **既知の代償**: iOSホーム画面でBasic資格情報を忘れる既知UXは許容する。Basicは一時措置であり、Store Candidate後の公開時は架空表示・FN-02・権利台帳をゲートにして解除を再判断する。
+
 ## 2026-08-14 — Steam正式日程と4枠の半自律開発体制を採用
 
 - **正式日程（ユーザー決定）**: **2026-09-30 Steam Coming Soon公開・ウィッシュリスト開始／2026-11-13 feature freeze／2026-11-30 製品build審査／2026-12-10 Windows版発売**。12/17は延期ではなく緊急予備日。旧「9月末Web v1.0、Steamは発売後」の計画を上書きする。

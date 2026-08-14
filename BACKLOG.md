@@ -27,7 +27,7 @@ Windows発売側は `WIN-01 → WIN-02/03 → WIN-04/05 → PLAY-01 → REL-02 �
 ### 8月14日〜9月30日 — Coming Soon
 
 - [x] **SCH-01 正本同期**: ROADMAP/SCOPE/BACKLOG/DECISIONS/PARALLEL_SESSIONS/AGENTS/CLAUDE/CODEX_HANDOFF/VISIONを新日程とGit実態へ同期。✅ `codex/steam-release-plan`。担当=Orchestrator。
-- [ ] **PUB-01 現在のkantoku-lab公開状態を権利方針と一致させる**: 2026-07-24にBasic認証が撤去済み。再ロック／架空表示を既定にする／現状容認のいずれかを人間決定。**決定まではCloudflareへ新規デプロイしない**。
+- [x] **PUB-01 kantoku-lab再ロック**: ユーザー決定によりBasic認証をfail-closedで復旧。✅ `7739dad`。`LAB_PASS`未設定=503、無/誤認証=401、正認証だけ配信。独立QA 20/20＋既存581件PASS。`integ/lab`から本番反映し、root／JS／開発ビューアの401を確認。
 - [ ] **STM-01 Steamworks Partner／Steam Direct登録**（ユーザー専用）: 法的名義、本人確認、税務、銀行、アプリ料。エージェントは入力案内とチェックリストまで。
 - [ ] **STM-02 商品定義**: 正式タイトル、発売元表示、短い訴求、ジャンル/タグ、公開する発売時期、価格決定の期限を確定。期限=8/21。
 - [ ] **IP-01 権利・AI台帳**: 画像、生成AI、音源、フォント、文章について出所・モデル/生成日・利用条件・採否・Steam申告対応を記録。実在ロゴ/似顔/透かし/禁止語も監査。期限=9/6。
