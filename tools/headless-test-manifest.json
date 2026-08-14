@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "discovery": {
+    "roots": ["tools"],
+    "suffixes": ["-test.js", "-test.mjs"],
+    "excludePrefixes": ["tools/art/", "tools/proto/"]
+  },
+  "includes": [
+    {
+      "file": "tools/events-reproduce.js",
+      "args": [],
+      "reason": "Event列が試合結果を欠落なく再現する不変条件テスト"
+    },
+    {
+      "file": "tools/match-driver.js",
+      "args": ["12345"],
+      "reason": "createMatchの逐次実行・介入・seedガードの決定論テスト"
+    },
+    {
+      "file": "tools/seed-repro.js",
+      "args": ["12345"],
+      "reason": "本番playMatch経路のseed完全再現テスト"
+    }
+  ],
+  "excludedPrograms": [
+    {
+      "files": ["tools/regression-harness.js"],
+      "reason": "未シードの統計ゲート。エンジン・バランス変更時は npm run regression:full で別実行"
+    },
+    {
+      "files": ["tools/aging-careers.js", "tools/aging-neutrality.js", "tools/mtg1-video-effect-probe.js"],
+      "reason": "長時間soak・benchmark・probeであり、決定論的な常時テストではない"
+    },
+    {
+      "files": ["tools/docs-guard.js", "tools/deploy-guard.js"],
+      "reason": "テストではなくソース／デプロイの個別ゲート。check:docsはrelease:sourceで別実行"
+    },
+    {
+      "files": ["build.js", "tools/make-lab-html.js", "tools/art/", "tools/proto/"],
+      "reason": "build・asset生成・実験・ブラウザ確認をheadless単体テストへ混ぜない"
+    }
+  ],
+  "timeoutMs": 120000
+}
