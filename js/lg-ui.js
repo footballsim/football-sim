@@ -66,10 +66,16 @@
 
   /** [data-labart] の canvas を LabArt で塗る。実画像が無くても必ず絵になる。
    * サイズ測定と再試行は LabArt.fitLater に任せる（挿入直後の 0px を踏まないため）。 */
+  var _artPreload = null;
   LgUI.paintArt = function (root) {
     if (!root || typeof LabArt === 'undefined' || !LabArt.fitLater) return;
-    var list = root.querySelectorAll('canvas[data-labart]');
-    Array.prototype.forEach.call(list, function (cv) { LabArt.fitLater(cv); });
+    function paint() {
+      var list = root.querySelectorAll('canvas[data-labart]');
+      Array.prototype.forEach.call(list, function (cv) { LabArt.fitLater(cv); });
+    }
+    paint();
+    if (!_artPreload && LabArt.preload) _artPreload = LabArt.preload(['boardroom']);
+    if (_artPreload) _artPreload.then(paint);
   };
 
   /* 画面サイズが変わったら背景アートを測り直して塗り直す（横持ち⇄縦持ち対策）。 */
