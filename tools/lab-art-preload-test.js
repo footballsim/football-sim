@@ -48,7 +48,7 @@ async function main() {
   context.window.LgUI.paintArt(root);
   await Promise.resolve();
   if (preloadCalls !== 1) throw new Error('初回preloadは1回であるべき: ' + preloadCalls);
-  if (JSON.stringify(preloadKeys) !== JSON.stringify(['boardroom'])) {
+  if (JSON.stringify(preloadKeys) !== JSON.stringify(['boardroom', 'office_bg'])) {
     throw new Error('配置済み画像だけをpreloadするべき: ' + JSON.stringify(preloadKeys));
   }
   if (paintCalls !== 4) throw new Error('fallback＋load後の2回描画が必要: ' + paintCalls);

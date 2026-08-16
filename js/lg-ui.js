@@ -74,7 +74,7 @@
       Array.prototype.forEach.call(list, function (cv) { LabArt.fitLater(cv); });
     }
     paint();
-    if (!_artPreload && LabArt.preload) _artPreload = LabArt.preload(['boardroom']);
+    if (!_artPreload && LabArt.preload) _artPreload = LabArt.preload(['boardroom', 'office_bg']);
     if (_artPreload) _artPreload.then(paint);
   };
 
