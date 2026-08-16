@@ -26,9 +26,8 @@
  *   NAMES.toggle()（デバッグ用・localStorage に保存してリロード）
  *   既定は **実名（OFF）**＝開発中のバランス調整は実データのまま。
  *
- * ⚠️ この層が持つ架空名は **FN-00 の検証用プレースホルダ**。
- *    言語圏に合った本番の生成（FN-01・9月中旬）で NAMES.registerNames() から
- *    差し替える。生成器を置き換えても内部IDは変わらないのでセーブは無傷。
+ * FN-01で、リーグ8クラブには公開用の固有名・色・抽象crestと地域別の架空人名を実装済み。
+ * リーグ外のチームは汎用生成をフォールバックとして維持する。どちらも内部IDは変えない。
  * ========================================================================= */
 (function (global) {
   'use strict';
@@ -39,11 +38,12 @@
    * 逆引きを持つ理由: 選手オブジェクトは各所で clone される（simulate.js の allPlayers・
    * league.js の overlay squad 等）ため、隠しフィールドを生やす方式だと clone で落ちる。
    * 名前そのものから引ければ clone でも確実に内部IDへ戻れる。 */
-  var REAL = { players: {}, clubs: {} };
+  var REAL = { players: {}, clubs: {}, teamPlayers: {} };
   var FICT = { players: {}, clubs: {} };
   var REV = { players: {}, clubs: {} };
   var PLAYER_IDS = [];
   var CLUB_IDS = [];
+  var PLAYER_CLUB = {};
   var captured = false;
   var applied = false;
 
@@ -58,7 +58,7 @@
   }
   function _pick(arr, h) { return arr[(h >>> 0) % arr.length]; }   // ★ XOR は符号付きになるので必ず >>>0
 
-  /* ── プレースホルダ生成器（FN-01 で差し替える） ─────────────────────────
+  /* ── リーグ外チーム用の汎用生成器 ──────────────────────────────────────
    * 日英で同じ音になる CV 音節表。ja=カタカナ / en=ローマ字。 */
   var SYL = [
     { ja: 'カ', en: 'ka' }, { ja: 'キ', en: 'ki' }, { ja: 'ク', en: 'ku' }, { ja: 'ケ', en: 'ke' }, { ja: 'コ', en: 'ko' },
@@ -83,6 +83,56 @@
     { ja: 'レアル', en: 'Real' }, { ja: 'スポルティング', en: 'Sporting' }
   ];
 
+  /* FN-01: リーグ8クラブの公開用アイデンティティ。
+   * TEAM_DATA key はセーブ/対戦の内部IDなので変えず、表示用メタデータだけを差し替える。 */
+  var FICTION_CLUBS = {
+    england2026:     { name: 'ノースブリッジ・ローヴァーズ', en_name: 'Northbridge Rovers', team_color: '#5B2C83', flag: '◆' },
+    netherlands2026: { name: 'ハーフェンスタットFC',          en_name: 'Havenstad FC',         team_color: '#0F766E', flag: '◈' },
+    spain2026:       { name: 'バルドーロCF',                  en_name: 'Valdoro CF',           team_color: '#D97706', flag: '▲' },
+    france2026:      { name: 'モンクレール・ユニオン',        en_name: 'Montclair Union',      team_color: '#1D4ED8', flag: '✦' },
+    argentina2026:   { name: 'プエルト・アスール・アトレティコ', en_name: 'Puerto Azul Atletico', team_color: '#0E7490', flag: '◉' },
+    italy2026:       { name: 'バルドンブラ・カルチョ',        en_name: 'Valdombra Calcio',     team_color: '#991B1B', flag: '⬟' },
+    brazil2026:      { name: 'セーハ・ヴェルデEC',            en_name: 'Serra Verde EC',       team_color: '#15803D', flag: '❖' },
+    belgium2026:     { name: 'リヴモンSC',                    en_name: 'Rivemont SC',          team_color: '#334155', flag: '⬢' }
+  };
+
+  /* リーグで使う8地域の架空人名プール。実在選手の綴りを転用せず、地域ごとの
+   * 音と姓の構造だけを参照した創作名を組み合わせる。各配列要素=[ja,en]。 */
+  var FICTION_NAME_POOLS = {
+    england2026: {
+      given: [['エイデン','Aiden'],['カラム','Callum'],['エリス','Ellis'],['フィンリー','Finley'],['ジュード','Jude'],['マイルズ','Miles'],['ローワン','Rowan'],['テオ','Theo']],
+      family: [['アシュコム','Ashcombe'],['ベルグレイヴ','Bellgrave'],['クロウミア','Crowmere'],['ダンリー','Dunleigh'],['エヴァーコット','Evercott'],['フェンウィック','Fenwicke'],['グレイフォード','Grayford'],['ハートウェル','Hartwell']]
+    },
+    netherlands2026: {
+      given: [['ブラム','Bram'],['ダーン','Daan'],['イェルーン','Jeroen'],['コーエン','Koen'],['ラース','Lars'],['メース','Mees'],['ニーク','Niek'],['セム','Sem']],
+      family: [['ファン・アールデン','van Aerden'],['デ・クレルスト','de Klerst'],['ボスメーレン','Bosmeeren'],['ダールフェイク','Daalwijk'],['ヘルデリンク','Gelderink'],['ホーフェレン','Hoeveren'],['メールダム','Meerdam'],['フェルハウト','Verhout']]
+    },
+    spain2026: {
+      given: [['アドリアン','Adrian'],['ブルーノ','Bruno'],['ダリオ','Dario'],['イケル','Iker'],['ハビ','Javi'],['マルコス','Marcos'],['ニコ','Nico'],['ラウール','Raul']],
+      family: [['アルバレナ','Alvarena'],['センドラレス','Cendrales'],['ドルバード','Dorvado'],['エステロン','Estelon'],['フェランサ','Ferranza'],['ガルベラ','Galvera'],['ルセロス','Luceros'],['バルデサ','Valdesa']]
+    },
+    france2026: {
+      given: [['アドリアン','Adrien'],['バスティアン','Bastien'],['クレマン','Clement'],['エリアス','Elias'],['ジュリアン','Julien'],['ロイク','Loic'],['マティス','Mathis'],['レミ','Remy']],
+      family: [['アルヴェル','Arvelle'],['ベルクール','Belcourt'],['シャルニエ','Charnier'],['デルモン','Delmont'],['エヴラール','Evrardel'],['フォレストン','Foreston'],['ラクロワン','Lacroine'],['モンヴェル','Montvert']]
+    },
+    argentina2026: {
+      given: [['アグスティン','Agustin'],['バウティスタ','Bautista'],['ファクンド','Facundo'],['ガエル','Gael'],['ホアキン','Joaquin'],['マテオ','Mateo'],['ナウエル','Nahuel'],['ティアゴ','Tiago']],
+      family: [['アルカサール','Alcazarro'],['ベルモンテス','Belmontes'],['コルベラ','Corvera'],['デルソラル','Del Solar'],['エスピナル','Espinaldo'],['フェルベラ','Fervera'],['リオベラ','Riovera'],['サルディアス','Saldias']]
+    },
+    italy2026: {
+      given: [['アレッシオ','Alessio'],['ダヴィデ','Davide'],['エリア','Elia'],['ガブリエレ','Gabriele'],['ロレンツォ','Lorenzo'],['マッテオ','Matteo'],['ニコロ','Nicolo'],['トンマーゾ','Tommaso']],
+      family: [['ベッラフォルテ','Bellaforte'],['カザルヴィ','Casalvi'],['ドレッティ','Doretti'],['フェランツィオ','Feranzio'],['ガルディエリ','Galdieri'],['ルチェッラ','Lucerra'],['モンタヴィーニ','Montavini'],['ヴァレッシ','Valessi']]
+    },
+    brazil2026: {
+      given: [['アンドレ','Andre'],['カイオ','Caio'],['ダニーロ','Danilo'],['エンゾ','Enzo'],['イーゴル','Igor'],['ルアン','Luan'],['マテウス','Matheus'],['ヴィトル','Vitor']],
+      family: [['アルヴェイロ','Alveiro'],['カステローザ','Castelosa'],['ドウラヴァス','Douravas'],['フェレイラウ','Ferreirao'],['ルスカルド','Luzcardo'],['モンテヴァウ','Monteval'],['リベイラル','Ribeiral'],['セラヴィオ','Serravio']]
+    },
+    belgium2026: {
+      given: [['アルノー','Arnaud'],['バス','Bas'],['セドリック','Cedric'],['ドリース','Dries'],['エミール','Emiel'],['ロイク','Loic'],['マティアス','Mathias'],['ティボー','Thibaut']],
+      family: [['ファン・アルデン','Van Alden'],['デ・ブレーク','De Bleeck'],['クラースモン','Claesmont'],['デルヴィーヌ','Delvigne'],['ヘルマンデル','Germandel'],['メルテヴェル','Mertvelde'],['ヴァンデルーン','Vandeloon'],['ヴェルカン','Verkanne']]
+    }
+  };
+
   function _cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 
   /* 音節を n 個つないだ語を作る。salt で系列をずらす（姓と名で別系列にするため） */
@@ -102,6 +152,20 @@
 
   function _genPlayerName(id, seq) {
     var salt = 'fnplayer' + (seq ? '#' + seq : '');
+    var pool = FICTION_NAME_POOLS[PLAYER_CLUB[id]];
+    if (pool) {
+      /* seq は全組合せを順番に探索する。一意化時に別hashへ飛ばすだけだと、
+       * 同じ数組を循環して50回で衝突が残ることがある。 */
+      var combo = (_hash('locale-name|' + id) + (seq || 0)) % (pool.family.length * pool.given.length);
+      var pf = pool.family[combo % pool.family.length];
+      var pg = pool.given[Math.floor(combo / pool.family.length) % pool.given.length];
+      return {
+        name: pf[0],
+        en_name: pf[1],
+        long_name: pg[0] + '・' + pf[0],
+        en_long_name: pg[1] + ' ' + pf[1]
+      };
+    }
     var fam = _word(id, salt + '/family', 2 + (_hash(salt + id) % 2));   // 姓は2〜3音節
     var giv = _word(id, salt + '/given', 2);                             // 名は2音節
     return {
@@ -132,15 +196,18 @@
       if (!Object.prototype.hasOwnProperty.call(TD, key)) continue;
       var td = TD[key];
       if (!td) continue;
-      REAL.clubs[key] = { name: td.name, en_name: td.en_name };
+      REAL.clubs[key] = { name: td.name, en_name: td.en_name, team_color: td.team_color, flag: td.flag };
       CLUB_IDS.push(key);
       var ps = td.players || [];
+      REAL.teamPlayers[key] = [];
       for (var i = 0; i < ps.length; i++) {
         var p = ps[i];
-        if (!p) continue;
+        if (!p) { REAL.teamPlayers[key].push(null); continue; }
+        REAL.teamPlayers[key].push({ name: p.name, en_name: p.en_name });
         var id = p.long_name || p.name || '';
         if (!id || REAL.players[id]) continue;   // 同一IDは同一人物扱い（既存の _playerKey と同じ粒度）
         REAL.players[id] = { name: p.name, en_name: p.en_name, long_name: p.long_name };
+        PLAYER_CLUB[id] = key;
         PLAYER_IDS.push(id);
       }
     }
@@ -159,7 +226,7 @@
     }
     for (i = 0; i < CLUB_IDS.length; i++) {
       var cid = CLUB_IDS[i];
-      seq = 0; var c = _genClubName(cid, 0);
+      seq = 0; var c = FICTION_CLUBS[cid] || _genClubName(cid, 0);
       while (usedC[c.name] && seq < 50) { seq++; c = _genClubName(cid, seq); }
       usedC[c.name] = true;
       FICT.clubs[cid] = c;
@@ -214,14 +281,21 @@
       var td = TD[key];
       if (!td) continue;
       var cd = fiction ? FICT.clubs[key] : REAL.clubs[key];
-      if (cd) { td.name = cd.name; td.en_name = cd.en_name; }
+      if (cd) {
+        td.name = cd.name;
+        td.en_name = cd.en_name;
+        if (Object.prototype.hasOwnProperty.call(cd, 'team_color')) td.team_color = cd.team_color;
+        if (Object.prototype.hasOwnProperty.call(cd, 'flag')) td.flag = cd.flag;
+      }
       var ps = td.players || [];
       for (var i = 0; i < ps.length; i++) {
         var p = ps[i];
         if (!p) continue;
         /* 現在の表示名から内部IDへ戻す（片道にならないよう常に逆引き経由） */
         var id = playerId(p);
-        var src = fiction ? FICT.players[id] : REAL.players[id];
+        /* 実データには同じlong_nameを共有しつつ短縮名だけ異なる行がある。
+         * OFF復帰時はチーム内indexの原本を優先し、表示メタデータを完全に戻す。 */
+        var src = fiction ? FICT.players[id] : ((REAL.teamPlayers[key] && REAL.teamPlayers[key][i]) || REAL.players[id]);
         if (!src) continue;
         p.name = src.name;
         p.en_name = fiction ? (src.en_name || src.name) : src.en_name;
