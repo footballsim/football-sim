@@ -1311,8 +1311,10 @@ body.league-mode #screen-home.season-end-mode:not(.active) { display: none; }
 body.league-mode #screen-home.season-end-mode > #league-body {
   flex: 1 1 auto; min-height: 0; display: flex; width: 100%;
 }
-/* 最終話は全面の固定UI＝監督室の背景アートは伏せる（隙間からの覗き込み・プレースホルダ文字を消す） */
-#screen-home.season-end-mode .lg-office-backdrop { display: none; }
+/* 最終話・節進行は全面の固定UI＝監督室の背景アートは伏せる。
+ * season-end-mode は通常ハブ（.lg-sh）も固定フレーム目的で流用するため、
+ * 実際に全面ページ（.lg-se）が載る時だけ隠す。 */
+#screen-home.season-end-mode:has(> #league-body > .lg-se) .lg-office-backdrop { display: none; }
 
 .lg-se {
   /* 最終話ローカルの限定パレット（:root を触らず scoped に持つ） */
