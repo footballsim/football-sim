@@ -101,6 +101,7 @@ let leaked = [];
 LEAGUE_IDS.forEach(function (id) {
   const td = api.TEAM_DATA[id];
   const original = before[id];
+  const playerClub = api.NAMES._tables().PLAYER_CLUB;
   clubJa.push(td.name); clubEn.push(td.en_name); colors.push(td.team_color); crests.push(td.flag);
   check(id + ' のクラブ名が日英とも架空化', td.name !== original.name && td.en_name !== original.en_name);
   check(id + ' の色が架空化', td.team_color !== original.team_color && /^#[0-9A-F]{6}$/i.test(td.team_color));
@@ -108,11 +109,13 @@ LEAGUE_IDS.forEach(function (id) {
   let idsStable = true;
   let paramsStable = true;
   let shortNamesChanged = true;
+  let localeAssigned = true;
   td.players.forEach(function (p, index) {
     const prev = original.players[index];
     idsStable = idsStable && p.long_name === prev.long_name;
     paramsStable = paramsStable && JSON.stringify(p.params) === prev.params;
     shortNamesChanged = shortNamesChanged && p.name !== prev.name && p.en_name !== prev.en_name;
+    localeAssigned = localeAssigned && playerClub[p.long_name] === id;
     run.context.LANG = 'ja';
     const ja = api.NAMES.displayName(p.long_name, { full: true });
     run.context.LANG = 'en';
@@ -132,6 +135,7 @@ LEAGUE_IDS.forEach(function (id) {
   check(id + ' の全long_name不変', idsStable);
   check(id + ' の全params不変', paramsStable);
   check(id + ' の全短縮名が架空化', shortNamesChanged);
+  check(id + ' の全選手が該当地域プールへ割当', localeAssigned);
   check(id + ' default_system不変', td.default_system === original.default_system);
 });
 
@@ -148,6 +152,8 @@ function duplicates(values) {
 check('全リーグ選手の日本語フルネームが一意', new Set(fullJa).size === fullJa.length, duplicates(fullJa).slice(0, 5).join(', '));
 check('全リーグ選手の英語フルネームが一意', new Set(fullEn).size === fullEn.length, duplicates(fullEn).slice(0, 5).join(', '));
 check('実名・禁止語の再利用なし', leaked.length === 0, leaked.slice(0, 5).join(', '));
+const publicText = clubJa.concat(clubEn, fullJa, fullEn).join('\n');
+check('auditTextでも実名トークン残留なし', api.NAMES.auditText(publicText).length === 0, api.NAMES.auditText(publicText).slice(0, 5).join(', '));
 
 api.NAMES.setFiction(false, { persist: false, reload: false });
 const afterOff = snapshot(api);
@@ -173,5 +179,9 @@ LEAGUE_IDS.some(function (id) {
 check('OFFでクラブ・選手表示メタデータが完全復帰', JSON.stringify(afterOff) === JSON.stringify(before), restoreDetail);
 api.NAMES.setFiction(true, { persist: false, reload: false });
 check('再ONでも同じ架空名・色・crestになる', JSON.stringify(snapshot(api)) === JSON.stringify(fictionOne));
+const englandMeta = snapshot(api).england2026;
+api.NAMES.registerNames({ clubs: { england2026: { name: 'テストクラブ', en_name: 'Test Club' } } });
+check('部分registerNamesでも架空色を保持', api.TEAM_DATA.england2026.team_color === englandMeta.team_color);
+check('部分registerNamesでも抽象crestを保持', api.TEAM_DATA.england2026.flag === englandMeta.flag);
 
 console.log('\n✅ FN-01 ' + passed + '/' + passed + ' PASS');

@@ -86,7 +86,7 @@
   /* FN-01: リーグ8クラブの公開用アイデンティティ。
    * TEAM_DATA key はセーブ/対戦の内部IDなので変えず、表示用メタデータだけを差し替える。 */
   var FICTION_CLUBS = {
-    england2026:     { name: 'ノースブリッジ・ローヴァーズ', en_name: 'Northbridge Rovers', team_color: '#5B2C83', flag: '◆' },
+    england2026:     { name: 'ブラッケンミア・ローヴァーズ', en_name: 'Brackenmere Rovers',  team_color: '#5B2C83', flag: '◆' },
     netherlands2026: { name: 'ハーフェンスタットFC',          en_name: 'Havenstad FC',         team_color: '#0F766E', flag: '◈' },
     spain2026:       { name: 'バルドーロCF',                  en_name: 'Valdoro CF',           team_color: '#D97706', flag: '▲' },
     france2026:      { name: 'モンクレール・ユニオン',        en_name: 'Montclair Union',      team_color: '#1D4ED8', flag: '✦' },
@@ -108,20 +108,20 @@
       family: [['ファン・アールデン','van Aerden'],['デ・クレルスト','de Klerst'],['ボスメーレン','Bosmeeren'],['ダールフェイク','Daalwijk'],['ヘルデリンク','Gelderink'],['ホーフェレン','Hoeveren'],['メールダム','Meerdam'],['フェルハウト','Verhout']]
     },
     spain2026: {
-      given: [['アドリアン','Adrian'],['ブルーノ','Bruno'],['ダリオ','Dario'],['イケル','Iker'],['ハビ','Javi'],['マルコス','Marcos'],['ニコ','Nico'],['ラウール','Raul']],
+      given: [['アドリアン','Adrian'],['ブリアノ','Briano'],['タデオ','Tadeo'],['イケル','Iker'],['ハビ','Javi'],['マルコス','Marcos'],['ニコ','Nico'],['ラウール','Raul']],
       family: [['アルバレナ','Alvarena'],['センドラレス','Cendrales'],['ドルバード','Dorvado'],['エステロン','Estelon'],['フェランサ','Ferranza'],['ガルベラ','Galvera'],['ルセロス','Luceros'],['バルデサ','Valdesa']]
     },
     france2026: {
-      given: [['アドリアン','Adrien'],['バスティアン','Bastien'],['クレマン','Clement'],['エリアス','Elias'],['ジュリアン','Julien'],['ロイク','Loic'],['マティス','Mathis'],['レミ','Remy']],
+      given: [['アドリアン','Adrien'],['バスティアン','Bastien'],['クレマン','Clement'],['ノエム','Noem'],['ジュリアン','Julien'],['ロイク','Loic'],['マティス','Mathis'],['レミ','Remy']],
       family: [['アルヴェル','Arvelle'],['ベルクール','Belcourt'],['シャルニエ','Charnier'],['デルモン','Delmont'],['エヴラール','Evrardel'],['フォレストン','Foreston'],['ラクロワン','Lacroine'],['モンヴェル','Montvert']]
     },
     argentina2026: {
       given: [['アグスティン','Agustin'],['バウティスタ','Bautista'],['ファクンド','Facundo'],['ガエル','Gael'],['ホアキン','Joaquin'],['マテオ','Mateo'],['ナウエル','Nahuel'],['ティアゴ','Tiago']],
-      family: [['アルカサール','Alcazarro'],['ベルモンテス','Belmontes'],['コルベラ','Corvera'],['デルソラル','Del Solar'],['エスピナル','Espinaldo'],['フェルベラ','Fervera'],['リオベラ','Riovera'],['サルディアス','Saldias']]
+      family: [['アルカサール','Alcazarro'],['ベルバロス','Belvaros'],['コルベラ','Corvera'],['デルソラル','Del Solar'],['エスピナル','Espinaldo'],['フェルベラ','Fervera'],['リオベラ','Riovera'],['サルディアス','Saldias']]
     },
     italy2026: {
-      given: [['アレッシオ','Alessio'],['ダヴィデ','Davide'],['エリア','Elia'],['ガブリエレ','Gabriele'],['ロレンツォ','Lorenzo'],['マッテオ','Matteo'],['ニコロ','Nicolo'],['トンマーゾ','Tommaso']],
-      family: [['ベッラフォルテ','Bellaforte'],['カザルヴィ','Casalvi'],['ドレッティ','Doretti'],['フェランツィオ','Feranzio'],['ガルディエリ','Galdieri'],['ルチェッラ','Lucerra'],['モンタヴィーニ','Montavini'],['ヴァレッシ','Valessi']]
+      given: [['アレッシオ','Alessio'],['ダヴィデ','Davide'],['エネア','Enea'],['ネリオ','Nerio'],['ロレンツォ','Lorenzo'],['マッテオ','Matteo'],['ニコロ','Nicolo'],['トンマーゾ','Tommaso']],
+      family: [['ベッラフォルテ','Bellaforte'],['カザルヴィ','Casalvi'],['ルネッティ','Lunetti'],['フェランツィオ','Feranzio'],['ガルディエリ','Galdieri'],['ルチェッラ','Lucerra'],['モンタヴィーニ','Montavini'],['ヴァレッシ','Valessi']]
     },
     brazil2026: {
       given: [['アンドレ','Andre'],['カイオ','Caio'],['ダニーロ','Danilo'],['エンゾ','Enzo'],['イーゴル','Igor'],['ルアン','Luan'],['マテウス','Matheus'],['ヴィトル','Vitor']],
@@ -205,9 +205,11 @@
         if (!p) { REAL.teamPlayers[key].push(null); continue; }
         REAL.teamPlayers[key].push({ name: p.name, en_name: p.en_name });
         var id = p.long_name || p.name || '';
-        if (!id || REAL.players[id]) continue;   // 同一IDは同一人物扱い（既存の _playerKey と同じ粒度）
+        if (!id) continue;
+        /* 過去年版と現行リーグ版に同じ内部IDがいる場合、公開対象の現行8クラブを優先する。 */
+        if (FICTION_NAME_POOLS[key] || !PLAYER_CLUB[id]) PLAYER_CLUB[id] = key;
+        if (REAL.players[id]) continue;   // 同一IDは同一人物扱い（既存の _playerKey と同じ粒度）
         REAL.players[id] = { name: p.name, en_name: p.en_name, long_name: p.long_name };
-        PLAYER_CLUB[id] = key;
         PLAYER_IDS.push(id);
       }
     }
@@ -438,7 +440,16 @@
       if (REAL.players[pid]) FICT.players[pid] = map.players[pid];
     }
     if (map && map.clubs) for (var cid in map.clubs) {
-      if (REAL.clubs[cid]) FICT.clubs[cid] = map.clubs[cid];
+      if (REAL.clubs[cid]) {
+        var prev = FICT.clubs[cid] || {};
+        var next = map.clubs[cid] || {};
+        FICT.clubs[cid] = {
+          name: next.name || prev.name,
+          en_name: next.en_name || prev.en_name,
+          team_color: Object.prototype.hasOwnProperty.call(next, 'team_color') ? next.team_color : prev.team_color,
+          flag: Object.prototype.hasOwnProperty.call(next, 'flag') ? next.flag : prev.flag
+        };
+      }
     }
     _buildReverse();
     if (was) { _write(true); applied = true; }
@@ -459,7 +470,7 @@
     registerNames: registerNames,
     realNames: realNames,
     auditText: auditText,
-    _tables: function () { return { REAL: REAL, FICT: FICT }; }
+    _tables: function () { return { REAL: REAL, FICT: FICT, PLAYER_CLUB: PLAYER_CLUB }; }
   };
   global.NAMES = NAMES;
 
