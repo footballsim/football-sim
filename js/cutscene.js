@@ -2269,7 +2269,8 @@ function _renderCinematicShotScene(sc) {
 //   entry は既存呼び出し互換のため受け取る。
 // ============================================================
 function _renderShotScene(sc, entry) {
-  return (_csShotVarHash(sc) & 1) ? _renderCinematicShotScene(sc) : _renderAdoptedShotScene(sc);
+  var canRecolor = typeof MangaRecolor !== 'undefined' && MangaRecolor.render;
+  return (canRecolor && (_csShotVarHash(sc) & 1)) ? _renderCinematicShotScene(sc) : _renderAdoptedShotScene(sc);
 }
 
 // 旧シュート演出（演出ラボでの比較確認専用・本編からは呼ばない）。
