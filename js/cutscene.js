@@ -2182,13 +2182,94 @@ function _renderAdoptedShotScene(sc) {
   return canvas;
 }
 
+// 追加シュート4拍（GFX-04）。既存の採用4コマは保護したまま、決定論的に交互表示する。
+// 分離色ベースを MangaRecolor に通すため、攻撃側のキット色と選手の肌色へ追従する。
+var _CINEMATIC_SHOT_FRAMES = [
+  'img/cutscenes/manga_shot_cinematic/frame_01.png?v=1',
+  'img/cutscenes/manga_shot_cinematic/frame_02.png?v=1',
+  'img/cutscenes/manga_shot_cinematic/frame_03.png?v=1',
+  'img/cutscenes/manga_shot_cinematic/frame_04.png?v=1'
+];
+
+function _renderCinematicShotScene(sc) {
+  if (typeof document === 'undefined') return null;
+  var W = 480, H = 216, ground = 192, P = 620;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var imgs = _CINEMATIC_SHOT_FRAMES.map(function (src) { return _loadCutsceneImg(src); });
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var shooterP = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  var feat = _mangaFeat(shooterP ? (shooterP.long_name || shooterP.name || '') : '');
+  var cols = _mangaColors(sc.offence, feat.skin);
+  var recolor = typeof MangaRecolor !== 'undefined' && MangaRecolor.render;
+  var nativeRight = true;
+  var flipH = nativeRight !== _csAttackRight(sc);
+  var T0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  var started = false;
+
+  function drawFigure(idx, kick) {
+    var img = imgs[idx];
+    if (!img || !img.complete || !img.naturalWidth) return null;
+    var spr = recolor ? MangaRecolor.render('cinematic-shot-' + idx, img, cols) : img;
+    var dh = 166, dw = dh * ((spr.width || img.naturalWidth) / (spr.height || img.naturalHeight));
+    var cx = 205, dx = cx - dw / 2, dy = ground - dh;
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    var punch = kick ? 1.045 : 1;
+    ctx.translate(cx, H * 0.57); ctx.scale(punch, punch); ctx.translate(-cx, -H * 0.57);
+    ctx.drawImage(spr, dx, dy, dw, dh);
+    ctx.restore();
+    return { x: dx, y: dy, w: dw, h: dh };
+  }
+
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var p = Math.min(1, (now - T0) / P);
+    ctx.clearRect(0, 0, W, H);
+
+    var cam = _csCam.mk({ fx: 300, fy: 168 });
+    var camOn = (typeof CS_CAM_ENABLED === 'undefined') || CS_CAM_ENABLED;
+    if (camOn) _csCam.shake(cam, (p - 0.47) * P, 170, 2.7);
+    _csCam.begin(ctx, cam, camOn ? 0.34 : 1);
+    ctx.imageSmoothingEnabled = false;
+    _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+    _csCam.end(ctx);
+
+    var idx = p < 0.22 ? 0 : p < 0.43 ? 1 : p < 0.68 ? 2 : 3;
+    ctx.save();
+    if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+    _csCam.begin(ctx, cam, camOn ? 1 : 1);
+    var box = drawFigure(idx, idx === 2);
+    if (p >= 0.43 && box) {
+      var u = Math.max(0, Math.min(1, (p - 0.43) / 0.32));
+      var contactX = box.x + box.w * 0.97, contactY = box.y + box.h * 0.72;
+      var bx = contactX + 330 * u, by = contactY - 20 * u;
+      if (u < 0.94) _lpBall(ctx, bx, by, 10, u * 34);
+    }
+    _csCam.end(ctx);
+    ctx.restore();
+
+    var flash = 1 - Math.min(1, Math.abs(p - 0.47) / 0.045);
+    if (flash > 0) {
+      ctx.fillStyle = 'rgba(255,255,255,' + (flash * 0.38).toFixed(3) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return canvas;
+}
+
 // ============================================================
 // 通常シュートの本編入口。
-//   旧「対決割り / 2拍・顔カットイン」のローテーションは廃止し、
-//   合格済みの採用4コマへ一本化する。entry は既存呼び出し互換のため受け取る。
+//   保護対象の採用4コマと、追加したシネマチック4拍を決定論で交互表示する。
+//   entry は既存呼び出し互換のため受け取る。
 // ============================================================
 function _renderShotScene(sc, entry) {
-  return _renderAdoptedShotScene(sc);
+  return (_csShotVarHash(sc) & 1) ? _renderCinematicShotScene(sc) : _renderAdoptedShotScene(sc);
 }
 
 // 旧シュート演出（演出ラボでの比較確認専用・本編からは呼ばない）。
