@@ -16,7 +16,7 @@
   var LabArt = {};
 
   // ★ 画像を差し替えたらここを上げる（キャッシュバスト）
-  LabArt.VER = '3';
+  LabArt.VER = '4';
 
   var DIR = 'img/lab/';
 
