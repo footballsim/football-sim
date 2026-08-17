@@ -5,7 +5,7 @@ football-sim をゲーム化（[GAME_PLAN.md](GAME_PLAN.md)）するための契
 
 > **2026-08-14 正式日程**: 9/30 Steam Coming Soon公開・ウィッシュリスト受付、11/13機能凍結、12/10 Windows版発売（12/17予備日）。日付は [ROADMAP.md](ROADMAP.md) が正本。
 
-> **2026-08-14 包括委任（ユーザー正式決定）**: 凍結済みスコープ内の通常開発は、タスク分解から独立QA、`game-main`統合、build、`game-main` push、Basic認証中の`kantoku-lab`反映までCodexへ包括委任する。都度の人間承認は不要。Steam提出・公開・発売、価格/支払い/契約/秘密情報、権利・AI申告の最終確定、baseline・save schema・内部ID・duel logic、スコープ/日程変更だけを例外ゲートとして停止する。詳細は [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md)。
+> **2026-08-14 包括委任（ユーザー正式決定）**: 凍結済みスコープ内の通常開発は、タスク分解から独立QA、`game-main`統合、build、`game-main` push、Basic認証中の`kantoku-lab`反映までCodexへ包括委任する。都度の人間承認は不要。Steam提出・公開・発売、価格/支払い/契約/秘密情報、権利・AI申告の最終確定、baseline・save schema・内部ID・duel logic、スコープ/日程変更、**試合パートの新規・差替え画像の採否**だけを例外ゲートとして停止する。詳細は [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md)。
 > gitの書込操作はworkspace外の固定gateway `~/.codex/bin/football-sim-delegated-git.mjs`経由とし、gatewayと`.codex/rules/football-sim.rules`の変更自体は例外ゲートとする。
 
 ## 🔀 プロジェクト分離（2026-08-13 ユーザー決定）— **シミュレーターとゲームは別プロジェクト**
@@ -60,6 +60,7 @@ football-sim をゲーム化（[GAME_PLAN.md](GAME_PLAN.md)）するための契
    - 高さ制約のある面に `overflow: hidden` を使わない（下端が到達不能になる）。
    - grid/flex の中央寄せは **`safe center`**（素の `center` は溢れた先頭がスクロール範囲外に出る）。
    - 確認は `dist-lab/device-preview.html`（PCから端末切替＋キャッシュ無視リロード）。
+11. **試合パートのグラフィックは、1シーンごとにユーザー目視ゲートを通す**（2026-08-17ユーザー指示）。Writerは生成・仮配線・内部QA・Reviewerまで進めてよいが、採否確認前に`game-main`へ統合、build/push/deploy、次シーンの画像生成へ進まない。Oは最終候補画像と実機プレビュー、QA所見を提示し、明示的な採用回答を待つ。
 
 ---
 
@@ -83,7 +84,7 @@ football-sim をゲーム化（[GAME_PLAN.md](GAME_PLAN.md)）するための契
 3. **Implement** — 担当エージェントが root の `js/` のみ編集。
 4. **Validate** — QA が下記ゲートを実行。失敗なら Implement に差し戻し（自動反復、上限3回で人間へエスカレーション）。
 5. **Review** — Reviewer が本ファイル＋CLAUDE.md 準拠を確認。
-6. **Standing Delegation Gate** — Oがスコープ内・停止条件なし・QA/Review緑・担当外差分なしを確認する。条件を満たせば人間確認を挟まず`game-main`へ統合する。
+6. **Standing Delegation Gate** — Oがスコープ内・停止条件なし・QA/Review緑・担当外差分なしを確認する。条件を満たせば人間確認を挟まず`game-main`へ統合する。ただし試合パート画像は、候補提示後のユーザー採用回答も必須とする。
 7. **Ship** — cleanな統合worktreeでfull gate → 必要時build → `game-main` push → Basic認証中の`kantoku-lab`へ正規経路で反映する。例外ゲート該当時だけ停止する。
 8. **Log** — [DECISIONS.md](DECISIONS.md) にコミット・QA・反映証拠を追記し、BACKLOGを更新してから次スプリントへ進む。
 
