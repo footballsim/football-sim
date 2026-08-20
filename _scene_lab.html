@@ -370,7 +370,7 @@ var _wideFig=1.0;
 function setWideFig(v){_wideFig=parseFloat(v);document.getElementById('wfigv').textContent='×'+_wideFig.toFixed(1);run('wide');}
 function err(m){document.getElementById('err').textContent=m||'';}
 function run(kind,retry){
-  cur=kind; err('');
+  if(!_putTarget)cur=kind; err('');
   document.querySelectorAll('button[data-k]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-k')===kind);});
   try{
     var a=mk(atk.value),b=mk(def.value);

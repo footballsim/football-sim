@@ -216,6 +216,36 @@ assert(cutscene.includes('ctx.translate(W / 2, H / 2); ctx.scale(sceneScale, sce
 assert(cutscene.includes('var flipH = false;'), 'lab cross6 must keep the approved native screen-right pose');
 assert(lab.includes('nativeのscreen-right固定'), 'lab must explain the fixed review direction');
 
+// Execute the real Lab run/replay functions. Gallery snapshots render through
+// run(kind), but must not replace the scene selected by the user.
+const labRunSource = section(lab, 'function run(kind,retry){', "if(typeof Portrait!=='undefined'");
+const labRuns = [], labPuts = [];
+const labTeam = {
+  players: Array.from({ length: 11 }, (_, i) => ({ name: `P${i}`, en_name: `Player ${i}` })),
+  lineup: Array.from({ length: 11 }, (_, i) => i)
+};
+const labHarness = {
+  atk: { value: 'attack' }, def: { value: 'defence' }, window: {},
+  mk() { return labTeam; }, err() {}, setTimeout() { throw new Error('unexpected Lab retry'); },
+  document: {
+    querySelectorAll() { return []; },
+    getElementById(id) { assert.strictEqual(id, 'ok'); return { checked: true }; }
+  },
+  _renderCross6LabScene() { labRuns.push('cross6'); return { kind: 'cross6' }; },
+  _renderSkillActivateScene() { labRuns.push('skill_captaincy'); return { kind: 'skill_captaincy' }; },
+  put(value) { labPuts.push(value.kind); }
+};
+vm.runInNewContext(`var cur='shotduel';var _putTarget=null;${labRunSource}\nthis.runLab=run;this.replayLab=replay;`, labHarness);
+labHarness.runLab('cross6');
+assert.strictEqual(labHarness.cur, 'cross6', 'direct cross6 selection did not become current');
+labHarness._putTarget = { snapshot: true };
+labHarness.runLab('skill_captaincy');
+assert.strictEqual(labHarness.cur, 'cross6', 'gallery snapshot replaced the current cross6 selection');
+labHarness._putTarget = null;
+labHarness.replayLab();
+assert.deepStrictEqual(labRuns, ['cross6', 'skill_captaincy', 'cross6'], 'replay did not return to cross6 after gallery snapshots');
+assert.deepStrictEqual(labPuts, labRuns, 'Lab run harness did not exercise the real render/put path');
+
 // Execute the real cross6 renderer with delayed Image objects. The animation
 // clock must not begin until every pose is decoded, and a broken/never-loaded
 // image must end in a visible, finite error state.
