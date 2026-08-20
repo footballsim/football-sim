@@ -2745,14 +2745,15 @@ function _renderCross6LabScene(sc) {
   // Lab review keeps the user-approved native screen-right pose. Directional
   // mirroring belongs to the later production-routing task, not this asset gate.
   var flipH = false;
-  var frameDur = [150, 120, 130, 150, 180, 320];
+  var frameDur = [95, 80, 80, 85, 100, 220];
   var leaveMs = frameDur[0] + frameDur[1] + frameDur[2] + frameDur[3] + frameDur[4];
   var totalMs = frameDur.reduce(function (sum, ms) { return sum + ms; }, 0);
-  // Each trimmed frame has a different width. Pin the measured hip joint and
-  // add only a 6px/frame forward drift, instead of centering each bounding box.
+  // Each trimmed frame has a different width. Pin the measured hip joint, then
+  // reproduce the reference approach: advance strongly into contact and ease
+  // the forward travel during the follow-through.
   var ph = 190, scale = ph / 336;
   var hipSrc = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];
-  var hipScreenX = [220, 226, 232, 238, 244, 250], hipScreenY = 106;
+  var hipScreenX = [182, 198, 218, 239, 253, 260], hipScreenY = 106;
   var rightBoot5 = [190, 304];
   var contactX = hipScreenX[4] + (rightBoot5[0] - hipSrc[4][0]) * scale;
   var contactY = hipScreenY + (rightBoot5[1] - hipSrc[4][1]) * scale;
@@ -2812,6 +2813,13 @@ function _renderCross6LabScene(sc) {
       if (elapsed < acc) { fi = k; break; }
       fi = frameDur.length - 1;
     }
+    var segmentStart = acc - frameDur[fi];
+    var travelT = fi < hipScreenX.length - 1
+      ? Math.max(0, Math.min(1, (elapsed - segmentStart) / frameDur[fi]))
+      : 0;
+    var currentHipX = fi < hipScreenX.length - 1
+      ? hipScreenX[fi] + (hipScreenX[fi + 1] - hipScreenX[fi]) * travelT
+      : hipScreenX[fi];
 
     ctx.clearRect(0, 0, W, H);
     ctx.imageSmoothingEnabled = false;
@@ -2825,7 +2833,7 @@ function _renderCross6LabScene(sc) {
       if (spr) {
         var dw = spr.width * scale, dh = spr.height * scale;
         var pix = _csPixelate(spr, key, dw, ph);
-        var dx = hipScreenX[fi] - hipSrc[fi][0] * scale;
+        var dx = currentHipX - hipSrc[fi][0] * scale;
         var dy = hipScreenY - hipSrc[fi][1] * scale;
         ctx.drawImage(pix, dx, dy, dw, dh);
       }
@@ -2850,7 +2858,7 @@ function _renderCross6LabScene(sc) {
     else canvas.dataset.cross6State = 'done';
   }
   requestAnimationFrame(frame);
-  // rightBoot5 maps to roughly (297,178); contact is derived from that anchor.
+  // rightBoot5 maps to roughly (306,178); contact is derived from that anchor.
   return _csCenterSubject(canvas, 0.50, false);
 }
 
