@@ -230,6 +230,7 @@ assert.strictEqual(
 );
 const labPutSource = section(lab, 'function put(c,target){', '/* ══ 一覧');
 const labPlaySource = section(lab, 'function playScene(k,nm){', 'function buildGallery');
+const labBuildSource = section(lab, 'function buildGallery(){', '// シューター絵');
 const labRunSource = section(lab, 'function run(kind,retry,target){', "if(typeof Portrait!=='undefined'");
 const labDetailSource = lab.match(/function setBgTone\(v\)\{[^\n]+\}/)[0];
 const labRuns = [], labTimers = [];
@@ -242,7 +243,19 @@ function labHost(id) {
   const host = {
     id, style: {}, children: [],
     appendChild(value) { this.children.push(value); },
-    querySelector(selector) { return selector === 'canvas' ? this.children[0] || null : null; }
+    querySelector(selector) {
+      if (selector === 'canvas') return this.children[0] || null;
+      if (selector === 'canvas.ph') {
+        if (!this.placeholder) {
+          this.placeholder = {
+            width: 0, height: 0,
+            getContext() { return { drawImage() {} }; }
+          };
+        }
+        return this.placeholder;
+      }
+      return null;
+    }
   };
   Object.defineProperty(host, 'innerHTML', {
     get() { return html; },
@@ -252,44 +265,51 @@ function labHost(id) {
 }
 const labStage = labHost('stage'), labSnapHost = labHost('snapHost');
 const labGallery = labHost('gallery'), labPlayer = labHost('player');
+const labGrid = labHost('galGrid'), labStatus = { textContent: '' };
 const labPlayTitle = { textContent: '' };
 let failNextSkill = false;
 const labHarness = {
   atk: { value: 'attack' }, def: { value: 'defence' }, window: { scrollTo() {} },
+  SCENE_CATALOG: [{ k: 'skill_captaincy', lay: 'C', nm: 'スキル発動' }],
   mk() { return labTeam; }, err() {},
   setTimeout(callback, delay) { labTimers.push({ callback, delay }); return labTimers.length; },
   document: {
     querySelectorAll() { return []; },
+    createElement(tag) { return labHost(tag); },
     getElementById(id) {
       const nodes = {
         ok: { checked: true }, stage: labStage, gallery: labGallery,
-        player: labPlayer, playTitle: labPlayTitle
+        player: labPlayer, playTitle: labPlayTitle, galGrid: labGrid,
+        snapHost: labSnapHost, galStatus: labStatus
       };
       assert(nodes[id], `unexpected Lab DOM id: ${id}`);
       return nodes[id];
     }
   },
   _renderCross6LabScene() {
-    const canvas = { kind: 'cross6', serial: labRuns.length };
+    const canvas = { kind: 'cross6', serial: labRuns.length, width: 480, height: 270 };
     labRuns.push(canvas);
     return canvas;
   },
   _renderSkillActivateScene() {
     if (failNextSkill) { failNextSkill = false; return null; }
-    const canvas = { kind: 'skill_captaincy', serial: labRuns.length };
+    const canvas = { kind: 'skill_captaincy', serial: labRuns.length, width: 480, height: 270 };
     labRuns.push(canvas);
     return canvas;
   }
 };
 vm.runInNewContext(
-  `var cur='shotduel';${labPutSource}\n${labPlaySource}\n${labDetailSource}\n${labRunSource}\n` +
-  'this.runLab=run;this.replayLab=replay;this.playSceneLab=playScene;this.setBgToneLab=setBgTone;',
+  `var cur='shotduel';${labPutSource}\n${labPlaySource}\n${labBuildSource}\n${labDetailSource}\n${labRunSource}\n` +
+  'this.runLab=run;this.replayLab=replay;this.playSceneLab=playScene;' +
+  'this.buildGalleryLab=buildGallery;this.setBgToneLab=setBgTone;',
   labHarness
 );
-labHarness.runLab('skill_captaincy', 0, labSnapHost);
+labHarness.buildGalleryLab();
 assert.strictEqual(labHarness.cur, 'shotduel', 'gallery snapshot replaced current before user selection');
 assert.strictEqual(labSnapHost.children[0].kind, 'skill_captaincy', 'snapshot did not render into snapHost');
 assert.strictEqual(labStage.children.length, 0, 'snapshot leaked into visible stage');
+assert.strictEqual(labTimers.length, 1, 'real buildGallery did not schedule its snapshot callback');
+assert.strictEqual(labTimers[0].delay, 850, 'real gallery snapshot delay changed');
 
 labHarness.playSceneLab('cross6', 'クロス6コマ');
 assert.strictEqual(labHarness.cur, 'cross6', 'user selection during gallery build did not become current');
@@ -299,11 +319,12 @@ assert.strictEqual(labPlayer.style.display, '', 'user selection did not show pla
 assert.strictEqual(labPlayTitle.textContent, 'クロス6コマ', 'user selection title changed');
 const selectedCanvas = labStage.children[0];
 
-labHarness.runLab('skill_captaincy', 0, labSnapHost);
-assert.strictEqual(labHarness.cur, 'cross6', 'continuing gallery snapshot replaced cross6 current');
-assert.strictEqual(labStage.children[0], selectedCanvas, 'continuing gallery snapshot replaced visible cross6 canvas');
-labSnapHost.innerHTML = ''; // gallery timer cleanup must only detach its own canvas
-assert.strictEqual(labStage.children[0], selectedCanvas, 'snapshot timer cleanup cleared visible stage');
+labTimers.shift().callback(); // execute the real buildGallery timer body
+assert.strictEqual(labSnapHost.children.length, 0, 'real gallery timer did not clear snapHost');
+assert.strictEqual(labStatus.textContent, '1件', 'real gallery timer did not complete its queue');
+assert.strictEqual(labHarness.cur, 'cross6', 'real gallery timer replaced current cross6');
+assert.strictEqual(labStage.children[0], selectedCanvas, 'real gallery timer cleared visible cross6 canvas');
+assert.strictEqual(labPlayTitle.textContent, 'クロス6コマ', 'real gallery timer changed visible title');
 
 labHarness.replayLab();
 assert.strictEqual(labHarness.cur, 'cross6', 'replay changed current scene');
@@ -326,6 +347,29 @@ labTimers.shift().callback();
 assert.strictEqual(labSnapHost.children[0].kind, 'skill_captaincy', 'deferred retry lost its snapshot target');
 assert.strictEqual(labStage.children[0], detailedCanvas, 'deferred retry replaced visible cross6');
 assert.strictEqual(labHarness.cur, 'cross6', 'deferred retry replaced current cross6');
+
+// Mutation check: the same oracle must reject a buildGallery callback that
+// clears #stage instead of its off-screen host. This proves the real callback
+// assertions above are sensitive to the original P1 regression.
+const mutantBuildSource = labBuildSource.replace(
+  "host.innerHTML='';        // ← DOMから外す＝各シーンのrAFが止まる",
+  "document.getElementById('stage').innerHTML=''; // MUTANT: wrong cleanup target"
+);
+assert.notStrictEqual(mutantBuildSource, labBuildSource, 'gallery clear-target mutant was not created');
+vm.runInNewContext(`${mutantBuildSource}\nthis.buildGalleryMutant=buildGallery;`, labHarness);
+labTimers.length = 0;
+labStage.innerHTML = '';
+labSnapHost.innerHTML = '';
+labHarness.buildGalleryMutant();
+assert.strictEqual(labTimers.length, 1, 'mutant buildGallery did not schedule its callback');
+labHarness.playSceneLab('cross6', 'クロス6コマ');
+const mutantSelectedCanvas = labStage.children[0];
+labTimers.shift().callback();
+const mutantPreservedVisibleSelection =
+  labStage.children[0] === mutantSelectedCanvas &&
+  labHarness.cur === 'cross6' &&
+  labPlayTitle.textContent === 'クロス6コマ';
+assert.strictEqual(mutantPreservedVisibleSelection, false, 'test oracle accepted a stage-clearing gallery mutant');
 
 // Execute the real cross6 renderer with delayed Image objects. The animation
 // clock must not begin until every pose is decoded, and a broken/never-loaded
