@@ -215,7 +215,7 @@ const expectedHipScreenX = [182, 198, 218, 239, 253, 260];
 const runtimeScale = 190 / 336;
 function makeCrossHarness() {
   let now = 0;
-  const raf = [], rendered = [], drawCalls = [], messages = [];
+  const raf = [], rendered = [], drawCalls = [], ballCalls = [], messages = [];
   const images = new Map(frames.map(rel => [rel, {
     src: rel, complete: false, naturalWidth: 0, naturalHeight: 336
   }]));
@@ -247,7 +247,8 @@ function makeCrossHarness() {
     _loadCutsceneImg(src) {
       return images.get(src) || { src, complete: true, naturalWidth: 480, naturalHeight: 216 };
     },
-    _lpBg() { return {}; }, _lpDrawBg() {}, _lpBall() {},
+    _lpBg() { return {}; }, _lpDrawBg() {},
+    _lpBall(_ctx, bx, by, radius, rotation) { ballCalls.push({ now, bx, by, radius, rotation }); },
     _mangaFeat() { return { skin: '#bd7245' }; },
     _mangaColors() {
       return { shirt: '#111', shorts: '#222', socks: '#333', accent: '#444', skin: '#555' };
@@ -262,7 +263,7 @@ function makeCrossHarness() {
     assert(raf.length, 'animation unexpectedly stopped');
     raf.shift()();
   }
-  return { canvas, images, messages, raf, rendered, drawCalls, step };
+  return { canvas, images, messages, raf, rendered, drawCalls, ballCalls, step };
 }
 
 const delayed = makeCrossHarness();
@@ -279,8 +280,8 @@ finalDelayedImage.complete = true; finalDelayedImage.naturalWidth = 225;
 delayed.step(40);
 assert.strictEqual(delayed.canvas.dataset.cross6State, 'playing', 'renderer did not start after all six images loaded');
 let guard = 0;
-while (delayed.raf.length && guard++ < 200) delayed.step(5);
-assert(guard < 200, 'cross6 animation did not stop');
+while (delayed.raf.length && guard++ < 700) delayed.step(1);
+assert(guard < 700, 'cross6 animation did not stop');
 const renderedOrder = delayed.rendered.filter((rel, i, all) => i === 0 || rel !== all[i - 1]);
 assert.deepStrictEqual(renderedOrder, frames, 'cold-loaded poses did not render f1 through f6 in order');
 assert.strictEqual(delayed.canvas.dataset.cross6State, 'done', 'one-shot did not finish');
@@ -295,6 +296,16 @@ const allHipX = delayed.drawCalls.map(call => {
 assert(Math.abs(allHipX[0] - 182) < 0.01 && Math.abs(allHipX.at(-1) - 260) < 0.01, 'real renderer travel endpoints changed');
 assert(allHipX.every((x, i) => i === 0 || x >= allHipX[i - 1]), 'real renderer must travel continuously screen-right');
 assert(allHipX.every((x, i) => i === 0 || x - allHipX[i - 1] <= 2), 'real renderer has a visible between-frame position jump');
+const ballStartNow = delayed.ballCalls[0].now;
+const ballAt = elapsed => delayed.ballCalls.find(call => call.now - ballStartNow === elapsed);
+const ball340 = ballAt(340), ball439 = ballAt(439), ball440 = ballAt(440), ball441 = ballAt(441);
+for (const [elapsed, call] of [[340,ball340], [439,ball439], [440,ball440], [441,ball441]]) {
+  assert(call, `real renderer omitted the ball at ${elapsed}ms`);
+}
+for (const call of [ball340, ball439, ball440]) {
+  assert(Math.abs(call.bx - 306.15) < 0.1 && Math.abs(call.by - 178.38) < 0.1, 'real renderer moved the ball before the f6 departure');
+}
+assert(ball441.bx > ball440.bx && ball441.by < ball440.by, 'real renderer did not launch the ball screen-right/up after f6 began');
 
 const broken = makeCrossHarness();
 broken.step(0);
