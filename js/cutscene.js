@@ -2766,11 +2766,45 @@ function _renderCross6LabScene(sc) {
     }
   }
 
-  var T0 = null, started = false;
+  var T0 = null, loadT0 = null, started = false;
+  var loadTimeoutMs = 5000;
+
+  function drawLoadState(message, isError) {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#081729'; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = isError ? '#ff6b6b' : '#56c7ff'; ctx.lineWidth = 2;
+    ctx.strokeRect(22, 22, W - 44, H - 44);
+    ctx.fillStyle = '#f5f7fb'; ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(message, W / 2, H / 2);
+  }
+
   function frame() {
-    if (canvas.isConnected) started = true; else if (started) return;
     var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
-    if (T0 === null) { if (!canvas.isConnected) { requestAnimationFrame(frame); return; } T0 = now; }
+    if (canvas.isConnected) {
+      started = true;
+      if (loadT0 === null) loadT0 = now;
+    } else {
+      if (started) return;
+      requestAnimationFrame(frame); return;
+    }
+
+    var broken = imgs.some(function (img) { return img.complete && !img.naturalWidth; });
+    var loaded = imgs.every(function (img) { return img.complete && img.naturalWidth; });
+    if (broken || (!loaded && now - loadT0 >= loadTimeoutMs)) {
+      canvas.dataset.cross6State = 'error';
+      drawLoadState('CROSS 6 ASSET ERROR', true);
+      return;
+    }
+    if (!loaded) {
+      canvas.dataset.cross6State = 'loading';
+      drawLoadState('LOADING CROSS 6...', false);
+      requestAnimationFrame(frame); return;
+    }
+    if (T0 === null) {
+      T0 = now;
+      canvas.dataset.cross6State = 'playing';
+    }
     var elapsed = Math.min(totalMs, now - T0);
     var fi = 0, acc = 0;
     for (var k = 0; k < frameDur.length; k++) {
@@ -2812,8 +2846,8 @@ function _renderCross6LabScene(sc) {
       ctx.fillRect(0, 0, W, H);
     }
 
-    var loading = imgs.some(function (img) { return !img.complete; });
-    if (elapsed < totalMs || loading) requestAnimationFrame(frame);
+    if (elapsed < totalMs) requestAnimationFrame(frame);
+    else canvas.dataset.cross6State = 'done';
   }
   requestAnimationFrame(frame);
   // rightBoot5 maps to roughly (297,178); contact is derived from that anchor.

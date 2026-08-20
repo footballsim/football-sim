@@ -154,15 +154,118 @@ for (const rel of frames) {
 assert(lab.includes('data-k="cross6"'), 'independent cross6 lab button missing');
 assert(lab.includes("{k:'cross6', lay:'M'"), 'cross6 gallery catalog entry missing');
 assert(lab.includes("kind==='cross6'"), 'cross6 lab runner missing');
+assert(lab.includes('<script src="js/cutscene.js?v=lab86"></script>'), 'Scene Lab must cache-bust the cross6 runtime');
+assert(!lab.includes('js/cutscene.js?v=lab85'), 'stale Scene Lab cutscene cache key remains');
 assert(cutscene.includes('var frameDur = [150, 120, 130, 150, 180, 320];'), 'six-frame one-shot timing missing');
-assert(cutscene.includes('if (elapsed < totalMs || loading) requestAnimationFrame(frame);'), 'one-shot stop contract missing');
-assert(cutscene.includes('if (canvas.isConnected) started = true; else if (started) return;'), 'detach stop missing');
+assert(cutscene.includes('if (elapsed < totalMs) requestAnimationFrame(frame);'), 'one-shot stop contract missing');
 assert(cutscene.includes('if (elapsed >= leaveMs)'), 'f6 ball departure missing');
 assert(cutscene.includes('var rightBoot5 = [190, 304];'), 'f5 screen-right boot anchor missing');
 assert(cutscene.includes('var hipSrc = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];'), 'six measured hip anchors missing');
 assert(cutscene.includes('var hipScreenX = [220, 226, 232, 238, 244, 250], hipScreenY = 106;'), 'hip drift anchors missing');
 assert(cutscene.includes('var flipH = false;'), 'lab cross6 must keep the approved native screen-right pose');
 assert(lab.includes('nativeのscreen-right固定'), 'lab must explain the fixed review direction');
+
+// Execute the real cross6 renderer with delayed Image objects. The animation
+// clock must not begin until every pose is decoded, and a broken/never-loaded
+// image must end in a visible, finite error state.
+const crossRendererSource = section(
+  cutscene,
+  'function _renderCross6LabScene(sc) {',
+  '// ============================================================\n// フリーキック'
+);
+assert(crossRendererSource.includes('if (started) return;'), 'cross6 detach stop missing');
+function makeCrossHarness() {
+  let now = 0;
+  const raf = [], rendered = [], messages = [];
+  const images = new Map(frames.map(rel => [rel, {
+    src: rel, complete: false, naturalWidth: 0, naturalHeight: 336
+  }]));
+  const canvas = {
+    width: 0, height: 0, style: {}, dataset: {}, isConnected: true,
+    getContext() { return ctx; }
+  };
+  const ctx = {
+    clearRect() {}, fillRect() {}, strokeRect() {}, beginPath() {}, moveTo() {}, lineTo() {}, stroke() {},
+    save() {}, restore() {}, translate() {}, scale() {},
+    drawImage() {},
+    fillText(text) { messages.push(text); },
+    set fillStyle(_) {}, set strokeStyle(_) {}, set lineWidth(_) {}, set font(_) {},
+    set textAlign(_) {}, set textBaseline(_) {}, set imageSmoothingEnabled(_) {}
+  };
+  const env = {
+    performance: { now: () => now },
+    requestAnimationFrame(cb) { raf.push(cb); },
+    document: { createElement(tag) { assert.strictEqual(tag, 'canvas'); return canvas; } },
+    MangaRecolor: {
+      render(key, image) {
+        rendered.push(image.src);
+        return { width: image.naturalWidth, height: image.naturalHeight };
+      }
+    },
+    _LP_BG_SRC: 'background.png',
+    _loadCutsceneImg(src) {
+      return images.get(src) || { src, complete: true, naturalWidth: 480, naturalHeight: 216 };
+    },
+    _lpBg() { return {}; }, _lpDrawBg() {}, _lpBall() {},
+    _mangaFeat() { return { skin: '#bd7245' }; },
+    _mangaColors() {
+      return { shirt: '#111', shorts: '#222', socks: '#333', accent: '#444', skin: '#555' };
+    },
+    _csPixelate(sprite) { return sprite; },
+    _csCenterSubject(value) { return value; }
+  };
+  vm.runInNewContext(`${expectedFrameArray}\n${crossRendererSource}\nthis.renderCross6 = _renderCross6LabScene;`, env);
+  env.renderCross6({ offence: { players: [], lineup: [] }, ofsPos: 0 });
+  function step(ms) {
+    now += ms;
+    assert(raf.length, 'animation unexpectedly stopped');
+    raf.shift()();
+  }
+  return { canvas, images, messages, raf, rendered, step };
+}
+
+const delayed = makeCrossHarness();
+delayed.step(0);
+for (let i = 0; i < 5; i++) {
+  const image = delayed.images.get(frames[i]);
+  image.complete = true; image.naturalWidth = 220 + i;
+  delayed.step(40);
+}
+assert.strictEqual(delayed.canvas.dataset.cross6State, 'loading', 'partial cold load must remain paused');
+assert.deepStrictEqual(delayed.rendered, [], 'a pose rendered before all six images were ready');
+const finalDelayedImage = delayed.images.get(frames[5]);
+finalDelayedImage.complete = true; finalDelayedImage.naturalWidth = 225;
+delayed.step(40);
+assert.strictEqual(delayed.canvas.dataset.cross6State, 'playing', 'renderer did not start after all six images loaded');
+let guard = 0;
+while (delayed.raf.length && guard++ < 80) delayed.step(40);
+assert(guard < 80, 'cross6 animation did not stop');
+const renderedOrder = delayed.rendered.filter((rel, i, all) => i === 0 || rel !== all[i - 1]);
+assert.deepStrictEqual(renderedOrder, frames, 'cold-loaded poses did not render f1 through f6 in order');
+assert.strictEqual(delayed.canvas.dataset.cross6State, 'done', 'one-shot did not finish');
+
+const broken = makeCrossHarness();
+broken.step(0);
+const brokenImage = broken.images.get(frames[2]);
+brokenImage.complete = true; brokenImage.naturalWidth = 0;
+broken.step(20);
+assert.strictEqual(broken.canvas.dataset.cross6State, 'error', 'broken image must enter error state');
+assert.strictEqual(broken.raf.length, 0, 'broken image must stop the animation loop');
+assert(broken.messages.includes('CROSS 6 ASSET ERROR'), 'broken image placeholder is not explicit');
+
+const timedOut = makeCrossHarness();
+timedOut.step(0); timedOut.step(5001);
+assert.strictEqual(timedOut.canvas.dataset.cross6State, 'error', 'never-loaded image must time out');
+assert.strictEqual(timedOut.raf.length, 0, 'load timeout must stop the animation loop');
+
+const detached = makeCrossHarness();
+for (const image of detached.images.values()) {
+  image.complete = true; image.naturalWidth = 224;
+}
+detached.step(0);
+detached.canvas.isConnected = false;
+detached.step(20);
+assert.strictEqual(detached.raf.length, 0, 'detached cross6 canvas must stop the animation loop');
 
 // Hip anchors move only 6px/frame; trim-width changes cannot make f4→f5→f6 jump.
 const hipSrc = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];
