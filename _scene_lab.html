@@ -142,6 +142,11 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
       <button data-k="lpresult" onclick="run('lpresult')">拍2：守備の反応（成功=スルー/失敗=カット）</button>
     </div></div>
 
+    <div class="grp"><h2>クロス6コマ（GFX-06・Scene Lab限定）</h2><div class="btns">
+      <button data-k="cross6" onclick="run('cross6')">助走→接触→クロス（6コマ・一回再生）</button>
+    </div>
+    <p class="hint" style="margin:6px 0 0">採用済み6局面の比較確認用。f5でコードballへ接触し、f6でボールが離れます。素材レビューのためnativeのscreen-right固定。本編の方向対応・クロス経路はまだ変更しません。</p></div>
+
     <div class="grp"><h2>ヘディング（Rise・対決割り）</h2><div class="btns">
       <button data-k="header" onclick="run('header')">競り合い（成功/競り負けは「成功」チェックで切替）</button>
     </div></div>
@@ -286,6 +291,7 @@ var SCENE_CATALOG=[
  {k:'overhead5', lay:'M', nm:'オーバーヘッド5コマ', nt:'浮き球を頭上で叩く・一回再生'},
  {k:'longpass', lay:'M', nm:'ロングパス（蹴り出し）', nt:'結果非開示の拍'},
  {k:'lpresult', lay:'M', nm:'ロングパス（結果）', nt:'スルー / カット'},
+ {k:'cross6', lay:'M', nm:'クロス6コマ（ラボ限定）', nt:'screen-right固定・f5接触→f6でボールが離れる'},
  {k:'onetwo', lay:'M', nm:'ワンツー', nt:'3カット連結'},
  {k:'freekick', lay:'M', nm:'フリーキック', nt:'蹴る前→蹴った瞬間'},
  {k:'header', lay:'M', nm:'ヘディング競り合い', nt:'縦2分割'},
@@ -416,6 +422,10 @@ function run(kind,retry){
     }else if(kind==='lpresult'){
       var sc={offence:a,defence:b,ofsPos:7,dfsPos:5,action:'ロングパス',scenario:'ロングパス',result:ok?'成功':'失敗'};
       c=_renderLongpassResultScene(sc);
+    }else if(kind==='cross6'){
+      var sc={offence:a,defence:b,ofsPos:8,crossPos:8,dfsPos:0,action:'クロス',scenario:'クロス',result:'成功'};
+      c=_renderCross6LabScene(sc);
+      if(!c)return err('MangaRecolor未ロード（ラボ専用シーンです）');
     }else if(kind==='dribble'){
       var sc={offence:a,defence:b,ofsPos:9,dfsPos:4,action:'ドリブル突破',scenario:'ドリブル突破',result:ok?'成功':'失敗'};
       c=_renderDribbleScene(sc);

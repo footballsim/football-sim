@@ -2715,6 +2715,112 @@ function _renderOnetwoScene(sc) {
 }
 
 // ============================================================
+// Scene Lab限定: クロス6コマ（GFX-06）。
+//   採用済みキーポーズを一回だけ再生し、f5で足元のコードballへ接触、
+//   f6でボールだけがクロス方向へ離れる。実試合のcross/longpass routingからは
+//   呼ばず、_scene_lab.html が比較確認用に直接呼ぶ。
+// ============================================================
+var _LAB_CROSS6_FRAMES = [
+  'img/cutscenes/manga_cross6/frame_01.png',
+  'img/cutscenes/manga_cross6/frame_02.png',
+  'img/cutscenes/manga_cross6/frame_03.png',
+  'img/cutscenes/manga_cross6/frame_04.png',
+  'img/cutscenes/manga_cross6/frame_05.png',
+  'img/cutscenes/manga_cross6/frame_06.png'
+];
+function _renderCross6LabScene(sc) {
+  if (typeof MangaRecolor === 'undefined' || !MangaRecolor.render) return null;
+  var W = 480, H = 216, ground = 198;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var imgs = _LAB_CROSS6_FRAMES.map(function (src) { return _loadCutsceneImg(src); });
+  var kicker = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  var feat = _mangaFeat(kicker ? (kicker.long_name || kicker.name || '') : '');
+  var cols = _mangaColors(sc.offence, feat.skin);
+  var sig = cols.shirt + cols.shorts + cols.socks + cols.accent + cols.skin;
+
+  // Lab review keeps the user-approved native screen-right pose. Directional
+  // mirroring belongs to the later production-routing task, not this asset gate.
+  var flipH = false;
+  var frameDur = [150, 120, 130, 150, 180, 320];
+  var leaveMs = frameDur[0] + frameDur[1] + frameDur[2] + frameDur[3] + frameDur[4];
+  var totalMs = frameDur.reduce(function (sum, ms) { return sum + ms; }, 0);
+  // Each trimmed frame has a different width. Pin the measured hip joint and
+  // add only a 6px/frame forward drift, instead of centering each bounding box.
+  var ph = 190, scale = ph / 336;
+  var hipSrc = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];
+  var hipScreenX = [220, 226, 232, 238, 244, 250], hipScreenY = 106;
+  var rightBoot5 = [190, 304];
+  var contactX = hipScreenX[4] + (rightBoot5[0] - hipSrc[4][0]) * scale;
+  var contactY = hipScreenY + (rightBoot5[1] - hipSrc[4][1]) * scale;
+
+  function burst(x, y, a) {
+    ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5;
+    for (var i = 0; i < 12; i++) {
+      var an = i / 12 * 6.28;
+      ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 9, y + Math.sin(an) * 9);
+      ctx.lineTo(x + Math.cos(an) * 37, y + Math.sin(an) * 37); ctx.stroke();
+    }
+  }
+
+  var T0 = null, started = false;
+  function frame() {
+    if (canvas.isConnected) started = true; else if (started) return;
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    if (T0 === null) { if (!canvas.isConnected) { requestAnimationFrame(frame); return; } T0 = now; }
+    var elapsed = Math.min(totalMs, now - T0);
+    var fi = 0, acc = 0;
+    for (var k = 0; k < frameDur.length; k++) {
+      acc += frameDur[k];
+      if (elapsed < acc) { fi = k; break; }
+      fi = frameDur.length - 1;
+    }
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.imageSmoothingEnabled = false;
+    _lpDrawBg(ctx, bgImg, bgFallback, W, H);
+    ctx.save();
+    if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+    var im = imgs[fi], spr = null;
+    if (im && im.complete && im.naturalWidth) {
+      var key = 'lab-cross6|' + (fi + 1) + '|' + sig;
+      spr = MangaRecolor.render(key, im, cols);
+      if (spr) {
+        var dw = spr.width * scale, dh = spr.height * scale;
+        var pix = _csPixelate(spr, key, dw, ph);
+        var dx = hipScreenX[fi] - hipSrc[fi][0] * scale;
+        var dy = hipScreenY - hipSrc[fi][1] * scale;
+        ctx.drawImage(pix, dx, dy, dw, dh);
+      }
+    }
+
+    // f1–f5: ball stays at the contact point. f6: the same code ball leaves.
+    var bx = contactX, by = contactY, rot = 0;
+    if (elapsed >= leaveMs) {
+      var dt = (elapsed - leaveMs) / 1000;
+      bx += 760 * dt; by -= 340 * dt; rot = dt * 70;
+    }
+    if (bx < W + 24 && by > -24) _lpBall(ctx, bx, by, 12, rot);
+    var impact = Math.max(0, 1 - Math.abs(elapsed - (leaveMs - 55)) / 75);
+    if (impact > 0) burst(contactX, contactY, impact * 0.75);
+    ctx.restore();
+    if (impact > 0) {
+      ctx.fillStyle = 'rgba(255,255,255,' + (impact * 0.32) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    var loading = imgs.some(function (img) { return !img.complete; });
+    if (elapsed < totalMs || loading) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  // rightBoot5 maps to roughly (297,178); contact is derived from that anchor.
+  return _csCenterSubject(canvas, 0.50, false);
+}
+
+// ============================================================
 // フリーキック（中央の直接FK・action='フリーキック'）専用カットイン:
 //   ①蹴る前（freekick1）→ ②蹴った瞬間（freekick2）＋ボールが足元から弧を描いて上方（攻撃方向＝ゴール）へ伸びる の2フレーム。
 //   提供赤キットアート2枚を実行時に攻撃チーム色へリカラー。ネイティブ=左攻め（ボールは左上へ）。team1は全体ミラー。
