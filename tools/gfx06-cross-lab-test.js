@@ -189,8 +189,8 @@ for (const rel of frames) {
 assert(lab.includes('data-k="cross6"'), 'independent cross6 lab button missing');
 assert(lab.includes("{k:'cross6', lay:'M'"), 'cross6 gallery catalog entry missing');
 assert(lab.includes("kind==='cross6'"), 'cross6 lab runner missing');
-assert(lab.includes('<script src="js/cutscene.js?v=lab88"></script>'), 'Scene Lab must cache-bust the cross6 runtime');
-assert(!lab.includes('js/cutscene.js?v=lab87'), 'stale Scene Lab cutscene cache key remains');
+assert(lab.includes('<script src="js/cutscene.js?v=lab89"></script>'), 'Scene Lab must cache-bust the cross6 runtime');
+assert(!lab.includes('js/cutscene.js?v=lab88'), 'stale Scene Lab cutscene cache key remains');
 assert(cutscene.includes('var frameDur = [95, 80, 80, 85, 100, 220];'), 'reference-paced six-frame timing missing');
 assert(cutscene.includes('if (elapsed < totalMs) requestAnimationFrame(frame);'), 'one-shot stop contract missing');
 assert(cutscene.includes('if (elapsed >= leaveMs)'), 'f6 ball departure missing');
@@ -298,8 +298,8 @@ assert(allHipX.every((x, i) => i === 0 || x >= allHipX[i - 1]), 'real renderer m
 assert(allHipX.every((x, i) => i === 0 || x - allHipX[i - 1] <= 2), 'real renderer has a visible between-frame position jump');
 const ballStartNow = delayed.ballCalls[0].now;
 const ballAt = elapsed => delayed.ballCalls.find(call => call.now - ballStartNow === elapsed);
-const ball340 = ballAt(340), ball439 = ballAt(439), ball440 = ballAt(440), ball441 = ballAt(441);
-for (const [elapsed, call] of [[340,ball340], [439,ball439], [440,ball440], [441,ball441]]) {
+const ball340 = ballAt(340), ball439 = ballAt(439), ball440 = ballAt(440), ball441 = ballAt(441), ball540 = ballAt(540);
+for (const [elapsed, call] of [[340,ball340], [439,ball439], [440,ball440], [441,ball441], [540,ball540]]) {
   assert(call, `real renderer omitted the ball at ${elapsed}ms`);
 }
 for (const call of [ball340, ball439, ball440]) {
@@ -307,6 +307,7 @@ for (const call of [ball340, ball439, ball440]) {
   assert.strictEqual(call.radius, 12, 'real renderer changed the authored ball radius');
 }
 assert(ball441.bx > ball440.bx && ball441.by < ball440.by, 'real renderer did not launch the ball screen-right/up after f6 began');
+assert(Math.abs(ball540.bx - 400.15) < 0.1 && Math.abs(ball540.by - 140.38) < 0.1, 'real renderer changed the faster cross6 ball trajectory');
 
 const broken = makeCrossHarness();
 broken.step(0);

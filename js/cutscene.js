@@ -2760,6 +2760,7 @@ function _renderCross6LabScene(sc) {
   var ballRadius = 12;
   // Keep the ball's left edge at the boot instead of overlapping its center.
   var ballRestX = bootContactX + ballRadius;
+  var ballVelocityX = 820, ballVelocityY = 380;
 
   function burst(x, y, a) {
     ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5;
@@ -2846,7 +2847,7 @@ function _renderCross6LabScene(sc) {
     var bx = ballRestX, by = bootContactY, rot = 0;
     if (elapsed >= leaveMs) {
       var dt = (elapsed - leaveMs) / 1000;
-      bx += 760 * dt; by -= 340 * dt; rot = dt * 70;
+      bx += ballVelocityX * dt; by -= ballVelocityY * dt; rot = dt * 70;
     }
     if (bx < W + 24 && by > -24) _lpBall(ctx, bx, by, ballRadius, rot);
     var impact = Math.max(0, 1 - Math.abs(elapsed - (leaveMs - 55)) / 75);
