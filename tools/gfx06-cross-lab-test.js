@@ -189,8 +189,8 @@ for (const rel of frames) {
 assert(lab.includes('data-k="cross6"'), 'independent cross6 lab button missing');
 assert(lab.includes("{k:'cross6', lay:'M'"), 'cross6 gallery catalog entry missing');
 assert(lab.includes("kind==='cross6'"), 'cross6 lab runner missing');
-assert(lab.includes('<script src="js/cutscene.js?v=lab87"></script>'), 'Scene Lab must cache-bust the cross6 runtime');
-assert(!lab.includes('js/cutscene.js?v=lab86'), 'stale Scene Lab cutscene cache key remains');
+assert(lab.includes('<script src="js/cutscene.js?v=lab88"></script>'), 'Scene Lab must cache-bust the cross6 runtime');
+assert(!lab.includes('js/cutscene.js?v=lab87'), 'stale Scene Lab cutscene cache key remains');
 assert(cutscene.includes('var frameDur = [95, 80, 80, 85, 100, 220];'), 'reference-paced six-frame timing missing');
 assert(cutscene.includes('if (elapsed < totalMs) requestAnimationFrame(frame);'), 'one-shot stop contract missing');
 assert(cutscene.includes('if (elapsed >= leaveMs)'), 'f6 ball departure missing');
@@ -303,7 +303,8 @@ for (const [elapsed, call] of [[340,ball340], [439,ball439], [440,ball440], [441
   assert(call, `real renderer omitted the ball at ${elapsed}ms`);
 }
 for (const call of [ball340, ball439, ball440]) {
-  assert(Math.abs(call.bx - 306.15) < 0.1 && Math.abs(call.by - 178.38) < 0.1, 'real renderer moved the ball before the f6 departure');
+  assert(Math.abs(call.bx - 318.15) < 0.1 && Math.abs(call.by - 178.38) < 0.1, 'real renderer moved the ball before the f6 departure');
+  assert.strictEqual(call.radius, 12, 'real renderer changed the authored ball radius');
 }
 assert(ball441.bx > ball440.bx && ball441.by < ball440.by, 'real renderer did not launch the ball screen-right/up after f6 began');
 
@@ -341,10 +342,13 @@ assert.strictEqual(hipScreenX.at(-1) - hipScreenX[0], 78, 'cross6 total forward 
 assert(hipDeltas.every(dx => dx > 0 && dx <= 24), 'cross6 must advance monotonically without teleporting');
 assert(hipDeltas[4] < hipDeltas[3], 'cross6 must decelerate after contact');
 const rightBoot5 = [190, 304];
-const contact = [
+const bootContact = [
   hipScreenX[4] + (rightBoot5[0] - hipSrc[4][0]) * scale,
   hipScreenY + (rightBoot5[1] - hipSrc[4][1]) * scale
 ];
-assert(Math.abs(contact[0] - 306.15) < 0.1 && Math.abs(contact[1] - 178.38) < 0.1, 'f5 ball contact is not tied to the right boot');
+const ballRadius = 12;
+const ballRest = [bootContact[0] + ballRadius, bootContact[1]];
+assert(Math.abs(bootContact[0] - 306.15) < 0.1 && Math.abs(bootContact[1] - 178.38) < 0.1, 'f5 contact is not tied to the right boot');
+assert(Math.abs(ballRest[0] - 318.15) < 0.1 && Math.abs(ballRest[1] - 178.38) < 0.1, 'f5 ball does not rest one radius beyond the boot');
 
-console.log('GFX-07 cross6 lab: clean assets + continuous travel + faster cadence + one-shot ball PASS');
+console.log('GFX-07 cross6 lab: clean assets + continuous travel + spaced one-shot ball PASS');

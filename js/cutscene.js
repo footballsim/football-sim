@@ -2755,8 +2755,11 @@ function _renderCross6LabScene(sc) {
   var hipSrc = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];
   var hipScreenX = [182, 198, 218, 239, 253, 260], hipScreenY = 106;
   var rightBoot5 = [190, 304];
-  var contactX = hipScreenX[4] + (rightBoot5[0] - hipSrc[4][0]) * scale;
-  var contactY = hipScreenY + (rightBoot5[1] - hipSrc[4][1]) * scale;
+  var bootContactX = hipScreenX[4] + (rightBoot5[0] - hipSrc[4][0]) * scale;
+  var bootContactY = hipScreenY + (rightBoot5[1] - hipSrc[4][1]) * scale;
+  var ballRadius = 12;
+  // Keep the ball's left edge at the boot instead of overlapping its center.
+  var ballRestX = bootContactX + ballRadius;
 
   function burst(x, y, a) {
     ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5;
@@ -2839,15 +2842,15 @@ function _renderCross6LabScene(sc) {
       }
     }
 
-    // f1–f5: ball stays at the contact point. f6: the same code ball leaves.
-    var bx = contactX, by = contactY, rot = 0;
+    // f1–f5: the ball rests just beyond the boot. f6: the same code ball leaves.
+    var bx = ballRestX, by = bootContactY, rot = 0;
     if (elapsed >= leaveMs) {
       var dt = (elapsed - leaveMs) / 1000;
       bx += 760 * dt; by -= 340 * dt; rot = dt * 70;
     }
-    if (bx < W + 24 && by > -24) _lpBall(ctx, bx, by, 12, rot);
+    if (bx < W + 24 && by > -24) _lpBall(ctx, bx, by, ballRadius, rot);
     var impact = Math.max(0, 1 - Math.abs(elapsed - (leaveMs - 55)) / 75);
-    if (impact > 0) burst(contactX, contactY, impact * 0.75);
+    if (impact > 0) burst(bootContactX, bootContactY, impact * 0.75);
     ctx.restore();
     if (impact > 0) {
       ctx.fillStyle = 'rgba(255,255,255,' + (impact * 0.32) + ')';
@@ -2858,7 +2861,7 @@ function _renderCross6LabScene(sc) {
     else canvas.dataset.cross6State = 'done';
   }
   requestAnimationFrame(frame);
-  // rightBoot5 maps to roughly (306,178); contact is derived from that anchor.
+  // rightBoot5 maps to roughly (306,178); the 12px-radius ball rests just beyond it.
   return _csCenterSubject(canvas, 0.50, false);
 }
 
