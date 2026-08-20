@@ -216,35 +216,116 @@ assert(cutscene.includes('ctx.translate(W / 2, H / 2); ctx.scale(sceneScale, sce
 assert(cutscene.includes('var flipH = false;'), 'lab cross6 must keep the approved native screen-right pose');
 assert(lab.includes('nativeのscreen-right固定'), 'lab must explain the fixed review direction');
 
-// Execute the real Lab run/replay functions. Gallery snapshots render through
-// run(kind), but must not replace the scene selected by the user.
-const labRunSource = section(lab, 'function run(kind,retry){', "if(typeof Portrait!=='undefined'");
-const labRuns = [], labPuts = [];
+// Execute the real Lab put/play/run/replay/detail functions. Gallery snapshots
+// use an explicit host, so a user selection made while thumbnails are still
+// rendering must keep both the visible stage and current scene independent.
+assert(!lab.includes('_putTarget'), 'implicit global gallery target remains');
+assert(lab.includes('function put(c,target)'), 'Lab put target parameter missing');
+assert(lab.includes('function run(kind,retry,target)'), 'Lab run target parameter missing');
+assert(lab.includes('run(t.e.k,0,host);'), 'gallery snapshot does not pass its host explicitly');
+assert.strictEqual(
+  (lab.match(/run\(kind,\(retry\|\|0\)\+1,target\)/g) || []).length,
+  3,
+  'shot2, longpass, and generic retries must preserve their target'
+);
+const labPutSource = section(lab, 'function put(c,target){', '/* ══ 一覧');
+const labPlaySource = section(lab, 'function playScene(k,nm){', 'function buildGallery');
+const labRunSource = section(lab, 'function run(kind,retry,target){', "if(typeof Portrait!=='undefined'");
+const labDetailSource = lab.match(/function setBgTone\(v\)\{[^\n]+\}/)[0];
+const labRuns = [], labTimers = [];
 const labTeam = {
   players: Array.from({ length: 11 }, (_, i) => ({ name: `P${i}`, en_name: `Player ${i}` })),
   lineup: Array.from({ length: 11 }, (_, i) => i)
 };
+function labHost(id) {
+  let html = '';
+  const host = {
+    id, style: {}, children: [],
+    appendChild(value) { this.children.push(value); },
+    querySelector(selector) { return selector === 'canvas' ? this.children[0] || null : null; }
+  };
+  Object.defineProperty(host, 'innerHTML', {
+    get() { return html; },
+    set(value) { html = value; if (value === '') host.children = []; }
+  });
+  return host;
+}
+const labStage = labHost('stage'), labSnapHost = labHost('snapHost');
+const labGallery = labHost('gallery'), labPlayer = labHost('player');
+const labPlayTitle = { textContent: '' };
+let failNextSkill = false;
 const labHarness = {
-  atk: { value: 'attack' }, def: { value: 'defence' }, window: {},
-  mk() { return labTeam; }, err() {}, setTimeout() { throw new Error('unexpected Lab retry'); },
+  atk: { value: 'attack' }, def: { value: 'defence' }, window: { scrollTo() {} },
+  mk() { return labTeam; }, err() {},
+  setTimeout(callback, delay) { labTimers.push({ callback, delay }); return labTimers.length; },
   document: {
     querySelectorAll() { return []; },
-    getElementById(id) { assert.strictEqual(id, 'ok'); return { checked: true }; }
+    getElementById(id) {
+      const nodes = {
+        ok: { checked: true }, stage: labStage, gallery: labGallery,
+        player: labPlayer, playTitle: labPlayTitle
+      };
+      assert(nodes[id], `unexpected Lab DOM id: ${id}`);
+      return nodes[id];
+    }
   },
-  _renderCross6LabScene() { labRuns.push('cross6'); return { kind: 'cross6' }; },
-  _renderSkillActivateScene() { labRuns.push('skill_captaincy'); return { kind: 'skill_captaincy' }; },
-  put(value) { labPuts.push(value.kind); }
+  _renderCross6LabScene() {
+    const canvas = { kind: 'cross6', serial: labRuns.length };
+    labRuns.push(canvas);
+    return canvas;
+  },
+  _renderSkillActivateScene() {
+    if (failNextSkill) { failNextSkill = false; return null; }
+    const canvas = { kind: 'skill_captaincy', serial: labRuns.length };
+    labRuns.push(canvas);
+    return canvas;
+  }
 };
-vm.runInNewContext(`var cur='shotduel';var _putTarget=null;${labRunSource}\nthis.runLab=run;this.replayLab=replay;`, labHarness);
-labHarness.runLab('cross6');
-assert.strictEqual(labHarness.cur, 'cross6', 'direct cross6 selection did not become current');
-labHarness._putTarget = { snapshot: true };
-labHarness.runLab('skill_captaincy');
-assert.strictEqual(labHarness.cur, 'cross6', 'gallery snapshot replaced the current cross6 selection');
-labHarness._putTarget = null;
+vm.runInNewContext(
+  `var cur='shotduel';${labPutSource}\n${labPlaySource}\n${labDetailSource}\n${labRunSource}\n` +
+  'this.runLab=run;this.replayLab=replay;this.playSceneLab=playScene;this.setBgToneLab=setBgTone;',
+  labHarness
+);
+labHarness.runLab('skill_captaincy', 0, labSnapHost);
+assert.strictEqual(labHarness.cur, 'shotduel', 'gallery snapshot replaced current before user selection');
+assert.strictEqual(labSnapHost.children[0].kind, 'skill_captaincy', 'snapshot did not render into snapHost');
+assert.strictEqual(labStage.children.length, 0, 'snapshot leaked into visible stage');
+
+labHarness.playSceneLab('cross6', 'クロス6コマ');
+assert.strictEqual(labHarness.cur, 'cross6', 'user selection during gallery build did not become current');
+assert.strictEqual(labStage.children[0].kind, 'cross6', 'user selection did not render into visible stage');
+assert.strictEqual(labGallery.style.display, 'none', 'user selection did not hide gallery');
+assert.strictEqual(labPlayer.style.display, '', 'user selection did not show player');
+assert.strictEqual(labPlayTitle.textContent, 'クロス6コマ', 'user selection title changed');
+const selectedCanvas = labStage.children[0];
+
+labHarness.runLab('skill_captaincy', 0, labSnapHost);
+assert.strictEqual(labHarness.cur, 'cross6', 'continuing gallery snapshot replaced cross6 current');
+assert.strictEqual(labStage.children[0], selectedCanvas, 'continuing gallery snapshot replaced visible cross6 canvas');
+labSnapHost.innerHTML = ''; // gallery timer cleanup must only detach its own canvas
+assert.strictEqual(labStage.children[0], selectedCanvas, 'snapshot timer cleanup cleared visible stage');
+
 labHarness.replayLab();
-assert.deepStrictEqual(labRuns, ['cross6', 'skill_captaincy', 'cross6'], 'replay did not return to cross6 after gallery snapshots');
-assert.deepStrictEqual(labPuts, labRuns, 'Lab run harness did not exercise the real render/put path');
+assert.strictEqual(labHarness.cur, 'cross6', 'replay changed current scene');
+assert.strictEqual(labStage.children[0].kind, 'cross6', 'replay did not return to visible cross6');
+const replayCanvas = labStage.children[0];
+labHarness.setBgToneLab('0');
+assert.strictEqual(labHarness.cur, 'cross6', 'detail change changed current scene');
+assert.strictEqual(labStage.children[0].kind, 'cross6', 'detail change did not redraw visible cross6');
+assert.notStrictEqual(labStage.children[0], replayCanvas, 'detail change did not execute the real render/put path');
+
+// A deferred gallery retry must retain snapHost even after the user has opened
+// cross6; firing it may update the thumbnail host, never the visible player.
+const detailedCanvas = labStage.children[0];
+failNextSkill = true;
+labHarness.runLab('skill_captaincy', 0, labSnapHost);
+assert.strictEqual(labTimers.length, 1, 'generic null renderer did not schedule one retry');
+assert.strictEqual(labTimers[0].delay, 400, 'generic retry delay changed');
+assert.strictEqual(labHarness.cur, 'cross6', 'deferred snapshot attempt replaced current cross6');
+labTimers.shift().callback();
+assert.strictEqual(labSnapHost.children[0].kind, 'skill_captaincy', 'deferred retry lost its snapshot target');
+assert.strictEqual(labStage.children[0], detailedCanvas, 'deferred retry replaced visible cross6');
+assert.strictEqual(labHarness.cur, 'cross6', 'deferred retry replaced current cross6');
 
 // Execute the real cross6 renderer with delayed Image objects. The animation
 // clock must not begin until every pose is decoded, and a broken/never-loaded

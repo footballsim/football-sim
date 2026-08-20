@@ -258,8 +258,7 @@ KEYS.forEach(function(k){atk.add(new Option(k[1],k[0]));def.add(new Option(k[1],
 atk.value='belgium2026';def.value='brazil2026';
 var cur='shotduel';
 function mk(key){var d=TEAM_DATA[key];var si=system_data.findIndex(function(s){return s.name===d.default_system;});return buildTeam(d,{systemIdx:si>=0?si:0,lineup:d.default_lineup.slice(),tactics:d.default_tactics,keyplayer:d.default_keyplayer,marked_player:d.default_marked_player});}
-var _putTarget=null;   // 一覧のサムネ生成中はオフスクリーンへ描かせる
-function put(c){var st=_putTarget||document.getElementById('stage');st.innerHTML='';st.appendChild(c);}
+function put(c,target){var st=target||document.getElementById('stage');st.innerHTML='';st.appendChild(c);}
 
 /* ══ 一覧（モンタージュ）════════════════════════════════════════════════
    ボタンが22個まで増えて「どれを見ればいいか分からない」状態になったので、
@@ -335,10 +334,9 @@ function buildGallery(){
   // 1枚ずつ実描画→スナップショット→ループ破棄（同時に何十もrAFを回さない）
   var i=0;
   function next(){
-    if(i>=tiles.length){ status.textContent=tiles.length+'件'; _putTarget=null; host.innerHTML=''; return; }
+    if(i>=tiles.length){ status.textContent=tiles.length+'件'; host.innerHTML=''; return; }
     var t=tiles[i]; status.textContent='生成中… '+(i+1)+'/'+tiles.length;
-    _putTarget=host;
-    try{ run(t.e.k); }catch(err){}
+    try{ run(t.e.k,0,host); }catch(err){}
     setTimeout(function(){
       var src=host.querySelector('canvas');
       var ph=t.el.querySelector('canvas.ph');
@@ -369,8 +367,8 @@ function setCam01(v){var on=(v==='1');window.CS_CAM_ENABLED=on;try{CS_CAM_ENABLE
 var _wideFig=1.0;
 function setWideFig(v){_wideFig=parseFloat(v);document.getElementById('wfigv').textContent='×'+_wideFig.toFixed(1);run('wide');}
 function err(m){document.getElementById('err').textContent=m||'';}
-function run(kind,retry){
-  if(!_putTarget)cur=kind; err('');
+function run(kind,retry,target){
+  if(!target)cur=kind; err('');
   document.querySelectorAll('button[data-k]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-k')===kind);});
   try{
     var a=mk(atk.value),b=mk(def.value);
@@ -406,7 +404,7 @@ function run(kind,retry){
     }else if(kind==='shot2'){
       var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'成功'};
       var entry=_pickCutscene('shot',a.team_color);
-      if(!entry||!entry.file){if((retry||0)<12)return setTimeout(function(){run(kind,(retry||0)+1);},400);return err('素材読込待ち…リロードしてください');}
+      if(!entry||!entry.file){if((retry||0)<12)return setTimeout(function(){run(kind,(retry||0)+1,target);},400);return err('素材読込待ち…リロードしてください');}
       c=_renderLegacyShotScene(sc,entry);   // 旧2拍は詳細設定からの比較確認だけに残す
     }else if(kind==='gksave'){
       var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'GK防いだ！'};
@@ -417,7 +415,7 @@ function run(kind,retry){
     }else if(kind==='longpass'){
       var sc={offence:a,defence:b,ofsPos:7,dfsPos:5,action:'ロングパス',scenario:'ロングパス',result:'成功'};
       var entry=_pickCutscene('longpass',a.team_color);
-      if(!entry||!entry.fileA){if((retry||0)<12)return setTimeout(function(){run(kind,(retry||0)+1);},400);return err('素材読込待ち…リロードしてください');}
+      if(!entry||!entry.fileA){if((retry||0)<12)return setTimeout(function(){run(kind,(retry||0)+1,target);},400);return err('素材読込待ち…リロードしてください');}
       c=_renderLongpassScene(sc,entry);
     }else if(kind==='lpresult'){
       var sc={offence:a,defence:b,ofsPos:7,dfsPos:5,action:'ロングパス',scenario:'ロングパス',result:ok?'成功':'失敗'};
@@ -482,8 +480,8 @@ function run(kind,retry){
       var fxMap={fx_rays:'rays',fx_ring:'ring',fx_grade_burst:'grade-burst',fx_grade_drain:'grade-drain',fx_flashes:'flashes',fx_type:'type',fx_punch:'punch'};
       c=_csFxDemo(fxMap[kind]);
     }
-    if(!c){if((retry||0)<12)return setTimeout(function(){run(kind,(retry||0)+1);},400);return err('描画がnull（素材読込前かも・リロード）');}
-    put(c);
+    if(!c){if((retry||0)<12)return setTimeout(function(){run(kind,(retry||0)+1,target);},400);return err('描画がnull（素材読込前かも・リロード）');}
+    put(c,target);
   }catch(e){err('ERR: '+e.message+'\n'+e.stack);}
 }
 function replay(){run(cur);}
