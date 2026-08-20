@@ -2752,19 +2752,22 @@ function _renderCross6LabScene(sc) {
   // reproduce the reference approach: advance strongly into contact and ease
   // the forward travel during the follow-through.
   var tuning = { stageShiftX: -28 };
-  var ph = 190, scale = ph / 336;
+  var playerVisualScale = 0.86;
+  var ph = 190 * playerVisualScale, scale = ph / 336;
   var hipSrc = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];
   var hipScreenX = [182, 198, 218, 239, 253, 260].map(function (x) { return x + tuning.stageShiftX; });
   var hipScreenY = 106;
   var rightBoot5 = [190, 304];
   var bootContactX = hipScreenX[4] + (rightBoot5[0] - hipSrc[4][0]) * scale;
   var bootContactY = hipScreenY + (rightBoot5[1] - hipSrc[4][1]) * scale;
-  var ballRadius = 12;
+  var ballRadius = 10;
   // Keep the ball's left edge at the boot instead of overlapping its center.
   var ballRestX = bootContactX + ballRadius;
   var ballCarryOffsetX = ballRestX - hipScreenX[4];
   var ballCarryStartX = hipScreenX[0] + ballCarryOffsetX;
-  var ballVelocityX = 780, ballVelocityY = 380;
+  // Keep a visible sliver through 659ms, then let the complete ball cross the
+  // right edge naturally at 660ms (the draw call itself is never cut early).
+  var ballVelocityX = 960, ballVelocityY = 380;
 
   function burst(x, y, a) {
     ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5;
