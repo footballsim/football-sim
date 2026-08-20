@@ -114,6 +114,18 @@ function assertCleanFrame(rel, image) {
 }
 
 const frames = Array.from({ length: 6 }, (_, i) => `img/cutscenes/manga_cross6/frame_${String(i + 1).padStart(2, '0')}.png`);
+const crossFrameGitObjects = [
+  '6426f5c44da7fbb1fcefacdba8376b0e18837d82',
+  'bd3c88ec4ccf2f6be01250d455516e380b7b1268',
+  '26e8f5a669da46a10b30cb963a55c58599d194aa',
+  'de31f771e99ceed20f31f14e7351691abb3484f4',
+  'c8ae48a53b875fd65dc2db01db772cd865cae390',
+  'c5d8fd29d53ef5fbf7f47f2933b207d6d7110ec3'
+];
+frames.forEach((rel, i) => {
+  const actual = execFileSync('git', ['rev-parse', `HEAD:${rel}`], { cwd: ROOT, encoding: 'utf8' }).trim();
+  assert.strictEqual(actual, crossFrameGitObjects[i], `approved cross6 image changed: ${rel}`);
+});
 const decoded = new Map();
 for (const rel of frames) {
   const image = decodeRgbaPng(fs.readFileSync(path.join(ROOT, rel)));
@@ -189,15 +201,18 @@ for (const rel of frames) {
 assert(lab.includes('data-k="cross6"'), 'independent cross6 lab button missing');
 assert(lab.includes("{k:'cross6', lay:'M'"), 'cross6 gallery catalog entry missing');
 assert(lab.includes("kind==='cross6'"), 'cross6 lab runner missing');
-assert(lab.includes('<script src="js/cutscene.js?v=lab90"></script>'), 'Scene Lab must cache-bust the cross6 runtime');
-assert(!lab.includes('js/cutscene.js?v=lab89'), 'stale Scene Lab cutscene cache key remains');
+assert(lab.includes('<script src="js/cutscene.js?v=lab91"></script>'), 'Scene Lab must cache-bust the cross6 runtime');
+assert(!lab.includes('js/cutscene.js?v=lab90'), 'stale Scene Lab cutscene cache key remains');
 assert(cutscene.includes('var frameDur = [95, 80, 80, 85, 100, 220];'), 'reference-paced six-frame timing missing');
 assert(cutscene.includes('if (elapsed < totalMs) requestAnimationFrame(frame);'), 'one-shot stop contract missing');
 assert(cutscene.includes('if (elapsed >= leaveMs)'), 'f6 ball departure missing');
 assert(cutscene.includes('var rightBoot5 = [190, 304];'), 'f5 screen-right boot anchor missing');
 assert(cutscene.includes('var hipSrc = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];'), 'six measured hip anchors missing');
-assert(cutscene.includes('var hipScreenX = [182, 198, 218, 239, 253, 260], hipScreenY = 106;'), 'forward-travel hip anchors missing');
+assert(cutscene.includes('var tuning = { stageShiftX: -28, zoomEndScale: 0.94, zoomDurationMs: 140 };'), 'cross6 staging controls changed');
+assert(cutscene.includes('var hipScreenX = [182, 198, 218, 239, 253, 260].map(function (x) { return x + tuning.stageShiftX; });'), 'shifted forward-travel hip anchors missing');
 assert(cutscene.includes('var currentHipX = fi < hipScreenX.length - 1'), 'continuous between-frame travel missing');
+assert(cutscene.includes('var carryHipX = Math.min(currentHipX, hipScreenX[4]);'), 'pre-kick ball carry missing');
+assert(cutscene.includes('ctx.translate(W / 2, H / 2); ctx.scale(sceneScale, sceneScale); ctx.translate(-W / 2, -H / 2);'), 'centered whole-scene zoom missing');
 assert(cutscene.includes('var flipH = false;'), 'lab cross6 must keep the approved native screen-right pose');
 assert(lab.includes('nativeのscreen-right固定'), 'lab must explain the fixed review direction');
 
@@ -211,11 +226,14 @@ const crossRendererSource = section(
 );
 assert(crossRendererSource.includes('if (started) return;'), 'cross6 detach stop missing');
 const hipSrcForRuntime = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];
-const expectedHipScreenX = [182, 198, 218, 239, 253, 260];
+const expectedHipScreenX = [154, 170, 190, 211, 225, 232];
 const runtimeScale = 190 / 336;
 function makeCrossHarness() {
   let now = 0;
-  const raf = [], rendered = [], drawCalls = [], ballCalls = [], messages = [];
+  let currentScale = 1;
+  const savedScales = [];
+  const raf = [], rendered = [], drawCalls = [], ballCalls = [], scaleCalls = [];
+  const backgroundCalls = [], effectCalls = [], messages = [];
   const images = new Map(frames.map(rel => [rel, {
     src: rel, complete: false, naturalWidth: 0, naturalHeight: 336
   }]));
@@ -225,9 +243,16 @@ function makeCrossHarness() {
   };
   const ctx = {
     clearRect() {}, fillRect() {}, strokeRect() {}, beginPath() {}, moveTo() {}, lineTo() {}, stroke() {},
-    save() {}, restore() {}, translate() {}, scale() {},
+    save() { savedScales.push(currentScale); },
+    restore() { currentScale = savedScales.pop(); },
+    translate() {},
+    scale(sx, sy) {
+      assert(Math.abs(Math.abs(sx) - Math.abs(sy)) < 1e-9, 'cross6 scene zoom must remain uniform');
+      currentScale *= Math.abs(sx);
+      scaleCalls.push({ now, sx, sy, sceneScale: currentScale });
+    },
     drawImage(image, dx, dy, dw, dh) {
-      if (arguments.length >= 5 && image && image.src) drawCalls.push({ src: image.src, dx, dy, dw, dh });
+      if (arguments.length >= 5 && image && image.src) drawCalls.push({ now, src: image.src, dx, dy, dw, dh, sceneScale: currentScale });
     },
     fillText(text) { messages.push(text); },
     set fillStyle(_) {}, set strokeStyle(_) {}, set lineWidth(_) {}, set font(_) {},
@@ -247,8 +272,9 @@ function makeCrossHarness() {
     _loadCutsceneImg(src) {
       return images.get(src) || { src, complete: true, naturalWidth: 480, naturalHeight: 216 };
     },
-    _lpBg() { return {}; }, _lpDrawBg() {},
-    _lpBall(_ctx, bx, by, radius, rotation) { ballCalls.push({ now, bx, by, radius, rotation }); },
+    _lpBg() { return {}; },
+    _lpDrawBg() { backgroundCalls.push({ now, sceneScale: currentScale }); },
+    _lpBall(_ctx, bx, by, radius, rotation) { ballCalls.push({ now, bx, by, radius, rotation, sceneScale: currentScale }); },
     _mangaFeat() { return { skin: '#bd7245' }; },
     _mangaColors() {
       return { shirt: '#111', shorts: '#222', socks: '#333', accent: '#444', skin: '#555' };
@@ -263,7 +289,12 @@ function makeCrossHarness() {
     assert(raf.length, 'animation unexpectedly stopped');
     raf.shift()();
   }
-  return { canvas, images, messages, raf, rendered, drawCalls, ballCalls, step };
+  const originalStroke = ctx.stroke;
+  ctx.stroke = function () {
+    effectCalls.push({ now, sceneScale: currentScale });
+    originalStroke();
+  };
+  return { canvas, images, messages, raf, rendered, drawCalls, ballCalls, scaleCalls, backgroundCalls, effectCalls, step };
 }
 
 const delayed = makeCrossHarness();
@@ -293,24 +324,76 @@ const allHipX = delayed.drawCalls.map(call => {
   const frameIndex = frames.indexOf(call.src);
   return call.dx + hipSrcForRuntime[frameIndex][0] * runtimeScale;
 });
-assert(Math.abs(allHipX[0] - 182) < 0.01 && Math.abs(allHipX.at(-1) - 260) < 0.01, 'real renderer travel endpoints changed');
+assert(Math.abs(allHipX[0] - 154) < 0.01 && Math.abs(allHipX.at(-1) - 232) < 0.01, 'real renderer shifted travel endpoints changed');
 assert(allHipX.every((x, i) => i === 0 || x >= allHipX[i - 1]), 'real renderer must travel continuously screen-right');
 assert(allHipX.every((x, i) => i === 0 || x - allHipX[i - 1] <= 2), 'real renderer has a visible between-frame position jump');
 const ballStartNow = delayed.ballCalls[0].now;
 const ballAt = elapsed => delayed.ballCalls.find(call => call.now - ballStartNow === elapsed);
-const ball340 = ballAt(340), ball439 = ballAt(439), ball440 = ballAt(440), ball441 = ballAt(441), ball540 = ballAt(540), ball660 = ballAt(660);
-for (const [elapsed, call] of [[340,ball340], [439,ball439], [440,ball440], [441,ball441], [540,ball540], [660,ball660]]) {
+const ball0 = ballAt(0), ball95 = ballAt(95), ball175 = ballAt(175), ball255 = ballAt(255);
+const ball340 = ballAt(340), ball439 = ballAt(439), ball440 = ballAt(440), ball441 = ballAt(441);
+const ball540 = ballAt(540), ball580 = ballAt(580), ball660 = ballAt(660);
+for (const [elapsed, call] of [[0,ball0], [95,ball95], [175,ball175], [255,ball255], [340,ball340], [439,ball439], [440,ball440], [441,ball441], [540,ball540], [580,ball580], [660,ball660]]) {
   assert(call, `real renderer omitted the ball at ${elapsed}ms`);
-}
-for (const call of [ball340, ball439, ball440]) {
-  assert(Math.abs(call.bx - 318.15) < 0.1 && Math.abs(call.by - 178.38) < 0.1, 'real renderer moved the ball before the f6 departure');
   assert.strictEqual(call.radius, 12, 'real renderer changed the authored ball radius');
 }
+const carried = [ball0, ball95, ball175, ball255, ball340];
+const carriedExpectedX = [219.15, 235.15, 255.15, 276.15, 290.15];
+carried.forEach((call, i) => assert(Math.abs(call.bx - carriedExpectedX[i]) < 0.1, `ball carry changed at f${i + 1}`));
+assert(carried.every((call, i) => i === 0 || call.bx > carried[i - 1].bx), 'ball must advance strictly from f1 through f5');
+assert(carried.every((call, i) => i === 0 || call.rotation > carried[i - 1].rotation), 'ball rotation must track the pre-kick travel');
+assert(Math.abs((ball340.bx - ball0.bx) - (225 - 154)) < 0.01, 'ball and player must cover the same f1-to-f5 distance');
+for (const call of [ball340, ball439, ball440]) {
+  assert(Math.abs(call.bx - 290.15) < 0.1 && Math.abs(call.by - 178.38) < 0.1, 'real renderer changed the shifted f5 contact');
+}
+assert(Math.abs(ball440.bx - ball439.bx) < 0.001 && Math.abs(ball440.by - ball439.by) < 0.001, 'f6 launch origin is discontinuous');
 assert(ball441.bx > ball440.bx && ball441.by < ball440.by, 'real renderer did not launch the ball screen-right/up after f6 began');
-assert(Math.abs(ball540.bx - 396.15) < 0.1 && Math.abs(ball540.by - 140.38) < 0.1, 'real renderer changed the faster cross6 ball trajectory');
-assert(Math.abs(ball660.bx - 489.75) < 0.1 && Math.abs(ball660.by - 94.78) < 0.1, 'real renderer changed the final cross6 ball position');
-const finalVisiblePx = 480 - (ball660.bx - ball660.radius * 1.14);
-assert(finalVisiblePx > 3 && finalVisiblePx < 5, 'cross6 ball must keep a few outer-ring pixels visible at the final frame');
+assert(Math.abs(ball540.bx - 368.15) < 0.1 && Math.abs(ball540.by - 140.38) < 0.1, 'real renderer changed the relative cross6 launch trajectory');
+assert(Math.abs(ball580.bx - 399.35) < 0.1 && Math.abs(ball580.by - 125.18) < 0.1, 'real renderer changed the zoom-settle trajectory');
+assert(Math.abs(ball660.bx - 461.75) < 0.1 && Math.abs(ball660.by - 94.78) < 0.1, 'real renderer changed the final cross6 ball position');
+
+const scaleAt = elapsed => delayed.scaleCalls.find(call => call.now - ballStartNow === elapsed && call.sx > 0);
+const zoom440 = scaleAt(440), zoom441 = scaleAt(441), zoom540 = scaleAt(540), zoom580 = scaleAt(580), zoom660 = scaleAt(660);
+for (const [elapsed, call] of [[440,zoom440], [441,zoom441], [540,zoom540], [580,zoom580], [660,zoom660]]) {
+  assert(call, `real renderer omitted the whole-scene zoom at ${elapsed}ms`);
+}
+const preKickZoom = delayed.scaleCalls.filter(call => call.sx > 0 && call.now - ballStartNow <= 440);
+assert(preKickZoom.every(call => Math.abs(call.sceneScale - 1) < 1e-9), 'zoom-out began before the kick');
+assert(zoom441.sceneScale < 1 && zoom441.sceneScale > 0.99, 'zoom-out did not begin immediately after the kick');
+const expectedZoom540 = 1 - 0.06 * (1 - Math.pow(1 - 100 / 140, 3));
+assert(Math.abs(zoom540.sceneScale - expectedZoom540) < 1e-9, 'zoom ease-out curve changed');
+assert(Math.abs(zoom580.sceneScale - 0.94) < 1e-9 && Math.abs(zoom660.sceneScale - 0.94) < 1e-9, 'zoom did not settle at 0.94');
+const postKickZoom = delayed.scaleCalls.filter(call => call.sx > 0 && call.now - ballStartNow >= 440);
+assert(postKickZoom.every((call, i) => i === 0 || call.sceneScale <= postKickZoom[i - 1].sceneScale + 1e-12), 'zoom-out must be monotonic');
+assert(postKickZoom.every(call => call.sceneScale >= 0.94 - 1e-12), 'zoom-out exceeded its safe endpoint');
+
+// Background, sprite, code ball and impact burst must share the same camera transform.
+const sceneScale441 = zoom441.sceneScale;
+const layerScale441 = [
+  delayed.backgroundCalls.find(call => call.now - ballStartNow === 441),
+  delayed.drawCalls.find(call => call.now - ballStartNow === 441),
+  ball441,
+  delayed.effectCalls.find(call => call.now - ballStartNow === 441)
+];
+assert(layerScale441.every(Boolean), 'whole-scene zoom omitted a rendered layer');
+assert(layerScale441.every(call => Math.abs(call.sceneScale - sceneScale441) < 1e-9), 'background/player/ball/effect do not share one zoom transform');
+
+function centered(value, center, sceneScale) { return center + (value - center) * sceneScale; }
+const finalPlayer = delayed.drawCalls.find(call => call.now - ballStartNow === 660);
+assert(finalPlayer, 'final player frame missing');
+const finalNativeBounds = {
+  left: Math.min(centered(finalPlayer.dx, 240, finalPlayer.sceneScale), centered(ball660.bx - ball660.radius * 1.14, 240, ball660.sceneScale)),
+  right: Math.max(centered(finalPlayer.dx + finalPlayer.dw, 240, finalPlayer.sceneScale), centered(ball660.bx + ball660.radius * 1.14, 240, ball660.sceneScale)),
+  top: Math.min(centered(finalPlayer.dy, 108, finalPlayer.sceneScale), centered(ball660.by - ball660.radius * 1.14, 108, ball660.sceneScale)),
+  bottom: Math.max(centered(finalPlayer.dy + finalPlayer.dh, 108, finalPlayer.sceneScale), centered(ball660.by + ball660.radius * 1.14, 108, ball660.sceneScale))
+};
+assert(finalNativeBounds.left >= 0 && finalNativeBounds.right <= 480 && finalNativeBounds.top >= 0 && finalNativeBounds.bottom <= 216, 'final zoomed player/ball bounds clip the native canvas');
+assert(lab.includes('aspect-ratio:480/216'), 'Scene Lab stage aspect ratio changed');
+for (const [vw, vh] of [[1920,1080], [844,390], [800,360], [667,375]]) {
+  const viewportScale = vw / 480, stageHeight = 216 * viewportScale;
+  assert(stageHeight <= vh + 0.01, `${vw}x${vh} cannot contain the Scene Lab stage`);
+  assert(finalNativeBounds.left * viewportScale >= 0 && finalNativeBounds.right * viewportScale <= vw + 0.01, `${vw}x${vh} clips the final horizontal bounds`);
+  assert(finalNativeBounds.top * viewportScale >= 0 && finalNativeBounds.bottom * viewportScale <= stageHeight + 0.01, `${vw}x${vh} clips the final vertical bounds`);
+}
 
 const broken = makeCrossHarness();
 broken.step(0);
@@ -337,9 +420,10 @@ assert.strictEqual(detached.raf.length, 0, 'detached cross6 canvas must stop the
 
 // The reference player travels roughly 12–15% of the video width. On the
 // 480px lab canvas, use 78px of monotonic forward travel: strongest into the
-// strike, then a smaller f5→f6 follow-through step.
+// strike, then a smaller f5→f6 follow-through step. GFX-08 shifts the whole
+// staging 28px left without changing that authored cadence.
 const hipSrc = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];
-const hipScreenX = [182, 198, 218, 239, 253, 260], hipScreenY = 106, scale = 190 / 336;
+const hipScreenX = [154, 170, 190, 211, 225, 232], hipScreenY = 106, scale = 190 / 336;
 const hipDeltas = hipScreenX.slice(1).map((x, i) => x - hipScreenX[i]);
 assert.deepStrictEqual(hipDeltas, [16, 20, 21, 14, 7], 'cross6 forward-travel cadence changed');
 assert.strictEqual(hipScreenX.at(-1) - hipScreenX[0], 78, 'cross6 total forward travel changed');
@@ -352,7 +436,10 @@ const bootContact = [
 ];
 const ballRadius = 12;
 const ballRest = [bootContact[0] + ballRadius, bootContact[1]];
-assert(Math.abs(bootContact[0] - 306.15) < 0.1 && Math.abs(bootContact[1] - 178.38) < 0.1, 'f5 contact is not tied to the right boot');
-assert(Math.abs(ballRest[0] - 318.15) < 0.1 && Math.abs(ballRest[1] - 178.38) < 0.1, 'f5 ball does not rest one radius beyond the boot');
+const ballCarryStart = ballRest[0] + hipScreenX[0] - hipScreenX[4];
+assert(Math.abs(bootContact[0] - 278.15) < 0.1 && Math.abs(bootContact[1] - 178.38) < 0.1, 'f5 contact is not tied to the shifted right boot');
+assert(Math.abs(ballRest[0] - 290.15) < 0.1 && Math.abs(ballRest[1] - 178.38) < 0.1, 'f5 ball does not rest one radius beyond the shifted boot');
+assert(Math.abs(ballCarryStart - 219.15) < 0.1, 'f1 ball carry origin changed');
+assert.strictEqual(ballRest[0] - ballCarryStart, hipScreenX[4] - hipScreenX[0], 'ball/player approach travel must match');
 
-console.log('GFX-07 cross6 lab: clean assets + continuous travel + spaced one-shot ball PASS');
+console.log('GFX-08 cross6 lab: carried ball + left staging + whole-scene zoom-out PASS');

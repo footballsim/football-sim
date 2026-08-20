@@ -2751,15 +2751,19 @@ function _renderCross6LabScene(sc) {
   // Each trimmed frame has a different width. Pin the measured hip joint, then
   // reproduce the reference approach: advance strongly into contact and ease
   // the forward travel during the follow-through.
+  var tuning = { stageShiftX: -28, zoomEndScale: 0.94, zoomDurationMs: 140 };
   var ph = 190, scale = ph / 336;
   var hipSrc = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];
-  var hipScreenX = [182, 198, 218, 239, 253, 260], hipScreenY = 106;
+  var hipScreenX = [182, 198, 218, 239, 253, 260].map(function (x) { return x + tuning.stageShiftX; });
+  var hipScreenY = 106;
   var rightBoot5 = [190, 304];
   var bootContactX = hipScreenX[4] + (rightBoot5[0] - hipSrc[4][0]) * scale;
   var bootContactY = hipScreenY + (rightBoot5[1] - hipSrc[4][1]) * scale;
   var ballRadius = 12;
   // Keep the ball's left edge at the boot instead of overlapping its center.
   var ballRestX = bootContactX + ballRadius;
+  var ballCarryOffsetX = ballRestX - hipScreenX[4];
+  var ballCarryStartX = hipScreenX[0] + ballCarryOffsetX;
   var ballVelocityX = 780, ballVelocityY = 380;
 
   function burst(x, y, a) {
@@ -2825,8 +2829,16 @@ function _renderCross6LabScene(sc) {
       ? hipScreenX[fi] + (hipScreenX[fi + 1] - hipScreenX[fi]) * travelT
       : hipScreenX[fi];
 
+    var zoomT = Math.max(0, Math.min(1, (elapsed - leaveMs) / tuning.zoomDurationMs));
+    var zoomEase = 1 - Math.pow(1 - zoomT, 3);
+    var sceneScale = 1 - (1 - tuning.zoomEndScale) * zoomEase;
+
     ctx.clearRect(0, 0, W, H);
+    // The zoom-out exposes a narrow frame; keep it on the established dark Lab base.
+    ctx.fillStyle = '#081729'; ctx.fillRect(0, 0, W, H);
     ctx.imageSmoothingEnabled = false;
+    ctx.save();
+    ctx.translate(W / 2, H / 2); ctx.scale(sceneScale, sceneScale); ctx.translate(-W / 2, -H / 2);
     _lpDrawBg(ctx, bgImg, bgFallback, W, H);
     ctx.save();
     if (flipH) { ctx.translate(W, 0); ctx.scale(-1, 1); }
@@ -2843,11 +2855,15 @@ function _renderCross6LabScene(sc) {
       }
     }
 
-    // f1–f5: the ball rests just beyond the boot. f6: the same code ball leaves.
-    var bx = ballRestX, by = bootContactY, rot = 0;
+    // f1–f4: carry the ball by exactly the player's approach distance. At f5 it
+    // reaches the shifted boot contact, then f6 launches from that same origin.
+    var carryHipX = Math.min(currentHipX, hipScreenX[4]);
+    var bx = carryHipX + ballCarryOffsetX, by = bootContactY;
+    var rot = (bx - ballCarryStartX) / ballRadius;
     if (elapsed >= leaveMs) {
       var dt = (elapsed - leaveMs) / 1000;
-      bx += ballVelocityX * dt; by -= ballVelocityY * dt; rot = dt * 70;
+      bx = ballRestX + ballVelocityX * dt; by -= ballVelocityY * dt;
+      rot = (ballRestX - ballCarryStartX) / ballRadius + dt * 70;
     }
     if (bx < W + 24 && by > -24) _lpBall(ctx, bx, by, ballRadius, rot);
     var impact = Math.max(0, 1 - Math.abs(elapsed - (leaveMs - 55)) / 75);
@@ -2857,12 +2873,13 @@ function _renderCross6LabScene(sc) {
       ctx.fillStyle = 'rgba(255,255,255,' + (impact * 0.32) + ')';
       ctx.fillRect(0, 0, W, H);
     }
+    ctx.restore();
 
     if (elapsed < totalMs) requestAnimationFrame(frame);
     else canvas.dataset.cross6State = 'done';
   }
   requestAnimationFrame(frame);
-  // rightBoot5 maps to roughly (306,178); the 12px-radius ball rests just beyond it.
+  // Shifted rightBoot5 maps to roughly (278,178); the 12px-radius ball rests just beyond it.
   return _csCenterSubject(canvas, 0.50, false);
 }
 
