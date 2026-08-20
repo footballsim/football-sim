@@ -2873,7 +2873,7 @@ function _renderCross6LabScene(sc) {
     else canvas.dataset.cross6State = 'done';
   }
   requestAnimationFrame(frame);
-  // Shifted rightBoot5 maps to roughly (278,178); the 12px-radius ball rests just beyond it.
+  // Shifted rightBoot5 maps to roughly (271,168); the 10px-radius ball rests just beyond it.
   return _csCenterSubject(canvas, 0.50, false);
 }
 
