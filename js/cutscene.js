@@ -2760,7 +2760,7 @@ function _renderCross6LabScene(sc) {
   var ballRadius = 12;
   // Keep the ball's left edge at the boot instead of overlapping its center.
   var ballRestX = bootContactX + ballRadius;
-  var ballVelocityX = 820, ballVelocityY = 380;
+  var ballVelocityX = 780, ballVelocityY = 380;
 
   function burst(x, y, a) {
     ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5;
