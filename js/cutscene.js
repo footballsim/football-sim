@@ -319,7 +319,9 @@ function renderShootStep(sc, stepType) {
   if (sc.action === 'ミドルシュート') return _renderMidShotScene(shotSc);
   if (sc.action === 'ボレーシュート') return _renderVolleyScene(shotSc);
   if (sc.action === 'ヘディングシュート') return _renderHeadingAnimScene(shotSc) || _renderHeaderRiseDuelScene(shotSc) || _renderHeaderScene(shotSc);   // 6コマアニメ優先→対決割りRise→旧重ね絵
-  return _renderShotScene(shotSc, null);   // 通常シュート/PKは採用4コマへ直結（旧shot素材に依存しない）
+  var entry = _pickCutscene('shot', sc.offence && sc.offence.team_color);   // ← PK もここ（シュート絵）
+  if (entry && entry.file) return _renderShotScene(shotSc, entry);
+  return null;
 }
 
 function renderSceneArt(sc, nextSc) {
@@ -354,12 +356,6 @@ function renderSceneArt(sc, nextSc) {
   if (moment === 'dribble') return _renderDribbleScene(sc);     // ドリブルは専用2スプライト（緑/赤を実行時recolor・manifest非依存）
   if (moment === 'runin') return _renderRunInScene(sc);         // 飛び出し: dribbleスプライト流用・manifest非依存
   if (moment === 'postplay') return _renderPostplayScene(sc);   // ポストプレー: 成功=ホールドアップ→反転(ドリブル流用) / 失敗=守備が弾く
-  // 通常シュートは採用4コマへ直結。結果専用演出（枠外/GKセーブ）は従来どおり維持する。
-  if (moment === 'shot') {
-    if (sc.result === '枠を外した！') return _renderMissScene(sc);
-    if (sc.result === 'GK防いだ！') return _renderGkScene(sc, 'save');
-    return _renderShotScene(sc, null);
-  }
   var entry = _pickCutscene(moment, sc.offence && sc.offence.team_color);
   if (!entry) return null;
 
@@ -381,6 +377,12 @@ function renderSceneArt(sc, nextSc) {
     var isPlainPass = !nextSc || (_noSfx.indexOf(nextSc.scenario) === -1 && nextSc.ofsPos !== sc.ofsPos);   // 「別」のみ通常パス
     if (!isPlainPass) return _renderOnetwoScene(sc);   // ワンツー3カット連結（同 or パス交換）
     return _renderShortpassScene(sc, entry);            // 別選手への通常ショートパス／次シーン無し
+  }
+  // シュート: 枠外=ニアポスト脇を外す演出、GK防いだ！=GKカット、ブロック=シューター演出。（ゴールは上で処理）
+  if (moment === 'shot' && entry.file) {
+    if (sc.result === '枠を外した！') return _renderMissScene(sc);
+    if (sc.result === 'GK防いだ！') return _renderGkScene(sc, 'save');
+    return _renderShotScene(sc, entry);
   }
   var img = _loadCutsceneImg(entry.file);
   var W = 390, H = 195;
@@ -2075,7 +2077,7 @@ function _renderHeaderRiseDuelScene(sc) {
 //   枠外/ブロック=現状の左へ抜ける簡易演出（後で専用画像に差し替え）。ゴール！！は takeover 側。
 //   1回再生で静止（ループしない）。detach で停止。
 // ============================================================
-// 採用シュート4コマ（2026-08-13・演出ラボ先行）
+// 不採用シュート4コマ（2026-08-21・演出ラボの比較確認専用）
 //   ユーザー指定のファイル名時刻順で1ビートとして再生する。
 //   白地を除去した透明PNGを共通フィールド背景へ重ねる。
 //   ★ 表示層のみ。実試合のシュート選択・結果・rng消費には接続しない。
@@ -2264,16 +2266,14 @@ function _renderCinematicShotScene(sc) {
 }
 
 // ============================================================
-// 通常シュートの本編入口。
-//   保護対象の採用4コマと、追加したシネマチック4拍を決定論で交互表示する。
-//   entry は既存呼び出し互換のため受け取る。
+// 通常シュートの本編入口。67263a2直前の2拍／顔カットインへ復元。
+// 不採用4コマと追加シネマチック4拍はScene Labの比較用途にのみ残す。
 // ============================================================
 function _renderShotScene(sc, entry) {
-  var canRecolor = typeof MangaRecolor !== 'undefined' && MangaRecolor.render;
-  return (canRecolor && (_csShotVarHash(sc) & 1)) ? _renderCinematicShotScene(sc) : _renderAdoptedShotScene(sc);
+  return _renderLegacyShotScene(sc, entry);
 }
 
-// 旧シュート演出（演出ラボでの比較確認専用・本編からは呼ばない）。
+// 67263a2直前のシュート演出本体。
 function _renderLegacyShotScene(sc, entry) {
   // 構図ローテーション（lab）: 決定論ハッシュが奇数 → Var A=対角対決割り（_renderShotDuelScene）。偶数 → Var B=2拍（本体）。
   //   対象は result='成功'（分割'shot'ビート/PK蹴り＝結果非開示）のみ。ブロック等の結果付き描画は Var B 固定。

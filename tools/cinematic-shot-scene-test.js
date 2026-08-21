@@ -94,7 +94,8 @@ newFrames.forEach(rel => {
 
 assert(cutscene.includes('var _CINEMATIC_SHOT_FRAMES = ['), 'new shot sequence is not registered');
 newFrames.forEach(rel => assert(cutscene.includes(rel + '?v=1'), `missing runtime path: ${rel}`));
-assert(/function _renderShotScene\(sc, entry\) \{\s*var canRecolor = typeof MangaRecolor !== 'undefined' && MangaRecolor\.render;\s*return \(canRecolor && \(_csShotVarHash\(sc\) & 1\)\) \? _renderCinematicShotScene\(sc\) : _renderAdoptedShotScene\(sc\);\s*\}/m.test(cutscene), 'shot variants must use deterministic rotation, require recoloring, and preserve the adopted fallback');
+assert(/function _renderShotScene\(sc, entry\) \{\s*return _renderLegacyShotScene\(sc, entry\);\s*\}/m.test(cutscene), 'production shot must use the restored pre-67263 renderer');
+assert(!/function renderShootStep[\s\S]*?function renderSceneArt/.exec(cutscene)[0].includes('_renderCinematicShotScene'), 'cinematic shot must not be reachable from production shoot step');
 assert(cutscene.includes("MangaRecolor.render('cinematic-shot-' + idx, img, cols)"), 'new shot must follow runtime kit recoloring');
 
-console.log('cinematic shot: protected original + 4 RGBA frames + deterministic rotation PASS');
+console.log('cinematic shot: protected comparison assets + production isolation PASS');

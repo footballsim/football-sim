@@ -32,13 +32,16 @@ function section(src, start, end) {
   return src.slice(a, b);
 }
 for (const [start, end] of [
-  ['function renderShootStep', 'function renderSceneArt'],
-  ['function renderSceneArt', '// ロングパス専用カットイン'],
   ['function _renderLongpassScene', 'function _renderLongpassResultScene'],
   ['function _renderLongpassResultScene', '// GKのキット色を選ぶ']
 ]) {
   assert.strictEqual(section(cutscene, start, end), section(baseCutscene, start, end), `${start} routing changed`);
 }
+assert.strictEqual(
+  cutscene.match(/if \(sc\.action === 'クロス'\) return _renderCrossScene\(sc\);[^\n]*/)[0],
+  baseCutscene.match(/if \(sc\.action === 'クロス'\) return _renderCrossScene\(sc\);[^\n]*/)[0],
+  'production cross routing changed'
+);
 assert.strictEqual(
   cutscene.match(/function _renderCrossScene\([^\n]+/)[0],
   baseCutscene.match(/function _renderCrossScene\([^\n]+/)[0],
@@ -238,8 +241,8 @@ for (const rel of frames) {
 assert(lab.includes('data-k="cross6"'), 'independent cross6 lab button missing');
 assert(lab.includes("{k:'cross6', lay:'M'"), 'cross6 gallery catalog entry missing');
 assert(lab.includes("kind==='cross6'"), 'cross6 lab runner missing');
-assert(lab.includes('<script src="js/cutscene.js?v=lab93"></script>'), 'Scene Lab must cache-bust the scaled cross6 runtime');
-assert(!lab.includes('js/cutscene.js?v=lab92'), 'stale Scene Lab cutscene cache key remains');
+assert(lab.includes('<script src="js/cutscene.js?v=lab94"></script>'), 'Scene Lab must cache-bust the current cutscene runtime');
+assert(!lab.includes('js/cutscene.js?v=lab93'), 'stale Scene Lab cutscene cache key remains');
 assert(cutscene.includes('var frameDur = [95, 80, 80, 85, 100, 220];'), 'reference-paced six-frame timing missing');
 assert(cutscene.includes('if (elapsed < totalMs) requestAnimationFrame(frame);'), 'one-shot stop contract missing');
 assert(cutscene.includes('if (elapsed >= leaveMs)'), 'f6 ball departure missing');
