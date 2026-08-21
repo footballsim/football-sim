@@ -104,8 +104,8 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
       </select>
     </div>
     <div class="btns">
-      <button data-k="shotduel" onclick="run('shotduel')">対決割り（漫画演出・停止中の比較用）</button>
-      <button data-k="shot2" onclick="run('shot2')">2拍・顔カットイン</button>
+      <button data-k="shotduel" onclick="run('shotduel')">現行本編A：対決割り</button>
+      <button data-k="shot2" onclick="run('shot2')">現行本編B：2拍・顔カットイン</button>
     </div>
     <p class="hint" style="margin:6px 0 0">層C＝主語は<b>感情</b>。全身でなく<b>部位</b>を見切れるサイズ（120〜130%）で見せます。<b>1コマずつ足していく</b>＝1画面に4つ出すのではなく時間軸で1ビートずつ（1画面1ビートと矛盾しない）。<br><b>新規アセットは1枚も作っていません</b>：目元=Portraitの合成頭(720×840)をEYEアンカーで切出／スパイク=既存シュート絵の蹴り足(0.42,0.79)／グローブ=GKダイブ絵のreaching glove／ボール=手続き描画。</p>
     <div class="row" style="margin-top:8px">
@@ -277,10 +277,11 @@ var SCENE_CATALOG=[
 
  {sec:'層C 部位アップ（試作）'},
  {k:'shot4new', lay:'M', nm:'不採用・4コマ案（比較用）', nt:'2026-08-21に不採用。比較確認専用で本編からは到達しない'},
+ {k:'shot4cinematic', lay:'M', nm:'未採用・追加4拍（比較用）', nt:'本編から隔離した追加案。比較確認専用'},
  {k:'montage', lay:'C', nm:'寄りの4連続 MONT-02', nt:'★4分割コマ割りを廃止。1画面1コマの寄りを4ビート連続で叩きつける'},
- {k:'shotduel', lay:'C', nm:'旧・対決割り①（比較用）', nt:'本編から撤去済み。旧GKダイブ構図の比較確認専用'},
- {k:'shotduelface', lay:'C', nm:'旧・対決割り②（比較用）', nt:'本編から撤去済み。旧GK顔アップ構図の比較確認専用'},
- {k:'shot2', lay:'M', nm:'シュート（復元版・現行本編）', nt:'67263a2直前の2拍／顔カットインを本編へ復元'},
+ {k:'shotduel', lay:'C', nm:'シュート（復元本編A・対決割り）', nt:'通常シュートの決定論ローテーションA。GKダイブ構図'},
+ {k:'shotduelface', lay:'C', nm:'シュート（復元本編A・GK顔）', nt:'対決割りAのGK顔アップ確認'},
+ {k:'shot2', lay:'M', nm:'シュート（復元本編B・2拍）', nt:'通常シュートの決定論ローテーションB。2拍／顔カットイン'},
 
  {sec:'試合中の演出（現行・本番同等）'},
  {k:'gksave', lay:'M', nm:'GKダイブ', nt:'★3作品と同じ構図＝ここは変えなくてよい'},
@@ -394,6 +395,9 @@ function run(kind,retry,target){
     }else if(kind==='shot4new'){
       var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'成功'};
       c=_renderAdoptedShotScene(sc);   // 不採用4コマはラボの比較確認だけに隔離
+    }else if(kind==='shot4cinematic'){
+      var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'成功'};
+      c=_renderCinematicShotScene(sc);   // 未採用の追加4拍もラボ比較だけに隔離
     }else if(kind==='montage'){
       var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'成功'};
       c=_renderShotMontageScene(sc);
