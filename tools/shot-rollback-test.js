@@ -64,6 +64,6 @@ ok(lab.includes("nm:'未採用・追加4拍（比較用）'"), 'Labで追加4拍
 ok(lab.includes('c=_renderAdoptedShotScene(sc);   // 不採用4コマはラボの比較確認だけに隔離'), '不採用4コマはLab明示経路だけで描画する');
 ok(lab.includes('c=_renderCinematicShotScene(sc);   // 未採用の追加4拍もラボ比較だけに隔離'), '未採用追加4拍はLab明示経路だけで描画する');
 ok(lab.includes('c=_renderShotScene(sc,entry);   // 本編と同じ復元入口を通す'), '復元版Labが本編入口を通る');
-ok(lab.includes('js/cutscene.js?v=lab94'), 'Lab cache keyを更新する');
+ok(lab.includes('js/cutscene.js?v=lab95'), 'Lab cache keyを更新する');
 
 console.log(`shot rollback test: ${passed}/${passed} PASS`);

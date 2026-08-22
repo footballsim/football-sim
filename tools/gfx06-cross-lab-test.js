@@ -241,21 +241,21 @@ for (const rel of frames) {
 assert(lab.includes('data-k="cross6"'), 'independent cross6 lab button missing');
 assert(lab.includes("{k:'cross6', lay:'M'"), 'cross6 gallery catalog entry missing');
 assert(lab.includes("kind==='cross6'"), 'cross6 lab runner missing');
-assert(lab.includes('<script src="js/cutscene.js?v=lab94"></script>'), 'Scene Lab must cache-bust the current cutscene runtime');
-assert(!lab.includes('js/cutscene.js?v=lab93'), 'stale Scene Lab cutscene cache key remains');
+assert(lab.includes('<script src="js/cutscene.js?v=lab95"></script>'), 'Scene Lab must cache-bust the current cutscene runtime');
+assert(!lab.includes('js/cutscene.js?v=lab94'), 'stale Scene Lab cutscene cache key remains');
 assert(cutscene.includes('var frameDur = [95, 80, 80, 85, 100, 220];'), 'reference-paced six-frame timing missing');
 assert(cutscene.includes('if (elapsed < totalMs) requestAnimationFrame(frame);'), 'one-shot stop contract missing');
 assert(cutscene.includes('if (elapsed >= leaveMs)'), 'f6 ball departure missing');
 assert(cutscene.includes('var rightBoot5 = [190, 304];'), 'f5 screen-right boot anchor missing');
 assert(cutscene.includes('var hipSrc = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];'), 'six measured hip anchors missing');
-assert(cutscene.includes('var tuning = { stageShiftX: -28 };'), 'cross6 left staging control changed');
+assert(cutscene.includes('var tuning = { stageShiftX: -44 };'), 'cross6 left staging control changed');
 assert(cutscene.includes('var playerVisualScale = 0.86;'), 'cross6 player visual scale changed');
 assert(cutscene.includes('var ph = 190 * playerVisualScale, scale = ph / 336;'), 'cross6 player draw scale is not derived from the audited take');
 assert(cutscene.includes('var ballRadius = 10;'), 'cross6 ball radius must match protected heading/overhead scenes');
 assert(cutscene.includes('var CS_FIGURE_SCALE = 0.83;'), 'protected figure scale changed');
 assert((cutscene.match(/Math\.round\(12 \* CS_FIGURE_SCALE\)/g) || []).length >= 2, 'protected heading/overhead ball-radius derivation changed');
 assert.strictEqual(Math.round(12 * protectedFigureScale), 10, 'protected heading/overhead ball radius is no longer 10');
-assert(cutscene.includes('var ballVelocityX = 960, ballVelocityY = 380;'), 'cross6 natural-exit velocity changed');
+assert(cutscene.includes('var ballVelocityX = 1032, ballVelocityY = 380;'), 'cross6 natural-exit velocity changed');
 assert(cutscene.includes('var hipScreenX = [182, 198, 218, 239, 253, 260].map(function (x) { return x + tuning.stageShiftX; });'), 'shifted forward-travel hip anchors missing');
 assert(cutscene.includes('var currentHipX = fi < hipScreenX.length - 1'), 'continuous between-frame travel missing');
 assert(cutscene.includes('var carryHipX = Math.min(currentHipX, hipScreenX[4]);'), 'pre-kick ball carry missing');
@@ -429,7 +429,7 @@ const crossRendererSource = section(
 );
 assert(crossRendererSource.includes('if (started) return;'), 'cross6 detach stop missing');
 const hipSrcForRuntime = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];
-const expectedHipScreenX = [154, 170, 190, 211, 225, 232];
+const expectedHipScreenX = [138, 154, 174, 195, 209, 216];
 const runtimeScale = (190 * 0.86) / 336;
 function makeCrossHarness() {
   let now = 0;
@@ -532,7 +532,7 @@ const allHipX = delayed.drawCalls.map(call => {
   const frameIndex = frames.indexOf(call.src);
   return call.dx + hipSrcForRuntime[frameIndex][0] * runtimeScale;
 });
-assert(Math.abs(allHipX[0] - 154) < 0.01 && Math.abs(allHipX.at(-1) - 232) < 0.01, 'real renderer shifted travel endpoints changed');
+assert(Math.abs(allHipX[0] - 138) < 0.01 && Math.abs(allHipX.at(-1) - 216) < 0.01, 'real renderer shifted travel endpoints changed');
 assert(allHipX.every((x, i) => i === 0 || x >= allHipX[i - 1]), 'real renderer must travel continuously screen-right');
 assert(allHipX.every((x, i) => i === 0 || x - allHipX[i - 1] <= 2), 'real renderer has a visible between-frame position jump');
 const ballStartNow = delayed.ballCalls[0].now;
@@ -545,31 +545,31 @@ for (const [elapsed, call] of [[0,ball0], [95,ball95], [175,ball175], [255,ball2
   assert.strictEqual(call.radius, 10, 'real renderer ball radius differs from protected heading/overhead');
 }
 const carried = [ball0, ball95, ball175, ball255, ball340];
-const carriedExpectedX = [209.71, 225.71, 245.71, 266.71, 280.71];
+const carriedExpectedX = [193.71, 209.71, 229.71, 250.71, 264.71];
 carried.forEach((call, i) => assert(Math.abs(call.bx - carriedExpectedX[i]) < 0.1, `ball carry changed at f${i + 1}`));
 assert(carried.every((call, i) => i === 0 || call.bx > carried[i - 1].bx), 'ball must advance strictly from f1 through f5');
 assert(carried.every((call, i) => i === 0 || call.rotation > carried[i - 1].rotation), 'ball rotation must track the pre-kick travel');
-assert(Math.abs((ball340.bx - ball0.bx) - (225 - 154)) < 0.01, 'ball and player must cover the same f1-to-f5 distance');
+assert(Math.abs((ball340.bx - ball0.bx) - (209 - 138)) < 0.01, 'ball and player must cover the same f1-to-f5 distance');
 for (const call of [ball340, ball439, ball440]) {
-  assert(Math.abs(call.bx - 280.71) < 0.1 && Math.abs(call.by - 168.25) < 0.1, 'real renderer changed the scaled f5 contact');
+  assert(Math.abs(call.bx - 264.71) < 0.1 && Math.abs(call.by - 168.25) < 0.1, 'real renderer changed the scaled f5 contact');
 }
 assert(Math.abs(ball440.bx - ball439.bx) < 0.001 && Math.abs(ball440.by - ball439.by) < 0.001, 'f6 launch origin is discontinuous');
 assert(ball441.bx > ball440.bx && ball441.by < ball440.by, 'real renderer did not launch the ball screen-right/up after f6 began');
-assert(Math.abs((ball440.bx - ball440.radius) - 270.71) < 0.1, 'f5 ball edge does not touch the scaled boot contact');
-assert(Math.abs(ball540.bx - 376.71) < 0.1 && Math.abs(ball540.by - 130.25) < 0.1, 'real renderer changed the relative cross6 launch trajectory');
-assert(Math.abs(ball580.bx - 415.11) < 0.1 && Math.abs(ball580.by - 115.05) < 0.1, 'real renderer changed the post-kick trajectory');
-assert(Math.abs(ball660.bx - 491.91) < 0.1 && Math.abs(ball660.by - 84.65) < 0.1, 'real renderer changed the final cross6 ball position');
+assert(Math.abs((ball440.bx - ball440.radius) - 254.71) < 0.1, 'f5 ball edge does not touch the scaled boot contact');
+assert(Math.abs(ball540.bx - 367.91) < 0.1 && Math.abs(ball540.by - 130.25) < 0.1, 'real renderer changed the relative cross6 launch trajectory');
+assert(Math.abs(ball580.bx - 409.19) < 0.1 && Math.abs(ball580.by - 115.05) < 0.1, 'real renderer changed the post-kick trajectory');
+assert(Math.abs(ball660.bx - 491.75) < 0.1 && Math.abs(ball660.by - 84.65) < 0.1, 'real renderer changed the final cross6 ball position');
 
-// Radius 10 draws an outer rim at 1.14r. vx=960 is the narrow safe band that
+// Radius 10 draws an outer rim at 1.14r. vx=1032 is the narrow safe band that
 // leaves a visible sliver at 659ms, then moves the full rim beyond x=480 at
 // 660ms. Calls at both times prove canvas clipping, not a sudden code removal.
 const ballOuterRadius = 10 * 1.14;
 const minimumSafeVx = (480 + ballOuterRadius - ball440.bx) / 0.220;
 const maximumVisibleAt659Vx = (480 + ballOuterRadius - ball440.bx) / 0.219;
-assert(960 > minimumSafeVx && 960 <= maximumVisibleAt659Vx, 'f6 horizontal velocity is outside the safe natural-exit band');
+assert(1032 > minimumSafeVx && 1032 <= maximumVisibleAt659Vx, 'f6 horizontal velocity is outside the safe natural-exit band');
 assert(ball659.bx - ballOuterRadius < 480, 'ball should retain a visible sliver at 659ms');
 assert(ball660.bx - ballOuterRadius > 480, 'ball outer rim did not fully exit screen-right at 660ms');
-assert(Math.abs((ball660.bx - ball659.bx) - 0.96) < 1e-9, 'ball did not travel continuously through its final clipped millisecond');
+assert(Math.abs((ball660.bx - ball659.bx) - 1.032) < 1e-9, 'ball did not travel continuously through its final clipped millisecond');
 
 // GFX-09: there is no camera shrink at any point. Background, sprite, code
 // ball and impact burst stay at native scale before and after the kick.
@@ -640,10 +640,10 @@ assert.strictEqual(detached.raf.length, 0, 'detached cross6 canvas must stop the
 
 // The reference player travels roughly 12–15% of the video width. On the
 // 480px lab canvas, use 78px of monotonic forward travel: strongest into the
-// strike, then a smaller f5→f6 follow-through step. GFX-08 shifts the whole
-// staging 28px left without changing that authored cadence.
+// strike, then a smaller f5→f6 follow-through step. GFX-11 shifts the whole
+// staging 44px left without changing that authored cadence.
 const hipSrc = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];
-const hipScreenX = [154, 170, 190, 211, 225, 232], hipScreenY = 106, scale = (190 * 0.86) / 336;
+const hipScreenX = [138, 154, 174, 195, 209, 216], hipScreenY = 106, scale = (190 * 0.86) / 336;
 const hipDeltas = hipScreenX.slice(1).map((x, i) => x - hipScreenX[i]);
 assert.deepStrictEqual(hipDeltas, [16, 20, 21, 14, 7], 'cross6 forward-travel cadence changed');
 assert.strictEqual(hipScreenX.at(-1) - hipScreenX[0], 78, 'cross6 total forward travel changed');
@@ -657,9 +657,9 @@ const bootContact = [
 const ballRadius = 10;
 const ballRest = [bootContact[0] + ballRadius, bootContact[1]];
 const ballCarryStart = ballRest[0] + hipScreenX[0] - hipScreenX[4];
-assert(Math.abs(bootContact[0] - 270.71) < 0.1 && Math.abs(bootContact[1] - 168.25) < 0.1, 'f5 contact is not tied to the scaled right boot');
-assert(Math.abs(ballRest[0] - 280.71) < 0.1 && Math.abs(ballRest[1] - 168.25) < 0.1, 'f5 ball does not rest one radius beyond the scaled boot');
-assert(Math.abs(ballCarryStart - 209.71) < 0.1, 'f1 ball carry origin changed');
+assert(Math.abs(bootContact[0] - 254.71) < 0.1 && Math.abs(bootContact[1] - 168.25) < 0.1, 'f5 contact is not tied to the scaled right boot');
+assert(Math.abs(ballRest[0] - 264.71) < 0.1 && Math.abs(ballRest[1] - 168.25) < 0.1, 'f5 ball does not rest one radius beyond the scaled boot');
+assert(Math.abs(ballCarryStart - 193.71) < 0.1, 'f1 ball carry origin changed');
 assert.strictEqual(ballRest[0] - ballCarryStart, hipScreenX[4] - hipScreenX[0], 'ball/player approach travel must match');
 
-console.log('GFX-10 cross6 lab: 0.86 player + r10 ball + natural screen-right exit PASS');
+console.log('GFX-11 cross6 lab: left-shifted player/ball + natural screen-right exit PASS');

@@ -2751,7 +2751,7 @@ function _renderCross6LabScene(sc) {
   // Each trimmed frame has a different width. Pin the measured hip joint, then
   // reproduce the reference approach: advance strongly into contact and ease
   // the forward travel during the follow-through.
-  var tuning = { stageShiftX: -28 };
+  var tuning = { stageShiftX: -44 };
   var playerVisualScale = 0.86;
   var ph = 190 * playerVisualScale, scale = ph / 336;
   var hipSrc = [[125,170], [132,174], [158,176], [170,168], [96,176], [107,166]];
@@ -2767,7 +2767,7 @@ function _renderCross6LabScene(sc) {
   var ballCarryStartX = hipScreenX[0] + ballCarryOffsetX;
   // Keep a visible sliver through 659ms, then let the complete ball cross the
   // right edge naturally at 660ms (the draw call itself is never cut early).
-  var ballVelocityX = 960, ballVelocityY = 380;
+  var ballVelocityX = 1032, ballVelocityY = 380;
 
   function burst(x, y, a) {
     ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = 2.5;
@@ -2873,7 +2873,7 @@ function _renderCross6LabScene(sc) {
     else canvas.dataset.cross6State = 'done';
   }
   requestAnimationFrame(frame);
-  // Shifted rightBoot5 maps to roughly (271,168); the 10px-radius ball rests just beyond it.
+  // Shifted rightBoot5 maps to roughly (255,168); the 10px-radius ball rests just beyond it.
   return _csCenterSubject(canvas, 0.50, false);
 }
 
