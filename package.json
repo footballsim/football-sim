@@ -10,6 +10,7 @@
     "test:all": "node tools/run-headless-tests.mjs",
     "brain:snapshot": "node tools/brain-snapshot.mjs",
     "context:pack": "node tools/context-pack.mjs",
+    "weekly:report": "node tools/weekly-report.mjs",
     "check:docs": "node tools/docs-guard.js",
     "release:source": "npm run check && npm run check:docs && npm run test:all",
     "regression": "node tools/regression-harness.js check",

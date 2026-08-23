@@ -74,6 +74,7 @@ Windows発売側は `WIN-01 → WIN-02/03 → WIN-04/05 → PLAY-01 → REL-02 �
 - [ ] **AUTO-05 Asset allowlist＋provenance gate**: buildへdraft/.DS_Store/台帳外画像が混入しないよう停止する。
 - [ ] **AUTO-06 週次報告**: 毎週金曜に完了コミット、QA、期限差、次週最大3タスク、Go/No-goを提示。
 - [x] **AUTO-07 外部脳／コンテキスト入口**: ✅ **2026-08-23**。`npm run brain:snapshot`で短い現況・判断・未完了タスクを出力し、`npm run context:pack`でテーマ別・文字数上限付きの最小読込を生成。週次の定期実行はAUTO-06に分離。
+- [x] **AUTO-08 週次外部脳レポート**: ✅ **2026-08-23**。`npm run weekly:report`で直近7日コミット、期限超過、次週最大3タスク、tracked差分と期限によるGo/No-goを同じ形式で出力。自動化は読み取り専用で実行する。
 
 ---
 
