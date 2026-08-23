@@ -8,6 +8,7 @@ const focus = (process.argv.find((x) => x.startsWith('--focus=')) || '--focus=ge
 const rawBudget = Number((process.argv.find((x) => x.startsWith('--budget=')) || '--budget=12000').slice(9));
 const budget = Number.isFinite(rawBudget) && rawBudget > 1000 ? rawBudget : 12000;
 const focusFiles = {
+  cutscene: ['CUTSCENE_HANDOFF.md', 'design/PLAYER_BODY_CANON.md'],
   missions: ['js/missions.js', 'tools/manager-missions-test.js'],
   release: ['package.json', 'build.js', 'tools/deploy-guard.js'],
   ui: ['DESIGN_SYSTEM.md', 'css/league-ui.css']
@@ -15,11 +16,17 @@ const focusFiles = {
 const baseRules = {
   'AGENTS.md': [/^## 絶対ガードレール/, /^## 検証ゲート/, /^## チームの記憶/],
   'CODEX_HANDOFF.md': [/^## 0\./, /^## 2-/, /^## 3\./, /^## 6\./],
+  'CUTSCENE_HANDOFF.md': [/^# /, /^## /, /^\|/],
   'SCOPE.md': [/^# /, /^## /],
   'BACKLOG.md': [/^## 2026-08-14 現在地/, /^## 自走開発基盤/],
   'DECISIONS.md': [/^## /]
 };
-const files = ['AGENTS.md', 'CODEX_HANDOFF.md', 'SCOPE.md', 'BACKLOG.md', 'DECISIONS.md', ...(focusFiles[focus] || [])];
+const standardFiles = ['AGENTS.md', 'CODEX_HANDOFF.md', 'SCOPE.md', 'BACKLOG.md', 'DECISIONS.md'];
+// 画像制作の再開では、広い計画文書よりも先にライブ台帳を出す。
+// これにより、小さなコンテキスト予算でも却下済み候補を掘り返さない。
+const files = focus === 'cutscene'
+  ? [...focusFiles.cutscene, 'AGENTS.md', 'CODEX_HANDOFF.md', 'DECISIONS.md', 'BACKLOG.md']
+  : [...standardFiles, ...(focusFiles[focus] || [])];
 const always = /^(?:- \[[ ~]\]|- \*\*AUTO-|\*\*実装境界|\*\*未完了ゲート|\*\*決定|\*\*Go\/No-go)/;
 let used = 0;
 

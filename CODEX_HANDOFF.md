@@ -14,6 +14,7 @@
 1. `AGENTS.md` — 絶対ガードレール（違反＝ロールバック）
 2. **本書（CODEX_HANDOFF.md）** — 地雷と実務則
 3. `SCOPE.md`（機能スコープの正本）→ `ROADMAP.md`（日程）→ `BACKLOG.md`（作業）→ `DECISIONS.md`（判断の履歴）
+   - **試合画像／Scene Labのタスクでは続けて [CUTSCENE_HANDOFF.md](CUTSCENE_HANDOFF.md) を読む。** 過去の会話ではなく、同書の採否・禁止候補・次の許可作業から再開する。
 4. `PARALLEL_SESSIONS.md` — **複数セッションを同時に走らせる場合のみ**（ファイル所有権・git 作法・デプロイ調停）
 5. `CLAUDE.md` — 名前は Claude 由来だが**中身はプロジェクトの技術仕様**（ファイル構成・関数の在処・ビルド/インフラ）。Codex も読む。
 
@@ -33,7 +34,7 @@ cd ~/football-sim && git log --oneline -5 && git status --short | head -30 && gi
 
 Codex内の並行実行は **O / D / X-P / Q の最大4枠**。2026-08-14の包括委任により、正式スコープ内は実装・検証・独立レビュー・`game-main`統合・build/push・Basic認証中のkantoku-lab反映まで自走する。Steam提出/公開/発売、価格/契約/秘密、権利・AI申告の最終確定、baseline/save schema/内部ID/duel logic、スコープ/日程変更だけは人間承認後に限る。1タスク1worktreeで、同じworking treeを共有しない。詳細は [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md)。
 
-- **正本はリポジトリの `.md` 群**。会話やメモリに依存した引き継ぎはしない（今回の反省）。
+- **正本はリポジトリの `.md` 群**。会話やメモリに依存した引き継ぎはしない（今回の反省）。とくに試合演出のライブ状態は `CUTSCENE_HANDOFF.md` を最優先にし、却下済み候補を推測で掘り起こさない。
 - **Claude 側の独自資産**（残るもの）: `~/.claude/agents/` のサブエージェント9体（qa-regression / reviewer / asset-qa 等）、`/deploy` スキル、js 編集後 `node --check` の自動フック、`docs/`・`dist-lab` 手編集のブロックフック。
   ★ **フックは Claude Code のセッションにしか効かない**。その代替として**ツール非依存の npm ゲート**を用意した（2026-08-13）:
   ```bash

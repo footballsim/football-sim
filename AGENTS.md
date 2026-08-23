@@ -28,6 +28,7 @@ football-sim をゲーム化（[GAME_PLAN.md](GAME_PLAN.md)）するための契
 
 **読む順**: 本ファイル → **[CODEX_HANDOFF.md](CODEX_HANDOFF.md)（地雷と実務則・引き継ぎの本体）** →
 [SCOPE.md](SCOPE.md)（機能の正本）→ [ROADMAP.md](ROADMAP.md) → [BACKLOG.md](BACKLOG.md) → [DECISIONS.md](DECISIONS.md)。
+**試合パートの画像／Scene Labを扱うタスクでは、この直後に必ず [CUTSCENE_HANDOFF.md](CUTSCENE_HANDOFF.md) を読む。** そのシーンの採用済み・却下済み・制作中の状態と次の許可作業は同ファイルを最優先正本とする。
 複数セッションを同時に走らせる時だけ [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md)（所有権・git 作法・**デプロイ調停**）。
 
 **反映先は kantoku-lab.pages.dev のみ**（football-sim.com は 2026-07-03 から凍結中）。
@@ -60,7 +61,7 @@ football-sim をゲーム化（[GAME_PLAN.md](GAME_PLAN.md)）するための契
    - 高さ制約のある面に `overflow: hidden` を使わない（下端が到達不能になる）。
    - grid/flex の中央寄せは **`safe center`**（素の `center` は溢れた先頭がスクロール範囲外に出る）。
    - 確認は `dist-lab/device-preview.html`（PCから端末切替＋キャッシュ無視リロード）。
-11. **試合パートのグラフィックは、1シーンごとにユーザー目視ゲートを通す**（2026-08-17ユーザー指示）。Writerは生成・仮配線・内部QA・Reviewerまで進めてよいが、採否確認前に`game-main`へ統合、build/push/deploy、次シーンの画像生成へ進まない。Oは最終候補画像と実機プレビュー、QA所見を提示し、明示的な採用回答を待つ。
+11. **試合パートのグラフィックは、1シーンごとにユーザー目視ゲートを通す**（2026-08-17ユーザー指示）。Writerは生成・仮配線・内部QA・Reviewerまで進めてよいが、採否確認前に`game-main`へ統合、build/push/deploy、次シーンの画像生成へ進まない。Oは最終候補画像と実機プレビュー、QA所見を提示し、明示的な採用回答を待つ。**着手／再開前には必ず[CUTSCENE_HANDOFF.md](CUTSCENE_HANDOFF.md)の該当行を照合し、却下済み素材・比較専用素材・推測だけのポーズを再利用しない。行が無い／状態が不明なら生成せずユーザーへ確認する。**
 
 ---
 
