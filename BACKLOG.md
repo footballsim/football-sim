@@ -73,6 +73,7 @@ Windows発売側は `WIN-01 → WIN-02/03 → WIN-04/05 → PLAY-01 → REL-02 �
 - [ ] **AUTO-04 成果物照合**: dist-lab/Steam成果物に元commitを記録し、HEADより古い成果物で撮影・提出しない。
 - [ ] **AUTO-05 Asset allowlist＋provenance gate**: buildへdraft/.DS_Store/台帳外画像が混入しないよう停止する。
 - [ ] **AUTO-06 週次報告**: 毎週金曜に完了コミット、QA、期限差、次週最大3タスク、Go/No-goを提示。
+- [x] **AUTO-07 外部脳／コンテキスト入口**: ✅ **2026-08-23**。`npm run brain:snapshot`で短い現況・判断・未完了タスクを出力し、`npm run context:pack`でテーマ別・文字数上限付きの最小読込を生成。週次の定期実行はAUTO-06に分離。
 
 ---
 

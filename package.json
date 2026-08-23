@@ -8,6 +8,8 @@
     "test:fn00": "node tools/fn00-names-test.js",
     "test:mg06": "node tools/mg06-coaches-test.js",
     "test:all": "node tools/run-headless-tests.mjs",
+    "brain:snapshot": "node tools/brain-snapshot.mjs",
+    "context:pack": "node tools/context-pack.mjs",
     "check:docs": "node tools/docs-guard.js",
     "release:source": "npm run check && npm run check:docs && npm run test:all",
     "regression": "node tools/regression-harness.js check",
