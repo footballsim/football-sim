@@ -40,7 +40,7 @@ const JS_FILES = ['players.js', 'rng.js', 'simulate.js', 'events.js', 'match.js'
 const LAB_ONLY_JS = ['names.js', 'sns.js', 'mental.js', 'discipline.js', 'portrait.js', 'manga_recolor.js',
   'juice.js', 'lab-art.js', 'lg-ui.js', 'matchday.js', 'wideshot.js', 'league.js',
   // MTG1（2026-08-03 第1回面白さMTG採用分・全てキルスイッチ付き）
-  'attribution.js', 'archetype.js', 'dramascore.js', 'rail.js', 'oshi.js'];
+  'attribution.js', 'archetype.js', 'dramascore.js', 'rail.js', 'missions.js', 'oshi.js'];
 
 // 試合エンジン系: 最小化＋軽難読化
 const LOGIC_OPTS = {
@@ -161,6 +161,7 @@ const labInject =
   `<script src="js/archetype.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/dramascore.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/rail.js?v=${BUILD_VER}"></script>\n` +
+  `<script src="js/missions.js?v=${BUILD_VER}"></script>\n` +
   `<script src="js/oshi.js?v=${BUILD_VER}"></script>\n` +
   // BG-TONE-01: 背景1枚絵の声量を描画時に下げる（cutscene.js の _bgTone）。
   //   ★ 公開 docs/ はフラグ未定義＝完全OFF。ここで lab だけ有効化する。

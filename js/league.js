@@ -1727,6 +1727,7 @@
         if (def.grow) _add(def.grow.param, G[def.grow.base] || 0);
         if (def.consume) def.consume(s, out);
         _state.seasonMeta.actionsLog.push({ round: pa.round, action: s.kind, target: s.target });
+        if (typeof ManagerMissions !== 'undefined' && ManagerMissions.onPrepare) ManagerMissions.onPrepare(pa.round);
       }
       _state.seasonMeta.pendingAction = null;
     }
@@ -6561,11 +6562,13 @@
       '⚽ ' + _t('次へ：練習メニュー', 'Next: Training') + '</button>';
     // MTG1-#5: 推しの1行（oshi.js 非同梱/キルOFFなら空文字＝従来の見た目のまま）
     var oshiRow = (typeof oshiHubRow === 'function') ? oshiHubRow() : '';
+    var missionRow = (typeof managerMissionsHubRow === 'function') ? managerMissionsHubRow() : '';
     return '<section class="lg-sh-panel lg-sh-mgr">' +
       '<div class="lg-sh-ph">' + _t('監督ステータス', 'Manager') + '</div>' +
       '<div class="lg-sh-mgrtop">' + face + lvBox + '</div>' +
       '<div class="lg-sh-stats">' + stats + '</div>' +
       oshiRow +
+      missionRow +
       cta +
     '</section>';
   }
@@ -7034,6 +7037,13 @@
     squad: function () { return _state ? _overlaySquad(_state.myClub) : null; },
     key: _playerKey, displayName: _keyDisplayName, peek: _peekSquadEntry,
     paint: _paintPortraitCanvases, home: function () { _renderHub(false); }
+  };
+
+  /* 監督ミッション（任意フィールドのみ・未搭載時は完全no-op）。 */
+  window._leagueMissionHost = {
+    state: function () { return _state; }, save: _save,
+    today: _todayStr,
+    home: function () { _renderHub(false); }
   };
 
   /* 検証用 seam（lab限定・UI からは使わない）。
