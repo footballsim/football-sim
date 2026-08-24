@@ -5,6 +5,12 @@ The immutable image references and their hashes are recorded in
 
 ## Character rendering
 
+- Body proportions are not inferred from the style board. They are locked by
+  `design/PLAYER_BODY_CANON.md` and its measurement image. Reconstructed stature
+  must be 5.40-5.80 head-heights around the 5.60H target; head width 0.97-1.07H;
+  shoulder width 1.32-1.48H; normalized head-height drift across F1-F6 at most
+  3% and normally within +/-2px. A frame outside any band is rejected before
+  user presentation.
 - Preserve `design/shortpass-approval/style-approved.png` as the immutable visual
   approval evidence. Do not pass its full-body silhouette to image generation.
 - Use only `design/shortpass-approval/style-board-derived.png` as the generation
@@ -43,6 +49,8 @@ The immutable image references and their hashes are recorded in
   only. The original full-body style image is evidence, not a generation input.
 - Right-profile reference: haircut and rear-head silhouette only; not face
   identity.
+- Player-body canon measurement: body ratios only; never pose, clothing, face,
+  or hairstyle.
 - No previously generated short-pass image may be used as a reference.
 - Soft image-reference pose conditioning is prohibited for production
   candidates. Trace-only v16, a rig-only trial, and four-reference hybrid v18

@@ -29,6 +29,7 @@ football-sim をゲーム化（[GAME_PLAN.md](GAME_PLAN.md)）するための契
 **読む順**: 本ファイル → **[CODEX_HANDOFF.md](CODEX_HANDOFF.md)（地雷と実務則・引き継ぎの本体）** →
 [SCOPE.md](SCOPE.md)（機能の正本）→ [ROADMAP.md](ROADMAP.md) → [BACKLOG.md](BACKLOG.md) → [DECISIONS.md](DECISIONS.md)。
 **試合パートの画像／Scene Labを扱うタスクでは、この直後に必ず [CUTSCENE_HANDOFF.md](CUTSCENE_HANDOFF.md) を読む。** そのシーンの採用済み・却下済み・制作中の状態と次の許可作業は同ファイルを最優先正本とする。
+さらに画像の再開・再生成・品質修正では、外部脳 `~/Documents/2nd-Brain/football-sim.md` の該当シーンも検索して経緯を接続する。**採否・数値契約・禁止入力はリポジトリ正本を優先**し、外部脳は失敗理由と判断文脈の補完に使う。外部脳が古い／該当記録が無い場合は、その事実を明示して正本へ戻り、会話の記憶だけで再開しない。
 複数セッションを同時に走らせる時だけ [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md)（所有権・git 作法・**デプロイ調停**）。
 
 **反映先は kantoku-lab.pages.dev のみ**（football-sim.com は 2026-07-03 から凍結中）。

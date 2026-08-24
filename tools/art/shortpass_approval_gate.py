@@ -86,15 +86,18 @@ def main() -> None:
         style_evidence = registry["design_references"]["character_style"]
         style = registry["design_references"]["character_style_board"]
         profile = registry["design_references"]["right_profile_hair"]
+        body_canon = registry["design_references"]["player_body_canon"]
         if (
             style_evidence["status"] != "user-approved"
             or style["status"] != "derived-from-user-approved"
             or profile["status"] != "user-approved"
+            or body_canon["status"] != "user-approved"
         ):
             raise SystemExit("FAIL generation gate: design references are not user-approved")
         verify_file(args.artifact_root, "character style approval evidence", style_evidence["artifact"])
         verify_file(args.artifact_root, "pose-neutral character style board", style["artifact"])
         verify_file(args.artifact_root, "right-profile hair", profile["artifact"])
+        verify_file(args.artifact_root, "player-body canon", body_canon["artifact"])
         if not normalized_inputs:
             raise SystemExit("FAIL generation gate: explicit --input paths are required")
         expected = {
@@ -102,11 +105,12 @@ def main() -> None:
             Path(pose_rig["path"]).as_posix(),
             Path(style["artifact"]["path"]).as_posix(),
             Path(profile["artifact"]["path"]).as_posix(),
+            Path(body_canon["artifact"]["path"]).as_posix(),
         }
         if normalized_inputs != expected:
             raise SystemExit(
                 "FAIL generation gate: input set must equal approved-trace+approved-coordinate-rig+"
-                "pose-neutral-style-board+profile "
+                "pose-neutral-style-board+profile+player-body-canon "
                 "for the selected frame; "
                 f"expected {sorted(expected)}, got {sorted(normalized_inputs)}"
             )

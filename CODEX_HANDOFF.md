@@ -15,8 +15,9 @@
 2. **本書（CODEX_HANDOFF.md）** — 地雷と実務則
 3. `SCOPE.md`（機能スコープの正本）→ `ROADMAP.md`（日程）→ `BACKLOG.md`（作業）→ `DECISIONS.md`（判断の履歴）
    - **試合画像／Scene Labのタスクでは続けて [CUTSCENE_HANDOFF.md](CUTSCENE_HANDOFF.md) を読む。** 過去の会話ではなく、同書の採否・禁止候補・次の許可作業から再開する。
-4. `PARALLEL_SESSIONS.md` — **複数セッションを同時に走らせる場合のみ**（ファイル所有権・git 作法・デプロイ調停）
-5. `CLAUDE.md` — 名前は Claude 由来だが**中身はプロジェクトの技術仕様**（ファイル構成・関数の在処・ビルド/インフラ）。Codex も読む。
+4. **画像の再開・再生成・品質修正では外部脳 `~/Documents/2nd-Brain/football-sim.md` の該当シーンを検索する。** リポジトリを採否・数値・禁止事項の正本、外部脳を経緯と失敗理由の補助記録として突き合わせる。更新日が古い／記録が無い場合も黙って補完せず、その状態を明示する。
+5. `PARALLEL_SESSIONS.md` — **複数セッションを同時に走らせる場合のみ**（ファイル所有権・git 作法・デプロイ調停）
+6. `CLAUDE.md` — 名前は Claude 由来だが**中身はプロジェクトの技術仕様**（ファイル構成・関数の在処・ビルド/インフラ）。Codex も読む。
 
 **まず打つコマンド**（現状把握・破壊なし）:
 ```bash
@@ -141,7 +142,7 @@ AGENTS.md → CODEX_HANDOFF.md → SCOPE.md → BACKLOG.md の順に読んでか
 
 ## 6. 外部の関連リソース
 
-- **外部脳（Obsidian）**: `~/Documents/2nd-Brain/football-sim.md` — 日付ごとの「現在地」と意思決定の物語。**repo の .md より文脈が厚い**ので、経緯を知りたい時はここ。
+- **外部脳（Obsidian）**: `~/Documents/2nd-Brain/football-sim.md` — 日付ごとの「現在地」と意思決定の物語。**repo の .md より文脈が厚い**。試合画像の再開・再生成・品質修正では任意参照ではなく必須検索とし、repo正本との不一致や更新停滞も確認する。外部脳だけで採否を決めない。
 - **量産パイプライン**: `~/sprite-studio/`（キーポーズ→補間→一括生成→検査）。
 - **画像生成**: `codex exec` で ChatGPT サブスク内・API 課金ゼロ。出力は `~/.codex/generated_images/`。
 - **macOS の制約**: `~/Downloads` はシェルから読めない（`Operation not permitted`）。ファイル受け渡しは **`~/football-sim/_incoming/`** へ。

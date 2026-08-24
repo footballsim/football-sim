@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "scene": "shortpass",
   "video_id": "rnqIgNSQ-is",
   "keyframe_times_seconds": [17.0, 18.0, 19.0, 20.0, 21.0, 22.2],
@@ -96,13 +96,30 @@
       },
       "role": "right-facing haircut and rear-head silhouette only; face identity and body pose are outside the approved scope",
       "hair_contract": "Spiky medium-length top and fringe; side and back are visibly close-cropped/undercut. The rear skull must not grow into a rounded full-volume hairstyle, mullet, long nape, or matching-length back."
+    },
+    "player_body_canon": {
+      "status": "user-approved",
+      "artifact": {
+        "path": "design/reference/player_body_canon_measurement.png",
+        "sha256": "d584fc6213ac02b5ebf9012f9045ccc2a3d4b42e7f70d7e42b6f2a32eb1437b2"
+      },
+      "role": "body-ratio measurement only; never pose, clothing, face identity or hairstyle",
+      "constraints": {
+        "target_reconstructed_stature_head_heights": 5.6,
+        "accepted_reconstructed_stature_head_heights": [5.4, 5.8],
+        "accepted_head_width_per_head_height": [0.97, 1.07],
+        "accepted_shoulder_width_per_head_height": [1.32, 1.48],
+        "maximum_interframe_head_height_drift_percent": 3,
+        "normal_maximum_normalized_head_height_drift_pixels": 2
+      }
     }
   },
   "generation_gate": {
     "enabled": true,
     "required_backend": "hard-pose-control",
     "rejected_backend": "built-in image generation with soft image-reference conditioning",
-    "reason": "The combined trace and design references were explicitly approved by the user on 2026-08-24. Soft image-reference conditioning failed independent QA in trace-only v16, rig-only trial, and four-reference hybrid v18. Future generation must use an OpenPose/ControlNet-equivalent hard pose constraint. The four role-separated inputs remain the approved broadcast trace for facing/occlusion, its deterministic rig for joint geometry, the pose-neutral style board for rendering, and the approved right-profile reference for haircut."
+    "calibration_frame": "F3",
+    "reason": "The combined trace and design references were explicitly approved by the user on 2026-08-24. Soft image-reference conditioning failed independent QA in trace-only v16, rig-only trial, and four-reference hybrid v18. Future generation must use an OpenPose/ControlNet-equivalent hard pose constraint. Five role-separated inputs are mandatory: approved broadcast trace for facing/occlusion, deterministic rig for joint geometry, pose-neutral style board for rendering, approved right-profile reference for haircut, and the player-body canon measurement for 5.6H proportions. F3 must pass calibration before the remaining frames are generated."
   },
   "composite_policy": {
     "method": "pixel-mask union of the two approved PNG artifacts",
