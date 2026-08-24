@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "scene": "shortpass",
+  "video_id": "rnqIgNSQ-is",
+  "keyframe_times_seconds": [17.0, 18.0, 19.0, 20.0, 21.0, 22.2],
+  "artifact_root": "repository root",
+  "components": {
+    "legs": {
+      "status": "user-approved",
+      "approved_on": "2026-08-24",
+      "joint_set": ["hip", "knee", "ankle"],
+      "support_color": "#32f06b",
+      "kicking_color": "#ff38c9",
+      "artifact": {
+        "path": "design/shortpass-approval/legs-approved.png",
+        "sha256": "7e8e26bdcacb06f66903c505b6f66a43c8c8f8a6b27e760a1642c7d04a0951d0"
+      },
+      "ledger": {
+        "path": "design/shortpass-approval/legs-approved-ledger.json",
+        "sha256": "1f331cae66d27227698d6ac76182f270bc19e08175c3439207d46e4c103a5d93"
+      },
+      "approval_evidence": "User reconfirmed the attached MoveNet 30fps temporal identity audit as the approved leg version on 2026-08-24."
+    },
+    "arms": {
+      "status": "user-approved",
+      "approved_on": "2026-08-24",
+      "joint_set": ["shoulder", "elbow", "wrist"],
+      "left_color": "#13c4ff",
+      "right_color": "#ff9f1c",
+      "artifact": {
+        "path": "design/shortpass-approval/arms-approved.png",
+        "sha256": "1691a745546a48188d535b9ac70faffaee6f227bfc28f63c0d00b9bb5553309d"
+      },
+      "ledger": {
+        "path": "design/shortpass-approval/arms-approved-ledger.json",
+        "sha256": "ad547b204b17af56baf95db6127bbcea00b4fe765f334366b90e496edb2c6083"
+      },
+      "visibility": [
+        {"frame": "F1", "left": false, "right": true},
+        {"frame": "F2", "left": true, "right": true},
+        {"frame": "F3", "left": true, "right": true},
+        {"frame": "F4", "left": false, "right": true},
+        {"frame": "F5", "left": false, "right": true},
+        {"frame": "F6", "left": false, "right": true}
+      ]
+    },
+    "composite": {
+      "status": "pending-user-approval",
+      "artifact": null,
+      "sha256": null
+    }
+  },
+  "generation_gate": {
+    "enabled": false,
+    "reason": "The combined approved-leg and approved-arm overlay must be shown to and approved by the user first."
+  },
+  "composite_policy": {
+    "method": "pixel-mask union of the two approved PNG artifacts",
+    "z_order": "approved legs remain foreground where an approved arm color overlaps a leg color",
+    "reason": "F1 right wrist and kicking-leg hip overlap; preserving the approved leg mask prevents approval drift"
+  },
+  "forbidden_inputs": [
+    "tools/proto/shortpass-direct-trace/decoded_manual_trace_v7/trace_f01.png",
+    "tools/proto/shortpass-direct-trace/decoded_manual_trace_v7/pose_guide_f01.png",
+    "tools/proto/shortpass-direct-trace/shortpass_direct_skeleton_trace_v10_occlusion_aware_0m17_0m22p2.png",
+    "tools/proto/shortpass-direct-trace/shortpass_approved_canonical_trace_v11_landscape.png",
+    "tools/proto/shortpass-direct-trace/generated_v11_pose_locked",
+    "tools/proto/shortpass-direct-trace/generated_v12_pose_corrected",
+    "tools/proto/shortpass-direct-trace/generated_v13_deterministic_ball"
+  ]
+}
