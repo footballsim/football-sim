@@ -45,14 +45,64 @@
       ]
     },
     "composite": {
-      "status": "pending-user-approval",
-      "artifact": null,
-      "sha256": null
+      "status": "user-approved",
+      "approved_on": "2026-08-24",
+      "artifact": {
+        "path": "design/shortpass-approval/composite-approved.png",
+        "sha256": "af9118b1266c929e037c4b708efe1b92baa8743baf7e1ff4db042163d2aede0b"
+      },
+      "pose_frames": [
+        {"frame": "F1", "path": "design/shortpass-approval/pose-approved-f01.png", "sha256": "6b5dac186aa2fb00a46eade958c0252241e5ed0f79f12c2d1a29942d769bb3fe"},
+        {"frame": "F2", "path": "design/shortpass-approval/pose-approved-f02.png", "sha256": "9a513e4a6e13e7afc9b809a3fb80d3518b1da5a0e262a053638db9d2ac4e73dc"},
+        {"frame": "F3", "path": "design/shortpass-approval/pose-approved-f03.png", "sha256": "ac32d57c20de6d6568a4f5dba3e9dc96ac2af369a8388b572fe8111e3017bba3"},
+        {"frame": "F4", "path": "design/shortpass-approval/pose-approved-f04.png", "sha256": "ef6c5507b3b1151545bee5b274c1a1a1ab94b19fd5968633fa5b6de675d3ff6d"},
+        {"frame": "F5", "path": "design/shortpass-approval/pose-approved-f05.png", "sha256": "cb3d09e458af6172d1a14e1cd863ccc191d8c9cdd68db1ab28fa18b271482b64"},
+        {"frame": "F6", "path": "design/shortpass-approval/pose-approved-f06.png", "sha256": "3b4bbbf8a50dffb548c1345c9a0a73dd22394419e8d413e6535f2b1740eb0046"}
+      ],
+      "pose_rigs": [
+        {"frame": "F1", "path": "design/shortpass-approval/pose-rig-derived-f01.png", "sha256": "bf03754f5f078d024c0102bcd58f26a8b453c51343ceef6ab824a12e069470b8"},
+        {"frame": "F2", "path": "design/shortpass-approval/pose-rig-derived-f02.png", "sha256": "898677a96b712b4f8956cf92f4432a812cb59f8045e8d6265228ec4b4a53367a"},
+        {"frame": "F3", "path": "design/shortpass-approval/pose-rig-derived-f03.png", "sha256": "3f08968c9270f2268f6a30ed0c219894a0bc8a28bcebad444db04c3dfedb9a57"},
+        {"frame": "F4", "path": "design/shortpass-approval/pose-rig-derived-f04.png", "sha256": "df76a8d5b045a38041d430c05fa3657a7c5d0e7892a14fb2f39b5704c878cac8"},
+        {"frame": "F5", "path": "design/shortpass-approval/pose-rig-derived-f05.png", "sha256": "b658fb396f50d693797c9a94acdb511d4c2322e79a6106e8a6ce593d8fc71cdb"},
+        {"frame": "F6", "path": "design/shortpass-approval/pose-rig-derived-f06.png", "sha256": "e77205d5cfa794efeb8b541d85aa5a0f288fde693e5044f72a9d5c97565ea7b2"}
+      ]
+    }
+  },
+  "design_references": {
+    "character_style": {
+      "status": "user-approved",
+      "artifact": {
+        "path": "design/shortpass-approval/style-approved.png",
+        "sha256": "8371ec4d54d8b07a8940a968850311ddb13b20c616052145f61a255db4f39433"
+      },
+      "role": "immutable approval evidence for style, body design, uniform, palette and pixel rendering; never pass this full-body image to generation because its kick silhouette leaks into pose"
+    },
+    "character_style_board": {
+      "status": "derived-from-user-approved",
+      "artifact": {
+        "path": "design/shortpass-approval/style-board-derived.png",
+        "sha256": "f7379d8dad7b2ffb91b84d2162f02485c237caf4df1bdbb064cc47b463aabd03"
+      },
+      "derived_from": "design_references.character_style",
+      "method": "deterministic pixel-preserving crops arranged without the source full-body silhouette",
+      "role": "the only character style input permitted for generation; design, uniform, palette and pixel rendering only; never pose"
+    },
+    "right_profile_hair": {
+      "status": "user-approved",
+      "artifact": {
+        "path": "design/shortpass-approval/profile-right-approved.png",
+        "sha256": "15d5da45303b454c2e8bcfbc03317d019f128ba671818f1e9bec9bf845bb39af"
+      },
+      "role": "right-facing haircut and rear-head silhouette only; face identity and body pose are outside the approved scope",
+      "hair_contract": "Spiky medium-length top and fringe; side and back are visibly close-cropped/undercut. The rear skull must not grow into a rounded full-volume hairstyle, mullet, long nape, or matching-length back."
     }
   },
   "generation_gate": {
-    "enabled": false,
-    "reason": "The combined approved-leg and approved-arm overlay must be shown to and approved by the user first."
+    "enabled": true,
+    "required_backend": "hard-pose-control",
+    "rejected_backend": "built-in image generation with soft image-reference conditioning",
+    "reason": "The combined trace and design references were explicitly approved by the user on 2026-08-24. Soft image-reference conditioning failed independent QA in trace-only v16, rig-only trial, and four-reference hybrid v18. Future generation must use an OpenPose/ControlNet-equivalent hard pose constraint. The four role-separated inputs remain the approved broadcast trace for facing/occlusion, its deterministic rig for joint geometry, the pose-neutral style board for rendering, and the approved right-profile reference for haircut."
   },
   "composite_policy": {
     "method": "pixel-mask union of the two approved PNG artifacts",
@@ -66,6 +116,10 @@
     "tools/proto/shortpass-direct-trace/shortpass_approved_canonical_trace_v11_landscape.png",
     "tools/proto/shortpass-direct-trace/generated_v11_pose_locked",
     "tools/proto/shortpass-direct-trace/generated_v12_pose_corrected",
-    "tools/proto/shortpass-direct-trace/generated_v13_deterministic_ball"
+    "tools/proto/shortpass-direct-trace/generated_v13_deterministic_ball",
+    "tools/proto/shortpass-direct-trace/generated_v15_style_hair_locked",
+    "tools/proto/shortpass-direct-trace/generated_v16_pose_neutral_style",
+    "tools/proto/shortpass-direct-trace/generated_v18_hybrid_pose",
+    "tools/proto/shortpass-direct-trace/generated_v19_deterministic_sprite"
   ]
 }

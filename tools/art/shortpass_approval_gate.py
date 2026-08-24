@@ -48,6 +48,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--artifact-root", type=Path, default=REPO)
     parser.add_argument("--mode", choices=("build-composite", "generation"), required=True)
+    parser.add_argument("--frame", choices=("F1", "F2", "F3", "F4", "F5", "F6"))
+    parser.add_argument("--backend", choices=("hard-pose-control",))
     parser.add_argument("--input", action="append", default=[])
     args = parser.parse_args()
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
@@ -70,15 +72,49 @@ def main() -> None:
                 "FAIL generation gate: the merged leg/arm composite has not been user-approved"
             )
         verify_file(args.artifact_root, "composite artifact", composite["artifact"])
+        if not args.frame:
+            raise SystemExit("FAIL generation gate: --frame is required")
+        if args.backend != gate["required_backend"]:
+            raise SystemExit(
+                "FAIL generation gate: a hard-pose-control backend is required; "
+                "soft image-reference conditioning failed repeated independent QA"
+            )
+        pose = next(entry for entry in composite["pose_frames"] if entry["frame"] == args.frame)
+        verify_file(args.artifact_root, f"{args.frame} pose", pose)
+        pose_rig = next(entry for entry in composite["pose_rigs"] if entry["frame"] == args.frame)
+        verify_file(args.artifact_root, f"{args.frame} pose rig", pose_rig)
+        style_evidence = registry["design_references"]["character_style"]
+        style = registry["design_references"]["character_style_board"]
+        profile = registry["design_references"]["right_profile_hair"]
+        if (
+            style_evidence["status"] != "user-approved"
+            or style["status"] != "derived-from-user-approved"
+            or profile["status"] != "user-approved"
+        ):
+            raise SystemExit("FAIL generation gate: design references are not user-approved")
+        verify_file(args.artifact_root, "character style approval evidence", style_evidence["artifact"])
+        verify_file(args.artifact_root, "pose-neutral character style board", style["artifact"])
+        verify_file(args.artifact_root, "right-profile hair", profile["artifact"])
         if not normalized_inputs:
             raise SystemExit("FAIL generation gate: explicit --input paths are required")
-        approved_composite = Path(composite["artifact"]["path"]).as_posix()
-        if normalized_inputs != {approved_composite}:
+        expected = {
+            Path(pose["path"]).as_posix(),
+            Path(pose_rig["path"]).as_posix(),
+            Path(style["artifact"]["path"]).as_posix(),
+            Path(profile["artifact"]["path"]).as_posix(),
+        }
+        if normalized_inputs != expected:
             raise SystemExit(
-                "FAIL generation gate: input set must equal the sole approved composite; "
-                f"expected {approved_composite}, got {sorted(normalized_inputs)}"
+                "FAIL generation gate: input set must equal approved-trace+approved-coordinate-rig+"
+                "pose-neutral-style-board+profile "
+                "for the selected frame; "
+                f"expected {sorted(expected)}, got {sorted(normalized_inputs)}"
             )
     else:
+        if args.frame:
+            raise SystemExit("FAIL build-composite mode does not accept --frame")
+        if args.backend:
+            raise SystemExit("FAIL build-composite mode does not accept --backend")
         if args.input:
             raise SystemExit("FAIL build-composite mode does not accept generation inputs")
         print("PASS component approvals; composite build allowed; generation remains disabled")
