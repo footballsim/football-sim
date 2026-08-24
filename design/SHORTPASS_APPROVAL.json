@@ -137,6 +137,7 @@
     "tools/proto/shortpass-direct-trace/generated_v15_style_hair_locked",
     "tools/proto/shortpass-direct-trace/generated_v16_pose_neutral_style",
     "tools/proto/shortpass-direct-trace/generated_v18_hybrid_pose",
-    "tools/proto/shortpass-direct-trace/generated_v19_deterministic_sprite"
+    "tools/proto/shortpass-direct-trace/generated_v19_deterministic_sprite",
+    "tools/proto/shortpass-hardpose-v20"
   ]
 }
