@@ -119,7 +119,15 @@
     "required_backend": "hard-pose-control",
     "rejected_backend": "built-in image generation with soft image-reference conditioning",
     "calibration_frame": "F3",
-    "reason": "The combined trace and design references were explicitly approved by the user on 2026-08-24. Soft image-reference conditioning failed independent QA in trace-only v16, rig-only trial, and four-reference hybrid v18. Future generation must use an OpenPose/ControlNet-equivalent hard pose constraint. Five role-separated inputs are mandatory: approved broadcast trace for facing/occlusion, deterministic rig for joint geometry, pose-neutral style board for rendering, approved right-profile reference for haircut, and the player-body canon measurement for 5.6H proportions. F3 must pass calibration before the remaining frames are generated."
+        "reason": "The combined trace and design references were explicitly approved by the user on 2026-08-24. Soft image-reference conditioning failed independent QA in trace-only v16, rig-only trial, and four-reference hybrid v18. Future generation must use an OpenPose/ControlNet-equivalent hard pose constraint. Five role-separated inputs are mandatory: approved broadcast trace for facing/occlusion, deterministic rig for joint geometry, pose-neutral style board for rendering, approved right-profile reference for haircut, and the player-body canon measurement for 5.6H proportions. F3 must pass calibration before the remaining frames are generated.",
+        "local_backend_findings_2026_08_25": {
+            "status": "rejected-for-production",
+            "machine": "Apple M1 with 8 GB unified memory",
+            "sdxl_openpose": "SDXL base plus Xinsir OpenPose SDXL exceeded the MPS 9.07 GB allocation limit and could not complete one 384x512 sampling step in more than ten minutes.",
+            "lightweight_control": "Stability AI Canny Control-LoRA rank128 plus ByteDance SDXL-Lightning 2-step completed at 256x320, but interpreted the colored skeleton as object contours rather than human joints.",
+            "no_control_diagnostic": "The same 2-step stack without control produced a coherent but upper-body-cropped generic cartoon; approved pixel style, white background and 5.6H full-body proportions failed.",
+            "next_allowed_backend": "A sufficiently provisioned GPU running the dedicated SDXL style LoRA with semantic SDXL OpenPose at near-native resolution. Paid Replicate execution requires explicit approval before spending."
+        }
   },
   "composite_policy": {
     "method": "pixel-mask union of the two approved PNG artifacts",
