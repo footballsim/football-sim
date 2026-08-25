@@ -121,7 +121,7 @@
     "calibration_frame": "F3",
         "reason": "The combined trace and design references were explicitly approved by the user on 2026-08-24. On 2026-08-25 the user rejected the detour into a new paid hard-pose backend and instructed the project to reuse the successful cross-scene production experience. The required workflow is therefore the cross recipe: generate only F3, freeze every region that passes independent QA, edit one failed body region at a time, normalize the exterior white matte deterministically, and never regenerate the remaining five frames until F3 is visually adopted. Five role-separated references remain mandatory: approved broadcast trace for facing/occlusion, deterministic rig for joint geometry, pose-neutral style board for rendering, approved right-profile reference for haircut, and the player-body canon measurement for 5.6H proportions.",
         "cross_recipe_candidate_2026_08_25": {
-            "status": "pending-user-review",
+            "status": "F3-adopted",
             "frame": "F3",
             "workflow": "built-in ImageGen base candidate followed by single-region edits: kicking leg, right elbow, then rigid upper-body alignment; the user selected the third of four displayed variants as the strongest design; its gaze was then corrected without changing the accepted body",
             "artifact": {
@@ -133,7 +133,7 @@
                 "sha256": "26d9785d3eaa9fa7bcd75c4f14e040112ceaf86312b8f6c4a5f4fd71aaee38af"
             },
             "user_selected_variant_gaze_revision": {
-                "status": "pending-user-review",
+                "status": "rejected-white-eye-excess",
                 "selection": "user identified the third image from the left as the best of four and requested only a downward gaze toward the former ball-contact point",
                 "baseline": {
                     "path": "tools/proto/shortpass-cross-recipe-f3/gaze-edit/f3_selected_left3_baseline.png",
@@ -144,9 +144,22 @@
                     "sha256": "158bf35ee3448e62cdfe9e68fd7712b4caa4eeb837921bdb27a28e02c8e75226"
                 },
                 "edit_scope": "23 changed pixels inside the original triangular eye interior at x=880..883, y=236..245; zero changed pixels outside that box; original 1592x1810 canvas retained",
-                "independent_visual_qa": "PASS"
+                "independent_visual_qa": "PASS",
+                "user_rejection": "The user found the final gaze revision unnatural because it exposed too much sclera; do not reuse it."
             },
-            "integration": "forbidden until explicit user adoption"
+            "adopted_frame_2026_08_25": {
+                "status": "adopted",
+                "frame": "F3",
+                "user_decision": "The user explicitly adopted the newly attached image after rejecting the previous gaze revision for excessive visible sclera.",
+                "artifact": {
+                    "path": "img/cutscenes/manga_shortpass6/frame_03.png",
+                    "sha256": "df54ea8579474747ca0357521868e0a38aa951fefa337f437ff435177d7d6bfa",
+                    "dimensions": [1474, 1682]
+                },
+                "copy_integrity": "workspace artifact is byte-for-byte identical to the user attachment",
+                "independent_visual_qa": "PASS: full body, right-facing direction, F3 limb intent, rear undercut, approved pixel style, natural eye, no extra object or text, and no open-ended critical anomaly"
+            },
+            "integration": "F3 canonical storage is allowed; full six-frame scene integration, build, push and deploy remain forbidden until F1, F2, F4, F5 and F6 are generated, independently checked and explicitly adopted"
         },
         "local_backend_findings_2026_08_25": {
             "status": "rejected-for-production",
