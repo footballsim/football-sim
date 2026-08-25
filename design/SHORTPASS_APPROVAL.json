@@ -127,6 +127,14 @@
             "lightweight_control": "Stability AI Canny Control-LoRA rank128 plus ByteDance SDXL-Lightning 2-step completed at 256x320, but interpreted the colored skeleton as object contours rather than human joints.",
             "no_control_diagnostic": "The same 2-step stack without control produced a coherent but upper-body-cropped generic cartoon; approved pixel style, white background and 5.6H full-body proportions failed.",
             "next_allowed_backend": "A sufficiently provisioned GPU running the dedicated SDXL style LoRA with semantic SDXL OpenPose at near-native resolution. Paid Replicate execution requires explicit approval before spending."
+        },
+        "replicate_backend_findings_2026_08_25": {
+            "status": "rejected-no-output",
+            "model_version": "fofr/sdxl-multi-controlnet-lora:89eb212b3d1366a83e949c12a4b45dfe6b6b313b594cb8268e864931ac9ffb16",
+            "first_attempt": "F3 semantic OpenPose plus dedicated SDXL LoRA, four outputs, 35 steps, Cancel-After 80 seconds; aborted with zero outputs.",
+            "second_attempt": "F3 semantic OpenPose plus dedicated SDXL LoRA, one output, 30 steps, Cancel-After 20 seconds; aborted with zero outputs.",
+            "billing_guard": "Official rate was 0.000975 USD per second. The two deadline ceilings totalled 0.0975 USD, below the user's 0.10 USD maximum. No further paid attempts are allowed.",
+            "next_allowed_backend": "A sufficiently provisioned semantic SDXL OpenPose backend whose runtime can be validated before spending; do not retry this Replicate model version for short-pass F3."
         }
   },
   "composite_policy": {
