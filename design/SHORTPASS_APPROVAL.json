@@ -123,7 +123,7 @@
         "cross_recipe_candidate_2026_08_25": {
             "status": "pending-user-review",
             "frame": "F3",
-            "workflow": "built-in ImageGen base candidate followed by single-region edits: kicking leg, right elbow, then rigid upper-body alignment; independent QA passed pose, identity, body canon, haircut, style and crop; exterior near-white matte was normalized without regenerating the player",
+            "workflow": "built-in ImageGen base candidate followed by single-region edits: kicking leg, right elbow, then rigid upper-body alignment; the user selected the third of four displayed variants as the strongest design; its gaze was then corrected without changing the accepted body",
             "artifact": {
                 "path": "tools/proto/shortpass-cross-recipe-f3/candidate_v4_white.png",
                 "sha256": "6b723c3865fefad5038495d0881218358cd9b6dbe7dcb988c87235ab81b6a419"
@@ -131,6 +131,20 @@
             "comparison": {
                 "path": "tools/proto/shortpass-cross-recipe-f3/f3_trace_above_candidate_v4_landscape.png",
                 "sha256": "26d9785d3eaa9fa7bcd75c4f14e040112ceaf86312b8f6c4a5f4fd71aaee38af"
+            },
+            "user_selected_variant_gaze_revision": {
+                "status": "pending-user-review",
+                "selection": "user identified the third image from the left as the best of four and requested only a downward gaze toward the former ball-contact point",
+                "baseline": {
+                    "path": "tools/proto/shortpass-cross-recipe-f3/gaze-edit/f3_selected_left3_baseline.png",
+                    "sha256": "71c0bb74283917f6fb829f42267512e329b2e2efedfbc7ac00b0635fa70e3338"
+                },
+                "artifact": {
+                    "path": "tools/proto/shortpass-cross-recipe-f3/gaze-edit/f3_selected_left3_gaze_down_v3.png",
+                    "sha256": "158bf35ee3448e62cdfe9e68fd7712b4caa4eeb837921bdb27a28e02c8e75226"
+                },
+                "edit_scope": "23 changed pixels inside the original triangular eye interior at x=880..883, y=236..245; zero changed pixels outside that box; original 1592x1810 canvas retained",
+                "independent_visual_qa": "PASS"
             },
             "integration": "forbidden until explicit user adoption"
         },
