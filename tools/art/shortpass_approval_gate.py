@@ -49,7 +49,7 @@ def main() -> None:
     parser.add_argument("--artifact-root", type=Path, default=REPO)
     parser.add_argument("--mode", choices=("build-composite", "generation"), required=True)
     parser.add_argument("--frame", choices=("F1", "F2", "F3", "F4", "F5", "F6"))
-    parser.add_argument("--backend", choices=("hard-pose-control",))
+    parser.add_argument("--backend", choices=("hard-pose-control", "cross-recipe-imagegen"))
     parser.add_argument("--input", action="append", default=[])
     args = parser.parse_args()
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
@@ -76,8 +76,7 @@ def main() -> None:
             raise SystemExit("FAIL generation gate: --frame is required")
         if args.backend != gate["required_backend"]:
             raise SystemExit(
-                "FAIL generation gate: a hard-pose-control backend is required; "
-                "soft image-reference conditioning failed repeated independent QA"
+                "FAIL generation gate: the backend does not match the workflow selected in the approval ledger"
             )
         pose = next(entry for entry in composite["pose_frames"] if entry["frame"] == args.frame)
         verify_file(args.artifact_root, f"{args.frame} pose", pose)
