@@ -290,6 +290,17 @@ F2は台帳上採用済みで、Phase 1では正本パスとSHAをmanifestへ固
 - CT4Dはgeometry-onlyでF2/F3再現準備を行う。ID/ライトパスからF2/F3の輪郭・陰影・パレットへ寄せる工程はPhase 2の較正対象とする。
 - F2/F3を再現できないシェーダーをF4へ進めない。
 
+#### Phase 2A 現在地: 採用2D仕上げの決定論的抽出・Independent QA PASS（2026-08-27）
+
+- `tools/art/cutscene_style_calibration.py` は、採用済みF2/F3のSHA固定PNGだけを入力にし、HSVの直接分類とF2/F3共通Labパレットアンカーで素材マスクを決定論的に抽出する。
+- 出力正本候補は `design/cutscene-production/calibration/manga190/calibration.json` と、F2/F3それぞれの190px logical preview／`shirt`, `shorts`, `socks`, `accent`, `skin`, `dark_fixed`, `silhouette`, `background`マスクである。マスクは排他的で、素材6種の和がsilhouetteと一致する。
+- logical previewとmaskは人物外接高を190pxへnearest-neighborだけで正規化する。元座標からlogical座標へのaffine、入力SHA、全出力SHAをcalibration台帳へ固定する。
+- 抽出は`calibration/`直下の新規兄弟stagingへ全成果物を書き、byte／寸法／mode／非空／排他／silhouette unionを検証してからディレクトリ単位でatomic swapする。既存正本はbackup renameとrollbackで保護し、入力・出力の全階層でsymlinkを拒否する。回復可能な失敗では、その取引が作成したstaging／backupの正確なパスだけをbest-effort削除し、既存の同名風ディレクトリへ触れない。backupを保持するのはrollback自体が正本を復元できない場合だけで、エラーへ絶対復旧パスを出す。
+- 実測対象は外接矩形、素材面積比、RGB/Lab中央値、頻出パレット、純白率とRGB各250以上の近白率、輪郭境界のLab差によるhardness/anti-alias proxyである。背景純度は採用済みF2/F3の失格条件にしない。
+- 色だけでは髪の頭頂から顎下を安定分離できないため、頭身比は`unavailable`とし、推測値を置かない。同様に素材色から解剖学的な左右脚・左右腕を主張しない。
+- 決定論再実行、negative test、Independent QAはPASS済み。抽出器の独立レビュー完了とシェーダー較正完了は別であるため、`independent_review=passed`と記録しても`calibration_status=not-calibrated`、`candidate_gate=locked`を維持し、候補受入thresholdはまだ定義しない。
+- これは採用2D仕上げの測定であり、CT4Dが最終キック画質を再現できるという証明ではない。CT4Dの最終キック品質は過去に不採用で、Phase 2Aではgeometry-onlyの責務を越えて認定しない。
+
 ### Phase 3: F4認定
 
 - 承認リグからF4を決定論レンダリングする。

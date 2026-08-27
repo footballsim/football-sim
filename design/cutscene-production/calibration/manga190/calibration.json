@@ -1,0 +1,1710 @@
+{
+  "calibration_version": "manga190-phase2a-v1",
+  "caveats": [
+    "Color masks are material classes, not anatomical left/right or limb-instance masks.",
+    "Low-saturation enclosed details are assigned by nearest Lab palette anchor and may combine shoe marks, eye whites, or kit trim.",
+    "Pure-white and near-white background ratios are reported separately and do not invalidate adopted F2/F3.",
+    "Head/body ratio is unavailable until a geometry or approved head-boundary source is provided.",
+    "Accepted 2D finish measurements do not establish that CT4D can reproduce final kick art."
+  ],
+  "cross_frame_measurements": {
+    "interpretation": "extraction consistency only; not a candidate acceptance threshold",
+    "material_area_ratio_absolute_delta": {
+      "accent": 0.00140512,
+      "dark_fixed": 0.00237736,
+      "shirt": 0.02268487,
+      "shorts": 0.00061537,
+      "skin": 0.00823242,
+      "socks": 0.01761957
+    },
+    "maximum_observed_delta": 0.02268487
+  },
+  "frames": {
+    "F2": {
+      "metrics": {
+        "background_purity": {
+          "adoption_policy": "measured-not-a-fail-condition",
+          "all_pixels": {
+            "near_white_250_ratio": 0.75324008,
+            "pure_white_ratio": 0.00133653
+          },
+          "border_connected_background": {
+            "near_white_250_ratio": 0.97247329,
+            "pixels": 2088517,
+            "pure_white_ratio": 0.00172371,
+            "rgb_median": [
+              253,
+              253,
+              253
+            ],
+            "top_exact_rgb": [
+              {
+                "pixels": 928511,
+                "ratio": 0.4445791,
+                "rgb": [
+                  253,
+                  253,
+                  253
+                ]
+              },
+              {
+                "pixels": 257870,
+                "ratio": 0.12347039,
+                "rgb": [
+                  254,
+                  253,
+                  253
+                ]
+              },
+              {
+                "pixels": 190361,
+                "ratio": 0.09114649,
+                "rgb": [
+                  254,
+                  254,
+                  254
+                ]
+              },
+              {
+                "pixels": 131634,
+                "ratio": 0.0630275,
+                "rgb": [
+                  253,
+                  252,
+                  252
+                ]
+              },
+              {
+                "pixels": 117615,
+                "ratio": 0.05631508,
+                "rgb": [
+                  254,
+                  254,
+                  253
+                ]
+              },
+              {
+                "pixels": 107386,
+                "ratio": 0.05141735,
+                "rgb": [
+                  253,
+                  253,
+                  252
+                ]
+              },
+              {
+                "pixels": 86496,
+                "ratio": 0.04141503,
+                "rgb": [
+                  252,
+                  252,
+                  252
+                ]
+              },
+              {
+                "pixels": 40292,
+                "ratio": 0.01929216,
+                "rgb": [
+                  253,
+                  254,
+                  254
+                ]
+              }
+            ]
+          },
+          "definition": {
+            "near_white_250": "R>=250 and G>=250 and B>=250",
+            "pure_white": "R=G=B=255"
+          }
+        },
+        "direct_hsv_seed_coverage_ratio": 0.99268613,
+        "edge_hardness_antialias_proxy": {
+          "crossing_count": 10510,
+          "deltaE76_median": 30.84282494,
+          "deltaE76_p10": 17.17940636,
+          "deltaE76_p90": 43.90260315,
+          "hard_crossing_ratio_deltaE_gte_40": 0.19191246,
+          "interpretation": "proxy-only; not an anatomical or candidate acceptance metric",
+          "method": "CIE-Lab deltaE76 across horizontal/vertical silhouette boundary crossings",
+          "soft_crossing_ratio_deltaE_lt_15": 0.08049477
+        },
+        "head_body_ratio": {
+          "reason": "color-only material segmentation cannot isolate hair-crown-to-chin reliably",
+          "status": "unavailable"
+        },
+        "logical_unique_rgba_in_preview": 4650,
+        "material_area_ratio_of_logical_silhouette": {
+          "accent": 0.06174248,
+          "dark_fixed": 0.24811065,
+          "shirt": 0.21531442,
+          "shorts": 0.14031085,
+          "skin": 0.22714958,
+          "socks": 0.10737202
+        },
+        "material_area_ratio_of_source_silhouette": {
+          "accent": 0.06182332,
+          "dark_fixed": 0.24692651,
+          "shirt": 0.21686515,
+          "shorts": 0.14086967,
+          "skin": 0.22656873,
+          "socks": 0.10694661
+        },
+        "material_color_facts": {
+          "accent": {
+            "median": {
+              "lab": [
+                73.44970703,
+                -9.796875,
+                -31.109375
+              ],
+              "rgb": [
+                114,
+                189,
+                234
+              ]
+            },
+            "top_exact_rgb": [
+              {
+                "pixels": 125,
+                "ratio": 0.00332535,
+                "rgb": [
+                  118,
+                  195,
+                  244
+                ]
+              },
+              {
+                "pixels": 110,
+                "ratio": 0.00292631,
+                "rgb": [
+                  116,
+                  193,
+                  243
+                ]
+              },
+              {
+                "pixels": 104,
+                "ratio": 0.00276669,
+                "rgb": [
+                  115,
+                  192,
+                  242
+                ]
+              },
+              {
+                "pixels": 104,
+                "ratio": 0.00276669,
+                "rgb": [
+                  115,
+                  194,
+                  244
+                ]
+              },
+              {
+                "pixels": 100,
+                "ratio": 0.00266028,
+                "rgb": [
+                  118,
+                  195,
+                  243
+                ]
+              },
+              {
+                "pixels": 98,
+                "ratio": 0.00260708,
+                "rgb": [
+                  117,
+                  194,
+                  243
+                ]
+              },
+              {
+                "pixels": 97,
+                "ratio": 0.00258047,
+                "rgb": [
+                  117,
+                  194,
+                  244
+                ]
+              },
+              {
+                "pixels": 91,
+                "ratio": 0.00242086,
+                "rgb": [
+                  115,
+                  193,
+                  242
+                ]
+              }
+            ]
+          },
+          "dark_fixed": {
+            "median": {
+              "lab": [
+                5.98754883,
+                0.40625,
+                2.40625
+              ],
+              "rgb": [
+                24,
+                16,
+                9
+              ]
+            },
+            "top_exact_rgb": [
+              {
+                "pixels": 2317,
+                "ratio": 0.01543257,
+                "rgb": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "pixels": 1147,
+                "ratio": 0.00763969,
+                "rgb": [
+                  1,
+                  0,
+                  0
+                ]
+              },
+              {
+                "pixels": 1026,
+                "ratio": 0.00683376,
+                "rgb": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              {
+                "pixels": 688,
+                "ratio": 0.00458248,
+                "rgb": [
+                  2,
+                  2,
+                  2
+                ]
+              },
+              {
+                "pixels": 551,
+                "ratio": 0.00366998,
+                "rgb": [
+                  22,
+                  20,
+                  16
+                ]
+              },
+              {
+                "pixels": 526,
+                "ratio": 0.00350347,
+                "rgb": [
+                  2,
+                  0,
+                  0
+                ]
+              },
+              {
+                "pixels": 464,
+                "ratio": 0.00309051,
+                "rgb": [
+                  2,
+                  1,
+                  1
+                ]
+              },
+              {
+                "pixels": 459,
+                "ratio": 0.00305721,
+                "rgb": [
+                  1,
+                  1,
+                  0
+                ]
+              }
+            ]
+          },
+          "shirt": {
+            "median": {
+              "lab": [
+                31.54296875,
+                54.71875,
+                -83.390625
+              ],
+              "rgb": [
+                16,
+                42,
+                208
+              ]
+            },
+            "top_exact_rgb": [
+              {
+                "pixels": 3619,
+                "ratio": 0.02744598,
+                "rgb": [
+                  19,
+                  46,
+                  236
+                ]
+              },
+              {
+                "pixels": 2514,
+                "ratio": 0.01906582,
+                "rgb": [
+                  17,
+                  45,
+                  236
+                ]
+              },
+              {
+                "pixels": 2301,
+                "ratio": 0.01745046,
+                "rgb": [
+                  20,
+                  47,
+                  237
+                ]
+              },
+              {
+                "pixels": 2201,
+                "ratio": 0.01669207,
+                "rgb": [
+                  20,
+                  47,
+                  236
+                ]
+              },
+              {
+                "pixels": 1897,
+                "ratio": 0.01438658,
+                "rgb": [
+                  20,
+                  48,
+                  237
+                ]
+              },
+              {
+                "pixels": 1514,
+                "ratio": 0.01148196,
+                "rgb": [
+                  19,
+                  46,
+                  237
+                ]
+              },
+              {
+                "pixels": 1342,
+                "ratio": 0.01017754,
+                "rgb": [
+                  20,
+                  47,
+                  238
+                ]
+              },
+              {
+                "pixels": 1303,
+                "ratio": 0.00988177,
+                "rgb": [
+                  19,
+                  45,
+                  236
+                ]
+              }
+            ]
+          },
+          "shorts": {
+            "median": {
+              "lab": [
+                54.03442383,
+                -36.21875,
+                36.921875
+              ],
+              "rgb": [
+                81,
+                144,
+                61
+              ]
+            },
+            "top_exact_rgb": [
+              {
+                "pixels": 2224,
+                "ratio": 0.02596553,
+                "rgb": [
+                  83,
+                  146,
+                  62
+                ]
+              },
+              {
+                "pixels": 2150,
+                "ratio": 0.02510157,
+                "rgb": [
+                  84,
+                  147,
+                  63
+                ]
+              },
+              {
+                "pixels": 1825,
+                "ratio": 0.02130715,
+                "rgb": [
+                  83,
+                  147,
+                  62
+                ]
+              },
+              {
+                "pixels": 1763,
+                "ratio": 0.02058329,
+                "rgb": [
+                  84,
+                  148,
+                  63
+                ]
+              },
+              {
+                "pixels": 1732,
+                "ratio": 0.02022136,
+                "rgb": [
+                  83,
+                  148,
+                  63
+                ]
+              },
+              {
+                "pixels": 1584,
+                "ratio": 0.01849344,
+                "rgb": [
+                  83,
+                  146,
+                  63
+                ]
+              },
+              {
+                "pixels": 1417,
+                "ratio": 0.01654369,
+                "rgb": [
+                  82,
+                  146,
+                  61
+                ]
+              },
+              {
+                "pixels": 1318,
+                "ratio": 0.01538785,
+                "rgb": [
+                  82,
+                  145,
+                  61
+                ]
+              }
+            ]
+          },
+          "skin": {
+            "median": {
+              "lab": [
+                63.81835938,
+                24.78125,
+                47.296875
+              ],
+              "rgb": [
+                217,
+                135,
+                71
+              ]
+            },
+            "top_exact_rgb": [
+              {
+                "pixels": 1682,
+                "ratio": 0.01220973,
+                "rgb": [
+                  230,
+                  149,
+                  77
+                ]
+              },
+              {
+                "pixels": 1540,
+                "ratio": 0.01117894,
+                "rgb": [
+                  229,
+                  148,
+                  76
+                ]
+              },
+              {
+                "pixels": 1369,
+                "ratio": 0.00993764,
+                "rgb": [
+                  231,
+                  152,
+                  80
+                ]
+              },
+              {
+                "pixels": 1151,
+                "ratio": 0.00835517,
+                "rgb": [
+                  231,
+                  153,
+                  80
+                ]
+              },
+              {
+                "pixels": 1075,
+                "ratio": 0.00780348,
+                "rgb": [
+                  228,
+                  147,
+                  76
+                ]
+              },
+              {
+                "pixels": 1067,
+                "ratio": 0.00774541,
+                "rgb": [
+                  230,
+                  151,
+                  79
+                ]
+              },
+              {
+                "pixels": 1049,
+                "ratio": 0.00761475,
+                "rgb": [
+                  230,
+                  150,
+                  78
+                ]
+              },
+              {
+                "pixels": 1039,
+                "ratio": 0.00754216,
+                "rgb": [
+                  229,
+                  148,
+                  77
+                ]
+              }
+            ]
+          },
+          "socks": {
+            "median": {
+              "lab": [
+                49.53613281,
+                63.0625,
+                -12.9375
+              ],
+              "rgb": [
+                203,
+                59,
+                142
+              ]
+            },
+            "top_exact_rgb": [
+              {
+                "pixels": 844,
+                "ratio": 0.01297942,
+                "rgb": [
+                  216,
+                  63,
+                  153
+                ]
+              },
+              {
+                "pixels": 677,
+                "ratio": 0.01041122,
+                "rgb": [
+                  217,
+                  64,
+                  154
+                ]
+              },
+              {
+                "pixels": 676,
+                "ratio": 0.01039584,
+                "rgb": [
+                  214,
+                  61,
+                  148
+                ]
+              },
+              {
+                "pixels": 645,
+                "ratio": 0.00991911,
+                "rgb": [
+                  214,
+                  61,
+                  149
+                ]
+              },
+              {
+                "pixels": 643,
+                "ratio": 0.00988835,
+                "rgb": [
+                  213,
+                  60,
+                  147
+                ]
+              },
+              {
+                "pixels": 634,
+                "ratio": 0.00974995,
+                "rgb": [
+                  216,
+                  62,
+                  152
+                ]
+              },
+              {
+                "pixels": 582,
+                "ratio": 0.00895027,
+                "rgb": [
+                  216,
+                  63,
+                  152
+                ]
+              },
+              {
+                "pixels": 556,
+                "ratio": 0.00855043,
+                "rgb": [
+                  217,
+                  63,
+                  153
+                ]
+              }
+            ]
+          }
+        },
+        "residual_lab_assignment_ratio": 0.00731387,
+        "source_dimensions": [
+          1442,
+          1870
+        ],
+        "source_silhouette_pixels": 608023,
+        "source_unique_rgb_in_silhouette": 81671
+      },
+      "normalization": {
+        "logical_body_height_px": 190,
+        "logical_dimensions": [
+          94,
+          190
+        ],
+        "logical_pixel_to_source_index": "floor((logical_index + 0.5) * source_extent / logical_extent) + crop_origin",
+        "resampling": "nearest-neighbor pixel-center floor only",
+        "source_body_bbox_dimensions": [
+          876,
+          1767
+        ],
+        "source_body_bbox_xyxy_exclusive": [
+          247,
+          10,
+          1123,
+          1777
+        ],
+        "source_edge_to_logical_edge_affine_2x3": [
+          0.10730594,
+          0.0,
+          -26.50456621,
+          0.0,
+          0.10752688,
+          -1.07526882
+        ]
+      },
+      "outputs": {
+        "masks": {
+          "accent": {
+            "dimensions": [
+              94,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f2/masks/accent.png",
+            "sha256": "0c12dd8db3080006934c3f877f422251b816310697a63a10a483ed72f0cb89e9"
+          },
+          "background": {
+            "dimensions": [
+              94,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f2/masks/background.png",
+            "sha256": "e780c6297a346cb6be33ac915d505cc4e0cdef974c3d2c1c681551b1f6244c59"
+          },
+          "dark_fixed": {
+            "dimensions": [
+              94,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f2/masks/dark_fixed.png",
+            "sha256": "237b339f987d6219b9915d2c2aecf153dd526e48482b593e9db41ec872e9d384"
+          },
+          "shirt": {
+            "dimensions": [
+              94,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f2/masks/shirt.png",
+            "sha256": "637552dd8c14b369b5da7556eda206c9b240b60892df6cdb332ae5a91c42d539"
+          },
+          "shorts": {
+            "dimensions": [
+              94,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f2/masks/shorts.png",
+            "sha256": "c20938dea78fcf80553cdc6bd0636a5f21f603707b73674ee5103e3eca347438"
+          },
+          "silhouette": {
+            "dimensions": [
+              94,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f2/masks/silhouette.png",
+            "sha256": "6c40517c92866db1467ef903112db8d7997ba8a1069b53727a14cb686dbe114d"
+          },
+          "skin": {
+            "dimensions": [
+              94,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f2/masks/skin.png",
+            "sha256": "66ada051231a790be80531b2f4b0082b43ad6c1e6152e87ad787d78ae0dec974"
+          },
+          "socks": {
+            "dimensions": [
+              94,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f2/masks/socks.png",
+            "sha256": "f926573942b050c8e2bb8c683652aad7c4fb4724135ea3216856a27588525fff"
+          }
+        },
+        "preview": {
+          "dimensions": [
+            94,
+            190
+          ],
+          "mode": "RGBA",
+          "path": "design/cutscene-production/calibration/manga190/f2/preview.png",
+          "sha256": "5c73e8cb2455e0c153efed043e40540d78a7477d2181dd767cf1344011adb901"
+        }
+      },
+      "source": {
+        "dimensions": [
+          1442,
+          1870
+        ],
+        "mode": "RGBA",
+        "path": "img/cutscenes/manga_shortpass6/frame_02.png",
+        "sha256": "b88e22e17b0d1bacd65268122ce68313e41c8e999d3bb464dbbf6224e7811b0e"
+      }
+    },
+    "F3": {
+      "metrics": {
+        "background_purity": {
+          "adoption_policy": "measured-not-a-fail-condition",
+          "all_pixels": {
+            "near_white_250_ratio": 0.79873737,
+            "pure_white_ratio": 0.00138912
+          },
+          "border_connected_background": {
+            "near_white_250_ratio": 0.98780022,
+            "pixels": 2004709,
+            "pure_white_ratio": 0.00171796,
+            "rgb_median": [
+              253,
+              253,
+              253
+            ],
+            "top_exact_rgb": [
+              {
+                "pixels": 768806,
+                "ratio": 0.38350005,
+                "rgb": [
+                  253,
+                  253,
+                  253
+                ]
+              },
+              {
+                "pixels": 242837,
+                "ratio": 0.12113329,
+                "rgb": [
+                  254,
+                  253,
+                  253
+                ]
+              },
+              {
+                "pixels": 158598,
+                "ratio": 0.07911273,
+                "rgb": [
+                  253,
+                  253,
+                  252
+                ]
+              },
+              {
+                "pixels": 146301,
+                "ratio": 0.07297867,
+                "rgb": [
+                  253,
+                  252,
+                  252
+                ]
+              },
+              {
+                "pixels": 141772,
+                "ratio": 0.07071949,
+                "rgb": [
+                  254,
+                  254,
+                  254
+                ]
+              },
+              {
+                "pixels": 129514,
+                "ratio": 0.06460489,
+                "rgb": [
+                  252,
+                  252,
+                  252
+                ]
+              },
+              {
+                "pixels": 88878,
+                "ratio": 0.04433461,
+                "rgb": [
+                  254,
+                  254,
+                  253
+                ]
+              },
+              {
+                "pixels": 44942,
+                "ratio": 0.02241822,
+                "rgb": [
+                  253,
+                  252,
+                  253
+                ]
+              }
+            ]
+          },
+          "definition": {
+            "near_white_250": "R>=250 and G>=250 and B>=250",
+            "pure_white": "R=G=B=255"
+          }
+        },
+        "direct_hsv_seed_coverage_ratio": 0.99348448,
+        "edge_hardness_antialias_proxy": {
+          "crossing_count": 9058,
+          "deltaE76_median": 28.68270683,
+          "deltaE76_p10": 15.88497591,
+          "deltaE76_p90": 39.52866859,
+          "hard_crossing_ratio_deltaE_gte_40": 0.09030691,
+          "interpretation": "proxy-only; not an anatomical or candidate acceptance metric",
+          "method": "CIE-Lab deltaE76 across horizontal/vertical silhouette boundary crossings",
+          "soft_crossing_ratio_deltaE_lt_15": 0.08820932
+        },
+        "head_body_ratio": {
+          "reason": "color-only material segmentation cannot isolate hair-crown-to-chin reliably",
+          "status": "unavailable"
+        },
+        "logical_unique_rgba_in_preview": 5169,
+        "material_area_ratio_of_logical_silhouette": {
+          "accent": 0.05797101,
+          "dark_fixed": 0.2482555,
+          "shirt": 0.19390768,
+          "shorts": 0.14157273,
+          "skin": 0.23322598,
+          "socks": 0.1250671
+        },
+        "material_area_ratio_of_source_silhouette": {
+          "accent": 0.0604182,
+          "dark_fixed": 0.24454915,
+          "shirt": 0.19418028,
+          "shorts": 0.14148504,
+          "skin": 0.23480115,
+          "socks": 0.12456618
+        },
+        "material_color_facts": {
+          "accent": {
+            "median": {
+              "lab": [
+                73.59008789,
+                -14.953125,
+                -28.78125
+              ],
+              "rgb": [
+                101,
+                192,
+                229
+              ]
+            },
+            "top_exact_rgb": [
+              {
+                "pixels": 148,
+                "ratio": 0.00516183,
+                "rgb": [
+                  101,
+                  194,
+                  238
+                ]
+              },
+              {
+                "pixels": 130,
+                "ratio": 0.00453404,
+                "rgb": [
+                  100,
+                  193,
+                  237
+                ]
+              },
+              {
+                "pixels": 101,
+                "ratio": 0.0035226,
+                "rgb": [
+                  102,
+                  195,
+                  239
+                ]
+              },
+              {
+                "pixels": 90,
+                "ratio": 0.00313895,
+                "rgb": [
+                  102,
+                  195,
+                  240
+                ]
+              },
+              {
+                "pixels": 57,
+                "ratio": 0.001988,
+                "rgb": [
+                  106,
+                  199,
+                  243
+                ]
+              },
+              {
+                "pixels": 55,
+                "ratio": 0.00191825,
+                "rgb": [
+                  102,
+                  195,
+                  238
+                ]
+              },
+              {
+                "pixels": 54,
+                "ratio": 0.00188337,
+                "rgb": [
+                  99,
+                  192,
+                  237
+                ]
+              },
+              {
+                "pixels": 54,
+                "ratio": 0.00188337,
+                "rgb": [
+                  100,
+                  193,
+                  238
+                ]
+              }
+            ]
+          },
+          "dark_fixed": {
+            "median": {
+              "lab": [
+                7.25708008,
+                0.375,
+                2.75
+              ],
+              "rgb": [
+                26,
+                18,
+                11
+              ]
+            },
+            "top_exact_rgb": [
+              {
+                "pixels": 880,
+                "ratio": 0.00758274,
+                "rgb": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "pixels": 661,
+                "ratio": 0.00569567,
+                "rgb": [
+                  1,
+                  0,
+                  0
+                ]
+              },
+              {
+                "pixels": 467,
+                "ratio": 0.00402402,
+                "rgb": [
+                  1,
+                  1,
+                  1
+                ]
+              },
+              {
+                "pixels": 371,
+                "ratio": 0.00319682,
+                "rgb": [
+                  2,
+                  2,
+                  2
+                ]
+              },
+              {
+                "pixels": 326,
+                "ratio": 0.00280906,
+                "rgb": [
+                  2,
+                  1,
+                  0
+                ]
+              },
+              {
+                "pixels": 324,
+                "ratio": 0.00279183,
+                "rgb": [
+                  2,
+                  0,
+                  0
+                ]
+              },
+              {
+                "pixels": 315,
+                "ratio": 0.00271428,
+                "rgb": [
+                  3,
+                  1,
+                  0
+                ]
+              },
+              {
+                "pixels": 292,
+                "ratio": 0.00251609,
+                "rgb": [
+                  2,
+                  1,
+                  1
+                ]
+              }
+            ]
+          },
+          "shirt": {
+            "median": {
+              "lab": [
+                34.50927734,
+                51.828125,
+                -84.234375
+              ],
+              "rgb": [
+                20,
+                54,
+                216
+              ]
+            },
+            "top_exact_rgb": [
+              {
+                "pixels": 1626,
+                "ratio": 0.01764514,
+                "rgb": [
+                  23,
+                  61,
+                  242
+                ]
+              },
+              {
+                "pixels": 1527,
+                "ratio": 0.01657081,
+                "rgb": [
+                  23,
+                  60,
+                  241
+                ]
+              },
+              {
+                "pixels": 1187,
+                "ratio": 0.01288117,
+                "rgb": [
+                  24,
+                  63,
+                  242
+                ]
+              },
+              {
+                "pixels": 1178,
+                "ratio": 0.01278351,
+                "rgb": [
+                  23,
+                  62,
+                  242
+                ]
+              },
+              {
+                "pixels": 867,
+                "ratio": 0.00940857,
+                "rgb": [
+                  23,
+                  59,
+                  241
+                ]
+              },
+              {
+                "pixels": 853,
+                "ratio": 0.00925665,
+                "rgb": [
+                  23,
+                  60,
+                  242
+                ]
+              },
+              {
+                "pixels": 775,
+                "ratio": 0.0084102,
+                "rgb": [
+                  24,
+                  64,
+                  243
+                ]
+              },
+              {
+                "pixels": 754,
+                "ratio": 0.00818231,
+                "rgb": [
+                  25,
+                  65,
+                  243
+                ]
+              }
+            ]
+          },
+          "shorts": {
+            "median": {
+              "lab": [
+                54.37011719,
+                -43.296875,
+                40.765625
+              ],
+              "rgb": [
+                66,
+                147,
+                54
+              ]
+            },
+            "top_exact_rgb": [
+              {
+                "pixels": 1626,
+                "ratio": 0.02421697,
+                "rgb": [
+                  69,
+                  154,
+                  56
+                ]
+              },
+              {
+                "pixels": 1502,
+                "ratio": 0.02237017,
+                "rgb": [
+                  69,
+                  153,
+                  56
+                ]
+              },
+              {
+                "pixels": 1414,
+                "ratio": 0.02105953,
+                "rgb": [
+                  70,
+                  155,
+                  56
+                ]
+              },
+              {
+                "pixels": 1409,
+                "ratio": 0.02098506,
+                "rgb": [
+                  68,
+                  151,
+                  55
+                ]
+              },
+              {
+                "pixels": 1326,
+                "ratio": 0.01974889,
+                "rgb": [
+                  69,
+                  153,
+                  55
+                ]
+              },
+              {
+                "pixels": 1270,
+                "ratio": 0.01891485,
+                "rgb": [
+                  70,
+                  155,
+                  57
+                ]
+              },
+              {
+                "pixels": 995,
+                "ratio": 0.01481912,
+                "rgb": [
+                  68,
+                  152,
+                  55
+                ]
+              },
+              {
+                "pixels": 948,
+                "ratio": 0.01411912,
+                "rgb": [
+                  67,
+                  149,
+                  54
+                ]
+              }
+            ]
+          },
+          "skin": {
+            "median": {
+              "lab": [
+                64.99023438,
+                27.34375,
+                51.328125
+              ],
+              "rgb": [
+                224,
+                136,
+                64
+              ]
+            },
+            "top_exact_rgb": [
+              {
+                "pixels": 865,
+                "ratio": 0.00776293,
+                "rgb": [
+                  241,
+                  153,
+                  74
+                ]
+              },
+              {
+                "pixels": 604,
+                "ratio": 0.00542059,
+                "rgb": [
+                  241,
+                  153,
+                  75
+                ]
+              },
+              {
+                "pixels": 536,
+                "ratio": 0.00481032,
+                "rgb": [
+                  241,
+                  153,
+                  76
+                ]
+              },
+              {
+                "pixels": 510,
+                "ratio": 0.00457699,
+                "rgb": [
+                  239,
+                  151,
+                  72
+                ]
+              },
+              {
+                "pixels": 493,
+                "ratio": 0.00442442,
+                "rgb": [
+                  239,
+                  150,
+                  71
+                ]
+              },
+              {
+                "pixels": 461,
+                "ratio": 0.00413724,
+                "rgb": [
+                  238,
+                  149,
+                  70
+                ]
+              },
+              {
+                "pixels": 446,
+                "ratio": 0.00400262,
+                "rgb": [
+                  238,
+                  150,
+                  71
+                ]
+              },
+              {
+                "pixels": 424,
+                "ratio": 0.00380518,
+                "rgb": [
+                  238,
+                  151,
+                  74
+                ]
+              }
+            ]
+          },
+          "socks": {
+            "median": {
+              "lab": [
+                51.12304688,
+                70.40625,
+                -13.421875
+              ],
+              "rgb": [
+                218,
+                50,
+                147
+              ]
+            },
+            "top_exact_rgb": [
+              {
+                "pixels": 898,
+                "ratio": 0.01519099,
+                "rgb": [
+                  223,
+                  52,
+                  152
+                ]
+              },
+              {
+                "pixels": 843,
+                "ratio": 0.01426058,
+                "rgb": [
+                  220,
+                  50,
+                  147
+                ]
+              },
+              {
+                "pixels": 771,
+                "ratio": 0.0130426,
+                "rgb": [
+                  223,
+                  52,
+                  151
+                ]
+              },
+              {
+                "pixels": 725,
+                "ratio": 0.01226444,
+                "rgb": [
+                  223,
+                  52,
+                  153
+                ]
+              },
+              {
+                "pixels": 667,
+                "ratio": 0.01128328,
+                "rgb": [
+                  221,
+                  51,
+                  149
+                ]
+              },
+              {
+                "pixels": 644,
+                "ratio": 0.0108942,
+                "rgb": [
+                  221,
+                  51,
+                  148
+                ]
+              },
+              {
+                "pixels": 618,
+                "ratio": 0.01045438,
+                "rgb": [
+                  223,
+                  53,
+                  153
+                ]
+              },
+              {
+                "pixels": 601,
+                "ratio": 0.0101668,
+                "rgb": [
+                  222,
+                  52,
+                  151
+                ]
+              }
+            ]
+          }
+        },
+        "residual_lab_assignment_ratio": 0.00651552,
+        "source_dimensions": [
+          1474,
+          1682
+        ],
+        "source_silhouette_pixels": 474559,
+        "source_unique_rgb_in_silhouette": 76602
+      },
+      "normalization": {
+        "logical_body_height_px": 190,
+        "logical_dimensions": [
+          151,
+          190
+        ],
+        "logical_pixel_to_source_index": "floor((logical_index + 0.5) * source_extent / logical_extent) + crop_origin",
+        "resampling": "nearest-neighbor pixel-center floor only",
+        "source_body_bbox_dimensions": [
+          1207,
+          1514
+        ],
+        "source_body_bbox_xyxy_exclusive": [
+          160,
+          9,
+          1367,
+          1523
+        ],
+        "source_edge_to_logical_edge_affine_2x3": [
+          0.12510356,
+          0.0,
+          -20.01657001,
+          0.0,
+          0.12549538,
+          -1.12945839
+        ]
+      },
+      "outputs": {
+        "masks": {
+          "accent": {
+            "dimensions": [
+              151,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f3/masks/accent.png",
+            "sha256": "9f975186350c82379709e8fc77227dfc459aad9d1d4b5c2e99c88d901c4ef1ca"
+          },
+          "background": {
+            "dimensions": [
+              151,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f3/masks/background.png",
+            "sha256": "e8b73962cd44a8582caca763d3dea07fb36aee209d9a5bf69e9165f9f6095001"
+          },
+          "dark_fixed": {
+            "dimensions": [
+              151,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f3/masks/dark_fixed.png",
+            "sha256": "28b726b2e3595b1844a01e98c1214925f60c240c46ff514f298df5f3ddf63837"
+          },
+          "shirt": {
+            "dimensions": [
+              151,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f3/masks/shirt.png",
+            "sha256": "8369aecda5d204da8ce28e5e019cd36ca02bab668c66d3b418fd33577b05c62c"
+          },
+          "shorts": {
+            "dimensions": [
+              151,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f3/masks/shorts.png",
+            "sha256": "5082a6ca5b5478999da510f70d3c05a7acbfd661061aa7640a4ede156e1c8a04"
+          },
+          "silhouette": {
+            "dimensions": [
+              151,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f3/masks/silhouette.png",
+            "sha256": "f6af6c01d3341ebab2b4c64578d370d4e41202be816a83b796750d89f1000f34"
+          },
+          "skin": {
+            "dimensions": [
+              151,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f3/masks/skin.png",
+            "sha256": "70c169e26577b07c1237b942f279c2079604c3295ea1ab99f07687c7c7982207"
+          },
+          "socks": {
+            "dimensions": [
+              151,
+              190
+            ],
+            "mode": "L",
+            "path": "design/cutscene-production/calibration/manga190/f3/masks/socks.png",
+            "sha256": "bec6bbbab203b1657397e1e4082e6a9fb257f0740a463845831ba7f2069de67e"
+          }
+        },
+        "preview": {
+          "dimensions": [
+            151,
+            190
+          ],
+          "mode": "RGBA",
+          "path": "design/cutscene-production/calibration/manga190/f3/preview.png",
+          "sha256": "d26b4e6fd3eb196a39e8166941732b3715121dc1de70efbfd014dcd705604853"
+        }
+      },
+      "source": {
+        "dimensions": [
+          1474,
+          1682
+        ],
+        "mode": "RGBA",
+        "path": "img/cutscenes/manga_shortpass6/frame_03.png",
+        "sha256": "df54ea8579474747ca0357521868e0a38aa951fefa337f437ff435177d7d6bfa"
+      }
+    }
+  },
+  "method": {
+    "algorithm": "manga190-hsv-lab-material-partition-v1",
+    "color_spaces": [
+      "sRGB uint8",
+      "OpenCV HSV float H=degrees S/V=0..1",
+      "OpenCV CIE-Lab float"
+    ],
+    "extraction_invariants": {
+      "candidate_acceptance_thresholds": "none",
+      "maximum_f2_f3_material_area_ratio_delta": 0.04,
+      "minimum_direct_seed_coverage_ratio": 0.95,
+      "minimum_source_pixels_per_material": 32
+    },
+    "global_lab_palette_anchors": {
+      "accent": [
+        73.74572754,
+        -10.84375,
+        -30.34375
+      ],
+      "dark_fixed": [
+        6.42700195,
+        0.375,
+        2.609375
+      ],
+      "shirt": [
+        32.69042969,
+        52.90625,
+        -83.8125
+      ],
+      "shorts": [
+        54.24194336,
+        -36.671875,
+        37.296875
+      ],
+      "skin": [
+        64.34326172,
+        26.421875,
+        48.8125
+      ],
+      "socks": [
+        50.42114258,
+        65.6875,
+        -13.28125
+      ]
+    },
+    "hsv_rules": {
+      "accent": {
+        "hue_deg_gte": 155.0,
+        "hue_deg_lt": 215.0,
+        "value_gte": 0.32
+      },
+      "dark_fixed": {
+        "value_lt": 0.32
+      },
+      "shirt": {
+        "hue_deg_gte": 215.0,
+        "hue_deg_lt": 270.0,
+        "value_gte": 0.32
+      },
+      "shorts": {
+        "hue_deg_gte": 70.0,
+        "hue_deg_lt": 155.0,
+        "value_gte": 0.32
+      },
+      "silhouette_seed": {
+        "combine": "or",
+        "saturation_gt": 0.12,
+        "value_lt": 0.72
+      },
+      "skin": {
+        "hue_deg_gte": 8.0,
+        "hue_deg_lt": 60.0,
+        "value_gte": 0.32
+      },
+      "socks": {
+        "hue_deg_gte_or_lte": [
+          285.0,
+          3.0
+        ],
+        "saturation_gt": 0.12,
+        "value_gte": 0.32
+      }
+    },
+    "logical_normalization": {
+      "body_height_px": 190,
+      "quantization": "none",
+      "resampling": "nearest-neighbor pixel-center floor only"
+    },
+    "residual_assignment": "nearest global F2+F3 direct-seed median in CIE-Lab",
+    "silhouette": "complement of border-connected low-saturation/high-value background; retains enclosed white details"
+  },
+  "schema": "cutscene-style-calibration",
+  "schema_version": 1,
+  "scope": {
+    "anatomical_left_right_inference": "forbidden",
+    "candidate_evaluation": "forbidden",
+    "facts_only": true,
+    "image_generation": "forbidden"
+  },
+  "status": {
+    "calibration_status": "not-calibrated",
+    "candidate_gate": "locked",
+    "ct4d_final_art_reproduction": "not-established",
+    "extraction_verification": "passed",
+    "independent_review": "passed",
+    "phase": "phase2a-deterministic-style-extraction"
+  },
+  "style_profile": "MANGA_190_V1"
+}
