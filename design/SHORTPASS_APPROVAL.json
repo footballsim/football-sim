@@ -3,6 +3,24 @@
   "scene": "shortpass",
   "video_id": "rnqIgNSQ-is",
   "keyframe_times_seconds": [17.0, 18.0, 19.0, 20.0, 21.0, 22.2],
+  "active_sequence": {
+    "status": "user-approved-five-frame-revision",
+    "decided_on": "2026-08-26",
+    "removed_source_frame": {"frame": "F1", "time_seconds": 17.0},
+    "reason": "The user removed F1 after repeated pose-reproduction failures and decided that the short-pass scene should be completed in five frames.",
+    "source_frames": ["F2", "F3", "F4", "F5", "F6"],
+    "times_seconds": [18.0, 19.0, 20.0, 21.0, 22.2],
+    "final_slot_mapping": {
+      "frame_01": "F2",
+      "frame_02": "F3",
+      "frame_03": "F4",
+      "frame_04": "F5",
+      "frame_05": "F6"
+    },
+    "naming_policy": "Keep source F-numbers during production so every image remains tied to its approved trace. Apply the five-slot filename mapping only after all active frames are explicitly adopted.",
+    "f2_storage_policy": "The adopted F2 remains byte-locked at img/cutscenes/manga_shortpass6/frame_02.png during production; copy it to final slot frame_01 only at the final five-frame integration gate.",
+    "f3_storage_policy": "The adopted F3 remains byte-locked at img/cutscenes/manga_shortpass6/frame_03.png during production; copy it to final slot frame_02 only at the final five-frame integration gate."
+  },
   "artifact_root": "repository root",
   "components": {
     "legs": {
@@ -67,6 +85,48 @@
         {"frame": "F5", "path": "design/shortpass-approval/pose-rig-derived-f05.png", "sha256": "b658fb396f50d693797c9a94acdb511d4c2322e79a6106e8a6ce593d8fc71cdb"},
         {"frame": "F6", "path": "design/shortpass-approval/pose-rig-derived-f06.png", "sha256": "e77205d5cfa794efeb8b541d85aa5a0f288fde693e5044f72a9d5c97565ea7b2"}
       ]
+    },
+    "semantic_surfaces": {
+      "status": "user-approved",
+      "approved_on": "2026-08-26",
+      "purpose": "Hard visible-surface authority for F4 generation. Garment regions and exposed skin are separate; the shorts mask must never absorb either exposed thigh.",
+      "frames": [
+        {
+          "frame": "F4",
+          "source_time_seconds": 20.0,
+          "artifact": {
+            "path": "design/cutscene-production/shortpass/f4/semantic-trace.png",
+            "sha256": "d30a64e8032f2b941ab5d0efdd13abec80e5557ecb2cbfbecd067fb3642df0e7"
+          },
+          "review": {
+            "path": "design/cutscene-production/shortpass/f4/review.png",
+            "sha256": "6925bb9316b385997e69a7d664e1170420dad71fb2396ee4e8bf4c61c7eec6e9"
+          },
+          "overlay": {
+            "path": "design/cutscene-production/shortpass/f4/overlay.png",
+            "sha256": "7970afef912e41c241ace254068c910b51bbf8a88e506eca8de9def656121e55"
+          },
+          "exact_edit_control": {
+            "status": "derived-from-approved-coordinates",
+            "path": "design/cutscene-production/shortpass/f4/exact-control.png",
+            "sha256": "526e0c7416f52ade7d883c252b365f1eb7e4ef97721af682cf7b60d58759da2e",
+            "base": "tools/proto/shortpass-semantic-f4/candidate_v3_lowerbody_local.png",
+            "role": "Same-canvas local-edit control: green=left support leg, magenta=right kicking leg, orange=visible right arm, yellow=torso axis. Every endpoint is computed from the SHA-locked approved ledgers through the adopted-F3 Vision calibration."
+          },
+          "color_roles": {
+            "blue": "shirt surface",
+            "purple": "shorts fabric only; render green in final art",
+            "green": "support-leg sock",
+            "magenta": "kicking-leg sock",
+            "dark_green": "support cleat",
+            "dark_magenta": "kicking cleat",
+            "white_gaps": "exposed skin or intentionally untraced body; never fill as shorts"
+          },
+          "machine_qa": "PASS: shorts are one component and shorts-to-exposed-thigh intrusion is 0.0.",
+          "independent_visual_qa": "PASS after removal of the thin purple tail on the kicking thigh.",
+          "user_decision": "The user explicitly approved this trace and instructed image generation to resume."
+        }
+      ]
     }
   },
   "design_references": {
@@ -115,9 +175,10 @@
     }
   },
   "generation_gate": {
-    "enabled": true,
+    "enabled": false,
+    "phase": "phase1-authority-verification-only",
     "required_backend": "cross-recipe-imagegen",
-    "rejected_backend": "one-shot six-frame generation, full-frame rewrites after a local correction, local M1 SDXL, and the rejected Replicate public model version",
+    "rejected_backend": "one-shot multi-frame generation, full-frame rewrites after a local correction, local M1 SDXL, and the rejected Replicate public model version",
     "calibration_frame": "F3",
         "reason": "The combined trace and design references were explicitly approved by the user on 2026-08-24. On 2026-08-25 the user rejected the detour into a new paid hard-pose backend and instructed the project to reuse the successful cross-scene production experience. The required workflow is therefore the cross recipe: generate only F3, freeze every region that passes independent QA, edit one failed body region at a time, normalize the exterior white matte deterministically, and never regenerate the remaining five frames until F3 is visually adopted. Five role-separated references remain mandatory: approved broadcast trace for facing/occlusion, deterministic rig for joint geometry, pose-neutral style board for rendering, approved right-profile reference for haircut, and the player-body canon measurement for 5.6H proportions.",
         "cross_recipe_candidate_2026_08_25": {
@@ -157,9 +218,412 @@
                     "dimensions": [1474, 1682]
                 },
                 "copy_integrity": "workspace artifact is byte-for-byte identical to the user attachment",
-                "independent_visual_qa": "PASS: full body, right-facing direction, F3 limb intent, rear undercut, approved pixel style, natural eye, no extra object or text, and no open-ended critical anomaly"
+                "independent_visual_qa": "PASS: full body, right-facing direction, F3 limb intent, rear undercut, approved pixel style, natural eye, no extra object or text, and no open-ended critical anomaly",
+                "vision_calibration": {
+                    "path": "design/shortpass-approval/f3-vision-calibration.json",
+                    "sha256": "0428ebe7c439f706cccc8b62bfa146934a41839c39b1cefe46cc224eb2379ad2",
+                    "role": "SHA-locked bridge from approved broadcast-trace joint centers to macOS Vision joint centers on the user-adopted pixel character; calibrates segment rotation and length without weakening frame-to-frame motion checks"
+                }
             },
-            "integration": "F3 canonical storage is allowed; full six-frame scene integration, build, push and deploy remain forbidden until F1, F2, F4, F5 and F6 are generated, independently checked and explicitly adopted"
+            "post_calibration_reference_policy": {
+                "applies_to": ["F2", "F4", "F5", "F6"],
+                "five_inputs": "selected-frame approved trace, selected-frame approved coordinate rig, adopted F3, approved right-profile hair, and player-body canon",
+                "superseded_input": "the pose-neutral style board remains approval evidence but is replaced as a live generation input by the stronger user-adopted F3 anchor",
+                "reason": "the built-in generator accepts at most five image inputs; adopted F3 now carries the exact approved face, natural eye, proportions, palette, haircut and rendering style",
+                "local_edit_exception": "for a later geometry-edit call, the current candidate itself occupies the style/identity slot; retain the approved trace, approved rig and profile, while body proportions remain inherited from the current candidate. Do not include the full-body adopted F3 in F1/F2/F4/F5/F6 geometry corrections because the v15 audit proved that its wide-stride pose can leak into the edited frame despite explicit negative prompting. F3 remains the immutable style canon and must be used for post-geometry visual comparison, not as a simultaneous pose-edit input."
+            },
+            "f1_candidate_2026_08_25": {
+                "status": "user-rejected",
+                "frame": "F1",
+                "workflow": "built-in ImageGen base, right-kicking-leg correction, accepted-region composite, then one final residual correction for kicking ankle, visible right wrist and torso lean",
+                "artifact": {
+                    "path": "tools/proto/shortpass-cross-recipe-f1/candidate_v3_white.png",
+                    "sha256": "2ed9fb6464fff904739b6da885e76a7bfd10574f2b45dba787805f386e06523e",
+                    "dimensions": [1174, 1339]
+                },
+                "comparison": {
+                    "path": "tools/proto/shortpass-cross-recipe-f1/f1_trace_above_candidate_v3_landscape.png",
+                    "sha256": "a77e32dda38c27c574dabb3712b22ae1e26fa2cea6242a7ffea3f7ad3d1245bc"
+                },
+                "independent_visual_qa": "INVALIDATED: the reviewer incorrectly passed projected limb endpoints without verifying anatomical hip-to-leg identity, accepted a coarse arm direction instead of the approved shoulder-elbow-wrist coordinates, and confused downward head pitch with downward iris direction",
+                "white_matte": "exterior-connected near-white matte was normalized deterministically; all outer-edge pixels are pure white",
+                "user_rejection": "The user rejected the candidate because the left/right legs are wrong, the arm position differs from the approved trace, and the gaze looks forward rather than down.",
+                "reuse_policy": "do not adopt, integrate or use this candidate as a base for F2/F4/F5/F6",
+                "next_gate": "before another F1 generation, require three separate checks: pelvis-to-leg anatomical identity, normalized shoulder-elbow-wrist coordinate error, and eye-ROI iris direction independent of head pitch"
+            },
+            "f1_candidate_v13_2026_08_26": {
+                "status": "user-rejected",
+                "frame": "F1",
+                "workflow": "current SHA-locked ledger -> explicit diagnostic anatomy colours (right leg magenta, left leg green, visible right arm orange) -> fixed-side macOS Vision audit with no label swapping -> colour-only restoration from adopted F3 -> exterior-connected pure-white normalization",
+                "artifact": {
+                    "path": "tools/proto/shortpass-cross-recipe-f1/candidate_v13_current_ledger_white.png",
+                    "sha256": "d2bdcdebe7a5d4a84a7056f414f797d350a2fa335b08c47bb855497d35d7ed10",
+                    "dimensions": [1098, 1433]
+                },
+                "comparison": {
+                    "path": "tools/proto/shortpass-cross-recipe-f1/f1_trace_above_candidate_v13_landscape.png",
+                    "sha256": "961139533bff3874136801cd8abc42581a307da1ce2314200baebc925d1b47be"
+                },
+                "machine_qa": "INVALIDATED FOR POSE: anatomical left/right identity was correctly fixed, but the aggregate leg RMS concealed joint-specific and segment-direction errors. In particular, the right knee did not travel far enough forward, the right knee-to-ankle vector had the wrong horizontal sign, and the left knee sat too far screen-left.",
+                "independent_visual_qa": "INVALIDATED FOR POSE: the visual review correctly recognized anatomical identity but accepted a coarse silhouette instead of checking each approved joint, bone angle and torso axis independently.",
+                "background": "all exterior edge pixels are pure white after deterministic connected-matte normalization",
+                "user_rejection": "The user confirmed that right/left leg identity is correct but rejected the candidate because the pose reproduction is inaccurate.",
+                "reuse_policy": "never present or adopt v13 and never use it for F2 or later frames; its accepted anatomy identity, style, haircut and natural downward eye may only be retained as frozen local regions while F1 geometry is deterministically corrected",
+                "next_gate": "before another F1 candidate is presented, require every visible joint component and distance, every limb-segment angle and length, the F1 right-shin horizontal direction, and torso angle to pass independently; aggregate RMS is supplementary only"
+            },
+            "f1_candidate_v14_2026_08_26": {
+                "status": "machine-rejected-never-present",
+                "frame": "F1",
+                "workflow": "deterministic thin-plate-spline correction of v13 toward the live approved joints",
+                "artifact": {
+                    "path": "tools/proto/shortpass-cross-recipe-f1/candidate_v14_pose_locked.png",
+                    "sha256": "568556b5e97ae2279f99fb9e0648bb48735239ec3e3b1f7bbdad5b6fe896ae48",
+                    "dimensions": [1098, 1433]
+                },
+                "rejection": "The global nonlinear warp moved joints but visibly bent the right arm and torso into rubber-like curves. It was rejected internally before user presentation.",
+                "reuse_policy": "never present, adopt, or use as an edit base"
+            },
+            "f1_candidate_v15_2026_08_26": {
+                "status": "machine-rejected-work-in-progress",
+                "frame": "F1",
+                "workflow": "one built-in ImageGen pose-only edit of v13 using the approved F1 trace, approved F1 rig, adopted F3 and approved profile",
+                "artifact": {
+                    "path": "tools/proto/shortpass-cross-recipe-f1/candidate_v15_imagegen_pose_attempt.png",
+                    "sha256": "a86d3d548369ae372f9163c248205493bd3baac2f889dba23e59ac29a8a91bb8",
+                    "dimensions": [1097, 1434]
+                },
+                "machine_qa": "FAIL: anatomical knee and ankle ordering failed, leg RMS 1.0722, right-shin angle error 72.82 degrees, torso angle error 11.67 degrees, and multiple joint/segment limits failed.",
+                "rejection": "The adopted F3 reference leaked its wide-stride pose into an F1 geometry edit despite an explicit instruction not to copy F3 pose.",
+                "reuse_policy": "never present as an adoption candidate and never use as an edit base; do not include full-body adopted F3 in a future F1 pose-correction edit"
+            },
+            "f1_gate_correction_2026_08_26": {
+                "failure": "the first candidate gate hard-coded coordinates from the forbidden legacy decoded_manual_trace_v7 script; that stale trace had a diagonally descending F1 support shin and incorrectly allowed rejected v8-v12",
+                "fix": "candidate QA now reads legs-approved-ledger.json and arms-approved-ledger.json directly after verifying their SHA-256 values against this registry; anatomical leg labels may never be swapped to minimize error. When both arms are visible, Vision's two complete shoulder-elbow-wrist chains may be assigned as whole chains to the approved temporal trace by minimum geometric error because the side-on detector can flip both arm labels together; individual arm joints may never be swapped independently",
+                "rejected_outputs": ["candidate_v8_anatomy_warp.png", "candidate_v9_final_raw.png", "candidate_v10_joint_locked.png", "candidate_v11_knees_locked.png", "candidate_v12_knees_lowerbody_only.png", "candidate_v13_current_ledger_white.png", "candidate_v14_pose_locked.png", "candidate_v15_imagegen_pose_attempt.png"],
+                "second_failure": "v13 proved anatomical identity but the gate still averaged four leg joints into one RMS score, allowing large opposing joint errors and a wrong right-shin direction to cancel numerically",
+                "second_fix": "the gate now converts Vision's normalized coordinates back to image pixels before torso normalization, then fails closed per joint (x/y component and Euclidean distance), per segment (angle and length), F1-specific right-shin direction, and torso axis before consulting aggregate RMS"
+            },
+            "f2_internal_review_2026_08_26": {
+                "status": "machine-rejected-review-only",
+                "frame": "F2",
+                "source_time_seconds": 18.0,
+                "workflow": "built-in ImageGen base followed by local lower-body, torso, left-arm and right-arm corrections; each revision was measured against the SHA-locked F2 ledgers through the F3 Vision calibration bridge",
+                "best_internal_artifact": {
+                    "path": "tools/proto/shortpass-cross-recipe-f2/candidate_v15_right_upperarm_white.png",
+                    "sha256": "0d6b11854d9e856178f10ac975ca915e425e2093d5015d7e1ea0aaae11257288",
+                    "dimensions": [1121, 1403]
+                },
+                "comparison": {
+                    "path": "tools/proto/shortpass-cross-recipe-f2/f2_trace_above_candidate_v15_review.png",
+                    "sha256": "da4a704ae3e7ba2c03387ad8d770256a7684bccb08bc05d16e948924aa626c55",
+                    "dimensions": [1600, 900],
+                    "label": "not adopted"
+                },
+                "machine_qa": "FAIL: all leg joints and segments pass; all arm joints pass and visible-arm RMS is 0.0592, but left forearm angle 13.49 degrees and length drift 22.8%, right upper-arm length drift 21.4%, and torso angle 16.31 degrees exceed their independent limits. Independent gaze evidence is also still absent.",
+                "final_attempt": {
+                    "path": "tools/proto/shortpass-cross-recipe-f2/candidate_v16_upperbody_final.png",
+                    "sha256": "592385fa46da6af6071234eb7492eef263ffb01eedd567777131e18dd7ba3a3b",
+                    "dimensions": [1122, 1402],
+                    "rejection": "torso error improved to 8.88 degrees, but the edit regressed the right ankle, right elbow and right wrist beyond per-joint limits; never use v16 as an edit base"
+                },
+                "reuse_policy": "v15 may be shown only as a labeled review comparison and is not adopted; v16 is machine-rejected and must not be presented as a candidate or used as a base",
+                "next_gate": "do not generate F4. Any further F2 work must preserve v15's passing legs and joint positions while addressing the named segment and torso residuals; then require independent eye-ROI gaze evidence and explicit user adoption"
+            },
+            "adopted_f2_2026_08_26": {
+                "status": "user-adopted",
+                "frame": "F2",
+                "source_time_seconds": 18.0,
+                "user_decision": "After an equal-height direct comparison, the user explicitly selected the right-hand attached image as the adopted F2.",
+                "artifact": {
+                    "path": "img/cutscenes/manga_shortpass6/frame_02.png",
+                    "sha256": "b88e22e17b0d1bacd65268122ce68313e41c8e999d3bb464dbbf6224e7811b0e",
+                    "dimensions": [1442, 1870]
+                },
+                "source_attachment": {
+                    "path_at_adoption": "/Users/iwasakimitsuru/Desktop/スクリーンショット 2026-08-26 7.18.31.png",
+                    "copy_integrity": "The canonical artifact is byte-for-byte identical to the user attachment at adoption time."
+                },
+                "comparison": {
+                    "path": "tools/proto/shortpass-cross-recipe-f2/f2_candidate_v15_vs_user_reference_side_by_side.png",
+                    "sha256": "6fafb43c66b7088a80df0b00b22c02641b2c25478df8a730b3fb5ef3ab1c7e89",
+                    "dimensions": [1600, 900],
+                    "selection": "right"
+                },
+                "machine_qa": "Recorded for downstream calibration only: the strict F3-calibrated geometry gate did not pass several per-joint and per-segment limits and had no independent eye-ROI gaze evidence. This does not override the explicit user visual adoption.",
+                "reuse_policy": "This artifact is the only adopted F2. The internally generated v15 and v16 remain non-adopted and must not replace it.",
+                "storage_policy": "Keep at source-numbered frame_02 during production; copy to final frame_01 only after all five active frames are adopted."
+            },
+            "f4_generation_attempts_2026_08_26": {
+                "status": "machine-rejected-stop-after-three-calls",
+                "frame": "F4",
+                "source_time_seconds": 20.0,
+                "backend": "built-in ImageGen; no external API or Replicate charge",
+                "workflow": "one F4 base generation followed by two lower-body-only edits. The approved F4 trace and rig remained the pose authority; adopted F3 supplied style and identity only; the approved right-profile supplied the undercut; the hidden left arm was never intentionally inferred.",
+                "attempts": [
+                    {
+                        "artifact": "tools/proto/shortpass-cross-recipe-f4/candidate_v1_raw.png",
+                        "sha256": "34303270d4c03e1f842e8e14563fead1625932b1ac4c35f3ba02b206077311a0",
+                        "result": "FAIL: anatomical knee ordering was wrong, leg RMS 0.4541, visible-arm RMS 0.2344 and torso angle error 21.14 degrees."
+                    },
+                    {
+                        "artifact": "tools/proto/shortpass-cross-recipe-f4/candidate_v2_lowerbody.png",
+                        "sha256": "88d5c39dad0ad2be9616d6f751e9c5ea443581c6449536429d4337bdc1ec930b",
+                        "result": "FAIL: leg RMS improved to 0.3757 but anatomical knee ordering remained wrong; both legs remained substantially too long."
+                    },
+                    {
+                        "artifact": "tools/proto/shortpass-cross-recipe-f4/candidate_v3_crossed_compact_white.png",
+                        "sha256": "9aff068ba120602ab71c85aef58f605cba4c5737cf85441950c5985db4604424",
+                        "result": "FAIL: knee ordering and left thigh passed, but left ankle distance was 0.2863, right knee 0.2200, right ankle 0.4251, left-shin length drift 51.6%, right-thigh angle error 19.31 degrees, right arm remained out of tolerance and torso angle error was 21.71 degrees. Independent eye-ROI gaze evidence was absent."
+                    }
+                ],
+                "diagnostic_comparison": {
+                    "path": "tools/proto/shortpass-cross-recipe-f4/f4_trace_above_candidate_v3_diagnostic.png",
+                    "sha256": "34f07718a136efdc4ec78369fb13764b91dcc9ac9074e05793ac141f1e2816ba",
+                    "dimensions": [1600, 900],
+                    "label": "not adopted; machine QA fail"
+                },
+                "user_status": "not presented as an adoption candidate and not adopted",
+                "reuse_policy": "Never place v1, v2 or v3 in the canonical img directory or use them for F5/F6. v3 is diagnostic evidence only.",
+                "stop_reason": "Three built-in generation/edit calls failed the same strict F4 pose gate. Do not make a fourth call with the same soft-reference editing method.",
+                "next_gate": "Await user direction before changing method. If approved, keep F4 as the only active frame and use deterministic articulated 2D placement against the approved rig, with generation restricted to seam cleanup after joint geometry is locked."
+            },
+            "f4_articulated_attempt_2026_08_26": {
+                "status": "machine-rejected-not-adopted",
+                "frame": "F4",
+                "source_time_seconds": 20.0,
+                "method": "deterministic articulated 2D scaffold with approved calibrated joint endpoints, followed by built-in ImageGen seam/render cleanup only; a second cleanup used a post-corrected short-limb scaffold after the first cleanup elongated the limbs",
+                "billing": "built-in ImageGen only; no external API or Replicate charge",
+                "first_cleanup": {
+                    "artifact": {
+                        "path": "tools/proto/shortpass-cross-recipe-f4/candidate_v6_articulated_cleanup.png",
+                        "sha256": "ba3a183defe735199299d040c9e8944c1fd54de691e8b0471e4c4ef8eb9f6c4d",
+                        "dimensions": [1174, 1339]
+                    },
+                    "machine_qa": "FAIL: anatomical left/right identity and all segment directions passed; torso angle error was 1.07 degrees and right-upper-arm angle error 0.86 degrees, but ImageGen elongated leg segments by 26.0% to 63.3%, giving leg RMS 0.2935."
+                },
+                "postcorrect_cleanup": {
+                    "artifact": {
+                        "path": "tools/proto/shortpass-cross-recipe-f4/candidate_v9_articulated_final.png",
+                        "sha256": "97598751c4e2b1ad367df4cd2105dd5f4ab93588ecd7d56308e819971064e81e",
+                        "dimensions": [1167, 1348]
+                    },
+                    "machine_qa": "FAIL, but improved: anatomical left/right identity passed; all four leg segment direction errors were at most 2.19 degrees; torso angle error was 0.59 degrees and right-upper-arm length drift 0.23%. The remaining failure is length: left shin +54.6%, right thigh +35.9%, right shin +36.6%, right forearm +54.0%; leg RMS improved from 0.2935 to 0.2008. Independent gaze evidence was not produced because geometry already failed."
+                },
+                "diagnostic_comparison": {
+                    "path": "tools/proto/shortpass-cross-recipe-f4/f4_trace_above_candidate_v9_diagnostic.png",
+                    "sha256": "a3056f77edc675465ecb39496ea99d4f559e1bc67796b7c96a698ec5a7ddc793",
+                    "dimensions": [1400, 1000],
+                    "label": "not adopted; machine QA fail"
+                },
+                "finding": "The articulated scaffold reliably preserves side identity and limb directions, but built-in ImageGen still normalizes the deliberately foreshortened F4 anatomy by lengthening lower limbs during repaint. Prompt emphasis alone is not a sufficient hard length constraint.",
+                "reuse_policy": "Neither v6 nor v9 may be adopted, copied to the canonical img directory, integrated, or used for F5/F6. The deterministic target coordinates and scaffold scripts may be retained as diagnostics only.",
+                "next_gate": "Stop additional F4 generation. Present the labelled comparison and await user direction; F5/F6 remain ungenerated. A future method must preserve limb length after rendering through a hard geometric renderer or a verified post-render constraint, not another soft cleanup prompt."
+            },
+            "f4_cross_recipe_reopen_2026_08_26": {
+                "status": "machine-rejected-stop-after-three-calls",
+                "frame": "F4",
+                "source_time_seconds": 20.0,
+                "user_direction": "The user explicitly reopened F4 and requested continuing with the same method used for adopted F2 and F3.",
+                "workflow": "Cross-recipe local iteration: one fresh F4 base from the approved F4 trace, approved F4 rig, adopted F3, approved right-profile hair and 5.6H body canon; then one right-kicking-leg-only edit; then one lower-body-only edit from the base. No articulated scaffold or rejected F4 image was used as a generation reference.",
+                "billing": "built-in ImageGen only; no external API or Replicate charge",
+                "attempts": [
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-cross-recipe-f4/candidate_v10_crossrecipe_restart.png",
+                            "sha256": "fb37be30bc6b30b138435309829b8ee5b933dfe83e7459ac673391d5d74a7297",
+                            "dimensions": [1122, 1402]
+                        },
+                        "result": "FAIL: left/right ankle and knee ordering passed, but leg RMS was 0.2785, visible-arm RMS 0.2342 and torso angle error 22.07 degrees. The left wrist was detected despite approved occlusion."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-cross-recipe-f4/candidate_v11_rightleg_local.png",
+                            "sha256": "961b467741b3858c5547800fcc6caa8bf2829ebd7e51c0b0ae9a4ee0313bd7a3",
+                            "dimensions": [1122, 1402]
+                        },
+                        "result": "FAIL and regression: a right-kicking-leg-only correction was interpreted as a raised-knee pose; right-thigh angle error became 50.53 degrees and leg RMS worsened to 0.2935. Never use v11 as an edit base."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-cross-recipe-f4/candidate_v12_lowerbody_local.png",
+                            "sha256": "618d88d4568d77ec24d2bae21439d822b19cd28998d2c6e4c2523edbb2313df8",
+                            "dimensions": [1122, 1402]
+                        },
+                        "result": "FAIL, best of this three-call reopen: lower-body editing improved leg RMS from 0.2785 to 0.2512, but left-knee distance 0.1721, left-ankle 0.3138, right-knee 0.3090 and right-ankle 0.5302 remained outside limits. Left-shin length drift was 68.0%, right-thigh 56.0%, right-shin 32.3%, visible-arm RMS 0.2234 and torso angle error 22.28 degrees. Gaze evidence was not produced because geometry failed."
+                    }
+                ],
+                "diagnostic_comparison": {
+                    "path": "tools/proto/shortpass-cross-recipe-f4/f4_trace_above_candidate_v12_crossrecipe_diagnostic.png",
+                    "sha256": "4c47aa9c54c2fd0037c51e8a0aa286b236164a430f2b8ccc2df3c911f526bd08",
+                    "dimensions": [1400, 1000],
+                    "label": "not adopted; machine QA fail"
+                },
+                "finding": "The F2/F3 local-iteration workflow preserves the adopted character design, but on F4 it still treats the compact post-contact crossed pose as a soft hint. A one-leg edit can change action semantics, while a lower-body edit preserves the action but leaves the legs substantially too long and the torso/arm outside tolerance.",
+                "reuse_policy": "v10, v11 and v12 are review evidence only. Do not adopt, copy to canonical img storage, integrate, or use them for F5/F6. v11 is specifically forbidden as an edit base.",
+                "next_gate": "Stop after three calls and present v12 only as a labelled diagnostic comparison. Await explicit user direction; do not generate F5/F6, integrate, build, push or deploy."
+            },
+            "f4_semantic_surface_generation_2026_08_26": {
+                "status": "machine-rejected-stop-after-three-calls",
+                "frame": "F4",
+                "source_time_seconds": 20.0,
+                "user_direction": "The user approved semantic surface trace v18 and explicitly instructed image generation to resume.",
+                "method": "Built-in ImageGen only. Attempt 1 used the approved flat semantic surface, abstract F4 rig, adopted F3, approved profile and 5.6H canon. Attempt 2 replaced the abstract rig with the approved broadcast-frame skeleton so the full-body silhouette became explicit. Attempt 3 locally shortened only the lower body of attempt 2.",
+                "billing": "0.00 USD external API spend; no Replicate or other paid backend used.",
+                "attempts": [
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v1_raw.png",
+                            "sha256": "6b8c6c86aae05ff27c13a236d40f6303126f4689734a8b9851cc91db456f10e1",
+                            "dimensions": [1122, 1402]
+                        },
+                        "result": "FAIL: shorts/thigh separation improved, but the generator normalized the abstract rig into long limbs; leg RMS 0.3535, torso angle error 23.01 degrees, visible-arm RMS 0.2989, and the hidden left wrist was detected."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v2_broadcast_pose.png",
+                            "sha256": "6ddfd3305f129b793ddffeccfe83220b40497e48d3030d0775efd4cfd28be62c",
+                            "dimensions": [1111, 1415]
+                        },
+                        "result": "FAIL but improved: anatomical identity/order and hidden-left-arm check passed; visible-arm RMS 0.1199. Both shins remained 51.7% to 60.0% too long, right thigh 45.9% too long, torso angle error 16.55 degrees."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v3_lowerbody_local.png",
+                            "sha256": "4924df303168f57a69f3ff939b7db0e030bfbed6fee3ab4d1cd24844f6f9cd36",
+                            "dimensions": [1113, 1414]
+                        },
+                        "result": "FAIL, best of this method: leg RMS improved to 0.1407 and all four leg segment angles plus anatomical identity/order passed. Residual failures are left ankle distance 0.2113, right knee 0.1607, right ankle 0.2806, left shin +24.7%, right thigh +32.6%, right shin +20.8%, right forearm angle/length, torso angle 16.59 degrees, and missing independent eye-ROI evidence."
+                    }
+                ],
+                "diagnostic_comparison": {
+                    "path": "tools/proto/shortpass-semantic-f4/f4_approved_trace_above_candidate_v3.png",
+                    "sha256": "334b130eb2ea852979266152f185c5cd50e841040d1f1767833d58b72329df4a",
+                    "dimensions": [1600, 1000],
+                    "label": "review only; machine QA fail"
+                },
+                "finding": "The semantic surface trace solved the shorts-versus-exposed-thigh ambiguity and the broadcast silhouette substantially improved pose fidelity. ImageGen still lengthened foreshortened limbs and retained the prior upper-body axis, so soft generation/editing cannot satisfy the locked F4 geometry by itself.",
+                "reuse_policy": "v1 and v2 are machine-rejected. v3 may be shown only as labelled review evidence and is not adopted; none may enter canonical img storage or be used for F5/F6.",
+                "next_gate": "Stop after the three authorized built-in calls. Do not generate F5/F6, integrate, build, push or deploy. Continue only after explicit user direction; the next method must hard-lock ankle/knee positions, right-thigh length, torso axis and right forearm rather than asking ImageGen to infer them."
+            },
+            "f4_exact_surface_continuation_2026_08_27": {
+                "status": "v18-independent-qa-fail-v19-internal-reject",
+                "frame": "F4",
+                "user_direction": "After approving semantic surface trace v18, the user explicitly instructed the work to continue beyond the prior three-call stop.",
+                "billing": "0.00 USD external API spend; built-in ImageGen only and no paid backend used.",
+                "method": "Lock the approved 20.000s full-body silhouette and all six v18 garment surfaces before styling. Use deterministic pixel rendering as the pose base, then permit ImageGen to clean only style and joins. Reject any articulated composite with white seams, detached shoes or duplicated fragments.",
+                "attempts": [
+                    {
+                        "range": "v4-v7",
+                        "result": "INTERNAL REJECT: segmented articulated hard-locking on v3 produced white seams, duplicate or detached shoes, and incorrect ownership where same-colour crossed socks overlapped. Never present or reuse these images."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v8_exact_overlay_edit.png",
+                            "sha256": "6d7f39df5886b04349b15055054a2d3f5d8fc4ceb221069915bc0d150a636398"
+                        },
+                        "result": "FAIL: visually clean, but ImageGen ignored the exact same-canvas control; leg RMS 0.2147, left ankle 0.3001, right ankle 0.4506, right thigh +48.9%, right forearm angle 41.97 degrees, torso angle 33.29 degrees."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v9_exact_surface_pixel.png",
+                            "sha256": "0f725f2929273980ffe829997cd77555f1a043b52580f5c254e3df8501b71052"
+                        },
+                        "result": "INTERNAL REJECT AS FINAL ART: exact source silhouette and garment ownership were retained, shorts and thighs remained separate, hidden left arm remained absent, but the deterministic finish was too rough. macOS Vision also misassigned the crossed ankles even though the source silhouette itself was fixed."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v10_exact_surface_style.png",
+                            "sha256": "53b3dd00b90b6c37614e04866ccb1ab2e0e0d0027fb2b8d40e3846493ffe4702"
+                        },
+                        "result": "FAIL: design, undercut, one-arm visibility, white background and garment separation recovered, but ImageGen lengthened all four leg segments by 38.4% to 82.8%."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v11_hard_locked.png",
+                            "sha256": "a49f110721b37857822105bb6aed46480c39d58ebd97c05d7bf82e2345269367"
+                        },
+                        "result": "INTERNAL REJECT: post-render articulated locking again created large white gaps and detached fragments. Never present or reuse."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v12_white.png",
+                            "sha256": "94ba245ffda7f755b951859dd12a0963665b29734c34ffce83cdbf2320ca20a5",
+                            "dimensions": [1114, 1412]
+                        },
+                        "result": "USER REJECTED AS UNNATURAL on 2026-08-27. The image had already failed machine geometry: residual leg length drift +34.3% to +75.0%, leg RMS 0.3245, right forearm length +44.7%, and missing eye-ROI evidence. Never present or reuse."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v13_compact_lowerbody.png",
+                            "sha256": "befdea5e3da9ffe5e8444e477e85c31274a2377ac063d1eae5254bba86bd407e"
+                        },
+                        "result": "INTERNAL REJECT: one-sheet compression avoided detached limb pieces but over-compressed the lower body and broke body proportions. Never present or reuse."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v14_layered_surface.png",
+                            "sha256": "9e08cf1e15c55eca74cdbdf30f593598977aa9a422fa73e0c9acc50f87abdcc6"
+                        },
+                        "result": "INTERNAL STYLE BASE: every accepted body pixel is assigned to exactly one fixed visible layer; left arm has no layer; shorts and thighs are separate; all six garment layers exist; exterior is pure white. Geometry is never redrawn. Flat procedural material was retained only as a base and is not an adoption candidate."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v15_white.png",
+                            "sha256": "1730a751fd2fc453a8c50b76e73241fa72ca24e83110e4e0d8a6bb7fbc513c54",
+                            "dimensions": [1114, 1412]
+                        },
+                        "result": "REVIEW ONLY: polished material pixels are transformed independently per accepted surface and clipped back to v14 ownership. No full-body generation, pose normalization, limb scaling, left/right exchange or white seam can change the fixed surface map. User visual decision and independent review are still pending."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v16_crossrecipe_base.png",
+                            "sha256": "e95e94e958bef707f85f0888963571777c90c03581dba1b3537fdb1adc9b9a8f",
+                            "dimensions": [1024, 1536]
+                        },
+                        "result": "INTERNAL EDIT BASE: the adopted F3 finish, face, undercut, palette and one-arm occlusion recovered, but the lower legs were normalized too long and the compact F4 foreshortening remains insufficient. Never present as an adoption candidate; freeze the upper-body design and edit only the lower body."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v17_lowerbody_local.png",
+                            "sha256": "4742b451153cee9eefee474552443d1d82e3a46f094521c98a9d560c51b91182",
+                            "dimensions": [1024, 1536]
+                        },
+                        "result": "INTERNAL EDIT BASE: the upper-body design remained coherent and the lower legs shortened, but the projected shins and ankle height still exceed the approved F4 compact silhouette. Continue with one lower-body projection-height correction only."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v18_white.png",
+                            "sha256": "f4335ffa5e71fbc0feef13fdee49fa067a6ab48d32e1aa43a67675e33c19c56b",
+                            "dimensions": [1024, 1536]
+                        },
+                        "result": "INDEPENDENT QA FAIL: after the third authorized built-in ImageGen call, shins remained too long and ankles too low, the action read as dangling crossed legs instead of the exact compact post-contact pose, the eye showed excessive sclera and looked forward/right, and 4,448 edge pixels were non-white. Diagnostic only; not an adoption candidate."
+                    },
+                    {
+                        "artifact": {
+                            "path": "tools/proto/shortpass-semantic-f4/candidate_v19_exact_surface_polished.png",
+                            "sha256": "48a94e285c658f984c2d473138bbca4eaaa2d62a79c0b47d8f5504ff0073130d",
+                            "dimensions": [1114, 1412]
+                        },
+                        "result": "INTERNAL REJECT: transferring v18 material per anatomical surface restored the exact approved silhouette but produced conspicuous radial streaking and rough joins. It proves that generated geometry can be discarded, but is below the adopted F2/F3 finish and must not be presented as an adoption candidate."
+                    }
+                ],
+                "active_local_edit_base": {
+                    "status": "stopped-after-independent-qa-fail",
+                    "path": "tools/proto/shortpass-semantic-f4/candidate_v17_lowerbody_local.png",
+                    "sha256": "4742b451153cee9eefee474552443d1d82e3a46f094521c98a9d560c51b91182",
+                    "role": "Current-candidate style and identity anchor for one-region edits. Replaces adopted F3 as a live edit input so the F3 stride cannot leak back into F4."
+                },
+                "review": {
+                    "path": "tools/proto/shortpass-semantic-f4/f4_approved_trace_above_candidate_v18.png",
+                    "sha256": "b19fbcad703810914abca856c4097bc8784f1c75227172995abb8901f9242c32",
+                    "dimensions": [1600, 1000],
+                    "label": "diagnostic only; independent QA fail; not adopted"
+                },
+                "finding": "The adopted-F3 cross-recipe recovered character quality, identity, undercut, palette and one-arm occlusion, but three calls still normalized the unusual F4 projection: the shins stayed long and the ankles low. Hard material transfer restored the approved silhouette but introduced unacceptable streaking. Soft ImageGen and simple affine texture transfer therefore cannot satisfy both F4 geometry and adopted F2/F3 finish.",
+                "reuse_policy": "v12 is user-rejected. v4-v13 must not be presented or reused. v14 is structural only; v15 is superseded; v16/v17 are internal edit bases; v18 is independent-QA-failed diagnostic evidence; v19 is internally rejected. None may enter canonical img storage or be used for F5/F6.",
+                "next_gate": "Stop the current built-in cross-recipe after three calls. Await user direction on whether to accept a pose compromise or change to a genuinely hard pose-controlled renderer. Do not generate F5/F6, integrate, build, push or deploy."
+            },
+            "integration": "F1 is removed from the active scene. F2 and F3 canonical storage is allowed; final five-frame remapping, scene integration, build, push and deploy remain forbidden until F4, F5 and F6 are generated, independently checked and explicitly adopted alongside F2 and F3"
         },
         "local_backend_findings_2026_08_25": {
             "status": "rejected-for-production",

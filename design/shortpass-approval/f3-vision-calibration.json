@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "frame": "F3",
+  "source_time_seconds": 19.0,
+  "role": "calibrate systematic joint-center differences between the approved broadcast trace and macOS Vision observations on the adopted pixel-art character",
+  "source_image": {
+    "path": "img/cutscenes/manga_shortpass6/frame_03.png",
+    "sha256": "df54ea8579474747ca0357521868e0a38aa951fefa337f437ff435177d7d6bfa",
+    "dimensions": [1474, 1682]
+  },
+  "detector": "VNDetectHumanBodyPoseRequest; normalized canvas coordinates; anatomical labels retained without swapping",
+  "vision_pose": {
+    "left_ankle": {"confidence": 0.673828125, "x": 0.7977993488311768, "y": 0.8310052156448364},
+    "left_elbow": {"confidence": 0.74853515625, "x": 0.3189537525177002, "y": 0.33903682231903076},
+    "left_hip": {"confidence": 0.58642578125, "x": 0.4980625808238983, "y": 0.4197078347206116},
+    "left_knee": {"confidence": 0.681640625, "x": 0.6581577658653259, "y": 0.590952455997467},
+    "left_shoulder": {"confidence": 0.54345703125, "x": 0.48219025135040283, "y": 0.197235107421875},
+    "left_wrist": {"confidence": 0.83642578125, "x": 0.27076512575149536, "y": 0.44597727060317993},
+    "right_ankle": {"confidence": 0.7783203125, "x": 0.19425544142723083, "y": 0.6848132610321045},
+    "right_elbow": {"confidence": 0.7822265625, "x": 0.4207627475261688, "y": 0.31040048599243164},
+    "right_hip": {"confidence": 0.55859375, "x": 0.4158500134944916, "y": 0.4492291808128357},
+    "right_knee": {"confidence": 0.7998046875, "x": 0.4177299439907074, "y": 0.6653752326965332},
+    "right_shoulder": {"confidence": 0.72265625, "x": 0.40793779492378235, "y": 0.17711502313613892},
+    "right_wrist": {"confidence": 0.7578125, "x": 0.5472802519798279, "y": 0.3287186622619629}
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "schema": "cutscene-production-manifest",
+  "schema_version": 1,
+  "manifest_version": "phase1-v1",
+  "authority_pack_version": "shortpass-authority-v1",
+  "status": "phase1-authority-verification-only",
+  "calibration_status": "not-calibrated",
+  "styleProfile": "MANGA_190_V1",
+  "coordinate_contract": {
+    "source": "source rig",
+    "pose_render": "pose render",
+    "logical_height_px": 190,
+    "review_scale": "nearest",
+    "runtime": "runtime",
+    "interpolation": "no interpolation before pose render; nearest-neighbor only after logical sprite export"
+  },
+  "authority_policy": {
+    "canonical_root": "repository root",
+    "tracked_required": true,
+    "ignored_authority_forbidden": true,
+    "candidate_adoption_requires_user_gate": true,
+    "f5_f6_progression": "forbidden",
+    "f4_body_adoption": "forbidden"
+  },
+  "character": {
+    "bodyCanon": {"path": "design/reference/player_body_canon_measurement.png", "sha256": "d584fc6213ac02b5ebf9012f9045ccc2a3d4b42e7f70d7e42b6f2a32eb1437b2", "dimensions": [1192, 740], "mode": "RGB"},
+    "headCanon": {"path": "design/shortpass-approval/profile-right-approved.png", "sha256": "15d5da45303b454c2e8bcfbc03317d019f128ba671818f1e9bec9bf845bb39af", "dimensions": [271, 356], "mode": "RGB"},
+    "f3VisionCalibration": {"path": "design/shortpass-approval/f3-vision-calibration.json", "sha256": "0428ebe7c439f706cccc8b62bfa146934a41839c39b1cefe46cc224eb2379ad2"},
+    "viewClass": "PROFILE_R",
+    "depthClass": "CROSSED",
+    "visibility": "per-frame visible-limb contract",
+    "sideIdentity": {
+      "supportLeg": "left",
+      "kickingLeg": "right",
+      "leftArm": "omit when fully occluded",
+      "rightArm": "orange authority where visible"
+    }
+  },
+  "benchmarks": {
+    "F2": {
+      "status": "user-adopted",
+      "adoption": "adopted",
+      "actionFamily": "GROUND_KICK",
+      "viewClass": "PROFILE_R",
+      "depthClass": "PLANAR",
+      "character": {"bodyPreset": "outfield_male_v1", "kitTemplate": "standard_outfield_v1", "headSet": "01_spiky_twoblock", "skinTone": "skin_03", "hairStyle": "spiky_twoblock", "expression": "focused", "goalkeeper": false, "gloves": false},
+      "view": {"class": "PROFILE_R", "direction": "right"},
+      "depth": "PLANAR",
+      "visibility": {"leftArm": "visible", "rightArm": "visible", "leftLeg": "visible", "rightLeg": "visible"},
+      "sideIdentity": {"supportLeg": "left", "kickingLeg": "right", "leftArm": "left", "rightArm": "right"},
+      "adopted_png": {"path": "img/cutscenes/manga_shortpass6/frame_02.png", "sha256": "b88e22e17b0d1bacd65268122ce68313e41c8e999d3bb464dbbf6224e7811b0e", "dimensions": [1442, 1870], "mode": "RGBA"},
+      "pose": {"path": "design/shortpass-approval/pose-approved-f02.png", "sha256": "9a513e4a6e13e7afc9b809a3fb80d3518b1da5a0e262a053638db9d2ac4e73dc", "dimensions": [640, 360], "mode": "RGB"},
+      "pose_rig": {"path": "design/shortpass-approval/pose-rig-derived-f02.png", "sha256": "898677a96b712b4f8956cf92f4432a812cb59f8045e8d6265228ec4b4a53367a", "dimensions": [768, 1024], "mode": "RGB"}
+    },
+    "F3": {
+      "status": "user-adopted",
+      "adoption": "adopted",
+      "actionFamily": "GROUND_KICK",
+      "viewClass": "PROFILE_R",
+      "depthClass": "PLANAR",
+      "character": {"bodyPreset": "outfield_male_v1", "kitTemplate": "standard_outfield_v1", "headSet": "01_spiky_twoblock", "skinTone": "skin_03", "hairStyle": "spiky_twoblock", "expression": "focused", "goalkeeper": false, "gloves": false},
+      "view": {"class": "PROFILE_R", "direction": "right"},
+      "depth": "PLANAR",
+      "visibility": {"leftArm": "visible", "rightArm": "visible", "leftLeg": "visible", "rightLeg": "visible"},
+      "sideIdentity": {"supportLeg": "left", "kickingLeg": "right", "leftArm": "left", "rightArm": "right"},
+      "adopted_png": {"path": "img/cutscenes/manga_shortpass6/frame_03.png", "sha256": "df54ea8579474747ca0357521868e0a38aa951fefa337f437ff435177d7d6bfa", "dimensions": [1474, 1682], "mode": "RGBA"},
+      "pose": {"path": "design/shortpass-approval/pose-approved-f03.png", "sha256": "ac32d57c20de6d6568a4f5dba3e9dc96ac2af369a8388b572fe8111e3017bba3", "dimensions": [640, 360], "mode": "RGB"},
+      "pose_rig": {"path": "design/shortpass-approval/pose-rig-derived-f03.png", "sha256": "3f08968c9270f2268f6a30ed0c219894a0bc8a28bcebad444db04c3dfedb9a57", "dimensions": [768, 1024], "mode": "RGB"}
+    },
+    "F4": {
+      "status": "trace-only",
+      "adoption": "not-adopted",
+      "actionFamily": "GROUND_KICK",
+      "viewClass": "PROFILE_R",
+      "depthClass": "CROSSED",
+      "character": {"bodyPreset": "outfield_male_v1", "kitTemplate": "standard_outfield_v1", "headSet": "01_spiky_twoblock", "skinTone": "skin_03", "hairStyle": "spiky_twoblock", "expression": "focused", "goalkeeper": false, "gloves": false},
+      "view": {"class": "PROFILE_R", "direction": "right"},
+      "depth": "CROSSED",
+      "visibility": {"leftArm": "occluded", "rightArm": "visible", "leftLeg": "visible", "rightLeg": "visible"},
+      "sideIdentity": {"supportLeg": "left", "kickingLeg": "right", "leftArm": "occluded", "rightArm": "right"},
+      "pose": {"path": "design/shortpass-approval/pose-approved-f04.png", "sha256": "ef6c5507b3b1151545bee5b274c1a1a1ab94b19fd5968633fa5b6de675d3ff6d", "dimensions": [640, 360], "mode": "RGB"},
+      "pose_rig": {"path": "design/shortpass-approval/pose-rig-derived-f04.png", "sha256": "df76a8d5b045a38041d430c05fa3657a7c5d0e7892a14fb2f39b5704c878cac8", "dimensions": [768, 1024], "mode": "RGB"},
+      "semantic_surface": {"path": "design/cutscene-production/shortpass/f4/semantic-trace.png", "sha256": "d30a64e8032f2b941ab5d0efdd13abec80e5557ecb2cbfbecd067fb3642df0e7", "dimensions": [640, 360], "mode": "RGB"},
+      "review": {"path": "design/cutscene-production/shortpass/f4/review.png", "sha256": "6925bb9316b385997e69a7d664e1170420dad71fb2396ee4e8bf4c61c7eec6e9", "dimensions": [1600, 1348], "mode": "RGB"},
+      "overlay": {"path": "design/cutscene-production/shortpass/f4/overlay.png", "sha256": "7970afef912e41c241ace254068c910b51bbf8a88e506eca8de9def656121e55", "dimensions": [640, 360], "mode": "RGB"},
+      "exact_control": {"path": "design/cutscene-production/shortpass/f4/exact-control.png", "sha256": "526e0c7416f52ade7d883c252b365f1eb7e4ef97721af682cf7b60d58759da2e", "dimensions": [1113, 1414], "mode": "RGB"}
+    }
+  },
+  "certification": {
+    "Frame": "not-certified",
+    "Sequence": "not-certified",
+    "Pose class": "not-certified",
+    "Action family": "not-certified",
+    "Lane": "not-certified",
+    "System": "not-certified"
+  },
+  "prohibited_progression": ["F5", "F6", "adopted-F4-body", "runtime-integration", "build", "push", "deploy"],
+  "authority_paths": [
+    "CUTSCENE_HANDOFF.md",
+    "design/CUTSCENE_PRODUCTION_SYSTEM.md",
+    "design/SHORTPASS_APPROVAL.json",
+    "design/CUTSCENE_PRODUCTION_MANIFEST.json",
+    "design/reference/player_body_canon_measurement.png",
+    "design/shortpass-approval/profile-right-approved.png",
+    "design/shortpass-approval/f3-vision-calibration.json",
+    "img/cutscenes/manga_shortpass6/frame_02.png",
+    "img/cutscenes/manga_shortpass6/frame_03.png",
+    "design/shortpass-approval/pose-approved-f02.png",
+    "design/shortpass-approval/pose-approved-f03.png",
+    "design/shortpass-approval/pose-approved-f04.png",
+    "design/shortpass-approval/pose-rig-derived-f02.png",
+    "design/shortpass-approval/pose-rig-derived-f03.png",
+    "design/shortpass-approval/pose-rig-derived-f04.png",
+    "design/cutscene-production/shortpass/f4/semantic-trace.png",
+    "design/cutscene-production/shortpass/f4/review.png",
+    "design/cutscene-production/shortpass/f4/overlay.png",
+    "design/cutscene-production/shortpass/f4/exact-control.png"
+  ]
+}
