@@ -33,7 +33,7 @@ var CUTSCENE_MANIFEST = [
   { moment: 'longpass', kit: 'dark',    fileA: 'img/cutscenes/longpass_a_dark_01.png',    fileB: 'img/cutscenes/longpass_b_dark_01.png' },
   { moment: 'longpass', kit: 'orange',  fileA: 'img/cutscenes/longpass_a_orange_01.png',  fileB: 'img/cutscenes/longpass_b_orange_01.png' },
   { moment: 'longpass', kit: 'skyblue', fileA: 'img/cutscenes/longpass_a_skyblue_01.png', fileB: 'img/cutscenes/longpass_b_skyblue_01.png' },
-  // シュート（地上ストライク）。単一フレームのシューター＋コードのボールで結果別演出（_renderShotScene）。生成元 tools/art/cutscenes/shoot.png。
+  // シュート（地上ストライク）。ユーザー採用済み4コマ＋コードのボール（_renderShotScene）。
   { moment: 'shot', kit: 'red',     file: 'img/cutscenes/shot_red_01.png' },
   { moment: 'shot', kit: 'blue',    file: 'img/cutscenes/shot_blue_01.png' },
   { moment: 'shot', kit: 'yellow',  file: 'img/cutscenes/shot_yellow_01.png' },
@@ -42,7 +42,7 @@ var CUTSCENE_MANIFEST = [
   { moment: 'shot', kit: 'dark',    file: 'img/cutscenes/shot_dark_01.png' },
   { moment: 'shot', kit: 'orange',  file: 'img/cutscenes/shot_orange_01.png' },
   { moment: 'shot', kit: 'skyblue', file: 'img/cutscenes/shot_skyblue_01.png' },
-  // ショートパス（単一フレームのパサー＋コードのボールで短い横パス演出。_renderShortpassScene）。生成元 tools/art/cutscenes/shortpass.png。
+  // ショートパス。通常パスはユーザー採用済み5コマ＋コードのボール、失敗／ワンツーは専用経路。
   { moment: 'shortpass', kit: 'red',     file: 'img/cutscenes/shortpass_red_01.png' },
   { moment: 'shortpass', kit: 'blue',    file: 'img/cutscenes/shortpass_blue_01.png' },
   { moment: 'shortpass', kit: 'yellow',  file: 'img/cutscenes/shortpass_yellow_01.png' },
@@ -361,7 +361,7 @@ function renderSceneArt(sc, nextSc) {
 
   // ロングパスは2フレーム＋コードのボールで横長カットインを動的描画（攻撃側チーム色）。
   if (moment === 'longpass' && entry.fileA) return _renderLongpassScene(sc, entry);
-  // ショートパスは単一フレームのパサー＋コードのボールで短い横パス。
+  // ショートパスは採用済み5コマのパサー＋コードのボールで短い横パス。
   //   失敗/カウンター = 専用ポーズが無いので、ロングパス失敗と同じカット・タブロー演出を流用。
   if (moment === 'shortpass' && entry.file) {
     if (sc.result === '失敗' || sc.result === 'カウンター') {
@@ -376,7 +376,7 @@ function renderSceneArt(sc, nextSc) {
     var _noSfx = ['クロス', 'シュート', 'セットプレー', 'ミドルシュート'];   // この4つが次なら同/別を付けない（＝パス交換＝ワンツー）
     var isPlainPass = !nextSc || (_noSfx.indexOf(nextSc.scenario) === -1 && nextSc.ofsPos !== sc.ofsPos);   // 「別」のみ通常パス
     if (!isPlainPass) return _renderOnetwoScene(sc);   // ワンツー3カット連結（同 or パス交換）
-    return _renderShortpassScene(sc, entry);            // 別選手への通常ショートパス／次シーン無し
+    return _renderShortpass5Scene(sc);                  // 別選手への通常ショートパス／次シーン無し
   }
   // シュート: 枠外=ニアポスト脇を外す演出、GK防いだ！=GKカット、ブロック=シューター演出。（ゴールは上で処理）
   if (moment === 'shot' && entry.file) {
@@ -2077,10 +2077,10 @@ function _renderHeaderRiseDuelScene(sc) {
 //   枠外/ブロック=現状の左へ抜ける簡易演出（後で専用画像に差し替え）。ゴール！！は takeover 側。
 //   1回再生で静止（ループしない）。detach で停止。
 // ============================================================
-// 不採用シュート4コマ（2026-08-21・演出ラボの比較確認専用）
+// ユーザー採用シュート4コマ（2026-08-30採用）。
 //   ユーザー指定のファイル名時刻順で1ビートとして再生する。
 //   白地を除去した透明PNGを共通フィールド背景へ重ねる。
-//   ★ 表示層のみ。実試合のシュート選択・結果・rng消費には接続しない。
+//   ★ 表示層のみ。実試合の結果・rng消費には接続しない。
 // ============================================================
 var _ADOPTED_SHOT_FRAMES = [
   { src: 'img/cutscenes/manga_shot_adopted/frame_01_20260812_194453_alpha.png?v=3', crop: [105, 179, 885, 1143], cx: 348 },
@@ -2266,11 +2266,12 @@ function _renderCinematicShotScene(sc) {
 }
 
 // ============================================================
-// 通常シュートの本編入口。67263a2直前の2拍／顔カットインへ復元。
-// 不採用4コマと追加シネマチック4拍はScene Labの比較用途にのみ残す。
+// 通常シュートの本編入口。蹴る1ビートだけを採用4コマへ接続する。
+// 枠外／GK／ゴール等の結果ビートは呼び出し側の既存分岐を維持する。
+// 未採用の追加シネマチック4拍は比較専用。
 // ============================================================
 function _renderShotScene(sc, entry) {
-  return _renderLegacyShotScene(sc, entry);
+  return _renderAdoptedShotScene(sc);
 }
 
 // 67263a2直前のシュート演出本体。
@@ -2712,6 +2713,248 @@ function _renderOnetwoScene(sc) {
   //   物語の主役＝give-and-go する A（①→③, 平均 ≈324）。可視窓(cover)の中央へ寄せて左右の見切れを防ぐ。
   //   mirror（team1=右攻めで全体反転）を flipH として渡す（②壁役は反対側に出るが、A中心で最も破綻が少ない）。
   return _csCenterSubject(canvas, 324 / W, mirror);
+}
+
+// ============================================================
+// ユーザー採用ショートパス5コマ。本編の通常ショートパスとScene Labで共用する。
+//   ユーザー採用済みF2〜F6を推測補間せず直接切り替える。採用画像は不変のまま
+//   外周白マットだけを実行時透過し、既存スタジアム背景と右向きの低いball軌道を重ねる。
+//   攻撃方向ミラー、本編routingは別の目視ゲートまで追加しない。
+// ============================================================
+var _LAB_SHORTPASS5_FRAMES = [
+  'img/cutscenes/manga_shortpass5/frame_01.png',
+  'img/cutscenes/manga_shortpass5/frame_02.png',
+  'img/cutscenes/manga_shortpass5/frame_03.png',
+  'img/cutscenes/manga_shortpass5/frame_04.png',
+  'img/cutscenes/manga_shortpass5/frame_05_angle_v5.png'
+];
+var _LAB_SHORTPASS5_BBOX = [
+  [246, 9, 1124, 1778],
+  [159, 8, 1368, 1523],
+  [306, 75, 756, 1238],
+  [165, 122, 947, 1259],
+  [181, 122, 954, 1260]
+];
+var _LAB_SHORTPASS5_BASE_CACHE = {};
+function _shortpass5ClearExteriorMatte(imgData) {
+  var d = imgData.data, w = imgData.width, h = imgData.height, n = w * h;
+  var seen = new Uint8Array(n), queue = new Int32Array(n), head = 0, tail = 0;
+  function isMatte(p) {
+    var i = p * 4, r = d[i], g = d[i + 1], b = d[i + 2];
+    // 外周のアンチエイリアスに残る灰白色まで含める。色付きの肌・キット・輪郭は通さない。
+    return Math.min(r, g, b) >= 150 && Math.max(r, g, b) - Math.min(r, g, b) <= 45;
+  }
+  function isWhiteCore(p) {
+    var i = p * 4, r = d[i], g = d[i + 1], b = d[i + 2];
+    return Math.min(r, g, b) >= 220 && Math.max(r, g, b) - Math.min(r, g, b) <= 20;
+  }
+  function push(p) {
+    if (!seen[p] && isMatte(p)) { seen[p] = 1; queue[tail++] = p; }
+  }
+  var x, y, p;
+  for (x = 0; x < w; x++) { push(x); push((h - 1) * w + x); }
+  for (y = 1; y < h - 1; y++) { push(y * w); push(y * w + w - 1); }
+  while (head < tail) {
+    p = queue[head++]; d[p * 4 + 3] = 0;
+    x = p % w; y = (p - x) / w;
+    if (x) push(p - 1); if (x + 1 < w) push(p + 1);
+    if (y) push(p - w); if (y + 1 < h) push(p + w);
+  }
+  // 脚と脚の間のように黒線で囲まれた背景白は外周floodでは届かない。
+  // 実測最大=4003px。1000px以上の閉領域だけを抜き、目・スパイクの小さな白ハイライトは残す。
+  for (p = 0; p < n; p++) {
+    if (seen[p] || !isMatte(p)) continue;
+    head = 0; tail = 0; seen[p] = 1; queue[tail++] = p;
+    var hasWhiteCore = false;
+    while (head < tail) {
+      var q = queue[head++]; if (isWhiteCore(q)) hasWhiteCore = true;
+      x = q % w; y = (q - x) / w;
+      var np;
+      if (x) { np = q - 1; if (!seen[np] && isMatte(np)) { seen[np] = 1; queue[tail++] = np; } }
+      if (x + 1 < w) { np = q + 1; if (!seen[np] && isMatte(np)) { seen[np] = 1; queue[tail++] = np; } }
+      if (y) { np = q - w; if (!seen[np] && isMatte(np)) { seen[np] = 1; queue[tail++] = np; } }
+      if (y + 1 < h) { np = q + w; if (!seen[np] && isMatte(np)) { seen[np] = 1; queue[tail++] = np; } }
+    }
+    if (hasWhiteCore && tail >= 1000) {
+      for (var ci = 0; ci < tail; ci++) d[queue[ci] * 4 + 3] = 0;
+    }
+  }
+  return imgData;
+}
+function _shortpass5Hsv(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  var mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn, h = 0;
+  if (d) {
+    if (mx === r) h = ((g - b) / d) % 6;
+    else if (mx === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60; if (h < 0) h += 360;
+  }
+  return [h, mx ? d / mx : 0, mx];
+}
+function _shortpass5HsvRgb(h, s, v) {
+  var c = v * s, hp = h / 60, x = c * (1 - Math.abs(hp % 2 - 1));
+  var rgb = hp < 1 ? [c, x, 0] : hp < 2 ? [x, c, 0] : hp < 3 ? [0, c, x] :
+    hp < 4 ? [0, x, c] : hp < 5 ? [x, 0, c] : [c, 0, x];
+  var m = v - c;
+  return [Math.round((rgb[0] + m) * 255), Math.round((rgb[1] + m) * 255), Math.round((rgb[2] + m) * 255)];
+}
+// F2/F3のパンツだけは元色が黄緑(h=70..119)で共通shorts窓(h=120..168)から外れる。
+// 採用画像と全シーン共通MangaRecolorは変えず、このLab素材の入力色相だけh=140へ正規化する。
+function _shortpass5RecolorBase(frameIndex, source) {
+  if (typeof document === 'undefined') return source;
+  if (_LAB_SHORTPASS5_BASE_CACHE[frameIndex]) return _LAB_SHORTPASS5_BASE_CACHE[frameIndex];
+  var w = source.naturalWidth || source.width, h = source.naturalHeight || source.height;
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  var x = c.getContext('2d');
+  if (!x || !x.getImageData || !x.putImageData) return source;
+  x.drawImage(source, 0, 0);
+  var data = x.getImageData(0, 0, w, h), d = data.data;
+  // F2だけシャツ青の明度分布が他4枚より大幅に暗い。単純な一律加算では陰影を潰すため、
+  // p8〜p92内の順位をgammaで持ち上げ、MangaRecolorへ渡す前に分布だけを揃える。
+  var shirtRange = null;
+  if (frameIndex === 0) {
+    var shirtValues = [];
+    for (var si = 0; si < d.length; si += 4) {
+      if (d[si + 3] < 40) continue;
+      var sh = _shortpass5Hsv(d[si], d[si + 1], d[si + 2]);
+      if (sh[0] >= 203 && sh[0] <= 245 && sh[1] >= 0.16 && sh[2] >= 0.22) shirtValues.push(sh[2]);
+    }
+    shirtValues.sort(function (a, b) { return a - b; });
+    if (shirtValues.length > 8) shirtRange = [
+      shirtValues[Math.floor(shirtValues.length * 0.08)],
+      shirtValues[Math.floor(shirtValues.length * 0.92)]
+    ];
+  }
+  for (var i = 0; i < d.length; i += 4) {
+    if (d[i + 3] < 40) continue;
+    var hsv = _shortpass5Hsv(d[i], d[i + 1], d[i + 2]);
+    if (shirtRange && hsv[0] >= 203 && hsv[0] <= 245 && hsv[1] >= 0.16 && hsv[2] >= 0.22) {
+      var span = Math.max(0.001, shirtRange[1] - shirtRange[0]);
+      var su = Math.max(0, Math.min(1, (hsv[2] - shirtRange[0]) / span));
+      var sv = shirtRange[0] + span * Math.pow(su, 0.28);
+      var shirtRgb = _shortpass5HsvRgb(hsv[0], hsv[1], sv);
+      d[i] = shirtRgb[0]; d[i + 1] = shirtRgb[1]; d[i + 2] = shirtRgb[2];
+    } else if (frameIndex <= 1 && hsv[0] >= 70 && hsv[0] < 120 && hsv[1] >= 0.16 && hsv[2] >= 0.22) {
+      var rgb = _shortpass5HsvRgb(140, hsv[1], hsv[2]);
+      d[i] = rgb[0]; d[i + 1] = rgb[1]; d[i + 2] = rgb[2];
+    }
+  }
+  _shortpass5ClearExteriorMatte(data);
+  x.putImageData(data, 0, 0);
+  _LAB_SHORTPASS5_BASE_CACHE[frameIndex] = c;
+  return c;
+}
+function _renderShortpass5Scene(sc) {
+  if (typeof MangaRecolor === 'undefined' || !MangaRecolor.render) return null;
+  var W = 480, H = 216;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.cssText = 'display:block;width:100%;image-rendering:pixelated';
+  var ctx = canvas.getContext('2d');
+  var imgs = _LAB_SHORTPASS5_FRAMES.map(function (src) { return _loadCutsceneImg(src); });
+  var bgImg = _loadCutsceneImg(_LP_BG_SRC), bgFallback = _lpBg();
+  var passer = sc.offence && sc.offence.players && sc.offence.players[sc.offence.lineup[sc.ofsPos]];
+  var feat = _mangaFeat(passer ? (passer.long_name || passer.name || '') : '');
+  var cols = _mangaColors(sc.offence, feat.skin);
+  var sig = cols.shirt + cols.shorts + cols.socks + cols.accent + cols.skin;
+  var frameDur = [90, 90, 90, 90, 180];
+  var frameTotalMs = frameDur.reduce(function (sum, ms) { return sum + ms; }, 0);
+  // F5開始が蹴り足の接触。そこまではボールを足元に固定し、F6を必要時間だけ保持して飛行を完了する。
+  var contactMs = 270, ballFlightMs = 300;
+  var totalMs = Math.max(frameTotalMs, contactMs + ballFlightMs);
+  // Cross6の6コマ実描画下端(約184〜189px)の平均へ合わせ、シーン間の人物配置高を統一。
+  var visualH = 144, subjectStartX = 210, subjectTravelX = 24, subjectBottom = 186;
+  // 採用PNGはscreen-right向き。team2攻撃時だけ人物とボールをまとめて反転する。
+  var mirror = !_csAttackRight(sc);
+  var T0 = null, loadT0 = null, started = false, prepared = false, loadTimeoutMs = 5000;
+
+  function loadState(message, isError) {
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = isError ? '#d83a3a' : '#3b74c5'; ctx.lineWidth = 2;
+    ctx.strokeRect(22, 22, W - 44, H - 44);
+    ctx.fillStyle = '#172033'; ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(message, W / 2, H / 2);
+  }
+
+  function frame() {
+    var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    if (canvas.isConnected) {
+      started = true;
+      if (loadT0 === null) loadT0 = now;
+    } else {
+      if (started) return;
+      requestAnimationFrame(frame); return;
+    }
+    var broken = imgs.some(function (img) { return img.complete && !img.naturalWidth; });
+    var loaded = imgs.every(function (img) { return img.complete && img.naturalWidth; }) && bgImg.complete;
+    if (broken || (!loaded && now - loadT0 >= loadTimeoutMs)) {
+      canvas.dataset.shortpass5State = 'error';
+      loadState('SHORT PASS 5 ASSET ERROR', true); return;
+    }
+    if (!loaded) {
+      canvas.dataset.shortpass5State = 'loading';
+      loadState('LOADING SHORT PASS 5...', false);
+      requestAnimationFrame(frame); return;
+    }
+    // 大きい採用PNGの透過・リカラーを時計開始前に全コマ分キャッシュし、初回だけコマ落ちするのを防ぐ。
+    if (!prepared) {
+      imgs.forEach(function (img, idx) {
+        MangaRecolor.render('lab-shortpass5|' + (idx + 1) + '|' + sig, _shortpass5RecolorBase(idx, img), cols);
+      });
+      prepared = true;
+      now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    }
+    if (T0 === null) {
+      T0 = now;
+      canvas.dataset.shortpass5State = 'playing';
+    }
+    var elapsed = Math.min(totalMs, now - T0), fi = 0, acc = 0;
+    for (var i = 0; i < frameDur.length; i++) {
+      acc += frameDur[i];
+      if (elapsed < acc) { fi = i; break; }
+      fi = frameDur.length - 1;
+    }
+    canvas.dataset.shortpass5Frame = String(fi + 1);
+    if (bgImg.naturalWidth) ctx.drawImage(bgImg, 0, 0, W, H);
+    else ctx.drawImage(bgFallback, 0, 0, W, H);
+    var im = imgs[fi], box = _LAB_SHORTPASS5_BBOX[fi];
+    var key = 'lab-shortpass5|' + (fi + 1) + '|' + sig;
+    var spr = MangaRecolor.render(key, _shortpass5RecolorBase(fi, im), cols);
+    var motionU = frameTotalMs ? Math.max(0, Math.min(1, elapsed / frameTotalMs)) : 0;
+    // Cross6ほど大きく踏み込まず、5コマ全体で24pxだけscreen-rightへ進める。
+    // フレーム切替だけに載せず連続移動にして、足運びのガタつきを増やさない。
+    var subjectCx = subjectStartX + subjectTravelX * (1 - Math.pow(1 - motionU, 2));
+    canvas.dataset.shortpass5SubjectX = subjectCx.toFixed(1);
+    ctx.save();
+    if (mirror) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+    if (spr) {
+      var bh = box[3] - box[1], scale = visualH / bh;
+      var bboxCx = (box[0] + box[2]) / 2;
+      var dx = subjectCx - bboxCx * scale;
+      var dy = subjectBottom - box[3] * scale;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(spr, dx, dy, spr.width * scale, spr.height * scale);
+    }
+    var ballU = Math.max(0, Math.min(1, (elapsed - contactMs) / ballFlightMs));
+    var ballX = 260 + (W + 18 - 260) * ballU;
+    var ballY = 179 - Math.sin(ballU * Math.PI) * 4;
+    canvas.dataset.shortpass5BallX = ballX.toFixed(1);
+    canvas.dataset.shortpass5BallPhase = ballU ? (ballU < 1 ? 'moving' : 'exit') : 'contact';
+    ctx.save(); ctx.translate(ballX * 2, 0); ctx.scale(-1, 1);
+    _lpBall(ctx, ballX, ballY, 9, ballU * 34); ctx.restore();
+    ctx.restore();
+    if (elapsed < totalMs) requestAnimationFrame(frame);
+    else canvas.dataset.shortpass5State = 'done';
+  }
+  requestAnimationFrame(frame);
+  return _csCenterSubject(canvas, 0.50, mirror);
+}
+
+// 既存のLab明示経路を保つ互換入口。本編と同じrendererを必ず通す。
+function _renderShortpass5LabScene(sc) {
+  return _renderShortpass5Scene(sc);
 }
 
 // ============================================================

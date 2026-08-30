@@ -46,24 +46,24 @@ const historicalBody = functionBody(historical, '_renderShotScene');
 
 ok(shootStep.includes("_pickCutscene('shot', sc.offence && sc.offence.team_color)"), 'shoot stepがshot manifestを選ぶ');
 ok(shootStep.includes('if (entry && entry.file) return _renderShotScene(shotSc, entry);'), 'shoot stepがentry付き復元rendererを呼ぶ');
-ok(!shootStep.includes('_renderAdoptedShotScene') && !shootStep.includes('_renderCinematicShotScene'), 'shoot stepから不採用画像へ到達しない');
+ok(!shootStep.includes('_renderCinematicShotScene'), 'shoot stepから未採用シネマチック版へ到達しない');
 
 ok(sceneArt.includes('var entry = _pickCutscene(moment, sc.offence && sc.offence.team_color);'), 'scene artがmoment entryを先に取得する');
 ok(sceneArt.includes("if (moment === 'shot' && entry.file)"), '通常shotはentry存在時だけ描画する');
 ok(sceneArt.includes("if (sc.result === '枠を外した！') return _renderMissScene(sc);"), '枠外分岐を維持する');
 ok(sceneArt.includes("if (sc.result === 'GK防いだ！') return _renderGkScene(sc, 'save');"), 'GKセーブ分岐を維持する');
 ok(sceneArt.includes('return _renderShotScene(sc, entry);'), '通常shotがentry付き復元rendererを呼ぶ');
-ok(!sceneArt.includes('_renderAdoptedShotScene') && !sceneArt.includes('_renderCinematicShotScene'), 'scene artから不採用画像へ到達しない');
+ok(!sceneArt.includes('_renderCinematicShotScene'), 'scene artから未採用シネマチック版へ到達しない');
 
-ok(shotEntry.trim() === 'return _renderLegacyShotScene(sc, entry);', '本編入口は67263a2直前のrendererだけへ委譲する');
+ok(shotEntry.trim() === 'return _renderAdoptedShotScene(sc);', '本編入口はユーザー採用4コマへ委譲する');
 ok(legacyBody.trimEnd() === historicalBody.trimEnd(), '復元renderer本体が67263a2直前と一致する');
 ok(lab.includes("nm:'シュート（復元本編A・対決割り）'"), 'Labで現行variant Aを表示する');
 ok(lab.includes("nm:'シュート（復元本編B・2拍）'"), 'Labで現行variant Bを表示する');
-ok(lab.includes("nm:'不採用・4コマ案（比較用）'"), 'Labで4コマ案を不採用と表示する');
+ok(lab.includes("nm:'採用・4コマ版（本編反映）'"), 'Labで4コマ版を本編反映済みと表示する');
 ok(lab.includes("nm:'未採用・追加4拍（比較用）'"), 'Labで追加4拍を未採用と表示する');
-ok(lab.includes('c=_renderAdoptedShotScene(sc);   // 不採用4コマはラボの比較確認だけに隔離'), '不採用4コマはLab明示経路だけで描画する');
+ok(lab.includes('c=_renderAdoptedShotScene(sc);   // ユーザー採用済み4コマ。本編と同じ採用rendererを明示表示'), 'Labも本編と同じ採用4コマを描画する');
 ok(lab.includes('c=_renderCinematicShotScene(sc);   // 未採用の追加4拍もラボ比較だけに隔離'), '未採用追加4拍はLab明示経路だけで描画する');
-ok(lab.includes('c=_renderShotScene(sc,entry);   // 本編と同じ復元入口を通す'), '復元版Labが本編入口を通る');
+ok(lab.includes('c=_renderShotScene(sc,entry);   // 本編と同じ復元入口を通す'), '本編入口のLab確認経路を維持する');
 ok(lab.includes('js/cutscene.js?v=lab95'), 'Lab cache keyを更新する');
 
 console.log(`shot rollback test: ${passed}/${passed} PASS`);

@@ -142,6 +142,11 @@ label.chk{display:inline-flex;gap:6px;align-items:center;min-height:44px;cursor:
       <button data-k="lpresult" onclick="run('lpresult')">拍2：守備の反応（成功=スルー/失敗=カット）</button>
     </div></div>
 
+    <div class="grp"><h2>ショートパス5コマ（Scene Lab限定）</h2><div class="btns">
+      <button data-k="shortpass5" onclick="run('shortpass5')">採用5コマ（右へ小さく踏み込む）</button>
+    </div>
+    <p class="hint" style="margin:6px 0 0">ユーザー承認済みの足首角度v5を5コマ目へ反映。画面左の軸足は維持し、画面右の蹴り足スパイクを添付参照と同じ右下角度へ更新しています。外周白残り／F2シャツ明度補正、選手・ボール18px左寄せは維持しています。</p></div>
+
     <div class="grp"><h2>クロス6コマ（GFX-06・Scene Lab限定）</h2><div class="btns">
       <button data-k="cross6" onclick="run('cross6')">助走→接触→クロス（6コマ・一回再生）</button>
     </div>
@@ -265,18 +270,8 @@ function put(c,target){var st=target||document.getElementById('stage');st.innerH
    まず全部を並べて見せる。各タイルは実際に描画してスナップショットしたもの
    （＝説明でなく実物）。押すと大きく再生する。 */
 var SCENE_CATALOG=[
- {sec:'決着とその後（いま作っているところ）'},
- {k:'goal_burst', lay:'M', nm:'ゴール！！（クライマックス）', nt:'FXを乗せた決着。この直後に下の「間」が来る'},
- {k:'quiet_goal', lay:'M', nm:'間：ゴール後', nt:'ラベルもFXも全部剥がした1拍。3作品共通の文法'},
- {k:'quiet_miss', lay:'S', nm:'間：外した後', nt:'空いたピッチの引き画（ジャイキリ流の沈黙）'},
- {k:'goal_drain', lay:'M', nm:'失点', nt:'減彩＋赤ビネット'},
- {k:'quiet_concede',lay:'S',nm:'間：失点後', nt:'引き画・エリア強調なし'},
-
- {sec:'層S 引き画（試作）'},
- {k:'wide', lay:'S', nm:'スタジアム引き画', nt:'選手22人が実寸4〜9px。情報量は全部「環境」へ'},
-
  {sec:'層C 部位アップ（試作）'},
- {k:'shot4new', lay:'M', nm:'不採用・4コマ案（比較用）', nt:'2026-08-21に不採用。比較確認専用で本編からは到達しない'},
+ {k:'shot4new', lay:'M', nm:'採用・4コマ版（本編反映）', nt:'ユーザー採用済み。本編の通常シュートへ反映'},
  {k:'shot4cinematic', lay:'M', nm:'未採用・追加4拍（比較用）', nt:'本編から隔離した追加案。比較確認専用'},
  {k:'montage', lay:'C', nm:'寄りの4連続 MONT-02', nt:'★4分割コマ割りを廃止。1画面1コマの寄りを4ビート連続で叩きつける'},
  {k:'shotduel', lay:'C', nm:'シュート（復元本編A・対決割り）', nt:'通常シュートの決定論ローテーションA。GKダイブ構図'},
@@ -291,6 +286,7 @@ var SCENE_CATALOG=[
  {k:'overhead5', lay:'M', nm:'オーバーヘッド5コマ', nt:'浮き球を頭上で叩く・一回再生'},
  {k:'longpass', lay:'M', nm:'ロングパス（蹴り出し）', nt:'結果非開示の拍'},
  {k:'lpresult', lay:'M', nm:'ロングパス（結果）', nt:'スルー / カット'},
+ {k:'shortpass5', lay:'M', nm:'ショートパス5コマ（本編反映）', nt:'承認済み足首角度v5。本編の通常ショートパスと同じrenderer'},
  {k:'cross6', lay:'M', nm:'クロス6コマ（ラボ限定）', nt:'screen-right固定・f5接触→f6でボールが離れる'},
  {k:'onetwo', lay:'M', nm:'ワンツー', nt:'3カット連結'},
  {k:'freekick', lay:'M', nm:'フリーキック', nt:'蹴る前→蹴った瞬間'},
@@ -394,7 +390,7 @@ function run(kind,retry,target){
       c=_renderQuietBeatScene(qsc,qk);
     }else if(kind==='shot4new'){
       var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'成功'};
-      c=_renderAdoptedShotScene(sc);   // 不採用4コマはラボの比較確認だけに隔離
+      c=_renderAdoptedShotScene(sc);   // ユーザー採用済み4コマ。本編と同じ採用rendererを明示表示
     }else if(kind==='shot4cinematic'){
       var sc={offence:a,defence:b,ofsPos:10,dfsPos:0,action:'シュート',scenario:'シュート',result:'成功'};
       c=_renderCinematicShotScene(sc);   // 未採用の追加4拍もラボ比較だけに隔離
@@ -424,6 +420,10 @@ function run(kind,retry,target){
     }else if(kind==='lpresult'){
       var sc={offence:a,defence:b,ofsPos:7,dfsPos:5,action:'ロングパス',scenario:'ロングパス',result:ok?'成功':'失敗'};
       c=_renderLongpassResultScene(sc);
+    }else if(kind==='shortpass5'){
+      var sc={offence:a,defence:b,ofsPos:8,dfsPos:0,action:'ショートパス',scenario:'ショートパス',result:'成功'};
+      c=_renderShortpass5LabScene(sc);
+      if(!c)return err('MangaRecolor未ロード（ラボ専用シーンです）');
     }else if(kind==='cross6'){
       var sc={offence:a,defence:b,ofsPos:8,crossPos:8,dfsPos:0,action:'クロス',scenario:'クロス',result:'成功'};
       c=_renderCross6LabScene(sc);
