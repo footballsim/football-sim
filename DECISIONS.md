@@ -19,6 +19,7 @@
 - **本編範囲**: 別選手へつなぐ通常ショートパスだけを `_renderShortpass5Scene` へ接続する。ワンツー、失敗、カウンターの既存経路は変更しない。
 - **方向契約**: 採用PNGはscreen-rightを正本とし、team2攻撃時だけ人物とボールを一体で水平反転する。
 - **固定資産**: `manga_shortpass5/frame_01..05.png` のSHAを専用テストで固定し、却下済み足首候補は本編入力にしない。
+- **反映証拠**: 採用4コマシュートと一括で`game-main`へ統合し、kantoku-lab Production SHA `9b92483`へ反映。root／Scene Lab／新規画像のBasic認証401を確認した。
 
 ---
 
